@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\Include">
+      <UniqueIdentifier>{9d4818d0-fffa-4ed8-9c77-632031ef0dd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Impl">
+      <UniqueIdentifier>{403ac709-7ff2-43db-8e43-5cc41758e6af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Include\xml">
+      <UniqueIdentifier>{278177ba-2902-4696-a120-bbef27f8b7c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Impl\kernel">
+      <UniqueIdentifier>{dab57837-6ac2-48f6-86d0-b315ed5037d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Impl\xml">
+      <UniqueIdentifier>{5208d1f5-4a73-4962-b7b5-6daa28a87991}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\mpeg_audio_sequence.h">
+      <Filter>头文件\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Impl\kernel\Mpeg_alloctables.h">
+      <Filter>源文件\Impl\kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="Impl\kernel\Mpeg_audiotables.h">
+      <Filter>源文件\Impl\kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="Impl\kernel\Mpeg_decodetable.h">
+      <Filter>源文件\Impl\kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="Impl\kernel\Mpeg_filtertable.h">
+      <Filter>源文件\Impl\kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="compile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\xml\mpeg_audio_sequence_xml.h">
+      <Filter>头文件\Include\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\mpeg_audio_utilities.h">
+      <Filter>头文件\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\mpeg_audio_errorcode.h">
+      <Filter>头文件\Include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\mpeg_audio_sequence.cpp">
+      <Filter>源文件\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\kernel\Mpeg_allocatetables.cpp">
+      <Filter>源文件\Impl\kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\kernel\Mpeg_audiotables.cpp">
+      <Filter>源文件\Impl\kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\xml\mpeg_audio_sequence_xml.cpp">
+      <Filter>源文件\Impl\xml</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\mpeg_audio_utilities.cpp">
+      <Filter>源文件\Impl</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

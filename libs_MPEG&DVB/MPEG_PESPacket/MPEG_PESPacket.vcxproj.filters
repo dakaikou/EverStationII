@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="源文件\Impl">
+      <UniqueIdentifier>{6fd7ad72-3c86-40d8-90a2-da15378f211c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Include">
+      <UniqueIdentifier>{757f20ff-3168-487d-89f5-f5443423de5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Impl\xml">
+      <UniqueIdentifier>{ea3cb333-a35f-4af3-bf16-216c58a14cac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Include\xml">
+      <UniqueIdentifier>{d86183c3-b482-46b7-ba74-bf66ac7979cc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\MPEG_PES_packet.h">
+      <Filter>头文件\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\MPEG_PES_Utilities.h">
+      <Filter>头文件\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\MPEG_stream_id.h">
+      <Filter>头文件\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\xml\MPEG_PES_packet_XML.h">
+      <Filter>头文件\Include\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\MPEG_PES_ErrorCode.h">
+      <Filter>头文件\Include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\MPEG_PES_packet.cpp">
+      <Filter>源文件\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\MPEG_PES_Uitilites.cpp">
+      <Filter>源文件\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\xml\MPEG_PES_packet_XML.cpp">
+      <Filter>源文件\Impl\xml</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

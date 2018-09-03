@@ -1,0 +1,15 @@
+#ifndef _ESDECODER_ERROR_H_
+#define _ESDECODER_ERROR_H_
+
+#ifdef ESDECODER_NO_ERROR
+#undef ESDECODER_NO_ERROR
+#endif
+
+#define ESDECODER_NO_ERROR					0x00000000
+
+//ÏµÍ³´íÎó´úÂë
+#define ESDECODER_PARAMETER_ERROR			0xE4010001
+
+#define ESDECODER_UNKNOWN_ERROR				0xFFFFFFFF
+
+#endif

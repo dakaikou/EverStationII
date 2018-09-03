@@ -1,0 +1,678 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\Magic_TS">
+      <UniqueIdentifier>{eab5931c-9f71-4554-bd63-daeb04312a00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Magic_TS">
+      <UniqueIdentifier>{448f8a00-f9b3-4c66-b51c-6c878cce72de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Common">
+      <UniqueIdentifier>{7f029d90-85a3-41b6-b43d-a6af450b4ad1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\MFCExt">
+      <UniqueIdentifier>{be492300-fd38-4bf9-9517-19995bb01e89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\MFCExt\SplitWnd">
+      <UniqueIdentifier>{4d9ae7e9-462b-492d-a156-19a591da068e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Common">
+      <UniqueIdentifier>{01b854ff-7c76-4abe-adfb-535fa4d90082}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\MFCExt">
+      <UniqueIdentifier>{fc5b2602-0446-4a95-a559-339b99aa1140}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\MFCExt\SplitWnd">
+      <UniqueIdentifier>{618b05bf-cb99-4e65-bed6-28ba4b0b111e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Magic_PS">
+      <UniqueIdentifier>{de4b6259-838e-4836-8a76-3aa33399084e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Magic_ES">
+      <UniqueIdentifier>{5e19fdff-a8e6-4350-b066-e7d3ec165b6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Magic_YUV">
+      <UniqueIdentifier>{094d4935-0d86-450f-9a29-664e4edcca57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Magic_PS">
+      <UniqueIdentifier>{68ca23ba-729d-427a-82d2-d4a45dd41dbb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Magic_ES">
+      <UniqueIdentifier>{8a0e6d6e-cf35-43ad-9b07-ebe59a02a21a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Magic_YUV">
+      <UniqueIdentifier>{66c6f748-9af7-4cdc-94da-d9f97e7b4298}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\MFCExt\TreeList">
+      <UniqueIdentifier>{852559d1-d55a-4f0a-8437-a6de3d9bebb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\MFCExt\TreeList">
+      <UniqueIdentifier>{9f8fe803-e1ec-46fd-8786-a6f8565fb541}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MainFrm.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ChildFrm.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FileView.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ClassView.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewTree.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertiesWnd.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_SignalStatus.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TriggerWaiting.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Epg.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Overview.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_PacketTrigger.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Pcr.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_PesEs.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_PsiSi.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Subtitle.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Teletext.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\ListView_EpgSchedule.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\ListView_ServiceInfo.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TabView_TSMagic.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_Callbacks_From_Lib.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_Callbacks_To_Gui.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_Decimate_Dsmcc.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_Decimate_TSPacket.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_GuiAPi.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_GuiApi_MSG.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_Trigger.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_Trigger_PESES.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_Trigger_Section.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_Trigger_TSPacket.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagicFrm.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagicView.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Define.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Dlg_Progress.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCExt\SplitWnd\SplitWnd.h">
+      <Filter>头文件\MFCExt\SplitWnd</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_PS\Dlg_PSOverview.h">
+      <Filter>头文件\Magic_PS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_PS\PSMagicFrm.h">
+      <Filter>头文件\Magic_PS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_PS\psmagicview.h">
+      <Filter>头文件\Magic_PS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_ES\Dlg_ESOverview.h">
+      <Filter>头文件\Magic_ES</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_ES\ESMagicFrm.h">
+      <Filter>头文件\Magic_ES</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_ES\ESMagicview.h">
+      <Filter>头文件\Magic_ES</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_YUV\Dlg_xxxyuvFileName.h">
+      <Filter>头文件\Magic_YUV</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_YUV\Dlg_YUVCombine.h">
+      <Filter>头文件\Magic_YUV</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_YUV\Dlg_YUVPreview.h">
+      <Filter>头文件\Magic_YUV</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_YUV\guiapi_yuv.h">
+      <Filter>头文件\Magic_YUV</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_YUV\YUVMagicFrm.h">
+      <Filter>头文件\Magic_YUV</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_YUV\YUVMagicView.h">
+      <Filter>头文件\Magic_YUV</Filter>
+    </ClInclude>
+    <ClInclude Include="EverStationII.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="EverStationIIDoc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="EverStationIIView.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ListView_RunningLog.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ListView_ByteBuffer.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="DockPane_RunningLog.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagicDoc.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\InstrumentPanel_Base.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\InstrumentPanel_Histogram.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\InstrumentPanel_Waveform.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\InstrumentPanel_ScatterDiagram.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_YUV\YUVMagicDoc.h">
+      <Filter>头文件\Magic_YUV</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_ES\ESMagicDoc.h">
+      <Filter>头文件\Magic_ES</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_PS\PSMagicDoc.h">
+      <Filter>头文件\Magic_PS</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgConfigWinpcap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgConfigTSInput.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgConfigCoderDebug.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\HexEditView_ByteBuffer.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_ErrorCode.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\View_EpgContainer.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Dsmcc.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\NaviList_DSMCCs.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\NaviTree_Bouquets.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\NaviTree_ESs.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\NaviTree_PsiSiTables.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\NaviTree_Services.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Bouquet.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_TSPacket.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\TreeView_XMLBrowser.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MainFrm.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ChildFrm.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FileView.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ClassView.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewTree.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertiesWnd.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_SignalStatus.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TriggerWaiting.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TabView_TSMagic.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_Analyse_Offline.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_Analyse_Realtime.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_Callbacks_From_Lib.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_Callbacks_To_Gui.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_Decimate_Dsmcc.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_Decimate_TSPacket.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_Trigger.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_Trigger_PESES.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_Trigger_Section.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_Trigger_TSPacket.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagicView.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Dlg_Progress.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Epg.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Overview.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_PacketTrigger.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Pcr.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_PesEs.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_PsiSi.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Subtitle.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Teletext.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\ListView_EpgSchedule.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\ListView_ServiceInfo.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Dlg_Decimate.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Dlg_ShowVideo.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\ListView_ByteBuffer.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCExt\SplitWnd\SplitWnd.cpp">
+      <Filter>源文件\MFCExt\SplitWnd</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_YUV\Dlg_xxxyuvFileName.cpp">
+      <Filter>源文件\Magic_YUV</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_YUV\Dlg_YUVCombine.cpp">
+      <Filter>源文件\Magic_YUV</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_YUV\Dlg_YUVPreview.cpp">
+      <Filter>源文件\Magic_YUV</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_YUV\YUVMagicFrm.cpp">
+      <Filter>源文件\Magic_YUV</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_YUV\YUVMagicView.cpp">
+      <Filter>源文件\Magic_YUV</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_ES\Dlg_ESOverview.cpp">
+      <Filter>源文件\Magic_ES</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_ES\ESMagicFrm.cpp">
+      <Filter>源文件\Magic_ES</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_ES\ESMagicView.cpp">
+      <Filter>源文件\Magic_ES</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_PS\Dlg_PSOverview.cpp">
+      <Filter>源文件\Magic_PS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_PS\PSMagicFrm.cpp">
+      <Filter>源文件\Magic_PS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_PS\PSMagicView.cpp">
+      <Filter>源文件\Magic_PS</Filter>
+    </ClCompile>
+    <ClCompile Include="EverStationII.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="EverStationIIDoc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="EverStationIIView.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\ListView_RunningLog.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="DockPane_RunningLog.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagicDoc.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagicFrm.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentPanel_Base.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentPanel_Histogram.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentPanel_Waveform.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentPanel_ScatterDiagram.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_ES\ESMagicDoc.cpp">
+      <Filter>源文件\Magic_ES</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_YUV\YUVMagicDoc.cpp">
+      <Filter>源文件\Magic_YUV</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_PS\PSMagicDoc.cpp">
+      <Filter>源文件\Magic_PS</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgConfigWinpcap.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgConfigTSInput.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgConfigCoderDebug.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\HexEditView_ByteBuffer.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_ErrorCode_LUT.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\View_EpgContainer.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Dsmcc.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\NaviList_DSMCCs.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\NaviTree_Bouquets.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\NaviTree_ESs.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\NaviTree_PsiSiTables.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\NaviTree_Services.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Bouquet.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_TSPacket.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\TreeView_XMLBrowser.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\file_view.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\file_view_hc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\class_view.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\class_view_hc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\fileview.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\fileview_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\classview.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\classview_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\explorer.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\explorer_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\sort.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\sort_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\menuimages.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\menuimages_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\output_wnd.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\output_wnd_hc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\properties_wnd.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\properties_wnd_hc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\properties.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\properties_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\userimages.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Toolbar.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Toolbar256.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\toolbar_everstation.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\toolbar1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\toolbar_.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\toolbar_everstation_256.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bm_def_tree.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bm_def_sort.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bm_lockbox.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bm_def_head.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bm_bkgnd2.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bm_checkbox.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bm_bkgnd.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bmp00005.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\event_info.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\dtv.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bitmap1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bmp00002.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bmp00004.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bitmap_t.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\EverStationII.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\EverStationIIDoc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\menu_ima.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\toolbar_ever.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="EverStationII.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\EverStationII.rc2">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
+</Project>

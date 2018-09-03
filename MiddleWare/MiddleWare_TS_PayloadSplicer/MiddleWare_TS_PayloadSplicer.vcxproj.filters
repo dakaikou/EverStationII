@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\Include">
+      <UniqueIdentifier>{5e54820b-0910-4076-b817-6e135fc77988}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Impl">
+      <UniqueIdentifier>{7d25ddcf-8f8b-4b3a-9749-d968262b0826}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Mpeg2_PESSplicer.h">
+      <Filter>头文件\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Mpeg2_SectionSplicer.h">
+      <Filter>头文件\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\MiddleWare_PesSplicer_ErrorCode.h">
+      <Filter>头文件\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\MiddleWare_SectionSplicer_ErrorCode.h">
+      <Filter>头文件\Include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\Mpeg2_PESSplicer.cpp">
+      <Filter>源文件\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\Mpeg2_SectionSplicer.cpp">
+      <Filter>源文件\Impl</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

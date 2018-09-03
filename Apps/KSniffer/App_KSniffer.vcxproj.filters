@@ -1,0 +1,175 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\WinPcap">
+      <UniqueIdentifier>{1a0132a6-a9ce-459a-9b9b-aa636eca54df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\ThreadEx">
+      <UniqueIdentifier>{fbd9d222-bb01-4c46-841b-8095d7dd068c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\ThreadEx">
+      <UniqueIdentifier>{247311d8-75eb-4965-955a-287b596fb915}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\HexEdit">
+      <UniqueIdentifier>{3a451f28-6d11-4aa4-8464-6e76bd4c3c2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\HexEdit">
+      <UniqueIdentifier>{52516a31-8d73-489a-bb7a-da402383c539}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+    <None Include="res\KSniffer.rc2">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\KSniffer.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="app.config" />
+    <None Include="ClassDiagram1.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="KSniffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="KSnifferDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\bittypes.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ip6_misc.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Packet32.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\pcap.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\pcap-bpf.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\pcap-namedb.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\pcap-stdinc.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\remote-ext.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Win32-Extensions.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\pcap\bluetooth.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\pcap\bpf.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\pcap\namedb.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\pcap\pcap.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\pcap\sll.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\pcap\usb.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\pcap\vlan.h">
+      <Filter>头文件\WinPcap</Filter>
+    </ClInclude>
+    <ClInclude Include="AdaptersDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CapFilterDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CapThread.h">
+      <Filter>头文件\ThreadEx</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadEx.h">
+      <Filter>头文件\ThreadEx</Filter>
+    </ClInclude>
+    <ClInclude Include="commondef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Protocols.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalVar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ShowThread.h">
+      <Filter>头文件\ThreadEx</Filter>
+    </ClInclude>
+    <ClInclude Include="HexEdit.h">
+      <Filter>头文件\HexEdit</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="KSniffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="KSnifferDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AdaptersDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CapFilterDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CapThread.cpp">
+      <Filter>源文件\ThreadEx</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadEx.cpp">
+      <Filter>源文件\ThreadEx</Filter>
+    </ClCompile>
+    <ClCompile Include="Protocols.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalVar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ShowThread.cpp">
+      <Filter>源文件\ThreadEx</Filter>
+    </ClCompile>
+    <ClCompile Include="HexEdit.cpp">
+      <Filter>源文件\HexEdit</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="KSniffer.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
