@@ -25,8 +25,8 @@
 int MPEG2_DSMCC_UNM_DecodeSection_to_XML(uint8_t *section_buf, int section_size, XMLDocForMpegSyntax* pxmlDoc, dsmcc_unm_section_t* pDSMCCSection)
 {
 	int						rtcode = SECTION_PARSE_NO_ERROR;
-	int						payload_length;
-	uint8_t*				ptemp;
+	//int						payload_length;
+	//uint8_t*				ptemp;
 	char					pszTemp[64];
 
 	dsmccMessageHeader_t*				pdsmccMessageHeader;
@@ -118,13 +118,13 @@ int MPEG2_DSMCC_UNM_DecodeSection_to_XML(uint8_t *section_buf, int section_size,
 
 					if (pdsmcc_section->section_number <= pdsmcc_section->last_section_number)			//DSMCC语法特征点
 					{
-						payload_length = pdsmcc_section->dsmcc_section_length - 4 - 5;
-						ptemp = bs.p_cur;
-						BITS_byteSkip(&bs, payload_length);
+						int section_payload_length = pdsmcc_section->dsmcc_section_length - 4 - 5;
+						uint8_t* section_payload_ptr = bs.p_cur;
+						BITS_byteSkip(&bs, section_payload_length);
 						tinyxml2::XMLElement* pxmlMessageNode = NULL;
 
 						BYTES_t bytes;
-						BYTES_map(&bytes, ptemp, payload_length);
+						BYTES_map(&bytes, section_payload_ptr, section_payload_length);
 
 						if (pdsmcc_section->table_id == TABLE_ID_DSMCC_UNM)
 						{
@@ -132,7 +132,7 @@ int MPEG2_DSMCC_UNM_DecodeSection_to_XML(uint8_t *section_buf, int section_size,
 
 							//包含DownloadServerInitiate、DownloadInfoIndication、DownloadCancel
 
-							uint8_t* old_ptr = bytes.p_cur;
+							uint8_t* old_msg_header_ptr = bytes.p_cur;
 							tinyxml2::XMLElement* pxmlHeaderNode = pxmlDoc->NewKeyValuePairElementByteMode(pxmlMessageNode, "dsmccMessageHeader()");
 
 							pdsmccMessageHeader = &(pdsmcc_section->dsmccMessageHeader);
@@ -165,56 +165,59 @@ int MPEG2_DSMCC_UNM_DecodeSection_to_XML(uint8_t *section_buf, int section_size,
 
 							if (pdsmccMessageHeader->adaptationLength > 0)
 							{
-								uint8_t* adaption_header_ptr = bytes.p_cur;
-								BYTES_skip(&bytes, pdsmccMessageHeader->adaptationLength);
-								pxmlDoc->NewKeyValuePairElementByteMode(pxmlHeaderNode, "dsmccAdaptationHeader()", -1, -1, NULL, &bytes);
+								uint8_t* old_adaption_header_ptr = bytes.p_cur;
+								tinyxml2::XMLElement* pxmlAdaptationHeaderNode = pxmlDoc->NewKeyValuePairElementByteMode(pxmlHeaderNode, "dsmccAdaptationHeader()");
 
 								//解析adaptation
-								//pdsmccMessageHeader->dsmccAdaptationHeader.adaptationType = *ptemp++;
+								pdsmccMessageHeader->dsmccAdaptationHeader.adaptationType = BYTES_get(&bytes, 1);
+								pxmlDoc->NewKeyValuePairElementByteMode(pxmlAdaptationHeaderNode, "adaptationType", pdsmccMessageHeader->dsmccAdaptationHeader.adaptationType, 1, NULL, &bytes);
 
-								//copy_length = min(64, pdsmccMessageHeader->adaptationLength - 1);
-								//pdsmccMessageHeader->dsmccAdaptationHeader.N = copy_length;
-								//if (copy_length > 0)
-								//{
-								//	memcpy(pdsmccMessageHeader->dsmccAdaptationHeader.adaptationDataByte, ptemp, copy_length);
-								//	ptemp += (pdsmccMessageHeader->adaptationLength - 1);
-								//}
+								pdsmccMessageHeader->dsmccAdaptationHeader.N = pdsmccMessageHeader->adaptationLength - 1;
+
+								if (pdsmccMessageHeader->dsmccAdaptationHeader.N > 0)
+								{
+									int copy_length = min(64, pdsmccMessageHeader->dsmccAdaptationHeader.N);
+									memcpy(pdsmccMessageHeader->dsmccAdaptationHeader.adaptationDataByte, bytes.p_cur, copy_length);
+									BYTES_skip(&bytes, pdsmccMessageHeader->dsmccAdaptationHeader.N);
+
+									pxmlDoc->NewKeyValuePairElementByteMode(pxmlAdaptationHeaderNode, "adaptationDataByte[ ]", pdsmccMessageHeader->dsmccAdaptationHeader.adaptationDataByte, copy_length, NULL, &bytes);
+								}
+
+								pxmlDoc->UpdateBufMark(pxmlAdaptationHeaderNode, old_adaption_header_ptr, bytes.p_cur);
 							}
 
-							pxmlDoc->UpdateBufMark(pxmlHeaderNode, old_ptr, bytes.p_cur);
+							pxmlDoc->UpdateBufMark(pxmlHeaderNode, old_msg_header_ptr, bytes.p_cur);
 
-							ptemp = bytes.p_cur;
+							uint8_t* msg_payload_ptr = bytes.p_cur;
 
-							payload_length = pdsmccMessageHeader->messageLength - pdsmccMessageHeader->adaptationLength;
-							if (payload_length > 0)
+							int msg_payload_length = pdsmccMessageHeader->messageLength - pdsmccMessageHeader->adaptationLength;
+							if (msg_payload_length > 0)
 							{
-								BYTES_skip(&bytes, payload_length);
-
-								tinyxml2::XMLElement* pxmlSessionNode = NULL;
+								BYTES_skip(&bytes, msg_payload_length);
 
 								if (pdsmccMessageHeader->messageId == 0x1002)			//DII
 								{
-									pxmlSessionNode = pxmlDoc->NewKeyValuePairElement(pxmlMessageNode, "DownloadInfoIndication()");
 									pDownloadInfoIndication = &(pdsmcc_section->u.DownloadInfoIndication);
 
-									rtcode = MPEG2_DSMCC_DecodeDownloadInfoIndication_to_xml(ptemp, payload_length, pxmlDoc, pxmlSessionNode, pDownloadInfoIndication);
+									rtcode = MPEG2_DSMCC_DecodeDownloadInfoIndication_to_xml(msg_payload_ptr, msg_payload_length, pxmlDoc, pxmlMessageNode, pDownloadInfoIndication);
 								}
 								else if (pdsmccMessageHeader->messageId == 0x1006)							//DSI
 								{
-									pxmlSessionNode = pxmlDoc->NewKeyValuePairElement(pxmlMessageNode, "DownloadServerInitiate()");
 									pDownloadServerInitiate = &(pdsmcc_section->u.DownloadServerInitiate);
 
-									rtcode = MPEG2_DSMCC_DecodeDownloadServerInitiate_to_xml(ptemp, payload_length, pxmlDoc, pxmlSessionNode, pDownloadServerInitiate);
+									rtcode = MPEG2_DSMCC_DecodeDownloadServerInitiate_to_xml(msg_payload_ptr, msg_payload_length, pxmlDoc, pxmlMessageNode, pDownloadServerInitiate);
 								}
 								else
 								{
+									pxmlDoc->NewKeyValuePairElementByteMode(pxmlMessageNode, "messagePayload[ ]", msg_payload_ptr, msg_payload_length, NULL, &bytes);
+
 									sprintf_s(pszTemp, sizeof(pszTemp), "incorrect messageId = 0x%04X", pdsmccMessageHeader->messageId);
 									pxmlMessageNode->SetAttribute("error", pszTemp);
 
 									rtcode = SECTION_PARSE_SYNTAX_ERROR;
 								}
 
-								pxmlDoc->UpdateBufMark(pxmlSessionNode, ptemp, bytes.p_cur);
+								//pxmlDoc->UpdateBufMark(pxmlSessionNode, msg_payload_ptr, bytes.p_cur);
 							}
 						}
 						else
@@ -853,6 +856,8 @@ int	MPEG2_DSMCC_DecodeDownloadServerInitiate_to_xml(uint8_t *buf, int length, XM
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
+		tinyxml2::XMLElement* pxmlSessionNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "DownloadServerInitiate()");
+
 		if ((buf != NULL) && (length >= 22))
 		{
 			DownloadServerInitiate_t* pDownloadServerInitiate = (pDSI != NULL) ? pDSI : new DownloadServerInitiate_t;
@@ -861,10 +866,10 @@ int	MPEG2_DSMCC_DecodeDownloadServerInitiate_to_xml(uint8_t *buf, int length, XM
 			BYTES_map(&bytes, buf, length);
 
 			BYTES_copy(pDownloadServerInitiate->serverId, &bytes, 20);
-			pxmlDoc->NewKeyValuePairElementByteMode(pxmlParentNode, "serverId", pDownloadServerInitiate->serverId, 20, NULL, &bytes);
+			pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "serverId", pDownloadServerInitiate->serverId, 20, NULL, &bytes);
 
 			uint8_t* old_ptr = bytes.p_cur;
-			tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElementByteMode(pxmlParentNode, "compatibilityDescriptor()");
+			tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "compatibilityDescriptor()");
 
 			pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength = BYTES_get(&bytes, 2);
 			pxmlDoc->NewKeyValuePairElementByteMode(pxmlDescriptorNode, "compatibilityDescriptorLength", pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength, 2, NULL, &bytes);
@@ -881,7 +886,7 @@ int	MPEG2_DSMCC_DecodeDownloadServerInitiate_to_xml(uint8_t *buf, int length, XM
 			pxmlDoc->UpdateBufMark(pxmlDescriptorNode, old_ptr, bytes.p_cur);
 
 			pDownloadServerInitiate->privateDataLength = BYTES_get(&bytes, 2);
-			pxmlDoc->NewKeyValuePairElementByteMode(pxmlParentNode, "privateDataLength", pDownloadServerInitiate->privateDataLength, 2, NULL, &bytes);
+			pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "privateDataLength", pDownloadServerInitiate->privateDataLength, 2, NULL, &bytes);
 
 			//defined in EN 301 192
 			//若privateDataLength解析错误，将导致灾难性错误
@@ -916,7 +921,7 @@ int	MPEG2_DSMCC_DecodeDownloadServerInitiate_to_xml(uint8_t *buf, int length, XM
 					pDownloadServerInitiate->data_broadcast_type = 0x0006;
 
 					pGroupInfoIndication = &(pDownloadServerInitiate->u.GroupInfoIndication);
-					rtcode = MPEG2_DSMCC_DecodeGroupInfoIndication_to_xml(ptemp, pDownloadServerInitiate->privateDataLength, pxmlDoc, pxmlParentNode, pGroupInfoIndication);
+					rtcode = MPEG2_DSMCC_DecodeGroupInfoIndication_to_xml(ptemp, pDownloadServerInitiate->privateDataLength, pxmlDoc, pxmlSessionNode, pGroupInfoIndication);
 
 					BYTES_skip(&bytes, pDownloadServerInitiate->privateDataLength);
 				}
@@ -925,7 +930,7 @@ int	MPEG2_DSMCC_DecodeDownloadServerInitiate_to_xml(uint8_t *buf, int length, XM
 					pDownloadServerInitiate->data_broadcast_type = 0x0007;
 
 					pServiceGatewayInfo = &(pDownloadServerInitiate->u.ServiceGatewayInfo);
-					rtcode = MPEG2_DSMCC_DecodeServiceGatewayInfo_to_xml(ptemp, pDownloadServerInitiate->privateDataLength, pxmlDoc, pxmlParentNode, pServiceGatewayInfo);
+					rtcode = MPEG2_DSMCC_DecodeServiceGatewayInfo_to_xml(ptemp, pDownloadServerInitiate->privateDataLength, pxmlDoc, pxmlSessionNode, pServiceGatewayInfo);
 					BYTES_skip(&bytes, pDownloadServerInitiate->privateDataLength);
 				}
 				else
@@ -935,7 +940,7 @@ int	MPEG2_DSMCC_DecodeDownloadServerInitiate_to_xml(uint8_t *buf, int length, XM
 					BYTES_skip(&bytes, pDownloadServerInitiate->privateDataLength);
 
 					//如何判断privateDataByte载荷的类型？
-					pxmlDoc->NewKeyValuePairElementByteMode(pxmlParentNode, "privateDataByte[ ]", pDownloadServerInitiate->u.privateDataByte, pDownloadServerInitiate->privateDataLength, pszStyle, &bytes);
+					pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "privateDataByte[ ]", pDownloadServerInitiate->u.privateDataByte, pDownloadServerInitiate->privateDataLength, pszStyle, &bytes);
 				}
 			}
 
@@ -948,7 +953,7 @@ int	MPEG2_DSMCC_DecodeDownloadServerInitiate_to_xml(uint8_t *buf, int length, XM
 		else
 		{
 			sprintf_s(pszTemp, sizeof(pszTemp), "parameters error!");
-			pxmlParentNode->SetAttribute("error", pszTemp);
+			pxmlSessionNode->SetAttribute("error", pszTemp);
 			rtcode = SECTION_PARSE_PARAMETER_ERROR;
 		}
 	}
@@ -978,6 +983,9 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication_to_xml(uint8_t *buf, int length, XM
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
+		tinyxml2::XMLElement* pxmlSessionNode = NULL;
+		pxmlSessionNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "DownloadInfoIndication()");
+
 		if ((buf != NULL) && (length >= 20))
 		{
 			DownloadInfoIndication_t* pDownloadInfoIndication = (pDII != NULL) ? pDII : new DownloadInfoIndication_t;
@@ -986,25 +994,25 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication_to_xml(uint8_t *buf, int length, XM
 			BYTES_map(&bytes, buf, length);
 
 			pDownloadInfoIndication->downloadId = BYTES_get(&bytes, 4);
-			pxmlDoc->NewKeyValuePairElementByteMode(pxmlParentNode, "downloadId", pDownloadInfoIndication->downloadId, 4, NULL, &bytes);
+			pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "downloadId", pDownloadInfoIndication->downloadId, 4, NULL, &bytes);
 
 			pDownloadInfoIndication->blockSize = BYTES_get(&bytes, 2);
-			pxmlDoc->NewKeyValuePairElementByteMode(pxmlParentNode, "blockSize", pDownloadInfoIndication->blockSize, 2, NULL, &bytes);
+			pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "blockSize", pDownloadInfoIndication->blockSize, 2, NULL, &bytes);
 
 			pDownloadInfoIndication->windowSize = BYTES_get(&bytes, 1);
-			pxmlDoc->NewKeyValuePairElementByteMode(pxmlParentNode, "windowSize", pDownloadInfoIndication->windowSize, 1, NULL, &bytes);
+			pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "windowSize", pDownloadInfoIndication->windowSize, 1, NULL, &bytes);
 
 			pDownloadInfoIndication->ackPeriod = BYTES_get(&bytes, 1);
-			pxmlDoc->NewKeyValuePairElementByteMode(pxmlParentNode, "ackPeriod", pDownloadInfoIndication->ackPeriod, 1, NULL, &bytes);
+			pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "ackPeriod", pDownloadInfoIndication->ackPeriod, 1, NULL, &bytes);
 
 			pDownloadInfoIndication->tCDownloadWindow = BYTES_get(&bytes, 4);
-			pxmlDoc->NewKeyValuePairElementByteMode(pxmlParentNode, "tCDownloadWindow", pDownloadInfoIndication->tCDownloadWindow, 4, NULL, &bytes);
+			pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "tCDownloadWindow", pDownloadInfoIndication->tCDownloadWindow, 4, NULL, &bytes);
 
 			pDownloadInfoIndication->tCDownloadScenario = BYTES_get(&bytes, 4);
-			pxmlDoc->NewKeyValuePairElementByteMode(pxmlParentNode, "tCDownloadScenario", pDownloadInfoIndication->tCDownloadScenario, 4, NULL, &bytes);
+			pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "tCDownloadScenario", pDownloadInfoIndication->tCDownloadScenario, 4, NULL, &bytes);
 
 			uint8_t* old_ptr = bytes.p_cur;
-			tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElementByteMode(pxmlParentNode, "compatibilityDescriptor()");
+			tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "compatibilityDescriptor()");
 
 			pDownloadInfoIndication->compatibilityDescriptor.compatibilityDescriptorLength = BYTES_get(&bytes, 2);
 			pxmlDoc->NewKeyValuePairElementByteMode(pxmlDescriptorNode, "compatibilityDescriptorLength", pDownloadInfoIndication->compatibilityDescriptor.compatibilityDescriptorLength, 2, NULL, &bytes);
@@ -1022,7 +1030,7 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication_to_xml(uint8_t *buf, int length, XM
 
 			//defined in EN 301192
 			pDownloadInfoIndication->numberOfModules = BYTES_get(&bytes, 2);
-			pxmlDoc->NewKeyValuePairElementByteMode(pxmlParentNode, "numberOfModules", pDownloadInfoIndication->numberOfModules, 2, NULL, &bytes);
+			pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "numberOfModules", pDownloadInfoIndication->numberOfModules, 2, NULL, &bytes);
 
 			if (pDownloadInfoIndication->numberOfModules > 0)
 			{
@@ -1031,7 +1039,7 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication_to_xml(uint8_t *buf, int length, XM
 				{
 					uint8_t* old_module_ptr = bytes.p_cur;
 					sprintf_s(pszTemp, sizeof(pszTemp), "MODULE[%d]", moduleIndex);
-					tinyxml2::XMLElement* pxmlModuleNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, pszTemp);
+					tinyxml2::XMLElement* pxmlModuleNode = pxmlDoc->NewKeyValuePairElement(pxmlSessionNode, pszTemp);
 
 					uint16_t moduleId = BYTES_get(&bytes, 2);
 					pxmlDoc->NewKeyValuePairElementByteMode(pxmlModuleNode, "moduleId", moduleId, 2, NULL, &bytes);
@@ -1201,7 +1209,7 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication_to_xml(uint8_t *buf, int length, XM
 			}
 
 			pDownloadInfoIndication->privateDataLength = BYTES_get(&bytes, 2);
-			pxmlDoc->NewKeyValuePairElementByteMode(pxmlParentNode, "privateDataLength", pDownloadInfoIndication->privateDataLength, 2, NULL, &bytes);
+			pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "privateDataLength", pDownloadInfoIndication->privateDataLength, 2, NULL, &bytes);
 
 			if (pDownloadInfoIndication->privateDataLength > 0)
 			{
@@ -1209,6 +1217,7 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication_to_xml(uint8_t *buf, int length, XM
 				memcpy(pDownloadInfoIndication->privateDataByte, bytes.p_cur, copy_length);
 
 				BYTES_skip(&bytes, pDownloadInfoIndication->privateDataLength);
+				pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "privateDataByte[ ]", pDownloadInfoIndication->privateDataByte, copy_length, NULL, &bytes);
 			}
 
 			if (pDII == NULL)
@@ -1220,7 +1229,7 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication_to_xml(uint8_t *buf, int length, XM
 		else
 		{
 			sprintf_s(pszTemp, sizeof(pszTemp), "parameters error!");
-			pxmlParentNode->SetAttribute("error", pszTemp);
+			pxmlSessionNode->SetAttribute("error", pszTemp);
 			rtcode = SECTION_PARSE_PARAMETER_ERROR;
 		}
 	}
