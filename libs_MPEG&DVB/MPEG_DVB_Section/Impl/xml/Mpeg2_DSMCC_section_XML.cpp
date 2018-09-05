@@ -30,7 +30,6 @@ int MPEG2_DSMCC_DecodeSection_to_XML(uint8_t *section_buf, int section_size, XML
 
 	uint8_t						section_syntax_indicator;
 
-	dsmccMessageHeader_t*				pdsmccMessageHeader;
 	BITS_t   bs;
 
 	if (pxmlDoc != NULL)

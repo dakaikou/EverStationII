@@ -216,8 +216,6 @@ int MPEG2_DSMCC_UNM_DecodeSection_to_XML(uint8_t *section_buf, int section_size,
 
 									rtcode = SECTION_PARSE_SYNTAX_ERROR;
 								}
-
-								//pxmlDoc->UpdateBufMark(pxmlSessionNode, msg_payload_ptr, bytes.p_cur);
 							}
 						}
 						else
@@ -300,11 +298,11 @@ int	MPEG2_DSMCC_DecodeGroupInfoIndication_to_xml(uint8_t *buf, int length, XMLDo
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
+		tinyxml2::XMLElement* pxmlGroupsNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "privateDataByte[ ]", buf, length, "GroupInfoIndication()");
+		pxmlDoc->UpdateBufMark(pxmlGroupsNode, buf, buf + length);
+
 		if ((buf != NULL) && (length > 0))
 		{
-			tinyxml2::XMLElement* pxmlGroupsNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "privateDataByte[] - GroupInfoIndication()");
-			pxmlDoc->UpdateBufMark(pxmlGroupsNode, buf, buf + length);
-
 			GroupInfoIndication_t* pGroupInfoIndication = (pGII != NULL) ? pGII : new GroupInfoIndication_t;
 			memset(pGroupInfoIndication, 0x00, sizeof(GroupInfoIndication_t));
 
@@ -441,7 +439,7 @@ int	MPEG2_DSMCC_DecodeGroupInfoIndication_to_xml(uint8_t *buf, int length, XMLDo
 		else
 		{
 			sprintf_s(pszTemp, sizeof(pszTemp), "parameters error!");
-			pxmlParentNode->SetAttribute("error", pszTemp);
+			pxmlGroupsNode->SetAttribute("error", pszTemp);
 			rtcode = SECTION_PARSE_PARAMETER_ERROR;
 		}
 	}
@@ -491,17 +489,6 @@ int	MPEG2_DSMCC_DecodeIOR_to_xml(BITS_t* pbs, XMLDocForMpegSyntax* pxmlDoc, tiny
 
 					int copy_length = min(sizeof(pIOR->type_id_byte), N1);
 					memcpy(pIOR->type_id_byte, ptemp, copy_length);
-
-					//for (i = 0; i < min(8, copy_length); i++)
-					//{
-					//	sprintf_s(pszTemp + 3 * i, 4, "%02X ", ptemp[i]);
-					//}
-					//if (i < copy_length)
-					//{
-					//	strcpy_s(pszTemp + 3 * i, 4, "...");
-					//}
-
-					//pxmlDoc->NewSyntaxElement(pxmlIORNode, "type_id_byte()", -1, NULL, -1, pbs, pszTemp);
 					pxmlDoc->NewKeyValuePairElement(pxmlIORNode, "type_id_byte[ ]", (uint8_t*)pIOR->type_id_byte, N1, pIOR->type_id_byte, pbs);
 				}
 
@@ -764,11 +751,11 @@ int	MPEG2_DSMCC_DecodeServiceGatewayInfo_to_xml(uint8_t *buf, int length, XMLDoc
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
+		tinyxml2::XMLElement* pxmlSGINode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "privateDataByte[]", buf, length, "ServiceGatewayInfo()");
+		pxmlDoc->UpdateBufMark(pxmlSGINode, buf, buf + length);
+
 		if ((buf != NULL) && (length > 4))
 		{
-			tinyxml2::XMLElement* pxmlSGINode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "privateDataByte[] - ServiceGatewayInfo()");
-			pxmlDoc->UpdateBufMark(pxmlSGINode, buf, buf + length);
-
 			ServiceGatewayInfo_t* pServiceGatewayInfo = (pSGI != NULL) ? pSGI : new ServiceGatewayInfo_t;
 			memset(pServiceGatewayInfo, 0x00, sizeof(ServiceGatewayInfo_t));
 
@@ -788,23 +775,14 @@ int	MPEG2_DSMCC_DecodeServiceGatewayInfo_to_xml(uint8_t *buf, int length, XMLDoc
 			pxmlDoc->NewKeyValuePairElement(pxmlSGINode, "serviceContextList_count", pServiceGatewayInfo->serviceContextList_count, 8, "uimsbf", "N2", &bs);
 			if (pServiceGatewayInfo->serviceContextList_count > 0)
 			{
-				//uint8_t* ptemp = bs.p_cur;
-				//BITS_skip(&bs, pServiceGatewayInfo->serviceContextList_count);
+				uint8_t* ptemp = bs.p_cur;
+				BITS_skip(&bs, pServiceGatewayInfo->serviceContextList_count);
 
-				//int copy_length = min(sizeof(pServiceGatewayInfo->), pServiceGatewayInfo->serviceContextList_count);
-				//memcpy(pServiceGatewayInfo->userInfo_data_byte, ptemp, copy_length);
+				//int copy_length = min(sizeof(pServiceGatewayInfo->serviceContextList_data_byte), pServiceGatewayInfo->serviceContextList_count);
+				//memcpy(pServiceGatewayInfo->serviceContextList_data_byte, ptemp, copy_length);
 
-				//for (i = 0; i < min(8, copy_length); i++)
-				//{
-				//	sprintf_s(pszTemp + 3 * i, 4, "%02X ", ptemp[i]);
-				//}
-				//if (i < copy_length)
-				//{
-				//	strcpy_s(pszTemp + 3 * i, 4, "...");
-				//}
-
-				//pxmlDoc->NewSyntaxElement(pxmlParentNode, "userInfo_data_byte()", -1, NULL, -1, &bs, pszTemp);
-				//assert(0);
+				pxmlDoc->NewKeyValuePairElement(pxmlSGINode, "serviceContextList_data_byte()", ptemp, pServiceGatewayInfo->serviceContextList_count, NULL, &bs);
+				assert(0);
 			}
 
 			pServiceGatewayInfo->userInfoLength = BITS_get(&bs, 16);
@@ -815,7 +793,7 @@ int	MPEG2_DSMCC_DecodeServiceGatewayInfo_to_xml(uint8_t *buf, int length, XMLDoc
 				uint8_t* ptemp = bs.p_cur;
 				BITS_skip(&bs, pServiceGatewayInfo->userInfoLength);
 
-				int copy_length = min(sizeof(pServiceGatewayInfo->userInfo_data_byte), bs.p_end - bs.p_cur);
+				int copy_length = min(sizeof(pServiceGatewayInfo->userInfo_data_byte), pServiceGatewayInfo->userInfoLength);
 				memcpy(pServiceGatewayInfo->userInfo_data_byte, ptemp, copy_length);
 				pxmlDoc->NewKeyValuePairElement(pxmlSGINode, "userInfo_data_byte[ ]", pServiceGatewayInfo->userInfo_data_byte, copy_length, NULL, &bs);
 			}
@@ -829,7 +807,7 @@ int	MPEG2_DSMCC_DecodeServiceGatewayInfo_to_xml(uint8_t *buf, int length, XMLDoc
 		else
 		{
 			sprintf_s(pszTemp, sizeof(pszTemp), "parameters error!");
-			pxmlParentNode->SetAttribute("error", pszTemp);
+			pxmlSGINode->SetAttribute("error", pszTemp);
 			rtcode = SECTION_PARSE_PARAMETER_ERROR;
 		}
 	}
@@ -844,7 +822,7 @@ int	MPEG2_DSMCC_DecodeServiceGatewayInfo_to_xml(uint8_t *buf, int length, XMLDoc
 int	MPEG2_DSMCC_DecodeDownloadServerInitiate_to_xml(uint8_t *buf, int length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, DownloadServerInitiate_t* pDSI)
 {
 	int			rtcode = SECTION_PARSE_NO_ERROR;
-	uint8_t*	ptemp;
+	//uint8_t*	ptemp;
 	int			remain_length;
 	int			copy_length;
 	char		pszTemp[96];
@@ -857,6 +835,7 @@ int	MPEG2_DSMCC_DecodeDownloadServerInitiate_to_xml(uint8_t *buf, int length, XM
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
 		tinyxml2::XMLElement* pxmlSessionNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "DownloadServerInitiate()");
+		pxmlDoc->UpdateBufMark(pxmlSessionNode, buf, buf + length);
 
 		if ((buf != NULL) && (length >= 22))
 		{
@@ -880,7 +859,8 @@ int	MPEG2_DSMCC_DecodeDownloadServerInitiate_to_xml(uint8_t *buf, int length, XM
 				memcpy(pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorBuf, bytes.p_cur, copy_length);
 				BYTES_skip(&bytes, pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength);
 
-				pxmlDoc->NewKeyValuePairElementByteMode(pxmlDescriptorNode, "compatibilityDescriptorBuf", pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorBuf, pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength, NULL, &bytes);
+				pxmlDoc->NewKeyValuePairElementByteMode(pxmlDescriptorNode, "compatibilityDescriptorBuf", 
+					pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorBuf, copy_length, NULL, &bytes);
 			}
 
 			pxmlDoc->UpdateBufMark(pxmlDescriptorNode, old_ptr, bytes.p_cur);
@@ -895,15 +875,16 @@ int	MPEG2_DSMCC_DecodeDownloadServerInitiate_to_xml(uint8_t *buf, int length, XM
 				remain_length = length - (int)(bytes.p_cur - bytes.p_start);
 				assert(pDownloadServerInitiate->privateDataLength <= remain_length);
 
-				ptemp = bytes.p_cur;
+				uint8_t* privateDataByte = bytes.p_cur;
+				BYTES_skip(&bytes, pDownloadServerInitiate->privateDataLength);
 
 				//检查privateDataByte的类型
 				strcpy_s(pszStyle, sizeof(pszStyle), "unknown");
 
-				int value_hi = (ptemp[0] << 8) | ptemp[1];
+				int value_hi = (privateDataByte[0] << 8) | privateDataByte[1];
 				if (value_hi == 0)
 				{
-					int value_lo = (ptemp[2] << 8) | ptemp[3];
+					int value_lo = (privateDataByte[2] << 8) | privateDataByte[3];
 					if (value_lo == 4)
 					{
 						//判断的依据为 IOP::IOR()的type_id_length 一般为4
@@ -921,26 +902,23 @@ int	MPEG2_DSMCC_DecodeDownloadServerInitiate_to_xml(uint8_t *buf, int length, XM
 					pDownloadServerInitiate->data_broadcast_type = 0x0006;
 
 					pGroupInfoIndication = &(pDownloadServerInitiate->u.GroupInfoIndication);
-					rtcode = MPEG2_DSMCC_DecodeGroupInfoIndication_to_xml(ptemp, pDownloadServerInitiate->privateDataLength, pxmlDoc, pxmlSessionNode, pGroupInfoIndication);
-
-					BYTES_skip(&bytes, pDownloadServerInitiate->privateDataLength);
+					rtcode = MPEG2_DSMCC_DecodeGroupInfoIndication_to_xml(privateDataByte, pDownloadServerInitiate->privateDataLength, pxmlDoc, pxmlSessionNode, pGroupInfoIndication);
 				}
 				else if (strcmp(pszStyle, "ServiceGatewayInfo") == 0)
 				{
 					pDownloadServerInitiate->data_broadcast_type = 0x0007;
 
 					pServiceGatewayInfo = &(pDownloadServerInitiate->u.ServiceGatewayInfo);
-					rtcode = MPEG2_DSMCC_DecodeServiceGatewayInfo_to_xml(ptemp, pDownloadServerInitiate->privateDataLength, pxmlDoc, pxmlSessionNode, pServiceGatewayInfo);
-					BYTES_skip(&bytes, pDownloadServerInitiate->privateDataLength);
+					rtcode = MPEG2_DSMCC_DecodeServiceGatewayInfo_to_xml(privateDataByte, pDownloadServerInitiate->privateDataLength, pxmlDoc, pxmlSessionNode, pServiceGatewayInfo);
 				}
 				else
 				{
 					copy_length = min(pDownloadServerInitiate->privateDataLength, sizeof(pDownloadServerInitiate->u.privateDataByte));
-					memcpy(pDownloadServerInitiate->u.privateDataByte, bytes.p_cur, copy_length);
-					BYTES_skip(&bytes, pDownloadServerInitiate->privateDataLength);
+					memcpy(pDownloadServerInitiate->u.privateDataByte, privateDataByte, copy_length);
 
 					//如何判断privateDataByte载荷的类型？
-					pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "privateDataByte[ ]", pDownloadServerInitiate->u.privateDataByte, pDownloadServerInitiate->privateDataLength, pszStyle, &bytes);
+					pxmlDoc->NewKeyValuePairElementByteMode(pxmlSessionNode, "privateDataByte[ ]", pDownloadServerInitiate->u.privateDataByte, 
+						copy_length , pszStyle, &bytes);
 				}
 			}
 
@@ -985,6 +963,7 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication_to_xml(uint8_t *buf, int length, XM
 	{
 		tinyxml2::XMLElement* pxmlSessionNode = NULL;
 		pxmlSessionNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "DownloadInfoIndication()");
+		pxmlDoc->UpdateBufMark(pxmlSessionNode, buf, buf + length);
 
 		if ((buf != NULL) && (length >= 20))
 		{

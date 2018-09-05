@@ -18,9 +18,9 @@ int	MPEG2_DSMCC_DecodeServiceGatewayInfo_to_xml(uint8_t *buf, int length, XMLDoc
 
 int	MPEG2_DSMCC_DecodeDownloadServerInitiate_to_xml(uint8_t *buf, int length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, DownloadServerInitiate_t* pDownloadServerInitiate = NULL);
 int	MPEG2_DSMCC_DecodeDownloadInfoIndication_to_xml(uint8_t *buf, int length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, DownloadInfoIndication_t* pDownloadInfoIndication = NULL);
+int MPEG2_DSMCC_DecodeDownloadDataBlock_to_xml(uint8_t *buf, int length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, DownloadDataBlock_t* pDownloadDataBlock = NULL);
 
 _CDL_EXPORT	int	MPEG2_DSMCC_DecodeSection_to_XML(uint8_t *buf, int length, XMLDocForMpegSyntax* pxmlDoc, dsmcc_section_t* pDSMCCSection = NULL);
-
 _CDL_EXPORT	int MPEG2_DSMCC_UNM_DecodeSection_to_XML(uint8_t *section_buf, int section_size, XMLDocForMpegSyntax* pxmlDoc, dsmcc_unm_section_t* pDSMCCSection = NULL);
 _CDL_EXPORT	int MPEG2_DSMCC_DDM_DecodeSection_to_XML(uint8_t *section_buf, int section_size, XMLDocForMpegSyntax* pxmlDoc, dsmcc_ddm_section_t* pDSMCCSection = NULL);
 

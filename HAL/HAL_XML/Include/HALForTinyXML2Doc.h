@@ -23,7 +23,8 @@ public:
 	//tinyxml2::XMLElement * NewKeyValueElement(tinyxml2::XMLElement* pxmlParent, const char* key_name, unsigned int key_value, int bits = -1, const char* key_commnet = NULL);
 	//tinyxml2::XMLElement * NewTitleElement(tinyxml2::XMLElement* pxmlParent, const char* title_name);
 
-	tinyxml2::XMLElement * NewKeyValuePairElement(tinyxml2::XMLElement* pxmlParent, const char* key_name, uint32_t key_value = -1, int bits = -1, const char* mnemonic=NULL, const char* pszComment = NULL, const BITS_t* pbits_map = NULL);
+	tinyxml2::XMLElement * NewKeyValuePairElement(tinyxml2::XMLElement* pxmlParent, const char* key_name);
+	tinyxml2::XMLElement * NewKeyValuePairElement(tinyxml2::XMLElement* pxmlParent, const char* key_name, uint32_t key_value, int bits = -1, const char* mnemonic=NULL, const char* pszComment = NULL, const BITS_t* pbits_map = NULL);
 	tinyxml2::XMLElement * NewKeyValuePairElement(tinyxml2::XMLElement* pxmlParent, const char* key_name, const uint8_t* byte_buf, int byte_length, const char* pszComment = NULL, const BITS_t* pbits_map = NULL);
 	tinyxml2::XMLElement * NewKeyValuePairElement(tinyxml2::XMLElement* pxmlParent, const char* key_name, const char* string);
 

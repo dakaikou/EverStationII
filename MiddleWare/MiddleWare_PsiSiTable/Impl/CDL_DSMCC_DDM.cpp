@@ -34,8 +34,13 @@ void CDSMCC_DDM::Init(void)
 
 	CPVT::Init();
 
-	m_pucBlockBuf = NULL;
-	m_pnBlockLength = NULL;
+	for (i = 0; i < 256; i++)
+	{
+		m_astBlockInfo[i].length = 0;
+		m_astBlockInfo[i].buf = NULL;
+	}
+	//m_pucBlockBuf = NULL;
+	//m_pnBlockLength = NULL;
 
 	m_nDirMessageCount = 0;
 	for (i = 0; i < 128; i++)
@@ -56,26 +61,18 @@ void CDSMCC_DDM::Reset(void)
 {
 	int		i;
 
-	if (m_pnBlockLength != NULL)
+	for (i = 0; i < m_nSectionCount; i++)
 	{
-		free(m_pnBlockLength);
-		m_pnBlockLength = NULL;
-	}
-
-	if (m_pucBlockBuf != NULL)
-	{
-		for (i = 0; i < m_nSectionCount; i++)
+		if (m_astBlockInfo[i].buf != NULL)
 		{
-			if (m_pucBlockBuf[i] != NULL)
-			{
-				free(m_pucBlockBuf[i]);
-				m_pucBlockBuf[i] = NULL;
-			}
-		}
+			free(m_astBlockInfo[i].buf);
+			m_astBlockInfo[i].buf = NULL;
 
-		free(m_pucBlockBuf);
-		m_pucBlockBuf = NULL;
+			m_astBlockInfo[i].length = 0;
+		}
 	}
+
+	m_nModuleSize = 0;
 
 	m_nMemoryForBlockBuf = 0;
 
@@ -129,71 +126,38 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 		{
 			m_usMessageId = DSMCC_section.dsmccDownloadDataHeader.messageId;
 
-			if (m_usMessageId == 0x1006)			//DSI
+			if (m_usMessageId == 0x1003)			//DDB
 			{
-				//assert(0);
-			}
-			else if (m_usMessageId == 0x1002)			//DII
-			{
-				//assert(0);
-			}
-			else if (m_usMessageId == 0x1003)			//DDB
-			{
-				if (m_pnBlockLength == NULL)
+				if (m_astBlockInfo[pprivate_section->section_number].buf == NULL)
 				{
-					m_pnBlockLength = (S32*)calloc(m_nSectionCount, sizeof(S32));
-
-					if (m_pnBlockLength != NULL)
+					m_astBlockInfo[pprivate_section->section_number].buf = (uint8_t*)malloc(DSMCC_section.DownloadDataBlock.N);
+					if (m_astBlockInfo[pprivate_section->section_number].buf != NULL)
 					{
-						m_nMemoryForBlockBuf = m_nSectionCount * sizeof(S32);
-						for (i = 0; i < m_nSectionCount; i++)
-						{
-							m_pnBlockLength[i] = 0;
-						}
+						m_astBlockInfo[pprivate_section->section_number].length = DSMCC_section.DownloadDataBlock.N;
+						memcpy(m_astBlockInfo[pprivate_section->section_number].buf, DSMCC_section.DownloadDataBlock.blockDataByte, DSMCC_section.DownloadDataBlock.N);
+
+						m_nModuleSize += DSMCC_section.DownloadDataBlock.N;
+						m_nMemoryForBlockBuf += DSMCC_section.DownloadDataBlock.N;
 					}
-					m_nModuleSize = 0;
-				}
-
-				if (m_pucBlockBuf == NULL)
-				{
-					m_pucBlockBuf = (U8**)calloc(m_nSectionCount, sizeof(U8*));
-					if (m_pucBlockBuf != NULL)
-					{
-						m_nMemoryForBlockBuf += m_nSectionCount * sizeof(U8*);
-						for (i = 0; i < m_nSectionCount; i++)
-						{
-							m_pucBlockBuf[i] = NULL;
-						}
-					}
-				}
-
-				m_pnBlockLength[pprivate_section->section_number] = DSMCC_section.DownloadDataBlock.N;
-				m_nModuleSize += m_pnBlockLength[pprivate_section->section_number];
-
-				m_pucBlockBuf[pprivate_section->section_number] = (U8*)malloc(m_pnBlockLength[pprivate_section->section_number] * sizeof(U8));
-				if (m_pucBlockBuf[pprivate_section->section_number] != NULL)
-				{
-					m_nMemoryForBlockBuf += m_pnBlockLength[pprivate_section->section_number] * sizeof(U8);
-
-					memcpy(m_pucBlockBuf[pprivate_section->section_number], DSMCC_section.DownloadDataBlock.blockDataByte, m_pnBlockLength[pprivate_section->section_number]);
 				}
 
 				if (m_bCollectOver)
 				{
 					//如果搜集齐了
-
-					module_buf = (U8*)malloc(m_nModuleSize * sizeof(U8));
+					module_buf = (uint8_t*)malloc(m_nModuleSize);
 					if (module_buf != NULL)
 					{
+						//把block里面存储的数据按序倒腾到module缓存里面
 						module_length = 0;
 						for (i = 0; i < m_nSectionCount; i++)
 						{
-							if (m_pucBlockBuf[i] != NULL)
+							if (m_astBlockInfo[i].buf != NULL)
 							{
-								memcpy(module_buf + module_length, m_pucBlockBuf[i], m_pnBlockLength[i]);
-								module_length += m_pnBlockLength[i];
+								memcpy(module_buf + module_length, m_astBlockInfo[i].buf, m_astBlockInfo[i].length);
+								module_length += m_astBlockInfo[i].length;
 							}
 						}
+						assert(module_length == m_nModuleSize);
 
 						//解析DDB
 						memcpy(magic, module_buf, 4);
@@ -246,28 +210,11 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 						//释放module_buf
 						free(module_buf);
 					}
-
-					if (m_pnBlockLength != NULL)
-					{
-						free(m_pnBlockLength);
-						m_pnBlockLength = NULL;
-					}
-
-					if (m_pucBlockBuf != NULL)
-					{
-						for (i = 0; i < m_nSectionCount; i++)
-						{
-							if (m_pucBlockBuf[i] != NULL)
-							{
-								free(m_pucBlockBuf[i]);
-								m_pucBlockBuf[i] = NULL;
-							}
-						}
-
-						free(m_pucBlockBuf);
-						m_pucBlockBuf = NULL;
-					}
 				}
+			}
+			else
+			{
+				assert(0);
 			}
 		}
 	}

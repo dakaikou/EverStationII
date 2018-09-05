@@ -47,42 +47,13 @@ void XMLDocForMpegSyntax::UpdateBufMark(tinyxml2::XMLElement* pxmlNode, uint8_t*
 	}
 }
 
-//tinyxml2::XMLElement * XMLDocForMpegSyntax::NewKeyValueElement(tinyxml2::XMLElement* pxmlParent, const char* key_name, unsigned int key_value, int bits, const char* key_comment)
-//{
-//	tinyxml2::XMLElement* pxmlNewElement = tinyxml2::XMLDocument::NewElement(key_name);
-//
-//	pxmlNewElement->SetAttribute("value", key_value);
-//
-//	if (bits > 0)
-//	{
-//		pxmlNewElement->SetAttribute("bits", bits);
-//	}
-//
-//	if (key_comment != NULL)
-//	{
-//		pxmlNewElement->SetAttribute("comment", key_comment);
-//	}
-//
-//	pxmlParent->InsertEndChild(pxmlNewElement);
-//
-//	return pxmlNewElement;
-//}
+tinyxml2::XMLElement * XMLDocForMpegSyntax::NewKeyValuePairElement(tinyxml2::XMLElement* pxmlParent, const char* key_name)
+{
+	tinyxml2::XMLElement* pxmlNewElement = tinyxml2::XMLDocument::NewElement(key_name);
+	pxmlParent->InsertEndChild(pxmlNewElement);
 
-//tinyxml2::XMLElement * XMLDocForMpegSyntax::NewKeyValueElement(tinyxml2::XMLElement* pxmlParent, const char* key_name, unsigned int key_value, int bits)
-//{
-//	tinyxml2::XMLElement* pxmlNewElement = tinyxml2::XMLDocument::NewElement(key_name);
-//
-//	pxmlNewElement->SetAttribute("value", key_value);
-//
-//	if (bits > 0)
-//	{
-//		pxmlNewElement->SetAttribute("bits", bits);
-//	}
-//
-//	pxmlParent->InsertEndChild(pxmlNewElement);
-//
-//	return pxmlNewElement;
-//}
+	return pxmlNewElement;
+}
 
 tinyxml2::XMLElement * XMLDocForMpegSyntax::NewKeyValuePairElement(tinyxml2::XMLElement* pxmlParent, const char* key_name, const char* string)
 {
@@ -95,15 +66,6 @@ tinyxml2::XMLElement * XMLDocForMpegSyntax::NewKeyValuePairElement(tinyxml2::XML
 	return pxmlNewElement;
 }
 
-//tinyxml2::XMLElement * XMLDocForMpegSyntax::NewTitleElement(tinyxml2::XMLElement* pxmlParent, const char* title_name)
-//{
-//	tinyxml2::XMLElement* pxmlNewElement = tinyxml2::XMLDocument::NewElement(title_name);
-//
-//	pxmlParent->InsertEndChild(pxmlNewElement);
-//
-//	return pxmlNewElement;
-//}
-
 tinyxml2::XMLElement * XMLDocForMpegSyntax::NewKeyValuePairElement(tinyxml2::XMLElement* pxmlParent, const char* key_name, uint32_t key_value, int bits, const char* mnemonic, const char* pszComment, const BITS_t* pbits_map)
 {
 	tinyxml2::XMLElement* pxmlNewElement = tinyxml2::XMLDocument::NewElement(key_name);
@@ -111,12 +73,12 @@ tinyxml2::XMLElement * XMLDocForMpegSyntax::NewKeyValuePairElement(tinyxml2::XML
 	if (bits > 0)
 	{
 		pxmlNewElement->SetAttribute("bits", bits);
-		if (mnemonic != NULL)
-		{
-			pxmlNewElement->SetAttribute("mnemonic", mnemonic);
-		}
-		pxmlNewElement->SetAttribute("value", key_value);
 	}
+	if (mnemonic != NULL)
+	{
+		pxmlNewElement->SetAttribute("mnemonic", mnemonic);
+	}
+	pxmlNewElement->SetAttribute("value", key_value);
 
 	if (pbits_map != NULL)
 	{

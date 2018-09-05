@@ -64,10 +64,16 @@ class _CDL_EXPORT CDSMCC_DDM : public CPVT
 public:
 	CDSMCC_DDM(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
 	~CDSMCC_DDM(void);
+
+	struct
+	{
+		uint8_t* buf;
+		int		 length;
+	} m_astBlockInfo[256];
 public:
 
-	U8**					m_pucBlockBuf;
-	S32*					m_pnBlockLength;
+	//U8**					m_pucBlockBuf;
+	//S32*					m_pnBlockLength;
 	S32						m_nMemoryForBlockBuf;
 
 	S32						m_nModuleSize;

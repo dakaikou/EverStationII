@@ -52,6 +52,7 @@ protected:
 
 	int DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode);
 	int DSMCC_BuildDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t carousel_type_id, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode);
+	int OC_BuildDirectory(uint16_t PID, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, uint16_t moduleId, uint32_t objectKey_data);
 
 public:
 
