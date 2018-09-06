@@ -689,31 +689,10 @@ void CNaviList_DSMCCs::OnOcdcDownload(void)
 		state = listCtrl.GetItemState(item_index, LVIS_SELECTED);
 		if ((state & LVIS_SELECTED) == LVIS_SELECTED)
 		{
-			listCtrl.GetItemText(item_index, LISTITEM_COL_INDEX_TS_PID, pszTemp, sizeof(pszTemp));
+			//listCtrl.GetItemText(item_index, LISTITEM_COL_INDEX_TS_PID, pszTemp, sizeof(pszTemp));
 			//usPID = (uint16_t)strtol(pszTemp, &str, 16);
-			sscanf_s(pszTemp, "0x%04X", &usPID);
-
-			//listCtrl.GetItemText(item_index, LISTITEM_COL_INDEX_SERVICE_ID, pszTemp, sizeof(pszTemp));
-			////usServiceID = (uint16_t)strtol(pszTemp, &str, 16);
-			//sscanf_s(pszTemp, "0x%04X", &usServiceID);
-
-			//listCtrl.GetItemText(item_index, LISTITEM_COL_INDEX_TRANSACTION_ID, pszTemp, sizeof(pszTemp));
-			////dwTransactionID = (uint32_t)strtol(pszTemp, &str, 16);
-			//sscanf_s(pszTemp, "0x%08X", &dwTransactionID);
-
-			//PID = m_usPID_in_OCDCArray[item_index];
-			//data_broadcast_id = m_usDataBroadcastID_in_OCDCArray[item_index];
-			//component_tag = m_ucComponentTag_in_OCDCArray[item_index];
-
-			//if (m_usCarouselTypeID_in_OCDCArray[item_index] != 0xFFFF)
-			//{
-			//	carousel_type_id = m_usCarouselTypeID_in_OCDCArray[item_index];
-			//}
-
-			//if (m_uiTransactionID_in_OCDCArray[item_index] != 0xFFFFFFFF)
-			//{
-			//	transaction_id = m_uiTransactionID_in_OCDCArray[item_index];
-			//}
+			//sscanf_s(pszTemp, "0x%04X", &usPID);
+			usPID = (uint16_t)listCtrl.GetItemData(item_index);
 
 			pDSMCC_DSI = (CDSMCC_UNM*)pDB_PsiSiTables->QueryDsmccUNM_DSI(usPID);
 			if (pDSMCC_DSI != NULL)
@@ -812,15 +791,9 @@ void CNaviList_DSMCCs::OnOcdcDownload(void)
 		}
 		else
 		{
-			//			if (pWindow->m_kThreadParams.offline == 1)
-			//			{
 			pTSMagicView->m_kThreadParams.dsmcc_download_thread_running = 0;
 			pTSMagicView->m_kThreadParams.dsmcc_download_thread_stopped = 0;
 			::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_dsmcc_download_thread, (LPVOID)&(pTSMagicView->m_kThreadParams), 0, 0);
-			//			}
-			//			else
-			//			{
-			//			}
 		}
 	}
 }

@@ -181,7 +181,6 @@
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Impl\CDL_DSMCC_DDM.cpp" />
-    <ClCompile Include="Impl\CDL_DSMCC_PVT.cpp" />
     <ClCompile Include="Impl\CDL_DSMCC_UNM.cpp" />
     <ClCompile Include="Impl\CDL_IPDC_MPE.cpp" />
     <ClCompile Include="Impl\CDL_MHP_AIT.cpp" />

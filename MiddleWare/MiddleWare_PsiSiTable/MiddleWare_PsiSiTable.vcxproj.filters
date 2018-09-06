@@ -101,8 +101,5 @@
     <ClCompile Include="Impl\CDL_PSI_TSDT.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_DSMCC_PVT.cpp">
-      <Filter>源文件\Impl</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

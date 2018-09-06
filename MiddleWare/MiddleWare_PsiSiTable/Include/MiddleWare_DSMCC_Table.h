@@ -93,20 +93,20 @@ public:
 	int	 AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t* pprivate_section);
 };
 
-class _CDL_EXPORT CDSMCC_PVT : public CPVT
-{
-public:
-	CDSMCC_PVT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
-	~CDSMCC_PVT(void);
-public:
-
-	uint16_t					m_usMessageId;
-
-public:
-	void Init(void);
-	void Reset(void);
-	int	 AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t* pprivate_section);
-};
+//class _CDL_EXPORT CDSMCC_PVT : public CPVT
+//{
+//public:
+//	CDSMCC_PVT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
+//	~CDSMCC_PVT(void);
+//public:
+//
+//	uint16_t					m_usMessageId;
+//
+//public:
+//	void Init(void);
+//	void Reset(void);
+//	int	 AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t* pprivate_section);
+//};
 
 //MPE datagram
 class _CDL_EXPORT CMPE : public CPVT

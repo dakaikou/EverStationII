@@ -1507,29 +1507,28 @@ void CNaviTree_PsiSiTables::UpdateDSMCC(int section_number, CPVT* pPVT)
 			treeCtrl.SetItemData(hExtensionItem, 0);
 			treeCtrl.SetItemImage(hExtensionItem, 0, 1);
 			treeCtrl.SortChildren(hTableItem);
-
-			TreeCtrlItem.hParent = hExtensionItem;
-
-			{
-#if CHINESE_VERSION
-				sprintf_s(pszText, sizeof(pszText), "¶Î 0x%02X(%3d)", section_number, section_number);
-#else
-				sprintf_s(pszText, sizeof(pszText), "SECTION 0x%02X(%3d)", section_index, section_index);
-#endif
-				hSectionItem = treeCtrl.InsertItem(&TreeCtrlItem);
-
-				uint32_t dwItemData = pPVT->GetKey();
-				dwItemData <<= 8;
-				dwItemData |= pPVT->GetTableID();
-				dwItemData <<= 8;
-				dwItemData |= section_number;
-
-				treeCtrl.SetItemData(hSectionItem, dwItemData);
-				treeCtrl.SetItemImage(hSectionItem, 2, 3);
-			}
-
-			treeCtrl.SortChildren(hExtensionItem);
 		}
+
+		TreeCtrlItem.hParent = hExtensionItem;
+
+		{
+#if CHINESE_VERSION
+			sprintf_s(pszText, sizeof(pszText), "¶Î 0x%02X(%3d)", section_number, section_number);
+#else
+			sprintf_s(pszText, sizeof(pszText), "SECTION 0x%02X(%3d)", section_index, section_index);
+#endif
+			hSectionItem = treeCtrl.InsertItem(&TreeCtrlItem);
+
+			uint32_t dwItemData = pPVT->GetKey();
+			dwItemData <<= 8;
+			dwItemData |= pPVT->GetTableID();
+			dwItemData <<= 8;
+			dwItemData |= section_number;
+
+			treeCtrl.SetItemData(hSectionItem, dwItemData);
+			treeCtrl.SetItemImage(hSectionItem, 2, 3);
+		}
+		treeCtrl.SortChildren(hExtensionItem);
 
 		treeCtrl.SetItemState(m_hDsmccItem, TVIS_BOLD, TVIS_BOLD);
 	}

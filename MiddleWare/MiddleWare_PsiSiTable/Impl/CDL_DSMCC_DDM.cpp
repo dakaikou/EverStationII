@@ -39,8 +39,6 @@ void CDSMCC_DDM::Init(void)
 		m_astBlockInfo[i].length = 0;
 		m_astBlockInfo[i].buf = NULL;
 	}
-	//m_pucBlockBuf = NULL;
-	//m_pnBlockLength = NULL;
 
 	m_nDirMessageCount = 0;
 	for (i = 0; i < 128; i++)
