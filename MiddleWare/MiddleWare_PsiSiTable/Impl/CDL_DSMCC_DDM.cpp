@@ -41,13 +41,13 @@ void CDSMCC_DDM::Init(void)
 	}
 
 	m_nDirMessageCount = 0;
-	for (i = 0; i < 128; i++)
+	for (i = 0; i < MAX_DOWNLOAD_OBJS; i++)
 	{
 		m_pDirectoryMessage[i] = NULL;
 	}
 
 	m_nFileMessageCount = 0;
-	for (i = 0; i < 128; i++)
+	for (i = 0; i < MAX_DOWNLOAD_OBJS; i++)
 	{
 		m_pFileMessage[i] = NULL;
 	}
@@ -72,7 +72,7 @@ void CDSMCC_DDM::Reset(void)
 
 	m_nModuleSize = 0;
 
-	m_nMemoryForBlockBuf = 0;
+	m_nMemAllocatedForModule = 0;
 
 	for (i = 0; i < m_nDirMessageCount; i++)
 	{
@@ -82,19 +82,26 @@ void CDSMCC_DDM::Reset(void)
 			m_pDirectoryMessage[i] = NULL;
 		}
 	}
-	m_nMemoryForDirMessages = 0;
+	m_nMemAllocatedForDirMessages = 0;
 	m_nDirMessageCount = 0;
 
 	for (i = 0; i < m_nFileMessageCount; i++)
 	{
 		if (m_pFileMessage[i] != NULL)
 		{
+			if (m_pFileMessage[i]->content_data_byte != NULL)
+			{
+				free(m_pFileMessage[i]->content_data_byte);
+			}
+
 			free(m_pFileMessage[i]);
 			m_pFileMessage[i] = NULL;
 		}
 	}
-	m_nMemoryForFileMessages = 0;
+	m_nMemAllocatedForFileMessages = 0;
 	m_nFileMessageCount = 0;
+
+	m_usMessageId = 0xFFFF;
 
 	CPVT::Reset();
 }
@@ -122,9 +129,17 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 		rtcode = MPEG2_DSMCC_DDM_DecodeSection(buf, length, &DSMCC_section);
 		if (rtcode == SECTION_PARSE_NO_ERROR)
 		{
-			m_usMessageId = DSMCC_section.dsmccDownloadDataHeader.messageId;
+			uint16_t usMessageId = DSMCC_section.dsmccDownloadDataHeader.messageId;
+			if (m_usMessageId == 0xFFFF)
+			{
+				m_usMessageId = usMessageId;
+			}
+			else
+			{
+				assert(m_usMessageId == usMessageId);		//从messageId是否相等来检验语法，实际上没有多大必要
+			}
 
-			if (m_usMessageId == 0x1003)			//DDB
+			if (usMessageId == 0x1003)			//DDB
 			{
 				if (m_astBlockInfo[pprivate_section->section_number].buf == NULL)
 				{
@@ -135,11 +150,11 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 						memcpy(m_astBlockInfo[pprivate_section->section_number].buf, DSMCC_section.DownloadDataBlock.blockDataByte, DSMCC_section.DownloadDataBlock.N);
 
 						m_nModuleSize += DSMCC_section.DownloadDataBlock.N;
-						m_nMemoryForBlockBuf += DSMCC_section.DownloadDataBlock.N;
+						m_nMemAllocatedForModule += DSMCC_section.DownloadDataBlock.N;
 					}
 				}
 
-				if (m_bCollectOver)
+				if (m_bCollectOver)		//m_bCollectOver是基类CPVT的成员变量
 				{
 					//如果搜集齐了
 					module_buf = (uint8_t*)malloc(m_nModuleSize);
@@ -155,7 +170,7 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 								module_length += m_astBlockInfo[i].length;
 							}
 						}
-						assert(module_length == m_nModuleSize);
+						assert(module_length == m_nModuleSize);		//此处检测没啥必要，实际上是相等的
 
 						//解析DDB
 						memcpy(magic, module_buf, 4);
@@ -172,13 +187,13 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 								objectKey_length = message_buf[12];
 								memcpy(objectKind_data, message_buf + 17 + objectKey_length, 4);
 
-								if ((strcmp(objectKind_data, "dir") == 0) ||
-									(strcmp(objectKind_data, "srg") == 0))
+								if ((strcmp(objectKind_data, "dir") == 0) ||			//directory
+									(strcmp(objectKind_data, "srg") == 0))				//service gatway message
 								{
 									m_pDirectoryMessage[m_nDirMessageCount] = (DirectoryMessage_t*)malloc(sizeof(DirectoryMessage_t));
 									if (m_pDirectoryMessage[m_nDirMessageCount] != NULL)
 									{
-										m_nMemoryForDirMessages += sizeof(DirectoryMessage_t);
+										m_nMemAllocatedForDirMessages += sizeof(DirectoryMessage_t);
 
 										memset(m_pDirectoryMessage[m_nDirMessageCount], 0x00, sizeof(DirectoryMessage_t));
 										MPEG2_DSMCC_DecodeDirectoryMessage(message_buf, message_length, m_pDirectoryMessage[m_nDirMessageCount]);
@@ -188,13 +203,13 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 								}
 								else if (strcmp(objectKind_data, "fil") == 0)
 								{
-									m_pFileMessage[m_nFileMessageCount] = (BIOP_FileMessage_t*)malloc(sizeof(BIOP_FileMessage_t));
+									m_pFileMessage[m_nFileMessageCount] = (FileMessage_t*)malloc(sizeof(FileMessage_t));
 									if (m_pFileMessage[m_nFileMessageCount] != NULL)
 									{
-										m_nMemoryForFileMessages += sizeof(BIOP_FileMessage_t);
+										memset(m_pFileMessage[m_nFileMessageCount], 0x00, sizeof(FileMessage_t));
+										MPEG2_DSMCC_DecodeFileMessage(message_buf, message_length, m_pFileMessage[m_nFileMessageCount]);
 
-										memset(m_pFileMessage[m_nFileMessageCount], 0x00, sizeof(BIOP_FileMessage_t));
-										MPEG2_DSMCC_DecodeBIOPFileMessage(message_buf, message_length, m_pFileMessage[m_nFileMessageCount]);
+										m_nMemAllocatedForFileMessages += (sizeof(FileMessage_t) + m_pFileMessage[m_nFileMessageCount]->content_length);
 
 										m_nFileMessageCount++;
 									}

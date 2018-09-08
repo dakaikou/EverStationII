@@ -123,6 +123,8 @@ int CNaviList_DSMCCs::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	//	listCtrl.SetImageList(&m_ESImageList, LVSIL_SMALL);
 
 	listCtrl.SetExtendedStyle(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT);
+	//listCtrl.SetExtendedStyle((LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT) & ~LVS_SINGLESEL);
+	listCtrl.ModifyStyle(LVS_SINGLESEL, 0);
 
 	for (i = 0; i < LISTITEM_COL_COUNT; i++)
 	{
@@ -448,7 +450,7 @@ void CNaviList_DSMCCs::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
 	// TODO: 在此添加控件通知处理程序代码
-	char	    pszTemp[48];
+	//char	    pszTemp[48];
 	uint32_t	usPID;
 	//uint32_t	dwTransactionID;
 	//uint32_t	usBroadcastID;
@@ -504,8 +506,21 @@ void CNaviList_DSMCCs::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 		XMLDocForMpegSyntax xmlDoc;
 		pDB_PsiSiTables->BuildDsmccTree(usPID, &xmlDoc);
 
-		sprintf_s(pszTemp, sizeof(pszTemp), "e:\\temp\\DSMCC-sematics-0x%04X.xml", usPID);
-		xmlDoc.SaveFile(pszTemp);
+		char	pszExeFile[MAX_PATH];
+		char	exeDrive[3];
+		char	pszAppTempPath[MAX_PATH];
+		char	pszXmlPath[MAX_PATH];
+		char	pszFilePath[MAX_PATH];
+		GetModuleFileName(NULL, pszExeFile, MAX_PATH);
+		exeDrive[0] = pszExeFile[0];
+		exeDrive[1] = pszExeFile[1];
+		exeDrive[2] = '\0';
+		sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
+		sprintf_s(pszXmlPath, sizeof(pszXmlPath), "%s\\xml", pszAppTempPath);
+		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\DSMCC-sematics-0x%04X.xml", pszXmlPath, usPID);
+		::CreateDirectory(pszAppTempPath, NULL);
+		::CreateDirectory(pszXmlPath, NULL);
+		xmlDoc.SaveFile(pszFilePath);
 
 		m_pInfoTree->ShowXMLDoc(&xmlDoc);
 	}
@@ -545,96 +560,74 @@ void CNaviList_DSMCCs::OnNMRClick(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-void CNaviList_DSMCCs::OC_BuildDownloadTable(uint16_t PID, uint32_t downloadId, uint16_t moduleId, uint32_t objectKey_data, char* pszDir)
-{
-#if DEBUG_DSMCC
-	CDSMCC_DDM*					pDSMCC_DDM;
-	DirectoryMessage_t*			pDirectoryMessage;
-	Bindings_t*					pBindings;
-	//BIOP::Name_t*				pName;
-	BIOP::ObjectLocation_t*		pObjectLocation;
-
-	int							binding_index;
-	int							object_index;
-	unsigned short				sub_moduleId;
-	unsigned int				sub_objectKey_data;
-
-	char						pszText[MAX_TXT_CHARS];
-	char						pszPath[MAX_TXT_CHARS];
-
-	//OC_DOWNLOAD_INFO_t*			pOCDownloadInfo;
-
-	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
-	CDB_OCDCs* pDB_OCDCs = pTSMagicView->GetOCDCsDBase();
-
-	pDSMCC_DDM = (CDSMCC_DDM*)pDB_PsiSiTables->QueryBy3ID(PID, TABLE_ID_DSMCC_DDM, moduleId);
-	if (pDSMCC_DDM != NULL)
-	{
-		for (object_index = 0; object_index < pDSMCC_DDM->m_nDirMessageCount; object_index++)
-		{
-			pDirectoryMessage = pDSMCC_DDM->m_pDirectoryMessage[object_index];
-			if (pDirectoryMessage != NULL)
-			{
-				if (pDirectoryMessage->objectKey_data == objectKey_data)
-				{
-					for (binding_index = 0; binding_index < pDirectoryMessage->bindings_count; binding_index++)
-					{
-						pBindings = pDirectoryMessage->bindings + binding_index;
-						//pName = &(pBindings->Name);
-						pObjectLocation = &(pBindings->IOR.taggedProfile[0].u.BIOPProfileBody.ObjectLocation);
-
-						sprintf_s(pszText, sizeof(pszText), "%s", pBindings->Name.id_data_byte[0]);
-						if (strcmp(pBindings->IOR.type_id_byte, "dir") == 0)
-						{
-							sprintf_s(pszPath, sizeof(pszPath), "%s%s\\", pszDir, pszText);
-
-							sub_moduleId = pObjectLocation->moduleId;
-							sub_objectKey_data = pObjectLocation->objectKey_data;
-
-							OC_BuildDownloadTable(PID, downloadId, sub_moduleId, sub_objectKey_data, pszPath);
-						}
-						else
-						{
-							//PSISI_REPORT.oc_download_count ++;
-							//PSISI_REPORT.astOCDownloadInfo = (OC_DOWNLOAD_INFO_t*)realloc(PSISI_REPORT.astOCDownloadInfo, PSISI_REPORT.oc_download_count * sizeof(OC_DOWNLOAD_INFO_t));
-
-							//if (PSISI_REPORT.astOCDownloadInfo != NULL)
-							//{
-							//	PSISI_REPORT.memory_for_dsmcc_oc_download = PSISI_REPORT.oc_download_count * sizeof(OC_DOWNLOAD_INFO_t);
-
-							//	pOCDownloadInfo = &(PSISI_REPORT.astOCDownloadInfo[PSISI_REPORT.oc_download_count - 1]);
-
-							//	memset(pOCDownloadInfo, 0x00, sizeof(OC_DOWNLOAD_INFO_t));
-
-							//	pBIOP_ObjectLocation = &(pBindings->IOP_IOR.IOP_taggedProfile[0].u.BIOPProfileBody.BIOP_ObjectLocation);
-
-							//	sprintf_s(pOCDownloadInfo->pszFileName, sizeof(pOCDownloadInfo->pszFileName), "%s%s", pszDir, pszText);
-
-							//	pOCDownloadInfo->PID = pDSMCC_DDM->m_usPID;
-							//	pOCDownloadInfo->downloadId = pBIOP_ObjectLocation->carouselId;
-							//	pOCDownloadInfo->objectKey_data = pBIOP_ObjectLocation->objectKey_data;
-							//	pOCDownloadInfo->moduleId = pBIOP_ObjectLocation->moduleId;
-							//}
-							sprintf_s(pszPath, sizeof(pszPath), "%s%s", pszDir, pszText);
-
-							pDB_OCDCs->AddOCDownloadInfo(
-								PID,
-								pObjectLocation->carouselId,
-								pObjectLocation->objectKey_data,
-								pObjectLocation->moduleId,
-								pszPath
-							);
-						}
-					}
-
-					break;
-				}
-			}
-		}
-	}
-#endif
-}
+//void CNaviList_DSMCCs::OC_BuildDownloadTable(uint16_t PID, uint32_t downloadId, uint16_t moduleId, uint32_t objectKey_data, char* pszDir)
+//{
+//#if DEBUG_DSMCC
+//	CDSMCC_DDM*					pDSMCC_DDM;
+//	DirectoryMessage_t*			pDirectoryMessage;
+//	Bindings_t*					pBindings;
+//	//BIOP::Name_t*				pName;
+//	BIOP::ObjectLocation_t*		pObjectLocation;
+//
+//	int							binding_index;
+//	int							object_index;
+//	unsigned short				sub_moduleId;
+//	unsigned int				sub_objectKey_data;
+//
+//	char						pszText[MAX_TXT_CHARS];
+//	char						pszPath[MAX_TXT_CHARS];
+//
+//	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+//	CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
+//	CDB_OCDCs* pDB_OCDCs = pTSMagicView->GetOCDCsDBase();
+//
+//	pDSMCC_DDM = (CDSMCC_DDM*)pDB_PsiSiTables->QueryBy3ID(PID, TABLE_ID_DSMCC_DDM, moduleId);
+//	if (pDSMCC_DDM != NULL)
+//	{
+//		for (object_index = 0; object_index < pDSMCC_DDM->m_nDirMessageCount; object_index++)
+//		{
+//			pDirectoryMessage = pDSMCC_DDM->m_pDirectoryMessage[object_index];
+//			if (pDirectoryMessage != NULL)
+//			{
+//				if (pDirectoryMessage->objectKey_data == objectKey_data)
+//				{
+//					for (binding_index = 0; binding_index < pDirectoryMessage->bindings_count; binding_index++)
+//					{
+//						pBindings = pDirectoryMessage->bindings + binding_index;
+//						//pName = &(pBindings->Name);
+//						pObjectLocation = &(pBindings->IOR.taggedProfile[0].u.BIOPProfileBody.ObjectLocation);
+//
+//						sprintf_s(pszText, sizeof(pszText), "%s", pBindings->Name.id_data_byte[0]);
+//						if (strcmp(pBindings->IOR.type_id_byte, "dir") == 0)
+//						{
+//							sprintf_s(pszPath, sizeof(pszPath), "%s%s\\", pszDir, pszText);
+//
+//							sub_moduleId = pObjectLocation->moduleId;
+//							sub_objectKey_data = pObjectLocation->objectKey_data;
+//
+//							OC_BuildDownloadTable(PID, downloadId, sub_moduleId, sub_objectKey_data, pszPath);
+//						}
+//						else
+//						{
+//							sprintf_s(pszPath, sizeof(pszPath), "%s%s", pszDir, pszText);
+//
+//							pDB_OCDCs->AddOCDownloadInfo(
+//								PID,
+//								pObjectLocation->carouselId,
+//								pObjectLocation->objectKey_data,
+//								pObjectLocation->moduleId,
+//								pszPath
+//							);
+//						}
+//					}
+//
+//					break;
+//				}
+//			}
+//		}
+//	}
+//#endif
+//}
 
 void CNaviList_DSMCCs::OnOcdcDownload(void)
 {
@@ -643,36 +636,8 @@ void CNaviList_DSMCCs::OnOcdcDownload(void)
 	int		item_count;
 	DWORD	state;
 
-	CDSMCC_UNM*		pDSMCC_DSI;
-	CDSMCC_UNM*		pDSMCC_DII;
-	CDSMCC_DDM*		pDSMCC_DDM;
-	DSMCC_DSI_t*	pDSI;
-	DSMCC_DII_t*	pDII;
-	//int				dsi_table_index;
-	//int				dii_table_index;
-	//int				ddm_table_index;
-	int				group_index;
-	int				module_index;
-
-	char	    pszTemp[48];
+	//char	    pszTemp[48];
 	uint32_t	usPID;
-	//uint32_t	dwTransactionID;
-	//uint32_t	usBroadcastID;
-	//uint32_t	usServiceID;
-	//uint8_t		ucCarouselTypeID;
-
-	char				pszOCDir[MAX_PATH];
-	//int					PID = 0xFFFF;
-	//int					data_broadcast_id = 0x0006;
-	//unsigned int		transaction_id = 0x00000000;
-	//int					carousel_type_id = 0x0002;
-	//	int					dsi_table_id_extension;
-	int					dii_table_id_extension;
-	char				pszModuleName[MAX_PATH];
-
-	//unsigned char		component_tag;
-
-	int					exceed_max_count = 0;
 
 	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 	CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
@@ -683,7 +648,6 @@ void CNaviList_DSMCCs::OnOcdcDownload(void)
 	CListCtrl& listCtrl = GetListCtrl();
 
 	item_count = listCtrl.GetItemCount();
-
 	for (item_index = 0; item_index < item_count; item_index++)
 	{
 		state = listCtrl.GetItemState(item_index, LVIS_SELECTED);
@@ -694,106 +658,13 @@ void CNaviList_DSMCCs::OnOcdcDownload(void)
 			//sscanf_s(pszTemp, "0x%04X", &usPID);
 			usPID = (uint16_t)listCtrl.GetItemData(item_index);
 
-			pDSMCC_DSI = (CDSMCC_UNM*)pDB_PsiSiTables->QueryDsmccUNM_DSI(usPID);
-			if (pDSMCC_DSI != NULL)
-			{
-				assert(pDSMCC_DSI->GetMessageID() == 0x1006);
-
-				pDSI = &(pDSMCC_DSI->u.m_DSI);
-
-				if (pDSI->data_broadcast_type == 0x0006)				//DC
-				{
-					for (group_index = 0; group_index < pDSI->NumberOfGroups; group_index++)
-					{
-						dii_table_id_extension = (pDSI->astGroupInfo[group_index].GroupId & 0x0000ffff);
-
-						pDSMCC_DII = (CDSMCC_UNM*)pDB_PsiSiTables->QueryBy3ID(usPID, TABLE_ID_DSMCC_UNM, dii_table_id_extension);
-
-						if (pDSMCC_DII != NULL)
-						{
-							pDII = &(pDSMCC_DII->u.m_DII);
-
-							for (module_index = 0; module_index < pDII->numberOfModules; module_index++)
-							{
-								int dc_download_count = pDB_OCDCs->GetDCDownloadCount();
-								if (dc_download_count < 500)
-								{
-									if (pDII->astModuleInfo[module_index].u.DC_moduleInfo.name_descriptor.descriptor_tag != 0x00)
-									{
-										strcpy_s(pszModuleName, sizeof(pszModuleName), pDII->astModuleInfo[module_index].u.DC_moduleInfo.name_descriptor.text_char);
-									}
-									else
-									{
-										sprintf_s(pszModuleName, sizeof(pszModuleName), "virtual_file_0x%04X-0x%04X.dat", usPID, pDII->astModuleInfo[module_index].moduleId);
-									}
-
-									pDB_OCDCs->AddDCDownloadInfo(0, usPID, pDII->downloadId, pDII->blockSize,
-										pDII->astModuleInfo[module_index].moduleId,
-										pDII->astModuleInfo[module_index].moduleSize,
-										pDII->astModuleInfo[module_index].moduleVersion,
-										pszModuleName);
-								}
-								else
-								{
-									exceed_max_count = 1;
-								}
-							}
-						}
-					}
-				}
-				else			//OC
-				{
-					dii_table_id_extension = pDSI->table_id_extension_for_dii;
-					pDSMCC_DII = (CDSMCC_UNM*)pDB_PsiSiTables->QueryBy3ID(usPID, TABLE_ID_DSMCC_UNM, dii_table_id_extension);
-
-					if (pDSMCC_DII != NULL)
-					{
-						pDII = &(pDSMCC_DII->u.m_DII);
-
-						for (module_index = 0; module_index < pDII->numberOfModules; module_index++)
-						{
-							pDSMCC_DDM = (CDSMCC_DDM*)pDB_PsiSiTables->QueryBy3ID(usPID, TABLE_ID_DSMCC_DDM, pDII->astModuleInfo[module_index].moduleId);
-							//检查一下是否为有效的module
-							if (pDSMCC_DDM != NULL)
-							{
-								int dc_download_count = pDB_OCDCs->GetDCDownloadCount();
-								if (dc_download_count < 500)
-								{
-									sprintf_s(pszModuleName, sizeof(pszModuleName), "virtual_file_0x%04X-0x%04X.dat", usPID, pDII->astModuleInfo[module_index].moduleId);
-
-									pDB_OCDCs->AddDCDownloadInfo(1, usPID, pDII->downloadId, pDII->blockSize,
-										pDII->astModuleInfo[module_index].moduleId,
-										pDII->astModuleInfo[module_index].moduleSize,
-										pDII->astModuleInfo[module_index].moduleVersion,
-										pszModuleName);
-								}
-								else
-								{
-									exceed_max_count = 1;
-								}
-							}
-						}
-					}
-
-					memset(pszOCDir, 0x00, MAX_PATH);
-					OC_BuildDownloadTable(usPID, pDSI->carouselId, pDSI->moduleId_for_srg, pDSI->objectKey_data_for_srg, pszOCDir);
-				}
-			}
+			DOWNLOAD_INFO_t stDownloadInfo;
+			stDownloadInfo.usCandidatePID = usPID;
+			pDB_OCDCs->AppendDownloadInfo(&stDownloadInfo);
 		}
 	}
 
-	int dc_download_count = pDB_OCDCs->GetDCDownloadCount();
-	if (dc_download_count > 0)
-	{
-		if (exceed_max_count)
-		{
-			AfxMessageBox("需要下载的文件数量超出软件支持的范围，只下载前500个文件!", IDOK);
-		}
-		else
-		{
-			pTSMagicView->m_kThreadParams.dsmcc_download_thread_running = 0;
-			pTSMagicView->m_kThreadParams.dsmcc_download_thread_stopped = 0;
-			::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_dsmcc_download_thread, (LPVOID)&(pTSMagicView->m_kThreadParams), 0, 0);
-		}
-	}
+	pTSMagicView->m_kThreadParams.dsmcc_download_thread_running = 0;
+	pTSMagicView->m_kThreadParams.dsmcc_download_thread_stopped = 0;
+	::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_dsmcc_download_thread, (LPVOID)&(pTSMagicView->m_kThreadParams), 0, 0);
 }

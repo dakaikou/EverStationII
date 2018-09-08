@@ -18,157 +18,222 @@ CDB_OCDCs::~CDB_OCDCs()
 
 void CDB_OCDCs::Init(void)
 {
-	m_memory_used = 0;
+	m_nDownloadSessionCount = 0;
+	//m_memory_used = 0;
 
-	m_dc_download_count = 0;
-	m_astDCDownloadInfos = NULL;
+	//m_dc_download_count = 0;
+	//m_astDCDownloadInfos = NULL;
 
-	m_oc_download_count = 0;
-	m_astOCDownloadInfos = NULL;
+	//m_oc_download_count = 0;
+	//m_astOCDownloadInfos = NULL;
 }
 
 void CDB_OCDCs::Reset(void)
 {
 	int		download_index;
 
-	for (download_index = 0; download_index < m_dc_download_count; download_index++)
+	for (download_index = 0; download_index < m_nDownloadSessionCount; download_index++)
 	{
-		if (m_astDCDownloadInfos[download_index].blockFlags != NULL)
-		{
-			free(m_astDCDownloadInfos[download_index].blockFlags);
-		}
-		m_astDCDownloadInfos[download_index].blockFlags = NULL;
-		m_astDCDownloadInfos[download_index].blockCount = 0;
-
-		if (m_astDCDownloadInfos[download_index].fp != NULL)
-		{
-			fclose(m_astDCDownloadInfos[download_index].fp);
-		}
+		m_astDownloadInfos[download_index].usCandidatePID = 0xffff;
 	}
+	m_nDownloadSessionCount = 0;
 
-	if (m_astDCDownloadInfos != NULL)
-	{
-		free(m_astDCDownloadInfos);
-		m_astDCDownloadInfos = NULL;
-	}
+	//for (download_index = 0; download_index < m_dc_download_count; download_index++)
+	//{
+	//	if (m_astDCDownloadInfos[download_index].blockFlags != NULL)
+	//	{
+	//		free(m_astDCDownloadInfos[download_index].blockFlags);
+	//	}
+	//	m_astDCDownloadInfos[download_index].blockFlags = NULL;
+	//	m_astDCDownloadInfos[download_index].blockCount = 0;
 
-	m_memory_for_dsmcc_dc_download = 0;
+	//	if (m_astDCDownloadInfos[download_index].fp != NULL)
+	//	{
+	//		fclose(m_astDCDownloadInfos[download_index].fp);
+	//	}
+	//}
 
-	m_dc_download_count = 0;
-	m_dc_download_over = 0;
+	//if (m_astDCDownloadInfos != NULL)
+	//{
+	//	free(m_astDCDownloadInfos);
+	//	m_astDCDownloadInfos = NULL;
+	//}
 
-	m_dsmcc_download_enable = 0;
+	//m_memory_for_dsmcc_dc_download = 0;
 
-	for (download_index = 0; download_index < m_oc_download_count; download_index++)
-	{
-		if (m_astOCDownloadInfos[download_index].fp != NULL)
-		{
-			fclose(m_astOCDownloadInfos[download_index].fp);
-		}
-	}
+	//m_dc_download_count = 0;
+	//m_dc_download_over = 0;
 
-	if (m_astOCDownloadInfos != NULL)
-	{
-		free(m_astOCDownloadInfos);
-		m_astOCDownloadInfos = NULL;
-	}
+	//m_dsmcc_download_enable = 0;
 
-	m_memory_for_dsmcc_oc_download = 0;
+	//for (download_index = 0; download_index < m_oc_download_count; download_index++)
+	//{
+	//	if (m_astOCDownloadInfos[download_index].fp != NULL)
+	//	{
+	//		fclose(m_astOCDownloadInfos[download_index].fp);
+	//	}
+	//}
 
-	m_oc_download_count = 0;
-	m_oc_download_over = 0;
+	//if (m_astOCDownloadInfos != NULL)
+	//{
+	//	free(m_astOCDownloadInfos);
+	//	m_astOCDownloadInfos = NULL;
+	//}
 
-	m_memory_used = 0;
+	//m_memory_for_dsmcc_oc_download = 0;
+
+	//m_oc_download_count = 0;
+	//m_oc_download_over = 0;
+
+	//m_memory_used = 0;
 }
 
-int CDB_OCDCs::AddOCDownloadInfo(uint16_t usPID, uint32_t downloadID, uint32_t objectKey_data, uint16_t moduleID, char* pszFileName)
+//int CDB_OCDCs::AddOCDownloadInfo(uint16_t usPID, uint32_t downloadID, uint32_t objectKey_data, uint16_t moduleID, char* pszFileName)
+//{
+//	int rtcode = MIDDLEWARE_DB_UNKNOWN_ERROR;
+//	OC_DOWNLOAD_INFO_t*			pOCDownloadInfo = NULL;
+//
+//	m_astOCDownloadInfos = (OC_DOWNLOAD_INFO_t*)realloc(m_astOCDownloadInfos, (m_oc_download_count + 1) * sizeof(OC_DOWNLOAD_INFO_t));
+//
+//	if (m_astOCDownloadInfos != NULL)
+//	{
+//		m_oc_download_count++;
+//		m_memory_for_dsmcc_oc_download = m_oc_download_count * sizeof(OC_DOWNLOAD_INFO_t);
+//
+//		pOCDownloadInfo = &(m_astOCDownloadInfos[m_oc_download_count - 1]);
+//		memset(pOCDownloadInfo, 0x00, sizeof(OC_DOWNLOAD_INFO_t));
+//
+//		strcpy_s(pOCDownloadInfo->pszFileName, sizeof(pOCDownloadInfo->pszFileName), pszFileName);
+//		pOCDownloadInfo->PID = usPID;
+//		pOCDownloadInfo->downloadId = downloadID;
+//		pOCDownloadInfo->objectKey_data = objectKey_data;
+//		pOCDownloadInfo->moduleId = moduleID;
+//
+//		rtcode = MIDDLEWARE_DB_NO_ERROR;
+//	}
+//	else
+//	{
+//		rtcode = MIDDLEWARE_DB_NO_ENOUGH_MEMORY;
+//	}
+//
+//	return rtcode;
+//}
+
+
+int CDB_OCDCs::AppendDownloadInfo(DOWNLOAD_INFO_t* pstDownloadInfo)
 {
-	int rtcode = MIDDLEWARE_DB_UNKNOWN_ERROR;
-	OC_DOWNLOAD_INFO_t*			pOCDownloadInfo = NULL;
+	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 
-	m_astOCDownloadInfos = (OC_DOWNLOAD_INFO_t*)realloc(m_astOCDownloadInfos, (m_oc_download_count + 1) * sizeof(OC_DOWNLOAD_INFO_t));
-
-	if (m_astOCDownloadInfos != NULL)
+	if (pstDownloadInfo != NULL)
 	{
-		m_oc_download_count++;
-		m_memory_for_dsmcc_oc_download = m_oc_download_count * sizeof(OC_DOWNLOAD_INFO_t);
+		if (m_nDownloadSessionCount < MAX_DOWNLOAD_SESSION)
+		{
+			m_nDownloadSessionCount++;
 
-		pOCDownloadInfo = &(m_astOCDownloadInfos[m_oc_download_count - 1]);
-		memset(pOCDownloadInfo, 0x00, sizeof(OC_DOWNLOAD_INFO_t));
-
-		strcpy_s(pOCDownloadInfo->pszFileName, sizeof(pOCDownloadInfo->pszFileName), pszFileName);
-		pOCDownloadInfo->PID = usPID;
-		pOCDownloadInfo->downloadId = downloadID;
-		pOCDownloadInfo->objectKey_data = objectKey_data;
-		pOCDownloadInfo->moduleId = moduleID;
-
-		rtcode = MIDDLEWARE_DB_NO_ERROR;
+			memcpy(m_astDownloadInfos + m_nDownloadSessionCount - 1, pstDownloadInfo, sizeof(DOWNLOAD_INFO_t));
+		}
+		else
+		{
+			rtcode = MIDDLEWARE_DB_NO_ENOUGH_MEMORY;
+		}
 	}
 	else
 	{
-		rtcode = MIDDLEWARE_DB_NO_ENOUGH_MEMORY;
+		rtcode = MIDDLEWARE_DB_PARAMETER_ERROR;
 	}
 
 	return rtcode;
 }
 
-int CDB_OCDCs::AddDCDownloadInfo(int oc_flag, uint16_t usPID, uint32_t downloadID, int blockSize, uint16_t moduleID, int moduleSize, int moduleVersion, char* pszModuleName)
+//int CDB_OCDCs::AddDCDownloadInfo(int oc_flag, uint16_t usPID, uint32_t downloadID, int blockSize, uint16_t moduleID, int moduleSize, int moduleVersion, char* pszModuleName)
+//{
+//	int rtcode = MIDDLEWARE_DB_UNKNOWN_ERROR;
+//	DC_DOWNLOAD_INFO_t* pDCDownloadInfo = NULL;
+//
+//	m_astDCDownloadInfos = (DC_DOWNLOAD_INFO_t*)realloc(m_astDCDownloadInfos, (m_dc_download_count + 1) * sizeof(DC_DOWNLOAD_INFO_t));
+//
+//	if (m_astDCDownloadInfos != NULL)
+//	{
+//		m_dc_download_count++;
+//		m_memory_for_dsmcc_dc_download = m_dc_download_count * sizeof(DC_DOWNLOAD_INFO_t);
+//
+//		pDCDownloadInfo = &(m_astDCDownloadInfos[m_dc_download_count - 1]);
+//
+//		memset(pDCDownloadInfo, 0x00, sizeof(DC_DOWNLOAD_INFO_t));
+//
+//		pDCDownloadInfo->oc_flag = oc_flag;
+//		pDCDownloadInfo->PID = usPID;
+//		pDCDownloadInfo->downloadId = downloadID;
+//
+//		pDCDownloadInfo->blockSize = blockSize;
+//		pDCDownloadInfo->moduleId = moduleID;
+//		pDCDownloadInfo->moduleSize = moduleSize;
+//		pDCDownloadInfo->moduleVersion = moduleVersion;
+//
+//		strcpy_s(pDCDownloadInfo->moduleName, sizeof(pDCDownloadInfo->moduleName), pszModuleName);
+//
+//		rtcode = MIDDLEWARE_DB_NO_ERROR;
+//	}
+//	else
+//	{
+//		rtcode = MIDDLEWARE_DB_NO_ENOUGH_MEMORY;
+//	}
+//
+//	return rtcode;
+//}
+
+
+int CDB_OCDCs::GetDownloadCount(void)
 {
-	int rtcode = MIDDLEWARE_DB_UNKNOWN_ERROR;
-	DC_DOWNLOAD_INFO_t* pDCDownloadInfo = NULL;
+	return m_nDownloadSessionCount;
+}
 
-	m_astDCDownloadInfos = (DC_DOWNLOAD_INFO_t*)realloc(m_astDCDownloadInfos, (m_dc_download_count + 1) * sizeof(DC_DOWNLOAD_INFO_t));
+//int CDB_OCDCs::GetDCDownloadCount(void)
+//{
+//	return m_dc_download_count;
+//}
 
-	if (m_astDCDownloadInfos != NULL)
+int CDB_OCDCs::GetDownloadInfo(int index, DOWNLOAD_INFO_t* pstDownloadInfo)
+{
+	int rtcode = MIDDLEWARE_DB_NO_ERROR;
+
+	if ((index >= 0 && index < m_nDownloadSessionCount) && (pstDownloadInfo != NULL))
 	{
-		m_dc_download_count++;
-		m_memory_for_dsmcc_dc_download = m_dc_download_count * sizeof(DC_DOWNLOAD_INFO_t);
-
-		pDCDownloadInfo = &(m_astDCDownloadInfos[m_dc_download_count - 1]);
-
-		memset(pDCDownloadInfo, 0x00, sizeof(DC_DOWNLOAD_INFO_t));
-
-		pDCDownloadInfo->oc_flag = oc_flag;
-		pDCDownloadInfo->PID = usPID;
-		pDCDownloadInfo->downloadId = downloadID;
-
-		pDCDownloadInfo->blockSize = blockSize;
-		pDCDownloadInfo->moduleId = moduleID;
-		pDCDownloadInfo->moduleSize = moduleSize;
-		pDCDownloadInfo->moduleVersion = moduleVersion;
-
-		strcpy_s(pDCDownloadInfo->moduleName, sizeof(pDCDownloadInfo->moduleName), pszModuleName);
-
-		rtcode = MIDDLEWARE_DB_NO_ERROR;
+		memcpy(pstDownloadInfo, m_astDownloadInfos + index, sizeof(DOWNLOAD_INFO_t));
 	}
 	else
 	{
-		rtcode = MIDDLEWARE_DB_NO_ENOUGH_MEMORY;
+		rtcode = MIDDLEWARE_DB_PARAMETER_ERROR;
 	}
 
 	return rtcode;
 }
 
+//int CDB_OCDCs::GetOCDownloadCount(void)
+//{
+//	return m_oc_download_count;
+//}
+//
+//OC_DOWNLOAD_INFO_t* CDB_OCDCs::GetOCDownloadInfo(int index)
+//{
+//	return m_astOCDownloadInfos + index;
+//}
 
-int CDB_OCDCs::GetDCDownloadCount(void)
-{
-	return m_dc_download_count;
-}
 
-DC_DOWNLOAD_INFO_t* CDB_OCDCs::GetDCDownloadInfo(int index)
-{
-	return m_astDCDownloadInfos + index;
-}
-
-int CDB_OCDCs::GetOCDownloadCount(void)
-{
-	return m_oc_download_count;
-}
-
-OC_DOWNLOAD_INFO_t* CDB_OCDCs::GetOCDownloadInfo(int index)
-{
-	return m_astOCDownloadInfos + index;
-}
+//DC_DOWNLOAD_INFO_t* CDB_OCDCs::GetDCDownloadInfo(int index)
+//{
+//	return m_astDCDownloadInfos + index;
+//}
+//
+//int CDB_OCDCs::GetOCDownloadCount(void)
+//{
+//	return m_oc_download_count;
+//}
+//
+//OC_DOWNLOAD_INFO_t* CDB_OCDCs::GetOCDownloadInfo(int index)
+//{
+//	return m_astOCDownloadInfos + index;
+//}
 
 //void RSISI_REPORT_check_memory(HWND	hMsgWnd)
 //{

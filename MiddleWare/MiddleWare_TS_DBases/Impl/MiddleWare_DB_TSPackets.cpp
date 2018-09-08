@@ -42,19 +42,22 @@ int user_callback(void* param, int nColCount, char** pColValue, char** pColName)
 
 int sqlite3_test()
 {
-	//char	pszExeFile[MAX_PATH];
-	//char	pszDbPath[MAX_PATH];
 	char	pszDbFile[MAX_PATH];
-	//int		len;
 
-	//GetModuleFileNameA(NULL, pszExeFile, MAX_PATH);
-	//len = GetModulePathLength(pszExeFile);
-	//assert((len > 0) && (len < MAX_PATH));
+	char	pszExeFile[MAX_PATH];
+	char	exeDrive[3];
+	char	pszAppTempPath[MAX_PATH];
+	char	pszDbasePath[MAX_PATH];
+	GetModuleFileNameA(NULL, pszExeFile, MAX_PATH);
+	exeDrive[0] = pszExeFile[0];
+	exeDrive[1] = pszExeFile[1];
+	exeDrive[2] = '\0';
+	sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
+	sprintf_s(pszDbasePath, sizeof(pszDbasePath), "%s\\dbase", pszAppTempPath);
+	::CreateDirectoryA(pszAppTempPath, NULL);
+	::CreateDirectoryA(pszDbasePath, NULL);
 
-	//memcpy(pszDbPath, pszExeFile, len);
-	//pszDbPath[len] = '\0';
-	//	sprintf_s(pszDbFile, sizeof(pszDbFile), "%s\\test.db", pszDbPath);
-	sprintf_s(pszDbFile, sizeof(pszDbFile), "e:\\EverStationII.db");
+	sprintf_s(pszDbFile, sizeof(pszDbFile), "%s\\EverStationII.db", pszDbasePath);
 
 	char strSql[256];
 

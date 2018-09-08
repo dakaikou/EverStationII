@@ -4,6 +4,5 @@
 #include "../compile.h"
 
 _CDL_EXPORT int	GetModulePathLength(char* pszFile);
-//_CDL_EXPORT char* CharsetTrim(char* pstr_src);
 
 #endif

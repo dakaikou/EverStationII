@@ -113,94 +113,6 @@ namespace IOP
 	} IOR_t;
 };
 
-typedef struct _Bindings_s
-{
-	BIOP::Name_t	Name;
-	U8				bindingType;							//8
-	IOP::IOR_t		IOR;
-
-	int			objectInfo_length;						//16
-	U8			objectInfo_data_byte[16];
-
-} Bindings_t;
-
-typedef struct serviceContextList_s
-{
-	U32			context_id;									//32
-	int			context_data_length;						//16
-	U8			context_data_byte[4];						//8 x N
-} serviceContextList_t;
-
-typedef struct _DirectoryMessage_s
-{
-	char		magic[5];									//4 x 8				0x42494F50       "BIOP"
-
-	struct
-	{
-		U8		major;										//8					0x01
-		U8		minor;										//8					0x00
-	}biop_version;
-
-	U8			byte_order;									//8					0x00
-	U8			message_type;								//8					0x00
-
-	U32			message_size;								//32
-
-	int			objectKey_length;							//8
-															//	U8			objectKey_data_byte[4];						//8 x N				//DVB规定长度小于等于4个字节
-	U32			objectKey_data;
-
-	U32			objectKind_length;							//32				0x00000004
-	S8			objectKind_data[4];							//4x8				0x64697200		dir
-
-	U16			objectInfo_length;							//16
-	U8			objectInfo_data_byte[8];					//8 x N
-
-	U8						serviceContextList_count;					//8
-	serviceContextList_t	serviceContextList[2];
-
-	U32			messageBody_length;							//32
-	U16			bindings_count;								//16
-
-	Bindings_t	bindings[1024];
-
-} DirectoryMessage_t;
-
-typedef struct _BIOP_FileMessage_s
-{
-	S8			magic[5];									//4 x 8				0x42494F50       "BIOP"
-	
-	struct
-	{
-		U8		major;										//8					0x01
-		U8		minor;										//8					0x00
-	}biop_version;
-
-	U8			byte_order;									//8					0x00
-	U8			message_type;								//8					0x00
-
-	U32			message_size;								//32
-
-	U8			objectKey_length;							//8
-//	U8			objectKey_data_byte[4];						//8 x N				//DVB规定长度小于等于4个字节
-	U32			objectKey_data;
-
-	U32			objectKind_length;							//32				0x00000004
-	S8			objectKind_data[4];							//4x8				0x64697200		dir
-
-	U16			objectInfo_length;							//16
-	U8			ContentSize[8];								//64
-	U8			objectInfo_data_byte[1];					//8 x N
-
-	U8						serviceContextList_count;					//8
-	serviceContextList_t	serviceContextList[2];
-
-	U32			messageBody_length;							//32
-	U32			content_length;								//32
-	U8*			content_data_byte;
-
-} BIOP_FileMessage_t;
-
 typedef struct _ServiceGatewayInfo_s
 {
 	IOP::IOR_t	IOR;
@@ -442,8 +354,6 @@ typedef struct dsmcc_unm_section_s
 _CDL_EXPORT int	MPEG2_DSMCC_DecodeGroupInfoIndication(uint8_t *buf, int length, GroupInfoIndication_t* pGroupInfoIndication);
 
 _CDL_EXPORT int	MPEG2_DSMCC_DecodeServiceGatewayInfo(uint8_t *buf, int length, ServiceGatewayInfo_t* pServiceGatewayInfo);
-_CDL_EXPORT	int	MPEG2_DSMCC_DecodeDirectoryMessage(uint8_t *buf, int length, DirectoryMessage_t* pDirectoryMessage);
-_CDL_EXPORT	int	MPEG2_DSMCC_DecodeBIOPFileMessage(uint8_t *buf, int length, BIOP_FileMessage_t* pBIOP_FileMessage);
 
 _CDL_EXPORT	int	MPEG2_DSMCC_DecodeDownloadInfoIndication(uint8_t *buf, int length, DownloadInfoIndication_t* pDownloadInfoIndication);
 _CDL_EXPORT	int	MPEG2_DSMCC_DecodeDownloadServerInitiate(uint8_t *buf, int length, DownloadServerInitiate_t* pDownloadServerInitiate);

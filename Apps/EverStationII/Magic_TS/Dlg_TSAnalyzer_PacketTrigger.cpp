@@ -615,9 +615,25 @@ void CDlg_TSAnalyzer_PacketTrigger::UpdateCatchResult(void)
 			if (m_pTree != NULL)
 			{
 				XMLDocForMpegSyntax xmlDoc;
+				transport_packet_t ts_packet;
 
-				S32 rtcode = MPEG_decode_TS_packet_XML(packet_buf, packet_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\text.xml");
+				S32 rtcode = MPEG_decode_TS_packet_XML(packet_buf, packet_length, &xmlDoc, &ts_packet);
+
+				char	pszExeFile[MAX_PATH];
+				char	exeDrive[3];
+				char	pszAppTempPath[MAX_PATH];
+				char	pszXmlPath[MAX_PATH];
+				char	pszFilePath[MAX_PATH];
+				GetModuleFileName(NULL, pszExeFile, MAX_PATH);
+				exeDrive[0] = pszExeFile[0];
+				exeDrive[1] = pszExeFile[1];
+				exeDrive[2] = '\0';
+				sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
+				sprintf_s(pszXmlPath, sizeof(pszXmlPath), "%s\\xml", pszAppTempPath);
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\TS_packet_0x%04X.xml", pszXmlPath, ts_packet.PID);
+				::CreateDirectory(pszAppTempPath, NULL);
+				::CreateDirectory(pszXmlPath, NULL);
+				xmlDoc.SaveFile(pszFilePath);
 
 				m_pTree->Reset();
 				m_pTree->ShowXMLDoc(&xmlDoc);

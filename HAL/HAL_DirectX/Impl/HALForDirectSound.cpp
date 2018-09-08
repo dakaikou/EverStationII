@@ -278,8 +278,24 @@ S32 CHALForDirectSound::DirectSound_Init(void)
 	}
 
 #if SAVE_META_DATA_TO_DISK
-				
-	fp_pcm = fopen("e:\\≤‚ ‘¡˜\\pcm.wav", "wb");
+	
+	char	pszExeFile[MAX_PATH];
+	char	exeDrive[3];
+	char	pszAppTempPath[MAX_PATH];
+	char	pszMediaPath[MAX_PATH];
+	char	pszMediaFile[MAX_PATH];
+	GetModuleFileNameA(NULL, pszExeFile, MAX_PATH);
+	exeDrive[0] = pszExeFile[0];
+	exeDrive[1] = pszExeFile[1];
+	exeDrive[2] = '\0';
+	sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
+	sprintf_s(pszMediaPath, sizeof(pszMediaPath), "%s\\media", pszAppTempPath);
+	::CreateDirectoryA(pszAppTempPath, NULL);
+	::CreateDirectoryA(pszDbasePath, NULL);
+
+	sprintf_s(pszMediaFile, sizeof(pszMediaFile), "%s\\pcm.wav", pszMediaPath);
+
+	fp_pcm = fopen(pszMediaFile, "wb");
 	fseek(fp_pcm, 0, SEEK_SET);
 
 	fmtchunk.wformattag = wfx.wFormatTag;

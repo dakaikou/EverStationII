@@ -347,9 +347,22 @@ S32 CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 		rtcode = MIDDLEWARE_TS_PARAMETER_ERROR;						//–≠“È¥ÌŒÛ
 	}
 
+	//char	pszExeFile[MAX_PATH];
+	char	exeDrive[3];
+	char	pszAppTempPath[MAX_PATH];
+	char	pszPcrPath[MAX_PATH];
+	GetModuleFileNameA(NULL, pszExeFile, MAX_PATH);
+	exeDrive[0] = pszExeFile[0];
+	exeDrive[1] = pszExeFile[1];
+	exeDrive[2] = '\0';
+	sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
+	sprintf_s(pszPcrPath, sizeof(pszPcrPath), "%s\\pcr", pszAppTempPath);
+	::CreateDirectoryA(pszAppTempPath, NULL);
+	::CreateDirectoryA(pszPcrPath, NULL);
+
 	char file_name[128];
 	U32 old_tickcount = ::GetTickCount();
-	sprintf_s(file_name, sizeof(file_name), "e:\\temp\\tick_%08x_ts_bitrate.txt", old_tickcount);
+	sprintf_s(file_name, sizeof(file_name), "%s\\tick_%08x_ts_bitrate.txt", pszPcrPath, old_tickcount);
 
 	fp_dbase = NULL;
 	if (m_bEnableTSRateDebug)

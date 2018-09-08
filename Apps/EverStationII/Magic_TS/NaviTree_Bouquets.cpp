@@ -197,7 +197,6 @@ void CNaviTree_Bouquets::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 	// TODO: Add your control notification handler code here
 #if DEBUG_BAT
 	//CBAT*		pBAT;
-	char	    pszTemp[48];
 
 	CTreeCtrl& treeCtrl = GetTreeCtrl();
 
@@ -216,8 +215,21 @@ void CNaviTree_Bouquets::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 		XMLDocForMpegSyntax xmlDoc;
 		pDB_PsiSiTables->BuildBouquetTree(code, &xmlDoc);
 
-		sprintf_s(pszTemp, sizeof(pszTemp), "e:\\temp\\BOUQUET-sematics-0x%04X.xml", code & 0xffff);
-		xmlDoc.SaveFile(pszTemp);
+		char	pszExeFile[MAX_PATH];
+		char	exeDrive[3];
+		char	pszAppTempPath[MAX_PATH];
+		char	pszXmlPath[MAX_PATH];
+		char	pszFilePath[MAX_PATH];
+		GetModuleFileName(NULL, pszExeFile, MAX_PATH);
+		exeDrive[0] = pszExeFile[0];
+		exeDrive[1] = pszExeFile[1];
+		exeDrive[2] = '\0';
+		sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
+		sprintf_s(pszXmlPath, sizeof(pszXmlPath), "%s\\xml", pszAppTempPath);
+		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\BOUQUET-sematics-0x%04X.xml", pszXmlPath, code & 0xffff);
+		::CreateDirectory(pszAppTempPath, NULL);
+		::CreateDirectory(pszXmlPath, NULL);
+		xmlDoc.SaveFile(pszFilePath);
 
 		m_pInfoTree->ShowXMLDoc(&xmlDoc);
 	}

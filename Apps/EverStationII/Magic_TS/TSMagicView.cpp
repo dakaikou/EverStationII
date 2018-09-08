@@ -315,7 +315,7 @@ void CTSMagicView::loadCfg()
 	}
 }
 
-int BuildDirectory(CString  strPath);
+//int BuildDirectory(CString  strPath);
 
 void CTSMagicView::OnInitialUpdate() 
 {
@@ -375,6 +375,7 @@ void CTSMagicView::OnInitialUpdate()
 	//pWnd->SetWindowText(m_strURL);
 
 	char  pszExeFile[MAX_PATH];
+	char  pszAppTempPath[MAX_PATH];
 	char  pszRootPath[MAX_PATH];
 	char  exeDrive[3];
 //	char  pszRecordFile[MAX_PATH];
@@ -385,11 +386,14 @@ void CTSMagicView::OnInitialUpdate()
 //	assert(len > 0);
 
 	//将路径分离出来 
-	memset(exeDrive, 0x00, sizeof(exeDrive));
-	memcpy(exeDrive, pszExeFile, 2);
+	exeDrive[0] = pszExeFile[0];
+	exeDrive[1] = pszExeFile[1];
 	exeDrive[2] = '\0';
-	sprintf_s(pszRootPath, sizeof(pszRootPath), "%s\\download_TS", exeDrive);
-	BuildDirectory((CString)pszRootPath);
+	sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
+	sprintf_s(pszRootPath, sizeof(pszRootPath), "%s\\download_TS", pszAppTempPath);
+	//BuildDirectory((CString)pszRootPath);
+	::CreateDirectory(pszAppTempPath, NULL);
+	::CreateDirectory(pszRootPath, NULL);
 
 //	memcpy(pszExePath, pszExeFile, len);
 //	pszExePath[len]= '\0';

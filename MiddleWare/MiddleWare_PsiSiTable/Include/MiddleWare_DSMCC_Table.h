@@ -11,6 +11,7 @@
 
 #include "MiddleWare_PSISI_Common.h"
 
+#define MAX_DOWNLOAD_OBJS			256
 /*------------------------------------------------------------
 		AIT definition 
 -------------------------------------------------------------*/
@@ -65,48 +66,33 @@ public:
 	CDSMCC_DDM(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
 	~CDSMCC_DDM(void);
 
+protected:
 	struct
 	{
 		uint8_t* buf;
 		int		 length;
-	} m_astBlockInfo[256];
+	} m_astBlockInfo[256];		//block_count µÈÍ¬ÓÚsection_count
+
+	int						m_nMemAllocatedForModule;
+
+	int						m_nModuleSize;
+	uint16_t				m_usMessageId;
+
 public:
 
-	//U8**					m_pucBlockBuf;
-	//S32*					m_pnBlockLength;
-	S32						m_nMemoryForBlockBuf;
-
-	S32						m_nModuleSize;
-	U16						m_usMessageId;
-
-	S32							m_nDirMessageCount;
-	DirectoryMessage_t*			m_pDirectoryMessage[128];					//OC
-	S32							m_nMemoryForDirMessages;
+	int							m_nDirMessageCount;
+	DirectoryMessage_t*			m_pDirectoryMessage[MAX_DOWNLOAD_OBJS];					//OC
+	int							m_nMemAllocatedForDirMessages;
 
 	S32							m_nFileMessageCount;
-	BIOP_FileMessage_t*			m_pFileMessage[128];						//OC
-	S32							m_nMemoryForFileMessages;
+	FileMessage_t*				m_pFileMessage[MAX_DOWNLOAD_OBJS];						//OC
+	S32							m_nMemAllocatedForFileMessages;
 
 public:
 	void Init(void);
 	void Reset(void);
 	int	 AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t* pprivate_section);
 };
-
-//class _CDL_EXPORT CDSMCC_PVT : public CPVT
-//{
-//public:
-//	CDSMCC_PVT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
-//	~CDSMCC_PVT(void);
-//public:
-//
-//	uint16_t					m_usMessageId;
-//
-//public:
-//	void Init(void);
-//	void Reset(void);
-//	int	 AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t* pprivate_section);
-//};
 
 //MPE datagram
 class _CDL_EXPORT CMPE : public CPVT

@@ -137,8 +137,23 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 		m_pHexList->Reset();
 		m_pHexList->DisplayByteBuffer(section_buf, section_length);
 	}
+
 	if (m_pSyntaxTree != NULL)
 	{
+		char	pszExeFile[MAX_PATH];
+		char	exeDrive[3];
+		char	pszAppTempPath[MAX_PATH];
+		char	pszXmlPath[MAX_PATH];
+		char	pszFilePath[MAX_PATH];
+		GetModuleFileName(NULL, pszExeFile, MAX_PATH);
+		exeDrive[0] = pszExeFile[0];
+		exeDrive[1] = pszExeFile[1];
+		exeDrive[2] = '\0';
+		sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
+		sprintf_s(pszXmlPath, sizeof(pszXmlPath), "%s\\xml", pszAppTempPath);
+		::CreateDirectory(pszAppTempPath, NULL);
+		::CreateDirectory(pszXmlPath, NULL);
+
 		U8	table_id;
 		if ((section_buf != NULL) && (section_length >= 3))
 		{
@@ -149,92 +164,128 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			if (table_id == TABLE_ID_PAT)
 			{
 				MPEG2_PSI_PAT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\PAT.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\PAT-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if (table_id == TABLE_ID_PMT)
 			{
 				MPEG2_PSI_PMT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\PMT.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\PMT-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if (table_id == TABLE_ID_CAT)
 			{
 				MPEG2_PSI_CAT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\CAT.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\CAT-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if (table_id == TABLE_ID_NIT_ACTUAL || table_id == TABLE_ID_NIT_OTHER)
 			{
 				DVB_SI_NIT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\NIT.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\NIT-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if (table_id == TABLE_ID_SDT_ACTUAL || table_id == TABLE_ID_SDT_OTHER)
 			{
 				DVB_SI_SDT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\SDT.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\SDT-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if (table_id == TABLE_ID_BAT)
 			{
 				DVB_SI_BAT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\BAT.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\BAT-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if ((table_id >= TABLE_ID_EIT_PF_ACTUAL) && (table_id <= TABLE_ID_EIT_SCH_OTHER_F))
 			{
 				DVB_SI_EIT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\EIT.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\EIT-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if (table_id == TABLE_ID_TSDT)
 			{
 				MPEG2_PSI_TSDT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\TSDT.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\TSDT-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if (table_id == TABLE_ID_TDT)
 			{
 				DVB_SI_TDT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\TDT.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\TDT-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if (table_id == TABLE_ID_TOT)
 			{
 				DVB_SI_TOT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\TOT.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\TOT-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if (table_id == TABLE_ID_RST)
 			{
 				DVB_SI_RST_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\RST.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\RST-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if ((table_id >= TABLE_ID_ECM_MIN) && (table_id <= TABLE_ID_EMM_MAX))
 			{
 				DVB_SI_CMT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\CMT.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\CMT-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if (table_id == TABLE_ID_INT)
 			{
 				DVB_IPDC_INT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\INT.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\INT-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if (table_id == TABLE_ID_AIT)
 			{
 				DVB_MHP_AIT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\AIT.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\AIT-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if (table_id == TABLE_ID_DSMCC_MPE)
 			{
 				DVB_IPDC_MPE_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\MPE.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\MPE-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if (table_id == TABLE_ID_DSMCC_UNM)
 			{
 				MPEG2_DSMCC_UNM_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\DSMCC_UNM.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\DSMCC_UNM-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if (table_id == TABLE_ID_DSMCC_DDM)
 			{
 				MPEG2_DSMCC_DDM_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\DSMCC_UNM.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\DSMCC_DDM-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 			else if ((table_id >= TABLE_ID_DSMCC_SD) && (table_id <= TABLE_ID_DSMCC_RSV))
 			{
 				MPEG2_DSMCC_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
-				xmlDoc.SaveFile("e:\\temp\\DSMCC.xml");
+
+				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\DSMCC_RSV-0x%02X.xml", pszXmlPath, table_id);
+				xmlDoc.SaveFile(pszFilePath);
 			}
 
 			m_pSyntaxTree->Reset();

@@ -2,6 +2,7 @@
 #include <malloc.h>
 #include <stdlib.h>
 #include <time.h>
+#include <Shlwapi.h>
 
 #include "../Include/MiddleWare_DB_PsiSiTables.h"
 #include "../Include/MiddleWare_DB_ErrorCode.h"
@@ -466,7 +467,7 @@ int CDB_PsiSiTables::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, XMLDocFo
 
 			DSMCC_DII_t*				pDII;
 			DirectoryMessage_t*			pDirectoryMessage;
-			BIOP_FileMessage_t*			pBIOP_FileMessage;
+			FileMessage_t*				pFileMessage;
 			Bindings_t*					pBindings;
 			//BIOP::Name_t*				pName;
 			IOP::IOR_t*					pIOR;
@@ -538,6 +539,7 @@ int CDB_PsiSiTables::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, XMLDocFo
 					pDSMCC_DDM = (CDSMCC_DDM*)QueryBy3ID(PID, TABLE_ID_DSMCC_DDM, pDII->astModuleInfo[module_index].moduleId);
 					if (pDSMCC_DDM != NULL)
 					{
+						//有些是srg或者directory消息，有些是fil消息，最好能区分一下，而不是每个模块都去遍历一下
 						for (object_index = 0; object_index < pDSMCC_DDM->m_nDirMessageCount; object_index++)
 						{
 							pDirectoryMessage = pDSMCC_DDM->m_pDirectoryMessage[object_index];
@@ -567,7 +569,7 @@ int CDB_PsiSiTables::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, XMLDocFo
 								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "message_type", pDirectoryMessage->message_type, 8);
 								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "message_size", pDirectoryMessage->message_size, 32);
 								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "objectKey_length", pDirectoryMessage->objectKey_length, 8);
-								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "objectKey_data_byte[ ]", pDirectoryMessage->objectKey_data, 32);
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "objectKey_data_byte", pDirectoryMessage->objectKey_data, 32);
 								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "objectKind_length", pDirectoryMessage->objectKind_length, 8);
 								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "objectKind_data[ ]", (uint8_t*)pDirectoryMessage->objectKind_data, 4, pDirectoryMessage->objectKind_data);
 								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "objectInfo_length", pDirectoryMessage->objectInfo_length, 16);
@@ -724,31 +726,32 @@ int CDB_PsiSiTables::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, XMLDocFo
 
 						for (object_index = 0; object_index < pDSMCC_DDM->m_nFileMessageCount; object_index++)
 						{
-							pBIOP_FileMessage = pDSMCC_DDM->m_pFileMessage[object_index];
+							pFileMessage = pDSMCC_DDM->m_pFileMessage[object_index];
 
-							if (pBIOP_FileMessage != NULL)
+							if (pFileMessage != NULL)
 							{
-								sprintf_s(pszText, sizeof(pszText), "BIOP::FileMessage (objectKey_data_byte=0x%08X)", pBIOP_FileMessage->objectKey_data);
-								hSrgItem = pxmlDoc->NewKeyValuePairElement(hModuleItem, pszText);
+								sprintf_s(pszText, sizeof(pszText), "BIOP::FileMessage (objectKey_data_byte=0x%08X)", pFileMessage->objectKey_data);
+								tinyxml2::XMLElement* hFileItem = pxmlDoc->NewKeyValuePairElement(hModuleItem, pszText);
 
-								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "magic", pBIOP_FileMessage->magic);
-								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "biop_version.major", pBIOP_FileMessage->biop_version.major, 8);
-								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "biop_version.minor", pBIOP_FileMessage->biop_version.minor, 8);
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "magic", pFileMessage->magic);
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "biop_version.major", pFileMessage->biop_version.major, 8);
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "biop_version.minor", pFileMessage->biop_version.minor, 8);
 
-								MPEG2_DSMCC_NumericCoding2Text_byteOrder(pBIOP_FileMessage->byte_order, pszTemp, sizeof(pszTemp));
-								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "byte_order", pBIOP_FileMessage->byte_order, 8, NULL, pszTemp);
+								MPEG2_DSMCC_NumericCoding2Text_byteOrder(pFileMessage->byte_order, pszTemp, sizeof(pszTemp));
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "byte_order", pFileMessage->byte_order, 8, NULL, pszTemp);
 
-								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "message_type", pBIOP_FileMessage->message_type, 8);
-								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "message_size", pBIOP_FileMessage->message_size, 32);
-								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "objectKey_length", pBIOP_FileMessage->objectKey_length, 8);
-								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "objectKey_data_byte", pBIOP_FileMessage->objectKey_data, 32);
-								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "objectKind_length", pBIOP_FileMessage->objectKind_length, 8);
-								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "objectKind_data[ ]", (uint8_t*)pBIOP_FileMessage->objectKind_data, pBIOP_FileMessage->objectKind_length, pBIOP_FileMessage->objectKind_data);
-								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "objectInfo_length", pBIOP_FileMessage->objectInfo_length, 16);
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "message_type", pFileMessage->message_type, 8);
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "message_size", pFileMessage->message_size, 32);
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "objectKey_length", pFileMessage->objectKey_length, 8);
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "objectKey_data_byte", pFileMessage->objectKey_data, 32);
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "objectKind_length", pFileMessage->objectKind_length, 8);
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "objectKind_data[ ]", (uint8_t*)pFileMessage->objectKind_data, pFileMessage->objectKind_length, pFileMessage->objectKind_data);
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "objectInfo_length", pFileMessage->objectInfo_length, 16);
 
-								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "serviceContextList_count", pBIOP_FileMessage->serviceContextList_count, 8);
-								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "messageBody_length", pBIOP_FileMessage->messageBody_length, 32);
-								hChildItem = pxmlDoc->NewKeyValuePairElement(hSrgItem, "content_length", pBIOP_FileMessage->content_length, 32);
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "serviceContextList_count", pFileMessage->serviceContextList_count, 8);
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "messageBody_length", pFileMessage->messageBody_length, 32);
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "content_length", pFileMessage->content_length, 32);
+								hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "content_data_byte[ ]", pFileMessage->content_data_byte, pFileMessage->content_length, "实际文件内容");
 							}
 						}
 
@@ -771,7 +774,96 @@ int CDB_PsiSiTables::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, XMLDocFo
 }
 
 //递归函数，如果当前路径是个子目录，则递归调用本函数
-int CDB_PsiSiTables::OC_BuildDirectory(uint16_t PID, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, uint16_t moduleId, uint32_t objectKey_data)
+int CDB_PsiSiTables::OC_DownloadDirectoryAndFiles(uint16_t PID, uint16_t moduleId_for_srg, uint32_t objectKey_data, char* pszRootPath)
+{
+	int rtcode = MIDDLEWARE_DB_NO_ERROR;
+
+	CDSMCC_DDM*					pDSMCC_DDM;
+	DirectoryMessage_t*			pDirectoryMessage;
+	Bindings_t*					pBindings;
+	BIOP::Name_t*				pName;
+	BIOP::ObjectLocation_t*		pObjectLocation;
+
+	unsigned short				sub_moduleId;
+	unsigned int				sub_objectKey_data;
+
+	char			pszPath[256];
+
+	pDSMCC_DDM = (CDSMCC_DDM*)QueryBy3ID(PID, TABLE_ID_DSMCC_DDM, moduleId_for_srg);
+	if (pDSMCC_DDM != NULL)
+	{
+		for (int dir_object_index = 0; dir_object_index < pDSMCC_DDM->m_nDirMessageCount; dir_object_index++)
+		{
+			pDirectoryMessage = pDSMCC_DDM->m_pDirectoryMessage[dir_object_index];
+			if (pDirectoryMessage != NULL)
+			{
+				if (pDirectoryMessage->objectKey_data == objectKey_data)
+				{
+					for (int dir_binding_index = 0; dir_binding_index < pDirectoryMessage->bindings_count; dir_binding_index++)
+					{
+						pBindings = pDirectoryMessage->bindings + dir_binding_index;
+						pName = &(pBindings->Name);
+
+						//sprintf_s(pszText, sizeof(pszText), "%s:%s", pName->kind_data_byte[0], pName->id_data_byte[0]);
+						sprintf_s(pszPath, sizeof(pszPath), "%s\\%s", pszRootPath, pName->id_data_byte[0]);
+
+						if (strcmp(pBindings->IOR.type_id_byte, "dir") == 0)	//如果是目录
+						{
+							::CreateDirectoryA(pszPath, NULL);
+
+							pObjectLocation = &(pBindings->IOR.taggedProfile[0].u.BIOPProfileBody.ObjectLocation);
+
+							sub_moduleId = pObjectLocation->moduleId;
+							sub_objectKey_data = pObjectLocation->objectKey_data;
+
+							OC_DownloadDirectoryAndFiles(PID, sub_moduleId, sub_objectKey_data, pszPath);
+						}
+						else if (strcmp(pBindings->IOR.type_id_byte, "fil") == 0)	//如果是文件
+						{
+							FILE* fp = NULL;
+							fopen_s(&fp, pszPath, "wb");
+							if (fp != NULL)
+							{
+								uint16_t moduleId_for_ddb = pBindings->IOR.taggedProfile[0].u.BIOPProfileBody.ObjectLocation.moduleId;
+								uint32_t objectKey_data = pBindings->IOR.taggedProfile[0].u.BIOPProfileBody.ObjectLocation.objectKey_data;
+
+								pDSMCC_DDM = (CDSMCC_DDM*)QueryBy3ID(PID, TABLE_ID_DSMCC_DDM, moduleId_for_ddb);
+								if (pDSMCC_DDM != NULL)
+								{
+									for (int fil_object_index = 0; fil_object_index < pDSMCC_DDM->m_nFileMessageCount; fil_object_index++)
+									{
+										FileMessage_t* pFileMessage = pDSMCC_DDM->m_pFileMessage[fil_object_index];
+
+										if (pFileMessage != NULL)
+										{
+											if (pFileMessage->objectKey_data == objectKey_data)
+											{
+												//hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "content_length", pFileMessage->content_length, 32);
+												//hChildItem = pxmlDoc->NewKeyValuePairElement(hFileItem, "content_data_byte[ ]", pFileMessage->content_data_byte, pFileMessage->content_length, "实际文件内容");
+
+												fwrite(pFileMessage->content_data_byte, sizeof(uint8_t), pFileMessage->content_length, fp);
+												break;
+											}
+										}
+									}
+								}
+
+								fclose(fp);
+							}
+						}
+					}
+
+					break;
+				}
+			}
+		}
+	}
+
+	return rtcode;
+}
+
+//递归函数，如果当前路径是个子目录，则递归调用本函数
+int CDB_PsiSiTables::OC_BuildDirectory(uint16_t PID, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, uint16_t moduleId_for_srg, uint32_t objectKey_data)
 {
 	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 
@@ -789,7 +881,7 @@ int CDB_PsiSiTables::OC_BuildDirectory(uint16_t PID, XMLDocForMpegSyntax* pxmlDo
 
 	char			pszText[256];
 
-	pDSMCC_DDM = (CDSMCC_DDM*)QueryBy3ID(PID, TABLE_ID_DSMCC_DDM, moduleId);
+	pDSMCC_DDM = (CDSMCC_DDM*)QueryBy3ID(PID, TABLE_ID_DSMCC_DDM, moduleId_for_srg);
 	if (pDSMCC_DDM != NULL)
 	{
 		for (object_index = 0; object_index < pDSMCC_DDM->m_nDirMessageCount; object_index++)
@@ -922,6 +1014,86 @@ int CDB_PsiSiTables::DSMCC_BuildDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t 
 	return rtcode;
 }
 
+int CDB_PsiSiTables::DSMCC_DownloadDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t carousel_type_id, char* pszRootPath)
+{
+	int rtcode = MIDDLEWARE_DB_NO_ERROR;
+
+	if ((pDSI != NULL) && (pszRootPath != NULL))
+	{
+#if DEBUG_DSMCC
+		CDSMCC_UNM*		pDSMCC_DII;
+		DSMCC_DII_t*	pDII;
+
+		DC_moduleInfo_t*	pDC_moduleInfo;
+
+		char			pszText[256];
+		int				group_index;
+		int				module_index;
+		int				blockCount;
+
+		tinyxml2::XMLElement*	pxmlDsiItem;
+		tinyxml2::XMLElement*	pxmlChildItem;
+		tinyxml2::XMLElement*	pxmlGroupItem;
+		tinyxml2::XMLElement*	pxmlModuleItem;
+
+		if (carousel_type_id == 0x02)			//2层数据轮播
+		{
+			//for (group_index = 0; group_index < pDSI->NumberOfGroups; group_index++)
+			//{
+			//	sprintf_s(pszText, sizeof(pszText), "GROUP(%d)", group_index);
+			//	pxmlGroupItem = pxmlDoc->NewKeyValuePairElement(pxmlDsiItem, pszText);
+
+			//	pxmlDoc->NewKeyValuePairElement(pxmlGroupItem, "GroupId", pDSI->astGroupInfo[group_index].GroupId, 32);
+			//	pxmlDoc->NewKeyValuePairElement(pxmlGroupItem, "GroupSize", pDSI->astGroupInfo[group_index].GroupSize, 32);
+
+			//	pxmlDoc->NewKeyValuePairElement(pxmlGroupItem, "GroupName", pDSI->astGroupInfo[group_index].name_descriptor.text_char);
+
+			//	pDSMCC_DII = (CDSMCC_UNM*)QueryBy3ID(PID, TABLE_ID_DSMCC_UNM, (pDSI->astGroupInfo[group_index].GroupId & 0x0000ffff));
+
+			//	if (pDSMCC_DII != NULL)
+			//	{
+			//		pDII = &(pDSMCC_DII->u.m_DII);
+
+			//		pxmlDoc->NewKeyValuePairElement(pxmlGroupItem, "downloadId", pDII->downloadId, 32);
+			//		pxmlDoc->NewKeyValuePairElement(pxmlGroupItem, "blockSize", pDII->blockSize, 16);
+			//		pxmlDoc->NewKeyValuePairElement(pxmlGroupItem, "windowSize", pDII->windowSize, 8);
+			//		pxmlDoc->NewKeyValuePairElement(pxmlGroupItem, "ackPeriod", pDII->ackPeriod, 8);
+			//		pxmlDoc->NewKeyValuePairElement(pxmlGroupItem, "tCDownloadWindow", pDII->tCDownloadWindow, 32);
+			//		pxmlDoc->NewKeyValuePairElement(pxmlGroupItem, "tCDownloadScenario", pDII->tCDownloadScenario, 32);
+
+			//		pxmlDoc->NewKeyValuePairElement(pxmlGroupItem, "numberOfModules", pDII->numberOfModules, 16);
+
+			//		for (module_index = 0; module_index < pDII->numberOfModules; module_index++)
+			//		{
+			//			sprintf_s(pszText, sizeof(pszText), "MODULE(%d - 0x%04X)", module_index, pDII->astModuleInfo[module_index].moduleId);
+			//			pxmlModuleItem = pxmlDoc->NewKeyValuePairElement(pxmlGroupItem, pszText);
+
+			//			pxmlDoc->NewKeyValuePairElement(pxmlModuleItem, "moduleId", pDII->astModuleInfo[module_index].moduleId, 16);
+			//			pxmlDoc->NewKeyValuePairElement(pxmlModuleItem, "moduleSize", pDII->astModuleInfo[module_index].moduleSize, 32);
+			//			pxmlDoc->NewKeyValuePairElement(pxmlModuleItem, "moduleVersion", pDII->astModuleInfo[module_index].moduleVersion, 8);
+
+			//			//计算参数
+			//			blockCount = (S32)(ceil((double)pDII->astModuleInfo[module_index].moduleSize / pDII->blockSize));
+			//			//sprintf_s(pszText, sizeof(pszText), "%d", blockCount);
+			//			pxmlDoc->NewKeyValuePairElement(pxmlModuleItem, "blockCount", blockCount);
+
+			//			pDC_moduleInfo = &(pDII->astModuleInfo[module_index].u.DC_moduleInfo);
+			//			pxmlDoc->NewKeyValuePairElement(pxmlModuleItem, "moduleName", pDC_moduleInfo->name_descriptor.text_char);
+			//		}
+			//	}
+
+			//}
+		}
+#endif
+	}
+	else
+	{
+		rtcode = MIDDLEWARE_DB_PARAMETER_ERROR;
+	}
+
+	return rtcode;
+}
+
 //usPID  -- input, DSMCC 的PID；
 //pxmlDoc -- output，所生成的DSMCC树通过此参数反馈给调用者
 //返回值，程序处理状态码。
@@ -971,6 +1143,44 @@ int CDB_PsiSiTables::BuildDsmccTree(uint16_t usPID, XMLDocForMpegSyntax* pxmlDoc
 			rtcode = MIDDLEWARE_DB_PARAMETER_ERROR;
 		}
 
+	}
+	else
+	{
+		rtcode = MIDDLEWARE_DB_PARAMETER_ERROR;
+	}
+
+	return rtcode;
+}
+
+int CDB_PsiSiTables::DownloadDsmccTree(uint16_t usPID, char* pszRootPath)
+{
+	int rtcode = MIDDLEWARE_DB_NO_ERROR;
+
+	if (pszRootPath != NULL)
+	{
+		CDSMCC_UNM*		pDSMCC_DSI;
+		DSMCC_DSI_t*	pDSI;
+
+		pDSMCC_DSI = (CDSMCC_UNM*)QueryDsmccUNM_DSI(usPID);
+		if (pDSMCC_DSI != NULL)
+		{
+			assert(pDSMCC_DSI->GetMessageID() == 0x1006);
+
+			pDSI = &(pDSMCC_DSI->u.m_DSI);
+
+			if (pDSI->data_broadcast_type == 0x0006)		//DC
+			{
+				DSMCC_DownloadDCTree(usPID, pDSI, 0x02, pszRootPath);
+			}
+			else if (pDSI->data_broadcast_type == 0x0007)	//OC
+			{
+				OC_DownloadDirectoryAndFiles(usPID, pDSI->moduleId_for_srg, pDSI->objectKey_data_for_srg, pszRootPath);
+			}
+		}
+		else
+		{
+			rtcode = MIDDLEWARE_DB_PARAMETER_ERROR;
+		}
 	}
 	else
 	{

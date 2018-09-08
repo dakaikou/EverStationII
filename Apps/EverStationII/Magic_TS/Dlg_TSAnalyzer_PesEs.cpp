@@ -380,7 +380,21 @@ void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(U32 uiPESStyle, U8* pes_buf, S32 pe
 		m_pTree->Reset();
 		m_pTree->ShowXMLDoc(&xmlDoc);
 
-		xmlDoc.SaveFile("e:\\temp\\pes.xml");
+		char	pszExeFile[MAX_PATH];
+		char	exeDrive[3];
+		char	pszAppTempPath[MAX_PATH];
+		char	pszXmlPath[MAX_PATH];
+		char	pszFilePath[MAX_PATH];
+		GetModuleFileName(NULL, pszExeFile, MAX_PATH);
+		exeDrive[0] = pszExeFile[0];
+		exeDrive[1] = pszExeFile[1];
+		exeDrive[2] = '\0';
+		sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
+		sprintf_s(pszXmlPath, sizeof(pszXmlPath), "%s\\xml", pszAppTempPath);
+		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\PES_packet-0x%04X.xml", pszXmlPath, PID);
+		::CreateDirectory(pszAppTempPath, NULL);
+		::CreateDirectory(pszXmlPath, NULL);
+		xmlDoc.SaveFile(pszFilePath);
 
 		m_pList->Reset();
 		m_pList->DisplayByteBuffer(pes_buf, pes_length);
