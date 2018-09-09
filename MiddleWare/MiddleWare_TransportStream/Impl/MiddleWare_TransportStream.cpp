@@ -357,8 +357,7 @@ S32 CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 	exeDrive[2] = '\0';
 	sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
 	sprintf_s(pszPcrPath, sizeof(pszPcrPath), "%s\\pcr", pszAppTempPath);
-	::CreateDirectoryA(pszAppTempPath, NULL);
-	::CreateDirectoryA(pszPcrPath, NULL);
+	BuildDirectory(pszPcrPath);
 
 	char file_name[128];
 	U32 old_tickcount = ::GetTickCount();

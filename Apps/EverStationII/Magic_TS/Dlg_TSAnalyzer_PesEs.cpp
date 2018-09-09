@@ -33,6 +33,8 @@ static char THIS_FILE[] = __FILE__;
 #include "libs_ES\ES_AAC\Include\xml\aac_audio_sequence_xml.h"
 #include "libs_ES\ES_DRA\Include\xml\dra_audio_sequence_xml.h"
 
+#include "libs_Utilities\Include\XStream_Utilities.h"
+
 CDlg_TSAnalyzer_PesEs::CDlg_TSAnalyzer_PesEs(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlg_TSAnalyzer_PesEs::IDD, pParent)
 {
@@ -380,21 +382,22 @@ void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(U32 uiPESStyle, U8* pes_buf, S32 pe
 		m_pTree->Reset();
 		m_pTree->ShowXMLDoc(&xmlDoc);
 
+#ifdef _DEBUG
 		char	pszExeFile[MAX_PATH];
 		char	exeDrive[3];
-		char	pszAppTempPath[MAX_PATH];
-		char	pszXmlPath[MAX_PATH];
+		char	pszXmlDir[MAX_PATH];
 		char	pszFilePath[MAX_PATH];
 		GetModuleFileName(NULL, pszExeFile, MAX_PATH);
 		exeDrive[0] = pszExeFile[0];
 		exeDrive[1] = pszExeFile[1];
 		exeDrive[2] = '\0';
-		sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
-		sprintf_s(pszXmlPath, sizeof(pszXmlPath), "%s\\xml", pszAppTempPath);
-		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\PES_packet-0x%04X.xml", pszXmlPath, PID);
-		::CreateDirectory(pszAppTempPath, NULL);
-		::CreateDirectory(pszXmlPath, NULL);
+
+		sprintf_s(pszXmlDir, sizeof(pszXmlDir), "%s\\~EverStationII\\xml", exeDrive);
+		BuildDirectory(pszXmlDir);
+
+		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\PES_packet_0x%04X.xml", pszXmlDir, PID);
 		xmlDoc.SaveFile(pszFilePath);
+#endif
 
 		m_pList->Reset();
 		m_pList->DisplayByteBuffer(pes_buf, pes_length);

@@ -1,5 +1,9 @@
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+//#include <Windows.h>
+#include <direct.h> //_mkdir函数的头文件
+#include <io.h>     //_access函数的头文件
 
 #include "../Include/XStream_Utilities.h"
 
@@ -22,51 +26,78 @@ int	GetModulePathLength(char* pszFile)
 	return idx;
 }
 
-//int BuildDirectory(CString  strPath)
-//{
-//	CString   strSubPath;
-//	//	CString   strInfo;   
-//	int   nCount = 0;
-//	int   nIndex = 0;
-//
-//	//查找字符"\\"的个数   
-//	do
-//	{
-//		nIndex = strPath.Find("\\", nIndex) + 1;
-//		nCount++;
-//	} while ((nIndex - 1) != -1);
-//
-//	nIndex = 0;
-//	//检查，并创建目录   
-//	while ((nCount - 1) >= 0)
-//	{
-//		nIndex = strPath.Find("\\", nIndex) + 1;
-//		if ((nIndex - 1) == -1)
-//		{
-//			strSubPath = strPath;
-//		}
-//		else
-//		{
-//			strSubPath = strPath.Left(nIndex);
-//		}
-//
-//		if (!PathFileExists(strSubPath))
-//		{
-//			if (!::CreateDirectory(strSubPath, NULL))
-//			{
-//				//				strInfo   =   "Build   Directory";   
-//				//				strInfo   +=   strSubPath;   
-//				//				strInfo   +=   "   Fail!";   
-//				//				AfxMessageBox(strInfo, MB_OK);   
-//				return -1;
-//			}
-//		}
-//
-//		nCount--;
-//	};
-//
-//	return 0;
-//}
+int BuildDirectory(char* pszFilePath)
+{
+	//char	pszExeFile[MAX_PATH];
+	char	pszDrive[3];
+	char	pszDir[256];
+	char	pszFile[256];
+	char	pszExt[8];
+	int		idx = 0;
+	char	pszTemp[256];
+	char	pszLeftDir[256];
 
+	_splitpath_s(pszFilePath, pszDrive, pszDir, pszFile, pszExt);
+	idx = strlen(pszDrive);
+
+	//查找字符"\\"的个数
+	if (strlen(pszDir) > 0)
+	{
+		char* pszTempDir = pszDir + 1;
+		idx += 1;
+
+		char* pszSubDir = NULL;
+		while (strlen(pszTempDir) > 0)
+		{
+			pszSubDir = strchr(pszTempDir, '\\');
+			idx += (int)(pszSubDir - pszTempDir);
+			pszTempDir = pszSubDir + 1;
+			idx += 1;
+
+			memcpy(pszLeftDir, pszFilePath, idx);
+			pszLeftDir[idx] = '\0';
+			//sprintf_s(pszTemp, sizeof(pszTemp), "%s%s", pszLeftDir, pszFile);
+			_mkdir(pszLeftDir);
+		}
+
+		if (strlen(pszFile) > 0)
+		{
+			if (strlen(pszExt) == 0)
+			{
+				memcpy(pszLeftDir, pszFilePath, idx);
+				pszLeftDir[idx] = '\0';
+				sprintf_s(pszTemp, sizeof(pszTemp), "%s%s", pszLeftDir, pszFile);
+				_mkdir(pszTemp);
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+//void CreateDir(const char *dir)
+//{
+//	int m = 0, n;
+//	string str1, str2;
+//
+//	str1 = dir;
+//	str2 = str1.substr(0, 2);
+//	str1 = str1.substr(3, str1.size());
+//
+//	while (m >= 0)
+//	{
+//		m = str1.find('\\');
+//
+//		str2 += '\\' + str1.substr(0, m);
+//		n = _access(str2.c_str(), 0); //判断该目录是否存在
+//		if (n == -1)
+//		{
+//			_mkdir(str2.c_str());     //创建目录
+//		}
+//
+//		str1 = str1.substr(m + 1, str1.size());
+//	}
+//}
 
 

@@ -26,6 +26,8 @@ static char THIS_FILE[] = __FILE__;
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TransportStream.h"
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 
+#include "libs_MPEG&DVB\MPEG_TSPacket\Include\Mpeg2_TS_Utilities.h"
+
 CDlg_TSAnalyzer_Packets::CDlg_TSAnalyzer_Packets(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlg_TSAnalyzer_Packets::IDD, pParent)
 {
@@ -67,6 +69,9 @@ BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_Packets, CDialog)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_BTN_DECIMATE_STOP, &CDlg_TSAnalyzer_Packets::OnBnClickedBtnDecimateStop)
 	ON_NOTIFY(NM_RCLICK, IDC_LIST_PID, &CDlg_TSAnalyzer_Packets::OnRclickListPid)
+	ON_COMMAND(ID_TS_DECIMATE_TO_ES, &CDlg_TSAnalyzer_Packets::OnTsDecimateToEs)
+	ON_COMMAND(ID_TS_DECIMATE_TO_PES, &CDlg_TSAnalyzer_Packets::OnTsDecimateToPes)
+	ON_COMMAND(ID_TS_DECIMATE_TO_TS, &CDlg_TSAnalyzer_Packets::OnTsDecimateToTs)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1179,15 +1184,71 @@ void CDlg_TSAnalyzer_Packets::OnRclickListPid(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
 	// TODO: 在此添加控件通知处理程序代码
-	CMenu	menu, *pSubMenu;
-	menu.LoadMenu(IDR_RIGHT_KEY_MENU);//装载自定义的右键菜单
+	uint16_t usPID = 0xFFFF;
+	int nItemCount = m_listPID.GetItemCount();
+	for (int item_index = 0; item_index < nItemCount; item_index++)
+	{
+		UINT state = m_listPID.GetItemState(item_index, LVIS_SELECTED);
+		if ((state & LVIS_SELECTED) == LVIS_SELECTED)
+		{
+			usPID = (WORD)m_listPID.GetItemData(item_index);
+			break;
+		}
+	}
 
-	pSubMenu = menu.GetSubMenu(0);//获取第一个弹出菜单，所以第一个菜单必须有子菜单
+	if (usPID != 0xFFFF)
+	{
+		CMenu	menu, *pSubMenu;
+		menu.LoadMenu(IDR_RIGHT_KEY_MENU);//装载自定义的右键菜单
 
-	CPoint oPoint;//定义一个用于确定光标位置的位置
-	GetCursorPos(&oPoint);//获取当前光标的位置，以便使得菜单可以跟随光标
+		pSubMenu = menu.GetSubMenu(0);//获取第一个弹出菜单，所以第一个菜单必须有子菜单
+		pSubMenu->EnableMenuItem(ID_TS_DECIMATE_TO_TS, MF_ENABLED);
 
-	pSubMenu->TrackPopupMenu(TPM_LEFTALIGN, oPoint.x, oPoint.y, this); //在指定位置显示弹出菜单
+		CTSMagicView*		pWindow = CTSMagicView::GetView();
+		CDB_TSPackets*		pDB_TSPackets = pWindow->GetTSPacketsDBase();
+		RECORD_TSPacket_t	stTSPacketInfo;
+
+		pDB_TSPackets->GetRecord(usPID, &stTSPacketInfo);
+		if (stTSPacketInfo.ucClass == TSPAYLOAD_CLASS_SECTION)
+		{
+			pSubMenu->EnableMenuItem(ID_TS_DECIMATE_TO_ES, MF_GRAYED);
+			pSubMenu->EnableMenuItem(ID_TS_DECIMATE_TO_PES, MF_GRAYED);
+			pSubMenu->EnableMenuItem(ID_TS_DECIMATE_TO_SECTION, MF_ENABLED);
+		}
+		else if ((stTSPacketInfo.ucClass == TSPAYLOAD_CLASS_PES_AUDIO) ||
+			(stTSPacketInfo.ucClass == TSPAYLOAD_CLASS_PES_VIDEO))
+		{
+			pSubMenu->EnableMenuItem(ID_TS_DECIMATE_TO_ES, MF_ENABLED);
+			pSubMenu->EnableMenuItem(ID_TS_DECIMATE_TO_PES, MF_ENABLED);
+			pSubMenu->EnableMenuItem(ID_TS_DECIMATE_TO_SECTION, MF_GRAYED);
+		}
+
+		CPoint oPoint;//定义一个用于确定光标位置的位置
+		GetCursorPos(&oPoint);//获取当前光标的位置，以便使得菜单可以跟随光标
+
+		pSubMenu->TrackPopupMenu(TPM_LEFTALIGN, oPoint.x, oPoint.y, this); //在指定位置显示弹出菜单
+	}
 
 	*pResult = 0;
+}
+
+
+void CDlg_TSAnalyzer_Packets::OnTsDecimateToEs()
+{
+	// TODO: 在此添加命令处理程序代码
+	OnBtnDecimateTS2ES();
+}
+
+
+void CDlg_TSAnalyzer_Packets::OnTsDecimateToPes()
+{
+	// TODO: 在此添加命令处理程序代码
+	OnBtnDecimateTS2PES();
+}
+
+
+void CDlg_TSAnalyzer_Packets::OnTsDecimateToTs()
+{
+	// TODO: 在此添加命令处理程序代码
+	OnBtnDecimateTS2TS();
 }

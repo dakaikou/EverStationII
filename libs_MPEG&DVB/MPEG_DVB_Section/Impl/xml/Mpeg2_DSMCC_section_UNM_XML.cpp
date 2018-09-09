@@ -25,8 +25,6 @@
 int MPEG2_DSMCC_UNM_DecodeSection_to_XML(uint8_t *section_buf, int section_size, XMLDocForMpegSyntax* pxmlDoc, dsmcc_unm_section_t* pDSMCCSection)
 {
 	int						rtcode = SECTION_PARSE_NO_ERROR;
-	//int						payload_length;
-	//uint8_t*				ptemp;
 	char					pszTemp[64];
 
 	dsmccMessageHeader_t*				pdsmccMessageHeader;
@@ -1089,12 +1087,12 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication_to_xml(uint8_t *buf, int length, XM
 
 									switch (descriptor_tag)
 									{
-									//case MPEG2_DSMCC_NAME_DESCRIPTOR:
-									//	rtcode = MPEG2_DSMCC_decode_name_descriptor_to_xml(ptemp, move_length, pxmlDoc, pxmlModuleNode, &(pDC_moduleInfo->name_descriptor));
-									//	break;
-									//case MPEG2_DSMCC_LOCATION_DESCRIPTOR:
-									//	rtcode = MPEG2_DSMCC_decode_location_descriptor_to_xml(ptemp, move_length, pxmlDoc, pxmlModuleNode, &(pDC_moduleInfo->location_descriptor));
-									//	break;
+									case MPEG2_DSMCC_NAME_DESCRIPTOR:
+										rtcode = MPEG2_DSMCC_decode_name_descriptor_to_xml(ptemp, move_length, pxmlDoc, pxmlModuleNode, &(pDC_moduleInfo->name_descriptor));
+										break;
+									case MPEG2_DSMCC_LOCATION_DESCRIPTOR:
+										rtcode = MPEG2_DSMCC_decode_location_descriptor_to_xml(ptemp, move_length, pxmlDoc, pxmlModuleNode, &(pDC_moduleInfo->location_descriptor));
+										break;
 									default:
 
 										//if (descriptor_tag == 0x3081)

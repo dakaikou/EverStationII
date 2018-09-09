@@ -242,30 +242,12 @@ void CTSMagicView::AdjustLayout(int cx, int cy)
 		m_dlgTSAnalyzerSubtitle.MoveWindow(&rectTab);
 #endif
 #if GUI_TS_ANALYZER_OCDC
-		//m_dlgTSAnalyzerOCDC.MoveWindow(&rectTab);
 		m_dlgTSAnalyzerDsmcc.MoveWindow(&rectTab);
 #endif
 
 	}
 
 }
-
-//void CTSMagicView::saveCfg()
-//{
-//	//char	pszExeFile[MAX_PATH];
-//	//char	pszIniFile[MAX_PATH];
-//	//int		len;
-//
-//	//GetModuleFileNameA(NULL, pszExeFile, MAX_PATH); 
-//	//len = GetModulePathLength(pszExeFile);
-//	//assert(len > 0);
-//
-//	//memcpy(pszIniFile, pszExeFile, len);
-//	//pszIniFile[len]= '\0';
-//	//sprintf_s(pszIniFile, sizeof(pszIniFile), "%s\\config.ini", pszIniFile); 
-//
-//	//WritePrivateProfileString("最近一次URL", "URL", m_strURL, pszIniFile);
-//}
 
 void CTSMagicView::loadCfg()
 {
@@ -324,7 +306,6 @@ void CTSMagicView::OnInitialUpdate()
 	CTSMagicDoc* pDoc = (CTSMagicDoc*)GetDocument();
 
 	// TODO: Add your specialized code here and/or call the base class
-	//int		width = 0;
 	CRect	rect;
 	CWnd*	pWnd;
 
@@ -368,39 +349,18 @@ void CTSMagicView::OnInitialUpdate()
 	m_dlgSignalStatus.Create(IDD_SIGNAL_STATUS, this);
 	m_dlgSignalStatus.ShowWindow(SW_HIDE);
 
-	//载入配置文件
-	//loadCfg();
-
-	//pWnd = GetDlgItem(IDC_EDIT_TS_URL);
-	//pWnd->SetWindowText(m_strURL);
-
-	char  pszExeFile[MAX_PATH];
-	char  pszAppTempPath[MAX_PATH];
-	char  pszRootPath[MAX_PATH];
-	char  exeDrive[3];
-//	char  pszRecordFile[MAX_PATH];
-//	int   len;
-
-	GetModuleFileNameA(NULL, pszExeFile, MAX_PATH); 
-//	len = GetModulePathLength(pszExeFile);
-//	assert(len > 0);
-
-	//将路径分离出来 
+	char	pszExeFile[MAX_PATH];
+	char	exeDrive[3];
+	char	pszDownloadRootPath[MAX_PATH];
+	GetModuleFileName(NULL, pszExeFile, MAX_PATH);
 	exeDrive[0] = pszExeFile[0];
 	exeDrive[1] = pszExeFile[1];
 	exeDrive[2] = '\0';
-	sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
-	sprintf_s(pszRootPath, sizeof(pszRootPath), "%s\\download_TS", pszAppTempPath);
-	//BuildDirectory((CString)pszRootPath);
-	::CreateDirectory(pszAppTempPath, NULL);
-	::CreateDirectory(pszRootPath, NULL);
 
-//	memcpy(pszExePath, pszExeFile, len);
-//	pszExePath[len]= '\0';
-//	sprintf(pszRecordFile, "%s\\record.ts", pszExePath);
-//	CTime t = CTime::GetCurrentTime();
+	sprintf_s(pszDownloadRootPath, sizeof(pszDownloadRootPath), "%s\\~EverStationII\\download_TS", exeDrive);
+	BuildDirectory(pszDownloadRootPath);
 
-	strcpy_s(m_kThreadParams.pszDecimatePath, sizeof(m_kThreadParams.pszDecimatePath), pszRootPath);
+	strcpy_s(m_kThreadParams.pszDecimatePath, sizeof(m_kThreadParams.pszDecimatePath), pszDownloadRootPath);
 
 	m_bInitDone = 1;
 

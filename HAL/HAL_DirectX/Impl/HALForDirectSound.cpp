@@ -290,8 +290,7 @@ S32 CHALForDirectSound::DirectSound_Init(void)
 	exeDrive[2] = '\0';
 	sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
 	sprintf_s(pszMediaPath, sizeof(pszMediaPath), "%s\\media", pszAppTempPath);
-	::CreateDirectoryA(pszAppTempPath, NULL);
-	::CreateDirectoryA(pszDbasePath, NULL);
+	BuildDirector(pszMediaPath);
 
 	sprintf_s(pszMediaFile, sizeof(pszMediaFile), "%s\\pcm.wav", pszMediaPath);
 

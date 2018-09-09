@@ -74,6 +74,9 @@ protected:
 public:
 	afx_msg void OnBnClickedBtnDecimateStop();
 	afx_msg void OnRclickListPid(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnTsDecimateToEs();
+	afx_msg void OnTsDecimateToPes();
+	afx_msg void OnTsDecimateToTs();
 };
 
 //{{AFX_INSERT_LOCATION}}

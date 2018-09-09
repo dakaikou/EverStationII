@@ -17,6 +17,8 @@
 #include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
 #include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/MPEG_DVB_Common.h"
 
+#include "libs_Utilities\Include\XStream_Utilities.h"
+
 #include "../Include/MiddleWare_DB_TSPackets.h"
 #include "../Include/MiddleWare_DB_ErrorCode.h"
 
@@ -46,18 +48,16 @@ int sqlite3_test()
 
 	char	pszExeFile[MAX_PATH];
 	char	exeDrive[3];
-	char	pszAppTempPath[MAX_PATH];
-	char	pszDbasePath[MAX_PATH];
+	char	pszDbaseDir[MAX_PATH];
 	GetModuleFileNameA(NULL, pszExeFile, MAX_PATH);
 	exeDrive[0] = pszExeFile[0];
 	exeDrive[1] = pszExeFile[1];
 	exeDrive[2] = '\0';
-	sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
-	sprintf_s(pszDbasePath, sizeof(pszDbasePath), "%s\\dbase", pszAppTempPath);
-	::CreateDirectoryA(pszAppTempPath, NULL);
-	::CreateDirectoryA(pszDbasePath, NULL);
 
-	sprintf_s(pszDbFile, sizeof(pszDbFile), "%s\\EverStationII.db", pszDbasePath);
+	sprintf_s(pszDbaseDir, sizeof(pszDbaseDir), "%s\\~EverStationII\\dbase", exeDrive);
+	BuildDirectory(pszDbaseDir);
+
+	sprintf_s(pszDbFile, sizeof(pszDbFile), "%s\\EverStationII.db", pszDbaseDir);
 
 	char strSql[256];
 

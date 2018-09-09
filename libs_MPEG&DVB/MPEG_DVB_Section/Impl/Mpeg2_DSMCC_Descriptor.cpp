@@ -7,7 +7,6 @@
 #include "../Include/MPEG_DVB_ErrorCode.h"
 #include "HAL\HAL_Sys\Include\INTTYPES.H"
 
-using namespace std;
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
 #endif

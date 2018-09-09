@@ -55,7 +55,8 @@ void ts2es_decimate_loop(pthread_params_t pThreadParams)
 	if (pThreadParams != NULL)
 	{
 		pThreadParams->packet_decimate_thread_running = 1;
-		
+		pDB_TSPackets = pThreadParams->pDB_TSPackets;
+
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_DECIMATE_THREAD, 1, NULL);
 
 //		curTime = CTime::GetCurrentTime();
@@ -63,6 +64,7 @@ void ts2es_decimate_loop(pthread_params_t pThreadParams)
 		strTime = timeCurrent.Format("%Y%m%d_%H%M%S");
 
 		sprintf_s(pszEsFile, sizeof(pszEsFile), "%s\\%s.es", pThreadParams->pszDecimatePath, strTime.GetBuffer(strTime.GetLength()));
+		
 		sprintf_s(pszDebug, sizeof(pszDebug), "TS包分解(TS->ES): 开始, 文件存储路径=%s", pszEsFile);
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_OPEN);
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_DECIMATE_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_OPEN);
@@ -71,8 +73,6 @@ void ts2es_decimate_loop(pthread_params_t pThreadParams)
 		if (fp != NULL)
 		{
 //			TRIGGER_TS_PACKET.packet_length = ptransport_stream->m_nPacketLength;
-
-			pDB_TSPackets = pThreadParams->pDB_TSPackets;
 
 			ptransport_stream = pThreadParams->pTStream;
 			file_size_div_100 = ptransport_stream->m_llTotalFileLength / 100.0f;

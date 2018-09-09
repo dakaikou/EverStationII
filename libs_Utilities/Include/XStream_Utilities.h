@@ -4,5 +4,6 @@
 #include "../compile.h"
 
 _CDL_EXPORT int	GetModulePathLength(char* pszFile);
+_CDL_EXPORT int BuildDirectory(char* pszFilePath);
 
 #endif

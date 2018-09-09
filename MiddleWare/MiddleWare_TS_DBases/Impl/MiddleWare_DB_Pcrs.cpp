@@ -252,8 +252,7 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 			exeDrive[2] = '\0';
 			sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
 			sprintf_s(pszPcrPath, sizeof(pszPcrPath), "%s\\pcr", pszAppTempPath);
-			::CreateDirectoryA(pszAppTempPath, NULL);
-			::CreateDirectoryA(pszPcrPath, NULL);
+			BuildDirectory(pszPcrPath);
 
 			char file_name[128];
 			sprintf_s(file_name, sizeof(file_name), "%s\\tick_%08x_pcr_debug_0x%04X.txt", pszPcrPath, old_tickcount, pInfo->PCR_PID);

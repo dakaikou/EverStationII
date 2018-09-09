@@ -108,6 +108,8 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication(uint8_t *buf, int length, DownloadI
 						pDownloadInfoIndication->moduleInfo[n].moduleVersion = *ptemp ++;
 						pDownloadInfoIndication->moduleInfo[n].moduleInfoLength = *ptemp ++;
 
+						pDownloadInfoIndication->moduleInfo[n].data_broadcast_type = 0x0006;			//默认假设为DC
+
 						remain_length = length - (int)(ptemp - buf);
 
 						//如果moduleInfoLength解析错误,则会导致指针越界

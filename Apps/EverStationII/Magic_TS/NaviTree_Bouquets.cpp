@@ -14,6 +14,7 @@ static char THIS_FILE[] = __FILE__;
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
 
 #include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_SI_Utilities.h"
+#include "libs_Utilities\Include\XStream_Utilities.h"
 
 #include "..\Common\define.h"
 
@@ -196,8 +197,6 @@ void CNaviTree_Bouquets::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// TODO: Add your control notification handler code here
 #if DEBUG_BAT
-	//CBAT*		pBAT;
-
 	CTreeCtrl& treeCtrl = GetTreeCtrl();
 
 	HTREEITEM hSelItem = treeCtrl.GetSelectedItem();
@@ -214,24 +213,24 @@ void CNaviTree_Bouquets::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 
 		XMLDocForMpegSyntax xmlDoc;
 		pDB_PsiSiTables->BuildBouquetTree(code, &xmlDoc);
+		m_pInfoTree->ShowXMLDoc(&xmlDoc);
 
+#ifdef _DEBUG
 		char	pszExeFile[MAX_PATH];
 		char	exeDrive[3];
-		char	pszAppTempPath[MAX_PATH];
-		char	pszXmlPath[MAX_PATH];
+		char	pszXmlDir[MAX_PATH];
 		char	pszFilePath[MAX_PATH];
 		GetModuleFileName(NULL, pszExeFile, MAX_PATH);
 		exeDrive[0] = pszExeFile[0];
 		exeDrive[1] = pszExeFile[1];
 		exeDrive[2] = '\0';
-		sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
-		sprintf_s(pszXmlPath, sizeof(pszXmlPath), "%s\\xml", pszAppTempPath);
-		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\BOUQUET-sematics-0x%04X.xml", pszXmlPath, code & 0xffff);
-		::CreateDirectory(pszAppTempPath, NULL);
-		::CreateDirectory(pszXmlPath, NULL);
-		xmlDoc.SaveFile(pszFilePath);
 
-		m_pInfoTree->ShowXMLDoc(&xmlDoc);
+		sprintf_s(pszXmlDir, sizeof(pszXmlDir), "%s\\~EverStationII\\xml", exeDrive);
+		BuildDirectory(pszXmlDir);
+
+		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\BOUQUET_sematics_0x%04X.xml", pszXmlDir, code & 0xffff);
+		xmlDoc.SaveFile(pszFilePath);
+#endif
 	}
 #endif
 

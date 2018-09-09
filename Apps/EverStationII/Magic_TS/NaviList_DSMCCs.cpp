@@ -31,8 +31,6 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNCREATE(CNaviList_DSMCCs, CListView)
 
-//extern PSISI_REPORT_t			PSISI_REPORT;
-
 CNaviList_DSMCCs::CNaviList_DSMCCs()
 {
 }
@@ -505,24 +503,24 @@ void CNaviList_DSMCCs::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 
 		XMLDocForMpegSyntax xmlDoc;
 		pDB_PsiSiTables->BuildDsmccTree(usPID, &xmlDoc);
+		m_pInfoTree->ShowXMLDoc(&xmlDoc);
 
+#ifdef _DEBUG
 		char	pszExeFile[MAX_PATH];
 		char	exeDrive[3];
-		char	pszAppTempPath[MAX_PATH];
-		char	pszXmlPath[MAX_PATH];
+		char	pszXmlDir[MAX_PATH];
 		char	pszFilePath[MAX_PATH];
 		GetModuleFileName(NULL, pszExeFile, MAX_PATH);
 		exeDrive[0] = pszExeFile[0];
 		exeDrive[1] = pszExeFile[1];
 		exeDrive[2] = '\0';
-		sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
-		sprintf_s(pszXmlPath, sizeof(pszXmlPath), "%s\\xml", pszAppTempPath);
-		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\DSMCC-sematics-0x%04X.xml", pszXmlPath, usPID);
-		::CreateDirectory(pszAppTempPath, NULL);
-		::CreateDirectory(pszXmlPath, NULL);
-		xmlDoc.SaveFile(pszFilePath);
 
-		m_pInfoTree->ShowXMLDoc(&xmlDoc);
+		sprintf_s(pszXmlDir, sizeof(pszXmlDir), "%s\\~EverStationII\\xml", exeDrive);
+		BuildDirectory(pszXmlDir);
+
+		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\DSMCC_sematics_0x%04X.xml", pszXmlDir, usPID);
+		xmlDoc.SaveFile(pszFilePath);
+#endif
 	}
 
 	*pResult = 0;
@@ -538,11 +536,11 @@ void CNaviList_DSMCCs::OnNMRClick(NMHDR *pNMHDR, LRESULT *pResult)
 
 	CListCtrl& listCtrl = GetListCtrl();
 
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	//CTSMagicView* pWindow = CTSMagicView::GetView();
 
-	if (((pWindow->m_kThreadParams.offline == 1) && (pWindow->m_kThreadParams.main_thread_stopped == 1)) ||
-		(pWindow->m_kThreadParams.offline == 0))
-	{
+	//if (((pWindow->m_kThreadParams.offline == 1) && (pWindow->m_kThreadParams.main_thread_stopped == 1)) ||
+	//	(pWindow->m_kThreadParams.offline == 0))
+	//{
 		nSel = listCtrl.GetSelectionMark();
 		if (nSel >= 0)
 		{
@@ -555,79 +553,10 @@ void CNaviList_DSMCCs::OnNMRClick(NMHDR *pNMHDR, LRESULT *pResult)
 
 			pSubMenu->TrackPopupMenu(TPM_LEFTALIGN, oPoint.x, oPoint.y, this); //在指定位置显示弹出菜单
 		}
-	}
+	//}
 
 	*pResult = 0;
 }
-
-//void CNaviList_DSMCCs::OC_BuildDownloadTable(uint16_t PID, uint32_t downloadId, uint16_t moduleId, uint32_t objectKey_data, char* pszDir)
-//{
-//#if DEBUG_DSMCC
-//	CDSMCC_DDM*					pDSMCC_DDM;
-//	DirectoryMessage_t*			pDirectoryMessage;
-//	Bindings_t*					pBindings;
-//	//BIOP::Name_t*				pName;
-//	BIOP::ObjectLocation_t*		pObjectLocation;
-//
-//	int							binding_index;
-//	int							object_index;
-//	unsigned short				sub_moduleId;
-//	unsigned int				sub_objectKey_data;
-//
-//	char						pszText[MAX_TXT_CHARS];
-//	char						pszPath[MAX_TXT_CHARS];
-//
-//	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-//	CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
-//	CDB_OCDCs* pDB_OCDCs = pTSMagicView->GetOCDCsDBase();
-//
-//	pDSMCC_DDM = (CDSMCC_DDM*)pDB_PsiSiTables->QueryBy3ID(PID, TABLE_ID_DSMCC_DDM, moduleId);
-//	if (pDSMCC_DDM != NULL)
-//	{
-//		for (object_index = 0; object_index < pDSMCC_DDM->m_nDirMessageCount; object_index++)
-//		{
-//			pDirectoryMessage = pDSMCC_DDM->m_pDirectoryMessage[object_index];
-//			if (pDirectoryMessage != NULL)
-//			{
-//				if (pDirectoryMessage->objectKey_data == objectKey_data)
-//				{
-//					for (binding_index = 0; binding_index < pDirectoryMessage->bindings_count; binding_index++)
-//					{
-//						pBindings = pDirectoryMessage->bindings + binding_index;
-//						//pName = &(pBindings->Name);
-//						pObjectLocation = &(pBindings->IOR.taggedProfile[0].u.BIOPProfileBody.ObjectLocation);
-//
-//						sprintf_s(pszText, sizeof(pszText), "%s", pBindings->Name.id_data_byte[0]);
-//						if (strcmp(pBindings->IOR.type_id_byte, "dir") == 0)
-//						{
-//							sprintf_s(pszPath, sizeof(pszPath), "%s%s\\", pszDir, pszText);
-//
-//							sub_moduleId = pObjectLocation->moduleId;
-//							sub_objectKey_data = pObjectLocation->objectKey_data;
-//
-//							OC_BuildDownloadTable(PID, downloadId, sub_moduleId, sub_objectKey_data, pszPath);
-//						}
-//						else
-//						{
-//							sprintf_s(pszPath, sizeof(pszPath), "%s%s", pszDir, pszText);
-//
-//							pDB_OCDCs->AddOCDownloadInfo(
-//								PID,
-//								pObjectLocation->carouselId,
-//								pObjectLocation->objectKey_data,
-//								pObjectLocation->moduleId,
-//								pszPath
-//							);
-//						}
-//					}
-//
-//					break;
-//				}
-//			}
-//		}
-//	}
-//#endif
-//}
 
 void CNaviList_DSMCCs::OnOcdcDownload(void)
 {
@@ -636,7 +565,6 @@ void CNaviList_DSMCCs::OnOcdcDownload(void)
 	int		item_count;
 	DWORD	state;
 
-	//char	    pszTemp[48];
 	uint32_t	usPID;
 
 	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
