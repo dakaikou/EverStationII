@@ -33,6 +33,9 @@
     <ClInclude Include="Include\HALForTinyXML2Doc.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\HALForTinyXML2.h">
+      <Filter>头文件\Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -42,6 +45,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Impl\HALForTinyXML2Doc.cpp">
+      <Filter>源文件\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\HALForTinyXML2.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
   </ItemGroup>

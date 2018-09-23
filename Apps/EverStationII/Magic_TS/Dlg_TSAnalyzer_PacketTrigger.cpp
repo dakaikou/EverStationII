@@ -23,7 +23,7 @@ static char THIS_FILE[] = __FILE__;
 #include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/xml/Mpeg2_TS_packet_xml.h"
 #include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/Mpeg2_TS_PID.h"
 #include "libs_Utilities\Include\XStream_Utilities.h"
-#include "HAL\HAL_XML\Include\HALForTinyXML2Doc.h"
+#include "HAL\HAL_XML\Include\HALForTinyXML2.h"
 
 //using namespace std;
 //using namespace tinyxml2;
@@ -501,7 +501,7 @@ void CDlg_TSAnalyzer_PacketTrigger::OnBtnNext()
 
 		if (m_pTree != NULL)
 		{
-			XMLDocForMpegSyntax xmlDoc;
+			HALForXMLDoc xmlDoc;
 			int rtcode = MPEG_decode_TS_packet_XML(packet_buf, packet_length, &xmlDoc);
 
 			m_pTree->Reset();
@@ -535,7 +535,7 @@ void CDlg_TSAnalyzer_PacketTrigger::OnBtnPre()
 		}
 		if (m_pTree != NULL)
 		{
-			XMLDocForMpegSyntax xmlDoc;
+			HALForXMLDoc xmlDoc;
 			S32 rtcode = MPEG_decode_TS_packet_XML(packet_buf, packet_length, &xmlDoc);
 
 			m_pTree->Reset();
@@ -566,7 +566,7 @@ void CDlg_TSAnalyzer_PacketTrigger::OnHScroll(UINT nSBCode, UINT nPos, CScrollBa
 		}
 		if (m_pTree != NULL)
 		{
-			XMLDocForMpegSyntax xmlDoc;
+			HALForXMLDoc xmlDoc;
 			S32 rtcode = MPEG_decode_TS_packet_XML(packet_buf, packet_length, &xmlDoc);
 
 			m_pTree->Reset();
@@ -615,10 +615,10 @@ void CDlg_TSAnalyzer_PacketTrigger::UpdateCatchResult(void)
 			}
 			if (m_pTree != NULL)
 			{
-				XMLDocForMpegSyntax xmlDoc;
+				HALForXMLDoc xmlDoc;
 				transport_packet_t ts_packet;
 
-				S32 rtcode = MPEG_decode_TS_packet_XML(packet_buf, packet_length, &xmlDoc, &ts_packet);
+				int rtcode = MPEG_decode_TS_packet_XML(packet_buf, packet_length, &xmlDoc, &ts_packet);
 
 #ifdef _DEBUG
 				char	pszExeFile[MAX_PATH];

@@ -91,6 +91,7 @@ typedef struct transport_packet_s
 
 _CDL_EXPORT int MPEG_decode_TS_adaptation_field(uint8_t *buf, int length, adaptation_field_t* padaptation_field);
 _CDL_EXPORT int MPEG_decode_TS_packet(uint8_t *buf, int length, transport_packet_t* ptransport_packet);
+
 _CDL_EXPORT int MPEG_encode_TS_packet(uint8_t *buf, int length, transport_packet_t* ptransport_packet);
 
 _CDL_EXPORT int MPEG_PCR_minus(PCR_code_t* pcr1, PCR_code_t* pcr2);

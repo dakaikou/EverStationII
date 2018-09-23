@@ -1249,6 +1249,9 @@ class TINYXML2_LIB XMLElement : public XMLNode
 {
     friend class XMLDocument;
 public:
+
+	void SetStartEndPtr(uint8_t* start_ptr, uint8_t* end_ptr);
+
     /// Get the name of an element (which is the Value() of the node.)
     const char* Name() const		{
         return Value();
@@ -1665,6 +1668,13 @@ class TINYXML2_LIB XMLDocument : public XMLNode
     friend class XMLComment;
     friend class XMLDeclaration;
     friend class XMLUnknown;
+
+protected:
+	uint8_t * m_origin_ptr;							//extended by chendelin  20180922
+public:
+	void SetOriginPtr(uint8_t* origin_ptr);			//extended by chendelin  20180922
+	uint8_t* GetOriginPtr(void);					//extended by chendelin  20180922
+
 public:
     /// constructor
     XMLDocument( bool processEntities = true, Whitespace whitespaceMode = PRESERVE_WHITESPACE );

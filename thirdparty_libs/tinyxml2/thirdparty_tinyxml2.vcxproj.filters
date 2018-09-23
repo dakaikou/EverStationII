@@ -41,5 +41,8 @@
     <ClCompile Include="Impl\tinyxml2.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
+    <ClCompile Include="Impl\tinyxml2_ext.cpp">
+      <Filter>源文件\Impl</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
