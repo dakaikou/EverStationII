@@ -413,18 +413,13 @@ typedef struct
 //S32		VLC_dmvector(BITS_t* pbs);
 
 _CDL_EXPORT int mpgv_decode_sequence_header(uint8_t* nal_buf, int nal_length, MPGV_sequence_header_t* psequence_header);
-
 _CDL_EXPORT int	mpgv_decode_sequence_extension(uint8_t* nal_buf, int nal_length, MPGV_sequence_extension_t* psequence_extension);
-
 _CDL_EXPORT int	mpgv_decode_group_of_pictures_header(uint8_t* nal_buf, int nal_length, MPGV_group_of_pictures_header_t* pgroup_of_pictures_header);
-
 _CDL_EXPORT int mpgv_decode_picture_header(uint8_t* nal_buf, int nal_length, MPGV_picture_header_t* ppicture_header);
-
 _CDL_EXPORT int	mpgv_decode_picture_coding_extension(uint8_t* nal_buf, int nal_length, MPGV_picture_coding_extension_t* ppicture_coding_extension);
-
 _CDL_EXPORT int	mpgv_decode_slice(uint8_t* nal_buf, int nal_length, MPGV_slice_t* pslice);
 
-_CDL_EXPORT int	mpgv_picture_type_lookup(uint8_t code, char* pszTemp, int strSize);
+//_CDL_EXPORT int	mpgv_picture_type_lookup(uint8_t code, char* pszTemp, int strSize);
 
 #endif
 

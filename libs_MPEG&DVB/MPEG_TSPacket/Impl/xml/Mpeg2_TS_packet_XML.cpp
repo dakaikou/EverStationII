@@ -14,10 +14,10 @@
 
 int MPEG_decode_TS_adaptation_field_XML(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, adaptation_field_t* pAdaptFieldParam)
 {
-	S32	 rtcode = TSPACKET_PARSE_NO_ERROR;
-	U8*  old_buf = NULL;
-	U8*  adaptation_start_ptr = NULL;
-	U8*  adaptation_end_ptr = NULL;
+	int	 rtcode = TSPACKET_PARSE_NO_ERROR;
+	uint8_t*  old_buf = NULL;
+	uint8_t*  adaptation_start_ptr = NULL;
+	uint8_t*  adaptation_end_ptr = NULL;
 	XMLElement* pxmlAdaptationNode = NULL;
 
 	BITS_t bs;
@@ -219,7 +219,6 @@ int MPEG_decode_TS_packet_XML(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, t
 					BITS_byteSkip(&bs, ptransport_packet->adaptation_field.adaptation_field_length + 1);
 				}
 			}
-			//pxmlDoc->UpdateBufMark(pxmlHeaderNode, old_header_ptr, bs.p_cur);
 
 			//TS°ü¾»ºÉ
 			if (rtcode == TSPACKET_PARSE_NO_ERROR)

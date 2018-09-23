@@ -11,7 +11,7 @@
 
 #include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 
-int mpgv_decode_sequence_header(unsigned char* nal_buf, int nal_length, MPGV_sequence_header_t* psequence_header)
+int mpgv_decode_sequence_header(uint8_t* nal_buf, int nal_length, MPGV_sequence_header_t* psequence_header)
 {
 	int rtcode = MPV_NO_ERROR;
 	S32		i;
@@ -175,9 +175,9 @@ int mpgv_decode_picture_header(uint8_t* nal_buf, int nal_length, MPGV_picture_he
 	return rtcode;
 }
 
-S32 mpgv_decode_sequence_extension(U8* nal_buf, S32 nal_length, MPGV_sequence_extension_t* psequence_extension)
+int mpgv_decode_sequence_extension(uint8_t* nal_buf, int nal_length, MPGV_sequence_extension_t* psequence_extension)
 {
-	S32		rtcode = MPV_UNKNOWN_ERROR;
+	int		rtcode = MPV_UNKNOWN_ERROR;
 	BITS_t		bs;
 
 	if ((nal_buf != NULL) && (nal_length >= 4) && (psequence_extension != NULL))
@@ -212,9 +212,9 @@ S32 mpgv_decode_sequence_extension(U8* nal_buf, S32 nal_length, MPGV_sequence_ex
 	return rtcode;
 }
 
-S32 mpgv_decode_picture_coding_extension(U8* nal_buf, S32 nal_length, MPGV_picture_coding_extension_t* ppicture_coding_extension)
+int mpgv_decode_picture_coding_extension(uint8_t* nal_buf, int nal_length, MPGV_picture_coding_extension_t* ppicture_coding_extension)
 {
-	S32		rtcode = MPV_UNKNOWN_ERROR;
+	int		rtcode = MPV_UNKNOWN_ERROR;
 	BITS_t		bs;
 
 	if ((nal_buf != NULL) && (nal_length >= 4) && (ppicture_coding_extension != NULL))

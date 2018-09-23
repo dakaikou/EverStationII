@@ -1,10 +1,1 @@
-﻿  stdafx.cpp
-  bitstream.cpp
-e:\projects-mpeg2码流分析仪\软件工程\everstationii\thirdparty_libs\liba52\impl\bitstream.cpp(39): warning C4311: “类型强制转换”: 从“uint8_t *”到“uint32_t”的指针截断
-e:\projects-mpeg2码流分析仪\软件工程\everstationii\thirdparty_libs\liba52\impl\bitstream.cpp(39): warning C4302: “类型强制转换”: 从“uint8_t *”到“uint32_t”截断
-  bit_allocate.cpp
-  downmix.cpp
-  imdct.cpp
-  parse.cpp
-  正在生成代码...
-  thirdparty_liba52.vcxproj -> E:\Projects-Mpeg2码流分析仪\软件工程\EverStationII\thirdparty_libs\liba52\.\lib\thirdparty_liba52D(x64).lib
+﻿

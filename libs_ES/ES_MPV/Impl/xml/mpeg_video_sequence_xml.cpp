@@ -14,7 +14,7 @@
 
 #include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 
-int mpgv_decode_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
+int mpgv_decode_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	int rtcode = MPV_NO_ERROR;
 	char			pszTemp[64];
@@ -34,7 +34,7 @@ int mpgv_decode_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_length, XMLDocFor
 	return rtcode;
 }
 
-int mpgv_decode_unknown_nal_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
+int mpgv_decode_unknown_nal_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	int rtcode = MPV_NO_ERROR;
 	char			pszTemp[64];
@@ -54,7 +54,7 @@ int mpgv_decode_unknown_nal_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMp
 	return rtcode;
 }
 
-int mpgv_decode_sequence_header_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, MPGV_sequence_header_t* pParam)
+int mpgv_decode_sequence_header_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode, MPGV_sequence_header_t* pParam)
 {
 	int		rtcode = MPV_UNKNOWN_ERROR;
 	int		i;
@@ -176,7 +176,7 @@ int mpgv_decode_sequence_header_to_xml(uint8_t* nal_buf, int nal_length, XMLDocF
 	return rtcode;
 }
 
-int	mpgv_decode_group_of_pictures_header_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, MPGV_group_of_pictures_header_t* pGOPHeader)
+int	mpgv_decode_group_of_pictures_header_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode, MPGV_group_of_pictures_header_t* pGOPHeader)
 {
 	S32		rtcode = MPV_UNKNOWN_ERROR;
 	BITS_t		bs;
@@ -238,7 +238,7 @@ int	mpgv_decode_group_of_pictures_header_to_xml(uint8_t* nal_buf, int nal_length
 	return rtcode;
 }
 
-int mpgv_decode_picture_header_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, MPGV_picture_header_t* pPictureHeader)
+int mpgv_decode_picture_header_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode, MPGV_picture_header_t* pPictureHeader)
 {
 	int		rtcode = MPV_NO_ERROR;
 	BITS_t		bs;
@@ -333,7 +333,7 @@ int mpgv_decode_picture_header_to_xml(uint8_t* nal_buf, int nal_length, XMLDocFo
 	return rtcode;
 }
 
-int mpgv_decode_sequence_extension_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, MPGV_sequence_extension_t* pSequenceExtension)
+int mpgv_decode_sequence_extension_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode, MPGV_sequence_extension_t* pSequenceExtension)
 {
 	int		rtcode = MPV_UNKNOWN_ERROR;
 	BITS_t		bs;
@@ -405,7 +405,7 @@ int mpgv_decode_sequence_extension_to_xml(uint8_t* nal_buf, int nal_length, XMLD
 	return rtcode;
 }
 
-int mpgv_decode_sequence_display_extension_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, MPGV_sequence_display_extension_t* pSequenceDisplayExtension)
+int mpgv_decode_sequence_display_extension_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode, MPGV_sequence_display_extension_t* pSequenceDisplayExtension)
 {
 	int		rtcode = MPV_UNKNOWN_ERROR;
 	BITS_t		bs;
@@ -479,7 +479,7 @@ int mpgv_decode_sequence_display_extension_to_xml(uint8_t* nal_buf, int nal_leng
 	return rtcode;
 }
 
-int mpgv_decode_picture_coding_extension_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, MPGV_picture_coding_extension_t* pPictureCodingExtension)
+int mpgv_decode_picture_coding_extension_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode, MPGV_picture_coding_extension_t* pPictureCodingExtension)
 {
 	S32		rtcode = MPV_UNKNOWN_ERROR;
 	BITS_t		bs;
@@ -584,7 +584,7 @@ int mpgv_decode_picture_coding_extension_to_xml(uint8_t* nal_buf, int nal_length
 	return rtcode;
 }
 
-int	mpgv_decode_user_data_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, MPGV_user_data_t* pUserData)
+int	mpgv_decode_user_data_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode, MPGV_user_data_t* pUserData)
 {
 	int rtcode = MPV_NO_ERROR;
 	char			pszTemp[64];
@@ -631,7 +631,7 @@ int	mpgv_decode_user_data_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpeg
 	return rtcode;
 }
 
-int mpgv_decode_slice_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, MPGV_slice_t* pSliceParam)
+int mpgv_decode_slice_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode, MPGV_slice_t* pSliceParam)
 {
 	int		rtcode = MPV_UNKNOWN_ERROR;
 	BITS_t	 bs;
