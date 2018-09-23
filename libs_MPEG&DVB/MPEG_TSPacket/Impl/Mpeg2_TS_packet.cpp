@@ -9,8 +9,8 @@
 
 #include "../Include/Mpeg2_TS_ErrorCode.h"
 #include "../Include/Mpeg2_TS_packet.h"
-#include "../Include/xml/Mpeg2_TS_packet_XML.h"
 
+#include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 
 int MPEG_decode_TS_adaptation_field(uint8_t *buf, int length, adaptation_field_t* padaptation_field)
 {
@@ -18,37 +18,32 @@ int MPEG_decode_TS_adaptation_field(uint8_t *buf, int length, adaptation_field_t
 
 	if ((buf != NULL) && (length <= 204) && (padaptation_field != NULL))
 	{
-		padaptation_field->adaptation_field_length = *buf++;
+		BITS_t bs;
+		BITS_map(&bs, buf, length);
+
+		padaptation_field->adaptation_field_length = BITS_get(&bs, 8);
 
 		if ((padaptation_field->adaptation_field_length >= 0) && (padaptation_field->adaptation_field_length <= 183))
 		{
 			if (padaptation_field->adaptation_field_length > 0)
 			{
-				padaptation_field->discontinuity_indicator = ( *buf & 0x80 ) >> 7;
-				padaptation_field->random_access_indicator = ( *buf & 0x40 ) >> 6;
-				padaptation_field->elementary_stream_priority_indicator = ( *buf & 0x20 ) >> 5;
-				padaptation_field->PCR_flag	 = ( *buf & 0x10 ) >> 4;
-				padaptation_field->OPCR_flag = ( *buf & 0x08 ) >> 3;
-				padaptation_field->splicing_point_flag = ( *buf & 0x04 ) >> 2;
-				padaptation_field->transport_private_data_flag = ( *buf & 0x02 ) >> 1;
-				padaptation_field->adaptation_field_extension_flag = *buf++ & 0x01;
+				padaptation_field->discontinuity_indicator = BITS_get(&bs, 1);
+				padaptation_field->random_access_indicator = BITS_get(&bs, 1);
+				padaptation_field->elementary_stream_priority_indicator = BITS_get(&bs, 1);
+				padaptation_field->PCR_flag	 = BITS_get(&bs, 1);
+				padaptation_field->OPCR_flag = BITS_get(&bs, 1);
+				padaptation_field->splicing_point_flag = BITS_get(&bs, 1);
+				padaptation_field->transport_private_data_flag = BITS_get(&bs, 1);
+				padaptation_field->adaptation_field_extension_flag = BITS_get(&bs, 1);
 
 				if( padaptation_field->PCR_flag )
 				{
-					padaptation_field->program_clock_reference_base_32_30  = (*buf & 0xe0) >> 5;
-					padaptation_field->program_clock_reference_base_29_15  = (*buf++ & 0x1f);
-					padaptation_field->program_clock_reference_base_29_15 <<= 8;
-					padaptation_field->program_clock_reference_base_29_15 |= *buf++;
-					padaptation_field->program_clock_reference_base_29_15 <<= 2;
-					padaptation_field->program_clock_reference_base_29_15 |= (*buf & 0xc0) >> 6;
-					padaptation_field->program_clock_reference_base_14_0 = (*buf++ & 0x3f);
-					padaptation_field->program_clock_reference_base_14_0 <<= 8;
-					padaptation_field->program_clock_reference_base_14_0 |= *buf++;
-					padaptation_field->program_clock_reference_base_14_0 <<= 1;
-					padaptation_field->program_clock_reference_base_14_0 |= (*buf & 0x80) >> 7;
+					padaptation_field->program_clock_reference_base_32_30  = BITS_get(&bs, 3);
+					padaptation_field->program_clock_reference_base_29_15  = BITS_get(&bs, 15);
+					padaptation_field->program_clock_reference_base_14_0 = BITS_get(&bs, 15);
 
-					padaptation_field->program_clock_reference_extension  = ( *buf++ & 0x01 ) << 8;
-					padaptation_field->program_clock_reference_extension |=  *buf++;
+					padaptation_field->reserved0 = BITS_get(&bs, 6);
+					padaptation_field->program_clock_reference_extension  = BITS_get(&bs, 9);
 				}
 		/*
 				if( padaptation_field->OPCR_flag ){
@@ -115,86 +110,73 @@ int MPEG_decode_TS_adaptation_field(uint8_t *buf, int length, adaptation_field_t
 
 int MPEG_decode_TS_packet(uint8_t *buf, int length, transport_packet_t* ptransport_packet)
 {
-	return MPEG_decode_TS_packet_XML(buf, length, NULL, ptransport_packet);
-	//S32	 rtcode = TSPACKET_PARSE_NO_ERROR;
+	int	 rtcode = TSPACKET_PARSE_NO_ERROR;
 
-	//U8*  porigin = buf;
-	//S32	 offset = 0;
+	if ((buf != NULL) &&
+		((length == 188) || (length == 204)) &&
+		(ptransport_packet != NULL))
+	{
+		memset(ptransport_packet, 0x00, sizeof(transport_packet_t));
 
-	//if ((buf != NULL) && 
-	//	((length == 188) || (length == 204)) &&
-	//	(ptransport_packet != NULL))
-	//{
-	//	memset(ptransport_packet, 0x00, sizeof(transport_packet_t));
+		if ((buf[0] == 0x47) || (buf[0] == 0xB8))
+		{
+			BITS_t bs;
+			BITS_map(&bs, buf, length);
 
-	//	if ((buf[0] == 0x47) || (buf[0] == 0xB8))
-	//	{
-	//		ptransport_packet->sync_byte = *buf++;
+			ptransport_packet->sync_byte = BITS_get(&bs, 8);
 
-	//		ptransport_packet->transport_error_indicator = ( *buf & 0x80 ) >> 7;
-	//		ptransport_packet->payload_unit_start_indicator = ( *buf & 0x40 ) >> 6;
-	//		ptransport_packet->transport_priority = ( *buf & 0x20 ) >> 5;
+			ptransport_packet->transport_error_indicator = BITS_get(&bs, 1);
+			ptransport_packet->payload_unit_start_indicator = BITS_get(&bs, 1);
+			ptransport_packet->transport_priority = BITS_get(&bs, 1);
+			ptransport_packet->PID = BITS_get(&bs, 13);
 
-	//		ptransport_packet->PID = (*buf++ & 0x1F);
-	//		ptransport_packet->PID <<= 8;
-	//		ptransport_packet->PID |= *buf++;
+			ptransport_packet->transport_scrambling_control = BITS_get(&bs, 2);
+			ptransport_packet->adaptation_field_control = BITS_get(&bs, 2);
+			ptransport_packet->continuity_counter = BITS_get(&bs, 4);
 
-	//		ptransport_packet->transport_scrambling_control = ( *buf & 0xC0 ) >> 6;
-	//		ptransport_packet->adaptation_field_control = ( *buf & 0x30 ) >> 4;
-	//		ptransport_packet->continuity_counter = (*buf++) & 0x0F;
+			if ((ptransport_packet->adaptation_field_control & 0b10) == 0b10)	//判断是不是有adaptation域
+			{
+				rtcode = MPEG_decode_TS_adaptation_field(bs.p_cur, length - 4, &(ptransport_packet->adaptation_field));
+				if (rtcode == TSPACKET_PARSE_NO_ERROR)
+				{
+					BITS_byteSkip(&bs, ptransport_packet->adaptation_field.adaptation_field_length + 1);
+				}
+			}
 
-	//		if (( ptransport_packet->adaptation_field_control & 0b10 ) == 0b10)
-	//		{
-	//			rtcode = MPEG_decode_TS_adaptation_field(buf, length - 4, &(ptransport_packet->adaptation_field));
+			if (rtcode == TSPACKET_PARSE_NO_ERROR)
+			{
+				if ((ptransport_packet->adaptation_field_control & 0b01) == 0b01)	//判断是否有净荷
+				{
+					ptransport_packet->payload_length = (uint8_t)(188 - (bs.p_cur - bs.p_start));
+					if (ptransport_packet->payload_length > 0)
+					{
+						BITS_byteCopy(ptransport_packet->payload_buf, &bs, ptransport_packet->payload_length);
+					}
+				}
+				else
+				{
+					ptransport_packet->payload_length = 0;
+				}
+			}
+		}
+		else
+		{
+			rtcode = TSPACKET_PARSE_SYNC_ERROR;
+		}
+	}
+	else
+	{
+		rtcode = TSPACKET_PARSE_PARAMETER_ERROR;
+	}
 
-	//			if (rtcode == TSPACKET_PARSE_NO_ERROR)
-	//			{
-	//				buf += (ptransport_packet->adaptation_field.adaptation_field_length + 1);
-	//			}
-	//		}
-
-	//		if (rtcode == TSPACKET_PARSE_NO_ERROR)
-	//		{
-	//			offset = (int)(buf - porigin);
-	//			if (offset > 188)			//failure
-	//			{
-	//				rtcode = TSPACKET_PARSE_SYNTAX_ERROR;
-	//			}
-	//			else								//success
-	//			{
-	//				if ((ptransport_packet->adaptation_field_control & 0b01) == 0b01)
-	//				{
-	//					ptransport_packet->payload_length = 188 - offset;
-	//					if (ptransport_packet->payload_length > 0)
-	//					{
-	//						memcpy(ptransport_packet->payload_buf, buf, ptransport_packet->payload_length);
-	//					}
-	//				}
-	//				else
-	//				{
-	//					ptransport_packet->payload_length = 0;
-	//				}
-	//			}
-	//		}
-	//	}
-	//	else
-	//	{
-	//		rtcode = TSPACKET_PARSE_SYNC_ERROR;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = TSPACKET_PARSE_PARAMETER_ERROR;
-	//}
-
-	//return rtcode;
+	return rtcode;
 }
 
 int MPEG_encode_TS_packet(uint8_t *buf, int length, transport_packet_t* pTS_packet)
 {
-	S32		rtcode = TSPACKET_PARSE_NO_ERROR;
-	U16		usTemp;
-	U8		ucTemp;
+	int			rtcode = TSPACKET_PARSE_NO_ERROR;
+	uint16_t	usTemp;
+	uint8_t		ucTemp;
 
 	if ((buf != NULL) && (pTS_packet != NULL))
 	{
@@ -251,7 +233,7 @@ int MPEG_encode_TS_packet(uint8_t *buf, int length, transport_packet_t* pTS_pack
 
 int MPEG_PCR_minus(PCR_code_t* pcr1, PCR_code_t* pcr2)
 {
-	S32 pcr_code_diff = 0;
+	int pcr_code_diff = 0;
 
 	if ((pcr1 != NULL) && (pcr2 != NULL))
 	{

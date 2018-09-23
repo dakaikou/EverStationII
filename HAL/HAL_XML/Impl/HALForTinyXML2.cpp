@@ -8,7 +8,7 @@
 
 HALForXMLDoc::HALForXMLDoc(void)
 {
-	m_origin_ptr = NULL;
+	//m_origin_ptr = NULL;
 }
 
 HALForXMLDoc::~HALForXMLDoc(void)
@@ -66,33 +66,45 @@ XMLElement * HALForXMLDoc::NewElementForString(XMLElement* pxmlParent, const cha
 	return pxmlNewElement;
 }
 
-XMLElement * HALForXMLDoc::NewElementForBits(XMLElement* pxmlParent, const char* key_name, uint32_t key_value, int bits, const char* mnemonic, const char* pszComment, const BITS_t* pbits_map)
+XMLElement * HALForXMLDoc::NewElementForBits(XMLElement* pxmlParent, const char* key_name, uint32_t key_value, int bits, const char* mnemonic, const char* pszComment, BITS_TRACER_t* pbs_tracer)
 {
 	XMLElement* pxmlNewElement = XMLDocument::NewElement(key_name);
 
 	if (bits > 0)
 	{
 		pxmlNewElement->SetAttribute("bits", bits);
+
+		if (pbs_tracer != NULL)
+		{
+			int next_offset = pbs_tracer->offset;
+			int length = 0;
+			while (pbs_tracer->i_left < bits)
+			{
+				bits -= pbs_tracer->i_left;
+				pbs_tracer->i_left = 8;
+				next_offset++;
+				length++;
+			}
+
+			pbs_tracer->i_left -= bits;
+			if (pbs_tracer->i_left == 0)
+			{
+				pbs_tracer->i_left = 8;
+				next_offset++;
+			}
+			length++;
+
+			pxmlNewElement->SetAttribute("offset", pbs_tracer->offset);
+			pxmlNewElement->SetAttribute("length", length);
+
+			pbs_tracer->offset = next_offset;
+		}
 	}
 	if (mnemonic != NULL)
 	{
 		pxmlNewElement->SetAttribute("mnemonic", mnemonic);
 	}
 	pxmlNewElement->SetAttribute("value", key_value);
-
-	if (pbits_map != NULL)
-	{
-		int offset = (int)(pbits_map->p_old - m_origin_ptr);
-		int length = (int)(pbits_map->p_cur - pbits_map->p_old);
-
-		if (pbits_map->i_left < 8)
-		{
-			length ++;
-		}
-
-		pxmlNewElement->SetAttribute("offset", offset);
-		pxmlNewElement->SetAttribute("length", length);
-	}
 
 	if (pszComment != NULL)
 	{
@@ -143,7 +155,7 @@ XMLElement * HALForXMLDoc::NewElementForBits(XMLElement* pxmlParent, const char*
 //	return pxmlNewElement;
 //}
 
-XMLElement * HALForXMLDoc::NewElementForBytes(XMLElement* pxmlParent, const char* key_name, const uint8_t* byte_buf, int byte_length, const char* pszComment, const BITS_t* pbits_map)
+XMLElement * HALForXMLDoc::NewElementForBytes(XMLElement* pxmlParent, const char* key_name, const uint8_t* byte_buf, int byte_length, const char* pszComment, BITS_TRACER_t* pbs_tracer)
 {
 	char pszTemp[48];
 	int	 i;
@@ -169,18 +181,17 @@ XMLElement * HALForXMLDoc::NewElementForBytes(XMLElement* pxmlParent, const char
 		pxmlNewElement->SetAttribute("value", pszTemp);
 	}
 
-	if (pbits_map != NULL)
+	if (pbs_tracer != NULL)
 	{
-		int offset = (int)(pbits_map->p_old - m_origin_ptr);
-		int length = (int)(pbits_map->p_cur - pbits_map->p_old);
+		assert(pbs_tracer->i_left == 8);
 
-		if (pbits_map->i_left < 8)
-		{
-			length++;
-		}
+		int next_offset = pbs_tracer->offset + byte_length;
+		int length = byte_length;
 
-		pxmlNewElement->SetAttribute("offset", offset);
+		pxmlNewElement->SetAttribute("offset", pbs_tracer->offset);
 		pxmlNewElement->SetAttribute("length", length);
+
+		pbs_tracer->offset = next_offset;
 	}
 
 	if (pszComment != NULL)
@@ -212,15 +223,15 @@ XMLElement * HALForXMLDoc::NewElementForX64Bits(XMLElement* pxmlParent, const ch
 
 	if (pbits_map != NULL)
 	{
-		int offset = (int)(pbits_map->p_old - m_origin_ptr);
-		int length = (int)(pbits_map->p_cur - pbits_map->p_old);
-		if (pbits_map->i_left < 8)
-		{
-			length++;
-		}
+		//int offset = (int)(pbits_map->p_old - m_origin_ptr);
+		//int length = (int)(pbits_map->p_cur - pbits_map->p_old);
+		//if (pbits_map->i_left < 8)
+		//{
+		//	length++;
+		//}
 
-		pxmlNewElement->SetAttribute("offset", offset);
-		pxmlNewElement->SetAttribute("length", length);
+		//pxmlNewElement->SetAttribute("offset", offset);
+		//pxmlNewElement->SetAttribute("length", length);
 	}
 
 	if (pszComment != NULL)
