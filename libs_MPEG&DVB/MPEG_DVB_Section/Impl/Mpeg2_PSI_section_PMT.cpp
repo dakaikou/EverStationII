@@ -25,14 +25,14 @@ int MPEG2_PSI_PMT_DecodeSection(uint8_t *section_buf, int section_size, TS_progr
 	S32  es_loop_length;
 	U16	 descriptor_tag;
 	U8	 descriptor_length;
-	U16	 move_length;
+	int	 move_length;
 	S32	 CA_count = 0;
 	S32  language_count = 0;
 	S32	 descriptor_count = 0;
 
 	BITS_t bs;
 
-	ES_DESCRIPTION_t*	pESMap;
+	ES_DESCRIPTION_t*	pstESMap;
 
 	if ((section_buf != NULL) && (section_size >= MPEG2_PSI_PMT_SECTION_MIN_SIZE) && (section_size <= MPEG2_PSI_PMT_SECTION_MAX_SIZE) && (ppmt_section != NULL))
 	{
@@ -95,10 +95,11 @@ int MPEG2_PSI_PMT_DecodeSection(uint8_t *section_buf, int section_size, TS_progr
 
 								assert(descriptor_count < MAX_RESERVED_DESCRIPTORS);
 
-								ppmt_section->reserved_descriptor[descriptor_count].descriptor_tag = descriptor_tag;
-								ppmt_section->reserved_descriptor[descriptor_count].descriptor_length = descriptor_length;
-								ppmt_section->reserved_descriptor[descriptor_count].descriptor_buf = pl1temp;
-								ppmt_section->reserved_descriptor[descriptor_count].descriptor_size = (uint8_t)move_length;
+								ppmt_section->program_info_descriptors[descriptor_count].descriptor_buf = pl1temp;
+								ppmt_section->program_info_descriptors[descriptor_count].descriptor_size = move_length;
+
+								ppmt_section->program_info_descriptors[descriptor_count].descriptor_tag = descriptor_tag;
+								ppmt_section->program_info_descriptors[descriptor_count].descriptor_length = descriptor_length;
 
 								descriptor_count++;
 
@@ -107,7 +108,7 @@ int MPEG2_PSI_PMT_DecodeSection(uint8_t *section_buf, int section_size, TS_progr
 							}
 						}
 					}
-					ppmt_section->reserved_count = descriptor_count;
+					ppmt_section->program_info_descriptor_count = descriptor_count;
 
 					es_loop_length = ppmt_section->section_length - ppmt_section->program_info_length - 13;
 					N = 0;
@@ -121,37 +122,38 @@ int MPEG2_PSI_PMT_DecodeSection(uint8_t *section_buf, int section_size, TS_progr
 
 						while ((es_loop_length >= 5) && (N < MAX_ESS_PER_PMT_SECTION))			//为什么是16？ chendelin  2018/5/19
 						{
-							pESMap = ppmt_section->astESMap + N;
+							pstESMap = ppmt_section->astESMaps + N;
 
-							pESMap->stream_subtype = STREAM_SUBTYPE_UNKNOWN;		//chendelin  20110423
+							pstESMap->stream_subtype = STREAM_SUBTYPE_UNKNOWN;		//chendelin  20110423
 
-							pESMap->stream_type = BITS_get(&es_loop_bs, 8);
+							pstESMap->stream_type = BITS_get(&es_loop_bs, 8);
 
-							pESMap->reserved0 = BITS_get(&es_loop_bs, 3);
-							pESMap->elementary_PID = BITS_get(&es_loop_bs, 13);
+							pstESMap->reserved0 = BITS_get(&es_loop_bs, 3);
+							pstESMap->elementary_PID = BITS_get(&es_loop_bs, 13);
 
-							pESMap->reserved1 = BITS_get(&es_loop_bs, 4);
-							pESMap->ES_info_length = BITS_get(&es_loop_bs, 12);
+							pstESMap->reserved1 = BITS_get(&es_loop_bs, 4);
+							pstESMap->ES_info_length = BITS_get(&es_loop_bs, 12);
 
 							descriptor_count = 0;
-							if (pESMap->ES_info_length > 0)
+							if (pstESMap->ES_info_length > 0)
 							{
 								pl2temp = es_loop_bs.p_cur;
-								BITS_byteSkip(&es_loop_bs, pESMap->ES_info_length);
+								BITS_byteSkip(&es_loop_bs, pstESMap->ES_info_length);
 
-								if (pESMap->ES_info_length <= (es_loop_length - 5))
+								if (pstESMap->ES_info_length <= (es_loop_length - 5))
 								{
-									descriptor_loop_length = pESMap->ES_info_length;
+									descriptor_loop_length = pstESMap->ES_info_length;
 									while ((descriptor_loop_length >= 2) && (descriptor_count < MAX_RESERVED_DESCRIPTORS))
 									{
 										descriptor_tag = pl2temp[0];
 										descriptor_length = pl2temp[1];
 										move_length = descriptor_length + 2;
 
-										pESMap->reserved_descriptor[descriptor_count].descriptor_tag = descriptor_tag;
-										pESMap->reserved_descriptor[descriptor_count].descriptor_length = descriptor_length;
-										pESMap->reserved_descriptor[descriptor_count].descriptor_buf = pl2temp;
-										pESMap->reserved_descriptor[descriptor_count].descriptor_size = (uint8_t)move_length;
+										pstESMap->ES_info_descriptors[descriptor_count].descriptor_buf = pl2temp;
+										pstESMap->ES_info_descriptors[descriptor_count].descriptor_size = (uint8_t)move_length;
+
+										pstESMap->ES_info_descriptors[descriptor_count].descriptor_tag = descriptor_tag;
+										pstESMap->ES_info_descriptors[descriptor_count].descriptor_length = descriptor_length;
 
 										registration_descriptor_t registration_descriptor;
 										switch (descriptor_tag)
@@ -163,62 +165,62 @@ int MPEG2_PSI_PMT_DecodeSection(uint8_t *section_buf, int section_size, TS_progr
 
 										descriptor_count++;
 
-										if (pESMap->stream_type == 0x05)
+										if (pstESMap->stream_type == 0x05)
 										{
-											if (pESMap->stream_subtype == STREAM_SUBTYPE_UNKNOWN)
+											if (pstESMap->stream_subtype == STREAM_SUBTYPE_UNKNOWN)
 											{
 												switch (descriptor_tag)
 												{
 												case DVB_SI_APPLICATION_SIGNALLING_DESCRIPTOR:
-													pESMap->stream_subtype = STREAM_SUBTYPE_AIT;
+													pstESMap->stream_subtype = STREAM_SUBTYPE_AIT;
 													break;
 												default:
 													break;
 												}
 											}
 										}
-										else if (pESMap->stream_type == 0x06)
+										else if (pstESMap->stream_type == 0x06)
 										{
-											if (pESMap->stream_subtype == STREAM_SUBTYPE_UNKNOWN)
+											if (pstESMap->stream_subtype == STREAM_SUBTYPE_UNKNOWN)
 											{
 												switch (descriptor_tag)
 												{
 												case MPEG2_PSI_REGISTRATION_DESCRIPTOR:
 													if (strcmp(registration_descriptor.format_identifier_char, "DRA1") == 0)
 													{
-														pESMap->stream_subtype = STREAM_SUBTYPE_DRA;
+														pstESMap->stream_subtype = STREAM_SUBTYPE_DRA;
 													}
 													break;
 												case DVB_SI_TELETEXT_DESCRIPTOR:
-													pESMap->stream_subtype = STREAM_SUBTYPE_TELETEXT;
+													pstESMap->stream_subtype = STREAM_SUBTYPE_TELETEXT;
 													break;
 												case DVB_SI_SUBTITLING_DESCRIPTOR:
-													pESMap->stream_subtype = STREAM_SUBTYPE_SUBTITLE;
+													pstESMap->stream_subtype = STREAM_SUBTYPE_SUBTITLE;
 													break;
 												case DVB_SI_AC3_DESCRIPTOR:
-													pESMap->stream_subtype = STREAM_SUBTYPE_AC3;
+													pstESMap->stream_subtype = STREAM_SUBTYPE_AC3;
 													break;
 												default:
 													break;
 												}
 											}
 										}
-										else if (pESMap->stream_type == 0x81)				//added by chendelin		2018.4.28
+										else if (pstESMap->stream_type == 0x81)				//added by chendelin		2018.4.28
 										{
-											if (pESMap->stream_subtype == STREAM_SUBTYPE_UNKNOWN)
+											if (pstESMap->stream_subtype == STREAM_SUBTYPE_UNKNOWN)
 											{
 												switch (descriptor_tag)
 												{
 												case MPEG2_PSI_REGISTRATION_DESCRIPTOR:
 													if (strcmp(registration_descriptor.format_identifier_char, "AC-3") == 0)
 													{
-														pESMap->stream_subtype = STREAM_SUBTYPE_AC3;
+														pstESMap->stream_subtype = STREAM_SUBTYPE_AC3;
 													}
 
 													break;
 												case DVB_SI_AC3_DESCRIPTOR:
 												case DVB_SI_AC3_AUDIO_DESCRIPTOR:
-													pESMap->stream_subtype = STREAM_SUBTYPE_AC3;
+													pstESMap->stream_subtype = STREAM_SUBTYPE_AC3;
 													break;
 												default:
 													break;
@@ -232,13 +234,13 @@ int MPEG2_PSI_PMT_DecodeSection(uint8_t *section_buf, int section_size, TS_progr
 								}
 							}
 
-							pESMap->reserved_count = descriptor_count;
+							pstESMap->ES_info_descriptor_count = descriptor_count;
 
-							es_loop_length -= (pESMap->ES_info_length + 5);
+							es_loop_length -= (pstESMap->ES_info_length + 5);
 							N++;
 						}
 					}
-					ppmt_section->N = N;
+					ppmt_section->ES_map_count = N;
 				}
 				else
 				{

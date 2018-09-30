@@ -54,8 +54,8 @@ typedef struct program_association_section_s
 	U8			section_number;								//8
 	U8			last_section_number;						//8
 
-	S32							 N;
-	PROGRAM_MAP_DESCRIPTION_t	 astProgram[MAX_PROGRAMS_PER_PAT_SECTION];			//N x 32					每个section最多只能携带253个节目映射信息
+	int							 program_map_count;
+	PROGRAM_MAP_DESCRIPTION_t	 astProgramMaps[MAX_PROGRAMS_PER_PAT_SECTION];			//N x 32					每个section最多只能携带253个节目映射信息
 
 	U32			CRC_32;										//32
 	U32			CRC_32_verify;								//32
@@ -78,8 +78,8 @@ typedef struct _ES_DESCRIPTION_s
 	U16	    reserved1 : 4;
 	U16		ES_info_length : 12;
 
-	S32								reserved_count;
-	reserved_descriptor_t			reserved_descriptor[MAX_RESERVED_DESCRIPTORS];
+	int								ES_info_descriptor_count;
+	reserved_descriptor_t			ES_info_descriptors[MAX_RESERVED_DESCRIPTORS];
 
 } ES_DESCRIPTION_t, *PES_DESCRIPTION_t;
 
@@ -107,11 +107,11 @@ typedef struct TS_program_map_section_s
 	U8		reserved3;									// 4
 	U16		program_info_length;						//12
 
-	S32							reserved_count;
-	reserved_descriptor_t		reserved_descriptor[MAX_RESERVED_DESCRIPTORS];
+	int							program_info_descriptor_count;
+	reserved_descriptor_t		program_info_descriptors[MAX_RESERVED_DESCRIPTORS];
 
-	S32							N;
-	ES_DESCRIPTION_t			astESMap[MAX_ESS_PER_PMT_SECTION];
+	int							ES_map_count;
+	ES_DESCRIPTION_t			astESMaps[MAX_ESS_PER_PMT_SECTION];
 
 	U32							CRC_32;										//32
 	U32							CRC_32_verify;								//32

@@ -68,20 +68,20 @@ int CPAT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 				m_usTransportStreamID = pat_section.transport_stream_id;
 			}
 
-			m_astProgram = (PROGRAM_MAP_DESCRIPTION_t*)realloc(m_astProgram, (m_nProgramCount + pat_section.N) * sizeof(PROGRAM_MAP_DESCRIPTION_t));
+			m_astProgram = (PROGRAM_MAP_DESCRIPTION_t*)realloc(m_astProgram, (m_nProgramCount + pat_section.program_map_count) * sizeof(PROGRAM_MAP_DESCRIPTION_t));
 			if (m_astProgram != NULL)
 			{
-				m_nMemoryForProgramInfos = (m_nProgramCount + pat_section.N) * sizeof(PROGRAM_MAP_DESCRIPTION_t);
+				m_nMemoryForProgramInfos = (m_nProgramCount + pat_section.program_map_count) * sizeof(PROGRAM_MAP_DESCRIPTION_t);
 
 				index = m_nProgramCount;
-				for (i = 0; i < pat_section.N; i++)
+				for (i = 0; i < pat_section.program_map_count; i++)
 				{
-					if (pat_section.astProgram[i].program_number == 0x0000)
+					if (pat_section.astProgramMaps[i].program_number == 0x0000)
 					{
-						m_usNitPID = pat_section.astProgram[i].program_map_PID;
+						m_usNitPID = pat_section.astProgramMaps[i].program_map_PID;
 					}
 
-					memcpy(m_astProgram + index, &(pat_section.astProgram[i]), sizeof(PROGRAM_MAP_DESCRIPTION_t));
+					memcpy(m_astProgram + index, &(pat_section.astProgramMaps[i]), sizeof(PROGRAM_MAP_DESCRIPTION_t));
 					index ++;
 				}
 				

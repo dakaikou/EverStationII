@@ -502,7 +502,7 @@ void CDlg_TSAnalyzer_PacketTrigger::OnBtnNext()
 		if (m_pTree != NULL)
 		{
 			HALForXMLDoc xmlDoc;
-			int rtcode = MPEG_decode_TS_packet_XML(packet_buf, packet_length, &xmlDoc);
+			int rtcode = MPEG_decode_TS_packet_to_XML(packet_buf, packet_length, &xmlDoc);
 
 			m_pTree->Reset();
 			m_pTree->ShowXMLDoc(&xmlDoc);
@@ -536,7 +536,7 @@ void CDlg_TSAnalyzer_PacketTrigger::OnBtnPre()
 		if (m_pTree != NULL)
 		{
 			HALForXMLDoc xmlDoc;
-			S32 rtcode = MPEG_decode_TS_packet_XML(packet_buf, packet_length, &xmlDoc);
+			S32 rtcode = MPEG_decode_TS_packet_to_XML(packet_buf, packet_length, &xmlDoc);
 
 			m_pTree->Reset();
 			m_pTree->ShowXMLDoc(&xmlDoc);
@@ -567,7 +567,7 @@ void CDlg_TSAnalyzer_PacketTrigger::OnHScroll(UINT nSBCode, UINT nPos, CScrollBa
 		if (m_pTree != NULL)
 		{
 			HALForXMLDoc xmlDoc;
-			S32 rtcode = MPEG_decode_TS_packet_XML(packet_buf, packet_length, &xmlDoc);
+			S32 rtcode = MPEG_decode_TS_packet_to_XML(packet_buf, packet_length, &xmlDoc);
 
 			m_pTree->Reset();
 			m_pTree->ShowXMLDoc(&xmlDoc);
@@ -618,7 +618,7 @@ void CDlg_TSAnalyzer_PacketTrigger::UpdateCatchResult(void)
 				HALForXMLDoc xmlDoc;
 				transport_packet_t ts_packet;
 
-				int rtcode = MPEG_decode_TS_packet_XML(packet_buf, packet_length, &xmlDoc, &ts_packet);
+				int rtcode = MPEG_decode_TS_packet_to_XML(packet_buf, packet_length, &xmlDoc, &ts_packet);
 
 #ifdef _DEBUG
 				char	pszExeFile[MAX_PATH];

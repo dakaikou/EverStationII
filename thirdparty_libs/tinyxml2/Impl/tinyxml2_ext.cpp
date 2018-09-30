@@ -1,33 +1,29 @@
 #include <stdio.h>
+#include <assert.h>
 
 #include "../Include/tinyxml2.h"
+#include "../Include/tinyxml2_ext.h"
 
 using namespace tinyxml2;
 
-void XMLDocument::SetOriginPtr(uint8_t* origin_ptr)
+void XMLDocument::GetBitsTracer(BITS_TRACER_t* pbs_tracer)
 {
-	m_origin_ptr = origin_ptr;
-}
-
-uint8_t* XMLDocument::GetOriginPtr(void)
-{
-	return m_origin_ptr;
-}
-
-void XMLElement::SetStartEndPtr(uint8_t* start_ptr, uint8_t* end_ptr)
-{
-	uint8_t* origin_ptr = this->GetDocument()->GetOriginPtr();
-
-	if (origin_ptr != NULL)
+	if (pbs_tracer != NULL)
 	{
-		int offset = (int)(start_ptr - origin_ptr);
-		int length = (int)(end_ptr - start_ptr);
-		if (length == 0)
-		{
-			length = 1;
-		}
-
-		SetAttribute("offset", offset);
-		SetAttribute("length", length);
+		pbs_tracer->i_left = m_bs_tracer.i_left;
+		pbs_tracer->offset = m_bs_tracer.offset;
 	}
+}
+
+void XMLElement::SetFieldLength(int length)
+{
+	BITS_TRACER_t bs_tracer;
+	XMLDocument* pxmlDoc = this->GetDocument();
+
+	pxmlDoc->GetBitsTracer(&bs_tracer);
+	assert(bs_tracer.i_left == 8);
+
+	int offset = bs_tracer.offset;
+	SetAttribute("offset", offset);
+	SetAttribute("length", length);
 }
