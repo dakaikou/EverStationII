@@ -5,7 +5,8 @@
 
 #include "../../Include/MPEG_DVB_Common.h"
 #include "../../Include/MPEG_DVB_ErrorCode.h"
-#include "../../Include/xml/MPEG_DVB_Common_XML.h"
+
+#include "HAL\HAL_XML\Include\HALForTinyXML2Doc.h"
 
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
@@ -89,31 +90,3 @@ int decode_reserved_descriptor_to_xml(uint8_t *buf, int length, XMLDocForMpegSyn
 	return rtcode;
 }
 
-int MPEG_DVB_present_reserved_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, reserved_descriptor_t* preserved_descriptor)
-{
-	int		rtcode = SECTION_PARSE_NO_ERROR;
-	char   pszComment[64];
-
-	if ((pxmlDoc != NULL) && (preserved_descriptor != NULL))
-	{
-		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "unknown descriptor()");
-		XMLNODE_SetFieldLength(pxmlDescriptorNode, preserved_descriptor->descriptor_size);
-
-		sprintf_s(pszComment, sizeof(pszComment), "tag: 0x%02X, %d字节", preserved_descriptor->descriptor_tag, preserved_descriptor->descriptor_size);
-		XMLNODE_SetAttribute(pxmlDescriptorNode, "comment", pszComment);
-
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_tag", preserved_descriptor->descriptor_tag, 8, "uimsbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_length", preserved_descriptor->descriptor_length, 8, "uimsbf", NULL);
-
-		if (preserved_descriptor->descriptor_length > 0)
-		{
-			XMLDOC_NewElementForBytes(pxmlDoc, pxmlDescriptorNode, "descriptor_payload_buf[ ]", preserved_descriptor->descriptor_payload, preserved_descriptor->descriptor_length, NULL);
-		}
-	}
-	else
-	{
-		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	}
-
-	return rtcode;
-}

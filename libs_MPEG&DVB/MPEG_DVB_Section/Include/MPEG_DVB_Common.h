@@ -14,7 +14,6 @@ typedef struct _reserved_descriptor_s
 
 	uint16_t		descriptor_tag;						//16
 	uint8_t			descriptor_length;					//8
-	uint8_t*		descriptor_payload;
 
 } reserved_descriptor_t, *preserved_descriptor_t;
 
@@ -48,7 +47,7 @@ typedef struct private_section_s
 
 _CDL_EXPORT	int	MPEG_DVB_PVT_DecodeSection(uint8_t* buf, int length, private_section_t* pPVTSection);
 
-_CDL_EXPORT	int MPEG_DVB_GetSectionMinMaxLength(uint8_t table_id, int* pmin_length, int* pmax_length);
+_CDL_EXPORT	int GetSectionMinMaxLength(uint8_t table_id, int* pmin_length, int* pmax_length);
 
 _CDL_EXPORT int MPEG_DVB_NumericCoding2Text_TableID(uint16_t PID, uint8_t table_id, char* pszText, int strSize);
 _CDL_EXPORT int MPEG_DVB_NumericCoding2Text_CASystemID(uint16_t CA_system_ID, char* pszText, int strSize);

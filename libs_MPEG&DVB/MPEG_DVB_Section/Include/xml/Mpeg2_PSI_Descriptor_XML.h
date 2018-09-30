@@ -5,10 +5,9 @@
 
 #include "../Mpeg2_PSI_Descriptor.h"
 #include "HAL\HAL_XML\Include\HALForTinyXML2Doc.h"
-#include "HAL\HAL_XML\Include\HALForTinyXML2.h"
 
 /*TAG = PSI_VIDEO_STREAM_DESCRIPTOR			0x02*/
-_CDL_EXPORT int MPEG2_PSI_decode_video_stream_descriptor_to_xml(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, video_stream_descriptor_t* pvideo_stream_descriptor = NULL);
+_CDL_EXPORT int MPEG2_PSI_decode_video_stream_descriptor_to_xml(uint8_t *buf, int length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, video_stream_descriptor_t* pvideo_stream_descriptor = NULL);
 
 /*TAG = PSI_AUDIO_STREAM_DESCRIPTOR			0x03*/
 _CDL_EXPORT int MPEG2_PSI_decode_audio_stream_descriptor_to_xml(uint8_t *buf, int length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, audio_stream_descriptor_t* paudio_stream_descriptor = NULL);

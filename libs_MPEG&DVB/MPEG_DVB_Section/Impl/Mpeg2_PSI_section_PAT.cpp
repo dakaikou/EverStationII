@@ -57,7 +57,7 @@ int MPEG2_PSI_PAT_DecodeSection(uint8_t *section_buf, int section_size, program_
 				BITS_t program_loop_bs;
 				BITS_map(&program_loop_bs, loop_start_ptr, program_loop_length);
 
-				PROGRAM_MAP_DESCRIPTION_t* pProgram = ppat_section->astProgramMaps;
+				PROGRAM_MAP_DESCRIPTION_t* pProgram = ppat_section->astProgram;
 				while ((program_loop_length >= 4) && (N < MAX_PROGRAMS_PER_PAT_SECTION))		//N为啥需要小于64？ chendelin  2018/5/19
 				{
 					uint8_t* program_map_start_ptr = program_loop_bs.p_cur;
@@ -72,7 +72,7 @@ int MPEG2_PSI_PAT_DecodeSection(uint8_t *section_buf, int section_size, program_
 					pProgram++;
 				}
 			}
-			ppat_section->program_map_count = N;
+			ppat_section->N = N;
 
 			unsigned int CRC_32 = BITS_get(&bs, 32);
 			assert(CRC_32 == CRC_32_code);			//再次校验，检验解析过程中指针偏移是否有错

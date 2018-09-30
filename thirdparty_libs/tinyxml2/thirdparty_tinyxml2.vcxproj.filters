@@ -30,9 +30,6 @@
     <ClInclude Include="Include\tinyxml2.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="Include\tinyxml2_ext.h">
-      <Filter>头文件\Include</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

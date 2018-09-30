@@ -7,7 +7,6 @@
 #include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 #include "HAL\HAL_ByteStream\Include\HALForByteStream.h"
 #include "thirdparty_libs/tinyxml2/include/tinyxml2.h"
-#include "thirdparty_libs/tinyxml2/include/tinyxml2_ext.h"
 
 using namespace tinyxml2;
 
@@ -29,16 +28,19 @@ using namespace tinyxml2;
 #define XMLDOC_InsertEndChild(pxmlDoc,pxmlNode)					pxmlDoc->InsertEndChild(pxmlNode)
 #define XMLDOC_NewRootElement(pxmlDoc,pszTitle)					((tinyxml2::XMLDocument*)pxmlDoc)->NewElement(pszTitle)
 
-#define XMLDOC_NewElementForString(pxmlDoc,pxmlParentNode,pszField)									 pxmlDoc->NewElementForString(pxmlParentNode, pszField)
-#define XMLDOC_NewElementForBits(pxmlDoc,pxmlParentNode,pszField,value,bits,mnemonic,comment)		 pxmlDoc->NewElementForBits(pxmlParentNode, pszField, value, bits, mnemonic, comment)
-#define XMLDOC_NewElementForX64Bits(pxmlDoc,pxmlParentNode,pszField,value,bits,mnemonic,comment)	 pxmlDoc->NewElementForX64Bits(pxmlParentNode, pszField, value, bits, mnemonic, comment)
-#define XMLDOC_NewElementForBytes(pxmlDoc,pxmlParentNode,pszField,buf,length,comment)				 pxmlDoc->NewElementForBytes(pxmlParentNode, pszField, buf, length, comment)
+#define XMLDOC_NewElementForString(pxmlDoc,pxmlParentNode,pszField)										 pxmlDoc->NewElementForString(pxmlParentNode, pszField)
+#define XMLDOC_NewElementForBits(pxmlDoc,pxmlParentNode,pszField,value,bits,mnemonic,comment,pbs)		 pxmlDoc->NewElementForBits(pxmlParentNode, pszField, value, bits, mnemonic, comment, pbs)
+#define XMLDOC_NewElementForX64Bits(pxmlDoc,pxmlParentNode,pszField,value,bits,mnemonic,comment,pbs)	 pxmlDoc->NewElementForX64Bits(pxmlParentNode, pszField, value, bits, mnemonic, comment, pbs)
+#define XMLDOC_NewElementForBytes(pxmlDoc,pxmlParentNode,pszField,buf,length,comment,pbs)				 pxmlDoc->NewElementForBytes(pxmlParentNode, pszField, buf, length, comment, pbs)
 
-#define XMLDOC_SetSyncOffset(pxmlDoc,offset)	pxmlDoc->SetSyncOffset(offset)
-#define XMLDOC_GetSyncOffset(pxmlDoc)			pxmlDoc->GetSyncOffset()
+#define XMLNODE_SetAttribute(pxmlNode,pszItem,pszAttr)			pxmlNode->SetAttribute(pszItem, pszAttr)
+#define XMLNODE_SetStartEndPtr(pxmlNode,start_ptr,end_ptr)		pxmlNode->SetStartEndPtr(start_ptr, end_ptr)
 
-#define XMLNODE_SetAttribute(pxmlNode,pszItem,pszAttr)					pxmlNode->SetAttribute(pszItem, pszAttr)
-#define XMLNODE_SetFieldLength(pxmlNode,byte_length)					pxmlNode->SetFieldLength(byte_length)
+typedef struct
+{
+	int offset;
+	int i_left;
+} BITS_TRACER_t;
 
 class _CDL_EXPORT HALForXMLDoc : public tinyxml2::XMLDocument
 {
@@ -49,14 +51,11 @@ public:
 	~HALForXMLDoc(void);
 
 public:
-	void SetSyncOffset(int offset);
-	//int GetSyncOffset(void);
+	XMLElement * NewElementForBits(XMLElement* pxmlParent, const char* key_name, uint32_t key_value, int bits = -1, const char* mnemonic = NULL, const char* pszComment = NULL, BITS_TRACER_t* pbs_tracer = NULL);
+	XMLElement * NewElementForBytes(XMLElement* pxmlParent, const char* key_name, const uint8_t* byte_buf, int byte_length, const char* pszComment = NULL, BITS_TRACER_t* pbs_tracer = NULL);
+	XMLElement * NewElementForString(XMLElement* pxmlParent, const char* key_name, const char* string = NULL);
 
-	XMLElement * NewElementForBits(XMLElement* pxmlParent, const char* key_name, uint32_t key_value, int bits = -1, const char* mnemonic = NULL, const char* pszComment = NULL);
-	XMLElement * NewElementForBytes(XMLElement* pxmlParent, const char* key_name, const uint8_t* byte_buf, int byte_length, const char* pszComment = NULL);
-	XMLElement * NewElementForString(XMLElement* pxmlParent, const char* key_name, const char* string = NULL, const char* pszComment = NULL);
-
-	XMLElement * NewElementForX64Bits(XMLElement* pxmlParent, const char* key_name, const uint64_t key_value, int bits = -1, const char* mnemonic = NULL, const char* pszComment = NULL);
+	XMLElement * NewElementForX64Bits(XMLElement* pxmlParent, const char* key_name, const uint64_t key_value, int bits = -1, const char* mnemonic = NULL, const char* pszComment = NULL, const BITS_t* pbits_map = NULL);
 
 	//XMLElement * NewKeyValuePairElementByteMode(XMLElement* pxmlParent, const char* field_name, unsigned int value = -1, int byte_length = -1, const char* pszComment = NULL, const BYTES_t* pbytes_map = NULL);
 	//XMLElement * NewKeyValuePairElementByteMode(XMLElement* pxmlParent, const char* field_name, const uint8_t* byte_buf, int byte_length, const char* pszComment = NULL, const BYTES_t* pbytes_map = NULL);
