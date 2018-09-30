@@ -159,13 +159,12 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 		if ((section_buf != NULL) && (section_length >= 3))
 		{
 			XMLDocForMpegSyntax xmlDoc;
-			HALForXMLDoc xml2Doc;
 
 			table_id = section_buf[0];
 
 			if (table_id == TABLE_ID_PAT)
 			{
-				MPEG2_PSI_PAT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
+				MPEG2_PSI_PAT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\PAT-0x%02X.xml", pszXmlDir, table_id);
@@ -309,10 +308,9 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 #ifdef _DEBUG
 			xmlDoc.SaveFile(pszFilePath);
-			xml2Doc.SaveFile(pszFilePath);
 #endif
 			m_pSyntaxTree->Reset();
-			m_pSyntaxTree->ShowXMLDoc(&xml2Doc);
+			m_pSyntaxTree->ShowXMLDoc(&xmlDoc);
 		}
 	}
 }
