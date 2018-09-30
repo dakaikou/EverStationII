@@ -5,6 +5,7 @@
 
 #include "../DVB_SI_Descriptor.h"
 #include "HAL\HAL_XML\Include\HALForTinyXML2Doc.h"
+#include "HAL\HAL_XML\Include\HALForTinyXML2.h"
 
 /*TAG = DVB_SI_NETWORK_NAME_DESCRIPTOR						0x40	*/
 _CDL_EXPORT int DVB_SI_decode_network_name_descriptor_to_xml(uint8_t *buf, int length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, network_name_descriptor_t* pnetwork_name_descriptor = NULL);
@@ -68,6 +69,10 @@ _CDL_EXPORT int DVB_SI_decode_data_broadcast_descriptor_to_xml(uint8_t* buf, int
 
 /*TAG = DVB_SI_DATA_BROADCAST_ID_DESCRIPTOR		0x66*/
 _CDL_EXPORT int DVB_SI_decode_data_broadcast_id_descriptor_to_xml(uint8_t* buf, int length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, data_broadcast_id_descriptor_t* pdata_broadcast_id_descriptor = NULL);
+
+/*TAG = SI_TRANSPORT_STREAM_DESCRIPTOR		0x67*/
+_CDL_EXPORT int DVB_SI_decode_transport_stream_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, transport_stream_descriptor_t* ptransport_stream_descriptor = NULL);
+
 
 /*TAG = DVB_SI_AC3_DESCRIPTOR			0x6A*/
 //在TS 102 366中定义

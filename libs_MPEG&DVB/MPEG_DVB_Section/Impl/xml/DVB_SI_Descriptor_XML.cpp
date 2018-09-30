@@ -9,7 +9,7 @@
 #include "../../Include/MPEG_DVB_ErrorCode.h"
 
 #include "../../Include/xml/DVB_Databroadcast_XML.h"
-#include "HAL\HAL_XML\Include\HALForTinyXML2Doc.h"
+#include "../../Include/xml/DVB_SI_Descriptor_XML.h"
 
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
@@ -1572,6 +1572,45 @@ int DVB_SI_decode_private_data_specifier_descriptor_to_xml(uint8_t* buf, int len
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
 
+//功能：解传送流描述符					0x67
+//输入：buffer, 起始位置nIndex
+//返回：LPVOID指针
+int DVB_SI_decode_transport_stream_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, transport_stream_descriptor_t* pTSDescriptor)
+{
+	int		rtcode = SECTION_PARSE_NO_ERROR;
+	char	pszComment[128];
+
+	transport_stream_descriptor_t* ptransport_stream_descriptor = (pTSDescriptor == NULL) ? new transport_stream_descriptor_t : pTSDescriptor;
+	rtcode = DVB_SI_decode_transport_stream_descriptor(buf, length, ptransport_stream_descriptor);
+
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
+	{
+		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "transport_stream_descriptor()");
+		XMLNODE_SetFieldLength(pxmlDescriptorNode, length);
+
+		sprintf_s(pszComment, sizeof(pszComment), "tag: 0x%02X, %d字节", ptransport_stream_descriptor->descriptor_tag, length);
+		XMLNODE_SetAttribute(pxmlDescriptorNode, "comment", pszComment);
+
+		if (rtcode != SECTION_PARSE_NO_ERROR)
+		{
+			sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
+			XMLNODE_SetAttribute(pxmlDescriptorNode, "error", pszComment);
+		}
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_tag", ptransport_stream_descriptor->descriptor_tag, 8, "uimsbf", NULL);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_length", ptransport_stream_descriptor->descriptor_length, 8, "uimsbf", NULL);
+
+		XMLDOC_NewElementForBytes(pxmlDoc, pxmlDescriptorNode, "byte_char", (uint8_t*)(ptransport_stream_descriptor->byte_char), ptransport_stream_descriptor->descriptor_length, ptransport_stream_descriptor->byte_char);
+	}
+
+	if (pTSDescriptor == NULL)
+	{
+		delete ptransport_stream_descriptor;
+	}
+
+	return rtcode;
+}
 
 //
 int EN301192_decode_data_carousel_info_to_xml(uint8_t* buf, int length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, data_carousel_info_t* pDataCarouselInfo = NULL)

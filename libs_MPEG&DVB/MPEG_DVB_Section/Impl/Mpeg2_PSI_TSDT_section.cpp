@@ -10,9 +10,9 @@
 #include "libs_Math/Include/CRC_32.h"
 
 /////////////////////////////////////////////
-int MPEG2_PSI_TSDT_DecodeSection(unsigned char *buf, int length, TS_description_section_t* pTS_description_section)
+int MPEG2_PSI_TSDT_DecodeSection(uint8_t *buf, int length, TS_description_section_t* pTS_description_section)
 {
-	S32		rtcode = SECTION_PARSE_NO_ERROR;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
 	U8*		ptemp;
 	S32		move_length;
 	U16		descriptor_tag;
@@ -58,10 +58,10 @@ int MPEG2_PSI_TSDT_DecodeSection(unsigned char *buf, int length, TS_description_
 				descriptor_length = ptemp[1];
 				move_length = descriptor_length + 2;
 
-				pTS_description_section->reserved_descriptor[reserved_count].descriptor_tag = descriptor_tag;
-				pTS_description_section->reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-				pTS_description_section->reserved_descriptor[reserved_count].descriptor_buf = ptemp;
-				pTS_description_section->reserved_descriptor[reserved_count].descriptor_size = move_length;
+				pTS_description_section->TS_descriptors[reserved_count].descriptor_tag = descriptor_tag;
+				pTS_description_section->TS_descriptors[reserved_count].descriptor_length = descriptor_length;
+				pTS_description_section->TS_descriptors[reserved_count].descriptor_buf = ptemp;
+				pTS_description_section->TS_descriptors[reserved_count].descriptor_size = move_length;
 
 				reserved_count ++;
 
@@ -69,7 +69,7 @@ int MPEG2_PSI_TSDT_DecodeSection(unsigned char *buf, int length, TS_description_
 				loop_length -= move_length;
 			}
 
-			pTS_description_section->reserved_count = reserved_count;
+			pTS_description_section->TS_descriptor_count = reserved_count;
 		}
 		else
 		{

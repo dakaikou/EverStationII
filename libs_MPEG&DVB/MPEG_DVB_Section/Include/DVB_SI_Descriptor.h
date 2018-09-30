@@ -863,19 +863,14 @@ _CDL_EXPORT int DVB_SI_decode_data_broadcast_id_descriptor(uint8_t* buf, int len
 /*TAG = SI_TRANSPORT_STREAM_DESCRIPTOR		0x67*/
 typedef struct _transport_stream_descriptor_s
 {
-	//U8*			descriptor_buf;						//8
-	//U8			descriptor_size;					//8
+	uint16_t	descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
-
-
-	U32 byte_code;
-	S8 byte_char[4];						//
+	char		byte_char[4];						//
 
 } transport_stream_descriptor_t, *ptransport_stream_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_transport_stream_descriptor(U8* buf, S32 length, ptransport_stream_descriptor_t ptransport_stream_descriptor);
+_CDL_EXPORT int DVB_SI_decode_transport_stream_descriptor(uint8_t* buf, int length, transport_stream_descriptor_t* ptransport_stream_descriptor);
 
 /*TAG = SI_DSNG_DESCRIPTOR			0x68*/
 

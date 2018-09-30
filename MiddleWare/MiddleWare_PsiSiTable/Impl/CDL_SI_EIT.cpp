@@ -113,10 +113,18 @@ int CEIT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 
 						if (eit_section.astEvent[i].reserved_descriptor[descriptor_index].descriptor_tag == DVB_SI_SHORT_EVENT_DESCRIPTOR)
 						{
-							DVB_SI_decode_short_event_descriptor(descriptor_buf, descriptor_size, &short_event_descriptor);
-							strcpy_s(m_astEvent[m_nEventCount].pszEventName, sizeof(m_astEvent[m_nEventCount].pszEventName), short_event_descriptor.trimmed_event_name_char);
-							strcpy_s(m_astEvent[m_nEventCount].pszEventText, sizeof(m_astEvent[m_nEventCount].pszEventText), short_event_descriptor.trimmed_text_char);
-
+							rtcode = DVB_SI_decode_short_event_descriptor(descriptor_buf, descriptor_size, &short_event_descriptor);
+							if (rtcode == SECTION_PARSE_NO_ERROR)
+							{
+								strcpy_s(m_astEvent[m_nEventCount].pszEventName, sizeof(m_astEvent[m_nEventCount].pszEventName), short_event_descriptor.trimmed_event_name_char);
+								strcpy_s(m_astEvent[m_nEventCount].pszEventText, sizeof(m_astEvent[m_nEventCount].pszEventText), short_event_descriptor.trimmed_text_char);
+							}
+							else
+							{
+								//assert(0);
+								strcpy_s(m_astEvent[m_nEventCount].pszEventName, sizeof(m_astEvent[m_nEventCount].pszEventName), "*** syntax error!");
+								strcpy_s(m_astEvent[m_nEventCount].pszEventText, sizeof(m_astEvent[m_nEventCount].pszEventText), "*** syntax error!");
+							}
 							break;
 						}
 					}

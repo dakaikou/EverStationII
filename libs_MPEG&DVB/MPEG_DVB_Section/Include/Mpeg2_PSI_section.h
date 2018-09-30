@@ -1,6 +1,8 @@
 #ifndef _MPEG2_PSI_SECTION_H_
 #define _MPEG2_PSI_SECTION_H_
 
+#include <stdint.h>
+
 #include "../compile.h"
 #include "MPEG_DVB_Common.h"
 #include "MPEG_DVB_SysCapability.h"
@@ -155,25 +157,25 @@ _CDL_EXPORT	int	MPEG2_PSI_CAT_DecodeSection(uint8_t *buf, int length, CA_section
 -------------------------------------------------------------*/
 typedef struct TS_description_section_s
 {
-	U8		table_id;									//8
+	uint8_t		table_id;									//8
 
-	U8		section_syntax_indicator;					//1
-	U8		reserved_future_use;						//1
-	U8		reserved0;									//2
-	U16		section_length;								//12
+	uint8_t		section_syntax_indicator;					//1
+	uint8_t		reserved_future_use;						//1
+	uint8_t		reserved0;									//2
+	uint16_t	section_length;								//12
 
-	U32		reserved1;									//18
-	U8		version_number;								//5
-	U8		current_next_indicator;						//1
+	uint32_t	reserved1;									//18
+	uint8_t		version_number;								//5
+	uint8_t		current_next_indicator;						//1
 
-	U8		section_number;								//8
-	U8		last_section_number;						//8
+	uint8_t		section_number;								//8
+	uint8_t		last_section_number;						//8
 
-	S32							reserved_count;
-	reserved_descriptor_t		reserved_descriptor[MAX_RESERVED_DESCRIPTORS];
+	int							TS_descriptor_count;
+	reserved_descriptor_t		TS_descriptors[MAX_RESERVED_DESCRIPTORS];
 
-	U32					CRC_32;							//32
-	U32					CRC_32_verify;								//32
+	uint32_t					CRC_32;							//32
+	uint32_t					CRC_32_verify;					//32
 
 } TS_description_section_t, *pTS_description_section_t;
 
