@@ -10,7 +10,7 @@
 #include "../../Include/Mpeg2_PSI_Utilities.h"
 #include "../../Include/Mpeg2_PSI_Descriptor.h"
 
-#include "HAL\HAL_XML\Include\HALForTinyXML2Doc.h"
+#include "../../Include/xml/Mpeg2_PSI_Descriptor_XML.h"
 
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
@@ -26,81 +26,58 @@
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
 //备注：2000.11 chendelin
-int MPEG2_PSI_decode_video_stream_descriptor_to_xml(uint8_t *buf, int length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, video_stream_descriptor_t* pVideoStreamDescriptor)
+int MPEG2_PSI_decode_video_stream_descriptor_to_xml(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, video_stream_descriptor_t* pVideoStreamDescriptor)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
-	int		copy_length = 0;
-	char   pszTemp[64];
-	char			pszProfile[32];
-	char			pszLevel[32];
-	BITS_t bs;
+	char	pszProfile[32];
+	char	pszLevel[32];
+	char	pszComment[128];
 
-	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 3))
+	video_stream_descriptor_t* pvideo_stream_descriptor = (pVideoStreamDescriptor == NULL) ? new video_stream_descriptor_t : pVideoStreamDescriptor;
+	rtcode = MPEG2_PSI_decode_video_stream_descriptor(buf, length, pvideo_stream_descriptor);
+
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
-		tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "video_stream_descriptor()");
-		pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "video_stream_descriptor()");
+		XMLNODE_SetFieldLength(pxmlDescriptorNode, length);
 
-		video_stream_descriptor_t* pvideo_stream_descriptor = (pVideoStreamDescriptor == NULL) ? new video_stream_descriptor_t : pVideoStreamDescriptor;
-		memset(pvideo_stream_descriptor, 0x00, sizeof(video_stream_descriptor_t));
+		sprintf_s(pszComment, sizeof(pszComment), "tag: 0x%02X, %d字节", pvideo_stream_descriptor->descriptor_tag, length);
+		XMLNODE_SetAttribute(pxmlDescriptorNode, "comment", pszComment);
 
-		BITS_map(&bs, buf, length);
+		if (rtcode != SECTION_PARSE_NO_ERROR)
+		{
+			sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
+			XMLNODE_SetAttribute(pxmlDescriptorNode, "error", pszComment);
+		}
 
-		pvideo_stream_descriptor->descriptor_tag = BITS_get(&bs, 8);
-		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pvideo_stream_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_tag", pvideo_stream_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-		pvideo_stream_descriptor->descriptor_length = BITS_get(&bs, 8);
-		assert(pvideo_stream_descriptor->descriptor_length >= 1);
-		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pvideo_stream_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_length", pvideo_stream_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-		pvideo_stream_descriptor->multiple_frame_rate_flag = BITS_get(&bs, 1);
-		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "multiple_frame_rate_flag", pvideo_stream_descriptor->multiple_frame_rate_flag, 1, "bslbf", NULL, &bs);
-
-		pvideo_stream_descriptor->frame_rate_code = BITS_get(&bs, 4);
-		MPGV_DecodeFrameRateCodetoText(pvideo_stream_descriptor->frame_rate_code, pszTemp, sizeof(pszTemp));
-		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "frame_rate_code", pvideo_stream_descriptor->frame_rate_code, 4, "uimsbf", pszTemp, &bs);
-
-		pvideo_stream_descriptor->MPEG_1_only_flag = BITS_get(&bs, 1);
-		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "MPEG_1_only_flag", pvideo_stream_descriptor->MPEG_1_only_flag, 1, "bslbf", NULL, &bs);
-
-		pvideo_stream_descriptor->constrained_parameter_flag = BITS_get(&bs, 1);
-		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "constrained_parameter_flag", pvideo_stream_descriptor->constrained_parameter_flag, 1, "bslbf", NULL, &bs);
-
-		pvideo_stream_descriptor->still_picture_flag = BITS_get(&bs, 1);
-		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "still_picture_flag", pvideo_stream_descriptor->still_picture_flag, 1, "bslbf", NULL, &bs);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "multiple_frame_rate_flag", pvideo_stream_descriptor->multiple_frame_rate_flag, 1, "bslbf", NULL);
+		MPGV_DecodeFrameRateCodetoText(pvideo_stream_descriptor->frame_rate_code, pszComment, sizeof(pszComment));
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "frame_rate_code", pvideo_stream_descriptor->frame_rate_code, 4, "uimsbf", pszComment);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "MPEG_1_only_flag", pvideo_stream_descriptor->MPEG_1_only_flag, 1, "bslbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "constrained_parameter_flag", pvideo_stream_descriptor->constrained_parameter_flag, 1, "bslbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "still_picture_flag", pvideo_stream_descriptor->still_picture_flag, 1, "bslbf", NULL);
 
 		if (pvideo_stream_descriptor->MPEG_1_only_flag == 0)
 		{
-			assert(pvideo_stream_descriptor->descriptor_length == 3);
-
-			pvideo_stream_descriptor->profile_and_level_indication = BITS_get(&bs, 8);
 			MPGV_DecodeProfileCodetoText((pvideo_stream_descriptor->profile_and_level_indication & 0x70) >> 4, pszProfile, sizeof(pszProfile));
 			MPGV_DecodeLevelCodetoText((pvideo_stream_descriptor->profile_and_level_indication & 0x0F), pszLevel, sizeof(pszLevel));
-			sprintf_s(pszTemp, sizeof(pszTemp), "%s profile @ %s level", pszProfile, pszLevel);
-			pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "profile_and_level_indication", pvideo_stream_descriptor->profile_and_level_indication, 8, "uimsbf", pszTemp, &bs);
+			sprintf_s(pszComment, sizeof(pszComment), "%s profile @ %s level", pszProfile, pszLevel);
+			XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "profile_and_level_indication", pvideo_stream_descriptor->profile_and_level_indication, 8, "uimsbf", pszComment);
 
-			pvideo_stream_descriptor->chroma_format = BITS_get(&bs, 2);
-
-			MPGV_DecodeChromaFormatCodetoText(pvideo_stream_descriptor->chroma_format, pszTemp, sizeof(pszTemp));
-			pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "chroma_format", pvideo_stream_descriptor->chroma_format, 2, "uimsbf", pszTemp, &bs);
-
-			pvideo_stream_descriptor->frame_rate_extension_flag = BITS_get(&bs, 1);
-			pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "frame_rate_extension_flag", pvideo_stream_descriptor->frame_rate_extension_flag, 1, "uimsbf", NULL, &bs);
-			
-			pvideo_stream_descriptor->reserved = BITS_get(&bs, 5);
-			pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "reserved", pvideo_stream_descriptor->reserved, 5, "uimsbf", NULL, &bs);
-		}
-
-		sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", pvideo_stream_descriptor->descriptor_tag, length);
-		pxmlDescriptorNode->SetAttribute("comment", pszTemp);
-
-		if (pVideoStreamDescriptor == NULL)
-		{
-			delete pvideo_stream_descriptor;
+			MPGV_DecodeChromaFormatCodetoText(pvideo_stream_descriptor->chroma_format, pszComment, sizeof(pszComment));
+			XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "chroma_format", pvideo_stream_descriptor->chroma_format, 2, "uimsbf", pszComment);
+			XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "frame_rate_extension_flag", pvideo_stream_descriptor->frame_rate_extension_flag, 1, "uimsbf", NULL);
+			XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "reserved", pvideo_stream_descriptor->reserved, 5, "uimsbf", NULL);
 		}
 	}
-	else
+
+	if (pVideoStreamDescriptor == NULL)
 	{
-		rtcode = SECTION_PARSE_PARAMETER_ERROR;
+		delete pvideo_stream_descriptor;
 	}
 
 	return rtcode;

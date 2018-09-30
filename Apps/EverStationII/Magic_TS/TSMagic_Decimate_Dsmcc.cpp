@@ -47,7 +47,7 @@ void ts_dsmcc_download_loop(pthread_params_t pThreadParams)
 	S32							download_index;
 	S64							total_file_size;							//所有需要下载文件的大小，K字节
 	S64							download_file_size;
-	S32							download_ratio;
+	//S32							download_ratio;
 
 	U32							old_tickcount;
 	U32							new_tickcount;

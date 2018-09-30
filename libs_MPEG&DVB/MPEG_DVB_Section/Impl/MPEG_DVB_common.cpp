@@ -11,6 +11,8 @@
 #include "../Include/Mpeg2_PSI_section.h"
 #include "../Include/Mpeg2_DSMCC_section.h"
 
+#include "HAL\HAL_BitStream\Include\HALForBitStream.h"
+
 /////////////////////////////////////////////
 
 //对section数据做个简单的体检，以确定是不是section数据
@@ -105,10 +107,37 @@ int MPEG_DVB_PVT_DecodeSection(uint8_t *section_buf, int section_size, private_s
 	return rtcode;
 }
 
+//int MPEG_DVB_decode_reserved_descriptor(uint8_t *buf, int length, reserved_descriptor_t* preserved_descriptor)
+//{
+//	int		rtcode = SECTION_PARSE_NO_ERROR;
+//	char   pszTemp[64];
+//
+//	if ((preserved_descriptor != NULL) && (buf != NULL) && (length >= 2))
+//	{
+//		memset(preserved_descriptor, 0x00, sizeof(reserved_descriptor_t));
+//
+//		BITS_t bs;
+//		BITS_map(&bs, buf, length);
+//
+//		preserved_descriptor->descriptor_tag = BITS_get(&bs, 8);
+//		preserved_descriptor->descriptor_length = BITS_get(&bs, 8);
+//
+//		if (preserved_descriptor->descriptor_length > 0)
+//		{
+//			BITS_byteCopy(preserved_descriptor->descriptor_buf, &bs, preserved_descriptor->descriptor_length);
+//		}
+//	}
+//	else
+//	{
+//		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+//	}
+//
+//	return rtcode;
+//}
 
-S32 GetSectionMinMaxLength(U8 table_id, S32* pmin_length, S32* pmax_length)
+int MPEG_DVB_GetSectionMinMaxLength(uint8_t table_id, int* pmin_length, int* pmax_length)
 {
-	S32		rtcode = SECTION_PARSE_UNKNOWN_ERROR;
+	int		rtcode = SECTION_PARSE_UNKNOWN_ERROR;
 
 	if ((pmin_length != NULL) && (pmax_length != NULL))
 	{

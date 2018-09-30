@@ -444,7 +444,7 @@ int CDB_TSPackets::AddPacket(transport_packet_t* pTS_packet)
 									//if ((pTS_packet->payload_buf[iTableStartPos + 1] & 0xC0) == 0x80)			//判断条件更严格一点，降低识别错误
 									{
 										int min_length, max_length;
-										GetSectionMinMaxLength(table_id, &min_length, &max_length);
+										MPEG_DVB_GetSectionMinMaxLength(table_id, &min_length, &max_length);
 
 										section_length = (section_buf[1] & 0x0f);
 										section_length <<= 8;
