@@ -1,91 +1,90 @@
 #ifndef __MPEG2_TS_PACKET_H__
 #define __MPEG2_TS_PACKET_H__
 
-#include <stdint.h>
-
 #include "../compile.h"
+#include "HAL/HAL_Sys/Include/INTTYPES.H"
 
-//#define TSPACKET_GetPID(buf)		((buf[1] & 0x1f) << 8) | buf[2]
+#define TSPACKET_GetPID(buf)		((buf[1] & 0x1f) << 8) | buf[2]
 
 typedef struct _PCR_code_s
 {
-	uint8_t base_32_30;
-	uint16_t base_29_15;
-	uint16_t base_14_0;
+	U8 base_32_30;
+	U16 base_29_15;
+	U16 base_14_0;
 
-	uint16_t extension;
+	U16 extension;
 
 } PCR_code_t;
 
 typedef struct adaptation_field_s
 {
-	uint8_t		adaptation_field_length;							//8
 
-	uint8_t		adaptation_field_extension_flag;					//1
-	uint8_t		transport_private_data_flag;						//1
-	uint8_t		splicing_point_flag;								//1
-	uint8_t		OPCR_flag;											//1
-	uint8_t		PCR_flag;											//1
-	uint8_t		elementary_stream_priority_indicator;				//1
-	uint8_t		random_access_indicator;							//1
-	uint8_t		discontinuity_indicator;							//1
+	U8		adaptation_field_length;							//8
 
-	uint8_t		program_clock_reference_base_32_30;					//3
-	uint16_t	program_clock_reference_base_29_15;					//15
-	uint16_t	program_clock_reference_base_14_0;					//15
-	uint8_t		reserved0;											//6
-	uint8_t		program_clock_reference_extension;					//9
+	U8		adaptation_field_extension_flag;					//1
+	U8		transport_private_data_flag;						//1
+	U8		splicing_point_flag;								//1
+	U8		OPCR_flag;											//1
+	U8		PCR_flag;											//1
+	U8		elementary_stream_priority_indicator;				//1
+	U8		random_access_indicator;							//1
+	U8		discontinuity_indicator;							//1
 
-	uint8_t		original_program_clock_reference_base_32_30;		//3
-	uint16_t	original_program_clock_reference_base_29_15;		//15
-	uint16_t	original_program_clock_reference_base_14_0;			//15
-	uint8_t		reserved1;											//6
-	uint16_t	original_program_clock_reference_extension;			//9
+	S8		program_clock_reference_base_32_30;					//3
+	S16		program_clock_reference_base_29_15;					//15
+	S16		program_clock_reference_base_14_0;					//15
+	U8		reserved0;											//6
+	S16		program_clock_reference_extension;					//9
 
-	uint8_t		splice_countdown;
+	S8		original_program_clock_reference_base_32_30;		//3
+	S32		original_program_clock_reference_base_29_15;		//15
+	S32		original_program_clock_reference_base_14_0;			//15
+	U8		reserved1;											//6
+	S16		original_program_clock_reference_extension;			//9
 
-	uint8_t		transport_private_data_length;						//8
-	uint8_t*	pprivate_data_byte;
+	U8		splice_countdown;
 
-	uint8_t		adaptation_field_extension_length;					//8
+	U8		transport_private_data_length;						//8
+	U8*		pprivate_data_byte;
 
-	uint8_t		ltw_flag;											//1
+	U8		adaptation_field_extension_length;					//8
+	U8		ltw_flag;											//1
 
-	uint8_t		piecewise_rate_flag;								//1
-	uint8_t		seamless_splice_flag;								//1
+	U8		piecewise_rate_flag;								//1
+	U8		seamless_splice_flag;								//1
 
-	uint8_t		ltw_valid_flag;										//1
-	uint16_t	ltw_offset;											//15
+	U8		ltw_valid_flag;										//1
+	U16		ltw_offset;											//15
 
-	uint32_t	piecewise_rate;										//22
+	U32		piecewise_rate;										//22
 
-	uint8_t		splice_type;										//4
-	uint8_t		DTS_next_AU_32_30;									//3
-	uint16_t	DTS_next_AU_29_15;									//15
-	uint16_t	DTS_next_AU_14_0;									//15
+	U8		splice_type;										//4
+	S8		DTS_next_AU_32_30;									//3
+	S16		DTS_next_AU_29_15;									//15
+	S16		DTS_next_AU_14_0;									//15
 
-	uint8_t*	pstuffing_byte;
-	uint8_t		stuffing_byte_length;
+	U8*		pstuffing_byte;
+	U8		stuffing_byte_length;
 
 } adaptation_field_t, *padaptation_field_t;
 
 typedef struct transport_packet_s 
 {
-	uint8_t		sync_byte;										//8
+	U8		sync_byte;										//8
 
-	uint16_t	PID;											//13
-	uint8_t		transport_priority;								//2
-	uint8_t		payload_unit_start_indicator;					//1
-	uint8_t		transport_error_indicator;						//1
+	U16		PID;											//13
+	S8		transport_priority;								//2
+	S8		payload_unit_start_indicator;					//1
+	S8		transport_error_indicator;						//1
 
-	uint8_t		continuity_counter;								//4
-	uint8_t		adaptation_field_control;						//2
-	uint8_t		transport_scrambling_control;					//2
+	S8		continuity_counter;								//4
+	S8		adaptation_field_control;						//2
+	S8		transport_scrambling_control;					//2
 
 	adaptation_field_t adaptation_field;
 
-	uint8_t		payload_buf[200];
-	uint8_t		payload_length;
+	U8		payload_buf[200];
+	U8		payload_length;
 
 } transport_packet_t, *ptransport_packet_t;
 
