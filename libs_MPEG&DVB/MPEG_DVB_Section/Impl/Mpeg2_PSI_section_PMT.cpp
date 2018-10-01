@@ -5,7 +5,6 @@
 #include "../Include/Mpeg2_PSI_section.h"
 #include "../Include/Mpeg2_PSI_Descriptor.h"
 #include "../Include/DVB_SI_Descriptor.h"
-//#include "../Include/Mpeg2_DSMCC_section.h"
 #include "../Include/Mpeg2_table_id.h"
 #include "../Include/MPEG_DVB_ErrorCode.h"
 #include "../Include/Mpeg2_StreamType.h"
@@ -38,11 +37,8 @@ int MPEG2_PSI_PMT_DecodeSection(uint8_t *section_buf, int section_size, TS_progr
 	{
 		memset(ppmt_section, 0x00, sizeof(TS_program_map_section_t));
 
-		if (ppmt_section->CRC_32_verify == 0x00000000)
-		{
-			ppmt_section->CRC_32_verify = Encode_CRC_32(section_buf, section_size - 4);
-		}
-		ppmt_section->CRC_32 = (section_buf[section_size - 4] << 24) | (section_buf[section_size - 3] << 16) | (section_buf[section_size - 2] << 8) | section_buf[section_size - 1];
+		ppmt_section->CRC_32_recalculated = Encode_CRC_32(section_buf, section_size - 4);
+		uint32_t CRC_32_encoded = (section_buf[section_size - 4] << 24) | (section_buf[section_size - 3] << 16) | (section_buf[section_size - 2] << 8) | section_buf[section_size - 1];
 
 		//if (ppmt_section->CRC_32_verify == ppmt_section->CRC_32)
 		{
@@ -95,11 +91,11 @@ int MPEG2_PSI_PMT_DecodeSection(uint8_t *section_buf, int section_size, TS_progr
 
 								assert(descriptor_count < MAX_RESERVED_DESCRIPTORS);
 
-								ppmt_section->program_info_descriptors[descriptor_count].descriptor_buf = pl1temp;
-								ppmt_section->program_info_descriptors[descriptor_count].descriptor_size = move_length;
+								ppmt_section->program_descriptors[descriptor_count].descriptor_buf = pl1temp;
+								ppmt_section->program_descriptors[descriptor_count].descriptor_size = move_length;
 
-								ppmt_section->program_info_descriptors[descriptor_count].descriptor_tag = descriptor_tag;
-								ppmt_section->program_info_descriptors[descriptor_count].descriptor_length = descriptor_length;
+								ppmt_section->program_descriptors[descriptor_count].descriptor_tag = descriptor_tag;
+								ppmt_section->program_descriptors[descriptor_count].descriptor_length = descriptor_length;
 
 								descriptor_count++;
 
@@ -108,7 +104,7 @@ int MPEG2_PSI_PMT_DecodeSection(uint8_t *section_buf, int section_size, TS_progr
 							}
 						}
 					}
-					ppmt_section->program_info_descriptor_count = descriptor_count;
+					ppmt_section->program_descriptor_count = descriptor_count;
 
 					es_loop_length = ppmt_section->section_length - ppmt_section->program_info_length - 13;
 					N = 0;
@@ -149,11 +145,11 @@ int MPEG2_PSI_PMT_DecodeSection(uint8_t *section_buf, int section_size, TS_progr
 										descriptor_length = pl2temp[1];
 										move_length = descriptor_length + 2;
 
-										pstESMap->ES_info_descriptors[descriptor_count].descriptor_buf = pl2temp;
-										pstESMap->ES_info_descriptors[descriptor_count].descriptor_size = (uint8_t)move_length;
+										pstESMap->ES_descriptors[descriptor_count].descriptor_buf = pl2temp;
+										pstESMap->ES_descriptors[descriptor_count].descriptor_size = (uint8_t)move_length;
 
-										pstESMap->ES_info_descriptors[descriptor_count].descriptor_tag = descriptor_tag;
-										pstESMap->ES_info_descriptors[descriptor_count].descriptor_length = descriptor_length;
+										pstESMap->ES_descriptors[descriptor_count].descriptor_tag = descriptor_tag;
+										pstESMap->ES_descriptors[descriptor_count].descriptor_length = descriptor_length;
 
 										registration_descriptor_t registration_descriptor;
 										switch (descriptor_tag)
@@ -234,29 +230,32 @@ int MPEG2_PSI_PMT_DecodeSection(uint8_t *section_buf, int section_size, TS_progr
 								}
 							}
 
-							pstESMap->ES_info_descriptor_count = descriptor_count;
+							pstESMap->ES_descriptor_count = descriptor_count;
 
 							es_loop_length -= (pstESMap->ES_info_length + 5);
 							N++;
 						}
 					}
 					ppmt_section->ES_map_count = N;
+
+					ppmt_section->CRC_32 = BITS_get(&bs, 32);
+					assert(ppmt_section->CRC_32 == CRC_32_encoded);		//检验比特流读取指针是否发生错误
 				}
 				else
 				{
-					//rtcode = SECTION_PARSE_SYNTAX_ERROR;
+					rtcode = SECTION_PARSE_SYNTAX_ERROR;
 				}
 			}
 			else
 			{
-				//rtcode = SECTION_PARSE_SYNTAX_ERROR;
+				rtcode = SECTION_PARSE_SYNTAX_ERROR;
 			}
 		}
 
-		//if (ppmt_section->CRC_32_verify != ppmt_section->CRC_32)
-		//{
-		//	rtcode = SECTION_PARSE_CRC_ERROR;
-		//}
+		if (ppmt_section->CRC_32_recalculated != ppmt_section->CRC_32)
+		{
+			rtcode = SECTION_PARSE_CRC_ERROR;
+		}
 	}
 	else
 	{

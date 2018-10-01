@@ -240,7 +240,7 @@
     <ClCompile Include="Impl\Mpeg2_PSI_section_CAT.cpp" />
     <ClCompile Include="Impl\Mpeg2_PSI_section_PAT.cpp" />
     <ClCompile Include="Impl\Mpeg2_PSI_section_PMT.cpp" />
-    <ClCompile Include="Impl\Mpeg2_PSI_TSDT_section.cpp" />
+    <ClCompile Include="Impl\Mpeg2_PSI_section_TSDT.cpp" />
     <ClCompile Include="Impl\Mpeg2_PSI_Utilities.cpp" />
     <ClCompile Include="Impl\MPEG_DVB_common.cpp" />
     <ClCompile Include="Impl\xml\DVB_Databroadcast_XML.cpp" />

@@ -82,11 +82,11 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 			XMLElement* pxmlProgramInfoNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "program_info()");
 			XMLNODE_SetFieldLength(pxmlProgramInfoNode, ppmt_section->program_info_length);
 
-			for (int descriptor_index = 0; descriptor_index < ppmt_section->program_info_descriptor_count; descriptor_index++)
+			for (int descriptor_index = 0; descriptor_index < ppmt_section->program_descriptor_count; descriptor_index++)
 			{
-				descriptor_buf = ppmt_section->program_info_descriptors[descriptor_index].descriptor_buf;
-				descriptor_tag = ppmt_section->program_info_descriptors[descriptor_index].descriptor_tag;
-				descriptor_length = ppmt_section->program_info_descriptors[descriptor_index].descriptor_length;
+				descriptor_buf = ppmt_section->program_descriptors[descriptor_index].descriptor_buf;
+				descriptor_tag = ppmt_section->program_descriptors[descriptor_index].descriptor_tag;
+				descriptor_length = ppmt_section->program_descriptors[descriptor_index].descriptor_length;
 				descriptor_size = descriptor_length + 2;
 
 				switch (descriptor_tag)
@@ -110,7 +110,7 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 				//	MPEG2_PSI_decode_smoothing_buffer_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
 				//	break;
 				default:
-					MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlProgramInfoNode, ppmt_section->program_info_descriptors + descriptor_index);
+					MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlProgramInfoNode, ppmt_section->program_descriptors + descriptor_index);
 					break;
 				}
 			}
@@ -145,11 +145,11 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 					XMLElement* pxmlESInfoNode = XMLDOC_NewElementForString(pxmlDoc, pxmlESMapNode, "ES_info()");
 					XMLNODE_SetFieldLength(pxmlESInfoNode, pstESMap->ES_info_length);
 
-					for (int descriptor_index = 0; descriptor_index < pstESMap->ES_info_descriptor_count; descriptor_index++)
+					for (int descriptor_index = 0; descriptor_index < pstESMap->ES_descriptor_count; descriptor_index++)
 					{
-						descriptor_buf = pstESMap->ES_info_descriptors[descriptor_index].descriptor_buf;
-						descriptor_tag = pstESMap->ES_info_descriptors[descriptor_index].descriptor_tag;
-						descriptor_length = pstESMap->ES_info_descriptors[descriptor_index].descriptor_length;
+						descriptor_buf = pstESMap->ES_descriptors[descriptor_index].descriptor_buf;
+						descriptor_tag = pstESMap->ES_descriptors[descriptor_index].descriptor_tag;
+						descriptor_length = pstESMap->ES_descriptors[descriptor_index].descriptor_length;
 						descriptor_size = descriptor_length + 2;
 
 						switch (descriptor_tag)
@@ -194,7 +194,7 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 						//	DVB_SI_decode_ac3_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
 						//	break;
 						default:
-							MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlESInfoNode, pstESMap->ES_info_descriptors + descriptor_index);
+							MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlESInfoNode, pstESMap->ES_descriptors + descriptor_index);
 							break;
 						}
 					}
@@ -204,11 +204,10 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 
 		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", ppmt_section->CRC_32, 32, "rpchof", NULL);
 
-		if (ppmt_section->CRC_32_verify != ppmt_section->CRC_32)
+		if (ppmt_section->CRC_32_recalculated != ppmt_section->CRC_32)
 		{
-			sprintf_s(pszComment, sizeof(pszComment), "CRC_32 Error! Should be 0x%08X", ppmt_section->CRC_32_verify);
+			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", ppmt_section->CRC_32_recalculated);
 			pxmlCrcNode->SetAttribute("error", pszComment);
-			pxmlRootNode->SetAttribute("error", pszComment);
 		}
 	}
 

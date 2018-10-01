@@ -265,70 +265,43 @@ int MPEG2_PSI_decode_data_stream_alignment_descriptor_to_xml(uint8_t* buf, int l
 //功能：解CA描述子									0x09
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-int MPEG2_PSI_decode_CA_descriptor_to_xml(uint8_t* buf, int length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, CA_descriptor_t* pCADescriptor)
+int MPEG2_PSI_decode_CA_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, CA_descriptor_t* pCADescriptor)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
 	char   pszTemp[64];
 	char   pszCASystem[64];
 	char   pszComment[128];
-	BITS_t bs;
 
-	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
+	CA_descriptor_t* pCA_descriptor = (pCADescriptor == NULL) ? new CA_descriptor_t : pCADescriptor;
+	rtcode = MPEG2_PSI_decode_CA_descriptor(buf, length, pCA_descriptor);
+
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
-		tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "CA_descriptor()");
-		pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "CA_descriptor()", pszComment);
+		XMLNODE_SetFieldLength(pxmlDescriptorNode, length);
 
-		uint8_t descriptor_tag = buf[0];
-		sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", descriptor_tag, length);
-		pxmlDescriptorNode->SetAttribute("comment", pszTemp);
-
-		CA_descriptor_t* pCA_descriptor = (pCADescriptor == NULL) ? new CA_descriptor_t : pCADescriptor;
-		memset(pCA_descriptor, 0x00, sizeof(CA_descriptor_t));
-
-		BITS_map(&bs, buf, length);
-
-		pCA_descriptor->descriptor_tag = BITS_get(&bs, 8);
-		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pCA_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
-
-		pCA_descriptor->descriptor_length = BITS_get(&bs, 8);
-		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pCA_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
-
-		pCA_descriptor->CA_system_ID = BITS_get(&bs, 16);
 		MPEG_DVB_NumericCoding2Text_CASystemID(pCA_descriptor->CA_system_ID, pszCASystem, sizeof(pszCASystem));
-		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "CA_system_ID", pCA_descriptor->CA_system_ID, 16, "uimsbf", pszCASystem, &bs);
+		sprintf_s(pszComment, sizeof(pszComment), "tag: 0x%02X, %d字节, CA_PID=0x%04X - %s", pCA_descriptor->descriptor_tag, length, pCA_descriptor->CA_PID, pszCASystem);
+		XMLNODE_SetAttribute(pxmlDescriptorNode, "comment", pszComment);
 
-		pCA_descriptor->reserved = BITS_get(&bs, 3);
-		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "reserved", pCA_descriptor->reserved, 3, "uimsbf", NULL, &bs);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_tag", pCA_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-		pCA_descriptor->CA_PID = BITS_get(&bs, 13);
-		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "CA_PID", pCA_descriptor->CA_PID, 13, "uimsbf", NULL, &bs);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_length", pCA_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-		pCA_descriptor->private_data_length = pCA_descriptor->descriptor_length - 4;
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "CA_system_ID", pCA_descriptor->CA_system_ID, 16, "uimsbf", pszCASystem);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "reserved", pCA_descriptor->reserved, 3, "uimsbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "CA_PID", pCA_descriptor->CA_PID, 13, "uimsbf", NULL);
+
 		if (pCA_descriptor->private_data_length > 0)
 		{
-			int copy_length = min(pCA_descriptor->private_data_length, MAX_PRIVATE_DATA_LENGTH);
-
-			memcpy(pCA_descriptor->private_data_byte, bs.p_cur, copy_length);
-			BITS_skip(&bs, pCA_descriptor->private_data_length);
-
-			pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "private_data_byte", pCA_descriptor->private_data_byte, pCA_descriptor->private_data_length, NULL, &bs);
-		}
-		else
-		{
-			memset(pCA_descriptor->private_data_byte, 0x00, sizeof(pCA_descriptor->private_data_byte));
-		}
-
-		sprintf_s(pszComment, sizeof(pszComment), "tag: 0x%02X, %d字节, CA_PID=0x%04X - %s", pCA_descriptor->descriptor_tag, length, pCA_descriptor->CA_PID, pszCASystem);
-		pxmlDescriptorNode->SetAttribute("comment", pszComment);
-
-		if (pCADescriptor == NULL)
-		{
-			delete pCA_descriptor;
+			XMLDOC_NewElementForBytes(pxmlDoc, pxmlDescriptorNode, "private_data_byte[ ]", pCA_descriptor->private_data_byte, pCA_descriptor->private_data_length, NULL);
 		}
 	}
-	else
+
+	if (pCADescriptor == NULL)
 	{
-		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+		delete pCA_descriptor;
 	}
 
 	return rtcode;

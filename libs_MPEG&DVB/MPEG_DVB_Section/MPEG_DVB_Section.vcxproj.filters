@@ -284,9 +284,6 @@
     <ClCompile Include="Impl\Mpeg2_PSI_section_PMT.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\Mpeg2_PSI_TSDT_section.cpp">
-      <Filter>源文件\Impl</Filter>
-    </ClCompile>
     <ClCompile Include="Impl\Mpeg2_PSI_Utilities.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
@@ -315,6 +312,9 @@
       <Filter>源文件\Impl</Filter>
     </ClCompile>
     <ClCompile Include="Impl\DVB_SI_section_CMT.cpp">
+      <Filter>源文件\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\Mpeg2_PSI_section_TSDT.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
   </ItemGroup>

@@ -91,10 +91,10 @@ int MPEG2_PSI_TSDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, 
 
 		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", ptsdt_section->CRC_32, 32, "rpchof", NULL);
 
-		if (ptsdt_section->CRC_32_verify != ptsdt_section->CRC_32)
+		if (ptsdt_section->CRC_32_recalculated != ptsdt_section->CRC_32)
 		{
-			XMLNODE_SetAttribute(pxmlCrcNode, "error", "Error!");
-			XMLNODE_SetAttribute(pxmlRootNode, "error", "Error!");
+			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08x", ptsdt_section->CRC_32_recalculated);
+			XMLNODE_SetAttribute(pxmlCrcNode, "error", pszComment);
 		}
 	}
 

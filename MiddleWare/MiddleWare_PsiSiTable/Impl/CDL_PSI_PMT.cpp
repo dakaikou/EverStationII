@@ -93,33 +93,33 @@ int CPMT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 					m_astEsInfo[m_nEsCount].carousel_type_id = 0xFFFF;
 					m_astEsInfo[m_nEsCount].carousel_id = 0xFFFFFFFF;
 
-					for (descriptor_index = 0; descriptor_index < pmt_section.astESMaps[es_index].ES_info_descriptor_count; descriptor_index ++)
+					for (descriptor_index = 0; descriptor_index < pmt_section.astESMaps[es_index].ES_descriptor_count; descriptor_index ++)
 					{
-						uint8_t* descriptor_buf = pmt_section.astESMaps[es_index].ES_info_descriptors[descriptor_index].descriptor_buf;
-						int		 descriptor_size = pmt_section.astESMaps[es_index].ES_info_descriptors[descriptor_index].descriptor_size;
+						uint8_t* descriptor_buf = pmt_section.astESMaps[es_index].ES_descriptors[descriptor_index].descriptor_buf;
+						int		 descriptor_size = pmt_section.astESMaps[es_index].ES_descriptors[descriptor_index].descriptor_size;
 
-						if (pmt_section.astESMaps[es_index].ES_info_descriptors[descriptor_index].descriptor_tag == DVB_SI_DATA_BROADCAST_ID_DESCRIPTOR)
+						if (pmt_section.astESMaps[es_index].ES_descriptors[descriptor_index].descriptor_tag == DVB_SI_DATA_BROADCAST_ID_DESCRIPTOR)
 						{
 							if (DVB_SI_decode_data_broadcast_id_descriptor(descriptor_buf, descriptor_size, &data_broadcast_id_descriptor) == SECTION_PARSE_NO_ERROR)
 							{
 								m_astEsInfo[m_nEsCount].data_broadcast_id = data_broadcast_id_descriptor.data_broadcast_id;
 							}
 						}
-						else if (pmt_section.astESMaps[es_index].ES_info_descriptors[descriptor_index].descriptor_tag == DVB_SI_STREAM_IDENTIFIER_DESCRIPTOR)
+						else if (pmt_section.astESMaps[es_index].ES_descriptors[descriptor_index].descriptor_tag == DVB_SI_STREAM_IDENTIFIER_DESCRIPTOR)
 						{
 							if (DVB_SI_decode_stream_identifier_descriptor(descriptor_buf, descriptor_size, &stream_identifier_descriptor) == SECTION_PARSE_NO_ERROR)
 							{
 								m_astEsInfo[m_nEsCount].component_tag = stream_identifier_descriptor.component_tag;
 							}
 						}
-						else if (pmt_section.astESMaps[es_index].ES_info_descriptors[descriptor_index].descriptor_tag == MPEG2_DSMCC_CAROUSEL_IDENTIFIER_DESCRIPTOR)
+						else if (pmt_section.astESMaps[es_index].ES_descriptors[descriptor_index].descriptor_tag == MPEG2_DSMCC_CAROUSEL_IDENTIFIER_DESCRIPTOR)
 						{
 							if (MPEG2_DSMCC_decode_carousel_identifier_descriptor(descriptor_buf, descriptor_size, &carousel_identifier_descriptor) == SECTION_PARSE_NO_ERROR)
 							{
 								m_astEsInfo[m_nEsCount].carousel_id = carousel_identifier_descriptor.carousel_id;
 							}
 						}
-						else if (pmt_section.astESMaps[es_index].ES_info_descriptors[descriptor_index].descriptor_tag == MPEG2_DSMCC_ASSOCIATION_TAG_DESCRIPTOR)
+						else if (pmt_section.astESMaps[es_index].ES_descriptors[descriptor_index].descriptor_tag == MPEG2_DSMCC_ASSOCIATION_TAG_DESCRIPTOR)
 						{
 							if (MPEG2_DSMCC_decode_association_tag_descriptor(descriptor_buf, descriptor_size, &association_tag_descriptor) == SECTION_PARSE_NO_ERROR)
 							{
