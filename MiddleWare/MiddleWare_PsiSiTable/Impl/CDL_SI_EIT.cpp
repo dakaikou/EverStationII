@@ -95,23 +95,23 @@ int CEIT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 				rtcode = SECTION_PARSE_NO_ERROR;
 			}
 
-			m_astEvent = (EVENT_INFO_t*)realloc(m_astEvent, (m_nEventCount + eit_section.N) * sizeof(EVENT_INFO_t));
+			m_astEvent = (EVENT_INFO_t*)realloc(m_astEvent, (m_nEventCount + eit_section.event_count) * sizeof(EVENT_INFO_t));
 			if (m_astEvent != NULL)
 			{
-				m_nMemoryForEvents = (m_nEventCount + eit_section.N) * sizeof(EVENT_INFO_t);
+				m_nMemoryForEvents = (m_nEventCount + eit_section.event_count) * sizeof(EVENT_INFO_t);
 
-				for (int i = 0; i < eit_section.N; i++)
+				for (int i = 0; i < eit_section.event_count; i++)
 				{
-					m_astEvent[m_nEventCount].event_id = eit_section.astEvent[i].event_id;
-					m_astEvent[m_nEventCount].start_time = eit_section.astEvent[i].start_time;
-					m_astEvent[m_nEventCount].duration = eit_section.astEvent[i].duration;
+					m_astEvent[m_nEventCount].event_id = eit_section.astEvents[i].event_id;
+					m_astEvent[m_nEventCount].start_time = eit_section.astEvents[i].start_time;
+					m_astEvent[m_nEventCount].duration = eit_section.astEvents[i].duration;
 
-					for (descriptor_index = 0; descriptor_index < eit_section.astEvent[i].reserved_count; descriptor_index++)
+					for (descriptor_index = 0; descriptor_index < eit_section.astEvents[i].event_descriptor_count; descriptor_index++)
 					{
-						uint8_t* descriptor_buf = eit_section.astEvent[i].reserved_descriptor[descriptor_index].descriptor_buf;
-						int descriptor_size = eit_section.astEvent[i].reserved_descriptor[descriptor_index].descriptor_size;
+						uint8_t* descriptor_buf = eit_section.astEvents[i].event_descriptors[descriptor_index].descriptor_buf;
+						int descriptor_size = eit_section.astEvents[i].event_descriptors[descriptor_index].descriptor_size;
 
-						if (eit_section.astEvent[i].reserved_descriptor[descriptor_index].descriptor_tag == DVB_SI_SHORT_EVENT_DESCRIPTOR)
+						if (eit_section.astEvents[i].event_descriptors[descriptor_index].descriptor_tag == DVB_SI_SHORT_EVENT_DESCRIPTOR)
 						{
 							rtcode = DVB_SI_decode_short_event_descriptor(descriptor_buf, descriptor_size, &short_event_descriptor);
 							if (rtcode == SECTION_PARSE_NO_ERROR)

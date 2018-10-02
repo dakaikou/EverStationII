@@ -14,29 +14,31 @@
 /////////////////////////////////////////////
 int DVB_SI_EIT_DecodeSection(uint8_t *section_buf, int section_length, event_information_section_t* peit_section)
 {
-	S32		 rtcode = SECTION_PARSE_NO_ERROR;
-	S32		 N = 0;
+	int		 rtcode = SECTION_PARSE_NO_ERROR;
+	int		 N = 0;
 	uint8_t* pl1temp;
 	uint8_t* pl2temp;
 	uint8_t* buf;
 
-	U16		 descriptor_tag;
-	U8		 descriptor_length;
-	S32		 move_length;
-	S32		 reserved_count;
+	uint16_t descriptor_tag;
+	uint8_t	 descriptor_length;
+	int		 move_length;
+	int		 reserved_count;
 
-	EVENT_DESCRIPTION_t*	pEvent;
+	EVENT_DESCRIPTION_t*	pstEvent;
 
-	if ((section_buf != NULL) && (section_length >= DVB_SI_EIT_SECTION_MIN_SIZE) && (section_length <= DVB_SI_EIT_SECTION_MAX_SIZE) && (peit_section != NULL))
+	if ((section_buf != NULL) && 
+		((section_length >= DVB_SI_EIT_SECTION_MIN_SIZE) && (section_length <= DVB_SI_EIT_SECTION_MAX_SIZE)) && 
+		(peit_section != NULL))
 	{
 		memset(peit_section, 0x00, sizeof(event_information_section_t));
 		
 		buf = section_buf;
 
-		peit_section->CRC_32_verify = Encode_CRC_32(buf, section_length - 4);
-		peit_section->CRC_32 = (buf[section_length - 4] << 24) | (buf[section_length - 3] << 16) | (buf[section_length - 2] << 8) | buf[section_length - 1];
+		peit_section->CRC_32_recalculated = Encode_CRC_32(buf, section_length - 4);
+		uint32_t CRC_32_encoded = (buf[section_length - 4] << 24) | (buf[section_length - 3] << 16) | (buf[section_length - 2] << 8) | buf[section_length - 1];
 
-		if (peit_section->CRC_32 == peit_section->CRC_32_verify)
+		//if (peit_section->CRC_32 == peit_section->CRC_32_verify)
 		{
 			peit_section->table_id = *buf++;
 
@@ -74,50 +76,50 @@ int DVB_SI_EIT_DecodeSection(uint8_t *section_buf, int section_length, event_inf
 				buf += event_loop_length;
 				while ((event_loop_length >= 12) && (N < MAX_EVENTS_IN_EIT_SECTION))
 				{
-					pEvent = &(peit_section->astEvent[N]);
+					pstEvent = &(peit_section->astEvents[N]);
 
-					pEvent->event_id = *pl1temp++;
-					pEvent->event_id <<= 8;
-					pEvent->event_id |= *pl1temp++;
+					pstEvent->event_id = *pl1temp++;
+					pstEvent->event_id <<= 8;
+					pstEvent->event_id |= *pl1temp++;
 
-					pEvent->start_time = *pl1temp++;
-					pEvent->start_time <<= 8;
-					pEvent->start_time |= *pl1temp++;
-					pEvent->start_time <<= 8;
-					pEvent->start_time |= *pl1temp++;
-					pEvent->start_time <<= 8;
-					pEvent->start_time |= *pl1temp++;
-					pEvent->start_time <<= 8;
-					pEvent->start_time |= *pl1temp++;
+					pstEvent->start_time = *pl1temp++;
+					pstEvent->start_time <<= 8;
+					pstEvent->start_time |= *pl1temp++;
+					pstEvent->start_time <<= 8;
+					pstEvent->start_time |= *pl1temp++;
+					pstEvent->start_time <<= 8;
+					pstEvent->start_time |= *pl1temp++;
+					pstEvent->start_time <<= 8;
+					pstEvent->start_time |= *pl1temp++;
 
-					pEvent->duration = *pl1temp++;
-					pEvent->duration <<= 8;
-					pEvent->duration |= *pl1temp++;
-					pEvent->duration <<= 8;
-					pEvent->duration |= *pl1temp++;
+					pstEvent->duration = *pl1temp++;
+					pstEvent->duration <<= 8;
+					pstEvent->duration |= *pl1temp++;
+					pstEvent->duration <<= 8;
+					pstEvent->duration |= *pl1temp++;
 
-					pEvent->running_status = (*pl1temp & 0xE0) >> 5;
-					pEvent->free_CA_mode = (*pl1temp & 0x10) >> 4;
+					pstEvent->running_status = (*pl1temp & 0xE0) >> 5;
+					pstEvent->free_CA_mode = (*pl1temp & 0x10) >> 4;
 
-					pEvent->descriptors_loop_length = (*pl1temp++ & 0x0f) << 8;
-					pEvent->descriptors_loop_length |= *pl1temp++;
+					pstEvent->descriptors_loop_length = (*pl1temp++ & 0x0f) << 8;
+					pstEvent->descriptors_loop_length |= *pl1temp++;
 
 					reserved_count = 0;
-					if (pEvent->descriptors_loop_length)
+					if (pstEvent->descriptors_loop_length)
 					{
 						pl2temp = pl1temp;
-						pl1temp += pEvent->descriptors_loop_length;
-						int descriptor_loop_length = pEvent->descriptors_loop_length;
+						pl1temp += pstEvent->descriptors_loop_length;
+						int descriptor_loop_length = pstEvent->descriptors_loop_length;
 						while ((descriptor_loop_length >= 2) && (reserved_count < MAX_RESERVED_DESCRIPTORS))
 						{
 							descriptor_tag = pl2temp[0];
 							descriptor_length = pl2temp[1];
 							move_length = descriptor_length + 2;
 
-							pEvent->reserved_descriptor[reserved_count].descriptor_tag = descriptor_tag;
-							pEvent->reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-							pEvent->reserved_descriptor[reserved_count].descriptor_buf = pl2temp;
-							pEvent->reserved_descriptor[reserved_count].descriptor_size = (uint8_t)move_length;
+							pstEvent->event_descriptors[reserved_count].descriptor_tag = descriptor_tag;
+							pstEvent->event_descriptors[reserved_count].descriptor_length = descriptor_length;
+							pstEvent->event_descriptors[reserved_count].descriptor_buf = pl2temp;
+							pstEvent->event_descriptors[reserved_count].descriptor_size = move_length;
 
 							reserved_count++;
 
@@ -125,16 +127,20 @@ int DVB_SI_EIT_DecodeSection(uint8_t *section_buf, int section_length, event_inf
 							descriptor_loop_length -= move_length;
 						}
 					}
-					pEvent->reserved_count = reserved_count;
+					pstEvent->event_descriptor_count = reserved_count;
 
-					event_loop_length -= (12 + pEvent->descriptors_loop_length);
+					event_loop_length -= (12 + pstEvent->descriptors_loop_length);
 					N++;
 				}
 			}
 
-			peit_section->N = N;
+			peit_section->event_count = N;
+
+			peit_section->CRC_32 = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
+			assert(peit_section->CRC_32 == CRC_32_encoded);
 		}
-		else
+
+		if (peit_section->CRC_32_recalculated != peit_section->CRC_32)
 		{
 			rtcode = SECTION_PARSE_CRC_ERROR;
 		}

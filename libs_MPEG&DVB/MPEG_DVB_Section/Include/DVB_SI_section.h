@@ -173,17 +173,17 @@ _CDL_EXPORT	int	DVB_SI_SDT_DecodeSection(uint8_t *buf, int length, service_descr
 -------------------------------------------------------------*/
 typedef struct _EVENT_DESCRIPTION_s
 {
-	U16		event_id;									//16
+	uint16_t	event_id;									//16
 
-	unsigned long long	start_time;								//40
-	unsigned long		duration;								//24
+	uint64_t	start_time;								//40
+	uint32_t	duration;								//24
 
-	U8		running_status;								//3
-	U8		free_CA_mode;								//1
-	U16		descriptors_loop_length;					//12
+	uint8_t		running_status;								//3
+	uint8_t		free_CA_mode;								//1
+	uint16_t	descriptors_loop_length;					//12
 
-	S32										reserved_count;
-	reserved_descriptor_t					reserved_descriptor[MAX_RESERVED_DESCRIPTORS];
+	int										event_descriptor_count;
+	reserved_descriptor_t					event_descriptors[MAX_RESERVED_DESCRIPTORS];
 
 } EVENT_DESCRIPTION_t, *PEVENT_DESCRIPTION_t;
 
@@ -209,21 +209,21 @@ typedef struct event_information_section_s
 	U8		segment_last_section_number;				//8
 	U8		last_table_id;								//8
 
-	S32						N;
-	EVENT_DESCRIPTION_t		astEvent[MAX_EVENTS_IN_EIT_SECTION];
+	int						event_count;
+	EVENT_DESCRIPTION_t		astEvents[MAX_EVENTS_IN_EIT_SECTION];
 
 	U32						CRC_32;										//32
-	U32						CRC_32_verify;								//32
+	U32						CRC_32_recalculated;						//32
 
 } event_information_section_t, *pevent_information_section_t;
 
-typedef struct
-{
-	S32		nSectionCount;
-	U8*		aucSectionFlag;
-	S32		bCollectOver;
-
-} eit_segment_t;
+//typedef struct
+//{
+//	S32		nSectionCount;
+//	U8*		aucSectionFlag;
+//	S32		bCollectOver;
+//
+//} eit_segment_t;
 /*
 typedef struct 
 {
