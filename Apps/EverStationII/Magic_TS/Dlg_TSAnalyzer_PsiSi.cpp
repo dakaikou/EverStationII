@@ -229,7 +229,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_TDT)
 			{
-				DVB_SI_TDT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
+				DVB_SI_TDT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\TDT-0x%02X.xml", pszXmlDir, table_id);
