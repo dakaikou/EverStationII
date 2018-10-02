@@ -195,10 +195,10 @@ int DVB_SI_BAT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, XMLD
 												descriptor_length = pl2temp[1];
 												move_length = descriptor_length + 2;
 
-												pStream->reserved_descriptor[reserved_count].descriptor_tag = descriptor_tag;
-												pStream->reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-												pStream->reserved_descriptor[reserved_count].descriptor_buf = pl2temp;
-												pStream->reserved_descriptor[reserved_count].descriptor_size = move_length;
+												pStream->transport_descriptors[reserved_count].descriptor_tag = descriptor_tag;
+												pStream->transport_descriptors[reserved_count].descriptor_length = descriptor_length;
+												pStream->transport_descriptors[reserved_count].descriptor_buf = pl2temp;
+												pStream->transport_descriptors[reserved_count].descriptor_size = move_length;
 
 												switch (descriptor_tag)
 												{
@@ -220,7 +220,7 @@ int DVB_SI_BAT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, XMLD
 												descriptor_loop_length -= move_length;
 											}
 										}
-										pStream->reserved_count = reserved_count;
+										pStream->transport_descriptor_count = reserved_count;
 
 										pxmlDoc->UpdateBufMark(pxmlStreamNode, old_stream_ptr, stream_loop_bs.p_cur);
 										sprintf_s(pszTemp, sizeof(pszTemp), "TSID=0x%04X, ONetID=0x%04X", pStream->transport_stream_id, pStream->original_network_id);

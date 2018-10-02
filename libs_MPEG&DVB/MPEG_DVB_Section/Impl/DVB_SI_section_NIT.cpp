@@ -12,8 +12,8 @@
 /////////////////////////////////////////////
 int DVB_SI_NIT_DecodeSection(uint8_t *buf, int length, network_information_section_t* pnit_section)
 {
-	S32		 rtcode = SECTION_PARSE_NO_ERROR;
-	S32		 N = 0;
+	int		 rtcode = SECTION_PARSE_NO_ERROR;
+	int		 stream_count = 0;
 	S32		 stream_loop_length;
 	S32		 descriptor_loop_length;
 	U8*		 pl1temp;
@@ -25,16 +25,16 @@ int DVB_SI_NIT_DecodeSection(uint8_t *buf, int length, network_information_secti
 	S32		 move_length;
 	S32		 reserved_count;
 
-	STREAM_DESCRIPTION_t*	pStream;
+	STREAM_DESCRIPTION_t*	pstStream;
 
 	if ((buf != NULL) && (length >= DVB_SI_NIT_SECTION_MIN_SIZE) && (length <= DVB_SI_NIT_SECTION_MAX_SIZE) && (pnit_section != NULL))
 	{
 		memset(pnit_section, 0x00, sizeof(network_information_section_t));
 
-		pnit_section->CRC_32_verify = Encode_CRC_32(buf, length - 4);
-		pnit_section->CRC_32 = (buf[length - 4] << 24) | (buf[length - 3] << 16) | (buf[length - 2] << 8) | buf[length - 1];
+		pnit_section->CRC_32_recalculated = Encode_CRC_32(buf, length - 4);
+		uint32_t CRC_32_encoded = (buf[length - 4] << 24) | (buf[length - 3] << 16) | (buf[length - 2] << 8) | buf[length - 1];
 
-		if (pnit_section->CRC_32_verify == pnit_section->CRC_32)
+		//if (pnit_section->CRC_32_recalculated == pnit_section->CRC_32)
 		{
 			pnit_section->table_id = *buf++;
 
@@ -72,10 +72,10 @@ int DVB_SI_NIT_DecodeSection(uint8_t *buf, int length, network_information_secti
 				descriptor_length = pl1temp[1];
 				move_length = descriptor_length + 2;
 
-				pnit_section->reserved_descriptor[reserved_count].descriptor_tag = descriptor_tag;
-				pnit_section->reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-				pnit_section->reserved_descriptor[reserved_count].descriptor_buf = pl1temp;
-				pnit_section->reserved_descriptor[reserved_count].descriptor_size = (uint8_t)move_length;
+				pnit_section->network_descriptors[reserved_count].descriptor_tag = descriptor_tag;
+				pnit_section->network_descriptors[reserved_count].descriptor_length = descriptor_length;
+				pnit_section->network_descriptors[reserved_count].descriptor_buf = pl1temp;
+				pnit_section->network_descriptors[reserved_count].descriptor_size = (uint8_t)move_length;
 
 				reserved_count ++;
 
@@ -83,42 +83,41 @@ int DVB_SI_NIT_DecodeSection(uint8_t *buf, int length, network_information_secti
 				descriptor_loop_length -= move_length;
 			}
 
-			pnit_section->reserved_count = reserved_count;
+			pnit_section->network_descriptor_count = reserved_count;
 
 			pnit_section->reserved_future_use2 = (*buf & 0xf0) >> 4;
 
 			pnit_section->transport_stream_loop_length = (*buf++ & 0x0f) << 8;
 			pnit_section->transport_stream_loop_length |= *buf++;
 
-			N = 0;
-
+			stream_count = 0;
 			if (pnit_section->transport_stream_loop_length > 0)
 			{
 				pl1temp = buf;
 				stream_loop_length = pnit_section->transport_stream_loop_length;
 				buf += stream_loop_length;
 				
-				while ((stream_loop_length >= 6) && (N < MAX_STREAMS_PER_NIT_SECTION))
+				while ((stream_loop_length >= 6) && (stream_count < MAX_STREAMS_PER_NIT_SECTION))
 				{
-					pStream = pnit_section->astStream + N;
+					pstStream = pnit_section->astStreams + stream_count;
 
-					pStream->transport_stream_id = (*pl1temp++) << 8;
-					pStream->transport_stream_id |= *pl1temp++;
+					pstStream->transport_stream_id = (*pl1temp++) << 8;
+					pstStream->transport_stream_id |= *pl1temp++;
 
-					pStream->original_network_id = (*pl1temp++) << 8;
-					pStream->original_network_id |= *pl1temp++;
+					pstStream->original_network_id = (*pl1temp++) << 8;
+					pstStream->original_network_id |= *pl1temp++;
 
-					pStream->reserved = (*pl1temp  & 0xf0) >> 4;
+					pstStream->reserved = (*pl1temp  & 0xf0) >> 4;
 
-					pStream->transport_descriptors_length = (*pl1temp++ & 0x0f) << 8;
-					pStream->transport_descriptors_length |= *pl1temp++;
+					pstStream->transport_descriptors_length = (*pl1temp++ & 0x0f) << 8;
+					pstStream->transport_descriptors_length |= *pl1temp++;
 
 					reserved_count = 0;
-					if (pStream->transport_descriptors_length > 0)
+					if (pstStream->transport_descriptors_length > 0)
 					{
 						pl2temp = pl1temp;
-						pl1temp += pStream->transport_descriptors_length;
-						descriptor_loop_length = pStream->transport_descriptors_length;
+						pl1temp += pstStream->transport_descriptors_length;
+						descriptor_loop_length = pstStream->transport_descriptors_length;
 
 						while ((descriptor_loop_length >= 2) && (reserved_count < MAX_RESERVED_DESCRIPTORS))
 						{
@@ -126,10 +125,10 @@ int DVB_SI_NIT_DecodeSection(uint8_t *buf, int length, network_information_secti
 							descriptor_length = pl2temp[1];
 							move_length = descriptor_length + 2;
 
-							pStream->reserved_descriptor[reserved_count].descriptor_tag = descriptor_tag;
-							pStream->reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-							pStream->reserved_descriptor[reserved_count].descriptor_buf = pl2temp;
-							pStream->reserved_descriptor[reserved_count].descriptor_size = (uint8_t)move_length;
+							pstStream->transport_descriptors[reserved_count].descriptor_tag = descriptor_tag;
+							pstStream->transport_descriptors[reserved_count].descriptor_length = descriptor_length;
+							pstStream->transport_descriptors[reserved_count].descriptor_buf = pl2temp;
+							pstStream->transport_descriptors[reserved_count].descriptor_size = (uint8_t)move_length;
 
 							reserved_count ++;
 
@@ -137,17 +136,22 @@ int DVB_SI_NIT_DecodeSection(uint8_t *buf, int length, network_information_secti
 							descriptor_loop_length -= move_length;
 						}
 					}
-					pStream->reserved_count = reserved_count;
+					pstStream->transport_descriptor_count = reserved_count;
 
-					stream_loop_length -= (6 + pStream->transport_descriptors_length);
+					stream_loop_length -= (6 + pstStream->transport_descriptors_length);
 
-					N ++;
+					stream_count++;
 				}
 			}
 
-			pnit_section->N = N;
+			pnit_section->stream_count = stream_count;
+
+			pnit_section->CRC_32 = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
+			assert(pnit_section->CRC_32 == CRC_32_encoded);
+			buf += 4;
 		}
-		else
+
+		if (pnit_section->CRC_32 != pnit_section->CRC_32_recalculated)
 		{
 			rtcode = SECTION_PARSE_CRC_ERROR;
 		}

@@ -113,12 +113,12 @@ int CBAT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 
 					memset(&(pStreamInfo->service_list_descriptor), 0x00, sizeof(service_list_descriptor));
 
-					for (descriptor_index = 0; descriptor_index < pStreamDescription->reserved_count; descriptor_index ++)
+					for (descriptor_index = 0; descriptor_index < pStreamDescription->transport_descriptor_count; descriptor_index ++)
 					{
-						if (pStreamDescription->reserved_descriptor[descriptor_index].descriptor_tag == DVB_SI_SERVICE_LIST_DESCRIPTOR)
+						if (pStreamDescription->transport_descriptors[descriptor_index].descriptor_tag == DVB_SI_SERVICE_LIST_DESCRIPTOR)
 						{
-							DVB_SI_decode_service_list_descriptor(pStreamDescription->reserved_descriptor[descriptor_index].descriptor_buf,
-																pStreamDescription->reserved_descriptor[descriptor_index].descriptor_size,
+							DVB_SI_decode_service_list_descriptor(pStreamDescription->transport_descriptors[descriptor_index].descriptor_buf,
+																pStreamDescription->transport_descriptors[descriptor_index].descriptor_size,
 																&service_list_descriptor);
 							memcpy(&(pStreamInfo->service_list_descriptor), &service_list_descriptor, sizeof(service_list_descriptor_t));
 

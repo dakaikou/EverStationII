@@ -70,7 +70,7 @@ int MPEG2_PSI_CAT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 			uint8_t* descriptor_buf;
 			int		 descriptor_size;
 
-			XMLElement* pxmlCADescriptorLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "CA_description()");
+			XMLElement* pxmlCADescriptorLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "CA_description()", NULL);
 			XMLNODE_SetFieldLength(pxmlCADescriptorLoopNode, loop_length);
 
 			for (int descriptor_index = 0; descriptor_index < pcat_section->CA_descriptor_count; descriptor_index++)

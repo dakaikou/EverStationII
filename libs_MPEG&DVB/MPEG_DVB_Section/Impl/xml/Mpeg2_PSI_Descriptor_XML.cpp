@@ -38,7 +38,7 @@ int MPEG2_PSI_decode_video_stream_descriptor_to_xml(uint8_t *buf, int length, HA
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
-		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "video_stream_descriptor()");
+		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "video_stream_descriptor()", NULL);
 		XMLNODE_SetFieldLength(pxmlDescriptorNode, length);
 
 		sprintf_s(pszComment, sizeof(pszComment), "tag: 0x%02X, %d×Ö½Ú", pvideo_stream_descriptor->descriptor_tag, length);

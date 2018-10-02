@@ -32,14 +32,14 @@ Section size definition
 -------------------------------------------------------------*/
 typedef struct _STREAM_DESCRIPTION_s
 {
-	U16											transport_stream_id;
-	U16											original_network_id;
+	uint16_t									transport_stream_id;
+	uint16_t									original_network_id;
 
-	U8											reserved;
-	U16											transport_descriptors_length;
+	uint8_t										reserved;
+	uint16_t									transport_descriptors_length;
 
-	S32											reserved_count;
-	reserved_descriptor_t						reserved_descriptor[MAX_RESERVED_DESCRIPTORS];
+	int											transport_descriptor_count;
+	reserved_descriptor_t						transport_descriptors[MAX_RESERVED_DESCRIPTORS];
 
 } STREAM_DESCRIPTION_t, *PSTREAM_DESCRIPTION_t;
 
@@ -61,17 +61,17 @@ typedef struct network_information_section_s
 	U8			reserved_future_use1;						//4
 	U16			network_descriptors_length;					//12
 
-	S32										reserved_count;
-	reserved_descriptor_t					reserved_descriptor[MAX_RESERVED_DESCRIPTORS];
+	int										network_descriptor_count;
+	reserved_descriptor_t					network_descriptors[MAX_RESERVED_DESCRIPTORS];
 
 	U8						reserved_future_use2;						//4
 	U16						transport_stream_loop_length;				//12
 
-	S32						N;
-	STREAM_DESCRIPTION_t	astStream[MAX_STREAMS_PER_NIT_SECTION];
+	int						stream_count;
+	STREAM_DESCRIPTION_t	astStreams[MAX_STREAMS_PER_NIT_SECTION];
 
 	U32						CRC_32;										//32
-	U32						CRC_32_verify;								//32
+	U32						CRC_32_recalculated;						//32
 
 } network_information_section_t, *pnetwork_information_section_t;
 

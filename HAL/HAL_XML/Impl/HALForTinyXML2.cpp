@@ -8,7 +8,6 @@
 
 HALForXMLDoc::HALForXMLDoc(void)
 {
-	//m_origin_ptr = NULL;
 	m_bs_tracer.offset = 0;
 	m_bs_tracer.i_left = 8;
 }
@@ -26,24 +25,6 @@ void HALForXMLDoc::SetSyncOffset(int offset)
 //int HALForXMLDoc::GetSyncOffset(void)
 //{
 //	return m_bs_tracer.offset;
-//}
-
-//void XMLDocForMpegSyntax::SetActiveNode(tinyxml2::XMLElement* pActive)
-//{
-//	m_pActive = pActive;
-//}
-//
-//tinyxml2::XMLElement* XMLDocForMpegSyntax::GetActiveNode(void)
-//{
-//	return m_pActive;
-//}
-
-//tinyxml2::XMLElement * XMLDocForMpegSyntax::NewKeyValuePairElement(tinyxml2::XMLElement* pxmlParent, const char* key_name)
-//{
-//	tinyxml2::XMLElement* pxmlNewElement = tinyxml2::XMLDocument::NewElement(key_name);
-//	pxmlParent->InsertEndChild(pxmlNewElement);
-//
-//	return pxmlNewElement;
 //}
 
 XMLElement * HALForXMLDoc::NewElementForString(XMLElement* pxmlParent, const char* key_name, const char* string, const char* pszComment)
@@ -118,42 +99,6 @@ XMLElement * HALForXMLDoc::NewElementForBits(XMLElement* pxmlParent, const char*
 
 	return pxmlNewElement;
 }
-
-//tinyxml2::XMLElement * XMLDocForMpegSyntax::NewSyntaxElement(tinyxml2::XMLElement* pxmlParent, const char* field_name, unsigned int value, int bits, const char* mnemonic, const char* pszComment, uint8_t* start_buf, uint8_t* end_buf)
-//{
-//	tinyxml2::XMLElement* pxmlNewElement = tinyxml2::XMLDocument::NewElement(field_name);
-//
-//	if (bits > 0)
-//	{
-//		pxmlNewElement->SetAttribute("bits", bits);
-//		pxmlNewElement->SetAttribute("mnemonic", mnemonic);
-//		pxmlNewElement->SetAttribute("value", value);
-//	}
-//
-//	if (start_buf != NULL)
-//	{
-//		int offset = (int)(start_buf - m_origin_ptr);
-//		int length = (int)(end_buf - start_buf);
-//
-//		int byte_count = (bits + 7) / 8;
-//		if (length < byte_count)
-//		{
-//			length = byte_count;
-//		}
-//
-//		pxmlNewElement->SetAttribute("offset", offset);
-//		pxmlNewElement->SetAttribute("length", length);
-//	}
-//
-//	if (pszComment != NULL)
-//	{
-//		pxmlNewElement->SetAttribute("comment", pszComment);
-//	}
-//
-//	pxmlParent->InsertEndChild(pxmlNewElement);
-//
-//	return pxmlNewElement;
-//}
 
 XMLElement * HALForXMLDoc::NewElementForBytes(XMLElement* pxmlParent, const char* key_name, const uint8_t* byte_buf, int byte_length, const char* pszComment)
 {
@@ -250,84 +195,6 @@ XMLElement * HALForXMLDoc::NewElementForX64Bits(XMLElement* pxmlParent, const ch
 
 	return pxmlNewElement;
 }
-
-//XMLElement * XMLDocForMpegSyntax::NewKeyValuePairElementByteMode(XMLElement* pxmlParent, const char* field_name, unsigned int value, int bytes, const char* pszComment, const BYTES_t* pbytes_map)
-//{
-//	XMLElement* pxmlNewElement = XMLDocument::NewElement(field_name);
-//
-//	if (bytes > 0)
-//	{
-//		pxmlNewElement->SetAttribute("bytes", bytes);
-//		pxmlNewElement->SetAttribute("value", value);
-//	}
-//
-//	if (pbytes_map != NULL)
-//	{
-//		int offset = (int)(pbytes_map->p_old - m_origin_ptr);
-//		int length = (int)(pbytes_map->p_cur - pbytes_map->p_old);
-//
-//		assert(length >= 1);
-//
-//		pxmlNewElement->SetAttribute("offset", offset);
-//		pxmlNewElement->SetAttribute("length", length);
-//	}
-//
-//	if (pszComment != NULL)
-//	{
-//		pxmlNewElement->SetAttribute("comment", pszComment);
-//	}
-//
-//	pxmlParent->InsertEndChild(pxmlNewElement);
-//
-//	return pxmlNewElement;
-//}
-
-//XMLElement * XMLDocForMpegSyntax::NewKeyValuePairElementByteMode(XMLElement* pxmlParent, const char* field_name, const uint8_t* byte_buf, int byte_length, const char* pszComment, const BYTES_t* pbytes_map)
-//{
-//	char pszTemp[48];
-//	int	 i;
-//	XMLElement* pxmlNewElement = XMLDocument::NewElement(field_name);
-//
-//	if (byte_buf != NULL)
-//	{
-//		memset(pszTemp, 0x00, sizeof(pszTemp));
-//
-//		for (i = 0; i < min(8, byte_length); i++)
-//		{
-//			sprintf_s(pszTemp + i * 3, 4, "%02X ", byte_buf[i]);
-//		}
-//		if (i < byte_length)
-//		{
-//			sprintf_s(pszTemp + i * 3, 4, "...");
-//		}
-//		else
-//		{
-//			pszTemp[i * 3] = '\0';
-//		}
-//
-//		pxmlNewElement->SetAttribute("value", pszTemp);
-//	}
-//
-//	if (pbytes_map != NULL)
-//	{
-//		int offset = (int)(pbytes_map->p_old - m_origin_ptr);
-//		int length = (int)(pbytes_map->p_cur - pbytes_map->p_old);
-//
-//		assert(length >= 1);
-//
-//		pxmlNewElement->SetAttribute("offset", offset);
-//		pxmlNewElement->SetAttribute("length", length);
-//	}
-//
-//	if (pszComment != NULL)
-//	{
-//		pxmlNewElement->SetAttribute("comment", pszComment);
-//	}
-//
-//	pxmlParent->InsertEndChild(pxmlNewElement);
-//
-//	return pxmlNewElement;
-//}
 
 XMLElement* HALForXMLDoc::QueryNodeByKeyName(XMLElement* pxmlParentNode, const char* pszNodeName)
 {

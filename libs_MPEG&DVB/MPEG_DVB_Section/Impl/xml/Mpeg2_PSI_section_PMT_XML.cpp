@@ -29,10 +29,7 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 		int		 descriptor_length;
 		uint8_t* descriptor_buf;
 		int		 descriptor_size;
-		//int	 CA_count = 0;
-		//int  language_count = 0;
-		//int	 descriptor_count = 0;
-		char pszTemp[64];
+		char pszField[128];
 		char pszComment[128];
 
 		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
@@ -45,8 +42,8 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
 		XMLNODE_SetFieldLength(pxmlRootNode, section_size);
 
-		sprintf_s(pszTemp, sizeof(pszTemp), "%d字节", section_size);
-		XMLNODE_SetAttribute(pxmlRootNode, "comment", pszTemp);
+		sprintf_s(pszComment, sizeof(pszComment), "%d字节", section_size);
+		XMLNODE_SetAttribute(pxmlRootNode, "comment", pszComment);
 
 		if (rtcode != SECTION_PARSE_NO_ERROR)
 		{
@@ -79,7 +76,7 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 
 		if (ppmt_section->program_info_length > 0)
 		{
-			XMLElement* pxmlProgramInfoNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "program_info()");
+			XMLElement* pxmlProgramInfoNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "program_info()", NULL);
 			XMLNODE_SetFieldLength(pxmlProgramInfoNode, ppmt_section->program_info_length);
 
 			for (int descriptor_index = 0; descriptor_index < ppmt_section->program_descriptor_count; descriptor_index++)
@@ -118,31 +115,30 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 
 		if (ppmt_section->ES_map_count > 0)
 		{
-			XMLElement* pxmlESInfoLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "ES流循环()");
+			sprintf_s(pszField, sizeof(pszField), "ES流循环( 共 %d 个流)", ppmt_section->ES_map_count);
+			XMLElement* pxmlESInfoLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
 			XMLNODE_SetFieldLength(pxmlESInfoLoopNode, section_size - 12 - ppmt_section->program_info_length - 4);
 
 			for (int es_index = 0; es_index < ppmt_section->ES_map_count; es_index++)
 			{
 				ES_DESCRIPTION_t*	pstESMap = ppmt_section->astESMaps + es_index;
 
-				sprintf_s(pszTemp, sizeof(pszTemp), "ES流[%d](PID=0x%04X)", es_index, pstESMap->elementary_PID);
+				sprintf_s(pszField, sizeof(pszField), "ES流[%d](PID=0x%04X)", es_index, pstESMap->elementary_PID);
 				MPEG2_PSI_NumericCoding2Text_StreamType(pstESMap->stream_type, STREAM_SUBTYPE_UNKNOWN, pszComment, sizeof(pszComment));
+				XMLElement* pxmlESNode = XMLDOC_NewElementForString(pxmlDoc, pxmlESInfoLoopNode, pszField, pszComment);
+				XMLNODE_SetFieldLength(pxmlESNode, 5 + pstESMap->ES_info_length);
 
-				XMLElement* pxmlESMapNode = XMLDOC_NewElementForString(pxmlDoc, pxmlESInfoLoopNode, pszTemp);
-				XMLNODE_SetAttribute(pxmlESMapNode, "comment", pszComment);
-				XMLNODE_SetFieldLength(pxmlESMapNode, 5 + pstESMap->ES_info_length);
+				XMLDOC_NewElementForBits(pxmlDoc, pxmlESNode, "stream_type", pstESMap->stream_type, 8, "uimsbf", pszComment);
 
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlESMapNode, "stream_type", pstESMap->stream_type, 8, "uimsbf", pszComment);
+				XMLDOC_NewElementForBits(pxmlDoc, pxmlESNode, "reserved", pstESMap->reserved0, 3, "bslbf", NULL);
+				XMLDOC_NewElementForBits(pxmlDoc, pxmlESNode, "elementary_PID", pstESMap->elementary_PID, 13, "uimsbf", NULL);
 
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlESMapNode, "reserved", pstESMap->reserved0, 3, "bslbf", NULL);
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlESMapNode, "elementary_PID", pstESMap->elementary_PID, 13, "uimsbf", NULL);
-
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlESMapNode, "reserved", pstESMap->reserved1, 4, "bslbf", NULL);
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlESMapNode, "ES_info_length", pstESMap->ES_info_length, 12, "uimsbf", NULL);
+				XMLDOC_NewElementForBits(pxmlDoc, pxmlESNode, "reserved", pstESMap->reserved1, 4, "bslbf", NULL);
+				XMLDOC_NewElementForBits(pxmlDoc, pxmlESNode, "ES_info_length", pstESMap->ES_info_length, 12, "uimsbf", NULL);
 
 				if (pstESMap->ES_info_length > 0)
 				{
-					XMLElement* pxmlESInfoNode = XMLDOC_NewElementForString(pxmlDoc, pxmlESMapNode, "ES_info()");
+					XMLElement* pxmlESInfoNode = XMLDOC_NewElementForString(pxmlDoc, pxmlESNode, "ES_info()", NULL);
 					XMLNODE_SetFieldLength(pxmlESInfoNode, pstESMap->ES_info_length);
 
 					for (int descriptor_index = 0; descriptor_index < pstESMap->ES_descriptor_count; descriptor_index++)

@@ -121,10 +121,10 @@ int DVB_SI_BAT_DecodeSection(uint8_t *buf, int length, bouquet_association_secti
 							descriptor_length = pl2temp[1];
 							move_length = descriptor_length + 2;
 
-							pStream->reserved_descriptor[reserved_count].descriptor_tag = descriptor_tag;
-							pStream->reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-							pStream->reserved_descriptor[reserved_count].descriptor_buf = pl2temp;
-							pStream->reserved_descriptor[reserved_count].descriptor_size = (uint8_t)move_length;
+							pStream->transport_descriptors[reserved_count].descriptor_tag = descriptor_tag;
+							pStream->transport_descriptors[reserved_count].descriptor_length = descriptor_length;
+							pStream->transport_descriptors[reserved_count].descriptor_buf = pl2temp;
+							pStream->transport_descriptors[reserved_count].descriptor_size = (uint8_t)move_length;
 
 							reserved_count ++;
 
@@ -132,7 +132,7 @@ int DVB_SI_BAT_DecodeSection(uint8_t *buf, int length, bouquet_association_secti
 							descriptor_loop_length -= move_length;
 						}
 					}
-					pStream->reserved_count = reserved_count;
+					pStream->transport_descriptor_count = reserved_count;
 
 					stream_loop_length -= (6 + pStream->transport_descriptors_length);
 

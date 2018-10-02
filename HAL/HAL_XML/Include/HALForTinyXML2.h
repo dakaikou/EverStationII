@@ -29,7 +29,7 @@ using namespace tinyxml2;
 #define XMLDOC_InsertEndChild(pxmlDoc,pxmlNode)					pxmlDoc->InsertEndChild(pxmlNode)
 #define XMLDOC_NewRootElement(pxmlDoc,pszTitle)					((tinyxml2::XMLDocument*)pxmlDoc)->NewElement(pszTitle)
 
-#define XMLDOC_NewElementForString(pxmlDoc,pxmlParentNode,pszField)									 pxmlDoc->NewElementForString(pxmlParentNode, pszField)
+#define XMLDOC_NewElementForString(pxmlDoc,pxmlParentNode,pszField,comment)									 pxmlDoc->NewElementForString(pxmlParentNode, pszField,comment)
 #define XMLDOC_NewElementForBits(pxmlDoc,pxmlParentNode,pszField,value,bits,mnemonic,comment)		 pxmlDoc->NewElementForBits(pxmlParentNode, pszField, value, bits, mnemonic, comment)
 #define XMLDOC_NewElementForX64Bits(pxmlDoc,pxmlParentNode,pszField,value,bits,mnemonic,comment)	 pxmlDoc->NewElementForX64Bits(pxmlParentNode, pszField, value, bits, mnemonic, comment)
 #define XMLDOC_NewElementForBytes(pxmlDoc,pxmlParentNode,pszField,buf,length,comment)				 pxmlDoc->NewElementForBytes(pxmlParentNode, pszField, buf, length, comment)

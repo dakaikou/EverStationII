@@ -65,7 +65,7 @@ int MPEG_decode_TS_packet_to_XML(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc
 
 			int adaptation_field_length = 1 + padaptation_field->adaptation_field_length;
 
-			XMLElement* pxmlAdaptationNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "adaptation_field()");
+			XMLElement* pxmlAdaptationNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "adaptation_field()", NULL);
 			XMLNODE_SetFieldLength(pxmlAdaptationNode, adaptation_field_length);
 
 			XMLDOC_NewElementForBits(pxmlDoc, pxmlAdaptationNode, "adaptation_field_length", padaptation_field->adaptation_field_length, 8, "uimsbf", NULL);

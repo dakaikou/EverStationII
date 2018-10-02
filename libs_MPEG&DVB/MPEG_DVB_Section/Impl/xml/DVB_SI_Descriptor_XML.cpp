@@ -1585,7 +1585,7 @@ int DVB_SI_decode_transport_stream_descriptor_to_xml(uint8_t* buf, int length, H
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
-		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "transport_stream_descriptor()");
+		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "transport_stream_descriptor()", NULL);
 		XMLNODE_SetFieldLength(pxmlDescriptorNode, length);
 
 		sprintf_s(pszComment, sizeof(pszComment), "tag: 0x%02X, %d×Ö½Ú", ptransport_stream_descriptor->descriptor_tag, length);

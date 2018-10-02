@@ -67,7 +67,7 @@ int MPEG2_PSI_TSDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, 
 			uint8_t* descriptor_buf;
 			int		 descriptor_size;
 
-			XMLElement* pxmlDescriptionNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "TS_description()");
+			XMLElement* pxmlDescriptionNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "TS_description()", NULL);
 			XMLNODE_SetFieldLength(pxmlDescriptionNode, loop_length);
 
 			for (int descriptor_index = 0; descriptor_index < ptsdt_section->TS_descriptor_count; descriptor_index++)

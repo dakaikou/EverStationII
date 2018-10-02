@@ -96,7 +96,7 @@ int MPEG_DVB_present_reserved_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElemen
 
 	if ((pxmlDoc != NULL) && (preserved_descriptor != NULL))
 	{
-		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "unknown descriptor()");
+		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "unknown descriptor()", NULL);
 		XMLNODE_SetFieldLength(pxmlDescriptorNode, preserved_descriptor->descriptor_size);
 
 		sprintf_s(pszComment, sizeof(pszComment), "tag: 0x%02X, %d×Ö½Ú", preserved_descriptor->descriptor_tag, preserved_descriptor->descriptor_size);

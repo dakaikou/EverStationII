@@ -17,7 +17,7 @@ int MPEG2_PSI_PAT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 
 	if (pxmlDoc != NULL)
 	{
-		char pszField[48];
+		char pszField[128];
 		char pszTemp[128];
 		char pszComment[128];
 
@@ -60,8 +60,8 @@ int MPEG2_PSI_PAT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 		int sync_offset = 8;
 		if (ppat_section->program_map_count > 0)
 		{
-			sprintf_s(pszTemp, sizeof(pszTemp), "节目映射循环( 共 %d项)\0", ppat_section->program_map_count);
-			XMLElement* pxmlPmtLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszTemp);
+			sprintf_s(pszField, sizeof(pszField), "节目映射循环( 共 %d 项)\0", ppat_section->program_map_count);
+			XMLElement* pxmlPmtLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
 
 			int loop_length = section_size - 8 - 4;
 			XMLNODE_SetFieldLength(pxmlPmtLoopNode, loop_length);
@@ -79,7 +79,7 @@ int MPEG2_PSI_PAT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 				}
 				sprintf_s(pszTemp, sizeof(pszTemp), "节目映射[%d](<program_number=%d, %s=0x%04X>)\0", i, pstProgram->program_number, pszField, pstProgram->program_map_PID);
 
-				XMLElement* pxmlMapNode = XMLDOC_NewElementForString(pxmlDoc, pxmlPmtLoopNode, pszTemp);
+				XMLElement* pxmlMapNode = XMLDOC_NewElementForString(pxmlDoc, pxmlPmtLoopNode, pszTemp, NULL);
 				XMLNODE_SetFieldLength(pxmlMapNode, 4);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlMapNode, "program_number", pstProgram->program_number, 16, "uimsbf", NULL);

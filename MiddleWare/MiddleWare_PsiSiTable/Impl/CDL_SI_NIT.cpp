@@ -76,12 +76,12 @@ int CNIT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 		{
 			m_usNetworkID = nit_section.network_id;
 
-			for (descriptor_index = 0; descriptor_index < nit_section.reserved_count; descriptor_index++)
+			for (descriptor_index = 0; descriptor_index < nit_section.network_descriptor_count; descriptor_index++)
 			{
-				uint8_t* descriptor_buf = nit_section.reserved_descriptor[descriptor_index].descriptor_buf;
-				int descriptor_size = nit_section.reserved_descriptor[descriptor_index].descriptor_size;
+				uint8_t* descriptor_buf = nit_section.network_descriptors[descriptor_index].descriptor_buf;
+				int descriptor_size = nit_section.network_descriptors[descriptor_index].descriptor_size;
 
-				if (nit_section.reserved_descriptor[descriptor_index].descriptor_tag == DVB_SI_NETWORK_NAME_DESCRIPTOR)
+				if (nit_section.network_descriptors[descriptor_index].descriptor_tag == DVB_SI_NETWORK_NAME_DESCRIPTOR)
 				{
 					DVB_SI_decode_network_name_descriptor(descriptor_buf, descriptor_size, &network_name_descriptor);
 					strcpy_s(m_pszNetworkName, sizeof(m_pszNetworkName), network_name_descriptor.trimmed_network_name);
@@ -89,7 +89,7 @@ int CNIT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 
 					break;
 				}
-				else if (nit_section.reserved_descriptor[descriptor_index].descriptor_tag == DVB_SI_MULTILINGUAL_NETWORK_NAME_DESCRIPTOR)
+				else if (nit_section.network_descriptors[descriptor_index].descriptor_tag == DVB_SI_MULTILINGUAL_NETWORK_NAME_DESCRIPTOR)
 				{
 					if (strlen(m_pszNetworkName) == 0)
 					{
@@ -102,15 +102,15 @@ int CNIT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 				}
 			}
 
-			nStreamCount = m_nStreamCount + nit_section.N;
+			nStreamCount = m_nStreamCount + nit_section.stream_count;
 			m_astStreamInfo = (STREAM_INFO_t*)realloc(m_astStreamInfo, nStreamCount * sizeof(STREAM_INFO_t));
 			if (m_astStreamInfo != NULL)
 			{
 				m_nMemoryForStreamInfos = nStreamCount * sizeof(STREAM_INFO_t);
 
-				for (stream_index = 0; stream_index < nit_section.N; stream_index++)
+				for (stream_index = 0; stream_index < nit_section.stream_count; stream_index++)
 				{
-					pStreamDescription = nit_section.astStream + stream_index;
+					pStreamDescription = nit_section.astStreams + stream_index;
 					pStreamInfo = m_astStreamInfo + m_nStreamCount;
 
 					pStreamInfo->original_network_id = pStreamDescription->original_network_id;
@@ -121,33 +121,33 @@ int CNIT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 					memset(&(pStreamInfo->cable_delivery_system_descriptor), 0x00, sizeof(cable_delivery_system_descriptor_t));
 					memset(&(pStreamInfo->terrestrial_delivery_system_descriptor), 0x00, sizeof(terrestrial_delivery_system_descriptor_t));
 
-					for (descriptor_index = 0; descriptor_index < pStreamDescription->reserved_count; descriptor_index++)
+					for (descriptor_index = 0; descriptor_index < pStreamDescription->transport_descriptor_count; descriptor_index++)
 					{
-						if (pStreamDescription->reserved_descriptor[descriptor_index].descriptor_tag == DVB_SI_SERVICE_LIST_DESCRIPTOR)
+						if (pStreamDescription->transport_descriptors[descriptor_index].descriptor_tag == DVB_SI_SERVICE_LIST_DESCRIPTOR)
 						{
-							DVB_SI_decode_service_list_descriptor(pStreamDescription->reserved_descriptor[descriptor_index].descriptor_buf,
-								pStreamDescription->reserved_descriptor[descriptor_index].descriptor_size,
+							DVB_SI_decode_service_list_descriptor(pStreamDescription->transport_descriptors[descriptor_index].descriptor_buf,
+								pStreamDescription->transport_descriptors[descriptor_index].descriptor_size,
 								&service_list_descriptor);
 							memcpy(&(pStreamInfo->service_list_descriptor), &service_list_descriptor, sizeof(service_list_descriptor_t));
 						}
-						else if (pStreamDescription->reserved_descriptor[descriptor_index].descriptor_tag == DVB_SI_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR)
+						else if (pStreamDescription->transport_descriptors[descriptor_index].descriptor_tag == DVB_SI_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR)
 						{
-							DVB_SI_decode_satellite_delivery_system_descriptor(pStreamDescription->reserved_descriptor[descriptor_index].descriptor_buf,
-								pStreamDescription->reserved_descriptor[descriptor_index].descriptor_size,
+							DVB_SI_decode_satellite_delivery_system_descriptor(pStreamDescription->transport_descriptors[descriptor_index].descriptor_buf,
+								pStreamDescription->transport_descriptors[descriptor_index].descriptor_size,
 								&satellite_delivery_system_descriptor);
 							memcpy(&(pStreamInfo->satellite_delivery_system_descriptor), &satellite_delivery_system_descriptor, sizeof(satellite_delivery_system_descriptor));
 						}
-						else if (pStreamDescription->reserved_descriptor[descriptor_index].descriptor_tag == DVB_SI_CABLE_DELIVERY_SYSTEM_DESCRIPTOR)
+						else if (pStreamDescription->transport_descriptors[descriptor_index].descriptor_tag == DVB_SI_CABLE_DELIVERY_SYSTEM_DESCRIPTOR)
 						{
-							DVB_SI_decode_cable_delivery_system_descriptor(pStreamDescription->reserved_descriptor[descriptor_index].descriptor_buf,
-								pStreamDescription->reserved_descriptor[descriptor_index].descriptor_size,
+							DVB_SI_decode_cable_delivery_system_descriptor(pStreamDescription->transport_descriptors[descriptor_index].descriptor_buf,
+								pStreamDescription->transport_descriptors[descriptor_index].descriptor_size,
 								&cable_delivery_system_descriptor);
 							memcpy(&(pStreamInfo->cable_delivery_system_descriptor), &cable_delivery_system_descriptor, sizeof(cable_delivery_system_descriptor));
 						}
-						else if (pStreamDescription->reserved_descriptor[descriptor_index].descriptor_tag == DVB_SI_TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR)
+						else if (pStreamDescription->transport_descriptors[descriptor_index].descriptor_tag == DVB_SI_TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR)
 						{
-							DVB_SI_decode_terrestrial_delivery_system_descriptor(pStreamDescription->reserved_descriptor[descriptor_index].descriptor_buf,
-								pStreamDescription->reserved_descriptor[descriptor_index].descriptor_size,
+							DVB_SI_decode_terrestrial_delivery_system_descriptor(pStreamDescription->transport_descriptors[descriptor_index].descriptor_buf,
+								pStreamDescription->transport_descriptors[descriptor_index].descriptor_size,
 								&terrestrial_delivery_system_descriptor);
 							memcpy(&(pStreamInfo->terrestrial_delivery_system_descriptor), &terrestrial_delivery_system_descriptor, sizeof(terrestrial_delivery_system_descriptor));
 						}
