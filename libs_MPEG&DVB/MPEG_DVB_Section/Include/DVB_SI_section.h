@@ -7,6 +7,9 @@
 #include "MPEG_DVB_SysCapability.h"
 #include "HAL/HAL_Sys/Include/INTTYPES.H"
 
+#define MIN(x, y)						(x < y? x : y)
+//#define min(x, y)						(x < y? x : y)
+
 /*------------------------------------------------------------
 Section size definition
 -------------------------------------------------------------*/
@@ -217,22 +220,6 @@ typedef struct event_information_section_s
 
 } event_information_section_t, *pevent_information_section_t;
 
-//typedef struct
-//{
-//	S32		nSectionCount;
-//	U8*		aucSectionFlag;
-//	S32		bCollectOver;
-//
-//} eit_segment_t;
-/*
-typedef struct 
-{
-	S32					nSegmentCount;
-	eit_segment_t*		astSegment;
-	S32					bCollectOver;
-
-} eit_table_t;
-*/
 _CDL_EXPORT	int	DVB_SI_EIT_DecodeSection(uint8_t* buf, int length, event_information_section_t* pEITSection);
 
 /*------------------------------------------------------------
@@ -260,7 +247,7 @@ typedef struct running_status_section_s
 	U16		section_length;								//12
 
 	S32							N;										
-	RUNSTATUS_DESCRIPTION_t		RunStatus[MAX_STREAMS_PER_NETWORK];
+	RUNSTATUS_DESCRIPTION_t		astRunStatus[MAX_STREAMS_PER_NETWORK];
 
 } running_status_section_t, *prunning_status_section_t;
 
@@ -277,7 +264,7 @@ typedef struct time_date_section_s
 	U8		reserved_future_use;						//1
 	U8		reserved;									//2
 
-	U16		section_length;								//12
+	U16			section_length;								//12
 	uint64_t	UTC_time;									//40
 
 } time_date_section_t, *ptime_date_section_t;
@@ -296,17 +283,16 @@ typedef struct time_offset_section_s
 	U8		reserved0;									//2
 	U16		section_length;								//12
 
-	//U8		UTC_time[5];								//40
-	uint64_t UTC_time;								//40
+	uint64_t UTC_time;									//40
 	
 	U8		reserved1;									// 4
 	U16		descriptors_loop_length;					//12
 
-	S32										N;
+	S32										descriptor_count;
 	reserved_descriptor_t					descriptors[MAX_RESERVED_DESCRIPTORS];
 
 	U32		CRC_32;										//32
-	U32		CRC_32_verify;								//32
+	U32		CRC_32_recalculated;						//32
 
 } time_offset_section_t, *ptime_offset_section_t;
 
@@ -328,6 +314,6 @@ typedef struct CA_message_section_s
 
 } CA_message_section_t, *pCA_message_section_t;
 
-_CDL_EXPORT	int	DVB_SI_CMT_DecodeSection(uint8_t* buf, int length, CA_message_section_t* pCMTSection);
+_CDL_EXPORT	int	DVB_SI_CMT_DecodeSection(uint8_t* buf, int length, CA_message_section_t* pcmt_ection);
 
 #endif

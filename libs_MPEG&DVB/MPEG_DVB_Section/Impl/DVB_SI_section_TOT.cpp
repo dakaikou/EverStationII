@@ -25,7 +25,7 @@ int DVB_SI_TOT_DecodeSection(uint8_t *section_buf, int section_length, time_offs
 	{
 		memset(ptot_section, 0x00, sizeof(time_offset_section_t));
 
-		ptot_section->CRC_32_verify = Encode_CRC_32(buf, section_length - 4);
+		ptot_section->CRC_32_recalculated = Encode_CRC_32(buf, section_length - 4);
 
 		ptot_section->table_id = *buf++;
 
@@ -76,7 +76,7 @@ int DVB_SI_TOT_DecodeSection(uint8_t *section_buf, int section_length, time_offs
 			left_length -= move_length;
 		}
 
-		ptot_section->N = reserved_count;
+		ptot_section->descriptor_count = reserved_count;
 
 		buf = pend;
 		
@@ -86,6 +86,11 @@ int DVB_SI_TOT_DecodeSection(uint8_t *section_buf, int section_length, time_offs
 		ptot_section->CRC_32 |= *buf++;
 
 		buf += 4;
+
+		if (ptot_section->CRC_32_recalculated != ptot_section->CRC_32)
+		{
+			rtcode = SECTION_PARSE_CRC_ERROR;
+		}
 	}
 	else
 	{

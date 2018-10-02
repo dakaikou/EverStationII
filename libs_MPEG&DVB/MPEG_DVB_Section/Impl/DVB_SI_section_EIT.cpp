@@ -137,6 +137,7 @@ int DVB_SI_EIT_DecodeSection(uint8_t *section_buf, int section_length, event_inf
 			peit_section->event_count = N;
 
 			peit_section->CRC_32 = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
+			buf += 4;
 			assert(peit_section->CRC_32 == CRC_32_encoded);
 		}
 

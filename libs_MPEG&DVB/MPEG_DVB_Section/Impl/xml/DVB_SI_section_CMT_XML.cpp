@@ -5,79 +5,58 @@
 #include "../../Include/MPEG_DVB_ErrorCode.h"
 #include "../../Include/xml/DVB_SI_section_XML.h"
 
-#include "libs_Math/Include/CRC_32.h"
+//#include "libs_Math/Include/CRC_32.h"
+//
+//#ifndef min
+//#define min(a,b)  (((a)<(b))?(a):(b))
+//#endif
 
-#ifndef min
-#define min(a,b)  (((a)<(b))?(a):(b))
-#endif
-
-int DVB_SI_CMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, XMLDocForMpegSyntax* pxmlDoc, CA_message_section_t* pCMTSection)
+int DVB_SI_CMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, CA_message_section_t* pCMTSection)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
-	int		copy_length;
-	BITS_t	bs;
-	//char	pszTemp[64];
+	char pszComment[128];
+
+	CA_message_section_t* pcmt_section = (pCMTSection != NULL) ? pCMTSection : new CA_message_section_t;
+	rtcode = DVB_SI_CMT_DecodeSection(section_buf, section_size, pcmt_section);
 
 	if (pxmlDoc != NULL)
 	{
-		pxmlDoc->SetOrigin(section_buf);
-
 		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
 
-		tinyxml2::XMLDeclaration* xmlDeclaration = pxmlDoc->NewDeclaration(pszDeclaration);
-		pxmlDoc->InsertFirstChild(xmlDeclaration);
+		XMLDeclaration* xmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
+		XMLDOC_InsertFirstChild(pxmlDoc, xmlDeclaration);
 
 		//根节点
-		tinyxml2::XMLElement* pxmlRootNode = ((tinyxml2::XMLDocument*)pxmlDoc)->NewElement("CA_message_section()");
-		pxmlDoc->InsertEndChild(pxmlRootNode);
-		pxmlDoc->UpdateBufMark(pxmlRootNode, section_buf, section_buf + section_size);
+		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, "CA_message_section()");
+		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
+		XMLNODE_SetFieldLength(pxmlRootNode, section_size);
 
-		if ((section_buf != NULL) && (section_size >= DVB_SI_CMT_SECTION_MIN_SIZE))
+		sprintf_s(pszComment, sizeof(pszComment), "%d字节", section_size);
+		XMLNODE_SetAttribute(pxmlRootNode, "comment", pszComment);
+
+		if (rtcode != SECTION_PARSE_NO_ERROR)
 		{
-			CA_message_section_t* pcmt_section = (pCMTSection != NULL) ? pCMTSection : new CA_message_section_t;
-			memset(pcmt_section, 0x00, sizeof(CA_message_section_t));
-
-			BITS_map(&bs, section_buf, section_size);
-
-			pcmt_section->table_id = BITS_get(&bs, 8);
-			pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "table_id", pcmt_section->table_id, 8, "uimsbf", NULL, &bs);
-
-			pcmt_section->section_syntax_indicator = BITS_get(&bs, 1);
-			pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "section_syntax_indicator", pcmt_section->section_syntax_indicator, 1, "bslbf", NULL, &bs);
-
-			pcmt_section->DVB_reserved = BITS_get(&bs, 1);
-			pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "DVB_reserved", pcmt_section->DVB_reserved, 1, "bslbf", NULL, &bs);
-
-			pcmt_section->ISO_reserved = BITS_get(&bs, 2);
-			pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "ISO_reserved", pcmt_section->ISO_reserved, 2, "bslbf", NULL, &bs);
-
-			pcmt_section->CA_section_length = BITS_get(&bs, 12);
-			pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "CA_section_length", pcmt_section->CA_section_length, 12, "uimsbf", NULL, &bs);
-
-			if (pcmt_section->CA_section_length > 0)
-			{
-				copy_length = min(pcmt_section->CA_section_length, 64);
-				memcpy(pcmt_section->CA_data_byte, bs.p_cur, copy_length);
-				BITS_byteSkip(&bs, pcmt_section->CA_section_length);
-
-				pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "CA_data_byte[ ]", pcmt_section->CA_data_byte, pcmt_section->CA_section_length, NULL, &bs);
-			}
-
-			if (pCMTSection == NULL)
-			{
-				//说明ppat_section指针临时分配，函数返回前需要释放
-				delete pcmt_section;
-			}
+			sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
+			XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
 		}
-		else
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pcmt_section->table_id, 8, "uimsbf", NULL);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_syntax_indicator", pcmt_section->section_syntax_indicator, 1, "bslbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "DVB_reserved", pcmt_section->DVB_reserved, 1, "bslbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "ISO_reserved", pcmt_section->ISO_reserved, 2, "bslbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CA_section_length", pcmt_section->CA_section_length, 12, "uimsbf", NULL);
+
+		if (pcmt_section->CA_section_length > 0)
 		{
-			pxmlRootNode->SetAttribute("error", "section buffer parameters error!");
-			rtcode = SECTION_PARSE_PARAMETER_ERROR;
+			XMLDOC_NewElementForBytes(pxmlDoc, pxmlRootNode, "CA_data_byte[ ]", pcmt_section->CA_data_byte, pcmt_section->CA_section_length, NULL);
 		}
 	}
-	else
+
+	if (pCMTSection == NULL)
 	{
-		rtcode = SECTION_PARSE_PARAMETER_ERROR;
+		//说明ppat_section指针临时分配，函数返回前需要释放
+		delete pcmt_section;
 	}
 
 	return rtcode;

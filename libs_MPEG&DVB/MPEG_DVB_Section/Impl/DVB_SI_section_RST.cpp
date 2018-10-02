@@ -7,8 +7,6 @@
 #include "../Include/Mpeg2_table_id.h"
 #include "../Include/MPEG_DVB_ErrorCode.h"
 
-#include "libs_Math/Include/CRC_32.h"
-
 /////////////////////////////////////////////
 int DVB_SI_RST_DecodeSection(uint8_t *buf, int length, running_status_section_t* prst_section)
 {
@@ -38,20 +36,20 @@ int DVB_SI_RST_DecodeSection(uint8_t *buf, int length, running_status_section_t*
 			
 		while (loop_length > 0)
 		{
-			prst_section->RunStatus[N].transport_stream_id = (*ptemp++) << 8;
-			prst_section->RunStatus[N].transport_stream_id |= *ptemp++;
+			prst_section->astRunStatus[N].transport_stream_id = (*ptemp++) << 8;
+			prst_section->astRunStatus[N].transport_stream_id |= *ptemp++;
 
-			prst_section->RunStatus[N].original_network_id = (*ptemp++) << 8;
-			prst_section->RunStatus[N].original_network_id |= *ptemp++;
+			prst_section->astRunStatus[N].original_network_id = (*ptemp++) << 8;
+			prst_section->astRunStatus[N].original_network_id |= *ptemp++;
 
-			prst_section->RunStatus[N].service_id = (*ptemp++) << 8;
-			prst_section->RunStatus[N].service_id |= *ptemp++;
+			prst_section->astRunStatus[N].service_id = (*ptemp++) << 8;
+			prst_section->astRunStatus[N].service_id |= *ptemp++;
 
-			prst_section->RunStatus[N].event_id = (*ptemp++) << 8;
-			prst_section->RunStatus[N].event_id |= *ptemp++;
+			prst_section->astRunStatus[N].event_id = (*ptemp++) << 8;
+			prst_section->astRunStatus[N].event_id |= *ptemp++;
 
-			prst_section->RunStatus[N].reserved_future_use = (*ptemp & 0xF8) >> 3;
-			prst_section->RunStatus[N].running_status = *ptemp++ & 0x07;
+			prst_section->astRunStatus[N].reserved_future_use = (*ptemp & 0xF8) >> 3;
+			prst_section->astRunStatus[N].running_status = *ptemp++ & 0x07;
 
 			loop_length -= 9;
 			N ++;
