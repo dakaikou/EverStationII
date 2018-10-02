@@ -122,7 +122,7 @@ _CDL_EXPORT int	DVB_SI_BAT_DecodeSection(uint8_t *buf, int length, bouquet_assoc
 -------------------------------------------------------------*/
 typedef struct _SERVICE_DESCRIPTION_s
 {
-	U16										service_id;						//16
+	uint16_t								service_id;						//16
 
 	U8										reserved_future_use;			//6
 	U8										EIT_schedule_flag;				//1
@@ -132,8 +132,8 @@ typedef struct _SERVICE_DESCRIPTION_s
 	U8										free_CA_mode;					//1
 	U16										descriptors_loop_length;		//12
 
-	S32										reserved_count;
-	reserved_descriptor_t					reserved_descriptor[MAX_RESERVED_DESCRIPTORS];
+	int										service_descriptor_count;
+	reserved_descriptor_t					service_descriptors[MAX_RESERVED_DESCRIPTORS];
 
 } SERVICE_DESCRIPTION_t, *PSERVICE_DESCRIPTION_t;
 
@@ -158,11 +158,11 @@ typedef struct service_description_section_s
 
 	U8		reserved_future_use1;						// 8
 
-	S32						N;
-	SERVICE_DESCRIPTION_t	astServiceDescription[MAX_SERVICES_PER_STREAM];		
+	int						service_count;
+	SERVICE_DESCRIPTION_t	astServiceDescriptions[MAX_SERVICES_PER_STREAM];		
 
 	U32						CRC_32;										//32
-	U32						CRC_32_verify;								//32
+	U32						CRC_32_recalculated;						//32
 
 } service_description_section_t, *pservice_description_section_t;
 
