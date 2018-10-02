@@ -101,17 +101,17 @@ typedef struct bouquet_association_section_s
 	U8						reserved_future_use1;						//4
 	U16						bouquet_descriptors_length;					//12
 
-	S32						reserved_count;
-	reserved_descriptor_t	reserved_descriptor[MAX_RESERVED_DESCRIPTORS];
+	int						bouquet_descriptor_count;
+	reserved_descriptor_t	bouquet_descriptors[MAX_RESERVED_DESCRIPTORS];
 
 	U8		reserved_future_use2;						//4
 	U16		transport_stream_loop_length;				//12
 
-	S32						N;
-	STREAM_DESCRIPTION_t	astStream[MAX_STREAMS_PER_BAT_SECTION];
+	int						stream_count;
+	STREAM_DESCRIPTION_t	astStreams[MAX_STREAMS_PER_BAT_SECTION];
 
-	U32						CRC_32;										//32
-	U32						CRC_32_verify;								//32
+	uint32_t				CRC_32;										//32
+	uint32_t				CRC_32_recalculated;						//32
 	
 } bouquet_association_section_t, *pbouquet_association_section_t;
 

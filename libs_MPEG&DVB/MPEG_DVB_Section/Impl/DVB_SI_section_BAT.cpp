@@ -12,7 +12,7 @@
 /////////////////////////////////////////////
 int DVB_SI_BAT_DecodeSection(uint8_t *buf, int length, bouquet_association_section_t* pbat_section)
 {
-	S32		 rtcode = SECTION_PARSE_NO_ERROR;
+	int		 rtcode = SECTION_PARSE_NO_ERROR;
 	S32		 N = 0;
 	S32		 stream_loop_length;
 	S32		 descriptor_loop_length;
@@ -25,16 +25,16 @@ int DVB_SI_BAT_DecodeSection(uint8_t *buf, int length, bouquet_association_secti
 	S32		 move_length;
 	S32		 reserved_count;
 
-	STREAM_DESCRIPTION_t*	pStream;
+	STREAM_DESCRIPTION_t*	pstStream;
 
 	if ((buf != NULL) && (length >= DVB_SI_BAT_SECTION_MIN_SIZE) && (length <= DVB_SI_BAT_SECTION_MAX_SIZE) && (pbat_section != NULL))
 	{
 		memset(pbat_section, 0x00, sizeof(bouquet_association_section_t));
 
-		pbat_section->CRC_32_verify = Encode_CRC_32(buf, length - 4);
-		pbat_section->CRC_32 = (buf[length - 4] << 24) | (buf[length - 3] << 16) | (buf[length - 2] << 8) | buf[length - 1];
+		pbat_section->CRC_32_recalculated = Encode_CRC_32(buf, length - 4);
+		uint32_t CRC_32_encoded = (buf[length - 4] << 24) | (buf[length - 3] << 16) | (buf[length - 2] << 8) | buf[length - 1];
 
-		if (pbat_section->CRC_32_verify == pbat_section->CRC_32)
+		//if (pbat_section->CRC_32_verify == pbat_section->CRC_32)
 		{
 			pbat_section->table_id = *buf++;
 
@@ -70,16 +70,16 @@ int DVB_SI_BAT_DecodeSection(uint8_t *buf, int length, bouquet_association_secti
 				descriptor_length = pl1temp[1];
 				move_length = descriptor_length + 2;
 
-				pbat_section->reserved_descriptor[reserved_count].descriptor_tag = descriptor_tag;
-				pbat_section->reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-				pbat_section->reserved_descriptor[reserved_count].descriptor_buf = pl1temp;
-				pbat_section->reserved_descriptor[reserved_count].descriptor_size = move_length;
+				pbat_section->bouquet_descriptors[reserved_count].descriptor_tag = descriptor_tag;
+				pbat_section->bouquet_descriptors[reserved_count].descriptor_length = descriptor_length;
+				pbat_section->bouquet_descriptors[reserved_count].descriptor_buf = pl1temp;
+				pbat_section->bouquet_descriptors[reserved_count].descriptor_size = move_length;
 
 				reserved_count ++;
 				pl1temp += move_length;
 				descriptor_loop_length -= move_length;
 			}
-			pbat_section->reserved_count = reserved_count;
+			pbat_section->bouquet_descriptor_count = reserved_count;
 
 
 			pbat_section->reserved_future_use2 = (*buf & 0xf0) >> 4;
@@ -95,25 +95,25 @@ int DVB_SI_BAT_DecodeSection(uint8_t *buf, int length, bouquet_association_secti
 			
 				while ((stream_loop_length >= 6) && (N < MAX_STREAMS_PER_BAT_SECTION))
 				{
-					pStream = pbat_section->astStream + N;
+					pstStream = pbat_section->astStreams + N;
 
-					pStream->transport_stream_id = (*pl1temp++) << 8;
-					pStream->transport_stream_id |= *pl1temp++;
+					pstStream->transport_stream_id = (*pl1temp++) << 8;
+					pstStream->transport_stream_id |= *pl1temp++;
 
-					pStream->original_network_id = (*pl1temp++) << 8;
-					pStream->original_network_id |= *pl1temp++;
+					pstStream->original_network_id = (*pl1temp++) << 8;
+					pstStream->original_network_id |= *pl1temp++;
 
-					pStream->reserved = (*pl1temp & 0xf0) >> 4;
+					pstStream->reserved = (*pl1temp & 0xf0) >> 4;
 
-					pStream->transport_descriptors_length = (*pl1temp++ & 0x0f) << 8;
-					pStream->transport_descriptors_length |= *pl1temp++;
+					pstStream->transport_descriptors_length = (*pl1temp++ & 0x0f) << 8;
+					pstStream->transport_descriptors_length |= *pl1temp++;
 
 					reserved_count = 0;
-					if (pStream->transport_descriptors_length > 0)
+					if (pstStream->transport_descriptors_length > 0)
 					{
 						pl2temp = pl1temp;
-						pl1temp += pStream->transport_descriptors_length;
-						descriptor_loop_length = pStream->transport_descriptors_length;
+						pl1temp += pstStream->transport_descriptors_length;
+						descriptor_loop_length = pstStream->transport_descriptors_length;
 
 						while ((descriptor_loop_length >= 2) && (reserved_count < MAX_RESERVED_DESCRIPTORS))
 						{
@@ -121,10 +121,10 @@ int DVB_SI_BAT_DecodeSection(uint8_t *buf, int length, bouquet_association_secti
 							descriptor_length = pl2temp[1];
 							move_length = descriptor_length + 2;
 
-							pStream->transport_descriptors[reserved_count].descriptor_tag = descriptor_tag;
-							pStream->transport_descriptors[reserved_count].descriptor_length = descriptor_length;
-							pStream->transport_descriptors[reserved_count].descriptor_buf = pl2temp;
-							pStream->transport_descriptors[reserved_count].descriptor_size = (uint8_t)move_length;
+							pstStream->transport_descriptors[reserved_count].descriptor_tag = descriptor_tag;
+							pstStream->transport_descriptors[reserved_count].descriptor_length = descriptor_length;
+							pstStream->transport_descriptors[reserved_count].descriptor_buf = pl2temp;
+							pstStream->transport_descriptors[reserved_count].descriptor_size = move_length;
 
 							reserved_count ++;
 
@@ -132,17 +132,21 @@ int DVB_SI_BAT_DecodeSection(uint8_t *buf, int length, bouquet_association_secti
 							descriptor_loop_length -= move_length;
 						}
 					}
-					pStream->transport_descriptor_count = reserved_count;
+					pstStream->transport_descriptor_count = reserved_count;
 
-					stream_loop_length -= (6 + pStream->transport_descriptors_length);
+					stream_loop_length -= (6 + pstStream->transport_descriptors_length);
 
 					N ++;
 				}
 			}
 			
-			pbat_section->N = N;
+			pbat_section->stream_count = N;
+
+			pbat_section->CRC_32 = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
+			assert(pbat_section->CRC_32 == CRC_32_encoded);
 		}
-		else
+
+		if (pbat_section->CRC_32_recalculated != pbat_section->CRC_32)
 		{
 			rtcode = SECTION_PARSE_CRC_ERROR;
 		}

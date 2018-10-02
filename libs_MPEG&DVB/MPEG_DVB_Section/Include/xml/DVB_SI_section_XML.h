@@ -8,7 +8,7 @@
 #include "HAL\HAL_XML\Include\HALForTinyXML2.h"
 
 _CDL_EXPORT	int	DVB_SI_NIT_DecodeSection_to_XML(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, network_information_section_t* pNITSection = NULL);
-_CDL_EXPORT int	DVB_SI_BAT_DecodeSection_to_XML(uint8_t *buf, int length, XMLDocForMpegSyntax* pxmlDoc, bouquet_association_section_t* pBATSection = NULL);
+_CDL_EXPORT int	DVB_SI_BAT_DecodeSection_to_XML(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, bouquet_association_section_t* pBATSection = NULL);
 _CDL_EXPORT	int	DVB_SI_SDT_DecodeSection_to_XML(uint8_t *buf, int length, XMLDocForMpegSyntax* pxmlDoc, service_description_section_t* pSDTSection = NULL);
 _CDL_EXPORT	int	DVB_SI_EIT_DecodeSection_to_XML(uint8_t *buf, int length, XMLDocForMpegSyntax* pxmlDoc, event_information_section_t* pEITSection = NULL);
 _CDL_EXPORT	int	DVB_SI_RST_DecodeSection_to_XML(uint8_t *buf, int length, XMLDocForMpegSyntax* pxmlDoc, running_status_section_t* pRSTSection = NULL);

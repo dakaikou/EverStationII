@@ -75,7 +75,7 @@ int DVB_SI_NIT_DecodeSection(uint8_t *buf, int length, network_information_secti
 				pnit_section->network_descriptors[reserved_count].descriptor_tag = descriptor_tag;
 				pnit_section->network_descriptors[reserved_count].descriptor_length = descriptor_length;
 				pnit_section->network_descriptors[reserved_count].descriptor_buf = pl1temp;
-				pnit_section->network_descriptors[reserved_count].descriptor_size = (uint8_t)move_length;
+				pnit_section->network_descriptors[reserved_count].descriptor_size = move_length;
 
 				reserved_count ++;
 
