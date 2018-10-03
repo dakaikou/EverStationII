@@ -9,19 +9,16 @@
 #include "../../Include/xml/DVB_SI_section_XML.h"
 
 /////////////////////////////////////////////
-int DVB_SI_RST_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, running_status_section_t* pRSTSection)
+int DVB_SI_RST_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, running_status_section_t* prst_section)
 {
 	int	 rtcode = SECTION_PARSE_NO_ERROR;
 
 	int	 N = 0;
 	char pszStatus[64];
-	char pszFieldName[64];
+	char pszField[64];
 	char pszComment[128];
 
-	running_status_section_t* prst_section = (pRSTSection != NULL) ? pRSTSection : new running_status_section_t;
-	rtcode = DVB_SI_RST_DecodeSection(section_buf, section_size, prst_section);
-
-	if (pxmlDoc != NULL)
+	if ((pxmlDoc != NULL) && (prst_section != NULL))
 	{
 		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
 
@@ -29,18 +26,10 @@ int DVB_SI_RST_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
 
 		//根节点
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, "running_status_section()");
+		sprintf_s(pszField, sizeof(pszField), "running_status_section(table_id=0x%02X)", prst_section->table_id);
+		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
 		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, section_size);
-
-		sprintf_s(pszComment, sizeof(pszComment), "%d字节", section_size);
-		XMLNODE_SetAttribute(pxmlRootNode, "comment", pszComment);
-
-		if (rtcode != SECTION_PARSE_NO_ERROR)
-		{
-			sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
-			XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
-		}
+		XMLNODE_SetFieldLength(pxmlRootNode, prst_section->section_length + 3);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", prst_section->table_id, 8, "uimsbf", NULL);
 
@@ -51,12 +40,12 @@ int DVB_SI_RST_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 
 		if (prst_section->section_length > 0)
 		{
-			for (int loop_index = 0; loop_index < prst_section->N; loop_index++)			
+			for (int loop_index = 0; loop_index < prst_section->N; loop_index++)
 			{
 				RUNSTATUS_DESCRIPTION_t* pstRunStatus = prst_section->astRunStatus + loop_index;
 
-				sprintf_s(pszFieldName, sizeof(pszFieldName), "status[%d]()", loop_index);
-				XMLElement* pxmlStatusNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszFieldName, NULL);
+				sprintf_s(pszField, sizeof(pszField), "status[%d]()", loop_index);
+				XMLElement* pxmlStatusNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
 				XMLNODE_SetFieldLength(pxmlStatusNode, 9);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlStatusNode, "transport_stream_id", pstRunStatus->transport_stream_id, 16, "uimsbf", NULL);
@@ -82,6 +71,18 @@ int DVB_SI_RST_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 			}
 		}
 	}
+
+	return rtcode;
+}
+
+
+int DVB_SI_RST_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, running_status_section_t* pRSTSection)
+{
+	int	 rtcode = SECTION_PARSE_NO_ERROR;
+
+	running_status_section_t* prst_section = (pRSTSection != NULL) ? pRSTSection : new running_status_section_t;
+	rtcode = DVB_SI_RST_DecodeSection(section_buf, section_size, prst_section);
+	rtcode = DVB_SI_RST_PresentSection_to_XML(pxmlDoc, prst_section);
 
 	if (pRSTSection == NULL)
 	{

@@ -16,14 +16,11 @@
 #include "libs_Math/Include/CRC_32.h"
 
 ////////////////////////////////////////////
-int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, TS_program_map_section_t* pPMTSection)
+int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_section_t* ppmt_section)
 {
 	int	 rtcode = SECTION_PARSE_NO_ERROR;
 
-	TS_program_map_section_t* ppmt_section = (pPMTSection != NULL) ? pPMTSection : new TS_program_map_section_t;
-	rtcode = MPEG2_PSI_PMT_DecodeSection(section_buf, section_size, ppmt_section);
-
-	if (pxmlDoc != NULL)
+	if ((pxmlDoc != NULL) && (ppmt_section != NULL))
 	{
 		uint16_t descriptor_tag;
 		int		 descriptor_length;
@@ -38,18 +35,10 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
 
 		//根节点
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, "TS_program_map_section()");
+		sprintf_s(pszField, sizeof(pszField), "program_map_section(table_id=0x%02X)", ppmt_section->table_id);
+		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
 		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, section_size);
-
-		sprintf_s(pszComment, sizeof(pszComment), "%d字节", section_size);
-		XMLNODE_SetAttribute(pxmlRootNode, "comment", pszComment);
-
-		if (rtcode != SECTION_PARSE_NO_ERROR)
-		{
-			sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
-			XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
-		}
+		XMLNODE_SetFieldLength(pxmlRootNode, ppmt_section->section_length + 3);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", ppmt_section->table_id, 8, "uimsbf", NULL);
 
@@ -76,7 +65,8 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 
 		if (ppmt_section->program_info_length > 0)
 		{
-			XMLElement* pxmlProgramInfoNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "program_info()", NULL);
+			sprintf_s(pszField, sizeof(pszField), "program_info()");
+			XMLElement* pxmlProgramInfoNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
 			XMLNODE_SetFieldLength(pxmlProgramInfoNode, ppmt_section->program_info_length);
 
 			for (int descriptor_index = 0; descriptor_index < ppmt_section->program_descriptor_count; descriptor_index++)
@@ -88,24 +78,24 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 
 				switch (descriptor_tag)
 				{
-				//case MPEG2_PSI_REGISTRATION_DESCRIPTOR:
-				//	MPEG2_PSI_decode_registration_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-				//	break;
-				//case MPEG2_PSI_CA_DESCRIPTOR:
-				//	MPEG2_PSI_decode_CA_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-				//	break;
-				//case MPEG2_PSI_SYSTEM_CLOCK_DESCRIPTOR:
-				//	MPEG2_PSI_decode_system_clock_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-				//	break;
-				//case MPEG2_PSI_MULTIPLEX_BUFFER_UTILIZATION_DESCRIPTOR:
-				//	MPEG2_PSI_decode_multiplex_buffer_utilization_descriptor(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-				//	break;
-				//case MPEG2_PSI_MAXIMUM_BITRATE_DESCRIPTOR:
-				//	MPEG2_PSI_decode_maximum_bitrate_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-				//	break;
-				//case MPEG2_PSI_SMOOTHING_BUFFER_DESCRIPTOR:
-				//	MPEG2_PSI_decode_smoothing_buffer_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-				//	break;
+					//case MPEG2_PSI_REGISTRATION_DESCRIPTOR:
+					//	MPEG2_PSI_decode_registration_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+					//	break;
+					//case MPEG2_PSI_CA_DESCRIPTOR:
+					//	MPEG2_PSI_decode_CA_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+					//	break;
+					//case MPEG2_PSI_SYSTEM_CLOCK_DESCRIPTOR:
+					//	MPEG2_PSI_decode_system_clock_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+					//	break;
+					//case MPEG2_PSI_MULTIPLEX_BUFFER_UTILIZATION_DESCRIPTOR:
+					//	MPEG2_PSI_decode_multiplex_buffer_utilization_descriptor(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+					//	break;
+					//case MPEG2_PSI_MAXIMUM_BITRATE_DESCRIPTOR:
+					//	MPEG2_PSI_decode_maximum_bitrate_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+					//	break;
+					//case MPEG2_PSI_SMOOTHING_BUFFER_DESCRIPTOR:
+					//	MPEG2_PSI_decode_smoothing_buffer_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+					//	break;
 				default:
 					MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlProgramInfoNode, ppmt_section->program_descriptors + descriptor_index);
 					break;
@@ -113,20 +103,22 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 			}
 		}
 
-		if (ppmt_section->ES_map_count > 0)
+		int es_loop_length = ppmt_section->section_length - 9 - ppmt_section->program_info_length - 4;
+		if (es_loop_length > 0)
 		{
-			sprintf_s(pszField, sizeof(pszField), "ES流循环( 共 %d 个流)", ppmt_section->ES_map_count);
+			sprintf_s(pszField, sizeof(pszField), "ES流循环(共 %d 个流)", ppmt_section->ES_map_count);
 			XMLElement* pxmlESInfoLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
-			XMLNODE_SetFieldLength(pxmlESInfoLoopNode, section_size - 12 - ppmt_section->program_info_length - 4);
+			XMLNODE_SetFieldLength(pxmlESInfoLoopNode, es_loop_length);
 
 			for (int es_index = 0; es_index < ppmt_section->ES_map_count; es_index++)
 			{
 				ES_DESCRIPTION_t*	pstESMap = ppmt_section->astESMaps + es_index;
 
+				int es_description_length = 5 + pstESMap->ES_info_length;
 				sprintf_s(pszField, sizeof(pszField), "ES流[%d](PID=0x%04X)", es_index, pstESMap->elementary_PID);
 				MPEG2_PSI_NumericCoding2Text_StreamType(pstESMap->stream_type, STREAM_SUBTYPE_UNKNOWN, pszComment, sizeof(pszComment));
 				XMLElement* pxmlESNode = XMLDOC_NewElementForString(pxmlDoc, pxmlESInfoLoopNode, pszField, pszComment);
-				XMLNODE_SetFieldLength(pxmlESNode, 5 + pstESMap->ES_info_length);
+				XMLNODE_SetFieldLength(pxmlESNode, es_description_length);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlESNode, "stream_type", pstESMap->stream_type, 8, "uimsbf", pszComment);
 
@@ -138,7 +130,8 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 
 				if (pstESMap->ES_info_length > 0)
 				{
-					XMLElement* pxmlESInfoNode = XMLDOC_NewElementForString(pxmlDoc, pxmlESNode, "ES_info()", NULL);
+					sprintf_s(pszField, sizeof(pszField), "ES_info()");
+					XMLElement* pxmlESInfoNode = XMLDOC_NewElementForString(pxmlDoc, pxmlESNode, pszField, NULL);
 					XMLNODE_SetFieldLength(pxmlESInfoNode, pstESMap->ES_info_length);
 
 					for (int descriptor_index = 0; descriptor_index < pstESMap->ES_descriptor_count; descriptor_index++)
@@ -150,45 +143,45 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 
 						switch (descriptor_tag)
 						{
-						//case MPEG2_PSI_VIDEO_STREAM_DESCRIPTOR:
-						//	MPEG2_PSI_decode_video_stream_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlESInfoNode);
-						//	break;
-						//case MPEG2_PSI_AUDIO_STREAM_DESCRIPTOR:
-						//	MPEG2_PSI_decode_audio_stream_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-						//	break;
-						//case MPEG2_PSI_REGISTRATION_DESCRIPTOR:
-						//	MPEG2_PSI_decode_registration_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode, &registration_descriptor);
-						//	break;
-						//case MPEG2_PSI_DATA_STREAM_ALIGNMENT_DESCRIPTOR:
-						//	MPEG2_PSI_decode_data_stream_alignment_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-						//	break;
-						//case MPEG2_PSI_ISO_639_LANGUAGE_DESCRIPTOR:
-						//	MPEG2_PSI_decode_ISO_639_language_descriptor(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-						//	break;
-						//case MPEG2_PSI_MAXIMUM_BITRATE_DESCRIPTOR:
-						//	MPEG2_PSI_decode_maximum_bitrate_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-						//	break;
-						//case MPEG2_DSMCC_CAROUSEL_IDENTIFIER_DESCRIPTOR:
-						//	MPEG2_DSMCC_decode_carousel_identifier_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-						//	break;
-						//case MPEG2_DSMCC_ASSOCIATION_TAG_DESCRIPTOR:
-						//	MPEG2_DSMCC_decode_association_tag_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-						//	break;
-						//case DVB_SI_STREAM_IDENTIFIER_DESCRIPTOR:
-						//	DVB_SI_decode_stream_identifier_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-						//	break;
-						//case DVB_SI_TELETEXT_DESCRIPTOR:
-						//	DVB_SI_decode_teletext_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-						//	break;
-						//case DVB_SI_SUBTITLING_DESCRIPTOR:
-						//	DVB_SI_decode_subtitling_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-						//	break;
-						//case DVB_SI_DATA_BROADCAST_ID_DESCRIPTOR:
-						//	DVB_SI_decode_data_broadcast_id_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-						//	break;
-						//case DVB_SI_AC3_DESCRIPTOR:
-						//	DVB_SI_decode_ac3_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-						//	break;
+							//case MPEG2_PSI_VIDEO_STREAM_DESCRIPTOR:
+							//	MPEG2_PSI_decode_video_stream_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlESInfoNode);
+							//	break;
+							//case MPEG2_PSI_AUDIO_STREAM_DESCRIPTOR:
+							//	MPEG2_PSI_decode_audio_stream_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
+							//	break;
+							//case MPEG2_PSI_REGISTRATION_DESCRIPTOR:
+							//	MPEG2_PSI_decode_registration_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode, &registration_descriptor);
+							//	break;
+							//case MPEG2_PSI_DATA_STREAM_ALIGNMENT_DESCRIPTOR:
+							//	MPEG2_PSI_decode_data_stream_alignment_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
+							//	break;
+							//case MPEG2_PSI_ISO_639_LANGUAGE_DESCRIPTOR:
+							//	MPEG2_PSI_decode_ISO_639_language_descriptor(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
+							//	break;
+							//case MPEG2_PSI_MAXIMUM_BITRATE_DESCRIPTOR:
+							//	MPEG2_PSI_decode_maximum_bitrate_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
+							//	break;
+							//case MPEG2_DSMCC_CAROUSEL_IDENTIFIER_DESCRIPTOR:
+							//	MPEG2_DSMCC_decode_carousel_identifier_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
+							//	break;
+							//case MPEG2_DSMCC_ASSOCIATION_TAG_DESCRIPTOR:
+							//	MPEG2_DSMCC_decode_association_tag_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
+							//	break;
+							//case DVB_SI_STREAM_IDENTIFIER_DESCRIPTOR:
+							//	DVB_SI_decode_stream_identifier_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
+							//	break;
+							//case DVB_SI_TELETEXT_DESCRIPTOR:
+							//	DVB_SI_decode_teletext_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
+							//	break;
+							//case DVB_SI_SUBTITLING_DESCRIPTOR:
+							//	DVB_SI_decode_subtitling_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
+							//	break;
+							//case DVB_SI_DATA_BROADCAST_ID_DESCRIPTOR:
+							//	DVB_SI_decode_data_broadcast_id_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
+							//	break;
+							//case DVB_SI_AC3_DESCRIPTOR:
+							//	DVB_SI_decode_ac3_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
+							//	break;
 						default:
 							MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlESInfoNode, pstESMap->ES_descriptors + descriptor_index);
 							break;
@@ -206,6 +199,21 @@ int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
 	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
+	}
+
+	return rtcode;
+}
+
+int MPEG2_PSI_PMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, TS_program_map_section_t* pPMTSection)
+{
+	int	 rtcode = SECTION_PARSE_NO_ERROR;
+
+	TS_program_map_section_t* ppmt_section = (pPMTSection != NULL) ? pPMTSection : new TS_program_map_section_t;
+	rtcode = MPEG2_PSI_PMT_DecodeSection(section_buf, section_size, ppmt_section);
+	rtcode = MPEG2_PSI_PMT_PresentSection_to_XML(pxmlDoc, ppmt_section);
 
 	if (pPMTSection == NULL)
 	{

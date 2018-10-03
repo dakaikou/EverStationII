@@ -13,7 +13,7 @@
 #include "libs_Math/Include/CRC_32.h"
 
 /////////////////////////////////////////////
-int DVB_SI_EIT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, event_information_section_t* pEITSection)
+int DVB_SI_EIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, event_information_section_t* peit_section)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
 	char	pszField[256];
@@ -28,10 +28,7 @@ int DVB_SI_EIT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 
 	EVENT_DESCRIPTION_t*	pstEvent;
 
-	event_information_section_t* peit_section = (pEITSection != NULL) ? pEITSection : new event_information_section_t;
-	rtcode = DVB_SI_EIT_DecodeSection(section_buf, section_size, peit_section);
-
-	if (pxmlDoc != NULL)
+	if ((pxmlDoc != NULL) && (peit_section != NULL))
 	{
 		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
 
@@ -39,18 +36,10 @@ int DVB_SI_EIT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
 
 		//根节点
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, "event_information_section()");
+		sprintf_s(pszField, sizeof(pszField), "event_information_section(table_id=0x%02X)", peit_section->table_id);
+		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
 		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, section_size);
-
-		sprintf_s(pszComment, sizeof(pszComment), "%d字节", section_size);
-		XMLNODE_SetAttribute(pxmlRootNode, "comment", pszComment);
-
-		if (rtcode != SECTION_PARSE_NO_ERROR)
-		{
-			sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
-			XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
-		}
+		XMLNODE_SetFieldLength(pxmlRootNode, peit_section->section_length + 3);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", peit_section->table_id, 8, "uimsbf", NULL);
 
@@ -80,19 +69,20 @@ int DVB_SI_EIT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 		int event_loop_length = peit_section->section_length - 15;
 		if (event_loop_length > 0)
 		{
-			sprintf_s(pszField, sizeof(pszField), "事件循环( 共 %d条)", peit_section->event_count);
+			sprintf_s(pszField, sizeof(pszField), "事件循环(共 %d条)", peit_section->event_count);
 			XMLElement* pxmlEventsLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
 			XMLNODE_SetFieldLength(pxmlEventsLoopNode, event_loop_length);
 
-			for (int event_index = 0; event_index < peit_section->event_count; event_index ++)
+			for (int event_index = 0; event_index < peit_section->event_count; event_index++)
 			{
 				pstEvent = &(peit_section->astEvents[event_index]);
 
+				int event_description_length = 12 + pstEvent->descriptors_loop_length;
 				DVB_SI_NumericCoding2Text_UTCTime(pstEvent->start_time, pszStartTime, sizeof(pszStartTime));
 				DVB_SI_NumericCoding2Text_BCDTime(pstEvent->duration, pszDuration, sizeof(pszDuration));
-				sprintf_s(pszField, sizeof(pszField), "事件[%d](ID=0x%04X, start_time=%s, duration=%s)", event_index, pstEvent->event_id, pszStartTime, pszDuration);
+				sprintf_s(pszField, sizeof(pszField), "事件[%d](<ID=0x%04X, start_time=%s, duration=%s>)", event_index, pstEvent->event_id, pszStartTime, pszDuration);
 				XMLElement* pxmlEventNode = XMLDOC_NewElementForString(pxmlDoc, pxmlEventsLoopNode, pszField, NULL);
-				XMLNODE_SetFieldLength(pxmlEventNode, 12 + pstEvent->descriptors_loop_length);
+				XMLNODE_SetFieldLength(pxmlEventNode, event_description_length);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlEventNode, "event_id", pstEvent->event_id, 16, "uimsbf", NULL);
 
@@ -107,7 +97,8 @@ int DVB_SI_EIT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 
 				if (pstEvent->descriptors_loop_length > 0)
 				{
-					XMLElement* pxmlEventDescriptorsLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlEventNode, "事件描述符循环()", NULL);
+					sprintf_s(pszField, sizeof(pszField), "事件描述符循环()");
+					XMLElement* pxmlEventDescriptorsLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlEventNode, pszField, NULL);
 					XMLNODE_SetFieldLength(pxmlEventDescriptorsLoopNode, pstEvent->descriptors_loop_length);
 
 					for (int descriptor_index = 0; descriptor_index < pstEvent->event_descriptor_count; descriptor_index++)
@@ -119,15 +110,15 @@ int DVB_SI_EIT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 
 						switch (descriptor_tag)
 						{
-						//case DVB_SI_SHORT_EVENT_DESCRIPTOR:
-						//	DVB_SI_decode_short_event_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-						//	break;
-						//case DVB_SI_CONTENT_DESCRIPTOR:
-						//	DVB_SI_decode_content_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-						//	break;
-						//case DVB_SI_PARENTAL_RATING_DESCRIPTOR:
-						//	DVB_SI_decode_parental_rating_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-						//	break;
+							//case DVB_SI_SHORT_EVENT_DESCRIPTOR:
+							//	DVB_SI_decode_short_event_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
+							//	break;
+							//case DVB_SI_CONTENT_DESCRIPTOR:
+							//	DVB_SI_decode_content_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
+							//	break;
+							//case DVB_SI_PARENTAL_RATING_DESCRIPTOR:
+							//	DVB_SI_decode_parental_rating_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
+							//	break;
 						default:
 							MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlEventDescriptorsLoopNode, pstEvent->event_descriptors + descriptor_index);
 							break;
@@ -145,6 +136,17 @@ int DVB_SI_EIT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
 	}
+
+	return rtcode;
+}
+
+int DVB_SI_EIT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, event_information_section_t* pEITSection)
+{
+	int		rtcode = SECTION_PARSE_NO_ERROR;
+
+	event_information_section_t* peit_section = (pEITSection != NULL) ? pEITSection : new event_information_section_t;
+	rtcode = DVB_SI_EIT_DecodeSection(section_buf, section_size, peit_section);
+	rtcode = DVB_SI_EIT_PresentSection_to_XML(pxmlDoc, peit_section);
 
 	if (pEITSection == NULL)
 	{

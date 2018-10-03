@@ -8,15 +8,13 @@
 #include "../../Include/xml/DVB_SI_section_XML.h"
 
 /////////////////////////////////////////////
-int DVB_SI_TDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, time_date_section_t* pTDTSection)
+int DVB_SI_TDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, time_date_section_t* ptdt_section)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
+	char	pszField[64];
 	char	pszComment[64];
 
-	time_date_section_t* ptdt_section = (pTDTSection == NULL) ? new time_date_section_t : pTDTSection;
-	rtcode = DVB_SI_TDT_DecodeSection(section_buf, section_size, ptdt_section);
-
-	if (pxmlDoc != NULL)
+	if ((pxmlDoc != NULL) && (ptdt_section != NULL))
 	{
 		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
 
@@ -24,18 +22,16 @@ int DVB_SI_TDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
 
 		//根节点
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, "time_date_section()");
+		sprintf_s(pszField, sizeof(pszField), "time_date_section(table_id=0x%02X)", ptdt_section->table_id);
+		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
 		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, section_size);
+		XMLNODE_SetFieldLength(pxmlRootNode, ptdt_section->section_length + 3);
 
-		sprintf_s(pszComment, sizeof(pszComment), "%d字节", section_size);
-		pxmlRootNode->SetAttribute("comment", pszComment);
-
-		if (rtcode != SECTION_PARSE_NO_ERROR)
-		{
-			sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
-			XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
-		}
+		//if (rtcode != SECTION_PARSE_NO_ERROR)
+		//{
+		//	sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
+		//	XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
+		//}
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", ptdt_section->table_id, 8, "uimsbf", NULL);
 
@@ -47,6 +43,17 @@ int DVB_SI_TDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 		DVB_SI_NumericCoding2Text_UTCTime(ptdt_section->UTC_time, pszComment, sizeof(pszComment));
 		XMLDOC_NewElementForX64Bits(pxmlDoc, pxmlRootNode, "UTC_time", ptdt_section->UTC_time, 40, "bslbf", pszComment);
 	}
+
+	return rtcode;
+}
+
+int DVB_SI_TDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, time_date_section_t* pTDTSection)
+{
+	int		rtcode = SECTION_PARSE_NO_ERROR;
+
+	time_date_section_t* ptdt_section = (pTDTSection == NULL) ? new time_date_section_t : pTDTSection;
+	rtcode = DVB_SI_TDT_DecodeSection(section_buf, section_size, ptdt_section);
+	rtcode = DVB_SI_TDT_PresentSection_to_XML(pxmlDoc, ptdt_section);
 
 	if (pTDTSection == NULL)
 	{

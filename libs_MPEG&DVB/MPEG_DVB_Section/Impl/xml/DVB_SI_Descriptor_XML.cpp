@@ -1578,6 +1578,7 @@ int DVB_SI_decode_private_data_specifier_descriptor_to_xml(uint8_t* buf, int len
 int DVB_SI_decode_transport_stream_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, transport_stream_descriptor_t* pTSDescriptor)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
+	char	pszField[128];
 	char	pszComment[128];
 
 	transport_stream_descriptor_t* ptransport_stream_descriptor = (pTSDescriptor == NULL) ? new transport_stream_descriptor_t : pTSDescriptor;
@@ -1585,11 +1586,9 @@ int DVB_SI_decode_transport_stream_descriptor_to_xml(uint8_t* buf, int length, H
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
-		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "transport_stream_descriptor()", NULL);
+		sprintf_s(pszField, sizeof(pszField), "transport_stream_descriptor(tag: 0x%02X)", ptransport_stream_descriptor->descriptor_tag, length);
+		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, pszField, NULL);
 		XMLNODE_SetFieldLength(pxmlDescriptorNode, length);
-
-		sprintf_s(pszComment, sizeof(pszComment), "tag: 0x%02X, %d×Ö½Ú", ptransport_stream_descriptor->descriptor_tag, length);
-		XMLNODE_SetAttribute(pxmlDescriptorNode, "comment", pszComment);
 
 		if (rtcode != SECTION_PARSE_NO_ERROR)
 		{

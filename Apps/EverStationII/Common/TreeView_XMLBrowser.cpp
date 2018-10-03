@@ -159,7 +159,7 @@ HTREEITEM CTreeView_PacketSyntax::DisplaySingleNode(HTREEITEM hParent, tinyxml2:
 {
 	CTreeCtrl&		treeCtrl = GetTreeCtrl();
 	char			pszText[256];
-	char			pszElement[64];
+	char			pszElement[256];
 	TV_INSERTSTRUCT TreeCtrlItem;
 	DWORD			dwParam;
 
@@ -318,6 +318,14 @@ HTREEITEM CTreeView_PacketSyntax::DisplaySingleNode(HTREEITEM hParent, tinyxml2:
 		int len = (int)(strlen(pszText));
 
 		sprintf_s(pszText + len, sizeof(pszText) - len - 1, " : [%s]", pszComment);
+	}
+
+	int field_length = pxmlNode->IntAttribute("field_length", -1);
+	if (field_length > 0)
+	{
+		int len = (int)(strlen(pszText));
+
+		sprintf_s(pszText + len, sizeof(pszText) - len - 1, " <-%d×Ö½Ú->", field_length);
 	}
 
 	const char* pszError = pxmlNode->Attribute("error");

@@ -26,4 +26,6 @@ void XMLElement::SetFieldLength(int length)
 	int offset = bs_tracer.offset;
 	SetAttribute("offset", offset);
 	SetAttribute("length", length);
+
+	SetAttribute("field_length", length);
 }

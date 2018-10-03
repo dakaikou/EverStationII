@@ -11,7 +11,7 @@
 
 #include "libs_Math/Include/CRC_32.h"
 
-int DVB_SI_TOT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, time_offset_section_t* pTOTSection)
+int DVB_SI_TOT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, time_offset_section_t* ptot_section)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
 
@@ -23,10 +23,7 @@ int DVB_SI_TOT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 	char	 pszField[128];
 	char	 pszComment[128];
 
-	time_offset_section_t* ptot_section = (pTOTSection != NULL) ? pTOTSection : new time_offset_section_t;
-	rtcode = DVB_SI_TOT_DecodeSection(section_buf, section_size, ptot_section);
-
-	if (pxmlDoc != NULL)
+	if ((pxmlDoc != NULL) && (ptot_section != NULL))
 	{
 		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
 
@@ -34,18 +31,10 @@ int DVB_SI_TOT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
 
 		//根节点
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, "time_offset_section()");
+		sprintf_s(pszField, sizeof(pszField), "time_offset_section(table_id=0x%02X)", ptot_section->table_id);
+		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
 		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, section_size);
-
-		sprintf_s(pszComment, sizeof(pszComment), "%d字节", section_size);
-		XMLNODE_SetAttribute(pxmlRootNode, "comment", pszComment);
-
-		if (rtcode != SECTION_PARSE_NO_ERROR)
-		{
-			sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
-			XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
-		}
+		XMLNODE_SetFieldLength(pxmlRootNode, ptot_section->section_length + 3);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", ptot_section->table_id, 8, "uimsbf", NULL);
 
@@ -62,7 +51,8 @@ int DVB_SI_TOT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 
 		if (ptot_section->descriptors_loop_length > 0)
 		{
-			XMLElement* pxmlDescriptorsLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "descriptors_loop()", NULL);
+			sprintf_s(pszField, sizeof(pszField), "descriptors_loop()");
+			XMLElement* pxmlDescriptorsLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
 			XMLNODE_SetFieldLength(pxmlDescriptorsLoopNode, ptot_section->descriptors_loop_length);
 
 			for (int descriptor_index = 0; descriptor_index < ptot_section->descriptor_count; descriptor_index++)
@@ -74,9 +64,9 @@ int DVB_SI_TOT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 
 				switch (descriptor_tag)
 				{
-				//case DVB_SI_LOCAL_TIME_OFFSET_DESCRIPTOR:
-				//	DVB_SI_decode_local_time_offset_descriptor_to_xml(ptemp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-				//	break;
+					//case DVB_SI_LOCAL_TIME_OFFSET_DESCRIPTOR:
+					//	DVB_SI_decode_local_time_offset_descriptor_to_xml(ptemp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
+					//	break;
 				default:
 					MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlDescriptorsLoopNode, ptot_section->descriptors + descriptor_index);
 					break;
@@ -91,6 +81,17 @@ int DVB_SI_TOT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
 	}
+
+	return rtcode;
+}
+
+int DVB_SI_TOT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, time_offset_section_t* pTOTSection)
+{
+	int		rtcode = SECTION_PARSE_NO_ERROR;
+
+	time_offset_section_t* ptot_section = (pTOTSection != NULL) ? pTOTSection : new time_offset_section_t;
+	rtcode = DVB_SI_TOT_DecodeSection(section_buf, section_size, ptot_section);
+	rtcode = DVB_SI_TOT_PresentSection_to_XML(pxmlDoc, ptot_section);
 
 	if (pTOTSection == NULL)
 	{

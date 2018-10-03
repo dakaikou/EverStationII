@@ -5,21 +5,13 @@
 #include "../../Include/MPEG_DVB_ErrorCode.h"
 #include "../../Include/xml/DVB_SI_section_XML.h"
 
-//#include "libs_Math/Include/CRC_32.h"
-//
-//#ifndef min
-//#define min(a,b)  (((a)<(b))?(a):(b))
-//#endif
-
-int DVB_SI_CMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, CA_message_section_t* pCMTSection)
+int DVB_SI_CMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, CA_message_section_t* pcmt_section)
 {
-	int		rtcode = SECTION_PARSE_NO_ERROR;
+	int  rtcode = SECTION_PARSE_NO_ERROR;
+	char pszField[128];
 	char pszComment[128];
 
-	CA_message_section_t* pcmt_section = (pCMTSection != NULL) ? pCMTSection : new CA_message_section_t;
-	rtcode = DVB_SI_CMT_DecodeSection(section_buf, section_size, pcmt_section);
-
-	if (pxmlDoc != NULL)
+	if ((pxmlDoc != NULL) && (pcmt_section != NULL))
 	{
 		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
 
@@ -27,18 +19,10 @@ int DVB_SI_CMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 		XMLDOC_InsertFirstChild(pxmlDoc, xmlDeclaration);
 
 		//根节点
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, "CA_message_section()");
+		sprintf_s(pszField, sizeof(pszField), "CA_message_section(table_id=0x%02X)", pcmt_section->table_id);
+		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
 		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, section_size);
-
-		sprintf_s(pszComment, sizeof(pszComment), "%d字节", section_size);
-		XMLNODE_SetAttribute(pxmlRootNode, "comment", pszComment);
-
-		if (rtcode != SECTION_PARSE_NO_ERROR)
-		{
-			sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
-			XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
-		}
+		XMLNODE_SetFieldLength(pxmlRootNode, pcmt_section->CA_section_length + 3);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pcmt_section->table_id, 8, "uimsbf", NULL);
 
@@ -52,6 +36,17 @@ int DVB_SI_CMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 			XMLDOC_NewElementForBytes(pxmlDoc, pxmlRootNode, "CA_data_byte[ ]", pcmt_section->CA_data_byte, pcmt_section->CA_section_length, NULL);
 		}
 	}
+
+	return rtcode;
+}
+
+int DVB_SI_CMT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, CA_message_section_t* pCMTSection)
+{
+	int  rtcode = SECTION_PARSE_NO_ERROR;
+
+	CA_message_section_t* pcmt_section = (pCMTSection != NULL) ? pCMTSection : new CA_message_section_t;
+	rtcode = DVB_SI_CMT_DecodeSection(section_buf, section_size, pcmt_section);
+	rtcode = DVB_SI_CMT_PresentSection_to_XML(pxmlDoc, pcmt_section);
 
 	if (pCMTSection == NULL)
 	{

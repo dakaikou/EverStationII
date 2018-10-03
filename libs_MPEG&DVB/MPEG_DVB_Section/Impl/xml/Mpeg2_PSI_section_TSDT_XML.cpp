@@ -12,17 +12,13 @@
 #include "libs_Math/Include/CRC_32.h"
 
 /////////////////////////////////////////////
-int MPEG2_PSI_TSDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, TS_description_section_t* pTSDTSection)
+int MPEG2_PSI_TSDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_description_section_t* ptsdt_section)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
 
-	TS_description_section_t* ptsdt_section = (pTSDTSection != NULL) ? pTSDTSection : new TS_description_section_t;
-	rtcode = MPEG2_PSI_TSDT_DecodeSection(section_buf, section_size, ptsdt_section);
-
-	if (pxmlDoc != NULL)
+	if ((pxmlDoc != NULL) && (ptsdt_section != NULL))
 	{
-		//char pszField[48];
-		//char pszTemp[128];
+		char pszField[48];
 		char pszComment[128];
 
 		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
@@ -31,18 +27,10 @@ int MPEG2_PSI_TSDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, 
 		XMLDOC_InsertFirstChild(pxmlDoc, xmlDeclaration);
 
 		//根节点
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, "TS_description_section()");
+		sprintf_s(pszField, sizeof(pszField), "TS_description_section(table_id=0x%02X)", ptsdt_section->table_id);
+		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
 		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, section_size);
-
-		sprintf_s(pszComment, sizeof(pszComment), "%d字节", section_size);
-		XMLNODE_SetAttribute(pxmlRootNode, "comment", pszComment);
-
-		if (rtcode != SECTION_PARSE_NO_ERROR)
-		{
-			sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
-			XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
-		}
+		XMLNODE_SetFieldLength(pxmlRootNode, ptsdt_section->section_length + 3);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", ptsdt_section->table_id, 8, "uimsbf", NULL);
 
@@ -67,7 +55,8 @@ int MPEG2_PSI_TSDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, 
 			uint8_t* descriptor_buf;
 			int		 descriptor_size;
 
-			XMLElement* pxmlDescriptionNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "TS_description()", NULL);
+			sprintf_s(pszField, sizeof(pszField), "TS_description()");
+			XMLElement* pxmlDescriptionNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
 			XMLNODE_SetFieldLength(pxmlDescriptionNode, loop_length);
 
 			for (int descriptor_index = 0; descriptor_index < ptsdt_section->TS_descriptor_count; descriptor_index++)
@@ -97,6 +86,18 @@ int MPEG2_PSI_TSDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, 
 			XMLNODE_SetAttribute(pxmlCrcNode, "error", pszComment);
 		}
 	}
+
+	return rtcode;
+}
+
+
+int MPEG2_PSI_TSDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, TS_description_section_t* pTSDTSection)
+{
+	int		rtcode = SECTION_PARSE_NO_ERROR;
+
+	TS_description_section_t* ptsdt_section = (pTSDTSection != NULL) ? pTSDTSection : new TS_description_section_t;
+	rtcode = MPEG2_PSI_TSDT_DecodeSection(section_buf, section_size, ptsdt_section);
+	rtcode = MPEG2_PSI_TSDT_PresentSection_to_XML(pxmlDoc, ptsdt_section);
 
 	if (pTSDTSection == NULL)
 	{

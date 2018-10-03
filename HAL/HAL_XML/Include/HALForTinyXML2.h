@@ -54,7 +54,8 @@ public:
 
 	XMLElement * NewElementForBits(XMLElement* pxmlParent, const char* key_name, uint32_t key_value, int bits = -1, const char* mnemonic = NULL, const char* pszComment = NULL);
 	XMLElement * NewElementForBytes(XMLElement* pxmlParent, const char* key_name, const uint8_t* byte_buf, int byte_length, const char* pszComment = NULL);
-	XMLElement * NewElementForString(XMLElement* pxmlParent, const char* key_name, const char* string = NULL, const char* pszComment = NULL);
+	//XMLElement * NewElementForString(XMLElement* pxmlParent, const char* key_name, const char* string = NULL, const char* pszComment = NULL);
+	XMLElement * NewElementForString(XMLElement* pxmlParent, const char* key_name, const char* pszComment = NULL);
 
 	XMLElement * NewElementForX64Bits(XMLElement* pxmlParent, const char* key_name, const uint64_t key_value, int bits = -1, const char* mnemonic = NULL, const char* pszComment = NULL);
 

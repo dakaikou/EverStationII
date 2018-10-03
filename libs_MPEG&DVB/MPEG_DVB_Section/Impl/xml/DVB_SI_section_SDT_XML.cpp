@@ -10,10 +10,8 @@
 #include "../../Include/xml/DVB_SI_section_XML.h"
 #include "../../Include/xml/DVB_SI_Descriptor_XML.h"
 
-//#include "libs_Math/Include/CRC_32.h"
-
 /////////////////////////////////////////////
-int DVB_SI_SDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, service_description_section_t* pSDTSection)
+int DVB_SI_SDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, service_description_section_t* psdt_section)
 {
 	int		 rtcode = SECTION_PARSE_NO_ERROR;
 
@@ -28,29 +26,18 @@ int DVB_SI_SDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 
 	SERVICE_DESCRIPTION_t*	pstServiceDescription;
 
-	service_description_section_t* psdt_section = (pSDTSection != NULL) ? pSDTSection : new service_description_section_t;
-	rtcode = DVB_SI_SDT_DecodeSection(section_buf, section_size, psdt_section);
-
-	if (pxmlDoc != NULL)
-	{ 
+	if ((pxmlDoc != NULL) && (psdt_section != NULL))
+	{
 		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
 
 		XMLDeclaration* pxmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
 		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
 
 		//根节点
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, "service_description_section()");
+		sprintf_s(pszField, sizeof(pszField), "service_description_section(table_id=0x%02X)", psdt_section->table_id);
+		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
 		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, section_size);
-
-		sprintf_s(pszComment, sizeof(pszComment), "%d字节", section_size);
-		XMLNODE_SetAttribute(pxmlRootNode, "comment", pszComment);
-
-		if (rtcode != SECTION_PARSE_NO_ERROR)
-		{
-			sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
-			XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
-		}
+		XMLNODE_SetFieldLength(pxmlRootNode, psdt_section->section_length + 3);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", psdt_section->table_id, 8, "uimsbf", NULL);
 
@@ -76,17 +63,18 @@ int DVB_SI_SDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 		int service_loop_length = psdt_section->section_length - 12;
 		if (service_loop_length > 0)
 		{
-			sprintf_s(pszField, sizeof(pszField), "业务循环(共 %d 业务)", psdt_section->service_count);
+			sprintf_s(pszField, sizeof(pszField), "业务循环(共 %d 个业务)", psdt_section->service_count);
 			XMLElement* pxmlServiceLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
 			XMLNODE_SetFieldLength(pxmlServiceLoopNode, service_loop_length);
 
-			for (int service_index = 0; service_index < psdt_section->service_count; service_index ++)
+			for (int service_index = 0; service_index < psdt_section->service_count; service_index++)
 			{
 				pstServiceDescription = psdt_section->astServiceDescriptions + service_index;
 
+				int service_description_length = 5 + pstServiceDescription->descriptors_loop_length;
 				sprintf_s(pszField, sizeof(pszField), "业务(ID=0x%04X)", pstServiceDescription->service_id);
 				XMLElement* pxmlServiceNode = XMLDOC_NewElementForString(pxmlDoc, pxmlServiceLoopNode, pszField, NULL);
-				XMLNODE_SetFieldLength(pxmlServiceNode, 5 + pstServiceDescription->descriptors_loop_length);
+				XMLNODE_SetFieldLength(pxmlServiceNode, service_description_length);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlServiceNode, "service_id", pstServiceDescription->service_id, 16, "uimsbf", NULL);
 
@@ -101,7 +89,8 @@ int DVB_SI_SDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 
 				if (pstServiceDescription->descriptors_loop_length > 0)
 				{
-					XMLElement* pxmlServiceDescriptorsLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlServiceNode, "service_descriptors()", NULL);
+					sprintf_s(pszField, sizeof(pszField), "service_descriptors()");
+					XMLElement* pxmlServiceDescriptorsLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlServiceNode, pszField, NULL);
 					XMLNODE_SetFieldLength(pxmlServiceDescriptorsLoopNode, pstServiceDescription->descriptors_loop_length);
 
 					for (int descriptor_index = 0; descriptor_index < pstServiceDescription->service_descriptor_count; descriptor_index++)
@@ -113,24 +102,24 @@ int DVB_SI_SDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 
 						switch (descriptor_tag)
 						{
-						//case DVB_SI_BOUQUET_NAME_DESCRIPTOR:
-						//	DVB_SI_decode_bouquet_name_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-						//	break;
-						//case DVB_SI_SERVICE_DESCRIPTOR:
-						//	DVB_SI_decode_service_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode, &service_descriptor);
-						//	break;
-						//case DVB_SI_CA_IDENTIFIER_DESCRIPTOR:
-						//	DVB_SI_decode_CA_identifier_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-						//	break;
-						//case DVB_SI_MULTILINGUAL_SERVICE_NAME_DESCRIPTOR:
-						//	DVB_SI_decode_multilingual_service_name_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-						//	break;
-						//case DVB_SI_PRIVATE_DATA_SPECIFIER_DESCRIPTOR:
-						//	DVB_SI_decode_private_data_specifier_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-						//	break;
-						//case DVB_SI_DATA_BROADCAST_DESCRIPTOR:
-						//	DVB_SI_decode_data_broadcast_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-						//	break;
+							//case DVB_SI_BOUQUET_NAME_DESCRIPTOR:
+							//	DVB_SI_decode_bouquet_name_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
+							//	break;
+							//case DVB_SI_SERVICE_DESCRIPTOR:
+							//	DVB_SI_decode_service_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode, &service_descriptor);
+							//	break;
+							//case DVB_SI_CA_IDENTIFIER_DESCRIPTOR:
+							//	DVB_SI_decode_CA_identifier_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
+							//	break;
+							//case DVB_SI_MULTILINGUAL_SERVICE_NAME_DESCRIPTOR:
+							//	DVB_SI_decode_multilingual_service_name_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
+							//	break;
+							//case DVB_SI_PRIVATE_DATA_SPECIFIER_DESCRIPTOR:
+							//	DVB_SI_decode_private_data_specifier_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
+							//	break;
+							//case DVB_SI_DATA_BROADCAST_DESCRIPTOR:
+							//	DVB_SI_decode_data_broadcast_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
+							//	break;
 						default:
 							MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlServiceDescriptorsLoopNode, pstServiceDescription->service_descriptors + descriptor_index);
 							break;
@@ -150,6 +139,18 @@ int DVB_SI_SDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALF
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
 	}
+
+	return rtcode;
+}
+
+
+int DVB_SI_SDT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, service_description_section_t* pSDTSection)
+{
+	int		 rtcode = SECTION_PARSE_NO_ERROR;
+
+	service_description_section_t* psdt_section = (pSDTSection != NULL) ? pSDTSection : new service_description_section_t;
+	rtcode = DVB_SI_SDT_DecodeSection(section_buf, section_size, psdt_section);
+	rtcode = DVB_SI_SDT_PresentSection_to_XML(pxmlDoc, psdt_section);
 
 	if (pSDTSection == NULL)
 	{

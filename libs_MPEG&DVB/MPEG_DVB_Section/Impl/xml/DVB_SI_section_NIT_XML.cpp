@@ -12,7 +12,7 @@
 #include "libs_Math/Include/CRC_32.h"
 
 /////////////////////////////////////////////
-int DVB_SI_NIT_DecodeSection_to_XML(uint8_t* section_buf, int section_size, HALForXMLDoc* pxmlDoc, network_information_section_t* pNITSection)
+int DVB_SI_NIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, network_information_section_t* pnit_section)
 {
 	int		 rtcode = SECTION_PARSE_NO_ERROR;
 
@@ -24,10 +24,7 @@ int DVB_SI_NIT_DecodeSection_to_XML(uint8_t* section_buf, int section_size, HALF
 	char	 pszField[128];
 	char	 pszComment[128];
 
-	network_information_section_t* pnit_section = (pNITSection != NULL) ? pNITSection : new network_information_section_t;
-	rtcode = DVB_SI_NIT_DecodeSection(section_buf, section_size, pnit_section);
-
-	if (pxmlDoc != NULL)
+	if ((pxmlDoc != NULL) && (pnit_section != NULL))
 	{
 		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
 
@@ -35,18 +32,16 @@ int DVB_SI_NIT_DecodeSection_to_XML(uint8_t* section_buf, int section_size, HALF
 		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
 
 		//根节点
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, "network_information_section()");
+		sprintf_s(pszField, sizeof(pszField), "network_information_section(table_id=0x%02X)", pnit_section->table_id);
+		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
 		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, section_size);
+		XMLNODE_SetFieldLength(pxmlRootNode, pnit_section->section_length + 3);
 
-		sprintf_s(pszComment, sizeof(pszComment), "%d字节", section_size);
-		XMLNODE_SetAttribute(pxmlRootNode, "comment", pszComment);
-
-		if (rtcode != SECTION_PARSE_NO_ERROR)
-		{
-			sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
-			XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
-		}
+		//if (rtcode != SECTION_PARSE_NO_ERROR)
+		//{
+		//	sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
+		//	XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
+		//}
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pnit_section->table_id, 8, "uimsbf", NULL);
 
@@ -70,7 +65,8 @@ int DVB_SI_NIT_DecodeSection_to_XML(uint8_t* section_buf, int section_size, HALF
 
 		if (pnit_section->network_descriptors_length > 0)
 		{
-			XMLElement* pxmlNetworkDescriptorsNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "network_descriptors()", NULL);
+			sprintf_s(pszField, sizeof(pszField), "network_descriptors()");
+			XMLElement* pxmlNetworkDescriptorsNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
 			XMLNODE_SetFieldLength(pxmlNetworkDescriptorsNode, pnit_section->network_descriptors_length);
 
 			for (int descriptor_index = 0; descriptor_index < pnit_section->network_descriptor_count; descriptor_index++)
@@ -82,12 +78,12 @@ int DVB_SI_NIT_DecodeSection_to_XML(uint8_t* section_buf, int section_size, HALF
 
 				switch (descriptor_tag)
 				{
-				//case DVB_SI_NETWORK_NAME_DESCRIPTOR:
-				//	DVB_SI_decode_network_name_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-				//	break;
-				//case DVB_SI_MULTILINGUAL_NETWORK_NAME_DESCRIPTOR:
-				//	DVB_SI_decode_multilingual_network_name_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-				//	break;
+					//case DVB_SI_NETWORK_NAME_DESCRIPTOR:
+					//	DVB_SI_decode_network_name_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+					//	break;
+					//case DVB_SI_MULTILINGUAL_NETWORK_NAME_DESCRIPTOR:
+					//	DVB_SI_decode_multilingual_network_name_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+					//	break;
 				default:
 					MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlNetworkDescriptorsNode, pnit_section->network_descriptors + descriptor_index);
 					break;
@@ -108,9 +104,10 @@ int DVB_SI_NIT_DecodeSection_to_XML(uint8_t* section_buf, int section_size, HALF
 			{
 				STREAM_DESCRIPTION_t*	pstStream = pnit_section->astStreams + stream_index;
 
-				sprintf_s(pszField, sizeof(pszField), "transport_stream(TSID=0x%04X, ONetID=0x%04X)", pstStream->transport_stream_id, pstStream->original_network_id);
+				int stream_description_length = 6 + pstStream->transport_descriptors_length;
+				sprintf_s(pszField, sizeof(pszField), "transport_stream(<TSID=0x%04X, ONetID=0x%04X>)", pstStream->transport_stream_id, pstStream->original_network_id);
 				XMLElement* pxmlStreamNode = XMLDOC_NewElementForString(pxmlDoc, pxmlStreamsLoopNode, pszField, NULL);
-				XMLNODE_SetFieldLength(pxmlStreamNode, 6 + pstStream->transport_descriptors_length);
+				XMLNODE_SetFieldLength(pxmlStreamNode, stream_description_length);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlStreamNode, "transport_stream_id", pstStream->transport_stream_id, 16, "uimsbf", NULL);
 
@@ -121,7 +118,8 @@ int DVB_SI_NIT_DecodeSection_to_XML(uint8_t* section_buf, int section_size, HALF
 
 				if (pstStream->transport_descriptors_length > 0)
 				{
-					XMLElement* pxmlTransportDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlStreamNode, "transport_descriptors()", NULL);
+					sprintf_s(pszField, sizeof(pszField), "transport_descriptors()");
+					XMLElement* pxmlTransportDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlStreamNode, pszField, NULL);
 					XMLNODE_SetFieldLength(pxmlTransportDescriptorNode, pstStream->transport_descriptors_length);
 
 					for (int descriptor_index = 0; descriptor_index < pstStream->transport_descriptor_count; descriptor_index++)
@@ -133,18 +131,18 @@ int DVB_SI_NIT_DecodeSection_to_XML(uint8_t* section_buf, int section_size, HALF
 
 						switch (descriptor_tag)
 						{
-						//case DVB_SI_SERVICE_LIST_DESCRIPTOR:
-						//	DVB_SI_decode_service_list_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-						//	break;
-						//case DVB_SI_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR:
-						//	DVB_SI_decode_satellite_delivery_system_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-						//	break;
-						//case DVB_SI_CABLE_DELIVERY_SYSTEM_DESCRIPTOR:
-						//	DVB_SI_decode_cable_delivery_system_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-						//	break;
-						//case DVB_SI_PRIVATE_DATA_SPECIFIER_DESCRIPTOR:
-						//	DVB_SI_decode_private_data_specifier_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-						//	break;
+							//case DVB_SI_SERVICE_LIST_DESCRIPTOR:
+							//	DVB_SI_decode_service_list_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
+							//	break;
+							//case DVB_SI_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR:
+							//	DVB_SI_decode_satellite_delivery_system_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
+							//	break;
+							//case DVB_SI_CABLE_DELIVERY_SYSTEM_DESCRIPTOR:
+							//	DVB_SI_decode_cable_delivery_system_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
+							//	break;
+							//case DVB_SI_PRIVATE_DATA_SPECIFIER_DESCRIPTOR:
+							//	DVB_SI_decode_private_data_specifier_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
+							//	break;
 						default:
 							MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlTransportDescriptorNode, pstStream->transport_descriptors + descriptor_index);
 							break;
@@ -155,13 +153,23 @@ int DVB_SI_NIT_DecodeSection_to_XML(uint8_t* section_buf, int section_size, HALF
 		}
 
 		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", pnit_section->CRC_32, 32, "rpchof", NULL);
-
 		if (pnit_section->CRC_32_recalculated != pnit_section->CRC_32)
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", pnit_section->CRC_32_recalculated);
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
 	}
+
+	return rtcode;
+}
+
+int DVB_SI_NIT_DecodeSection_to_XML(uint8_t* section_buf, int section_size, HALForXMLDoc* pxmlDoc, network_information_section_t* pNITSection)
+{
+	int		 rtcode = SECTION_PARSE_NO_ERROR;
+
+	network_information_section_t* pnit_section = (pNITSection != NULL) ? pNITSection : new network_information_section_t;
+	rtcode = DVB_SI_NIT_DecodeSection(section_buf, section_size, pnit_section);
+	rtcode = DVB_SI_NIT_PresentSection_to_XML(pxmlDoc, pnit_section);
 
 	if (pNITSection == NULL)
 	{

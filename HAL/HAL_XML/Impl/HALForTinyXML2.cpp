@@ -27,14 +27,15 @@ void HALForXMLDoc::SetSyncOffset(int offset)
 //	return m_bs_tracer.offset;
 //}
 
-XMLElement * HALForXMLDoc::NewElementForString(XMLElement* pxmlParent, const char* key_name, const char* string, const char* pszComment)
+//XMLElement * HALForXMLDoc::NewElementForString(XMLElement* pxmlParent, const char* key_name, const char* string, const char* pszComment)
+XMLElement * HALForXMLDoc::NewElementForString(XMLElement* pxmlParent, const char* key_name, const char* pszComment)
 {
 	XMLElement* pxmlNewElement = XMLDocument::NewElement(key_name);
 
-	if (string != NULL)
-	{
-		pxmlNewElement->SetAttribute("value", string);
-	}
+	//if (string != NULL)
+	//{
+	//	pxmlNewElement->SetAttribute("value", string);
+	//}
 
 	if (pszComment != NULL)
 	{

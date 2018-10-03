@@ -11,22 +11,13 @@
 
 #include "libs_Math/Include/CRC_32.h"
 
-int MPEG2_PSI_CAT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, CA_section_t* pCATSection)
+int MPEG2_PSI_CAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, CA_section_t* pcat_section)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
-	U8*		ptemp;
-	S32		move_length;
-	U16		descriptor_tag;
-	U8		descriptor_length;
-	S32		loop_length;
-	S32		descriptor_loop_length;
-	S32		reserved_count;
+	char	pszField[128];
 	char	pszComment[128];
 
-	CA_section_t* pcat_section = (pCATSection == NULL) ? new CA_section_t : pCATSection;
-	rtcode = MPEG2_PSI_CAT_DecodeSection(section_buf, section_size, pcat_section);
-
-	if (pxmlDoc != NULL)
+	if ((pxmlDoc != NULL) && (pcat_section != NULL))
 	{
 		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
 
@@ -34,18 +25,16 @@ int MPEG2_PSI_CAT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
 
 		//根节点
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, "CA_section()");
+		sprintf_s(pszField, sizeof(pszField), "CA_section(table_id=0x%02X)", pcat_section->table_id);
+		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
 		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, section_size);
+		XMLNODE_SetFieldLength(pxmlRootNode, pcat_section->section_length + 3);
 
-		sprintf_s(pszComment, sizeof(pszComment), "%d字节", section_size);
-		XMLNODE_SetAttribute(pxmlRootNode, "comment", pszComment);
-
-		if (rtcode != SECTION_PARSE_NO_ERROR)
-		{
-			sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
-			XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
-		}
+		//if (rtcode != SECTION_PARSE_NO_ERROR)
+		//{
+		//	sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
+		//	XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
+		//}
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pcat_section->table_id, 8, "uimsbf", NULL);
 
@@ -70,8 +59,9 @@ int MPEG2_PSI_CAT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 			uint8_t* descriptor_buf;
 			int		 descriptor_size;
 
-			XMLElement* pxmlCADescriptorLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "CA_description()", NULL);
-			XMLNODE_SetFieldLength(pxmlCADescriptorLoopNode, loop_length);
+			sprintf_s(pszField, sizeof(pszField), "CA_description()");
+			XMLElement* pxmlCADescriptorsLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
+			XMLNODE_SetFieldLength(pxmlCADescriptorsLoopNode, loop_length);
 
 			for (int descriptor_index = 0; descriptor_index < pcat_section->CA_descriptor_count; descriptor_index++)
 			{
@@ -83,23 +73,33 @@ int MPEG2_PSI_CAT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, H
 				switch (descriptor_tag)
 				{
 				case MPEG2_PSI_CA_DESCRIPTOR:
-					MPEG2_PSI_decode_CA_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlCADescriptorLoopNode);
+					MPEG2_PSI_decode_CA_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlCADescriptorsLoopNode);
 					break;
 				default:
-					MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlCADescriptorLoopNode, pcat_section->CA_descriptors + descriptor_index);
+					MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlCADescriptorsLoopNode, pcat_section->CA_descriptors + descriptor_index);
 					break;
 				}
 			}
 		}
 
 		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", pcat_section->CRC_32, 32, "rpchof", NULL);
-
 		if (pcat_section->CRC_32_recalculated != pcat_section->CRC_32)
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08x", pcat_section->CRC_32_recalculated);
 			XMLNODE_SetAttribute(pxmlCrcNode, "error", pszComment);
 		}
 	}
+
+	return rtcode;
+}
+
+int MPEG2_PSI_CAT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, CA_section_t* pCATSection)
+{
+	int		rtcode = SECTION_PARSE_NO_ERROR;
+
+	CA_section_t* pcat_section = (pCATSection == NULL) ? new CA_section_t : pCATSection;
+	rtcode = MPEG2_PSI_CAT_DecodeSection(section_buf, section_size, pcat_section);
+	rtcode = MPEG2_PSI_CAT_PresentSection_to_XML(pxmlDoc, pcat_section);
 
 	if (pCATSection == NULL)
 	{

@@ -268,21 +268,20 @@ int MPEG2_PSI_decode_data_stream_alignment_descriptor_to_xml(uint8_t* buf, int l
 int MPEG2_PSI_decode_CA_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, CA_descriptor_t* pCADescriptor)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
-	char   pszTemp[64];
+	char   pszField[128];
 	char   pszCASystem[64];
-	char   pszComment[128];
+	//char   pszComment[128];
 
 	CA_descriptor_t* pCA_descriptor = (pCADescriptor == NULL) ? new CA_descriptor_t : pCADescriptor;
 	rtcode = MPEG2_PSI_decode_CA_descriptor(buf, length, pCA_descriptor);
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
-		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "CA_descriptor()", pszComment);
-		XMLNODE_SetFieldLength(pxmlDescriptorNode, length);
-
 		MPEG_DVB_NumericCoding2Text_CASystemID(pCA_descriptor->CA_system_ID, pszCASystem, sizeof(pszCASystem));
-		sprintf_s(pszComment, sizeof(pszComment), "tag: 0x%02X, %d×Ö½Ú, CA_PID=0x%04X - %s", pCA_descriptor->descriptor_tag, length, pCA_descriptor->CA_PID, pszCASystem);
-		XMLNODE_SetAttribute(pxmlDescriptorNode, "comment", pszComment);
+		sprintf_s(pszField, sizeof(pszField), "CA_descriptor(<tag: 0x%02X, %d×Ö½Ú, CA_PID=0x%04X, %s>)", pCA_descriptor->descriptor_tag, length, pCA_descriptor->CA_PID, pszCASystem);
+
+		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, pszField, NULL);
+		XMLNODE_SetFieldLength(pxmlDescriptorNode, length);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_tag", pCA_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 

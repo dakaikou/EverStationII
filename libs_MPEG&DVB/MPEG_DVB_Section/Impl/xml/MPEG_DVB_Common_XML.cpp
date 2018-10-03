@@ -91,16 +91,15 @@ int decode_reserved_descriptor_to_xml(uint8_t *buf, int length, XMLDocForMpegSyn
 
 int MPEG_DVB_present_reserved_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, reserved_descriptor_t* preserved_descriptor)
 {
-	int		rtcode = SECTION_PARSE_NO_ERROR;
-	char   pszComment[64];
+	int	   rtcode = SECTION_PARSE_NO_ERROR;
+	char   pszFiled[64];
 
 	if ((pxmlDoc != NULL) && (preserved_descriptor != NULL))
 	{
-		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "unknown descriptor()", NULL);
-		XMLNODE_SetFieldLength(pxmlDescriptorNode, preserved_descriptor->descriptor_size);
+		sprintf_s(pszFiled, sizeof(pszFiled), "unknown descriptor(tag: 0x%02X)", preserved_descriptor->descriptor_tag);
 
-		sprintf_s(pszComment, sizeof(pszComment), "tag: 0x%02X, %d×Ö½Ú", preserved_descriptor->descriptor_tag, preserved_descriptor->descriptor_size);
-		XMLNODE_SetAttribute(pxmlDescriptorNode, "comment", pszComment);
+		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, pszFiled, NULL);
+		XMLNODE_SetFieldLength(pxmlDescriptorNode, preserved_descriptor->descriptor_size);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_tag", preserved_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_length", preserved_descriptor->descriptor_length, 8, "uimsbf", NULL);
