@@ -24,7 +24,6 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication(uint8_t *buf, int length, DownloadI
 	U16		descriptor_tag;
 	U8		descriptor_length;
 	S32		move_length;
-	U8		moduleInfoLength;
 	S32		copy_length;
 	S32		tap_index;
 
@@ -207,216 +206,98 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication(uint8_t *buf, int length, DownloadI
 	return rtcode;
 }
 
-int	MPEG2_DSMCC_DecodeGroupInfoIndication(uint8_t *buf, int length, GroupInfoIndication_t* pGroupInfoIndication)
+int	MPEG2_DSMCC_DSI_DecodeGroupInfoIndication(uint8_t *buf, int length, GroupInfoIndication_t* pGroupInfoIndication)
 {
-	int			rtcode = SECTION_PARSE_NO_ERROR;
-	uint8_t*	ptemp;
-	uint8_t*	pend;
-	S32		remain_length;
-	S32		n;
-	S32		i;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
 	S32		reserved_count;
 	U16		descriptor_tag;
 	U8		descriptor_length;
 	S32		move_length;
 	S32		copy_length;
-	S32		GroupInfoLength;
-	S32		compatibilityDescriptorLength;
+	//S32		GroupInfoLength;
+	//S32		compatibilityDescriptorLength;
 
 	if ((buf != NULL) && (length > 0) && (pGroupInfoIndication != NULL))
 	{
 		memset(pGroupInfoIndication, 0x00, sizeof(GroupInfoIndication_t));
 
-		ptemp = buf;
+		BYTES_t bytes;
+		BYTES_map(&bytes, buf, length);
 
-		pGroupInfoIndication->NumberOfGroups = *ptemp ++;
-		pGroupInfoIndication->NumberOfGroups <<= 8;
-		pGroupInfoIndication->NumberOfGroups |= *ptemp ++;
+		pGroupInfoIndication->NumberOfGroups = BYTES_get(&bytes, 2);
+		assert(pGroupInfoIndication->NumberOfGroups <= MAX_GROUPS);
 
-		n = 0;
-		for (i = 0; i < pGroupInfoIndication->NumberOfGroups; i++)
+		for (int group_index = 0; group_index < pGroupInfoIndication->NumberOfGroups; group_index++)
 		{
-			remain_length = length - (int)(ptemp - buf);
-			if (remain_length >= 12)
+			GroupInfo_t* pGroupInfo = pGroupInfoIndication->GroupInfo + group_index;
+
+			pGroupInfo->GroupId = BYTES_get(&bytes, 4);
+
+			pGroupInfo->GroupSize = BYTES_get(&bytes, 4);
+
+			pGroupInfo->GroupCompatibility.compatibilityDescriptorLength = BYTES_get(&bytes, 2);
+			if (pGroupInfo->GroupCompatibility.compatibilityDescriptorLength > 0)
 			{
-				if (n < MAX_GROUPS)
+				copy_length = min(pGroupInfo->GroupCompatibility.compatibilityDescriptorLength, sizeof(pGroupInfo->GroupCompatibility.compatibilityDescriptorBuf));
+				memcpy(pGroupInfo->GroupCompatibility.compatibilityDescriptorBuf, bytes.p_cur, copy_length);
+				BYTES_skip(&bytes, pGroupInfo->GroupCompatibility.compatibilityDescriptorLength);
+			}
+
+			pGroupInfo->GroupInfoLength = BYTES_get(&bytes, 2);
+			if (pGroupInfo->GroupInfoLength > 0)
+			{
+				int remain_length = pGroupInfo->GroupInfoLength;
+				uint8_t* ptemp = bytes.p_cur;
+				BYTES_skip(&bytes, pGroupInfo->GroupInfoLength);
+
+				reserved_count = 0;
+				while ((remain_length >= 2) && (reserved_count < MAX_RESERVED_DESCRIPTORS))
 				{
-					pGroupInfoIndication->GroupInfo[n].GroupId = *ptemp ++;
-					pGroupInfoIndication->GroupInfo[n].GroupId <<= 8;
-					pGroupInfoIndication->GroupInfo[n].GroupId |= *ptemp ++;
-					pGroupInfoIndication->GroupInfo[n].GroupId <<= 8;
-					pGroupInfoIndication->GroupInfo[n].GroupId |= *ptemp ++;
-					pGroupInfoIndication->GroupInfo[n].GroupId <<= 8;
-					pGroupInfoIndication->GroupInfo[n].GroupId |= *ptemp ++;
+					descriptor_tag = (ptemp[0] | 0x3000);
+					descriptor_length = ptemp[1];
+					move_length = descriptor_length + 2;
 
-					pGroupInfoIndication->GroupInfo[n].GroupSize = *ptemp ++;
-					pGroupInfoIndication->GroupInfo[n].GroupSize <<= 8;
-					pGroupInfoIndication->GroupInfo[n].GroupSize |= *ptemp ++;
-					pGroupInfoIndication->GroupInfo[n].GroupSize <<= 8;
-					pGroupInfoIndication->GroupInfo[n].GroupSize |= *ptemp ++;
-					pGroupInfoIndication->GroupInfo[n].GroupSize <<= 8;
-					pGroupInfoIndication->GroupInfo[n].GroupSize |= *ptemp ++;
+					pGroupInfo->group_descriptors[reserved_count].descriptor_tag = descriptor_tag;
+					pGroupInfo->group_descriptors[reserved_count].descriptor_length = descriptor_length;
+					pGroupInfo->group_descriptors[reserved_count].descriptor_buf = ptemp;
+					pGroupInfo->group_descriptors[reserved_count].descriptor_size = move_length;
+					reserved_count++;
 
-					pGroupInfoIndication->GroupInfo[n].GroupCompatibility.compatibilityDescriptorLength = *ptemp ++;
-					pGroupInfoIndication->GroupInfo[n].GroupCompatibility.compatibilityDescriptorLength <<= 8;
-					pGroupInfoIndication->GroupInfo[n].GroupCompatibility.compatibilityDescriptorLength |= *ptemp ++;
-
-					if (pGroupInfoIndication->GroupInfo[n].GroupCompatibility.compatibilityDescriptorLength == 0)
+					switch (descriptor_tag)
 					{
-						pGroupInfoIndication->GroupInfo[n].GroupInfoLength = *ptemp ++;
-						pGroupInfoIndication->GroupInfo[n].GroupInfoLength <<= 8;
-						pGroupInfoIndication->GroupInfo[n].GroupInfoLength |= *ptemp ++;
-
-						remain_length = length - (int)(ptemp - buf);
-
-						if (remain_length >= pGroupInfoIndication->GroupInfo[n].GroupInfoLength)
+					case MPEG2_DSMCC_NAME_DESCRIPTOR:
+						MPEG2_DSMCC_decode_name_descriptor(ptemp, move_length, &(pGroupInfo->name_descriptor));
+						break;
+					case MPEG2_DSMCC_LOCATION_DESCRIPTOR:
+						MPEG2_DSMCC_decode_location_descriptor(ptemp, move_length, &(pGroupInfo->location_descriptor));
+						break;
+					default:
+						if (descriptor_tag == 0x3081)
 						{
-							pend = ptemp + pGroupInfoIndication->GroupInfo[n].GroupInfoLength;
-
-							memset(&(pGroupInfoIndication->GroupInfo[n].name_descriptor), 0, sizeof(name_descriptor_t));
-							memset(&(pGroupInfoIndication->GroupInfo[n].location_descriptor), 0, sizeof(location_descriptor_t));
-				
-							reserved_count = 0;
-				
-							while (ptemp < pend)
+							if (pGroupInfo->name_descriptor.descriptor_tag == 0x00)
 							{
-								descriptor_tag = (ptemp[0] | 0x3000);
-								descriptor_length = ptemp[1];
-				
-								move_length = descriptor_length + 2;
-
-								switch (descriptor_tag)
-								{
-								case MPEG2_DSMCC_NAME_DESCRIPTOR:
-									MPEG2_DSMCC_decode_name_descriptor(ptemp, move_length, &(pGroupInfoIndication->GroupInfo[n].name_descriptor));
-									break;
-								case MPEG2_DSMCC_LOCATION_DESCRIPTOR:
-									MPEG2_DSMCC_decode_location_descriptor(ptemp, move_length, &(pGroupInfoIndication->GroupInfo[n].location_descriptor));
-									break;
-								default:
-									if (descriptor_tag == 0x3081)
-									{
-										if (pGroupInfoIndication->GroupInfo[n].name_descriptor.descriptor_tag == 0x00)
-										{
-											MPEG2_DSMCC_decode_name_descriptor(ptemp, move_length, &(pGroupInfoIndication->GroupInfo[n].name_descriptor));
-										}
-									}
-									else
-									{
-										if (reserved_count < MAX_RESERVED_DESCRIPTORS)
-										{
-											pGroupInfoIndication->GroupInfo[n].reserved_descriptor[reserved_count].descriptor_tag = descriptor_tag;
-											pGroupInfoIndication->GroupInfo[n].reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-											pGroupInfoIndication->GroupInfo[n].reserved_descriptor[reserved_count].descriptor_buf = ptemp;
-											pGroupInfoIndication->GroupInfo[n].reserved_descriptor[reserved_count].descriptor_size = move_length;
-											reserved_count ++;
-										}
-									}
-
-									break;
-								}
-				
-								ptemp += move_length;
+								MPEG2_DSMCC_decode_name_descriptor(ptemp, move_length, &(pGroupInfo->name_descriptor));
 							}
-
-							assert(ptemp == pend);
-				
-							pGroupInfoIndication->GroupInfo[n].reserved_count = reserved_count;
-
-							n ++;
 						}
-						else
-						{
-							rtcode = SECTION_PARSE_SYNTAX_ERROR;
-							break;
-						}
-					}
-					else
-					{
-						rtcode = SECTION_PARSE_SYNTAX_ERROR;
+
 						break;
 					}
+
+					remain_length -= move_length;
+					ptemp += move_length;
 				}
-				else
-				{
-					//skip GroupId
-					ptemp += 4;
-
-					//skip GroupSize
-					ptemp += 4;
-
-					//skip compatibilityDescriptorLength
-					compatibilityDescriptorLength = *ptemp ++;
-					compatibilityDescriptorLength <<= 8;
-					compatibilityDescriptorLength |= *ptemp ++;
-
-					if (compatibilityDescriptorLength == 0)
-					{
-						//skip GroupInfoLength
-						GroupInfoLength = *ptemp ++;
-						GroupInfoLength <<= 8;
-						GroupInfoLength |= *ptemp ++;
-
-						remain_length = length - (int)(ptemp - buf);
-
-						if (remain_length >= GroupInfoLength)
-						{
-							ptemp += GroupInfoLength;
-						}
-						else
-						{
-							rtcode = SECTION_PARSE_SYNTAX_ERROR;
-							break;
-						}
-					}
-					else
-					{
-						rtcode = SECTION_PARSE_SYNTAX_ERROR;
-						break;
-					}
-				}
-			}
-			else
-			{
-				rtcode = SECTION_PARSE_SYNTAX_ERROR;
-				break;
+				pGroupInfo->group_descriptor_count = reserved_count;
 			}
 		}
-		pGroupInfoIndication->N = n;
 
-		remain_length = length - (int)(ptemp - buf);
-
-		if (remain_length >= 2)
+		pGroupInfoIndication->PrivateDataLength = BYTES_get(&bytes, 2);
+		if (pGroupInfoIndication->PrivateDataLength > 0)
 		{
-			pGroupInfoIndication->PrivateDataLength = *ptemp ++;
-			pGroupInfoIndication->PrivateDataLength <<= 8;
-			pGroupInfoIndication->PrivateDataLength |= *ptemp ++;
+			copy_length = min(pGroupInfoIndication->PrivateDataLength, sizeof(pGroupInfoIndication->privateDataByte));
+			memcpy(pGroupInfoIndication->privateDataByte, bytes.p_cur, copy_length);
+			BYTES_skip(&bytes, pGroupInfoIndication->PrivateDataLength);
 
-			remain_length = length - (int)(ptemp - buf);
-			if (remain_length >= pGroupInfoIndication->PrivateDataLength)
-			{
-				copy_length = min(64, pGroupInfoIndication->PrivateDataLength);
-				if (copy_length > 0)
-				{
-					memcpy(pGroupInfoIndication->privateDataByte, ptemp, copy_length);
-					ptemp += pGroupInfoIndication->PrivateDataLength;
-
-					remain_length = length - (int)(ptemp - buf);
-					if (remain_length > 0)
-					{
-						//说明解析有问题
-						rtcode = SECTION_PARSE_SYNTAX_ERROR;
-					}
-				}
-			}
-			else
-			{
-				rtcode = SECTION_PARSE_SYNTAX_ERROR;
-			}
-		}
-		else
-		{
-			rtcode = SECTION_PARSE_SYNTAX_ERROR;
+			assert(bytes.p_cur == bytes.p_end);
 		}
 	}
 	else
@@ -427,21 +308,11 @@ int	MPEG2_DSMCC_DecodeGroupInfoIndication(uint8_t *buf, int length, GroupInfoInd
 	return rtcode;
 }
 
-int	MPEG2_DSMCC_DecodeServiceGatewayInfo(uint8_t *buf, int length, ServiceGatewayInfo_t* pServiceGatewayInfo)
+int	MPEG2_DSMCC_DSI_DecodeServiceGatewayInfo(uint8_t *buf, int length, ServiceGatewayInfo_t* pServiceGatewayInfo)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
-	U8*		ptemp;
-	S32		i;
-	S32		component_index;
-	S32		remain_length;
 
-	BIOPProfileBody_t*			pBIOPProfileBody;
-	LiteOptionsProfileBody_t*	pLiteOptionsProfileBody;
-	BIOP::ObjectLocation_t*		pObjectLocation;
-	DSM::ConnBinder_t*			pConnBinder;
-	U32							tag;
-
-	if ((buf != NULL) && (length > 4) && (pServiceGatewayInfo != NULL))
+	if ((buf != NULL) && (length >= 12) && (pServiceGatewayInfo != NULL))
 	{
 		memset(pServiceGatewayInfo, 0x00, sizeof(ServiceGatewayInfo_t));
 
@@ -531,14 +402,14 @@ int	MPEG2_DSMCC_DecodeDownloadServerInitiate(uint8_t *buf, int length, DownloadS
 					///////////////////////////////////////////////////////////////////////////
 					GroupInfoIndication_t* pGroupInfoIndication = &(pDownloadServerInitiate->u.GroupInfoIndication);
 
-					rtcode = MPEG2_DSMCC_DecodeGroupInfoIndication(ptemp, pDownloadServerInitiate->privateDataLength, pGroupInfoIndication);
+					rtcode = MPEG2_DSMCC_DSI_DecodeGroupInfoIndication(ptemp, pDownloadServerInitiate->privateDataLength, pGroupInfoIndication);
 				}
 				else if (pDownloadServerInitiate->data_broadcast_type == 0x0007)			//OC
 				{
 					///////////////////////////////////////////////////////////////////////////
 					ServiceGatewayInfo_t* pServiceGatewayInfo = &(pDownloadServerInitiate->u.ServiceGatewayInfo);
 
-					rtcode = MPEG2_DSMCC_DecodeServiceGatewayInfo(ptemp, pDownloadServerInitiate->privateDataLength, pServiceGatewayInfo);
+					rtcode = MPEG2_DSMCC_DSI_DecodeServiceGatewayInfo(ptemp, pDownloadServerInitiate->privateDataLength, pServiceGatewayInfo);
 				}
 				else
 				{
@@ -657,7 +528,7 @@ int MPEG2_DSMCC_UNM_DecodeSection(uint8_t *section_buf, int section_size, dsmcc_
 						pdsmccMessageHeader->dsmccAdaptationHeader.adaptationType = BYTES_get(&bytes, 1);
 
 						pdsmccMessageHeader->dsmccAdaptationHeader.N = pdsmccMessageHeader->adaptationLength - 1;
-						copy_length = min(64, pdsmccMessageHeader->dsmccAdaptationHeader.N);
+						copy_length = min(sizeof(pdsmccMessageHeader->dsmccAdaptationHeader.adaptationDataByte), pdsmccMessageHeader->dsmccAdaptationHeader.N);
 						if (copy_length > 0)
 						{
 							memcpy(pdsmccMessageHeader->dsmccAdaptationHeader.adaptationDataByte, bytes.p_cur, copy_length);

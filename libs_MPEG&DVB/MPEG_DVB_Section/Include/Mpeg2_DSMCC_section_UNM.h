@@ -141,16 +141,14 @@ typedef struct GroupInfo_s
 	name_descriptor_t			name_descriptor;
 	location_descriptor_t		location_descriptor;
 
-	S32							reserved_count;
-	reserved_descriptor_t		reserved_descriptor[MAX_RESERVED_DESCRIPTORS];
+	S32							group_descriptor_count;
+	reserved_descriptor_t		group_descriptors[MAX_RESERVED_DESCRIPTORS];
 
 } GroupInfo_t, *pGroupInfo_t;
 
 typedef struct GroupInfoIndication_s
 {
 	int							NumberOfGroups;							//16
-
-	int							N;
 	GroupInfo_t					GroupInfo[MAX_GROUPS];
 
 	int							PrivateDataLength;
@@ -217,9 +215,8 @@ typedef struct dsmcc_unm_section_s
 
 } dsmcc_unm_section_t;
 
-_CDL_EXPORT int	MPEG2_DSMCC_DecodeGroupInfoIndication(uint8_t *buf, int length, GroupInfoIndication_t* pGroupInfoIndication);
-
-_CDL_EXPORT int	MPEG2_DSMCC_DecodeServiceGatewayInfo(uint8_t *buf, int length, ServiceGatewayInfo_t* pServiceGatewayInfo);
+_CDL_EXPORT int	MPEG2_DSMCC_DSI_DecodeGroupInfoIndication(uint8_t *buf, int length, GroupInfoIndication_t* pGroupInfoIndication);
+_CDL_EXPORT int	MPEG2_DSMCC_DSI_DecodeServiceGatewayInfo(uint8_t *buf, int length, ServiceGatewayInfo_t* pServiceGatewayInfo);
 
 _CDL_EXPORT	int	MPEG2_DSMCC_DecodeDownloadInfoIndication(uint8_t *buf, int length, DownloadInfoIndication_t* pDownloadInfoIndication);
 _CDL_EXPORT	int	MPEG2_DSMCC_DecodeDownloadServerInitiate(uint8_t *buf, int length, DownloadServerInitiate_t* pDownloadServerInitiate);

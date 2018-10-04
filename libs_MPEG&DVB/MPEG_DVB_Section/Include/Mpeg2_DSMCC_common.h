@@ -74,7 +74,6 @@ namespace DSM
 	} ConnBinder_t;
 };
 
-
 typedef struct _BIOPProfileBody_s
 {
 	uint32_t					profileId_tag;						//32
@@ -82,9 +81,9 @@ typedef struct _BIOPProfileBody_s
 	uint8_t						profile_data_byte_order;			//8
 	uint8_t						liteComponents_count;				//8
 
-	BIOP::ObjectLocation_t		ObjectLocation;
-	DSM::ConnBinder_t			ConnBinder;
-	BIOP::LiteComponent_t		liteComponents[1];					//数组长度liteComponents_count - 2, 数组长度为什么是16？  chendelin  2018.10.4
+	BIOP::ObjectLocation_t		ObjectLocation;						//liteComponent 0
+	DSM::ConnBinder_t			ConnBinder;							//liteComponent 1
+	BIOP::LiteComponent_t		liteComponents[1];					//liteComponent 2 ~ N, 数组长度liteComponents_count - 2, 数组长度为什么是16？  chendelin  2018.10.4
 
 } BIOPProfileBody_t;
 

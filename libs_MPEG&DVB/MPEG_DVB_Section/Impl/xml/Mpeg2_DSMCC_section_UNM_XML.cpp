@@ -152,8 +152,6 @@ int MPEG2_DSMCC_UNM_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, dsmcc_unm_secti
 
 						XMLElement* pxmlPayloadNode = XMLDOC_NewElementForString(pxmlDoc, pxmlUNMNode, "messagePayload[ ]", NULL);
 						XMLNODE_SetFieldLength(pxmlPayloadNode, msg_payload_length);
-
-						//pxmlUNMNode->SetAttribute("error", pszComment);
 					}
 				}
 			}
@@ -200,162 +198,71 @@ int MPEG2_DSMCC_UNM_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, dsmcc_unm_secti
 
 int	MPEG2_DSMCC_PresentGroupInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, GroupInfoIndication_t* pGroupInfoIndication)
 {
-	int			rtcode = SECTION_PARSE_NO_ERROR;
-	uint8_t*	ptemp;
-	S32		n;
-	S32		reserved_count;
-	U16		descriptor_tag;
-	U8		descriptor_length;
-	S32		move_length;
-	S32		copy_length;
-	char	pszTemp[96];
-	BYTES_t	bytes;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
+	char	pszField[96];
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pGroupInfoIndication != NULL))
 	{
 		XMLElement* pxmlGroupsNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "GroupInfoIndication()", NULL);
 
-		//if ((buf != NULL) && (length > 0))
-		//{
-		//	GroupInfoIndication_t* pGroupInfoIndication = (pGII != NULL) ? pGII : new GroupInfoIndication_t;
-		//	memset(pGroupInfoIndication, 0x00, sizeof(GroupInfoIndication_t));
+		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlGroupsNode, "NumberOfGroups", pGroupInfoIndication->NumberOfGroups, 2, NULL);
 
-		//	BYTES_map(&bytes, buf, length);
+		for (int group_index = 0; group_index < pGroupInfoIndication->NumberOfGroups; group_index++)
+		{
+			GroupInfo_t* pGroupInfo = pGroupInfoIndication->GroupInfo + group_index;
+			sprintf_s(pszField, sizeof(pszField), "GROUP[%d](ID:0x%08X)", group_index, pGroupInfo->GroupId);
 
-		//	pGroupInfoIndication->NumberOfGroups = BYTES_get(&bytes, 2);
-		//	pxmlDoc->NewKeyValuePairElementByteMode(pxmlGroupsNode, "NumberOfGroups", pGroupInfoIndication->NumberOfGroups, 2, NULL, &bytes);
+			XMLElement* pxmlGroupNode = XMLDOC_NewElementForString(pxmlDoc, pxmlGroupsNode, pszField, NULL);
 
-		//	n = 0;
-		//	for (int group_index = 0; group_index < pGroupInfoIndication->NumberOfGroups; group_index++)
-		//	{
-		//		sprintf_s(pszTemp, sizeof(pszTemp), "GROUP[%d]", group_index);
+			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlGroupNode, "GroupId", pGroupInfo->GroupId, 4, NULL);
 
-		//		uint8_t* old_group_ptr = bytes.p_cur;
-		//		tinyxml2::XMLElement* pxmlGroupNode = pxmlDoc->NewKeyValuePairElement(pxmlGroupsNode, pszTemp);
+			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlGroupNode, "GroupSize", pGroupInfo->GroupSize, 4, NULL);
 
-		//		if (n < MAX_GROUPS)
-		//		{
-		//			pGroupInfoIndication->GroupInfo[n].GroupId = BYTES_get(&bytes, 4);
-		//			pxmlDoc->NewKeyValuePairElementByteMode(pxmlGroupNode, "GroupId", pGroupInfoIndication->GroupInfo[n].GroupId, 4, NULL, &bytes);
+			compatibilityDescriptor_t* pcompatibilityDescriptor = &(pGroupInfo->GroupCompatibility);
+			XMLElement* pxmlGroupCompatibilityNode = XMLDOC_NewElementForString(pxmlDoc, pxmlGroupNode, "GroupCompatibility()", NULL);
+			XMLNODE_SetFieldLength(pxmlGroupCompatibilityNode, 2 + pcompatibilityDescriptor->compatibilityDescriptorLength);
 
-		//			pGroupInfoIndication->GroupInfo[n].GroupSize = BYTES_get(&bytes, 4);
-		//			pxmlDoc->NewKeyValuePairElementByteMode(pxmlGroupNode, "GroupSize", pGroupInfoIndication->GroupInfo[n].GroupSize, 4, NULL, &bytes);
+			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlGroupCompatibilityNode, "compatibilityDescriptorLength", pcompatibilityDescriptor->compatibilityDescriptorLength, 2, NULL);
+			if (pcompatibilityDescriptor->compatibilityDescriptorLength > 0)
+			{
+				XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlGroupCompatibilityNode, "compatibilityDescriptorBuf[ ]", pcompatibilityDescriptor->compatibilityDescriptorBuf, pcompatibilityDescriptor->compatibilityDescriptorLength, NULL);
+			}
 
-		//			uint8_t* old_descriptor_ptr = bytes.p_cur;
-		//			tinyxml2::XMLElement* pxmlGroupCompatibilityNode = pxmlDoc->NewKeyValuePairElement(pxmlGroupNode, "GroupCompatibility");
+			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlGroupNode, "GroupInfoLength", pGroupInfo->GroupInfoLength, 2, NULL);
 
-		//			pGroupInfoIndication->GroupInfo[n].GroupCompatibility.compatibilityDescriptorLength = BYTES_get(&bytes, 2);
-		//			assert(pGroupInfoIndication->GroupInfo[n].GroupCompatibility.compatibilityDescriptorLength == 0);
-		//			pxmlDoc->NewKeyValuePairElementByteMode(pxmlGroupCompatibilityNode, "compatibilityDescriptorLength", pGroupInfoIndication->GroupInfo[n].GroupCompatibility.compatibilityDescriptorLength, 2, NULL, &bytes);
+			if (pGroupInfo->GroupInfoLength > 0)
+			{
+				XMLElement* pxmlDescriptionNode = XMLDOC_NewElementForString(pxmlDoc, pxmlGroupNode, "GroupInfo()", NULL);
 
-		//			if (pGroupInfoIndication->GroupInfo[n].GroupCompatibility.compatibilityDescriptorLength > 0)
-		//			{
-		//				copy_length = min(pGroupInfoIndication->GroupInfo[n].GroupCompatibility.compatibilityDescriptorLength, sizeof(pGroupInfoIndication->GroupInfo[n].GroupCompatibility.compatibilityDescriptorBuf));
-		//				memcpy(pGroupInfoIndication->GroupInfo[n].GroupCompatibility.compatibilityDescriptorBuf, bytes.p_cur, copy_length);
-		//				BYTES_skip(&bytes, pGroupInfoIndication->GroupInfo[n].GroupCompatibility.compatibilityDescriptorLength);
+				for (int descriptor_index = 0; descriptor_index < pGroupInfo->group_descriptor_count; descriptor_index++)
+				{
+					uint8_t* descriptor_buf = pGroupInfo->group_descriptors[descriptor_index].descriptor_buf;
+					uint8_t descriptor_tag = pGroupInfo->group_descriptors[descriptor_index].descriptor_tag;
+					uint8_t descriptor_length = pGroupInfo->group_descriptors[descriptor_index].descriptor_length;
+					int descriptor_size = descriptor_length + 2;
 
-		//				pxmlDoc->NewKeyValuePairElementByteMode(pxmlGroupCompatibilityNode, "compatibilityDescriptorBuf", pGroupInfoIndication->GroupInfo[n].GroupCompatibility.compatibilityDescriptorBuf, copy_length, NULL, &bytes);
-		//			}
-		//			pxmlDoc->UpdateBufMark(pxmlGroupCompatibilityNode, old_descriptor_ptr, bytes.p_cur);
+					switch (descriptor_tag)
+					{
+						//case DVB_SI_NETWORK_NAME_DESCRIPTOR:
+						//	DVB_SI_decode_network_name_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+						//	break;
+						//case DVB_SI_MULTILINGUAL_NETWORK_NAME_DESCRIPTOR:
+						//	DVB_SI_decode_multilingual_network_name_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+						//	break;
+					default:
+						MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlDescriptionNode, pGroupInfo->group_descriptors + descriptor_index);
+						break;
+					}
+				}
 
-		//			pGroupInfoIndication->GroupInfo[n].GroupInfoLength = BYTES_get(&bytes, 2);
-		//			pxmlDoc->NewKeyValuePairElementByteMode(pxmlGroupNode, "GroupInfoLength", pGroupInfoIndication->GroupInfo[n].GroupInfoLength, 2, NULL, &bytes);
+			}
+		}
 
-		//			if (pGroupInfoIndication->GroupInfo[n].GroupInfoLength > 0)
-		//			{
-		//				ptemp = bytes.p_cur;
-		//				BYTES_skip(&bytes, pGroupInfoIndication->GroupInfo[n].GroupInfoLength);
-
-		//				tinyxml2::XMLElement* pxmlDescriptionNode = pxmlDoc->NewKeyValuePairElementByteMode(pxmlGroupNode, "GroupInfo()", -1, -1, NULL, &bytes);
-
-		//				memset(&(pGroupInfoIndication->GroupInfo[n].name_descriptor), 0, sizeof(name_descriptor_t));
-		//				memset(&(pGroupInfoIndication->GroupInfo[n].location_descriptor), 0, sizeof(location_descriptor_t));
-
-		//				reserved_count = 0;
-		//				int GroupInfoLength = pGroupInfoIndication->GroupInfo[n].GroupInfoLength;
-		//				while ((GroupInfoLength >= 2) && (reserved_count < 32))
-		//				{
-		//					descriptor_tag = (ptemp[0] | 0x3000);
-		//					descriptor_length = ptemp[1];
-
-		//					move_length = descriptor_length + 2;
-
-		//					switch (descriptor_tag)
-		//					{
-		//					//case MPEG2_DSMCC_NAME_DESCRIPTOR:
-		//					//	MPEG2_DSMCC_decode_name_descriptor_to_xml(ptemp, move_length, pxmlDoc, pxmlDescriptionNode, &(pGroupInfoIndication->GroupInfo[n].name_descriptor));
-		//					//	break;
-		//					//case MPEG2_DSMCC_LOCATION_DESCRIPTOR:
-		//					//	MPEG2_DSMCC_decode_location_descriptor_to_xml(ptemp, move_length, pxmlDoc, pxmlDescriptionNode, &(pGroupInfoIndication->GroupInfo[n].location_descriptor));
-		//					//	break;
-		//					default:
-		//						//if (descriptor_tag == 0x3081)
-		//						//{
-		//						//	if (pGroupInfoIndication->GroupInfo[n].name_descriptor.descriptor_tag == 0x00)
-		//						//	{
-		//						//		MPEG2_DSMCC_decode_name_descriptor_to_xml(ptemp, move_length, pxmlDoc, pxmlDescriptionNode, &(pGroupInfoIndication->GroupInfo[n].name_descriptor));
-		//						//	}
-		//						//}
-		//						//else
-		//						{
-		//							if (reserved_count < MAX_RESERVED_DESCRIPTORS)
-		//							{
-		//								pGroupInfoIndication->GroupInfo[n].reserved_descriptor[reserved_count].descriptor_tag = descriptor_tag;
-		//								pGroupInfoIndication->GroupInfo[n].reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-		//								pGroupInfoIndication->GroupInfo[n].reserved_descriptor[reserved_count].descriptor_buf = ptemp;
-		//								pGroupInfoIndication->GroupInfo[n].reserved_descriptor[reserved_count].descriptor_size = move_length;
-
-		//								decode_reserved_descriptor_to_xml(ptemp, move_length, pxmlDoc, pxmlDescriptionNode);
-
-		//								reserved_count++;
-		//							}
-		//						}
-
-		//						break;
-		//					}
-
-		//					ptemp += move_length;
-		//					GroupInfoLength -= move_length;
-		//				}
-
-		//				pGroupInfoIndication->GroupInfo[n].reserved_count = reserved_count;
-		//			}
-
-		//			n++;
-		//		}
-		//		else
-		//		{
-		//			assert(0);
-		//		}
-
-		//		pxmlDoc->UpdateBufMark(pxmlGroupNode, old_group_ptr, bytes.p_cur);
-		//	}
-		//	pGroupInfoIndication->N = n;
-
-		//	pGroupInfoIndication->PrivateDataLength = BYTES_get(&bytes, 2);
-		//	pxmlDoc->NewKeyValuePairElementByteMode(pxmlGroupsNode, "PrivateDataLength", pGroupInfoIndication->PrivateDataLength, 2, NULL, &bytes);
-
-		//	if (pGroupInfoIndication->PrivateDataLength > 0)
-		//	{
-		//		copy_length = min(sizeof(pGroupInfoIndication->privateDataByte), pGroupInfoIndication->PrivateDataLength);
-		//		memcpy(pGroupInfoIndication->privateDataByte, bytes.p_cur, copy_length);
-		//		BYTES_skip(&bytes, pGroupInfoIndication->PrivateDataLength);
-
-		//		pxmlDoc->NewKeyValuePairElementByteMode(pxmlGroupsNode, "privateDataByte", pGroupInfoIndication->privateDataByte, copy_length, NULL, &bytes);
-		//	}
-
-		//	if (pGII == NULL)
-		//	{
-		//		//说明pGroupInfoIndication指针临时分配，函数返回前需要释放
-		//		delete pGroupInfoIndication;
-		//	}
-		//}
-		//else
-		//{
-		//	sprintf_s(pszTemp, sizeof(pszTemp), "parameters error!");
-		//	pxmlGroupsNode->SetAttribute("error", pszTemp);
-		//	rtcode = SECTION_PARSE_PARAMETER_ERROR;
-		//}
+		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlGroupsNode, "PrivateDataLength", pGroupInfoIndication->PrivateDataLength, 2, NULL);
+		if (pGroupInfoIndication->PrivateDataLength > 0)
+		{
+			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlGroupsNode, "privateDataByte[ ]", pGroupInfoIndication->privateDataByte, pGroupInfoIndication->PrivateDataLength, NULL);
+		}
 	}
 	else
 	{

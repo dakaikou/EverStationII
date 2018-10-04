@@ -88,7 +88,7 @@ int CDSMCC_UNM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 
 				if (pDownloadServerInitiate->data_broadcast_type == 0x0006)		//DC
 				{
-					u.m_DSI.NumberOfGroups = pDownloadServerInitiate->u.GroupInfoIndication.N;
+					u.m_DSI.NumberOfGroups = pDownloadServerInitiate->u.GroupInfoIndication.NumberOfGroups;
 					u.m_DSI.astGroupInfo = (GroupInfo_t*)realloc(u.m_DSI.astGroupInfo, u.m_DSI.NumberOfGroups * sizeof(GroupInfo_t));
 
 					if (u.m_DSI.astGroupInfo != NULL)
