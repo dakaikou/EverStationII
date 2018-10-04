@@ -9,6 +9,8 @@
 #include "../Include/MPEG_DVB_ErrorCode.h"
 
 #include "libs_Math/Include/CRC_32.h"
+#include "HAL\HAL_BitStream\Include\HALForBitStream.h"
+#include "HAL\HAL_ByteStream\Include\HALForByteStream.h"
 
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
@@ -17,20 +19,13 @@
 
 int	MPEG2_DSMCC_DecodeDownloadInfoIndication(uint8_t *buf, int length, DownloadInfoIndication_t* pDownloadInfoIndication)
 {
-	S32		rtcode = SECTION_PARSE_NO_ERROR;
-	U8*		ptemp;
-	U8*		pstart;
-	U8*		pend;
-	S32		i;
-	S32		n;
-	S32		remain_length;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
 	S32		reserved_count;
 	U16		descriptor_tag;
 	U8		descriptor_length;
 	S32		move_length;
 	U8		moduleInfoLength;
 	S32		copy_length;
-	S32		parse_payload;
 	S32		tap_index;
 
 	DC_moduleInfo_t*	pDC_moduleInfo;
@@ -40,316 +35,168 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication(uint8_t *buf, int length, DownloadI
 	{
 		memset(pDownloadInfoIndication, 0x00, sizeof(DownloadInfoIndication_t));
 
-		ptemp = buf;
+		BYTES_t bytes;
+		BYTES_map(&bytes, buf, length);
 
-		pDownloadInfoIndication->downloadId = *ptemp ++;
-		pDownloadInfoIndication->downloadId <<= 8;
-		pDownloadInfoIndication->downloadId |= *ptemp ++;
-		pDownloadInfoIndication->downloadId <<= 8;
-		pDownloadInfoIndication->downloadId |= *ptemp ++;
-		pDownloadInfoIndication->downloadId <<= 8;
-		pDownloadInfoIndication->downloadId |= *ptemp ++;
+		pDownloadInfoIndication->downloadId = BYTES_get(&bytes, 4);
 
-		pDownloadInfoIndication->blockSize = *ptemp ++;
-		pDownloadInfoIndication->blockSize <<= 8;
-		pDownloadInfoIndication->blockSize |= *ptemp ++;
+		pDownloadInfoIndication->blockSize = BYTES_get(&bytes, 2);
 
-		pDownloadInfoIndication->windowSize = *ptemp ++;
+		pDownloadInfoIndication->windowSize = BYTES_get(&bytes, 1);
 
-		pDownloadInfoIndication->ackPeriod = *ptemp ++;
+		pDownloadInfoIndication->ackPeriod = BYTES_get(&bytes, 1);
 
-		pDownloadInfoIndication->tCDownloadWindow = *ptemp ++;
-		pDownloadInfoIndication->tCDownloadWindow <<= 8;
-		pDownloadInfoIndication->tCDownloadWindow |= *ptemp ++;
-		pDownloadInfoIndication->tCDownloadWindow <<= 8;
-		pDownloadInfoIndication->tCDownloadWindow |= *ptemp ++;
-		pDownloadInfoIndication->tCDownloadWindow <<= 8;
-		pDownloadInfoIndication->tCDownloadWindow |= *ptemp ++;
+		pDownloadInfoIndication->tCDownloadWindow = BYTES_get(&bytes, 4);
 
-		pDownloadInfoIndication->tCDownloadScenario = *ptemp ++;
-		pDownloadInfoIndication->tCDownloadScenario <<= 8;
-		pDownloadInfoIndication->tCDownloadScenario |= *ptemp ++;
-		pDownloadInfoIndication->tCDownloadScenario <<= 8;
-		pDownloadInfoIndication->tCDownloadScenario |= *ptemp ++;
-		pDownloadInfoIndication->tCDownloadScenario <<= 8;
-		pDownloadInfoIndication->tCDownloadScenario |= *ptemp ++;
+		pDownloadInfoIndication->tCDownloadScenario = BYTES_get(&bytes, 4);
 
-		pDownloadInfoIndication->compatibilityDescriptor.compatibilityDescriptorLength = *ptemp ++;
-		pDownloadInfoIndication->compatibilityDescriptor.compatibilityDescriptorLength <<= 8;
-		pDownloadInfoIndication->compatibilityDescriptor.compatibilityDescriptorLength |= *ptemp ++;
+		compatibilityDescriptor_t* pcompatibilityDescriptor = &(pDownloadInfoIndication->compatibilityDescriptor);
+		pcompatibilityDescriptor->compatibilityDescriptorLength = BYTES_get(&bytes, 2);
+		if (pcompatibilityDescriptor->compatibilityDescriptorLength > 0)
+		{
+			copy_length = min(pcompatibilityDescriptor->compatibilityDescriptorLength, sizeof(pcompatibilityDescriptor->compatibilityDescriptorBuf));
+			memcpy(pcompatibilityDescriptor->compatibilityDescriptorBuf, bytes.p_cur, copy_length);
+			BYTES_skip(&bytes, pcompatibilityDescriptor->compatibilityDescriptorLength);
+		}
 
-		if (pDownloadInfoIndication->compatibilityDescriptor.compatibilityDescriptorLength == 0x0000)
+		//if (pDownloadInfoIndication->compatibilityDescriptor.compatibilityDescriptorLength == 0x0000)
 		{
 			//defined in EN 301192
-			pDownloadInfoIndication->numberOfModules = *ptemp ++;
-			pDownloadInfoIndication->numberOfModules <<= 8;
-			pDownloadInfoIndication->numberOfModules |= *ptemp ++;
+			pDownloadInfoIndication->numberOfModules = BYTES_get(&bytes, 2);
+			assert(pDownloadInfoIndication->numberOfModules <= MAX_MODULES_PER_GROUP);
 
-			n = 0;
-			for (i = 0; i < pDownloadInfoIndication->numberOfModules; i++)
+			for (int moduleIndex = 0; moduleIndex < pDownloadInfoIndication->numberOfModules; moduleIndex++)
 			{
-				remain_length = length - (int)(ptemp - buf);
-				if (remain_length >= 8)
+				pDownloadInfoIndication->moduleInfo[moduleIndex].moduleId = BYTES_get(&bytes, 2);
+
+				pDownloadInfoIndication->moduleInfo[moduleIndex].moduleSize = BYTES_get(&bytes, 4);
+
+				pDownloadInfoIndication->moduleInfo[moduleIndex].moduleVersion = BYTES_get(&bytes, 1);
+				pDownloadInfoIndication->moduleInfo[moduleIndex].moduleInfoLength = BYTES_get(&bytes, 1);
+
+				if (pDownloadInfoIndication->moduleInfo[moduleIndex].moduleInfoLength > 0)
 				{
-					if (n < MAX_MODULES_PER_GROUP)
+					uint8_t* moduleInfoByte = bytes.p_cur;
+
+					//判断moduleInfo payload的类型
+					pDownloadInfoIndication->moduleInfo[moduleIndex].data_broadcast_type = 0x0006;			//默认假设为DC
+					if (pDownloadInfoIndication->moduleInfo[moduleIndex].moduleInfoLength >= 21)
 					{
-						pDownloadInfoIndication->moduleInfo[n].moduleId = *ptemp ++;
-						pDownloadInfoIndication->moduleInfo[n].moduleId <<= 8;
-						pDownloadInfoIndication->moduleInfo[n].moduleId |= *ptemp ++;
-
-						pDownloadInfoIndication->moduleInfo[n].moduleSize = *ptemp ++;
-						pDownloadInfoIndication->moduleInfo[n].moduleSize <<= 8;
-						pDownloadInfoIndication->moduleInfo[n].moduleSize |= *ptemp ++;
-						pDownloadInfoIndication->moduleInfo[n].moduleSize <<= 8;
-						pDownloadInfoIndication->moduleInfo[n].moduleSize |= *ptemp ++;
-						pDownloadInfoIndication->moduleInfo[n].moduleSize <<= 8;
-						pDownloadInfoIndication->moduleInfo[n].moduleSize |= *ptemp ++;
-
-						pDownloadInfoIndication->moduleInfo[n].moduleVersion = *ptemp ++;
-						pDownloadInfoIndication->moduleInfo[n].moduleInfoLength = *ptemp ++;
-
-						pDownloadInfoIndication->moduleInfo[n].data_broadcast_type = 0x0006;			//默认假设为DC
-
-						remain_length = length - (int)(ptemp - buf);
-
-						//如果moduleInfoLength解析错误,则会导致指针越界
-						if (remain_length >= pDownloadInfoIndication->moduleInfo[n].moduleInfoLength)
+						int taps_count = moduleInfoByte[12];
+						if (taps_count >= 1)
 						{
-							pstart = ptemp;
-							pend = ptemp + pDownloadInfoIndication->moduleInfo[n].moduleInfoLength;
-
-							parse_payload = 1;
-							while (parse_payload)
+							uint16_t ID = (moduleInfoByte[13] << 8) | moduleInfoByte[14];
+							uint16_t use = (moduleInfoByte[15] << 8) | moduleInfoByte[16];
+							uint8_t selector_length = moduleInfoByte[19];
+							if ((ID == 0x0000) && (use == 0x0017) && (selector_length == 0x00))
 							{
-								ptemp = pstart;
+								pDownloadInfoIndication->moduleInfo[moduleIndex].data_broadcast_type = 0x0007;	//假设为OC
+							}
+						}
+					}
 
-								if (pDownloadInfoIndication->moduleInfo[n].data_broadcast_type == 0x0006)			//DC
+					if (pDownloadInfoIndication->moduleInfo[moduleIndex].data_broadcast_type == 0x0006)			//DC
+					{
+						pDC_moduleInfo = &(pDownloadInfoIndication->moduleInfo[moduleIndex].u.DC_moduleInfo);
+
+						reserved_count = 0;
+						int loop_length = pDownloadInfoIndication->moduleInfo[moduleIndex].moduleInfoLength;
+						while ((loop_length >= 2) && (reserved_count < MAX_RESERVED_DESCRIPTORS))
+						{
+							descriptor_tag = (moduleInfoByte[0] | 0x3000);
+							descriptor_length = moduleInfoByte[1];
+							move_length = descriptor_length + 2;
+
+							switch (descriptor_tag)
+							{
+							case MPEG2_DSMCC_NAME_DESCRIPTOR:
+								rtcode = MPEG2_DSMCC_decode_name_descriptor(moduleInfoByte, move_length, &(pDC_moduleInfo->name_descriptor));
+								break;
+							case MPEG2_DSMCC_LOCATION_DESCRIPTOR:
+								rtcode = MPEG2_DSMCC_decode_location_descriptor(moduleInfoByte, move_length, &(pDC_moduleInfo->location_descriptor));
+								break;
+							default:
+
+								if (descriptor_tag == 0x3081)
 								{
-									//不管三七二十一，先按DC解析一遍
-									pDC_moduleInfo = &(pDownloadInfoIndication->moduleInfo[n].u.DC_moduleInfo);
-
-									reserved_count = 0;
-									while (ptemp < pend)
+									if (pDC_moduleInfo->name_descriptor.descriptor_tag == 0x00)
 									{
-										descriptor_tag = (ptemp[0] | 0x3000);
-										descriptor_length = ptemp[1];
-										move_length = descriptor_length + 2;
-
-										switch (descriptor_tag)
-										{
-										case MPEG2_DSMCC_NAME_DESCRIPTOR:
-											rtcode = MPEG2_DSMCC_decode_name_descriptor(ptemp, move_length, &(pDC_moduleInfo->name_descriptor));
-											break;
-										case MPEG2_DSMCC_LOCATION_DESCRIPTOR:
-											rtcode = MPEG2_DSMCC_decode_location_descriptor(ptemp, move_length, &(pDC_moduleInfo->location_descriptor));
-											break;
-										default:
-
-											if (descriptor_tag == 0x3081)
-											{
-												if (pDC_moduleInfo->name_descriptor.descriptor_tag == 0x00)
-												{
-													rtcode = MPEG2_DSMCC_decode_name_descriptor(ptemp, move_length, &(pDC_moduleInfo->name_descriptor));
-												}
-											}
-											else
-											{
-												if (reserved_count < MAX_RESERVED_DESCRIPTORS)
-												{
-													pDC_moduleInfo->reserved_descriptor[reserved_count].descriptor_tag = descriptor_tag;
-													pDC_moduleInfo->reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-													pDC_moduleInfo->reserved_descriptor[reserved_count].descriptor_buf = ptemp;
-													pDC_moduleInfo->reserved_descriptor[reserved_count].descriptor_size = move_length;
-
-													reserved_count ++;
-												}
-											}
-
-											break;
-										}
-
-										ptemp += move_length;
-									}
-
-									pDC_moduleInfo->reserved_count = reserved_count;
-
-									if (ptemp != pend)
-									{
-										rtcode = SECTION_PARSE_SYNTAX_ERROR;
-									}
-
-									if (rtcode == SECTION_PARSE_NO_ERROR)
-									{
-										parse_payload = 0;
-									}
-									else
-									{
-										rtcode = SECTION_PARSE_NO_ERROR;
-										pDownloadInfoIndication->moduleInfo[n].data_broadcast_type = 0x0007;
-									}
-								}
-								else if (pDownloadInfoIndication->moduleInfo[n].data_broadcast_type == 0x0007)
-								{
-									//假设是OC，尝试解析一遍
-									pBIOP_moduleInfo = &(pDownloadInfoIndication->moduleInfo[n].u.BIOP_moduleInfo);
-
-									pBIOP_moduleInfo->moduleTimeOut = *ptemp ++;
-									pBIOP_moduleInfo->moduleTimeOut <<= 8;
-									pBIOP_moduleInfo->moduleTimeOut |= *ptemp ++;
-									pBIOP_moduleInfo->moduleTimeOut <<= 8;
-									pBIOP_moduleInfo->moduleTimeOut |= *ptemp ++;
-									pBIOP_moduleInfo->moduleTimeOut <<= 8;
-									pBIOP_moduleInfo->moduleTimeOut |= *ptemp ++;
-
-									pBIOP_moduleInfo->blockTimeOut = *ptemp ++;
-									pBIOP_moduleInfo->blockTimeOut <<= 8;
-									pBIOP_moduleInfo->blockTimeOut |= *ptemp ++;
-									pBIOP_moduleInfo->blockTimeOut <<= 8;
-									pBIOP_moduleInfo->blockTimeOut |= *ptemp ++;
-									pBIOP_moduleInfo->blockTimeOut <<= 8;
-									pBIOP_moduleInfo->blockTimeOut |= *ptemp ++;
-
-									pBIOP_moduleInfo->minBlockTime = *ptemp ++;
-									pBIOP_moduleInfo->minBlockTime <<= 8;
-									pBIOP_moduleInfo->minBlockTime |= *ptemp ++;
-									pBIOP_moduleInfo->minBlockTime <<= 8;
-									pBIOP_moduleInfo->minBlockTime |= *ptemp ++;
-									pBIOP_moduleInfo->minBlockTime <<= 8;
-									pBIOP_moduleInfo->minBlockTime |= *ptemp ++;
-
-									pBIOP_moduleInfo->taps_count = *ptemp ++;
-
-									assert(pBIOP_moduleInfo->taps_count <= 4);
-									for (tap_index = 0; tap_index < pBIOP_moduleInfo->taps_count; tap_index++)
-									{
-										pBIOP_moduleInfo->TAP[tap_index].id = *ptemp ++;
-										pBIOP_moduleInfo->TAP[tap_index].id <<= 8;
-										pBIOP_moduleInfo->TAP[tap_index].id |= *ptemp ++;
-
-										pBIOP_moduleInfo->TAP[tap_index].use = *ptemp ++;
-										pBIOP_moduleInfo->TAP[tap_index].use <<= 8;
-										pBIOP_moduleInfo->TAP[tap_index].use |= *ptemp ++;
-
-										pBIOP_moduleInfo->TAP[tap_index].association_tag = *ptemp ++;
-										pBIOP_moduleInfo->TAP[tap_index].association_tag <<= 8;
-										pBIOP_moduleInfo->TAP[tap_index].association_tag |= *ptemp ++;
-
-										pBIOP_moduleInfo->TAP[tap_index].selector_length = *ptemp ++;
-										if (pBIOP_moduleInfo->TAP[tap_index].selector_length > 0)
-										{
-//											assert(0);
-											ptemp += pBIOP_moduleInfo->TAP[tap_index].selector_length;
-										}
-									}
-
-									pBIOP_moduleInfo->userInfoLength = *ptemp ++;
-
-									if (pBIOP_moduleInfo->userInfoLength > 0)
-									{
-										memcpy(pBIOP_moduleInfo->userInfo_data_byte, ptemp, pBIOP_moduleInfo->userInfoLength);
-										ptemp += pBIOP_moduleInfo->userInfoLength;
-									}
-
-									if (ptemp != pend)
-									{
-										rtcode = SECTION_PARSE_SYNTAX_ERROR;
-									}
-
-									if (rtcode == SECTION_PARSE_NO_ERROR)
-									{
-										parse_payload = 0;
-									}
-									else
-									{
-										rtcode = SECTION_PARSE_NO_ERROR;
-										pDownloadInfoIndication->moduleInfo[n].data_broadcast_type = 0xffff;
+										rtcode = MPEG2_DSMCC_decode_name_descriptor(moduleInfoByte, move_length, &(pDC_moduleInfo->name_descriptor));
 									}
 								}
 								else
 								{
-									parse_payload = 0;
+									if (reserved_count < MAX_RESERVED_DESCRIPTORS)
+									{
+										pDC_moduleInfo->reserved_descriptor[reserved_count].descriptor_tag = descriptor_tag;
+										pDC_moduleInfo->reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
+										pDC_moduleInfo->reserved_descriptor[reserved_count].descriptor_buf = moduleInfoByte;
+										pDC_moduleInfo->reserved_descriptor[reserved_count].descriptor_size = move_length;
+
+										reserved_count ++;
+									}
 								}
+
+								break;
 							}
 
-							ptemp = pend;
-
-							n ++;
+							moduleInfoByte += move_length;
 						}
-						else
+
+						pDC_moduleInfo->reserved_count = reserved_count;
+					}
+					else if (pDownloadInfoIndication->moduleInfo[moduleIndex].data_broadcast_type == 0x0007)
+					{
+						//假设是OC，尝试解析一遍
+						pBIOP_moduleInfo = &(pDownloadInfoIndication->moduleInfo[moduleIndex].u.BIOP_moduleInfo);
+
+						pBIOP_moduleInfo->moduleTimeOut = BYTES_get(&bytes, 4);
+
+						pBIOP_moduleInfo->blockTimeOut = BYTES_get(&bytes, 4);
+
+						pBIOP_moduleInfo->minBlockTime = BYTES_get(&bytes, 4);
+
+						pBIOP_moduleInfo->taps_count = BYTES_get(&bytes, 1);
+						assert(pBIOP_moduleInfo->taps_count <= 4);
+
+						for (tap_index = 0; tap_index < pBIOP_moduleInfo->taps_count; tap_index++)
 						{
-							rtcode = SECTION_PARSE_SYNTAX_ERROR;
-							break;
+							pBIOP_moduleInfo->TAP[tap_index].id = BYTES_get(&bytes, 2);
+
+							pBIOP_moduleInfo->TAP[tap_index].use = BYTES_get(&bytes, 2);
+
+							pBIOP_moduleInfo->TAP[tap_index].association_tag = BYTES_get(&bytes, 2);
+
+							pBIOP_moduleInfo->TAP[tap_index].selector_length = BYTES_get(&bytes, 1);
+							if (pBIOP_moduleInfo->TAP[tap_index].selector_length > 0)
+							{
+								BYTES_skip(&bytes, pBIOP_moduleInfo->TAP[tap_index].selector_length);
+							}
+						}
+
+						pBIOP_moduleInfo->userInfoLength = BYTES_get(&bytes, 1);
+
+						if (pBIOP_moduleInfo->userInfoLength > 0)
+						{
+							copy_length = min(sizeof(pBIOP_moduleInfo->userInfo_data_byte), pBIOP_moduleInfo->userInfoLength);
+							memcpy(pBIOP_moduleInfo->userInfo_data_byte, bytes.p_cur, copy_length);
+							BYTES_skip(&bytes, pBIOP_moduleInfo->userInfoLength);
 						}
 					}
 					else
 					{
-						//skip moduleId
-						ptemp += 2;
-
-						//skip moduleSize
-						ptemp += 4;
-
-						//skip moduleVersion
-						ptemp += 1;
-
-						moduleInfoLength = *ptemp ++;
-
-						remain_length = length - (int)(ptemp - buf);
-//							assert(remain_length >= pDownloadInfoIndication->moduleInfoLength[i]);
-
-						//如果moduleInfoLength解析错误,则会导致指针越界
-						if (remain_length >= moduleInfoLength)
-						{
-							ptemp += moduleInfoLength;
-						}
-						else
-						{
-							rtcode = SECTION_PARSE_SYNTAX_ERROR;
-							break;
-						}
+						BYTES_skip(&bytes, pDownloadInfoIndication->moduleInfo[moduleIndex].moduleInfoLength);
 					}
 				}
-				else
-				{
-					rtcode = SECTION_PARSE_SYNTAX_ERROR;
-					break;
-				}
 			}
 
-			pDownloadInfoIndication->N = n;
-
-			remain_length = length - (int)(ptemp - buf);
-			if (remain_length >= 2)
+			pDownloadInfoIndication->privateDataLength = BYTES_get(&bytes, 2);
+			if (pDownloadInfoIndication->privateDataLength > 0)
 			{
-				pDownloadInfoIndication->privateDataLength = *ptemp ++;
-				pDownloadInfoIndication->privateDataLength <<= 8;
-				pDownloadInfoIndication->privateDataLength |= *ptemp ++;
-
-				remain_length = length - (int)(ptemp - buf);
-
-				if (remain_length >= pDownloadInfoIndication->privateDataLength)
-				{
-					copy_length = min(64, pDownloadInfoIndication->privateDataLength);
-					if (copy_length > 0)
-					{
-						memcpy(pDownloadInfoIndication->privateDataByte, ptemp, copy_length);
-						ptemp += pDownloadInfoIndication->privateDataLength;
-					}
-				}
-				else
-				{
-					rtcode = SECTION_PARSE_SYNTAX_ERROR;
-				}
+				copy_length = min(sizeof(pDownloadInfoIndication->privateDataByte), pDownloadInfoIndication->privateDataLength);
+				memcpy(pDownloadInfoIndication->privateDataByte, bytes.p_cur, copy_length);
+				BYTES_skip(&bytes, pDownloadInfoIndication->privateDataLength);
 			}
-			else
-			{
-				rtcode = SECTION_PARSE_SYNTAX_ERROR;
-			}
-		}
-		else
-		{
-			rtcode = SECTION_PARSE_SYNTAX_ERROR;
-			assert(0);
 		}
 	}
 	else
@@ -582,13 +429,12 @@ int	MPEG2_DSMCC_DecodeGroupInfoIndication(uint8_t *buf, int length, GroupInfoInd
 
 int	MPEG2_DSMCC_DecodeServiceGatewayInfo(uint8_t *buf, int length, ServiceGatewayInfo_t* pServiceGatewayInfo)
 {
-	S32		rtcode = SECTION_PARSE_NO_ERROR;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
 	U8*		ptemp;
 	S32		i;
 	S32		component_index;
 	S32		remain_length;
 
-	IOP::IOR_t*					pIOR;
 	BIOPProfileBody_t*			pBIOPProfileBody;
 	LiteOptionsProfileBody_t*	pLiteOptionsProfileBody;
 	BIOP::ObjectLocation_t*		pObjectLocation;
@@ -599,207 +445,28 @@ int	MPEG2_DSMCC_DecodeServiceGatewayInfo(uint8_t *buf, int length, ServiceGatewa
 	{
 		memset(pServiceGatewayInfo, 0x00, sizeof(ServiceGatewayInfo_t));
 
-		ptemp = buf;
+		BITS_t bs;
+		BITS_map(&bs, buf, length);
 
-		//解析IOP::IOR()
-		pServiceGatewayInfo->IOR.type_id_length = *ptemp ++;
-		pServiceGatewayInfo->IOR.type_id_length <<= 8;
-		pServiceGatewayInfo->IOR.type_id_length |= *ptemp ++;
-		pServiceGatewayInfo->IOR.type_id_length <<= 8;
-		pServiceGatewayInfo->IOR.type_id_length |= *ptemp ++;
-		pServiceGatewayInfo->IOR.type_id_length <<= 8;
-		pServiceGatewayInfo->IOR.type_id_length |= *ptemp ++;
+		IOP::IOR_t*	pIOR = &(pServiceGatewayInfo->IOR);
+		MPEG2_DSMCC_DecodeIOR(&bs, pIOR);
 
-		if (pServiceGatewayInfo->IOR.type_id_length == 4)
+		pServiceGatewayInfo->downloadTaps_count = BITS_get(&bs, 8);
+		if (pServiceGatewayInfo->downloadTaps_count > 0)
 		{
-			memcpy(pServiceGatewayInfo->IOR.type_id_byte, ptemp, pServiceGatewayInfo->IOR.type_id_length);
-			ptemp += pServiceGatewayInfo->IOR.type_id_length;
-
-			if ((pServiceGatewayInfo->IOR.type_id_length % 4) != 0)
-			{
-				for (i = 0; i < (S32)(4 - (pServiceGatewayInfo->IOR.type_id_length % 4)); i++)
-				{
-					pServiceGatewayInfo->IOR.alignment_gap[i] = *ptemp ++;
-				}
-			}
-
-			pServiceGatewayInfo->IOR.taggedProfiles_count = *ptemp ++;
-			pServiceGatewayInfo->IOR.taggedProfiles_count <<= 8;
-			pServiceGatewayInfo->IOR.taggedProfiles_count |= *ptemp ++;
-			pServiceGatewayInfo->IOR.taggedProfiles_count <<= 8;
-			pServiceGatewayInfo->IOR.taggedProfiles_count |= *ptemp ++;
-			pServiceGatewayInfo->IOR.taggedProfiles_count <<= 8;
-			pServiceGatewayInfo->IOR.taggedProfiles_count |= *ptemp ++;
-
-			if (pServiceGatewayInfo->IOR.taggedProfiles_count > 0)
-			{
-				for (i = 0; i < (S32)(pServiceGatewayInfo->IOR.taggedProfiles_count); i++)
-				{
-					pIOR = &(pServiceGatewayInfo->IOR);
-
-					tag = *ptemp ++;
-					tag <<= 8;
-					tag |= *ptemp ++;
-					tag <<= 8;
-					tag |= *ptemp ++;
-					tag <<= 8;
-					tag |= *ptemp ++;
-
-					pIOR->taggedProfile[i].profileId_tag = tag;
-
-					if (tag == 0x49534F06)					//TAG_BIOP(BIOP Profile Body)
-					{
-						pBIOPProfileBody = &(pIOR->taggedProfile[i].u.BIOPProfileBody);
-
-						pBIOPProfileBody->profileId_tag = tag;
-
-						pBIOPProfileBody->profile_data_length = *ptemp ++;
-						pBIOPProfileBody->profile_data_length <<= 8;
-						pBIOPProfileBody->profile_data_length |= *ptemp ++;
-						pBIOPProfileBody->profile_data_length <<= 8;
-						pBIOPProfileBody->profile_data_length |= *ptemp ++;
-						pBIOPProfileBody->profile_data_length <<= 8;
-						pBIOPProfileBody->profile_data_length |= *ptemp ++;
-
-						pBIOPProfileBody->profile_data_byte_order = *ptemp ++;
-						pBIOPProfileBody->liteComponents_count = *ptemp ++;
-
-						for (component_index = 0; component_index < pBIOPProfileBody->liteComponents_count; component_index ++)
-						{
-							tag = *ptemp ++;
-							tag <<= 8;
-							tag |= *ptemp ++;
-							tag <<= 8;
-							tag |= *ptemp ++;
-							tag <<= 8;
-							tag |= *ptemp ++;
-
-							if (tag == 0x49534F50)
-							{
-								pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
-
-								pObjectLocation->componentId_tag = tag;
-								pObjectLocation->component_data_length = *ptemp ++;
-
-								pObjectLocation->carouselId = *ptemp ++;
-								pObjectLocation->carouselId <<= 8;
-								pObjectLocation->carouselId |= *ptemp ++;
-								pObjectLocation->carouselId <<= 8;
-								pObjectLocation->carouselId |= *ptemp ++;
-								pObjectLocation->carouselId <<= 8;
-								pObjectLocation->carouselId |= *ptemp ++;
-
-								pObjectLocation->moduleId = *ptemp ++;
-								pObjectLocation->moduleId <<= 8;
-								pObjectLocation->moduleId |= *ptemp ++;
-
-								pObjectLocation->version.major = *ptemp ++;
-								pObjectLocation->version.minor = *ptemp ++;
-
-								pObjectLocation->objectKey_length = *ptemp ++;
-//								if (pBIOP_ObjectLocation->objectKey_length > 0)
-//								{
-//									assert(pBIOP_ObjectLocation->objectKey_length <= 4);
-//									memcpy(pBIOP_ObjectLocation->objectKey_data_byte, ptemp, pBIOP_ObjectLocation->objectKey_length);
-//									ptemp += pBIOP_ObjectLocation->objectKey_length;
-//								}
-								pObjectLocation->objectKey_data = *ptemp++;
-								pObjectLocation->objectKey_data <<= 8;
-								pObjectLocation->objectKey_data |= *ptemp++;
-								pObjectLocation->objectKey_data <<= 8;
-								pObjectLocation->objectKey_data |= *ptemp++;
-								pObjectLocation->objectKey_data <<= 8;
-								pObjectLocation->objectKey_data |= *ptemp++;
-							}
-							else if (tag == 0x49534F40)
-							{
-								pConnBinder = &(pBIOPProfileBody->ConnBinder);
-
-								pConnBinder->componentId_tag = tag;
-								pConnBinder->component_data_length = *ptemp ++;
-								pConnBinder->taps_count = *ptemp ++;
-
-								pConnBinder->Tap.id = *ptemp ++;
-								pConnBinder->Tap.id <<= 8;
-								pConnBinder->Tap.id |= *ptemp ++;
-								pConnBinder->Tap.id <<= 8;
-
-								pConnBinder->Tap.use = *ptemp ++;
-								pConnBinder->Tap.use <<= 8;
-								pConnBinder->Tap.use |= *ptemp ++;
-
-								pConnBinder->Tap.association_tag = *ptemp ++;
-								pConnBinder->Tap.association_tag <<= 8;
-								pConnBinder->Tap.association_tag |= *ptemp ++;
-
-								pConnBinder->Tap.selector_length = *ptemp ++;
-
-								pConnBinder->Tap.selector_type = *ptemp ++;
-								pConnBinder->Tap.selector_type <<= 8;
-								pConnBinder->Tap.selector_type |= *ptemp ++;
-
-								pConnBinder->Tap.transactionId = *ptemp ++;
-								pConnBinder->Tap.transactionId <<= 8;
-								pConnBinder->Tap.transactionId |= *ptemp ++;
-								pConnBinder->Tap.transactionId <<= 8;
-								pConnBinder->Tap.transactionId |= *ptemp ++;
-								pConnBinder->Tap.transactionId <<= 8;
-								pConnBinder->Tap.transactionId |= *ptemp ++;
-
-								pConnBinder->Tap.timeout = *ptemp ++;
-								pConnBinder->Tap.timeout <<= 8;
-								pConnBinder->Tap.timeout |= *ptemp ++;
-								pConnBinder->Tap.timeout <<= 8;
-								pConnBinder->Tap.timeout |= *ptemp ++;
-								pConnBinder->Tap.timeout <<= 8;
-								pConnBinder->Tap.timeout |= *ptemp ++;
-							}
-						}
-					}
-					else if (tag == 0x49534F05)				//TAG_LITE_OPTION(LiteOptionsProfileBody)
-					{
-						pLiteOptionsProfileBody = &(pIOR->taggedProfile[i].u.LiteOptionsProfileBody);
-
-						pLiteOptionsProfileBody->profileId_tag = tag;
-
-						pLiteOptionsProfileBody->profile_data_length = *ptemp ++;
-						pLiteOptionsProfileBody->profile_data_length <<= 8;
-						pLiteOptionsProfileBody->profile_data_length |= *ptemp ++;
-						pLiteOptionsProfileBody->profile_data_length <<= 8;
-						pLiteOptionsProfileBody->profile_data_length |= *ptemp ++;
-						pLiteOptionsProfileBody->profile_data_length <<= 8;
-						pLiteOptionsProfileBody->profile_data_length |= *ptemp ++;
-
-						pLiteOptionsProfileBody->profile_data_byte_order = *ptemp ++;
-					}
-
-					remain_length = length - (int)(ptemp - buf);
-				}
-			}
-
-			pServiceGatewayInfo->downloadTaps_count = *ptemp ++;
-			if (pServiceGatewayInfo->downloadTaps_count > 0)
-			{
-				assert(0);
-			}
-
-			pServiceGatewayInfo->serviceContextList_count = *ptemp ++;
-			if (pServiceGatewayInfo->serviceContextList_count > 0)
-			{
-				assert(0);
-			}
-
-			pServiceGatewayInfo->userInfoLength = *ptemp ++;
-			pServiceGatewayInfo->userInfoLength <<= 8;
-			pServiceGatewayInfo->userInfoLength |= *ptemp ++;
-			if (pServiceGatewayInfo->userInfoLength > 0)
-			{
-//				assert(0);
-			}
+			assert(0);
 		}
-		else
+
+		pServiceGatewayInfo->serviceContextList_count = BITS_get(&bs, 8);
+		if (pServiceGatewayInfo->serviceContextList_count > 0)
 		{
-			rtcode = SECTION_PARSE_SYNTAX_ERROR;
+			assert(0);
+		}
+
+		pServiceGatewayInfo->userInfoLength = BITS_get(&bs, 16);
+		if (pServiceGatewayInfo->userInfoLength > 0)
+		{
+//				assert(0);
 		}
 	}
 	else
@@ -812,43 +479,38 @@ int	MPEG2_DSMCC_DecodeServiceGatewayInfo(uint8_t *buf, int length, ServiceGatewa
 
 int	MPEG2_DSMCC_DecodeDownloadServerInitiate(uint8_t *buf, int length, DownloadServerInitiate_t* pDownloadServerInitiate)
 {
-	S32		rtcode = SECTION_PARSE_NO_ERROR;
-	U8*		ptemp;
-	U8*		pend;
-	S32		remain_length;
-
-	GroupInfoIndication_t*			pGroupInfoIndication;
-	ServiceGatewayInfo_t*			pServiceGatewayInfo;
+	int			rtcode = SECTION_PARSE_NO_ERROR;
 
 	if ((buf != NULL) && (length > 24) && (pDownloadServerInitiate != NULL))
 	{
 		memset(pDownloadServerInitiate, 0x00, sizeof(DownloadServerInitiate_t));
 
-		ptemp = buf;
+		BYTES_t		bytes;
+		BYTES_map(&bytes, buf, length);
 
-		memcpy(pDownloadServerInitiate->serverId, ptemp, 20);
-		ptemp += 20;
+		BYTES_copy(pDownloadServerInitiate->serverId, &bytes, 20);
 
-		pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength = *ptemp ++;
-		pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength <<= 8;
-		pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength |= *ptemp ++;
+		pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength = BYTES_get(&bytes, 2);
 
-		if (pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength == 0)
+		if (pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength > 0)
+		{
+			int copy_length = min(pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength, sizeof(pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorBuf));
+			memcpy(pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorBuf, bytes.p_cur, copy_length);
+			BYTES_skip(&bytes, pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength);
+		}
+
+		//if (pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength == 0)
 		{
 			//defined in EN 301 192
-			pDownloadServerInitiate->privateDataLength = *ptemp ++;
-			pDownloadServerInitiate->privateDataLength <<= 8;
-			pDownloadServerInitiate->privateDataLength |= *ptemp ++;
+			pDownloadServerInitiate->privateDataLength = BYTES_get(&bytes, 2);
 
 			//若privateDataLength解析错误，将导致灾难性错误
-			remain_length = length - (int)(ptemp - buf);
-			if (remain_length >= pDownloadServerInitiate->privateDataLength)
+			if (pDownloadServerInitiate->privateDataLength > 0)
 			{
-				pend = ptemp + pDownloadServerInitiate->privateDataLength;	//指出下一处指针的位置
-
 				//检查privateDataByte的类型
 				pDownloadServerInitiate->data_broadcast_type = -1;
 
+				uint8_t* ptemp = bytes.p_cur;
 				int value_hi = (ptemp[0] << 8) | ptemp[1];
 				if (value_hi == 0)
 				{
@@ -867,31 +529,25 @@ int	MPEG2_DSMCC_DecodeDownloadServerInitiate(uint8_t *buf, int length, DownloadS
 				if (pDownloadServerInitiate->data_broadcast_type == 0x0006)		//DC
 				{
 					///////////////////////////////////////////////////////////////////////////
-					pGroupInfoIndication = &(pDownloadServerInitiate->u.GroupInfoIndication);
+					GroupInfoIndication_t* pGroupInfoIndication = &(pDownloadServerInitiate->u.GroupInfoIndication);
 
 					rtcode = MPEG2_DSMCC_DecodeGroupInfoIndication(ptemp, pDownloadServerInitiate->privateDataLength, pGroupInfoIndication);
 				}
 				else if (pDownloadServerInitiate->data_broadcast_type == 0x0007)			//OC
 				{
 					///////////////////////////////////////////////////////////////////////////
-					pServiceGatewayInfo = &(pDownloadServerInitiate->u.ServiceGatewayInfo);
+					ServiceGatewayInfo_t* pServiceGatewayInfo = &(pDownloadServerInitiate->u.ServiceGatewayInfo);
 
 					rtcode = MPEG2_DSMCC_DecodeServiceGatewayInfo(ptemp, pDownloadServerInitiate->privateDataLength, pServiceGatewayInfo);
 				}
 				else
 				{
+					int copy_length = min(pDownloadServerInitiate->privateDataLength, sizeof(pDownloadServerInitiate->u.privateDataByte));
+					memcpy(pDownloadServerInitiate->u.privateDataByte, ptemp, copy_length);
 				}
 
-				ptemp = pend;
+				BYTES_skip(&bytes, pDownloadServerInitiate->privateDataLength);
 			}
-			else
-			{
-				rtcode = SECTION_PARSE_SYNTAX_ERROR;
-			}
-		}
-		else
-		{
-			rtcode = SECTION_PARSE_SYNTAX_ERROR;
 		}
 	}
 	else
@@ -902,16 +558,15 @@ int	MPEG2_DSMCC_DecodeDownloadServerInitiate(uint8_t *buf, int length, DownloadS
 	return rtcode;
 }
 
-int MPEG2_DSMCC_UNM_DecodeSection(uint8_t *buf, int length, dsmcc_unm_section_t* pDSMCC_section)
+int MPEG2_DSMCC_UNM_DecodeSection(uint8_t *section_buf, int section_size, dsmcc_unm_section_t* pdsmcc_section)
 {
-	S32						rtcode = SECTION_PARSE_NO_ERROR;
-	S32						payload_length;
-	S32						copy_length;
-	U8*						ptemp;
-	U32						tempId;
-	S32						stream_error;
+	int						rtcode = SECTION_PARSE_NO_ERROR;
 
-	U8						section_syntax_indicator;
+	int						copy_length;
+	uint8_t*				ptemp;
+	int						stream_error;
+
+	uint8_t					section_syntax_indicator;
 
 	dsmccMessageHeader_t*				pdsmccMessageHeader;
 
@@ -919,19 +574,21 @@ int MPEG2_DSMCC_UNM_DecodeSection(uint8_t *buf, int length, dsmcc_unm_section_t*
 	DownloadInfoIndication_t*			pDownloadInfoIndication;
 	//DownloadDataBlock_t*				pDownloadDataBlock;
 
-	if ((buf != NULL) && (length >= MPEG2_DSMCC_SECTION_MIN_SIZE) && (pDSMCC_section != NULL))
+	if ((section_buf != NULL) &&
+		((section_size >= MPEG2_DSMCC_SECTION_MIN_SIZE) && (section_size <= MPEG2_DSMCC_SECTION_MAX_SIZE)) &&
+		(pdsmcc_section != NULL))
 	{
-		memset(pDSMCC_section, 0x00, sizeof(dsmcc_unm_section_t));
+		memset(pdsmcc_section, 0x00, sizeof(dsmcc_unm_section_t));
 
-		pDSMCC_section->CRC_32_verify = Encode_CRC_32(buf, length - 4);
-		pDSMCC_section->CRC_32 = ((buf[length - 4] << 24) | (buf[length - 3] << 16) | (buf[length - 2] << 8) | buf[length - 1]);
-
-		section_syntax_indicator = (buf[1] & 0x80) >> 7;
+		section_syntax_indicator = (section_buf[1] & 0x80) >> 7;
 
 		stream_error = 0;
 		if (section_syntax_indicator == 1)
 		{
-			if (pDSMCC_section->CRC_32_verify != pDSMCC_section->CRC_32)
+			pdsmcc_section->recalculated.CRC_32 = Encode_CRC_32(section_buf, section_size - 4);
+			uint32_t CRC_32_encoded = ((section_buf[section_size - 4] << 24) | (section_buf[section_size - 3] << 16) | (section_buf[section_size - 2] << 8) | section_buf[section_size - 1]);
+
+			if (pdsmcc_section->recalculated.CRC_32 != CRC_32_encoded)
 			{
 				stream_error = 1;
 			}
@@ -939,120 +596,122 @@ int MPEG2_DSMCC_UNM_DecodeSection(uint8_t *buf, int length, dsmcc_unm_section_t*
 		else
 		{
 			//没有校验checksum, 以后增加
+			pdsmcc_section->recalculated.checksum = Encode_CRC_32(section_buf, section_size - 4);
+			uint32_t checksum_encoded = ((section_buf[section_size - 4] << 24) | (section_buf[section_size - 3] << 16) | (section_buf[section_size - 2] << 8) | section_buf[section_size - 1]);
 
-//			assert((length % 4) == 0);
+			if (pdsmcc_section->recalculated.checksum != checksum_encoded)
+			{
+				stream_error = 1;
+			}
 		}
 
-		if (stream_error == 0)
+		//if (stream_error == 0)
 		{
-			pDSMCC_section->table_id = *buf++;
-			assert(pDSMCC_section->table_id == TABLE_ID_DSMCC_UNM);
+			BITS_t bs;
+			BITS_map(&bs, section_buf, section_size);
 
-			pDSMCC_section->section_syntax_indicator = (*buf & 0x80) >> 7;
+			pdsmcc_section->table_id = BITS_get(&bs, 8);
+			assert(pdsmcc_section->table_id == TABLE_ID_DSMCC_UNM);
 
-			pDSMCC_section->dsmcc_section_length = (*buf++ & 0x0f) << 8;
-			pDSMCC_section->dsmcc_section_length |= *buf++;
+			pdsmcc_section->section_syntax_indicator = BITS_get(&bs, 1);
+			pdsmcc_section->private_indicator = BITS_get(&bs, 1);
+			pdsmcc_section->reserved0 = BITS_get(&bs, 2);
+			pdsmcc_section->dsmcc_section_length = BITS_get(&bs, 12);
 
-			if ((pDSMCC_section->dsmcc_section_length + 3) == length)
+			if ((pdsmcc_section->dsmcc_section_length + 3) == section_size)
 			{
-				pDSMCC_section->table_id_extension = (*buf++) << 8;
-				pDSMCC_section->table_id_extension |= *buf++;
+				pdsmcc_section->table_id_extension = BITS_get(&bs, 16);
 
-				pDSMCC_section->version_number = (*buf & 0x3E) >> 1;
-				pDSMCC_section->current_next_indicator = (*buf++ & 0x01);
+				pdsmcc_section->reserved1 = BITS_get(&bs, 2);
+				pdsmcc_section->version_number = BITS_get(&bs, 5);
+				pdsmcc_section->current_next_indicator = BITS_get(&bs, 1);
 
-				pDSMCC_section->section_number = *buf++;
-				pDSMCC_section->last_section_number = *buf++;
+				pdsmcc_section->section_number = BITS_get(&bs, 8);
+				pdsmcc_section->last_section_number = BITS_get(&bs, 8);
 
-				ptemp = buf;
-				buf += (pDSMCC_section->dsmcc_section_length - 9);
-
-				pdsmccMessageHeader = &(pDSMCC_section->dsmccMessageHeader);
-
-				pdsmccMessageHeader->protocolDiscriminator = *ptemp++;
-				pdsmccMessageHeader->dsmccType = *ptemp ++;
-
-				pdsmccMessageHeader->messageId = *ptemp ++;
-				pdsmccMessageHeader->messageId <<= 8;
-				pdsmccMessageHeader->messageId |= *ptemp ++;
-
-				tempId = *ptemp ++;
-				tempId <<= 8;
-				tempId |= *ptemp ++;
-				tempId <<= 8;
-				tempId |= *ptemp ++;
-				tempId <<= 8;
-				tempId |= *ptemp ++;
-
-				pdsmccMessageHeader->transactionId = tempId;
-
-				pdsmccMessageHeader->reserved = *ptemp ++;
-
-				pdsmccMessageHeader->adaptationLength = *ptemp ++;
-
-				pdsmccMessageHeader->messageLength = *ptemp ++;
-				pdsmccMessageHeader->messageLength <<= 8;
-				pdsmccMessageHeader->messageLength |= *ptemp ++;
-
-				assert(pdsmccMessageHeader->adaptationLength <= pdsmccMessageHeader->messageLength);
-				//messageLength解析错误，将是灾难性的
-
-				if (pdsmccMessageHeader->adaptationLength > 0)
+				int section_payload_length = pdsmcc_section->dsmcc_section_length - 4 - 5;
+				if (section_payload_length > 0)
 				{
-					//解析adaptation
-					pdsmccMessageHeader->dsmccAdaptationHeader.adaptationType = *ptemp ++;
+					ptemp = bs.p_cur;
+					BITS_byteSkip(&bs, section_payload_length);
 
-					copy_length = min(64, pdsmccMessageHeader->adaptationLength - 1);
-					pdsmccMessageHeader->dsmccAdaptationHeader.N = copy_length;
-					if (copy_length > 0)
+					pdsmccMessageHeader = &(pdsmcc_section->dsmccMessageHeader);
+
+					BYTES_t bytes;
+					BYTES_map(&bytes, ptemp, section_payload_length);
+
+					pdsmccMessageHeader->protocolDiscriminator = BYTES_get(&bytes, 1);
+					pdsmccMessageHeader->dsmccType = BYTES_get(&bytes, 1);
+					pdsmccMessageHeader->messageId = BYTES_get(&bytes, 2);
+					pdsmccMessageHeader->transactionId = BYTES_get(&bytes, 4);
+					pdsmccMessageHeader->reserved = BYTES_get(&bytes, 1);
+					pdsmccMessageHeader->adaptationLength = BYTES_get(&bytes, 1);
+					pdsmccMessageHeader->messageLength = BYTES_get(&bytes, 2);
+
+					assert(pdsmccMessageHeader->adaptationLength <= pdsmccMessageHeader->messageLength);
+					//messageLength解析错误，将是灾难性的
+
+					if (pdsmccMessageHeader->adaptationLength > 0)
 					{
-						memcpy(pdsmccMessageHeader->dsmccAdaptationHeader.adaptationDataByte, ptemp, copy_length);
-						ptemp += (pdsmccMessageHeader->adaptationLength - 1);
+						//解析adaptation
+						pdsmccMessageHeader->dsmccAdaptationHeader.adaptationType = BYTES_get(&bytes, 1);
+
+						pdsmccMessageHeader->dsmccAdaptationHeader.N = pdsmccMessageHeader->adaptationLength - 1;
+						copy_length = min(64, pdsmccMessageHeader->dsmccAdaptationHeader.N);
+						if (copy_length > 0)
+						{
+							memcpy(pdsmccMessageHeader->dsmccAdaptationHeader.adaptationDataByte, bytes.p_cur, copy_length);
+							BYTES_skip(&bytes, pdsmccMessageHeader->dsmccAdaptationHeader.N);
+						}
 					}
+
+					int msg_payload_length = pdsmccMessageHeader->messageLength - pdsmccMessageHeader->adaptationLength;
+					if (msg_payload_length > 0)
+					{
+						if (pdsmccMessageHeader->messageId == 0x1002)			//DII
+						{
+							pDownloadInfoIndication = &(pdsmcc_section->u.DownloadInfoIndication);
+
+							rtcode = MPEG2_DSMCC_DecodeDownloadInfoIndication(bytes.p_cur, msg_payload_length, pDownloadInfoIndication);
+						}
+						else if (pdsmccMessageHeader->messageId == 0x1006)							//DSI
+						{
+							pDownloadServerInitiate = &(pdsmcc_section->u.DownloadServerInitiate);
+
+							rtcode = MPEG2_DSMCC_DecodeDownloadServerInitiate(bytes.p_cur, msg_payload_length, pDownloadServerInitiate);
+						}
+						else
+						{
+							assert(0);
+							rtcode = SECTION_PARSE_SYNTAX_ERROR;
+						}
+
+						BYTES_skip(&bytes, msg_payload_length);
+					}
+
+					assert(bytes.p_cur == bs.p_cur);
 				}
 
-//					payload_length = pdsmccMessageHeader->messageLength - pdsmccMessageHeader->adaptationLength;
-				payload_length = (int)(buf - ptemp);
-
-				if (payload_length >= pdsmccMessageHeader->messageLength)
+				uint32_t checksum_or_crc32 = BITS_get(&bs, 32);
+				if (pdsmcc_section->section_syntax_indicator == 1)
 				{
-					if (pdsmccMessageHeader->messageId == 0x1002)			//DII
-					{
-						pDownloadInfoIndication = &(pDSMCC_section->u.DownloadInfoIndication);
-
-						rtcode = MPEG2_DSMCC_DecodeDownloadInfoIndication(ptemp, payload_length, pDownloadInfoIndication);
-					}
-					else if (pdsmccMessageHeader->messageId == 0x1003)					//DDB
-					{
-						assert(0);
-					}
-					else if (pdsmccMessageHeader->messageId == 0x1006)							//DSI
-					{
-						pDownloadServerInitiate = &(pDSMCC_section->u.DownloadServerInitiate);
-
-						rtcode = MPEG2_DSMCC_DecodeDownloadServerInitiate(ptemp, payload_length, pDownloadServerInitiate);
-					}
-					else
-					{
-						rtcode = SECTION_PARSE_SYNTAX_ERROR;
-					}
+					pdsmcc_section->encode.CRC_32 = checksum_or_crc32;
 				}
 				else
 				{
-					rtcode = SECTION_PARSE_SYNTAX_ERROR;
+					pdsmcc_section->encode.checksum = checksum_or_crc32;
 				}
-
-				buf += 4;
 			}
 			else
 			{
 				rtcode = SECTION_PARSE_LENGTH_ERROR;				//section长度错误
 			}
 		}
-		else
-		{
-			rtcode = SECTION_PARSE_CRC_ERROR;						//校验错误
-		}
+
+		//else
+		//{
+		//	rtcode = SECTION_PARSE_CRC_ERROR;						//校验错误
+		//}
 	}
 	else
 	{

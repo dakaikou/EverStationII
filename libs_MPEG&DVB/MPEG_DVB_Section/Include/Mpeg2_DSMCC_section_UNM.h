@@ -6,146 +6,34 @@
 #include "MPEG_DVB_Common.h"
 #include "Mpeg2_DSMCC_Descriptor.h"
 #include "Mpeg2_DSMCC_section.h"
+#include "Mpeg2_DSMCC_common.h"
+
 #include "HAL/HAL_Sys/Include/INTTYPES.H"
 
 
 /*------------------------------------------------------------
 		DSM-CC definition 
 -------------------------------------------------------------*/
-namespace BIOP
-{
-	typedef struct _ObjectLocation_s
-	{
-		U32			componentId_tag;					//32
-		U8			component_data_length;				//8
-		U32			carouselId;							//32
-		U16			moduleId;							//16
-		struct
-		{
-			U8			major;							//8
-			U8			minor;							//8
-
-		} version;
-
-		U8			objectKey_length;					//8
-	//	U8			objectKey_data_byte[4];				//8 x N2
-		U32			objectKey_data;
-
-	} ObjectLocation_t;
-
-	typedef struct _Tap_s
-	{
-		U16			id;									//16
-		U16			use;								//16
-		U16			association_tag;					//16
-		U8			selector_length;					//8
-		U16			selector_type;						//16
-		U32			transactionId;						//32
-		U32			timeout;							//32
-
-	} Tap_t;
-
-	typedef struct _Name_s
-	{
-		U8			nameComponents_count;						//8
-
-		U8			id_length[1];								//8		标准中规定是1			
-		S8			id_data_byte[1][65];						//
-		U8			kind_length[1];
-		S8			kind_data_byte[1][4];
-	} Name_t;
-}
-
-namespace DSM
-{
-	typedef struct _ConnBinder_s
-	{
-		U32			componentId_tag;					//32
-		int			component_data_length;				//8
-		U8			taps_count;							//8
-
-		BIOP::Tap_t	Tap;
-
-	} ConnBinder_t;
-};
-
-typedef struct _BIOPProfileBody_s
-{
-	uint32_t					profileId_tag;						//32
-	int							profile_data_length;				//32
-	uint8_t						profile_data_byte_order;			//8
-	uint8_t						liteComponents_count;				//8
-	BIOP::ObjectLocation_t		ObjectLocation;
-	DSM::ConnBinder_t			ConnBinder;
-
-} BIOPProfileBody_t;
-
-typedef struct _LiteOptionsProfileBody_s
-{
-	U32							profileId_tag;						//32
-	int							profile_data_length;				//32
-	U8							profile_data_byte_order;			//8
-
-} LiteOptionsProfileBody_t;
-
-namespace IOP
-{
-	typedef struct _IOR_s
-	{
-		uint32_t				type_id_length;						//32
-		char					type_id_byte[4];					//8 x N1
-		uint8_t					alignment_gap[4];					//8 x ???
-
-		int					taggedProfiles_count;				//32
-		struct
-		{
-			uint32_t		profileId_tag;
-			int		profile_data_length;
-
-			union
-			{
-				BIOPProfileBody_t			BIOPProfileBody;
-				LiteOptionsProfileBody_t	LiteOptionsProfileBody;
-			} u;
-		
-		}taggedProfile[4];
-
-	} IOR_t;
-};
 
 typedef struct _ServiceGatewayInfo_s
 {
 	IOP::IOR_t	IOR;
 
-	U8			downloadTaps_count;						//8	
-	U8			Tap[1];									//
+	U8			downloadTaps_count;						//8	, N1
+	BIOP::TAP_t	Taps[1];								//为什么数组长度为1？  chendelin 2018.10.4
 
-	U8			serviceContextList_count;				//8
-	U32			context_id[1];							//32
-	U16			context_data_length[1];					//16
-	U8			context_data_byte[1][1];				//8
+	U8			serviceContextList_count;				//8, N2
+	uint8_t		serviceContextList_data_byte[255];
+	//struct {
+	//	U32			context_id;							//32
+	//	U16			context_data_length;				//16
+	//	U8			context_data_byte[1];				//8
+	//} serviceContexts[1];								//为什么数组长度为1？  chendelin 2018.10.4
+
 	U16			userInfoLength;							//16
 	U8			userInfo_data_byte[256];						
 
 } ServiceGatewayInfo_t;
-
-//typedef struct compatibilityDescriptor_s
-//{
-//	U16			compatibilityDescriptorLength;								//16			
-//} compatibilityDescriptor_t, *pcompatibilityDescriptor_t;
-
-//typedef struct dsmccAdaptationHeader_s
-//{
-//	U8			adaptationType;						//8
-//	U8			N;
-//	U8			adaptationDataByte[64];
-//
-//} dsmccAdaptationHeader_t, *pdsmccAdaptationHeader_t;
-
-//typedef struct LLCSNAP_s
-//{
-//	U8			reserved;
-//} LLCSNAP_t, *pLLCSNAP_t;
 
 typedef struct DownloadInfoRequest_s
 {
@@ -166,16 +54,17 @@ typedef struct BIOP_moduleInfo_s
 	U32			moduleTimeOut;				//32
 	U32			blockTimeOut;				//32
 	U32			minBlockTime;				//32
-	U8			taps_count;					//8
 
-	struct
-	{
-		U16			id;							//16
-		U16			use;						//16
-		U16			association_tag;			//16
-		U8			selector_length;			//8
-		//U8			selector_data_byte[256];	//8
-	}TAP[4];
+	U8			taps_count;					//8
+	BIOP::TAP_t TAP[4];
+	//struct
+	//{
+	//	U16			id;							//16
+	//	U16			use;						//16
+	//	U16			association_tag;			//16
+	//	U8			selector_length;			//8
+	//	//U8			selector_data_byte[256];	//8
+	//}TAP[4];											//为什么数组长度为4? chendelin 2018.10.4
 
 	U8			userInfoLength;				//8
 	U8			userInfo_data_byte[256];	//8
@@ -281,43 +170,11 @@ typedef struct DownloadServerInitiate_s
 	{
 		uint8_t							privateDataByte[128];
 		GroupInfoIndication_t			GroupInfoIndication;					//DC所使用到的数据结构
-		ServiceGatewayInfo_t			ServiceGatewayInfo;				//OC所使用到的数据结构
+		ServiceGatewayInfo_t			ServiceGatewayInfo;						//OC所使用到的数据结构
 	} u;
 
 } DownloadServerInitiate_t, *pDownloadServerInitiate_t;
 
-typedef struct DSMCC_DSI_s
-{
-	int				data_broadcast_type;						//0x0006 -- DC, 0x0007 -- OC
-
-	//DC
-	S32				NumberOfGroups;
-	GroupInfo_t*	astGroupInfo;
-
-	//OC
-	//业务网关信息
-	U32				carouselId;
-	U16				moduleId_for_srg;
-	U32				objectKey_data_for_srg;
-
-//	U16				moduleId_for_dii;
-	U16				table_id_extension_for_dii;
-
-} DSMCC_DSI_t;
-
-typedef struct DSMCC_DII_s
-{
-	U32			downloadId;								//32
-	U16			blockSize;								//16
-	U8			windowSize;								//8
-	U8			ackPeriod;								//8
-	U32			tCDownloadWindow;						//32
-	U32			tCDownloadScenario;						//32
-
-	U16				numberOfModules;					//16
-	moduleInfo_t*	astModuleInfo;
-
-} DSMCC_DII_t;
 
 typedef struct dsmcc_unm_section_s
 {
@@ -341,13 +198,22 @@ typedef struct dsmcc_unm_section_s
 
 	union
 	{
-		//DownloadDataBlock_t					DownloadDataBlock;
 		DownloadServerInitiate_t			DownloadServerInitiate;
 		DownloadInfoIndication_t			DownloadInfoIndication;
+		//DownloadDataBlock_t					DownloadDataBlock;
 	} u;
 
-	U32		CRC_32;										//32
-	U32		CRC_32_verify;								//32
+	union
+	{
+		uint32_t	CRC_32;										//32
+		uint32_t	checksum;									//32
+	} encode;
+
+	union
+	{
+		uint32_t	CRC_32;										//32
+		uint32_t	checksum;									//32
+	} recalculated;
 
 } dsmcc_unm_section_t;
 

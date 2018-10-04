@@ -27,7 +27,6 @@ void HALForXMLDoc::SetSyncOffset(int offset)
 //	return m_bs_tracer.offset;
 //}
 
-//XMLElement * HALForXMLDoc::NewElementForString(XMLElement* pxmlParent, const char* key_name, const char* string, const char* pszComment)
 XMLElement * HALForXMLDoc::NewElementForString(XMLElement* pxmlParent, const char* key_name, const char* pszComment)
 {
 	XMLElement* pxmlNewElement = XMLDocument::NewElement(key_name);
@@ -101,7 +100,40 @@ XMLElement * HALForXMLDoc::NewElementForBits(XMLElement* pxmlParent, const char*
 	return pxmlNewElement;
 }
 
-XMLElement * HALForXMLDoc::NewElementForBytes(XMLElement* pxmlParent, const char* key_name, const uint8_t* byte_buf, int byte_length, const char* pszComment)
+XMLElement * HALForXMLDoc::NewElementForByteMode(XMLElement* pxmlParent, const char* key_name, uint32_t key_value, int bytes, const char* pszComment)
+{
+	XMLElement* pxmlNewElement = XMLDocument::NewElement(key_name);
+
+	if (bytes > 0)
+	{
+		pxmlNewElement->SetAttribute("bytes", bytes);
+
+		assert(m_bs_tracer.i_left == 8);		//must be byte aligned   chendelin  2018.10.3
+		int next_offset = m_bs_tracer.offset + bytes;
+		int length = bytes;
+
+		pxmlNewElement->SetAttribute("offset", m_bs_tracer.offset);
+		pxmlNewElement->SetAttribute("length", length);
+
+		m_bs_tracer.offset = next_offset;
+	}
+
+	pxmlNewElement->SetAttribute("value", key_value);
+
+	if (pszComment != NULL)
+	{
+		pxmlNewElement->SetAttribute("comment", pszComment);
+	}
+
+	if (pxmlParent != NULL)
+	{
+		pxmlParent->InsertEndChild(pxmlNewElement);
+	}
+
+	return pxmlNewElement;
+}
+
+XMLElement * HALForXMLDoc::NewElementForByteBuf(XMLElement* pxmlParent, const char* key_name, const uint8_t* byte_buf, int byte_length, const char* pszComment)
 {
 	char pszTemp[48];
 	int	 i;

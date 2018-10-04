@@ -144,6 +144,9 @@
     <ClInclude Include="Impl\DVB_SI_Utilities_Inner.h">
       <Filter>源文件\Impl</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Mpeg2_DSMCC_common.h">
+      <Filter>头文件\Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -316,6 +319,12 @@
     </ClCompile>
     <ClCompile Include="Impl\Mpeg2_PSI_section_TSDT.cpp">
       <Filter>源文件\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\Mpeg2_DSMCC_common.cpp">
+      <Filter>源文件\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\xml\Mpeg2_DSMCC_common_XML.cpp">
+      <Filter>源文件\Impl\xml</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

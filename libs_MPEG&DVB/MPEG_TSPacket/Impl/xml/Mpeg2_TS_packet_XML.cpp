@@ -99,7 +99,7 @@ int MPEG_decode_TS_packet_to_XML(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc
 		if ((ptransport_packet->adaptation_field_control & 0b01) == 0b01)	//ÅÐ¶ÏÊÇ·ñÓÐ¾»ºÉ
 		{
 			XMLDOC_SetSyncOffset(pxmlDoc, payload_start_pos);
-			XMLDOC_NewElementForBytes(pxmlDoc, pxmlRootNode, "payload_buf[ ]", ptransport_packet->payload_buf, ptransport_packet->payload_length, NULL);
+			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlRootNode, "payload_buf[ ]", ptransport_packet->payload_buf, ptransport_packet->payload_length, NULL);
 		}
 	}
 

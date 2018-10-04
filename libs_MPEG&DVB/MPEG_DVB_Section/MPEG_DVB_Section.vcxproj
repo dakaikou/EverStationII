@@ -183,6 +183,7 @@
     <ClInclude Include="Include\DVB_SI_section.h" />
     <ClInclude Include="Include\DVB_SI_Utilities.h" />
     <ClInclude Include="Include\DVB_table_id.h" />
+    <ClInclude Include="Include\Mpeg2_DSMCC_common.h" />
     <ClInclude Include="Include\Mpeg2_DSMCC_Descriptor.h" />
     <ClInclude Include="Include\Mpeg2_DSMCC_section.h" />
     <ClInclude Include="Include\Mpeg2_DSMCC_section_DDM.h" />
@@ -231,6 +232,7 @@
     <ClCompile Include="Impl\DVB_SI_section_TDT.cpp" />
     <ClCompile Include="Impl\DVB_SI_section_TOT.cpp" />
     <ClCompile Include="Impl\DVB_SI_Utilities.cpp" />
+    <ClCompile Include="Impl\Mpeg2_DSMCC_common.cpp" />
     <ClCompile Include="Impl\Mpeg2_DSMCC_Descriptor.cpp" />
     <ClCompile Include="Impl\Mpeg2_DSMCC_section.cpp" />
     <ClCompile Include="Impl\Mpeg2_DSMCC_section_DDM.cpp" />
@@ -258,6 +260,7 @@
     <ClCompile Include="Impl\xml\DVB_SI_section_SDT_XML.cpp" />
     <ClCompile Include="Impl\xml\DVB_SI_section_TDT_XML.cpp" />
     <ClCompile Include="Impl\xml\DVB_SI_section_TOT_XML.cpp" />
+    <ClCompile Include="Impl\xml\Mpeg2_DSMCC_common_XML.cpp" />
     <ClCompile Include="Impl\xml\Mpeg2_DSMCC_Descriptor_XML.cpp" />
     <ClCompile Include="Impl\xml\Mpeg2_DSMCC_section_DDM_XML.cpp" />
     <ClCompile Include="Impl\xml\Mpeg2_DSMCC_section_UNM_XML.cpp" />

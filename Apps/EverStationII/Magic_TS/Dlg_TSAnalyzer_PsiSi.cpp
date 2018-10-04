@@ -285,7 +285,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_DSMCC_UNM)
 			{
-				MPEG2_DSMCC_UNM_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				MPEG2_DSMCC_UNM_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\DSMCC_UNM-0x%02X.xml", pszXmlDir, table_id);
@@ -293,7 +293,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_DSMCC_DDM)
 			{
-				MPEG2_DSMCC_DDM_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				MPEG2_DSMCC_DDM_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\DSMCC_DDM-0x%02X.xml", pszXmlDir, table_id);

@@ -99,15 +99,16 @@ int CDSMCC_UNM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 				}
 				else if (pDownloadServerInitiate->data_broadcast_type == 0x0007)		//OC
 				{
-					u.m_DSI.carouselId = pDownloadServerInitiate->u.ServiceGatewayInfo.IOR.taggedProfile[0].u.BIOPProfileBody.ObjectLocation.carouselId;
-					u.m_DSI.moduleId_for_srg = pDownloadServerInitiate->u.ServiceGatewayInfo.IOR.taggedProfile[0].u.BIOPProfileBody.ObjectLocation.moduleId;
-//										m_DSI.moduleId_for_dii = (pDownloadServerInitiate->u.ServiceGatewayInfo.IOR.IOP_taggedProfile[0].u.BIOP_ProfileBody.DSM_ConnBinder.BIOP_Tap.transactionId & 0x0000ffff);
-					u.m_DSI.table_id_extension_for_dii = (pDownloadServerInitiate->u.ServiceGatewayInfo.IOR.taggedProfile[0].u.BIOPProfileBody.ConnBinder.Tap.transactionId & 0x0000ffff);
+					BIOPProfileBody_t* pBIOPProfileBody = pDownloadServerInitiate->u.ServiceGatewayInfo.IOR.pBIOPProfileBodyPortrait;
 
-//										ptemp = pDownloadServerInitiate->u.BIOP_ServiceGatewayInfo.IOR.IOP_taggedProfile[0].u.BIOP_ProfileBody.BIOP_ObjectLocation.objectKey_data_byte;
-//										m_DSI.objectKey_data_for_srg = (ptemp[0] << 24) | (ptemp[1] << 16) | (ptemp[2] << 8) | ptemp[3];
+					BIOP::ObjectLocation_t* pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
+					u.m_DSI.carouselId = pObjectLocation->carouselId;
+					u.m_DSI.moduleId_for_srg = pObjectLocation->moduleId;
+					u.m_DSI.objectKey_data_for_srg = pObjectLocation->objectKey_data;
 
-					u.m_DSI.objectKey_data_for_srg = pDownloadServerInitiate->u.ServiceGatewayInfo.IOR.taggedProfile[0].u.BIOPProfileBody.ObjectLocation.objectKey_data;
+					DSM::ConnBinder_t* pConnBinder = &(pBIOPProfileBody->ConnBinder);
+					u.m_DSI.table_id_extension_for_dii = pConnBinder->Tap[0].transactionId & 0x0000ffff;
+
 				}
 			}
 			else if (m_usMessageId == 0x1002)			//DII

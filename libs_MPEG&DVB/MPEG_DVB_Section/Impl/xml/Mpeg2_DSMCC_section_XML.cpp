@@ -15,7 +15,6 @@
 
 #include "libs_Math/Include/CRC_32.h"
 
-using namespace std;
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
 #endif

@@ -294,7 +294,7 @@ int MPEG2_PSI_decode_CA_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc
 
 		if (pCA_descriptor->private_data_length > 0)
 		{
-			XMLDOC_NewElementForBytes(pxmlDoc, pxmlDescriptorNode, "private_data_byte[ ]", pCA_descriptor->private_data_byte, pCA_descriptor->private_data_length, NULL);
+			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlDescriptorNode, "private_data_byte[ ]", pCA_descriptor->private_data_byte, pCA_descriptor->private_data_length, NULL);
 		}
 	}
 

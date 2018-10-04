@@ -33,7 +33,7 @@ int DVB_SI_CMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, CA_message_section_t
 
 		if (pcmt_section->CA_section_length > 0)
 		{
-			XMLDOC_NewElementForBytes(pxmlDoc, pxmlRootNode, "CA_data_byte[ ]", pcmt_section->CA_data_byte, pcmt_section->CA_section_length, NULL);
+			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlRootNode, "CA_data_byte[ ]", pcmt_section->CA_data_byte, pcmt_section->CA_section_length, NULL);
 		}
 	}
 

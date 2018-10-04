@@ -3,14 +3,14 @@
 #include <assert.h>
 #include <math.h>
 
-//#include "../Include/Mpeg2_DSMCC_Descriptor.h"
-//#include "../Include/Mpeg2_PSI_section.h"
 #include "../Include/Mpeg2_DSMCC_section.h"
 #include "../Include/Mpeg2_DSMCC_section_DDM.h"
 #include "../Include/Mpeg2_table_id.h"
 #include "../Include/MPEG_DVB_ErrorCode.h"
 
 #include "libs_Math/Include/CRC_32.h"
+#include "HAL\HAL_BitStream\Include\HALForBitStream.h"
+#include "HAL\HAL_ByteStream\Include\HALForByteStream.h"
 
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
@@ -56,13 +56,11 @@ int	MPEG2_DSMCC_DecodeDownloadDataBlock(uint8_t *buf, int length, DownloadDataBl
 	return rtcode;
 }
 
-int MPEG2_DSMCC_DDM_DecodeSection(uint8_t *buf, int length, dsmcc_ddm_section_t* pDSMCC_section)
+int MPEG2_DSMCC_DDM_DecodeSection(uint8_t *section_buf, int section_size, dsmcc_ddm_section_t* pdsmcc_section)
 {
 	int						rtcode = SECTION_PARSE_NO_ERROR;
-	int						payload_length;
 	int						copy_length;
 	uint8_t*				ptemp;
-	uint32_t				tempId;
 	int						stream_error;
 
 	uint8_t					section_syntax_indicator;
@@ -70,19 +68,21 @@ int MPEG2_DSMCC_DDM_DecodeSection(uint8_t *buf, int length, dsmcc_ddm_section_t*
 	dsmccDownloadDataHeader_t*			pdsmccDownloadDataHeader;
 	DownloadDataBlock_t*				pDownloadDataBlock;
 
-	if ((buf != NULL) && (length >= MPEG2_DSMCC_SECTION_MIN_SIZE) && (pDSMCC_section != NULL))
+	if ((section_buf != NULL) && 
+		((section_size >= MPEG2_DSMCC_SECTION_MIN_SIZE) && (section_size <= MPEG2_DSMCC_SECTION_MAX_SIZE)) &&
+		(pdsmcc_section != NULL))
 	{
-		memset(pDSMCC_section, 0x00, sizeof(dsmcc_ddm_section_t));
+		memset(pdsmcc_section, 0x00, sizeof(dsmcc_ddm_section_t));
 
-		pDSMCC_section->CRC_32_verify = Encode_CRC_32(buf, length - 4);
-		pDSMCC_section->CRC_32 = ((buf[length - 4] << 24) | (buf[length - 3] << 16) | (buf[length - 2] << 8) | buf[length - 1]);
-
-		section_syntax_indicator = (buf[1] & 0x80) >> 7;
+		section_syntax_indicator = (section_buf[1] & 0x80) >> 7;
 
 		stream_error = 0;
 		if (section_syntax_indicator == 1)
 		{
-			if (pDSMCC_section->CRC_32_verify != pDSMCC_section->CRC_32)
+			pdsmcc_section->recalculated.CRC_32 = Encode_CRC_32(section_buf, section_size - 4);
+			uint32_t CRC_32_encoded = ((section_buf[section_size - 4] << 24) | (section_buf[section_size - 3] << 16) | (section_buf[section_size - 2] << 8) | section_buf[section_size - 1]);
+
+			if (pdsmcc_section->recalculated.CRC_32 != CRC_32_encoded)
 			{
 				stream_error = 1;
 			}
@@ -90,107 +90,103 @@ int MPEG2_DSMCC_DDM_DecodeSection(uint8_t *buf, int length, dsmcc_ddm_section_t*
 		else
 		{
 			//没有校验checksum, 以后增加
+			pdsmcc_section->recalculated.checksum = Encode_CRC_32(section_buf, section_size - 4);
+			uint32_t checksum_encoded = ((section_buf[section_size - 4] << 24) | (section_buf[section_size - 3] << 16) | (section_buf[section_size - 2] << 8) | section_buf[section_size - 1]);
 
-//			assert((length % 4) == 0);
+			if (pdsmcc_section->recalculated.checksum != checksum_encoded)
+			{
+				stream_error = 1;
+			}
 		}
 
 		if (stream_error == 0)
 		{
-			pDSMCC_section->table_id = *buf++;
-			assert(pDSMCC_section->table_id == TABLE_ID_DSMCC_DDM);
+			BITS_t bs;
+			BITS_map(&bs, section_buf, section_size);
 
-			pDSMCC_section->section_syntax_indicator = (*buf & 0x80) >> 7;
+			pdsmcc_section->table_id = BITS_get(&bs, 8);
+			assert(pdsmcc_section->table_id == TABLE_ID_DSMCC_DDM);
 
-			pDSMCC_section->dsmcc_section_length = (*buf++ & 0x0f) << 8;
-			pDSMCC_section->dsmcc_section_length |= *buf++;
+			pdsmcc_section->section_syntax_indicator = BITS_get(&bs, 1);
+			pdsmcc_section->private_indicator = BITS_get(&bs, 1);
+			pdsmcc_section->reserved0 = BITS_get(&bs, 2);
+			pdsmcc_section->dsmcc_section_length = BITS_get(&bs, 12);
 
-			if ((pDSMCC_section->dsmcc_section_length + 3) == length)
+			if ((pdsmcc_section->dsmcc_section_length + 3) == section_size)
 			{
-				pDSMCC_section->table_id_extension = (*buf++) << 8;
-				pDSMCC_section->table_id_extension |= *buf++;
+				pdsmcc_section->table_id_extension = BITS_get(&bs, 16);
 
-				pDSMCC_section->version_number = (*buf & 0x3E) >> 1;
-				pDSMCC_section->current_next_indicator = (*buf++ & 0x01);
+				pdsmcc_section->reserved1 = BITS_get(&bs, 2);
+				pdsmcc_section->version_number = BITS_get(&bs, 5);
+				pdsmcc_section->current_next_indicator = BITS_get(&bs, 1);
 
-				pDSMCC_section->section_number = *buf++;
-				pDSMCC_section->last_section_number = *buf++;
+				pdsmcc_section->section_number = BITS_get(&bs, 8);
+				pdsmcc_section->last_section_number = BITS_get(&bs, 8);
 
-				ptemp = buf;
-				buf += (pDSMCC_section->dsmcc_section_length - 9);
-
-				pdsmccDownloadDataHeader = &(pDSMCC_section->dsmccDownloadDataHeader);
-
-				pdsmccDownloadDataHeader->protocolDiscriminator = *ptemp++;
-				pdsmccDownloadDataHeader->dsmccType = *ptemp ++;
-
-				pdsmccDownloadDataHeader->messageId = *ptemp ++;
-				pdsmccDownloadDataHeader->messageId <<= 8;
-				pdsmccDownloadDataHeader->messageId |= *ptemp ++;
-
-				tempId = *ptemp ++;
-				tempId <<= 8;
-				tempId |= *ptemp ++;
-				tempId <<= 8;
-				tempId |= *ptemp ++;
-				tempId <<= 8;
-				tempId |= *ptemp ++;
-
-				pdsmccDownloadDataHeader->downloadId = tempId;
-
-				pdsmccDownloadDataHeader->reserved = *ptemp ++;
-
-				pdsmccDownloadDataHeader->adaptationLength = *ptemp ++;
-
-				pdsmccDownloadDataHeader->messageLength = *ptemp ++;
-				pdsmccDownloadDataHeader->messageLength <<= 8;
-				pdsmccDownloadDataHeader->messageLength |= *ptemp ++;
-
-				assert(pdsmccDownloadDataHeader->adaptationLength <= pdsmccDownloadDataHeader->messageLength);
-				//messageLength解析错误，将是灾难性的
-
-				if (pdsmccDownloadDataHeader->adaptationLength > 0)
+				int section_payload_length = pdsmcc_section->dsmcc_section_length - 4 - 5;
+				if (section_payload_length > 0)
 				{
-					//解析adaptation
-					pdsmccDownloadDataHeader->dsmccAdaptationHeader.adaptationType = *ptemp ++;
+					ptemp = bs.p_cur;
+					BITS_byteSkip(&bs, section_payload_length);
 
-					copy_length = min(64, pdsmccDownloadDataHeader->adaptationLength - 1);
-					pdsmccDownloadDataHeader->dsmccAdaptationHeader.N = copy_length;
-					if (copy_length > 0)
+					pdsmccDownloadDataHeader = &(pdsmcc_section->dsmccDownloadDataHeader);
+
+					BYTES_t bytes;
+					BYTES_map(&bytes, ptemp, section_payload_length);
+
+					pdsmccDownloadDataHeader->protocolDiscriminator = BYTES_get(&bytes, 1);
+					pdsmccDownloadDataHeader->dsmccType = BYTES_get(&bytes, 1);
+					pdsmccDownloadDataHeader->messageId = BYTES_get(&bytes, 2);
+					pdsmccDownloadDataHeader->downloadId = BYTES_get(&bytes, 4);
+					pdsmccDownloadDataHeader->reserved = BYTES_get(&bytes, 1);
+					pdsmccDownloadDataHeader->adaptationLength = BYTES_get(&bytes, 1);
+					pdsmccDownloadDataHeader->messageLength = BYTES_get(&bytes, 2);
+
+					assert(pdsmccDownloadDataHeader->adaptationLength <= pdsmccDownloadDataHeader->messageLength);
+					//messageLength解析错误，将是灾难性的
+
+					if (pdsmccDownloadDataHeader->adaptationLength > 0)
 					{
-						memcpy(pdsmccDownloadDataHeader->dsmccAdaptationHeader.adaptationDataByte, ptemp, copy_length);
-						ptemp += (pdsmccDownloadDataHeader->adaptationLength - 1);
+						//解析adaptation
+						pdsmccDownloadDataHeader->dsmccAdaptationHeader.adaptationType = BYTES_get(&bytes, 1);
+
+						pdsmccDownloadDataHeader->dsmccAdaptationHeader.N = pdsmccDownloadDataHeader->adaptationLength - 1;
+						copy_length = min(64, pdsmccDownloadDataHeader->dsmccAdaptationHeader.N);
+						if (copy_length > 0)
+						{
+							memcpy(pdsmccDownloadDataHeader->dsmccAdaptationHeader.adaptationDataByte, bytes.p_cur, copy_length);
+							BYTES_skip(&bytes, pdsmccDownloadDataHeader->dsmccAdaptationHeader.N);
+						}
 					}
+
+					int msg_payload_length = pdsmccDownloadDataHeader->messageLength - pdsmccDownloadDataHeader->adaptationLength;
+					if (msg_payload_length > 0)
+					{
+						if (pdsmccDownloadDataHeader->messageId == 0x1003)					//DDB
+						{
+							pDownloadDataBlock = &(pdsmcc_section->DownloadDataBlock);
+							rtcode = MPEG2_DSMCC_DecodeDownloadDataBlock(bytes.p_cur, msg_payload_length, pDownloadDataBlock);
+						}
+						else
+						{
+							assert(0);
+							rtcode = SECTION_PARSE_SYNTAX_ERROR;
+						}
+						BYTES_skip(&bytes, msg_payload_length);
+					}
+
+					assert(bytes.p_cur == bs.p_cur);
 				}
 
-				payload_length = (int)(buf - ptemp);
-
-				if (payload_length >= pdsmccDownloadDataHeader->messageLength)
+				uint32_t checksum_or_crc32 = BITS_get(&bs, 32);
+				if (pdsmcc_section->section_syntax_indicator == 1)
 				{
-					if (pdsmccDownloadDataHeader->messageId == 0x1002)			//DII
-					{
-						assert(0);
-					}
-					else if (pdsmccDownloadDataHeader->messageId == 0x1003)					//DDB
-					{
-						pDownloadDataBlock = &(pDSMCC_section->DownloadDataBlock);
-						rtcode = MPEG2_DSMCC_DecodeDownloadDataBlock(ptemp, payload_length, pDownloadDataBlock);
-
-					}
-					else if (pdsmccDownloadDataHeader->messageId == 0x1006)							//DSI
-					{
-						//assert(0);
-					}
-					else
-					{
-						rtcode = SECTION_PARSE_SYNTAX_ERROR;
-					}
+					pdsmcc_section->encode.CRC_32 = checksum_or_crc32;
 				}
 				else
 				{
-					rtcode = SECTION_PARSE_SYNTAX_ERROR;
+					pdsmcc_section->encode.checksum = checksum_or_crc32;
 				}
-
-				buf += 4;
 			}
 			else
 			{
@@ -212,351 +208,120 @@ int MPEG2_DSMCC_DDM_DecodeSection(uint8_t *buf, int length, dsmcc_ddm_section_t*
 
 int	MPEG2_DSMCC_DecodeDirectoryMessage(uint8_t *buf, int length, DirectoryMessage_t* pDirectoryMessage)
 {
-	S32		rtcode = SECTION_PARSE_NO_ERROR;
-	U8*		ptemp;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
 	S32		copy_length;
 	S32		i;
 	S32		j;
-	S32		profile_index;
-	S32		component_index;
 	S32		binding_index;
-	S32		remain_length;
-	U32		tag;
 
-	//BIOP::DirectoryMessage()
-	BIOPProfileBody_t*			pBIOPProfileBody;
-	LiteOptionsProfileBody_t*	pLiteOptionsProfileBody;
-	IOP::IOR_t*					pIOR;
-	BIOP::ObjectLocation_t*		pObjectLocation;
-	//BIOP::Name_t*				pName;
-	Bindings_t*					pBindings;
-	DSM::ConnBinder_t*			pConnBinder;
+	//IOP::IOR_t*					pIOR;
+	//Bindings_t*					pBindings;
 
-	if ((buf != NULL) && (length > 0) && (pDirectoryMessage != NULL))
-	{
-		//		memset(pBIOP_DirectoryMessage, 0x00, sizeof(BIOP_DirectoryMessage_t));
-		ptemp = buf;
+	//if ((buf != NULL) && (length > 0) && (pDirectoryMessage != NULL))
+	//{
+	//	memset(pDirectoryMessage, 0x00, sizeof(DirectoryMessage_t));
 
-		memcpy(pDirectoryMessage->magic, ptemp, 4);
-		pDirectoryMessage->magic[4] = '\0';
-		ptemp += 4;
+	//	BITS_t bs;
+	//	BITS_map(&bs, buf, length);
 
-		pDirectoryMessage->biop_version.major = *ptemp++;
-		pDirectoryMessage->biop_version.minor = *ptemp++;
+	//	BITS_byteCopy(pDirectoryMessage->magic, &bs, 4);
+	//	pDirectoryMessage->magic[4] = '\0';
 
-		pDirectoryMessage->byte_order = *ptemp++;
-		pDirectoryMessage->message_type = *ptemp++;
+	//	pDirectoryMessage->biop_version.major = BITS_get(&bs, 8);
+	//	pDirectoryMessage->biop_version.minor = BITS_get(&bs, 8);
 
-		pDirectoryMessage->message_size = *ptemp++;
-		pDirectoryMessage->message_size <<= 8;
-		pDirectoryMessage->message_size |= *ptemp++;
-		pDirectoryMessage->message_size <<= 8;
-		pDirectoryMessage->message_size |= *ptemp++;
-		pDirectoryMessage->message_size <<= 8;
-		pDirectoryMessage->message_size |= *ptemp++;
+	//	pDirectoryMessage->byte_order = BITS_get(&bs, 8);
+	//	pDirectoryMessage->message_type = BITS_get(&bs, 8);
 
-		pDirectoryMessage->objectKey_length = *ptemp++;
-		assert(pDirectoryMessage->objectKey_length == 4);
+	//	pDirectoryMessage->message_size = BITS_get(&bs, 32);
 
-		pDirectoryMessage->objectKey_data = *ptemp++;
-		pDirectoryMessage->objectKey_data <<= 8;
-		pDirectoryMessage->objectKey_data |= *ptemp++;
-		pDirectoryMessage->objectKey_data <<= 8;
-		pDirectoryMessage->objectKey_data |= *ptemp++;
-		pDirectoryMessage->objectKey_data <<= 8;
-		pDirectoryMessage->objectKey_data |= *ptemp++;
+	//	pDirectoryMessage->objectKey_length = BITS_get(&bs, 8);
+	//	assert(pDirectoryMessage->objectKey_length == 4);
 
-		pDirectoryMessage->objectKind_length = *ptemp++;
-		pDirectoryMessage->objectKind_length <<= 8;
-		pDirectoryMessage->objectKind_length |= *ptemp++;
-		pDirectoryMessage->objectKind_length <<= 8;
-		pDirectoryMessage->objectKind_length |= *ptemp++;
-		pDirectoryMessage->objectKind_length <<= 8;
-		pDirectoryMessage->objectKind_length |= *ptemp++;
+	//	pDirectoryMessage->objectKey_data = BITS_get(&bs, 32);
 
-		assert(pDirectoryMessage->objectKind_length == 4);
-		memcpy(pDirectoryMessage->objectKind_data, ptemp, 4);
-		ptemp += 4;
+	//	pDirectoryMessage->objectKind_length = BITS_get(&bs, 32);
 
-		pDirectoryMessage->objectInfo_length = *ptemp++;
-		pDirectoryMessage->objectInfo_length <<= 8;
-		pDirectoryMessage->objectInfo_length |= *ptemp++;
+	//	assert(pDirectoryMessage->objectKind_length == 4);
+	//	BITS_byteCopy(pDirectoryMessage->objectKind_data, &bs, 4);
 
-		copy_length = min(8, pDirectoryMessage->objectInfo_length);
-		if (copy_length > 0)
-		{
-			memcpy(pDirectoryMessage->objectInfo_data_byte, ptemp, copy_length);
-			ptemp += pDirectoryMessage->objectInfo_length;
-		}
+	//	pDirectoryMessage->objectInfo_length = BITS_get(&bs, 16);
 
-		pDirectoryMessage->serviceContextList_count = *ptemp++;
-		assert(pDirectoryMessage->serviceContextList_count <= 2);
+	//	copy_length = min(sizeof(pDirectoryMessage->objectInfo_data_byte), pDirectoryMessage->objectInfo_length);
+	//	if (copy_length > 0)
+	//	{
+	//		memcpy(pDirectoryMessage->objectInfo_data_byte, bs.p_cur, copy_length);
+	//		BITS_byteSkip(&bs, pDirectoryMessage->objectInfo_length);
+	//	}
 
-		for (i = 0; i < pDirectoryMessage->serviceContextList_count; i++)
-		{
-			pDirectoryMessage->serviceContextList[i].context_id = *ptemp++;
-			pDirectoryMessage->serviceContextList[i].context_id <<= 8;
-			pDirectoryMessage->serviceContextList[i].context_id |= *ptemp++;
-			pDirectoryMessage->serviceContextList[i].context_id <<= 8;
-			pDirectoryMessage->serviceContextList[i].context_id |= *ptemp++;
-			pDirectoryMessage->serviceContextList[i].context_id <<= 8;
-			pDirectoryMessage->serviceContextList[i].context_id |= *ptemp++;
+	//	pDirectoryMessage->serviceContextList_count = BITS_get(&bs, 8);
+	//	assert(pDirectoryMessage->serviceContextList_count <= 2);
 
-			pDirectoryMessage->serviceContextList[i].context_data_length = *ptemp++;
-			pDirectoryMessage->serviceContextList[i].context_data_length <<= 8;
-			pDirectoryMessage->serviceContextList[i].context_data_length |= *ptemp++;
+	//	for (i = 0; i < pDirectoryMessage->serviceContextList_count; i++)
+	//	{
+	//		pDirectoryMessage->serviceContextList[i].context_id = BITS_get(&bs, 32);
 
-			copy_length = min(4, pDirectoryMessage->serviceContextList[i].context_data_length);
-			if (copy_length > 0)
-			{
-				memcpy(pDirectoryMessage->serviceContextList[i].context_data_byte, ptemp, copy_length);
-				ptemp += pDirectoryMessage->serviceContextList[i].context_data_length;
-			}
-		}
+	//		pDirectoryMessage->serviceContextList[i].context_data_length = BITS_get(&bs, 16);
 
-		pDirectoryMessage->messageBody_length = *ptemp++;
-		pDirectoryMessage->messageBody_length <<= 8;
-		pDirectoryMessage->messageBody_length |= *ptemp++;
-		pDirectoryMessage->messageBody_length <<= 8;
-		pDirectoryMessage->messageBody_length |= *ptemp++;
-		pDirectoryMessage->messageBody_length <<= 8;
-		pDirectoryMessage->messageBody_length |= *ptemp++;
+	//		copy_length = min(sizeof(pDirectoryMessage->serviceContextList[i].context_data_byte), pDirectoryMessage->serviceContextList[i].context_data_length);
+	//		memcpy(pDirectoryMessage->serviceContextList[i].context_data_byte, bs.p_cur, copy_length);
+	//		BITS_byteSkip(&bs, pDirectoryMessage->serviceContextList[i].context_data_length);
+	//	}
 
-		pDirectoryMessage->bindings_count = *ptemp++;
-		pDirectoryMessage->bindings_count <<= 8;
-		pDirectoryMessage->bindings_count |= *ptemp++;
+	//	pDirectoryMessage->messageBody_length = BITS_get(&bs, 32);
 
-		assert(pDirectoryMessage->bindings_count <= 1024);
-		for (binding_index = 0; binding_index < pDirectoryMessage->bindings_count; binding_index++)
-		{
-			pBindings = pDirectoryMessage->bindings + binding_index;
+	//	pDirectoryMessage->bindings_count = BITS_get(&bs, 16);
+	//	assert(pDirectoryMessage->bindings_count <= 1024);
 
-			//pName = &(pBindings->Name);
+	//	for (binding_index = 0; binding_index < pDirectoryMessage->bindings_count; binding_index++)
+	//	{
+	//		pBindings = pDirectoryMessage->bindings + binding_index;
 
-			pBindings->Name.nameComponents_count = *ptemp++;
-			assert(pBindings->Name.nameComponents_count <= 1);
+	//		//pName = &(pBindings->Name);
 
-			for (j = 0; j < pBindings->Name.nameComponents_count; j++)
-			{
-				pBindings->Name.id_length[j] = *ptemp++;
-				copy_length = min(64, pBindings->Name.id_length[j]);
-				if (copy_length > 0)
-				{
-					memcpy(pBindings->Name.id_data_byte[j], ptemp, copy_length);
-					pBindings->Name.id_data_byte[j][copy_length] = '\0';
+	//		pBindings->Name.nameComponents_count = BITS_get(&bs, 8);
+	//		assert(pBindings->Name.nameComponents_count <= 1);
 
-					ptemp += pBindings->Name.id_length[j];
-				}
+	//		for (j = 0; j < pBindings->Name.nameComponents_count; j++)
+	//		{
+	//			pBindings->Name.id_length[j] = BITS_get(&bs, 8);
+	//			copy_length = min(sizeof(pBindings->Name.id_data_byte[j]), pBindings->Name.id_length[j]);
+	//			if (copy_length > 0)
+	//			{
+	//				memcpy(pBindings->Name.id_data_byte[j], bs.p_cur, copy_length);
+	//				pBindings->Name.id_data_byte[j][copy_length] = '\0';
 
-				pBindings->Name.kind_length[j] = *ptemp++;
-				//				assert(pName->kind_length[j] <= 4);
-				copy_length = min(4, pBindings->Name.kind_length[j]);
-				if (copy_length > 0)
-				{
-					memcpy(pBindings->Name.kind_data_byte[j], ptemp, copy_length);
-					ptemp += pBindings->Name.kind_length[j];
-				}
-			}
+	//				BITS_byteSkip(&bs, pBindings->Name.id_length[j]);
+	//			}
 
-			pBindings->bindingType = *ptemp++;
+	//			pBindings->Name.kind_length[j] = BITS_get(&bs, 8);
+	//			//				assert(pName->kind_length[j] <= 4);
+	//			copy_length = min(4, pBindings->Name.kind_length[j]);
+	//			if (copy_length > 0)
+	//			{
+	//				memcpy(pBindings->Name.kind_data_byte[j], bs.p_cur, copy_length);
+	//				BITS_byteSkip(&bs, pBindings->Name.kind_length[j]);
+	//			}
+	//		}
 
-			pIOR = &(pBindings->IOR);
+	//		pBindings->bindingType = BITS_get(&bs, 8);
 
-			pIOR->type_id_length = *ptemp++;
-			pIOR->type_id_length <<= 8;
-			pIOR->type_id_length |= *ptemp++;
-			pIOR->type_id_length <<= 8;
-			pIOR->type_id_length |= *ptemp++;
-			pIOR->type_id_length <<= 8;
-			pIOR->type_id_length |= *ptemp++;
+	//		pIOR = &(pBindings->IOR);
+	//		MPEG2_DSMCC_DecodeIOR(&bs, pIOR);
 
-			if (pIOR->type_id_length == 4)
-			{
-				memcpy(pIOR->type_id_byte, ptemp, pIOR->type_id_length);
-				ptemp += pIOR->type_id_length;
-
-				pIOR->taggedProfiles_count = *ptemp++;
-				pIOR->taggedProfiles_count <<= 8;
-				pIOR->taggedProfiles_count |= *ptemp++;
-				pIOR->taggedProfiles_count <<= 8;
-				pIOR->taggedProfiles_count |= *ptemp++;
-				pIOR->taggedProfiles_count <<= 8;
-				pIOR->taggedProfiles_count |= *ptemp++;
-
-				if (pIOR->taggedProfiles_count > 0)
-				{
-					for (profile_index = 0; profile_index < (S32)(pIOR->taggedProfiles_count); profile_index++)
-					{
-						tag = *ptemp++;
-						tag <<= 8;
-						tag |= *ptemp++;
-						tag <<= 8;
-						tag |= *ptemp++;
-						tag <<= 8;
-						tag |= *ptemp++;
-
-						pIOR->taggedProfile[profile_index].profileId_tag = tag;
-
-						if (tag == 0x49534F06)				//TAG_BIOP(BIOP Profile Body)
-						{
-							pBIOPProfileBody = &(pIOR->taggedProfile[profile_index].u.BIOPProfileBody);
-
-							pBIOPProfileBody->profileId_tag = tag;
-
-							pBIOPProfileBody->profile_data_length = *ptemp++;
-							pBIOPProfileBody->profile_data_length <<= 8;
-							pBIOPProfileBody->profile_data_length |= *ptemp++;
-							pBIOPProfileBody->profile_data_length <<= 8;
-							pBIOPProfileBody->profile_data_length |= *ptemp++;
-							pBIOPProfileBody->profile_data_length <<= 8;
-							pBIOPProfileBody->profile_data_length |= *ptemp++;
-
-							pBIOPProfileBody->profile_data_byte_order = *ptemp++;
-							pBIOPProfileBody->liteComponents_count = *ptemp++;
-
-							for (component_index = 0; component_index < pBIOPProfileBody->liteComponents_count; component_index++)
-							{
-								tag = *ptemp++;
-								tag <<= 8;
-								tag |= *ptemp++;
-								tag <<= 8;
-								tag |= *ptemp++;
-								tag <<= 8;
-								tag |= *ptemp++;
-
-								if (tag == 0x49534F50)
-								{
-									pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
-
-									pObjectLocation->componentId_tag = tag;
-									pObjectLocation->component_data_length = *ptemp++;
-
-									pObjectLocation->carouselId = *ptemp++;
-									pObjectLocation->carouselId <<= 8;
-									pObjectLocation->carouselId |= *ptemp++;
-									pObjectLocation->carouselId <<= 8;
-									pObjectLocation->carouselId |= *ptemp++;
-									pObjectLocation->carouselId <<= 8;
-									pObjectLocation->carouselId |= *ptemp++;
-
-									pObjectLocation->moduleId = *ptemp++;
-									pObjectLocation->moduleId <<= 8;
-									pObjectLocation->moduleId |= *ptemp++;
-
-									pObjectLocation->version.major = *ptemp++;
-									pObjectLocation->version.minor = *ptemp++;
-
-									pObjectLocation->objectKey_length = *ptemp++;
-									assert(pObjectLocation->objectKey_length == 4);
-
-									//									if (pBIOP_ObjectLocation->objectKey_length > 0)
-									//									{
-									//										assert(pBIOP_ObjectLocation->objectKey_length <= 4);
-									//										memcpy(pBIOP_ObjectLocation->objectKey_data_byte, ptemp, pBIOP_ObjectLocation->objectKey_length);
-									//										ptemp += pBIOP_ObjectLocation->objectKey_length;
-									//									}
-
-									pObjectLocation->objectKey_data = *ptemp++;
-									pObjectLocation->objectKey_data <<= 8;
-									pObjectLocation->objectKey_data |= *ptemp++;
-									pObjectLocation->objectKey_data <<= 8;
-									pObjectLocation->objectKey_data |= *ptemp++;
-									pObjectLocation->objectKey_data <<= 8;
-									pObjectLocation->objectKey_data |= *ptemp++;
-								}
-								else if (tag == 0x49534F40)
-								{
-									pConnBinder = &(pBIOPProfileBody->ConnBinder);
-
-									pConnBinder->componentId_tag = tag;
-									pConnBinder->component_data_length = *ptemp++;
-									pConnBinder->taps_count = *ptemp++;
-
-									pConnBinder->Tap.id = *ptemp++;
-									pConnBinder->Tap.id <<= 8;
-									pConnBinder->Tap.id |= *ptemp++;
-									pConnBinder->Tap.id <<= 8;
-
-									pConnBinder->Tap.use = *ptemp++;
-									pConnBinder->Tap.use <<= 8;
-									pConnBinder->Tap.use |= *ptemp++;
-
-									pConnBinder->Tap.association_tag = *ptemp++;
-									pConnBinder->Tap.association_tag <<= 8;
-									pConnBinder->Tap.association_tag |= *ptemp++;
-
-									pConnBinder->Tap.selector_length = *ptemp++;
-
-									pConnBinder->Tap.selector_type = *ptemp++;
-									pConnBinder->Tap.selector_type <<= 8;
-									pConnBinder->Tap.selector_type |= *ptemp++;
-
-									pConnBinder->Tap.transactionId = *ptemp++;
-									pConnBinder->Tap.transactionId <<= 8;
-									pConnBinder->Tap.transactionId |= *ptemp++;
-									pConnBinder->Tap.transactionId <<= 8;
-									pConnBinder->Tap.transactionId |= *ptemp++;
-									pConnBinder->Tap.transactionId <<= 8;
-									pConnBinder->Tap.transactionId |= *ptemp++;
-
-									pConnBinder->Tap.timeout = *ptemp++;
-									pConnBinder->Tap.timeout <<= 8;
-									pConnBinder->Tap.timeout |= *ptemp++;
-									pConnBinder->Tap.timeout <<= 8;
-									pConnBinder->Tap.timeout |= *ptemp++;
-									pConnBinder->Tap.timeout <<= 8;
-									pConnBinder->Tap.timeout |= *ptemp++;
-								}
-							}
-						}
-						else if (tag == 0x49534F05)			//TAG_LITE_OPTIONS(LiteOptionsProfileBody)
-						{
-							pLiteOptionsProfileBody = &(pIOR->taggedProfile[profile_index].u.LiteOptionsProfileBody);
-
-							pLiteOptionsProfileBody->profileId_tag = tag;
-
-							pLiteOptionsProfileBody->profile_data_length = *ptemp++;
-							pLiteOptionsProfileBody->profile_data_length <<= 8;
-							pLiteOptionsProfileBody->profile_data_length |= *ptemp++;
-							pLiteOptionsProfileBody->profile_data_length <<= 8;
-							pLiteOptionsProfileBody->profile_data_length |= *ptemp++;
-							pLiteOptionsProfileBody->profile_data_length <<= 8;
-							pLiteOptionsProfileBody->profile_data_length |= *ptemp++;
-
-							pLiteOptionsProfileBody->profile_data_byte_order = *ptemp++;
-						}
-
-						remain_length = length - (int)(ptemp - buf);
-
-						if (remain_length <= 0)
-						{
-							break;
-						}
-					}
-				}
-			}
-
-			pBindings->objectInfo_length = *ptemp++;
-			pBindings->objectInfo_length <<= 8;
-			pBindings->objectInfo_length |= *ptemp++;
-
-			copy_length = min(16, pBindings->objectInfo_length);
-			if (copy_length > 0)
-			{
-				memcpy(pBindings->objectInfo_data_byte, ptemp, copy_length);
-				ptemp += pBindings->objectInfo_length;
-			}
-
-			remain_length = length - (int)(ptemp - buf);
-		}
-
-		remain_length = length - (int)(ptemp - buf);
-		assert(remain_length == 0);
-	}
-	else
-	{
-		rtcode = SECTION_PARSE_PARAMETER_ERROR;
-	}
+	//		pBindings->objectInfo_length = BITS_get(&bs, 16);
+	//		copy_length = min(sizeof(pBindings->objectInfo_data_byte), pBindings->objectInfo_length);
+	//		if (copy_length > 0)
+	//		{
+	//			memcpy(pBindings->objectInfo_data_byte, bs.p_cur, copy_length);
+	//			BITS_byteSkip(&bs, pBindings->objectInfo_length);
+	//		}
+	//	}
+	//}
+	//else
+	//{
+	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;
+	//}
 
 	return rtcode;
 }

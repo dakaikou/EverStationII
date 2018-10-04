@@ -106,7 +106,7 @@ int MPEG_DVB_present_reserved_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElemen
 
 		if (preserved_descriptor->descriptor_length > 0)
 		{
-			XMLDOC_NewElementForBytes(pxmlDoc, pxmlDescriptorNode, "descriptor_payload_buf[ ]", preserved_descriptor->descriptor_buf + 2, preserved_descriptor->descriptor_length, NULL);
+			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlDescriptorNode, "descriptor_payload_buf[ ]", preserved_descriptor->descriptor_buf + 2, preserved_descriptor->descriptor_length, NULL);
 		}
 	}
 	else

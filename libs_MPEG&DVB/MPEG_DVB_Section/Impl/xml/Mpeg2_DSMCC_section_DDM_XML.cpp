@@ -14,305 +14,180 @@
 
 #include "../../Include/xml/Mpeg2_DSMCC_section_XML.h"
 
-#include "libs_Math/Include/CRC_32.h"
+////////////////////////////////////////////
 
-#ifndef min
-#define min(a,b)  (((a)<(b))?(a):(b))
-#endif
-/////////////////////////////////////////////
+int MPEG2_DSMCC_DDM_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, dsmcc_ddm_section_t* pDSMCCSection)
+{
+	int		rtcode = SECTION_PARSE_NO_ERROR;
 
-int MPEG2_DSMCC_DDM_DecodeSection_to_XML(uint8_t *section_buf, int section_size, XMLDocForMpegSyntax* pxmlDoc, dsmcc_ddm_section_t* pDSMCCSection)
+	dsmcc_ddm_section_t* pdsmcc_section = (pDSMCCSection != NULL) ? pDSMCCSection : new dsmcc_ddm_section_t;
+	rtcode = MPEG2_DSMCC_DDM_DecodeSection(section_buf, section_size, pdsmcc_section);
+	rtcode = MPEG2_DSMCC_DDM_PresentSection_to_XML(pxmlDoc, pdsmcc_section);
+
+	if (pDSMCCSection == NULL)
+	{
+		//说明pdsmcc_section指针临时分配，函数返回前需要释放
+		delete pdsmcc_section;
+	}
+
+	return rtcode;
+}
+
+int MPEG2_DSMCC_DDM_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, dsmcc_ddm_section_t* pdsmcc_section)
 {
 	int						rtcode = SECTION_PARSE_NO_ERROR;
-	int						payload_length;
-	int						stream_error;
-	char					pszTemp[64];
-
-	uint8_t						section_syntax_indicator;
+	char					pszField[64];
+	char					pszComment[64];
 
 	dsmccDownloadDataHeader_t*			pdsmccDownloadDataHeader;
 	DownloadDataBlock_t*				pDownloadDataBlock;
 
-	BITS_t   bs;
-
-	if (pxmlDoc != NULL)
+	if ((pxmlDoc != NULL) && (pdsmcc_section != NULL))
 	{
-		pxmlDoc->SetOrigin(section_buf);
-
 		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
 
-		tinyxml2::XMLDeclaration* xmlDeclaration = pxmlDoc->NewDeclaration(pszDeclaration);
-		pxmlDoc->InsertFirstChild(xmlDeclaration);
+		XMLDeclaration* xmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
+		XMLDOC_InsertFirstChild(pxmlDoc, xmlDeclaration);
 
 		//根节点
-		tinyxml2::XMLElement* pxmlRootNode = ((tinyxml2::XMLDocument*)pxmlDoc)->NewElement("DSMCC_section()");
-		pxmlDoc->InsertEndChild(pxmlRootNode);
-		pxmlDoc->UpdateBufMark(pxmlRootNode, section_buf, section_buf + section_size);
+		sprintf_s(pszField, sizeof(pszField), "DSMCC_section(table_id=0x%02X)", pdsmcc_section->table_id);
+		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
+		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
+		XMLNODE_SetFieldLength(pxmlRootNode, pdsmcc_section->dsmcc_section_length + 3);
 
-		if ((section_buf != NULL) && (section_size >= MPEG2_DSMCC_SECTION_MIN_SIZE) && (section_size <= MPEG2_DSMCC_SECTION_MAX_SIZE))
+		assert(pdsmcc_section->table_id == TABLE_ID_DSMCC_DDM);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pdsmcc_section->table_id, 8, "uimsbf", NULL);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_syntax_indicator", pdsmcc_section->section_syntax_indicator, 1, "bslbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "private_indicator", pdsmcc_section->private_indicator, 1, "bslbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", pdsmcc_section->reserved0, 2, "bslbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "dsmcc_section_length", pdsmcc_section->dsmcc_section_length, 12, "uimsbf", NULL);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id_extension", pdsmcc_section->table_id_extension, 16, "uimsbf", "moduleId");
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", pdsmcc_section->reserved1, 2, "bslbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "version_number", pdsmcc_section->version_number, 5, "uimsbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "current_next_indicator", pdsmcc_section->current_next_indicator, 1, "bslbf", NULL);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_number", pdsmcc_section->section_number, 8, "uimsbf", NULL);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "last_section_number", pdsmcc_section->last_section_number, 8, "uimsbf", NULL);
+
+		int section_payload_length = pdsmcc_section->dsmcc_section_length - 4 - 5;
+
+		if (pdsmcc_section->table_id == TABLE_ID_DSMCC_DDM)
 		{
-			dsmcc_ddm_section_t* pdsmcc_section = (pDSMCCSection != NULL) ? pDSMCCSection : new dsmcc_ddm_section_t;
-			memset(pdsmcc_section, 0x00, sizeof(dsmcc_ddm_section_t));
+			XMLElement* pxmlDDMNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "downloadDataMessage()", NULL);
+			XMLNODE_SetFieldLength(pxmlDDMNode, section_payload_length);
 
-			unsigned int CRC_32_verify = Encode_CRC_32(section_buf, section_size - 4);
-			unsigned int CRC_32_code = ((section_buf[section_size - 4] << 24) | (section_buf[section_size - 3] << 16) | (section_buf[section_size - 2] << 8) | section_buf[section_size - 1]);
+			pdsmccDownloadDataHeader = &(pdsmcc_section->dsmccDownloadDataHeader);
+			int message_header_length = 12 + pdsmccDownloadDataHeader->adaptationLength;
+			XMLElement* pxmlHeaderNode = XMLDOC_NewElementForString(pxmlDoc, pxmlDDMNode, "dsmccDownloadDataHeader()", NULL);
+			XMLNODE_SetFieldLength(pxmlHeaderNode, message_header_length);
 
-			//section_syntax_indicator = (section_buf[1] & 0x80) >> 7;
+			//包含DownloadDataBlock
+			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlHeaderNode, "protocolDiscriminator", pdsmccDownloadDataHeader->protocolDiscriminator, 1, NULL);
 
-			//stream_error = 0;
-			//if (section_syntax_indicator == 1)
-			//{
-			//	if (pdsmcc_section->CRC_32_verify != pdsmcc_section->CRC_32)
-			//	{
-			//		stream_error = 1;
-			//	}
-			//}
-			//else
-			//{
-			//	//没有校验checksum, 以后增加
+			MPEG2_DSMCC_NumericCoding2Text_dsmccType(pdsmccDownloadDataHeader->dsmccType, pszComment, sizeof(pszComment));
+			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlHeaderNode, "dsmccType", pdsmccDownloadDataHeader->dsmccType, 1, pszComment);
 
-			//	//			assert((length % 4) == 0);
-			//}
+			MPEG2_DSMCC_NumericCoding2Text_messageId(pdsmccDownloadDataHeader->messageId, pszComment, sizeof(pszComment));
+			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlHeaderNode, "messageId", pdsmccDownloadDataHeader->messageId, 2, pszComment);
 
-			BITS_map(&bs, section_buf, section_size);
+			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlHeaderNode, "downloadId", pdsmccDownloadDataHeader->downloadId, 4, NULL);
 
-			pdsmcc_section->table_id = BITS_get(&bs, 8);
-			pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "table_id", pdsmcc_section->table_id, 8, "uimsbf", NULL, &bs);
+			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlHeaderNode, "reserved", pdsmccDownloadDataHeader->reserved, 1, NULL);
 
-			assert(pdsmcc_section->table_id == TABLE_ID_DSMCC_DDM);
+			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlHeaderNode, "adaptationLength", pdsmccDownloadDataHeader->adaptationLength, 1, NULL);
 
-			pdsmcc_section->section_syntax_indicator = BITS_get(&bs, 1);
-			pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "section_syntax_indicator", pdsmcc_section->section_syntax_indicator, 1, "bslbf", NULL, &bs);
+			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlHeaderNode, "messageLength", pdsmccDownloadDataHeader->messageLength, 2, NULL);
 
-			pdsmcc_section->private_indicator = BITS_get(&bs, 1);
-			pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "private_indicator", pdsmcc_section->private_indicator, 1, "bslbf", NULL, &bs);
+			assert(pdsmccDownloadDataHeader->adaptationLength <= pdsmccDownloadDataHeader->messageLength);
+			//messageLength解析错误，将是灾难性的
 
-			pdsmcc_section->reserved0 = BITS_get(&bs, 2);
-			pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "reserved", pdsmcc_section->reserved0, 2, "bslbf", NULL, &bs);
-
-			pdsmcc_section->dsmcc_section_length = BITS_get(&bs, 12);
-			pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "dsmcc_section_length", pdsmcc_section->dsmcc_section_length, 12, "uimsbf", NULL, &bs);
-
-			if ((pdsmcc_section->dsmcc_section_length + 3) == section_size)
+			if (pdsmccDownloadDataHeader->adaptationLength > 0)
 			{
-				pdsmcc_section->table_id_extension = BITS_get(&bs, 16);
-				pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "table_id_extension", pdsmcc_section->table_id_extension, 16, "uimsbf", "moduleId", &bs);
+				XMLElement* pxmlAdaptationHeaderNode = XMLDOC_NewElementForString(pxmlDoc, pxmlHeaderNode, "dsmccAdaptationHeader()", NULL);
+				XMLNODE_SetFieldLength(pxmlAdaptationHeaderNode, pdsmccDownloadDataHeader->adaptationLength);
 
-				pdsmcc_section->reserved1 = BITS_get(&bs, 2);
-				pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "reserved", pdsmcc_section->reserved1, 2, "bslbf", NULL, &bs);
+				XMLDOC_NewElementForByteMode(pxmlDoc, pxmlAdaptationHeaderNode, "adaptationType", pdsmccDownloadDataHeader->dsmccAdaptationHeader.adaptationType, 1, NULL);
 
-				pdsmcc_section->version_number = BITS_get(&bs, 5);
-				pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "version_number", pdsmcc_section->version_number, 5, "uimsbf", NULL, &bs);
-
-				pdsmcc_section->current_next_indicator = BITS_get(&bs, 1);
-				pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "current_next_indicator", pdsmcc_section->current_next_indicator, 1, "bslbf", NULL, &bs);
-
-				pdsmcc_section->section_number = BITS_get(&bs, 8);
-				pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "section_number", pdsmcc_section->section_number, 8, "uimsbf", NULL, &bs);
-
-				pdsmcc_section->last_section_number = BITS_get(&bs, 8);
-				pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "last_section_number", pdsmcc_section->last_section_number, 8, "uimsbf", NULL, &bs);
-
-				if (pdsmcc_section->section_number <= pdsmcc_section->last_section_number)			//DSMCC语法特征点
+				if (pdsmccDownloadDataHeader->dsmccAdaptationHeader.N > 0)
 				{
-					payload_length = pdsmcc_section->dsmcc_section_length - 4 - 5;
-					uint8_t* payload_ptr = bs.p_cur;
-					BITS_byteSkip(&bs, payload_length);
-					tinyxml2::XMLElement* pxmlMessageNode = NULL;
+					XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlAdaptationHeaderNode, "adaptationDataByte[ ]", pdsmccDownloadDataHeader->dsmccAdaptationHeader.adaptationDataByte, pdsmccDownloadDataHeader->dsmccAdaptationHeader.N, NULL);
+				}
+			}
 
-					BYTES_t bytes;
-					BYTES_map(&bytes, payload_ptr, payload_length);
+			int msg_payload_length = pdsmccDownloadDataHeader->messageLength - pdsmccDownloadDataHeader->adaptationLength;
+			if (msg_payload_length > 0)
+			{
+				if (pdsmccDownloadDataHeader->messageId == 0x1003)
+				{
+					XMLNODE_SetAttribute(pxmlDDMNode, "comment", "DownloadDataBlock");
 
-					pxmlMessageNode = pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "downloadDataMessage()", -1, -1, NULL, NULL, &bs);
-
-					uint8_t* old_msg_header_ptr = bytes.p_cur;
-					tinyxml2::XMLElement* pxmlHeaderNode = pxmlDoc->NewKeyValuePairElement(pxmlMessageNode, "dsmccDownloadDataHeader()", -1, -1, NULL, NULL, &bs);
-
-					//包含DownloadDataBlock
-
-					pdsmccDownloadDataHeader = &(pdsmcc_section->dsmccDownloadDataHeader);
-
-					pdsmccDownloadDataHeader->protocolDiscriminator = BYTES_get(&bytes, 1);
-					pxmlDoc->NewKeyValuePairElementByteMode(pxmlHeaderNode, "protocolDiscriminator", pdsmccDownloadDataHeader->protocolDiscriminator, 1, NULL, &bytes);
-
-					pdsmccDownloadDataHeader->dsmccType = BYTES_get(&bytes, 1);
-					MPEG2_DSMCC_NumericCoding2Text_dsmccType(pdsmccDownloadDataHeader->dsmccType, pszTemp, sizeof(pszTemp));
-					pxmlDoc->NewKeyValuePairElementByteMode(pxmlHeaderNode, "dsmccType", pdsmccDownloadDataHeader->dsmccType, 1, pszTemp, &bytes);
-
-					pdsmccDownloadDataHeader->messageId = BYTES_get(&bytes, 2);
-					MPEG2_DSMCC_NumericCoding2Text_messageId(pdsmccDownloadDataHeader->messageId, pszTemp, sizeof(pszTemp));
-					pxmlDoc->NewKeyValuePairElementByteMode(pxmlHeaderNode, "messageId", pdsmccDownloadDataHeader->messageId, 2, pszTemp, &bytes);
-
-					pdsmccDownloadDataHeader->downloadId = BYTES_get(&bytes, 4);
-					pxmlDoc->NewKeyValuePairElementByteMode(pxmlHeaderNode, "downloadId", pdsmccDownloadDataHeader->downloadId, 4, NULL, &bytes);
-
-					pdsmccDownloadDataHeader->reserved = BYTES_get(&bytes, 1);
-					pxmlDoc->NewKeyValuePairElementByteMode(pxmlHeaderNode, "reserved", pdsmccDownloadDataHeader->reserved, 1, NULL, &bytes);
-
-					pdsmccDownloadDataHeader->adaptationLength = BYTES_get(&bytes, 1);
-					pxmlDoc->NewKeyValuePairElementByteMode(pxmlHeaderNode, "adaptationLength", pdsmccDownloadDataHeader->adaptationLength, 1, NULL, &bytes);
-
-					pdsmccDownloadDataHeader->messageLength = BYTES_get(&bytes, 2);
-					pxmlDoc->NewKeyValuePairElementByteMode(pxmlHeaderNode, "messageLength", pdsmccDownloadDataHeader->messageLength, 2, NULL, &bytes);
-
-					assert(pdsmccDownloadDataHeader->adaptationLength <= pdsmccDownloadDataHeader->messageLength);
-					//messageLength解析错误，将是灾难性的
-
-					if (pdsmccDownloadDataHeader->adaptationLength > 0)
-					{
-						uint8_t* old_adaption_header_ptr = bytes.p_cur;
-						tinyxml2::XMLElement* pxmlAdaptationHeaderNode = pxmlDoc->NewKeyValuePairElementByteMode(pxmlHeaderNode, "dsmccAdaptationHeader()");
-
-						//解析adaptation
-						pdsmccDownloadDataHeader->dsmccAdaptationHeader.adaptationType = BYTES_get(&bytes, 1);
-						pxmlDoc->NewKeyValuePairElementByteMode(pxmlAdaptationHeaderNode, "adaptationType", pdsmccDownloadDataHeader->dsmccAdaptationHeader.adaptationType, 1, NULL, &bytes);
-
-						pdsmccDownloadDataHeader->dsmccAdaptationHeader.N = pdsmccDownloadDataHeader->adaptationLength - 1;
-
-						if (pdsmccDownloadDataHeader->dsmccAdaptationHeader.N > 0)
-						{
-							int copy_length = min(64, pdsmccDownloadDataHeader->dsmccAdaptationHeader.N);
-							memcpy(pdsmccDownloadDataHeader->dsmccAdaptationHeader.adaptationDataByte, bytes.p_cur, copy_length);
-							BYTES_skip(&bytes, pdsmccDownloadDataHeader->dsmccAdaptationHeader.N);
-
-							pxmlDoc->NewKeyValuePairElementByteMode(pxmlAdaptationHeaderNode, "adaptationDataByte[ ]", pdsmccDownloadDataHeader->dsmccAdaptationHeader.adaptationDataByte, copy_length, NULL, &bytes);
-						}
-
-						pxmlDoc->UpdateBufMark(pxmlAdaptationHeaderNode, old_adaption_header_ptr, bytes.p_cur);
-					}
-
-					pxmlDoc->UpdateBufMark(pxmlHeaderNode, old_msg_header_ptr, bytes.p_cur);
-
-					uint8_t* msg_payload_ptr = bytes.p_cur;
-
-					int msg_payload_length = pdsmccDownloadDataHeader->messageLength - pdsmccDownloadDataHeader->adaptationLength;
-					if (msg_payload_length > 0)
-					{
-						BYTES_skip(&bytes, msg_payload_length);
-
-						assert(pdsmccDownloadDataHeader->messageId == 0x1003);
-
-						if (pdsmccDownloadDataHeader->messageId == 0x1003)					//DDB
-						{
-							pDownloadDataBlock = &(pdsmcc_section->DownloadDataBlock);
-
-							rtcode = MPEG2_DSMCC_DecodeDownloadDataBlock_to_xml(msg_payload_ptr, msg_payload_length, pxmlDoc, pxmlMessageNode, pDownloadDataBlock);
-						}
-						else
-						{
-							pxmlDoc->NewKeyValuePairElementByteMode(pxmlMessageNode, "messagePayload[ ]", msg_payload_ptr, msg_payload_length, NULL, &bytes);
-
-							sprintf_s(pszTemp, sizeof(pszTemp), "incorrect messageId = 0x%04X", pdsmccDownloadDataHeader->messageId);
-							pxmlMessageNode->SetAttribute("error", pszTemp);
-
-							rtcode = SECTION_PARSE_SYNTAX_ERROR;
-						}
-					}
-
-					unsigned int CRC_32 = BITS_get(&bs, 32);
-					assert(CRC_32 == CRC_32_code);			//再次校验，检验解析过程中指针偏移是否有错
-					pdsmcc_section->CRC_32 = CRC_32_code;
-					pdsmcc_section->CRC_32_verify = CRC_32_verify;
-					tinyxml2::XMLElement* pxmlCrcNode = pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "CRC_32", pdsmcc_section->CRC_32, 32, "rpchof", NULL, &bs);
-
-					if (CRC_32_verify != CRC_32_code)
-					{
-						sprintf_s(pszTemp, sizeof(pszTemp), "CRC_32 Error! Should be 0x%08X", pdsmcc_section->CRC_32_verify);
-						pxmlCrcNode->SetAttribute("error", pszTemp);
-						pxmlRootNode->SetAttribute("error", pszTemp);
-					}
+					pDownloadDataBlock = &(pdsmcc_section->DownloadDataBlock);
+					rtcode = MPEG2_DSMCC_PresentDownloadDataBlock_to_xml(pxmlDoc, pxmlDDMNode, pDownloadDataBlock);
 				}
 				else
 				{
-					sprintf_s(pszTemp, sizeof(pszTemp), "section syntax error! section_number = 0x%02X, last_section_number = 0x%02X", pdsmcc_section->section_number, pdsmcc_section->last_section_number);
-					pxmlRootNode->SetAttribute("error", pszTemp);
+					sprintf_s(pszComment, sizeof(pszComment), "unknown messageId: 0x%04X", pdsmccDownloadDataHeader->messageId);
+					XMLNODE_SetAttribute(pxmlDDMNode, "comment", pszComment);
 
-					rtcode = SECTION_PARSE_SYNTAX_ERROR;
+					XMLElement* pxmlPayloadNode = XMLDOC_NewElementForString(pxmlDoc, pxmlDDMNode, "messagePayload[ ]", NULL);
+					XMLNODE_SetFieldLength(pxmlPayloadNode, msg_payload_length);
+				}
+			}
+
+			if (pdsmcc_section->section_syntax_indicator == 1)
+			{
+				XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", pdsmcc_section->encode.CRC_32, 32, "rpchof", NULL);
+
+				if (pdsmcc_section->recalculated.CRC_32 != pdsmcc_section->encode.CRC_32)
+				{
+					sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", pdsmcc_section->recalculated.CRC_32);
+					pxmlCrcNode->SetAttribute("error", pszComment);
 				}
 			}
 			else
 			{
-				sprintf_s(pszTemp, sizeof(pszTemp), "syntax error! section_size = %d, dsmcc_section_length =%d", section_size, pdsmcc_section->dsmcc_section_length);
-				pxmlRootNode->SetAttribute("error", pszTemp);
-				rtcode = SECTION_PARSE_LENGTH_ERROR;				//section长度错误
-			}
+				XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "checksum", pdsmcc_section->encode.checksum, 32, "uimsbf", NULL);
 
-			if (pDSMCCSection == NULL)
-			{
-				//说明pdsmcc_section指针临时分配，函数返回前需要释放
-				delete pdsmcc_section;
+				if (pdsmcc_section->recalculated.checksum != pdsmcc_section->encode.checksum)
+				{
+					sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", pdsmcc_section->recalculated.checksum);
+					pxmlCrcNode->SetAttribute("error", pszComment);
+				}
 			}
-		}
-		else
-		{
-			//由于上层Section拼接的时候控制得好，这个判断分支几乎执行不到
-			sprintf_s(pszTemp, sizeof(pszTemp), "parameters error! section_size = %d", section_size);
-			pxmlRootNode->SetAttribute("error", pszTemp);
-			rtcode = SECTION_PARSE_PARAMETER_ERROR;
 		}
 	}
 	else
 	{
-		rtcode = SECTION_PARSE_PARAMETER_ERROR;						//输入参数错误
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;				//
 	}
 
 	return rtcode;
 }
 
 
-int MPEG2_DSMCC_DecodeDownloadDataBlock_to_xml(uint8_t *buf, int length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, DownloadDataBlock_t* pDDB)
+int MPEG2_DSMCC_PresentDownloadDataBlock_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, DownloadDataBlock_t* pDownloadDataBlock)
 {
-	int			rtcode = SECTION_PARSE_NO_ERROR;
-	U16		descriptor_tag;
-	U8		descriptor_length;
-	char	pszTemp[96];
-	BYTES_t	bytes;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
 
-	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pDownloadDataBlock != NULL))
 	{
-		tinyxml2::XMLElement* pxmlDDBNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "DownloadDataBlock()");
-		pxmlDoc->UpdateBufMark(pxmlDDBNode, buf, buf + length);
+		XMLElement* pxmlSessionNode = pxmlParentNode;
 
-		if ((buf != NULL) && (length > 0))
+		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "moduleId", pDownloadDataBlock->moduleId, 2, NULL);
+
+		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "moduleVersion", pDownloadDataBlock->moduleVersion, 1, NULL);
+
+		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "reserved", pDownloadDataBlock->reserved, 1, NULL);
+
+		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "blockNumber", pDownloadDataBlock->blockNumber, 2, NULL);
+
+		if (pDownloadDataBlock->N > 0)
 		{
-			DownloadDataBlock_t* pDownloadDataBlock = (pDDB != NULL) ? pDDB : new DownloadDataBlock_t;
-			memset(pDownloadDataBlock, 0x00, sizeof(DownloadDataBlock_t));
-
-			BYTES_map(&bytes, buf, length);
-
-			pDownloadDataBlock->moduleId = BYTES_get(&bytes, 2);
-			pxmlDoc->NewKeyValuePairElementByteMode(pxmlDDBNode, "moduleId", pDownloadDataBlock->moduleId, 2, NULL, &bytes);
-
-			pDownloadDataBlock->moduleVersion = BYTES_get(&bytes, 1);
-			pxmlDoc->NewKeyValuePairElementByteMode(pxmlDDBNode, "moduleVersion", pDownloadDataBlock->moduleVersion, 1, NULL, &bytes);
-
-			pDownloadDataBlock->reserved = BYTES_get(&bytes, 1);
-			pxmlDoc->NewKeyValuePairElementByteMode(pxmlDDBNode, "reserved", pDownloadDataBlock->reserved, 1, NULL, &bytes);
-
-			pDownloadDataBlock->blockNumber = BYTES_get(&bytes, 2);
-			pxmlDoc->NewKeyValuePairElementByteMode(pxmlDDBNode, "blockNumber", pDownloadDataBlock->blockNumber, 2, NULL, &bytes);
-
-			pDownloadDataBlock->N = length - 6;
-			if (pDownloadDataBlock->N > 0)
-			{
-				uint8_t* ddb_ptr = bytes.p_cur;
-				//int copy_length = min(pDownloadDataBlock->N, sizeof(pDownloadDataBlock->blockDataByte));
-				//memcpy(pDownloadDataBlock->blockDataByte, ddb_ptr, copy_length);
-				pDownloadDataBlock->blockDataByte = ddb_ptr;	//直接传指针的方法，可能会有问题，先这么操作，将来改。chendelin 2018.9.5
-				BYTES_skip(&bytes, pDownloadDataBlock->N);
-			}
-
-			if (pDDB == NULL)
-			{
-				//说明pGroupInfoIndication指针临时分配，函数返回前需要释放
-				delete pDownloadDataBlock;
-			}
-		}
-		else
-		{
-			sprintf_s(pszTemp, sizeof(pszTemp), "parameters error!");
-			pxmlDDBNode->SetAttribute("error", pszTemp);
-			rtcode = SECTION_PARSE_PARAMETER_ERROR;
+			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlSessionNode, "blockDataByte[ ]", pDownloadDataBlock->blockDataByte, pDownloadDataBlock->N, NULL);
 		}
 	}
 	else

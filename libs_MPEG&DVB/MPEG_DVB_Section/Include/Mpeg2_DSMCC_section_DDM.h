@@ -10,7 +10,7 @@
 -------------------------------------------------------------*/
 typedef struct _Bindings_s
 {
-	BIOP::Name_t	Name;
+	BIOP::NAME_t	Name;
 	uint8_t			bindingType;							//8
 	IOP::IOR_t		IOR;
 
@@ -150,8 +150,17 @@ typedef struct DSMCC_DDM_section_s
 	dsmccDownloadDataHeader_t		dsmccDownloadDataHeader;
 	DownloadDataBlock_t				DownloadDataBlock;
 
-	uint32_t		CRC_32;										//32
-	uint32_t		CRC_32_verify;								//32
+	union
+	{
+		uint32_t	CRC_32;										//32
+		uint32_t	checksum;									//32
+	} encode;
+
+	union
+	{
+		uint32_t	CRC_32;										//32
+		uint32_t	checksum;										//32
+	} recalculated;
 
 } dsmcc_ddm_section_t;
 

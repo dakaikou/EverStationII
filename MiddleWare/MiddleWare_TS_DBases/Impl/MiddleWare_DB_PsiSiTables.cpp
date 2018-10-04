@@ -633,7 +633,7 @@ int CDB_PsiSiTables::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, XMLDocFo
 
 										if (pIOR->taggedProfiles_count > 0)
 										{
-											for (profile_index = 0; profile_index < (S32)(pIOR->taggedProfiles_count); profile_index++)
+											for (profile_index = 0; profile_index < (int)(pIOR->taggedProfiles_count); profile_index++)
 											{
 												if (pIOR->taggedProfile[profile_index].profileId_tag == 0x49534F06)
 												{
@@ -649,51 +649,46 @@ int CDB_PsiSiTables::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, XMLDocFo
 													hChildItem = pxmlDoc->NewKeyValuePairElement(hIOP_taggedProfileItem, "profile_data_byte_order", pBIOPProfileBody->profile_data_byte_order, 8, pszTemp);
 													hChildItem = pxmlDoc->NewKeyValuePairElement(hIOP_taggedProfileItem, "liteComponents_count", pBIOPProfileBody->liteComponents_count, 8);
 
-													if (pBIOPProfileBody->ObjectLocation.componentId_tag == 0x49534F50)
-													{
-														pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
+													pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
 
-														sprintf_s(pszText, sizeof(pszText), "BIOP::ObjectLocation()");
-														hChildItem = pxmlDoc->NewKeyValuePairElement(hIOP_taggedProfileItem, pszText);
+													sprintf_s(pszText, sizeof(pszText), "BIOP::ObjectLocation()");
+													hChildItem = pxmlDoc->NewKeyValuePairElement(hIOP_taggedProfileItem, pszText);
 
-														MPEG2_DSMCC_NumericCoding2Text_tagId(pObjectLocation->componentId_tag, pszTemp, sizeof(pszTemp));
-														sprintf_s(pszText, sizeof(pszText), "componentId_tag = 0x%08X [%s]", pObjectLocation->componentId_tag, pszTemp);
-														pxmlDoc->NewKeyValuePairElement(hChildItem, pszText);
+													MPEG2_DSMCC_NumericCoding2Text_tagId(pObjectLocation->componentId_tag, pszTemp, sizeof(pszTemp));
+													sprintf_s(pszText, sizeof(pszText), "componentId_tag = 0x%08X [%s]", pObjectLocation->componentId_tag, pszTemp);
+													pxmlDoc->NewKeyValuePairElement(hChildItem, pszText);
 
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "component_data_length", pObjectLocation->component_data_length, 8);
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "carouselId", pObjectLocation->carouselId, 32);
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "moduleId", pObjectLocation->moduleId, 16);
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "version.major", pObjectLocation->version.major, 8);
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "version.minor", pObjectLocation->version.minor, 8);
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "objectKey_length", pObjectLocation->objectKey_length, 8);
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "objectKey_data_byte", pObjectLocation->objectKey_data, 32);
-													}
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "component_data_length", pObjectLocation->component_data_length, 8);
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "carouselId", pObjectLocation->carouselId, 32);
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "moduleId", pObjectLocation->moduleId, 16);
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "version.major", pObjectLocation->version.major, 8);
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "version.minor", pObjectLocation->version.minor, 8);
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "objectKey_length", pObjectLocation->objectKey_length, 8);
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "objectKey_data_byte", pObjectLocation->objectKey_data, 32);
 
-													if (pBIOPProfileBody->ConnBinder.componentId_tag == 0x49534F40)
-													{
-														pConnBinder = &(pBIOPProfileBody->ConnBinder);
+													pConnBinder = &(pBIOPProfileBody->ConnBinder);
 
-														sprintf_s(pszText, sizeof(pszText), "DSM::ConnBinder()");
-														hChildItem = pxmlDoc->NewKeyValuePairElement(hIOP_taggedProfileItem, pszText);
+													sprintf_s(pszText, sizeof(pszText), "DSM::ConnBinder()");
+													hChildItem = pxmlDoc->NewKeyValuePairElement(hIOP_taggedProfileItem, pszText);
 
-														MPEG2_DSMCC_NumericCoding2Text_tagId(pConnBinder->componentId_tag, pszTemp, sizeof(pszTemp));
-														sprintf_s(pszText, sizeof(pszText), "componentId_tag = 0x%08X [%s]", pConnBinder->componentId_tag, pszTemp);
-														pxmlDoc->NewKeyValuePairElement(hChildItem, pszText);
+													MPEG2_DSMCC_NumericCoding2Text_tagId(pConnBinder->componentId_tag, pszTemp, sizeof(pszTemp));
+													sprintf_s(pszText, sizeof(pszText), "componentId_tag = 0x%08X [%s]", pConnBinder->componentId_tag, pszTemp);
+													pxmlDoc->NewKeyValuePairElement(hChildItem, pszText);
 
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "component_data_length", 8, pConnBinder->component_data_length);
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "taps_count", 8, pConnBinder->taps_count);
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "component_data_length", 8, pConnBinder->component_data_length);
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "taps_count", 8, pConnBinder->taps_count);
 
-														hChildItem = pxmlDoc->NewKeyValuePairElement(hChildItem, "DSM::Tap()");
+													hChildItem = pxmlDoc->NewKeyValuePairElement(hChildItem, "DSM::Tap()");
 
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "id", pConnBinder->Tap.id, 16);
-														MPEG2_DSMCC_NumericCoding2Text_tapUse(pConnBinder->Tap.use, pszTemp, sizeof(pszTemp));
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "use", pConnBinder->Tap.use, 16, pszTemp);
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "association_tag", pConnBinder->Tap.association_tag, 16);
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "selector_length", pConnBinder->Tap.selector_length, 8);
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "selector_type", pConnBinder->Tap.selector_type, 16);
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "transactionId", pConnBinder->Tap.transactionId, 32);
-														pxmlDoc->NewKeyValuePairElement(hChildItem, "timeout", pConnBinder->Tap.timeout, 32);
-													}
+													BIOP::TAP_t* pTap = pConnBinder->Tap + 0;
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "id", pTap->id, 16);
+													MPEG2_DSMCC_NumericCoding2Text_tapUse(pTap->use, pszTemp, sizeof(pszTemp));
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "use", pTap->use, 16, pszTemp);
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "association_tag", pTap->association_tag, 16);
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "selector_length", pTap->selector_length, 8);
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "selector_type", pTap->selector_type, 16);
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "transactionId", pTap->transactionId, 32);
+													pxmlDoc->NewKeyValuePairElement(hChildItem, "timeout", pTap->timeout, 32);
 												}
 												else if (pIOR->taggedProfile[profile_index].profileId_tag == 0x49534F05)
 												{
@@ -707,6 +702,10 @@ int CDB_PsiSiTables::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, XMLDocFo
 
 													MPEG2_DSMCC_NumericCoding2Text_byteOrder(pLiteOptionsProfileBody->profile_data_byte_order, pszTemp, sizeof(pszTemp));
 													hChildItem = pxmlDoc->NewKeyValuePairElement(hIOP_taggedProfileItem, "profile_data_byte_order", pLiteOptionsProfileBody->profile_data_byte_order, 8, NULL, pszTemp);
+												}
+												else
+												{
+													assert(0);
 												}
 											}
 										}
@@ -778,7 +777,7 @@ int CDB_PsiSiTables::OC_DownloadDirectoryAndFiles(uint16_t PID, uint16_t moduleI
 	CDSMCC_DDM*					pDSMCC_DDM;
 	DirectoryMessage_t*			pDirectoryMessage;
 	Bindings_t*					pBindings;
-	BIOP::Name_t*				pName;
+	BIOP::NAME_t*				pName;
 	BIOP::ObjectLocation_t*		pObjectLocation;
 
 	unsigned short				sub_moduleId;
@@ -808,7 +807,8 @@ int CDB_PsiSiTables::OC_DownloadDirectoryAndFiles(uint16_t PID, uint16_t moduleI
 						{
 							BuildDirectory(pszPath);
 
-							pObjectLocation = &(pBindings->IOR.taggedProfile[0].u.BIOPProfileBody.ObjectLocation);
+							BIOPProfileBody_t* pBIOPProfileBody = pBindings->IOR.pBIOPProfileBodyPortrait;
+							pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
 
 							sub_moduleId = pObjectLocation->moduleId;
 							sub_objectKey_data = pObjectLocation->objectKey_data;
@@ -821,8 +821,11 @@ int CDB_PsiSiTables::OC_DownloadDirectoryAndFiles(uint16_t PID, uint16_t moduleI
 							fopen_s(&fp, pszPath, "wb");
 							if (fp != NULL)
 							{
-								uint16_t moduleId_for_ddb = pBindings->IOR.taggedProfile[0].u.BIOPProfileBody.ObjectLocation.moduleId;
-								uint32_t objectKey_data = pBindings->IOR.taggedProfile[0].u.BIOPProfileBody.ObjectLocation.objectKey_data;
+								BIOPProfileBody_t* pBIOPProfileBody = pBindings->IOR.pBIOPProfileBodyPortrait;
+								pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
+
+								uint16_t moduleId_for_ddb = pObjectLocation->moduleId;
+								uint32_t objectKey_data = pObjectLocation->objectKey_data;
 
 								pDSMCC_DDM = (CDSMCC_DDM*)QueryBy3ID(PID, TABLE_ID_DSMCC_DDM, moduleId_for_ddb);
 								if (pDSMCC_DDM != NULL)
@@ -867,7 +870,7 @@ int CDB_PsiSiTables::OC_BuildDirectory(uint16_t PID, XMLDocForMpegSyntax* pxmlDo
 	CDSMCC_DDM*					pDSMCC_DDM;
 	DirectoryMessage_t*			pDirectoryMessage;
 	Bindings_t*					pBindings;
-	BIOP::Name_t*				pName;
+	BIOP::NAME_t*				pName;
 	BIOP::ObjectLocation_t*		pObjectLocation;
 
 	int							ddm_table_index;
@@ -894,13 +897,12 @@ int CDB_PsiSiTables::OC_BuildDirectory(uint16_t PID, XMLDocForMpegSyntax* pxmlDo
 						pName = &(pBindings->Name);
 
 						sprintf_s(pszText, sizeof(pszText), "%s:%s", pName->kind_data_byte[0], pName->id_data_byte[0]);
-						//				sprintf_s(pszText, sizeof(pszText), "%s", pBIOP_Name->id_data_byte);
-
 						tinyxml2::XMLElement* pxmlChildNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, pszText);
-						//							hChildItem = TreeFun_InsertItem(&m_treeOCDCSyntax, hParent, pszText, -1, 0, NULL);
+
 						if (strcmp(pBindings->IOR.type_id_byte, "dir") == 0)
 						{
-							pObjectLocation = &(pBindings->IOR.taggedProfile[0].u.BIOPProfileBody.ObjectLocation);
+							BIOPProfileBody_t* pBIOPProfileBody = pBindings->IOR.pBIOPProfileBodyPortrait;
+							pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
 
 							sub_moduleId = pObjectLocation->moduleId;
 							sub_objectKey_data = pObjectLocation->objectKey_data;
