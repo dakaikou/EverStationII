@@ -7,10 +7,10 @@
 #include "../Include/MiddleWare_DB_PsiSiTables.h"
 #include "../Include/MiddleWare_DB_ErrorCode.h"
 
-#include "libs_MPEG&DVB\MPEG_DVB_Section\nativeInclude\DVB_table_id.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\nativeInclude\Mpeg2_table_id.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\nativeInclude\DVB_SI_Utilities.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\nativeInclude\Mpeg2_DSMCC_Utilities.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_table_id.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\Mpeg2_table_id.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_SI_Utilities.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\Mpeg2_DSMCC_Utilities.h"
 
 #include "libs_Utilities\Include\XStream_Utilities.h"
 

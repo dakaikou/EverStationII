@@ -19,10 +19,10 @@
     <Filter Include="源文件\Impl">
       <UniqueIdentifier>{403ac709-7ff2-43db-8e43-5cc41758e6af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\Include\xml">
+    <Filter Include="头文件\xmlInclude">
       <UniqueIdentifier>{3e4e65be-8158-404d-ba8f-3a79d2c94a76}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Impl\xml">
+    <Filter Include="源文件\xmlImpl">
       <UniqueIdentifier>{c0732d2f-856d-4d68-806f-60580041e461}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -36,9 +36,6 @@
     <ClInclude Include="compile.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\xml\h264_video_sequence_xml.h">
-      <Filter>头文件\Include\xml</Filter>
-    </ClInclude>
     <ClInclude Include="Include\h264_video_sequence.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
@@ -48,6 +45,9 @@
     <ClInclude Include="Include\h264_video_errorcode.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
+    <ClInclude Include="xml\Include\h264_video_sequence_xml.h">
+      <Filter>头文件\xmlInclude</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -56,11 +56,11 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\xml\h264_video_sequence_xml.cpp">
-      <Filter>源文件\Impl\xml</Filter>
-    </ClCompile>
     <ClCompile Include="Impl\h264_video_utilities.cpp">
       <Filter>源文件\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\h264_video_sequence_xml.cpp">
+      <Filter>源文件\xmlImpl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

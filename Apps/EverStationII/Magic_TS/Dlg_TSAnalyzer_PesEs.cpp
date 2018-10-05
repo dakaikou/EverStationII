@@ -21,17 +21,20 @@ static char THIS_FILE[] = __FILE__;
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare/MiddleWare_ESDecoder/Include\ESDecoder_segment_tools.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section\nativeInclude\Mpeg2_StreamType.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section\Include\Mpeg2_StreamType.h"
 #include "libs_Mpeg&DVB/Mpeg_TSPacket\Include\Mpeg2_TS_Utilities.h"
-#include "libs_Mpeg&DVB/Mpeg_PESPacket\Include\xml\MPEG_PES_Packet_xml.h"
+#include "libs_Mpeg&DVB/Mpeg_PESPacket/xml/Include/MPEG_PES_Packet_xml.h"
 
-#include "libs_ES\ES_MPV\Include\xml\mpeg_video_sequence_xml.h"
-#include "libs_ES\ES_AVS\Include\xml\avs_video_sequence_xml.h"
-#include "libs_ES\ES_H264\Include\xml\h264_video_sequence_xml.h"
-#include "libs_ES\ES_MPA\Include\xml\mpeg_audio_sequence_xml.h"
-#include "libs_ES\ES_AC3\Include\xml\ac3_audio_sequence_xml.h"
-#include "libs_ES\ES_AAC\Include\xml\aac_audio_sequence_xml.h"
-#include "libs_ES\ES_DRA\Include\xml\dra_audio_sequence_xml.h"
+#include "libs_ES\ES_MPV\Include\mpeg_video_sequence.h"
+#include "libs_ES\ES_AVS\Include\avs_video_sequence.h"
+
+#include "libs_ES\ES_MPV\xml\Include\mpeg_video_sequence_xml.h"
+#include "libs_ES\ES_AVS\xml\Include\avs_video_sequence_xml.h"
+#include "libs_ES\ES_H264\xml\Include\h264_video_sequence_xml.h"
+#include "libs_ES\ES_MPA\xml\Include\mpeg_audio_sequence_xml.h"
+#include "libs_ES\ES_AC3\xml\Include\ac3_audio_sequence_xml.h"
+#include "libs_ES\ES_AAC\xml\Include\aac_audio_sequence_xml.h"
+#include "libs_ES\ES_DRA\xml\Include\dra_audio_sequence_xml.h"
 
 #include "libs_Utilities\Include\XStream_Utilities.h"
 

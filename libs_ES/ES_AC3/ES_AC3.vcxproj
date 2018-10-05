@@ -175,21 +175,21 @@
     <ClInclude Include="Include\ac3_audio_errorcode.h" />
     <ClInclude Include="Include\ac3_audio_sequence.h" />
     <ClInclude Include="Include\ac3_audio_utilities.h" />
-    <ClInclude Include="Include\xml\ac3_audio_sequence_xml.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="xml\Include\ac3_audio_sequence_xml.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Impl\ac3_audio_sequence.cpp" />
     <ClCompile Include="Impl\ac3_audio_utilities.cpp" />
-    <ClCompile Include="Impl\xml\ac3_audio_sequence_xml.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="xml\Impl\ac3_audio_sequence_xml.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

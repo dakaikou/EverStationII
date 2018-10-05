@@ -19,11 +19,11 @@
     <Filter Include="源文件\Impl">
       <UniqueIdentifier>{403ac709-7ff2-43db-8e43-5cc41758e6af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\Include\xml">
-      <UniqueIdentifier>{abec583f-f775-4779-aa2a-d30605385203}</UniqueIdentifier>
+    <Filter Include="头文件\xmlInclude">
+      <UniqueIdentifier>{4d4cf343-7244-4044-8021-a8fcb3b35ef5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Impl\xml">
-      <UniqueIdentifier>{22abf5ea-fea0-4aa7-900a-d26a10e4c291}</UniqueIdentifier>
+    <Filter Include="源文件\xmlImpl">
+      <UniqueIdentifier>{fc30e418-6093-4b40-958e-af4defff18f7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -42,11 +42,11 @@
     <ClInclude Include="Include\aac_audio_sequence.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="Include\xml\aac_audio_sequence_xml.h">
-      <Filter>头文件\Include\xml</Filter>
-    </ClInclude>
     <ClInclude Include="Include\aac_audio_errorcode.h">
       <Filter>头文件\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\aac_audio_sequence_xml.h">
+      <Filter>头文件\xmlInclude</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -62,8 +62,8 @@
     <ClCompile Include="Impl\aac_audio_sequence.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\xml\aac_audio_sequence_xml.cpp">
-      <Filter>源文件\Impl\xml</Filter>
+    <ClCompile Include="xml\Impl\aac_audio_sequence_xml.cpp">
+      <Filter>源文件\xmlImpl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

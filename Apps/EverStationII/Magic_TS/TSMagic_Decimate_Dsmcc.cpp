@@ -9,9 +9,9 @@
 
 #include "libs_MPEG&DVB/MPEG_TSPacket/Include/Mpeg2_TS_ErrorCode.h"
 #include "libs_MPEG&DVB/MPEG_TSPacket\Include\Mpeg2_TS_Utilities.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section\nativeInclude\MPEG_DVB_ErrorCode.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_DSMCC_Utilities.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section\Include\MPEG_DVB_ErrorCode.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_DSMCC_Utilities.h"
 
 #include "libs_Utilities\Include\XStream_Utilities.h"
 

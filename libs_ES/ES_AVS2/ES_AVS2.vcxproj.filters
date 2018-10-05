@@ -19,11 +19,11 @@
     <Filter Include="源文件\Impl">
       <UniqueIdentifier>{403ac709-7ff2-43db-8e43-5cc41758e6af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\Include\xml">
-      <UniqueIdentifier>{9aec701c-4655-4b83-942f-641a0f0a8e1c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Impl\xml">
+    <Filter Include="源文件\xmlImpl">
       <UniqueIdentifier>{a66ee2d2-8173-4147-8dee-b126156ff543}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\xmlInclude">
+      <UniqueIdentifier>{9aec701c-4655-4b83-942f-641a0f0a8e1c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -42,9 +42,6 @@
     <ClInclude Include="Include\avs2_video_utilities.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="Include\xml\avs2_video_sequence_xml.h">
-      <Filter>头文件\Include\xml</Filter>
-    </ClInclude>
     <ClInclude Include="Impl\avs2_video_table.h">
       <Filter>源文件\Impl</Filter>
     </ClInclude>
@@ -53,6 +50,9 @@
     </ClInclude>
     <ClInclude Include="Include\avs2_video_errorcode.h">
       <Filter>头文件\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\avs2_video_sequence_xml.h">
+      <Filter>头文件\xmlInclude</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -65,8 +65,8 @@
     <ClCompile Include="Impl\avs2_video_sequence.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\xml\avs2_video_sequence_xml.cpp">
-      <Filter>源文件\Impl\xml</Filter>
+    <ClCompile Include="xml\Impl\avs2_video_sequence_xml.cpp">
+      <Filter>源文件\xmlImpl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

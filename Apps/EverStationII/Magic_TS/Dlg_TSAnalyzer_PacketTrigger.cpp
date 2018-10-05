@@ -20,7 +20,7 @@ static char THIS_FILE[] = __FILE__;
 #include "TSMagic_GuiApi_MSG.h"
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
-#include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/xml/Mpeg2_TS_packet_xml.h"
+#include "libs_Mpeg&DVB/Mpeg_TSPacket/xml/Include/Mpeg2_TS_packet_xml.h"
 #include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/Mpeg2_TS_PID.h"
 #include "libs_Utilities\Include\XStream_Utilities.h"
 #include "HAL\HAL_XML\Include\HALForTinyXML2.h"

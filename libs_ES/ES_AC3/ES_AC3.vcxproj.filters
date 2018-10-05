@@ -19,11 +19,11 @@
     <Filter Include="源文件\Impl">
       <UniqueIdentifier>{403ac709-7ff2-43db-8e43-5cc41758e6af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Impl\xml">
-      <UniqueIdentifier>{375c47bf-d4e3-4c5a-bc0c-c1271ed9b6cb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\Include\xml">
+    <Filter Include="头文件\xmlInclude">
       <UniqueIdentifier>{e35c373d-4ef0-449c-8ef6-264233dc8627}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\xmlImpl">
+      <UniqueIdentifier>{375c47bf-d4e3-4c5a-bc0c-c1271ed9b6cb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -39,14 +39,14 @@
     <ClInclude Include="Include\ac3_audio_sequence.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="Include\xml\ac3_audio_sequence_xml.h">
-      <Filter>头文件\Include\xml</Filter>
-    </ClInclude>
     <ClInclude Include="Include\ac3_audio_utilities.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
     <ClInclude Include="Include\ac3_audio_errorcode.h">
       <Filter>头文件\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\ac3_audio_sequence_xml.h">
+      <Filter>头文件\xmlInclude</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -59,11 +59,11 @@
     <ClCompile Include="Impl\ac3_audio_sequence.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\xml\ac3_audio_sequence_xml.cpp">
-      <Filter>源文件\Impl\xml</Filter>
-    </ClCompile>
     <ClCompile Include="Impl\ac3_audio_utilities.cpp">
       <Filter>源文件\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\ac3_audio_sequence_xml.cpp">
+      <Filter>源文件\xmlImpl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

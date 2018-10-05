@@ -13,8 +13,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_PSI_Utilities.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
 #include "libs_MPEG&DVB/Mpeg_TSPacket\Include\Mpeg2_TS_Utilities.h"
 
 #include "../resource.h"

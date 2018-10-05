@@ -4,7 +4,7 @@
 #include "../compile.h"
 #include <stdint.h>
 
-#include "libs_MPEG&DVB\MPEG_DVB_Section\nativeInclude\MPEG_DVB_Common.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\MPEG_DVB_Common.h"
 
 /*------------------------------------------------------------
 		PSISI Table Base definition 

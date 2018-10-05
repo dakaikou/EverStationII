@@ -23,7 +23,7 @@
 #include "MiddleWare/MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_ESDecoder/Include/ESDecoder.h"
 
-#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/MPEG_DVB_ErrorCode.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/MPEG_DVB_ErrorCode.h"
 #include "libs_MPEG&DVB/MPEG_TSPacket\Include\Mpeg2_TS_Utilities.h"
 
 //#include "MiddleWare_ESDecoder/Include/VideoDecoder_Mpeg2.h"

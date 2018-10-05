@@ -19,10 +19,10 @@
     <Filter Include="源文件\Impl">
       <UniqueIdentifier>{403ac709-7ff2-43db-8e43-5cc41758e6af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\Include\xml">
+    <Filter Include="头文件\xmlInclude">
       <UniqueIdentifier>{abec583f-f775-4779-aa2a-d30605385203}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Impl\xml">
+    <Filter Include="源文件\xmlImpl">
       <UniqueIdentifier>{22abf5ea-fea0-4aa7-900a-d26a10e4c291}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -42,11 +42,11 @@
     <ClInclude Include="Include\dra_audio_utilities.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="Include\xml\dra_audio_sequence_xml.h">
-      <Filter>头文件\Include\xml</Filter>
-    </ClInclude>
     <ClInclude Include="Include\dra_audio_errorcode.h">
       <Filter>头文件\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\dra_audio_sequence_xml.h">
+      <Filter>头文件\xmlInclude</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -62,8 +62,8 @@
     <ClCompile Include="Impl\dra_audio_utilites.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\xml\dra_audio_sequence_xml.cpp">
-      <Filter>源文件\Impl\xml</Filter>
+    <ClCompile Include="xml\Impl\dra_audio_sequence_xml.cpp">
+      <Filter>源文件\xmlImpl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

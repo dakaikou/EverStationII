@@ -3,11 +3,11 @@
 
 #include "../compile.h"
 #include "HAL/HAL_Sys/Include/INTTYPES.H"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\nativeInclude\MPEG_DVB_Common.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_DSMCC_Descriptor.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_DSMCC_Section.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/dsmcc/Mpeg2_DSMCC_UNM.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/dsmcc/Mpeg2_DSMCC_DDM.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\MPEG_DVB_Common.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_DSMCC_Descriptor.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_DSMCC_Section.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_UNM.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_DDM.h"
 
 #include "MiddleWare_PSISI_Common.h"
 

@@ -18,7 +18,7 @@ static char THIS_FILE[] = __FILE__;
 #include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_PSISI_Table.h"
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "libs_Utilities\Include\XStream_Utilities.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\nativeInclude\DVB_SI_Utilities.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_SI_Utilities.h"
 
 IMPLEMENT_DYNCREATE(CListView_EpgSchedule, CListView)
 

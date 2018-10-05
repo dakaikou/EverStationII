@@ -13,17 +13,8 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="头文件\nativeInclude">
-      <UniqueIdentifier>{46fcb035-91ee-41f2-8914-07f972e1b426}</UniqueIdentifier>
-    </Filter>
     <Filter Include="头文件\xmlInclude">
       <UniqueIdentifier>{941fea8a-66b4-488e-b1e9-8c40d2d51e6c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\nativeImpl">
-      <UniqueIdentifier>{2cf83676-88d7-4943-89d0-e656c9c70614}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\nativeImpl\dsmcc">
-      <UniqueIdentifier>{bba166ad-5d83-4c4e-a79f-8eee53db9657}</UniqueIdentifier>
     </Filter>
     <Filter Include="源文件\xmlImpl">
       <UniqueIdentifier>{1bd83669-81a3-419f-9cae-25d78e22415f}</UniqueIdentifier>
@@ -34,8 +25,17 @@
     <Filter Include="头文件\xmlInclude\dsmcc">
       <UniqueIdentifier>{f93df299-c819-4bdb-a4d5-04ce77859b64}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\nativeInclude\dsmcc">
+    <Filter Include="头文件\Include">
+      <UniqueIdentifier>{46fcb035-91ee-41f2-8914-07f972e1b426}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Include\dsmcc">
       <UniqueIdentifier>{81ae6047-4513-4479-b256-a4d818c3e9f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Impl">
+      <UniqueIdentifier>{2cf83676-88d7-4943-89d0-e656c9c70614}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Impl\dsmcc">
+      <UniqueIdentifier>{bba166ad-5d83-4c4e-a79f-8eee53db9657}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -45,155 +45,155 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\dsmcc\Mpeg2_DSMCC_common.h">
-      <Filter>头文件\nativeInclude\dsmcc</Filter>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_common.h">
+      <Filter>头文件\Include\dsmcc</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\dsmcc\Mpeg2_DSMCC_DDM.h">
-      <Filter>头文件\nativeInclude\dsmcc</Filter>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_DDM.h">
+      <Filter>头文件\Include\dsmcc</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\dsmcc\Mpeg2_DSMCC_UNM.h">
-      <Filter>头文件\nativeInclude\dsmcc</Filter>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM.h">
+      <Filter>头文件\Include\dsmcc</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\dsmcc\Mpeg2_DSMCC_UNM_DII.h">
-      <Filter>头文件\nativeInclude\dsmcc</Filter>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM_DII.h">
+      <Filter>头文件\Include\dsmcc</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\dsmcc\Mpeg2_DSMCC_UNM_DSI.h">
-      <Filter>头文件\nativeInclude\dsmcc</Filter>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM_DSI.h">
+      <Filter>头文件\Include\dsmcc</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\dsmcc\Mpeg2_DSMCC_UNM_DSI_DC.h">
-      <Filter>头文件\nativeInclude\dsmcc</Filter>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM_DSI_DC.h">
+      <Filter>头文件\Include\dsmcc</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\dsmcc\Mpeg2_DSMCC_UNM_DSI_OC.h">
-      <Filter>头文件\nativeInclude\dsmcc</Filter>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM_DSI_OC.h">
+      <Filter>头文件\Include\dsmcc</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\DVB_Databroadcast.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\DVB_Databroadcast.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\DVB_IPDC_Descriptor.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\DVB_IPDC_Descriptor.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\DVB_IPDC_section.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\DVB_IPDC_section.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\DVB_IPDC_Utilities.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\DVB_IPDC_Utilities.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\DVB_MHP_Descriptor.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\DVB_MHP_Descriptor.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\DVB_MHP_section.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\DVB_MHP_section.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\DVB_MHP_table_id.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\DVB_MHP_table_id.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\DVB_MHP_Utilities.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\DVB_MHP_Utilities.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\DVB_SI_Descriptor.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\DVB_SI_Descriptor.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\DVB_SI_section.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\DVB_SI_section.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\DVB_SI_Utilities.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\DVB_SI_Utilities.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\DVB_table_id.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\DVB_table_id.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\MPEG_DVB_Common.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\MPEG_DVB_Common.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\MPEG_DVB_ErrorCode.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\MPEG_DVB_ErrorCode.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\MPEG_DVB_SysCapability.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\MPEG_DVB_SysCapability.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\Mpeg2_DSMCC_Descriptor.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\Mpeg2_DSMCC_Descriptor.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\Mpeg2_DSMCC_section.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\Mpeg2_DSMCC_section.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\Mpeg2_DSMCC_Utilities.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\Mpeg2_DSMCC_Utilities.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\Mpeg2_PSI_Descriptor.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\Mpeg2_PSI_Descriptor.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\Mpeg2_PSI_section.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\Mpeg2_PSI_section.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\Mpeg2_PSI_Utilities.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\Mpeg2_PSI_Utilities.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\Mpeg2_StreamType.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\Mpeg2_StreamType.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="nativeInclude\Mpeg2_table_id.h">
-      <Filter>头文件\nativeInclude</Filter>
+    <ClInclude Include="Include\Mpeg2_table_id.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="xmlInclude\DVB_Databroadcast_XML.h">
-      <Filter>头文件\xmlInclude</Filter>
-    </ClInclude>
-    <ClInclude Include="xmlInclude\DVB_IPDC_Descriptor_XML.h">
-      <Filter>头文件\xmlInclude</Filter>
-    </ClInclude>
-    <ClInclude Include="xmlInclude\DVB_IPDC_section_XML.h">
-      <Filter>头文件\xmlInclude</Filter>
-    </ClInclude>
-    <ClInclude Include="xmlInclude\DVB_MHP_Descriptor_XML.h">
-      <Filter>头文件\xmlInclude</Filter>
-    </ClInclude>
-    <ClInclude Include="xmlInclude\DVB_MHP_section_XML.h">
-      <Filter>头文件\xmlInclude</Filter>
-    </ClInclude>
-    <ClInclude Include="xmlInclude\DVB_SI_Descriptor_XML.h">
-      <Filter>头文件\xmlInclude</Filter>
-    </ClInclude>
-    <ClInclude Include="xmlInclude\DVB_SI_section_XML.h">
-      <Filter>头文件\xmlInclude</Filter>
-    </ClInclude>
-    <ClInclude Include="xmlInclude\MPEG_DVB_Common_XML.h">
-      <Filter>头文件\xmlInclude</Filter>
-    </ClInclude>
-    <ClInclude Include="xmlInclude\Mpeg2_DSMCC_Descriptor_XML.h">
-      <Filter>头文件\xmlInclude</Filter>
-    </ClInclude>
-    <ClInclude Include="xmlInclude\Mpeg2_DSMCC_section_XML.h">
-      <Filter>头文件\xmlInclude</Filter>
-    </ClInclude>
-    <ClInclude Include="xmlInclude\Mpeg2_PSI_Descriptor_XML.h">
-      <Filter>头文件\xmlInclude</Filter>
-    </ClInclude>
-    <ClInclude Include="xmlInclude\Mpeg2_PSI_section_XML.h">
-      <Filter>头文件\xmlInclude</Filter>
-    </ClInclude>
-    <ClInclude Include="nativeImpl\DVB_SI_Utilities_Inner.h">
-      <Filter>源文件\nativeImpl</Filter>
-    </ClInclude>
-    <ClInclude Include="xmlInclude\dsmcc\Mpeg2_DSMCC_common_XML.h">
+    <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_common_XML.h">
       <Filter>头文件\xmlInclude\dsmcc</Filter>
     </ClInclude>
-    <ClInclude Include="xmlInclude\dsmcc\Mpeg2_DSMCC_DDM_XML.h">
+    <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_DDM_XML.h">
       <Filter>头文件\xmlInclude\dsmcc</Filter>
     </ClInclude>
-    <ClInclude Include="xmlInclude\dsmcc\Mpeg2_DSMCC_UNM_DII_XML.h">
+    <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_UNM_DII_XML.h">
       <Filter>头文件\xmlInclude\dsmcc</Filter>
     </ClInclude>
-    <ClInclude Include="xmlInclude\dsmcc\Mpeg2_DSMCC_UNM_DSI_DC_XML.h">
+    <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_UNM_DSI_DC_XML.h">
       <Filter>头文件\xmlInclude\dsmcc</Filter>
     </ClInclude>
-    <ClInclude Include="xmlInclude\dsmcc\Mpeg2_DSMCC_UNM_DSI_OC_XML.h">
+    <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_UNM_DSI_OC_XML.h">
       <Filter>头文件\xmlInclude\dsmcc</Filter>
     </ClInclude>
-    <ClInclude Include="xmlInclude\dsmcc\Mpeg2_DSMCC_UNM_DSI_XML.h">
+    <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_UNM_DSI_XML.h">
       <Filter>头文件\xmlInclude\dsmcc</Filter>
     </ClInclude>
-    <ClInclude Include="xmlInclude\dsmcc\Mpeg2_DSMCC_UNM_XML.h">
+    <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_UNM_XML.h">
       <Filter>头文件\xmlInclude\dsmcc</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\DVB_Databroadcast_XML.h">
+      <Filter>头文件\xmlInclude</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\DVB_IPDC_Descriptor_XML.h">
+      <Filter>头文件\xmlInclude</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\DVB_IPDC_section_XML.h">
+      <Filter>头文件\xmlInclude</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\DVB_MHP_Descriptor_XML.h">
+      <Filter>头文件\xmlInclude</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\DVB_MHP_section_XML.h">
+      <Filter>头文件\xmlInclude</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\DVB_SI_Descriptor_XML.h">
+      <Filter>头文件\xmlInclude</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\DVB_SI_section_XML.h">
+      <Filter>头文件\xmlInclude</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\MPEG_DVB_Common_XML.h">
+      <Filter>头文件\xmlInclude</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\Mpeg2_DSMCC_Descriptor_XML.h">
+      <Filter>头文件\xmlInclude</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\Mpeg2_DSMCC_section_XML.h">
+      <Filter>头文件\xmlInclude</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\Mpeg2_PSI_Descriptor_XML.h">
+      <Filter>头文件\xmlInclude</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\Mpeg2_PSI_section_XML.h">
+      <Filter>头文件\xmlInclude</Filter>
+    </ClInclude>
+    <ClInclude Include="Impl\DVB_SI_Utilities_Inner.h">
+      <Filter>源文件\Impl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -203,200 +203,200 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\dsmcc\Mpeg2_DSMCC_common.cpp">
-      <Filter>源文件\nativeImpl\dsmcc</Filter>
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_common.cpp">
+      <Filter>源文件\Impl\dsmcc</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\dsmcc\Mpeg2_DSMCC_DDM.cpp">
-      <Filter>源文件\nativeImpl\dsmcc</Filter>
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_DDM.cpp">
+      <Filter>源文件\Impl\dsmcc</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\dsmcc\Mpeg2_DSMCC_UNM.cpp">
-      <Filter>源文件\nativeImpl\dsmcc</Filter>
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM.cpp">
+      <Filter>源文件\Impl\dsmcc</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\dsmcc\Mpeg2_DSMCC_UNM_DII.cpp">
-      <Filter>源文件\nativeImpl\dsmcc</Filter>
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM_DII.cpp">
+      <Filter>源文件\Impl\dsmcc</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\dsmcc\Mpeg2_DSMCC_UNM_DSI.cpp">
-      <Filter>源文件\nativeImpl\dsmcc</Filter>
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM_DSI.cpp">
+      <Filter>源文件\Impl\dsmcc</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\dsmcc\Mpeg2_DSMCC_UNM_DSI_DC.cpp">
-      <Filter>源文件\nativeImpl\dsmcc</Filter>
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM_DSI_DC.cpp">
+      <Filter>源文件\Impl\dsmcc</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\dsmcc\Mpeg2_DSMCC_UNM_DSI_OC.cpp">
-      <Filter>源文件\nativeImpl\dsmcc</Filter>
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM_DSI_OC.cpp">
+      <Filter>源文件\Impl\dsmcc</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_Databroadcast.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_Databroadcast.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_IPDC_Descriptor.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_IPDC_Descriptor.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_IPDC_section_INT.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_IPDC_section_INT.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_IPDC_section_MPE.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_IPDC_section_MPE.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_IPDC_Utilities.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_IPDC_Utilities.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_MHP_Descriptor.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_MHP_Descriptor.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_MHP_section_AIT.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_MHP_section_AIT.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_MHP_Utilities.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_MHP_Utilities.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_SI_Descriptor.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_SI_Descriptor.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_SI_section_BAT.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_SI_section_BAT.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_SI_section_CMT.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_SI_section_CMT.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_SI_section_EIT.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_SI_section_EIT.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_SI_section_NIT.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_SI_section_NIT.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_SI_section_RST.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_SI_section_RST.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_SI_section_SDT.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_SI_section_SDT.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_SI_section_TDT.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_SI_section_TDT.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_SI_section_TOT.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_SI_section_TOT.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\DVB_SI_Utilities.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\DVB_SI_Utilities.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\MPEG_DVB_common.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\MPEG_DVB_common.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\Mpeg2_DSMCC_Descriptor.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\Mpeg2_DSMCC_Descriptor.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\Mpeg2_DSMCC_section.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\Mpeg2_DSMCC_section.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\Mpeg2_DSMCC_Utilities.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\Mpeg2_DSMCC_Utilities.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\Mpeg2_PSI_Descriptor.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\Mpeg2_PSI_Descriptor.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\Mpeg2_PSI_section_CAT.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\Mpeg2_PSI_section_CAT.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\Mpeg2_PSI_section_PAT.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\Mpeg2_PSI_section_PAT.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\Mpeg2_PSI_section_PMT.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\Mpeg2_PSI_section_PMT.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\Mpeg2_PSI_section_TSDT.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\Mpeg2_PSI_section_TSDT.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="nativeImpl\Mpeg2_PSI_Utilities.cpp">
-      <Filter>源文件\nativeImpl</Filter>
+    <ClCompile Include="Impl\Mpeg2_PSI_Utilities.cpp">
+      <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="xmlImpl\dsmcc\Mpeg2_DSMCC_common_XML.cpp">
+    <ClCompile Include="xml\Impl\dsmcc\Mpeg2_DSMCC_common_XML.cpp">
       <Filter>源文件\xmlImpl\dsmcc</Filter>
     </ClCompile>
-    <ClCompile Include="xmlImpl\dsmcc\Mpeg2_DSMCC_DDM_XML.cpp">
+    <ClCompile Include="xml\Impl\dsmcc\Mpeg2_DSMCC_DDM_XML.cpp">
       <Filter>源文件\xmlImpl\dsmcc</Filter>
     </ClCompile>
-    <ClCompile Include="xmlImpl\dsmcc\Mpeg2_DSMCC_UNM_XML.cpp">
+    <ClCompile Include="xml\Impl\dsmcc\Mpeg2_DSMCC_UNM_DII_XML.cpp">
       <Filter>源文件\xmlImpl\dsmcc</Filter>
     </ClCompile>
-    <ClCompile Include="xmlImpl\DVB_Databroadcast_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\DVB_IPDC_Descriptor_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\DVB_IPDC_section_INT_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\DVB_IPDC_section_MPE_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\DVB_MHP_Descriptor_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\DVB_MHP_section_AIT_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\DVB_SI_Descriptor_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\DVB_SI_section_BAT_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\DVB_SI_section_CMT_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\DVB_SI_section_EIT_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\DVB_SI_section_NIT_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\DVB_SI_section_RST_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\DVB_SI_section_SDT_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\DVB_SI_section_TDT_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\DVB_SI_section_TOT_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\MPEG_DVB_Common_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\Mpeg2_DSMCC_Descriptor_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\Mpeg2_DSMCC_section_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\Mpeg2_PSI_Descriptor_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\Mpeg2_PSI_section_CAT_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\Mpeg2_PSI_section_PAT_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\Mpeg2_PSI_section_PMT_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\Mpeg2_PSI_section_TSDT_XML.cpp">
-      <Filter>源文件\xmlImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlImpl\dsmcc\Mpeg2_DSMCC_UNM_DII_XML.cpp">
+    <ClCompile Include="xml\Impl\dsmcc\Mpeg2_DSMCC_UNM_DSI_DC_XML.cpp">
       <Filter>源文件\xmlImpl\dsmcc</Filter>
     </ClCompile>
-    <ClCompile Include="xmlImpl\dsmcc\Mpeg2_DSMCC_UNM_DSI_DC_XML.cpp">
+    <ClCompile Include="xml\Impl\dsmcc\Mpeg2_DSMCC_UNM_DSI_OC_XML.cpp">
       <Filter>源文件\xmlImpl\dsmcc</Filter>
     </ClCompile>
-    <ClCompile Include="xmlImpl\dsmcc\Mpeg2_DSMCC_UNM_DSI_OC_XML.cpp">
+    <ClCompile Include="xml\Impl\dsmcc\Mpeg2_DSMCC_UNM_DSI_XML.cpp">
       <Filter>源文件\xmlImpl\dsmcc</Filter>
     </ClCompile>
-    <ClCompile Include="xmlImpl\dsmcc\Mpeg2_DSMCC_UNM_DSI_XML.cpp">
+    <ClCompile Include="xml\Impl\dsmcc\Mpeg2_DSMCC_UNM_XML.cpp">
       <Filter>源文件\xmlImpl\dsmcc</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\DVB_Databroadcast_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\DVB_IPDC_Descriptor_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\DVB_IPDC_section_INT_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\DVB_IPDC_section_MPE_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\DVB_MHP_Descriptor_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\DVB_MHP_section_AIT_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\DVB_SI_Descriptor_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\DVB_SI_section_BAT_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\DVB_SI_section_CMT_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\DVB_SI_section_EIT_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\DVB_SI_section_NIT_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\DVB_SI_section_RST_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\DVB_SI_section_SDT_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\DVB_SI_section_TDT_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\DVB_SI_section_TOT_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\MPEG_DVB_Common_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\Mpeg2_DSMCC_Descriptor_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\Mpeg2_DSMCC_section_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\Mpeg2_PSI_Descriptor_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\Mpeg2_PSI_section_CAT_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\Mpeg2_PSI_section_PAT_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\Mpeg2_PSI_section_PMT_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\Mpeg2_PSI_section_TSDT_XML.cpp">
+      <Filter>源文件\xmlImpl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
