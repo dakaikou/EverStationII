@@ -14,13 +14,14 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_PsiSi dialog
 
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\Mpeg2_table_id.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\xml\Mpeg2_DSMCC_section_XML.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\xml\Mpeg2_PSI_section_XML.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_table_id.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\xml\DVB_SI_section_XML.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\xml\DVB_IPDC_section_XML.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\xml\DVB_MHP_section_XML.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\nativeInclude\Mpeg2_table_id.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\nativeInclude\DVB_table_id.h"
+
+#include "libs_MPEG&DVB\MPEG_DVB_Section\xmlInclude\Mpeg2_DSMCC_section_XML.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\xmlInclude\Mpeg2_PSI_section_XML.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\xmlInclude\DVB_SI_section_XML.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\xmlInclude\DVB_IPDC_section_XML.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\xmlInclude\DVB_MHP_section_XML.h"
 
 #include "libs_Utilities\Include\XStream_Utilities.h"
 

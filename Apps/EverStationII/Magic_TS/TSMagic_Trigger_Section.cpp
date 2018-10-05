@@ -10,8 +10,8 @@
 
 #include "libs_MPEG&DVB/MPEG_TSPacket/Include/Mpeg2_TS_ErrorCode.h"
 #include "libs_MPEG&DVB/MPEG_PESPacket/Include/MPEG_stream_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_table_id.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/DVB_table_id.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_SectionSplicer.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer\Include\MiddleWare_SectionSplicer_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TransportStream.h"

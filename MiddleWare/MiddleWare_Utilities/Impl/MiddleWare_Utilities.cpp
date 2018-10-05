@@ -3,8 +3,8 @@
 #include <assert.h>
 
 #include "../Include/MiddleWare_Utilities.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_section.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_PSI_Descriptor.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_PSI_section.h"
 #include "libs_Mpeg&DVB/MPEG_PESPacket/Include/MPEG_stream_id.h"
 
 

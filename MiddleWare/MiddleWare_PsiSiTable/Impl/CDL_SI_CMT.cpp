@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "../Include/MiddleWare_PSISI_Table.h"
 #include "../Include/MiddleWare_PSISI_ErrorCode.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section\Include\MPEG_DVB_ErrorCode.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section\nativeInclude\MPEG_DVB_ErrorCode.h"
 
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))

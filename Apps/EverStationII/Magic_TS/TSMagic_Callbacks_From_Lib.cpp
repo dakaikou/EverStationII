@@ -9,12 +9,12 @@
 #include "TSMagic_Callbacks_From_Lib.h"
 #include "TSMagic_Callbacks_To_Gui.h"
 
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/MPEG_DVB_ErrorCode.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/MPEG_DVB_Common.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/DVB_IPDC_Section.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/DVB_MHP_Section.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_table_id.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/MPEG_DVB_ErrorCode.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/MPEG_DVB_Common.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/DVB_table_id.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/DVB_IPDC_Section.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/DVB_MHP_Section.h"
 
 #include "MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_Pcrs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_TSPackets.h"

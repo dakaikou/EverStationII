@@ -21,7 +21,7 @@ static char THIS_FILE[] = __FILE__;
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare/MiddleWare_ESDecoder/Include\ESDecoder_segment_tools.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section\Include\Mpeg2_StreamType.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section\nativeInclude\Mpeg2_StreamType.h"
 #include "libs_Mpeg&DVB/Mpeg_TSPacket\Include\Mpeg2_TS_Utilities.h"
 #include "libs_Mpeg&DVB/Mpeg_PESPacket\Include\xml\MPEG_PES_Packet_xml.h"
 

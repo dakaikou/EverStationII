@@ -13,7 +13,7 @@ static char THIS_FILE[] = __FILE__;
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
 
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_SI_Utilities.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\nativeInclude\DVB_SI_Utilities.h"
 #include "libs_Utilities\Include\XStream_Utilities.h"
 
 #include "..\Common\define.h"

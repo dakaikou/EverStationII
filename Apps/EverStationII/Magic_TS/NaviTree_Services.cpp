@@ -13,9 +13,9 @@ static char THIS_FILE[] = __FILE__;
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
 
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_SI_Utilities.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_table_id.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/DVB_table_id.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\nativeInclude\DVB_SI_Utilities.h"
 
 #include "TSMagicView.h"
 /////////////////////////////////////////////////////////////////////////////

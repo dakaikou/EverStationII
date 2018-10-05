@@ -4,7 +4,7 @@
 #include "MiddleWare\MiddleWare_Utilities\Include\MiddleWare_Utilities.h"
 #include "MiddleWare\MiddleWare_TS_PayloadSplicer\Include\MiddleWare_SectionSplicer_ErrorCode.h"
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
-#include "libs_Mpeg&DVB\MPEG_DVB_Section\Include\MPEG_DVB_ErrorCode.h"
+#include "libs_Mpeg&DVB\MPEG_DVB_Section\nativeInclude\MPEG_DVB_ErrorCode.h"
 #include "libs_Mpeg&DVB/MPEG_TSPacket\Include\Mpeg2_TS_ErrorCode.h"
 
 int	TSMagic_ErrorCodeLookup(uint32_t error_code, char* pszText, int size)

@@ -13,8 +13,8 @@ static char THIS_FILE[] = __FILE__;
 
 #include <math.h>
 
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_SI_Utilities.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_PSI_Utilities.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/DVB_SI_Utilities.h"
 
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_PSISI_Table.h"

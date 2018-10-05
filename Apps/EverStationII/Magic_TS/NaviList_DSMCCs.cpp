@@ -12,11 +12,11 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_SI_Utilities.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Section.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/DVB_SI_Utilities.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/DVB_table_id.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_PSI_Section.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_table_id.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_PSI_Descriptor.h"
 
 #include "libs_Utilities\Include\XStream_Utilities.h"
 

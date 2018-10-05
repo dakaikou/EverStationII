@@ -12,10 +12,10 @@
 #include "libs_Mpeg&DVB/Mpeg_TSPacket\Include\Mpeg2_TS_PID.h"
 #include "libs_Mpeg&DVB/Mpeg_PESPacket/Include/MPEG_stream_id.h"
 #include "libs_Mpeg&DVB/Mpeg_PESPacket/Include/MPEG_PES_Utilities.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\Mpeg2_table_id.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_StreamType.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/MPEG_DVB_Common.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\nativeInclude\Mpeg2_table_id.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_StreamType.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_PSI_Utilities.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/MPEG_DVB_Common.h"
 
 #include "libs_Utilities\Include\XStream_Utilities.h"
 

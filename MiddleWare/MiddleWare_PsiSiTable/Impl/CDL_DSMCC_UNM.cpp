@@ -3,11 +3,12 @@
 #include <assert.h>
 #include <math.h>
 
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_DSMCC_section.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_UNM.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_DSMCC_Utilities.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section\Include\MPEG_DVB_ErrorCode.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_DSMCC_section.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_DSMCC_Utilities.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/Mpeg2_table_id.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/MPEG_DVB_ErrorCode.h"
+
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/nativeInclude/dsmcc/Mpeg2_DSMCC_UNM.h"
 
 #include "../Include/MiddleWare_PSISI_ErrorCode.h"
 #include "../Include/MiddleWare_DSMCC_Table.h"
