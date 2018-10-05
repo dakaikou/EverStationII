@@ -3,8 +3,10 @@
 #include <assert.h>
 #include <math.h>
 
-#include "../Include/Mpeg2_DSMCC_common.h"
-#include "../Include/MPEG_DVB_ErrorCode.h"
+#include "../../Include/dsmcc/Mpeg2_DSMCC_DDM.h"
+#include "../../Include/dsmcc/Mpeg2_DSMCC_UNM.h"
+#include "../../Include/dsmcc/Mpeg2_DSMCC_common.h"
+#include "../../Include/MPEG_DVB_ErrorCode.h"
 
 #include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 #include "HAL\HAL_ByteStream\Include\HALForByteStream.h"

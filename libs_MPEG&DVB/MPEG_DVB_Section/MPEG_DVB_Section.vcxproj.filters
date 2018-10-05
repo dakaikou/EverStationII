@@ -25,6 +25,15 @@
     <Filter Include="头文件\Include\xml">
       <UniqueIdentifier>{c517b58a-a412-4d87-b949-869e679a3121}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\Impl\dsmcc">
+      <UniqueIdentifier>{0d283625-5614-4b34-badc-38ec777e68a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Impl\xml\dsmcc">
+      <UniqueIdentifier>{43612a0d-e41d-48d9-80eb-d550f30f8720}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Include\dsmcc">
+      <UniqueIdentifier>{bf203712-165d-48d5-994a-4d70068fc796}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -132,20 +141,32 @@
     <ClInclude Include="Include\Mpeg2_table_id.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Mpeg2_DSMCC_section_DDM.h">
-      <Filter>头文件\Include</Filter>
-    </ClInclude>
     <ClInclude Include="Include\Mpeg2_DSMCC_section.h">
-      <Filter>头文件\Include</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Mpeg2_DSMCC_section_UNM.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
     <ClInclude Include="Impl\DVB_SI_Utilities_Inner.h">
       <Filter>源文件\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Mpeg2_DSMCC_common.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_common.h">
+      <Filter>头文件\Include\dsmcc</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_DDM.h">
+      <Filter>头文件\Include\dsmcc</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM.h">
+      <Filter>头文件\Include\dsmcc</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM_DSI.h">
+      <Filter>头文件\Include\dsmcc</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM_DII.h">
+      <Filter>头文件\Include\dsmcc</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM_DSI_DC.h">
+      <Filter>头文件\Include\dsmcc</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM_DSI_OC.h">
+      <Filter>头文件\Include\dsmcc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -296,18 +317,6 @@
     <ClCompile Include="Impl\xml\DVB_IPDC_section_INT_XML.cpp">
       <Filter>源文件\Impl\xml</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\xml\Mpeg2_DSMCC_section_DDM_XML.cpp">
-      <Filter>源文件\Impl\xml</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\xml\Mpeg2_DSMCC_section_UNM_XML.cpp">
-      <Filter>源文件\Impl\xml</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\Mpeg2_DSMCC_section_DDM.cpp">
-      <Filter>源文件\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\Mpeg2_DSMCC_section_UNM.cpp">
-      <Filter>源文件\Impl</Filter>
-    </ClCompile>
     <ClCompile Include="Impl\xml\Mpeg2_DSMCC_section_XML.cpp">
       <Filter>源文件\Impl\xml</Filter>
     </ClCompile>
@@ -320,11 +329,35 @@
     <ClCompile Include="Impl\Mpeg2_PSI_section_TSDT.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\Mpeg2_DSMCC_common.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_common.cpp">
+      <Filter>源文件\Impl\dsmcc</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\xml\Mpeg2_DSMCC_common_XML.cpp">
-      <Filter>源文件\Impl\xml</Filter>
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_DDM.cpp">
+      <Filter>源文件\Impl\dsmcc</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM.cpp">
+      <Filter>源文件\Impl\dsmcc</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\xml\dsmcc\Mpeg2_DSMCC_common_XML.cpp">
+      <Filter>源文件\Impl\xml\dsmcc</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\xml\dsmcc\Mpeg2_DSMCC_DDM_XML.cpp">
+      <Filter>源文件\Impl\xml\dsmcc</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\xml\dsmcc\Mpeg2_DSMCC_UNM_XML.cpp">
+      <Filter>源文件\Impl\xml\dsmcc</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM_DII.cpp">
+      <Filter>源文件\Impl\dsmcc</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM_DSI.cpp">
+      <Filter>源文件\Impl\dsmcc</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM_DSI_DC.cpp">
+      <Filter>源文件\Impl\dsmcc</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM_DSI_OC.cpp">
+      <Filter>源文件\Impl\dsmcc</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

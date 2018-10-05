@@ -172,6 +172,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Impl\DVB_SI_Utilities_Inner.h" />
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_common.h" />
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_DDM.h" />
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM.h" />
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM_DII.h" />
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM_DSI.h" />
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM_DSI_DC.h" />
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM_DSI_OC.h" />
     <ClInclude Include="Include\DVB_Databroadcast.h" />
     <ClInclude Include="Include\DVB_IPDC_Descriptor.h" />
     <ClInclude Include="Include\DVB_IPDC_section.h" />
@@ -183,11 +190,8 @@
     <ClInclude Include="Include\DVB_SI_section.h" />
     <ClInclude Include="Include\DVB_SI_Utilities.h" />
     <ClInclude Include="Include\DVB_table_id.h" />
-    <ClInclude Include="Include\Mpeg2_DSMCC_common.h" />
     <ClInclude Include="Include\Mpeg2_DSMCC_Descriptor.h" />
     <ClInclude Include="Include\Mpeg2_DSMCC_section.h" />
-    <ClInclude Include="Include\Mpeg2_DSMCC_section_DDM.h" />
-    <ClInclude Include="Include\Mpeg2_DSMCC_section_UNM.h" />
     <ClInclude Include="Include\Mpeg2_DSMCC_Utilities.h" />
     <ClInclude Include="Include\Mpeg2_PSI_Descriptor.h" />
     <ClInclude Include="Include\Mpeg2_PSI_section.h" />
@@ -214,6 +218,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_common.cpp" />
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_DDM.cpp" />
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM.cpp" />
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM_DII.cpp" />
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM_DSI.cpp" />
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM_DSI_DC.cpp" />
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM_DSI_OC.cpp" />
     <ClCompile Include="Impl\DVB_Databroadcast.cpp" />
     <ClCompile Include="Impl\DVB_IPDC_Descriptor.cpp" />
     <ClCompile Include="Impl\DVB_IPDC_section_INT.cpp" />
@@ -232,11 +243,8 @@
     <ClCompile Include="Impl\DVB_SI_section_TDT.cpp" />
     <ClCompile Include="Impl\DVB_SI_section_TOT.cpp" />
     <ClCompile Include="Impl\DVB_SI_Utilities.cpp" />
-    <ClCompile Include="Impl\Mpeg2_DSMCC_common.cpp" />
     <ClCompile Include="Impl\Mpeg2_DSMCC_Descriptor.cpp" />
     <ClCompile Include="Impl\Mpeg2_DSMCC_section.cpp" />
-    <ClCompile Include="Impl\Mpeg2_DSMCC_section_DDM.cpp" />
-    <ClCompile Include="Impl\Mpeg2_DSMCC_section_UNM.cpp" />
     <ClCompile Include="Impl\Mpeg2_DSMCC_Utilities.cpp" />
     <ClCompile Include="Impl\Mpeg2_PSI_Descriptor.cpp" />
     <ClCompile Include="Impl\Mpeg2_PSI_section_CAT.cpp" />
@@ -245,6 +253,9 @@
     <ClCompile Include="Impl\Mpeg2_PSI_section_TSDT.cpp" />
     <ClCompile Include="Impl\Mpeg2_PSI_Utilities.cpp" />
     <ClCompile Include="Impl\MPEG_DVB_common.cpp" />
+    <ClCompile Include="Impl\xml\dsmcc\Mpeg2_DSMCC_common_XML.cpp" />
+    <ClCompile Include="Impl\xml\dsmcc\Mpeg2_DSMCC_DDM_XML.cpp" />
+    <ClCompile Include="Impl\xml\dsmcc\Mpeg2_DSMCC_UNM_XML.cpp" />
     <ClCompile Include="Impl\xml\DVB_Databroadcast_XML.cpp" />
     <ClCompile Include="Impl\xml\DVB_IPDC_Descriptor_XML.cpp" />
     <ClCompile Include="Impl\xml\DVB_IPDC_section_INT_XML.cpp" />
@@ -260,10 +271,7 @@
     <ClCompile Include="Impl\xml\DVB_SI_section_SDT_XML.cpp" />
     <ClCompile Include="Impl\xml\DVB_SI_section_TDT_XML.cpp" />
     <ClCompile Include="Impl\xml\DVB_SI_section_TOT_XML.cpp" />
-    <ClCompile Include="Impl\xml\Mpeg2_DSMCC_common_XML.cpp" />
     <ClCompile Include="Impl\xml\Mpeg2_DSMCC_Descriptor_XML.cpp" />
-    <ClCompile Include="Impl\xml\Mpeg2_DSMCC_section_DDM_XML.cpp" />
-    <ClCompile Include="Impl\xml\Mpeg2_DSMCC_section_UNM_XML.cpp" />
     <ClCompile Include="Impl\xml\Mpeg2_DSMCC_section_XML.cpp" />
     <ClCompile Include="Impl\xml\Mpeg2_PSI_Descriptor_XML.cpp" />
     <ClCompile Include="Impl\xml\Mpeg2_PSI_section_CAT_XML.cpp" />

@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_DSMCC_section.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_DSMCC_section_DDM.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_DDM.h"
 #include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_DSMCC_Utilities.h"
 #include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
 #include "libs_Mpeg&DVB/MPEG_DVB_Section\Include\MPEG_DVB_ErrorCode.h"
@@ -196,7 +196,7 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 										m_nMemAllocatedForDirMessages += sizeof(DirectoryMessage_t);
 
 										memset(m_pDirectoryMessage[m_nDirMessageCount], 0x00, sizeof(DirectoryMessage_t));
-										MPEG2_DSMCC_DecodeDirectoryMessage(message_buf, message_length, m_pDirectoryMessage[m_nDirMessageCount]);
+										MPEG2_DSMCC_DDM_DecodeDirectoryMessage(message_buf, message_length, m_pDirectoryMessage[m_nDirMessageCount]);
 
 										m_nDirMessageCount++;
 									}
@@ -207,7 +207,7 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 									if (m_pFileMessage[m_nFileMessageCount] != NULL)
 									{
 										memset(m_pFileMessage[m_nFileMessageCount], 0x00, sizeof(FileMessage_t));
-										MPEG2_DSMCC_DecodeFileMessage(message_buf, message_length, m_pFileMessage[m_nFileMessageCount]);
+										MPEG2_DSMCC_DDM_DecodeFileMessage(message_buf, message_length, m_pFileMessage[m_nFileMessageCount]);
 
 										m_nMemAllocatedForFileMessages += (sizeof(FileMessage_t) + m_pFileMessage[m_nFileMessageCount]->content_length);
 

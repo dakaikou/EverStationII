@@ -1,9 +1,10 @@
-#ifndef _MPEG_DSMCC_SECTION_DDM_H_
-#define _MPEG_DSMCC_SECTION_DDM_H_
+#ifndef _MPEG_DSMCC_DDM_H_
+#define _MPEG_DSMCC_DDM_H_
 
-#include "../compile.h"
-#include "Mpeg2_DSMCC_section.h"
-#include "Mpeg2_DSMCC_section_UNM.h"
+#include "../../compile.h"
+//#include "../Mpeg2_DSMCC_section.h"
+//#include "Mpeg2_DSMCC_UNM.h"
+#include "Mpeg2_DSMCC_common.h"
 
 /*------------------------------------------------------------
 		DSM-CC definition 
@@ -63,7 +64,7 @@ typedef struct _DirectoryMessage_s
 
 typedef struct _FileMessage_s
 {
-	S8			magic[5];									//4 x 8				0x42494F50       "BIOP"
+	char	magic[5];									//4 x 8				0x42494F50       "BIOP"
 
 	struct
 	{
@@ -81,7 +82,7 @@ typedef struct _FileMessage_s
 	uint32_t		objectKey_data;
 
 	uint32_t		objectKind_length;							//32				0x00000004
-	S8				objectKind_data[4];							//4x8				0x64697200		dir
+	char			objectKind_data[4];							//4x8				0x64697200		dir
 
 	uint16_t		objectInfo_length;							//16
 	uint8_t			ContentSize[8];								//64
@@ -114,59 +115,8 @@ typedef struct DownloadDataRequest_s
 	uint8_t		reserved;
 } DownloadDataRequest_t, *pDownloadDataRequest_t;
 
-typedef struct dsmccDownloadDataHeader_s
-{
-	uint8_t			protocolDiscriminator;					//8
-	uint8_t			dsmccType;								//8
-	uint16_t		messageId;								//16
-	uint32_t		downloadId;								//32
 
-	uint8_t			reserved;								//8
-	uint8_t			adaptationLength;						//8
-	uint16_t		messageLength;							//16
-
-	dsmccAdaptationHeader_t		dsmccAdaptationHeader;
-
-} dsmccDownloadDataHeader_t;
-
-typedef struct DSMCC_DDM_section_s
-{
-	uint8_t		table_id;									//8
-
-	uint8_t		section_syntax_indicator;					//1
-	uint8_t		private_indicator;							//1
-	uint8_t		reserved0;									//2
-	uint16_t	dsmcc_section_length;						//12
-	
-	uint16_t	table_id_extension;							//16
-
-	uint8_t		reserved1;									//2
-	uint8_t		version_number;								//5
-	uint8_t		current_next_indicator;						//1
-
-	uint8_t		section_number;								//8
-	uint8_t		last_section_number;						//8
-
-	dsmccDownloadDataHeader_t		dsmccDownloadDataHeader;
-	DownloadDataBlock_t				DownloadDataBlock;
-
-	union
-	{
-		uint32_t	CRC_32;										//32
-		uint32_t	checksum;									//32
-	} encode;
-
-	union
-	{
-		uint32_t	CRC_32;										//32
-		uint32_t	checksum;										//32
-	} recalculated;
-
-} dsmcc_ddm_section_t;
-
-_CDL_EXPORT	int	MPEG2_DSMCC_DDM_DecodeSection(uint8_t *buf, int length, dsmcc_ddm_section_t* pDSMCCSection);
-
-_CDL_EXPORT	int	MPEG2_DSMCC_DecodeDirectoryMessage(uint8_t *buf, int length, DirectoryMessage_t* pDirectoryMessage);
-_CDL_EXPORT	int	MPEG2_DSMCC_DecodeFileMessage(uint8_t *buf, int length, FileMessage_t* pFileMessage);
+_CDL_EXPORT	int	MPEG2_DSMCC_DDM_DecodeDirectoryMessage(uint8_t *buf, int length, DirectoryMessage_t* pDirectoryMessage);
+_CDL_EXPORT	int	MPEG2_DSMCC_DDM_DecodeFileMessage(uint8_t *buf, int length, FileMessage_t* pFileMessage);
 
 #endif

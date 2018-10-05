@@ -7,7 +7,7 @@
 //#include "HAL\HAL_ByteStream\Include\HALForByteStream.h"
 
 //#include "../../Include/Mpeg2_DSMCC_section.h"
-#include "../../Include/Mpeg2_DSMCC_common.h"
+#include "../../Include/dsmcc/Mpeg2_DSMCC_common.h"
 //#include "../../Include/Mpeg2_DSMCC_section_UNM.h"
 #include "../../Include/Mpeg2_DSMCC_Utilities.h"
 #include "../../Include/Mpeg2_table_id.h"
