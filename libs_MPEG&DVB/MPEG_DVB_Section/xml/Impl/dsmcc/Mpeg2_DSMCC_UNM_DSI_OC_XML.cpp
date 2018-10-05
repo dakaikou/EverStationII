@@ -8,7 +8,7 @@
 
 #include "../../Include/dsmcc/Mpeg2_DSMCC_UNM_DSI_OC.h"
 #include "../../Include/dsmcc/Mpeg2_DSMCC_UNM_DSI_OC_XML.h"
-#include "../../Include/dsmcc/Mpeg2_DSMCC_Common_XML.h"
+#include "../../Include/dsmcc/Mpeg2_DSMCC_BIOP_XML.h"
 
 /////////////////////////////////////////////
 

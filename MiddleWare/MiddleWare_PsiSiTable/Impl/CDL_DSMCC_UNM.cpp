@@ -67,7 +67,7 @@ int CDSMCC_UNM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 {
 	int	rtcode = MIDDLEWARE_PSISI_UNKNOWN_ERROR;					//0 -- fail
 	
-	dsmcc_unm_section_t			DSMCC_section;
+	dsmcc_section_t				DSMCC_section;
 	DownloadServerInitiate_t*	pDownloadServerInitiate;
 	DownloadInfoIndication_t*	pDownloadInfoIndication;
 
@@ -76,7 +76,7 @@ int CDSMCC_UNM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 	{
 		assert(pprivate_section->table_id == 0x3B);
 
-		rtcode = MPEG2_DSMCC_UNM_DecodeSection(buf, length, &DSMCC_section);
+		rtcode = MPEG2_DSMCC_DecodeSection(buf, length, &DSMCC_section);
 		if (rtcode == SECTION_PARSE_NO_ERROR)
 		{
 			m_usMessageId = DSMCC_section.dsmccMessageHeader.messageId;

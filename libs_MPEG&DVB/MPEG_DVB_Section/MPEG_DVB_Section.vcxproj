@@ -172,7 +172,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Impl\DVB_SI_Utilities_Inner.h" />
-    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_common.h" />
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_BIOP.h" />
     <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_DDM.h" />
     <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM.h" />
     <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM_DII.h" />
@@ -204,7 +204,7 @@
     <ClInclude Include="Include\MPEG_DVB_SysCapability.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_common_XML.h" />
+    <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_BIOP_XML.h" />
     <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_DDM_XML.h" />
     <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_UNM_DII_XML.h" />
     <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_UNM_DSI_DC_XML.h" />
@@ -226,7 +226,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_common.cpp" />
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_BIOP.cpp" />
     <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_DDM.cpp" />
     <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM.cpp" />
     <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_UNM_DII.cpp" />
@@ -267,7 +267,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="xml\Impl\dsmcc\Mpeg2_DSMCC_common_XML.cpp" />
+    <ClCompile Include="xml\Impl\dsmcc\Mpeg2_DSMCC_BIOP_XML.cpp" />
     <ClCompile Include="xml\Impl\dsmcc\Mpeg2_DSMCC_DDM_XML.cpp" />
     <ClCompile Include="xml\Impl\dsmcc\Mpeg2_DSMCC_UNM_DII_XML.cpp" />
     <ClCompile Include="xml\Impl\dsmcc\Mpeg2_DSMCC_UNM_DSI_DC_XML.cpp" />

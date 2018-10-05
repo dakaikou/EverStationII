@@ -1,16 +1,16 @@
 #ifndef _MPEG_DSMCC_UNM_DSI_DC_H_
 #define _MPEG_DSMCC_UNM_DSI_DC_H_
 
-//#include "../../compile.h"
-
 #include "../MPEG_DVB_SysCapability.h"
 #include "../MPEG_DVB_Common.h"
 #include "../Mpeg2_DSMCC_Descriptor.h"
-#include "Mpeg2_DSMCC_common.h"
 
-/*------------------------------------------------------------
-		DSM-CC definition 
--------------------------------------------------------------*/
+//it is not propriateable to defined here
+typedef struct compatibilityDescriptor_s
+{
+	uint16_t	compatibilityDescriptorLength;								//16		
+	uint8_t		compatibilityDescriptorBuf[64];
+} compatibilityDescriptor_t, *pcompatibilityDescriptor_t;
 
 //for DC
 typedef struct GroupInfo_s

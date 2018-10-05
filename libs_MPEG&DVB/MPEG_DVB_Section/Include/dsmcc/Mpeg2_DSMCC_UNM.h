@@ -3,11 +3,6 @@
 
 #include "../../compile.h"
 
-//#include "../MPEG_DVB_SysCapability.h"
-//#include "../MPEG_DVB_Common.h"
-//#include "../Mpeg2_DSMCC_Descriptor.h"
-
-//#include "Mpeg2_DSMCC_common.h"
 #include "Mpeg2_DSMCC_UNM_DII.h"
 #include "Mpeg2_DSMCC_UNM_DSI.h"
 
@@ -31,7 +26,7 @@ typedef struct DownloadInfoIndication_s
 
 	compatibilityDescriptor_t		compatibilityDescriptor;
 
-	uint16_t				numberOfModules;						//16
+	uint16_t		numberOfModules;						//16
 
 	uint16_t		N;
 	moduleInfo_t	moduleInfo[MAX_MODULES_PER_GROUP];

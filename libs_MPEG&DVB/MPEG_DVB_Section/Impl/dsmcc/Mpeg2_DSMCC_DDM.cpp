@@ -10,6 +10,46 @@
 #define min(a,b)  (((a)<(b))?(a):(b))
 #endif
 /////////////////////////////////////////////
+//DDM
+
+int	MPEG2_DSMCC_DDM_DecodeDownloadDataBlock(uint8_t *buf, int length, DownloadDataBlock_t* pDownloadDataBlock)
+{
+	int				rtcode = SECTION_PARSE_NO_ERROR;
+	uint8_t*		ptemp;
+
+	if ((buf != NULL) && (length > 0) && (pDownloadDataBlock != NULL))
+	{
+		memset(pDownloadDataBlock, 0x00, sizeof(DownloadDataBlock_t));
+
+		ptemp = buf;
+
+		pDownloadDataBlock->moduleId = *ptemp++;
+		pDownloadDataBlock->moduleId <<= 8;
+		pDownloadDataBlock->moduleId |= *ptemp++;
+
+		pDownloadDataBlock->moduleVersion = *ptemp++;
+
+		pDownloadDataBlock->reserved = *ptemp++;
+
+		pDownloadDataBlock->blockNumber = *ptemp++;
+		pDownloadDataBlock->blockNumber <<= 8;
+		pDownloadDataBlock->blockNumber |= *ptemp++;
+
+		pDownloadDataBlock->N = length - (unsigned short)(ptemp - buf);
+		if (pDownloadDataBlock->N > 0)
+		{
+			//			memcpy(pDownloadDataBlock->blockDataByte, ptemp, pDownloadDataBlock->N);
+			pDownloadDataBlock->blockDataByte = ptemp;
+			ptemp += pDownloadDataBlock->N;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
+	}
+
+	return rtcode;
+}
 
 int	MPEG2_DSMCC_DDM_DecodeDirectoryMessage(uint8_t *buf, int length, DirectoryMessage_t* pDirectoryMessage)
 {

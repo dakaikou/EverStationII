@@ -112,7 +112,7 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 	int	rtcode = MIDDLEWARE_PSISI_UNKNOWN_ERROR;					//0 -- fail
 	int i;
 	
-	dsmcc_ddm_section_t			DSMCC_section;
+	dsmcc_section_t				DSMCC_section;
 
 	U8*							message_buf;
 	S32							message_length;
@@ -127,10 +127,10 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 	rtcode = CPVT::AddSection(usPID, pprivate_section);
 	if (rtcode == MIDDLEWARE_PSISI_NO_ERROR)
 	{
-		rtcode = MPEG2_DSMCC_DDM_DecodeSection(buf, length, &DSMCC_section);
+		rtcode = MPEG2_DSMCC_DecodeSection(buf, length, &DSMCC_section);
 		if (rtcode == SECTION_PARSE_NO_ERROR)
 		{
-			uint16_t usMessageId = DSMCC_section.dsmccDownloadDataHeader.messageId;
+			uint16_t usMessageId = DSMCC_section.dsmccMessageHeader.messageId;
 			if (m_usMessageId == 0xFFFF)
 			{
 				m_usMessageId = usMessageId;
@@ -144,14 +144,14 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 			{
 				if (m_astBlockInfo[pprivate_section->section_number].buf == NULL)
 				{
-					m_astBlockInfo[pprivate_section->section_number].buf = (uint8_t*)malloc(DSMCC_section.DownloadDataBlock.N);
+					m_astBlockInfo[pprivate_section->section_number].buf = (uint8_t*)malloc(DSMCC_section.u.DownloadDataBlock.N);
 					if (m_astBlockInfo[pprivate_section->section_number].buf != NULL)
 					{
-						m_astBlockInfo[pprivate_section->section_number].length = DSMCC_section.DownloadDataBlock.N;
-						memcpy(m_astBlockInfo[pprivate_section->section_number].buf, DSMCC_section.DownloadDataBlock.blockDataByte, DSMCC_section.DownloadDataBlock.N);
+						m_astBlockInfo[pprivate_section->section_number].length = DSMCC_section.u.DownloadDataBlock.N;
+						memcpy(m_astBlockInfo[pprivate_section->section_number].buf, DSMCC_section.u.DownloadDataBlock.blockDataByte, DSMCC_section.u.DownloadDataBlock.N);
 
-						m_nModuleSize += DSMCC_section.DownloadDataBlock.N;
-						m_nMemAllocatedForModule += DSMCC_section.DownloadDataBlock.N;
+						m_nModuleSize += DSMCC_section.u.DownloadDataBlock.N;
+						m_nMemAllocatedForModule += DSMCC_section.u.DownloadDataBlock.N;
 					}
 				}
 

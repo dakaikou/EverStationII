@@ -5,7 +5,7 @@
 
 #include "../../compile.h"
 
-#include "../../Include/dsmcc/Mpeg2_DSMCC_common.h"
+#include "../../Include/dsmcc/Mpeg2_DSMCC_BIOP.h"
 
 #include "HAL\HAL_XML\Include\HALForTinyXML2.h"
 

@@ -2,9 +2,7 @@
 #define _MPEG_DSMCC_DDM_H_
 
 #include "../../compile.h"
-//#include "../Mpeg2_DSMCC_section.h"
-//#include "Mpeg2_DSMCC_UNM.h"
-#include "Mpeg2_DSMCC_common.h"
+#include "Mpeg2_DSMCC_BIOP.h"
 
 /*------------------------------------------------------------
 		DSM-CC definition 
@@ -115,6 +113,7 @@ typedef struct DownloadDataRequest_s
 	uint8_t		reserved;
 } DownloadDataRequest_t, *pDownloadDataRequest_t;
 
+_CDL_EXPORT	int	MPEG2_DSMCC_DDM_DecodeDownloadDataBlock(uint8_t *buf, int length, DownloadDataBlock_t* pDownloadDataBlock);
 
 _CDL_EXPORT	int	MPEG2_DSMCC_DDM_DecodeDirectoryMessage(uint8_t *buf, int length, DirectoryMessage_t* pDirectoryMessage);
 _CDL_EXPORT	int	MPEG2_DSMCC_DDM_DecodeFileMessage(uint8_t *buf, int length, FileMessage_t* pFileMessage);

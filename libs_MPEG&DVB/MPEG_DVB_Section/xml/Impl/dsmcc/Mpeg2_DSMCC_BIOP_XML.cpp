@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <math.h>
 
-#include "../../Include/dsmcc/Mpeg2_DSMCC_common.h"
+#include "../../Include/dsmcc/Mpeg2_DSMCC_BIOP.h"
 #include "../../Include/Mpeg2_DSMCC_Utilities.h"
 #include "../../Include/MPEG_DVB_ErrorCode.h"
 

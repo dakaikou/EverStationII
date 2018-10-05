@@ -45,9 +45,6 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_common.h">
-      <Filter>头文件\Include\dsmcc</Filter>
-    </ClInclude>
     <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_DDM.h">
       <Filter>头文件\Include\dsmcc</Filter>
     </ClInclude>
@@ -135,9 +132,6 @@
     <ClInclude Include="Include\Mpeg2_table_id.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_common_XML.h">
-      <Filter>头文件\xmlInclude\dsmcc</Filter>
-    </ClInclude>
     <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_DDM_XML.h">
       <Filter>头文件\xmlInclude\dsmcc</Filter>
     </ClInclude>
@@ -195,6 +189,12 @@
     <ClInclude Include="Impl\DVB_SI_Utilities_Inner.h">
       <Filter>源文件\Impl</Filter>
     </ClInclude>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_BIOP.h">
+      <Filter>头文件\Include\dsmcc</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_BIOP_XML.h">
+      <Filter>头文件\xmlInclude\dsmcc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -202,9 +202,6 @@
     </ClCompile>
     <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_common.cpp">
-      <Filter>源文件\Impl\dsmcc</Filter>
     </ClCompile>
     <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_DDM.cpp">
       <Filter>源文件\Impl\dsmcc</Filter>
@@ -308,9 +305,6 @@
     <ClCompile Include="Impl\Mpeg2_PSI_Utilities.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="xml\Impl\dsmcc\Mpeg2_DSMCC_common_XML.cpp">
-      <Filter>源文件\xmlImpl\dsmcc</Filter>
-    </ClCompile>
     <ClCompile Include="xml\Impl\dsmcc\Mpeg2_DSMCC_DDM_XML.cpp">
       <Filter>源文件\xmlImpl\dsmcc</Filter>
     </ClCompile>
@@ -397,6 +391,12 @@
     </ClCompile>
     <ClCompile Include="xml\Impl\Mpeg2_PSI_section_TSDT_XML.cpp">
       <Filter>源文件\xmlImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\dsmcc\Mpeg2_DSMCC_BIOP.cpp">
+      <Filter>源文件\Impl\dsmcc</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\dsmcc\Mpeg2_DSMCC_BIOP_XML.cpp">
+      <Filter>源文件\xmlImpl\dsmcc</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,9 +1,7 @@
-#ifndef _MPEG_DSMCC_COMMON_H_
-#define _MPEG_DSMCC_COMMON_H_
+#ifndef _MPEG_DSMCC_BIOP_H_
+#define _MPEG_DSMCC_BIOP_H_
 
 #include <stdint.h>
-
-#include "../../compile.h"
 
 #include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 
@@ -125,50 +123,6 @@ namespace IOP
 	} IOR_t;
 };
 
-typedef struct compatibilityDescriptor_s
-{
-	uint16_t	compatibilityDescriptorLength;								//16		
-	uint8_t		compatibilityDescriptorBuf[64];
-} compatibilityDescriptor_t, *pcompatibilityDescriptor_t;
-
-typedef struct dsmccAdaptationHeader_s
-{
-	uint8_t		adaptationType;						//8
-	uint8_t		N;
-	uint8_t		adaptationDataByte[64];
-
-} dsmccAdaptationHeader_t, *pdsmccAdaptationHeader_t;
-
-typedef struct dsmccMessageHeader_s
-{
-	uint8_t			protocolDiscriminator;					//8
-	uint8_t			dsmccType;								//8
-	uint16_t		messageId;								//16
-	uint32_t		transactionId;							//32
-
-	uint8_t			reserved;								//8
-	uint8_t			adaptationLength;						//8
-	uint16_t		messageLength;							//16
-
-	dsmccAdaptationHeader_t		dsmccAdaptationHeader;
-
-} dsmccMessageHeader_t, *pdsmccMessageHeader_t;
-
-typedef struct dsmccDownloadDataHeader_s
-{
-	uint8_t			protocolDiscriminator;					//8
-	uint8_t			dsmccType;								//8
-	uint16_t		messageId;								//16
-	uint32_t		downloadId;								//32
-
-	uint8_t			reserved;								//8
-	uint8_t			adaptationLength;						//8
-	uint16_t		messageLength;							//16
-
-	dsmccAdaptationHeader_t		dsmccAdaptationHeader;
-
-} dsmccDownloadDataHeader_t;
-
-_CDL_EXPORT int	MPEG2_DSMCC_DecodeIOR(BITS_t* pbs, IOP::IOR_t* pIOR);
+int	MPEG2_DSMCC_DecodeIOR(BITS_t* pbs, IOP::IOR_t* pIOR);
 
 #endif
