@@ -150,7 +150,7 @@ int MPEG_decode_TS_packet(uint8_t *buf, int length, transport_packet_t* ptranspo
 					ptransport_packet->payload_length = (uint8_t)(188 - (bs.p_cur - bs.p_start));
 					if (ptransport_packet->payload_length > 0)
 					{
-						BITS_byteCopy(ptransport_packet->payload_buf, &bs, ptransport_packet->payload_length);
+						BITS_byteCopy(ptransport_packet->payload_buf, sizeof(ptransport_packet->payload_buf), &bs, ptransport_packet->payload_length);
 					}
 				}
 				else

@@ -2033,7 +2033,7 @@ int DVB_SI_decode_ac3_descriptor_to_xml(uint8_t* buf, int length, XMLDocForMpegS
 		}
 
 		N = length - (int)(bs.p_cur - bs.p_start);
-		BITS_byteCopy(pac3_descriptor->additional_info, &bs, N);		//maybe overflow
+		BITS_byteCopy(pac3_descriptor->additional_info, sizeof(pac3_descriptor->additional_info), &bs, N);		//maybe overflow
 		pac3_descriptor->N = N;
 		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "additional_info", -1, -1, NULL, NULL, &bs);
 

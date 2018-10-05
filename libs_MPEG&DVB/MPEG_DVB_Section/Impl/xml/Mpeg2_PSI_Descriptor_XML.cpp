@@ -182,7 +182,7 @@ int MPEG2_PSI_decode_registration_descriptor_to_xml(uint8_t *buf, int length, XM
 		int info_length = pregistration_descriptor->descriptor_length - 4;
 		if (info_length > 0)
 		{
-			BITS_byteCopy(pregistration_descriptor->additional_identification_info, &bs, info_length);
+			BITS_byteCopy(pregistration_descriptor->additional_identification_info, sizeof(pregistration_descriptor->additional_identification_info), &bs, info_length);
 			pregistration_descriptor->additional_identification_info[info_length] = '\0';
 		}
 		//else

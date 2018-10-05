@@ -5,11 +5,13 @@
 #include <assert.h>
 #include <string.h>
 
+#define MIN(x, y)						(x < y? x : y)
+
 //ported from x264 reference code, see bs.h file		chendelin	2006-12-27 8:45
 typedef struct
 {
 	uint8_t* p_start;
-	uint8_t* p_old;
+	uint8_t* p_old;					//to be obseletes    chendelin 2018.10.5
 	uint8_t* p_cur;
 	uint8_t* p_end;
 	int		 i_left;				//the left bits of current byte	(*p)
@@ -36,7 +38,7 @@ static _inline void BITS_align(BITS_t *pbs)
     }
 }
 
-static _inline int BITS_bealigned(BITS_t *pbs)
+static _inline int BITS_beAligned(BITS_t *pbs)
 {
 	return (pbs->i_left == 8);
 }
@@ -46,39 +48,50 @@ static _inline int BITS_pos(BITS_t *pbs)
     return (((int)(pbs->p_cur - pbs->p_start) << 3) + 8 - pbs->i_left);
 }
 
-static _inline int BITS_eof(BITS_t *pbs)
+static _inline int BITS_beEOF(BITS_t *pbs)
 {
     return ((pbs->p_cur >= pbs->p_end) ? 1 : 0);
 }
 
-static _inline unsigned int BITS_byteCopy(void* dst, BITS_t *pbs, int bytes)
+// add dstSize parameter for safety consideration      chendelin 2018.10.5
+static _inline int BITS_byteCopy(void* dstBuf, int dstSize, BITS_t *pbs, int copyLength)
 {
-    unsigned int  i_result = 0;
-    
-    assert(pbs->i_left == 8);
+	assert(pbs->i_left == 8);
+	int  i_result = 0;
     
     pbs->p_old = pbs->p_cur;				//保存一下旧指针    added by chendelin  2018.5.23
     
-    if ((pbs->p_cur + bytes) <= pbs->p_end)
+    if ((pbs->p_cur + copyLength) <= pbs->p_end)
     {
-        memcpy(dst, pbs->p_cur, bytes);
-        pbs->p_cur += bytes;
+		if (dstBuf != NULL)
+		{
+			int op_len = MIN(dstSize, copyLength);
+			memcpy(dstBuf, pbs->p_cur, op_len);
+		}
+        pbs->p_cur += copyLength;
     }
+	else
+	{
+		i_result = 0xFFFFFFFF;
+	}
 
     return (i_result);
 }
 
-static _inline unsigned int BITS_byteSkip(BITS_t *pbs, int bytes)
+static _inline int BITS_byteSkip(BITS_t *pbs, int skipLength)
 {
-	unsigned int  i_result = 0;
-
 	assert(pbs->i_left == 8);
+	int  i_result = 0;
 
 	pbs->p_old = pbs->p_cur;				//保存一下旧指针    added by chendelin  2018.5.23
 
-	if ((pbs->p_cur + bytes) <= pbs->p_end)
+	if ((pbs->p_cur + skipLength) <= pbs->p_end)
 	{
-		pbs->p_cur += bytes;
+		pbs->p_cur += skipLength;
+	}
+	else
+	{
+		i_result = 0xFFFFFFFF;
 	}
 
 	return (i_result);
@@ -99,6 +112,7 @@ static uint32_t i_mask[33] =
 
 static _inline uint32_t BITS_get(BITS_t *pbs, int bits)
 {
+	assert(bits <= 32);
     int		      i_shr;
     unsigned int  i_result = 0;
 
@@ -138,7 +152,8 @@ static _inline uint32_t BITS_get(BITS_t *pbs, int bits)
 
 static _inline uint64_t BITS_x64_get(BITS_t *pbs, int bits)
 {
-    int      i_shr;
+	assert(bits <= 64);
+    int		   i_shr;
     uint64_t   i_result = 0;
 
 	pbs->p_old = pbs->p_cur;				//保存一下旧指针    added by chendelin  2018.5.23
@@ -198,6 +213,7 @@ static _inline uint32_t BITS_get1(BITS_t *pbs)
 
 static _inline uint32_t BITS_show(BITS_t *pbs, int bits)		//this function has a bug.		chendelin	
 {
+	assert(bits <= 32);
 	uint8_t* p = pbs->p_cur;
 
 	pbs->p_old = pbs->p_cur;

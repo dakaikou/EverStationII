@@ -26,7 +26,7 @@ int	MPEG2_DSMCC_DecodeIOR(BITS_t* pbs, IOP::IOR_t* pIOR)
 		assert(pIOR->type_id_length == 4);
 		
 		{
-			BITS_byteCopy(pIOR->type_id_byte, pbs, pIOR->type_id_length);
+			BITS_byteCopy(pIOR->type_id_byte, sizeof(pIOR->type_id_byte), pbs, pIOR->type_id_length);
 
 			if ((pIOR->type_id_length % 4) != 0)
 			{
@@ -103,6 +103,7 @@ int	MPEG2_DSMCC_DecodeIOR(BITS_t* pbs, IOP::IOR_t* pIOR)
 							pConnBinder->Tap[tap_index].timeout = BITS_get(pbs, 32);
 						}
 
+						//normal components
 						for (int component_index = 0; component_index < pBIOPProfileBody->liteComponents_count - 2; component_index++)
 						{
 							BIOP::LiteComponent_t* pLiteComponent = pBIOPProfileBody->liteComponents + component_index;
@@ -111,9 +112,7 @@ int	MPEG2_DSMCC_DecodeIOR(BITS_t* pbs, IOP::IOR_t* pIOR)
 
 							pLiteComponent->component_data_length = BITS_get(pbs, 8);
 
-							int copy_length = min(pLiteComponent->component_data_length, sizeof(pLiteComponent->component_data_byte));
-							memcpy(pLiteComponent->component_data_byte, pbs->p_cur, copy_length);
-							BITS_byteSkip(pbs, pLiteComponent->component_data_length);
+							BITS_byteCopy(pLiteComponent->component_data_byte, sizeof(pLiteComponent->component_data_byte), pbs, pLiteComponent->component_data_length);
 						}
 
 						pIOR->pBIOPProfileBodyPortrait = pBIOPProfileBody;
@@ -139,9 +138,7 @@ int	MPEG2_DSMCC_DecodeIOR(BITS_t* pbs, IOP::IOR_t* pIOR)
 
 							pLiteComponent->component_data_length = BITS_get(pbs, 8);
 
-							int copy_length = min(pLiteComponent->component_data_length, sizeof(pLiteComponent->component_data_byte));
-							memcpy(pLiteComponent->component_data_byte, pbs->p_cur, copy_length);
-							BITS_byteSkip(pbs, pLiteComponent->component_data_length);
+							BITS_byteCopy(pLiteComponent->component_data_byte, sizeof(pLiteComponent->component_data_byte), pbs, pLiteComponent->component_data_length);
 						}
 					}
 					else

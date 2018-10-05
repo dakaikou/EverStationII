@@ -59,7 +59,6 @@ int	MPEG2_DSMCC_DecodeDownloadDataBlock(uint8_t *buf, int length, DownloadDataBl
 int MPEG2_DSMCC_DDM_DecodeSection(uint8_t *section_buf, int section_size, dsmcc_ddm_section_t* pdsmcc_section)
 {
 	int						rtcode = SECTION_PARSE_NO_ERROR;
-	int						copy_length;
 	uint8_t*				ptemp;
 	int						stream_error;
 
@@ -149,13 +148,12 @@ int MPEG2_DSMCC_DDM_DecodeSection(uint8_t *section_buf, int section_size, dsmcc_
 					{
 						//½âÎöadaptation
 						pdsmccDownloadDataHeader->dsmccAdaptationHeader.adaptationType = BYTES_get(&bytes, 1);
-
 						pdsmccDownloadDataHeader->dsmccAdaptationHeader.N = pdsmccDownloadDataHeader->adaptationLength - 1;
-						copy_length = min(64, pdsmccDownloadDataHeader->dsmccAdaptationHeader.N);
-						if (copy_length > 0)
+
+						if (pdsmccDownloadDataHeader->dsmccAdaptationHeader.N > 0)
 						{
-							memcpy(pdsmccDownloadDataHeader->dsmccAdaptationHeader.adaptationDataByte, bytes.p_cur, copy_length);
-							BYTES_skip(&bytes, pdsmccDownloadDataHeader->dsmccAdaptationHeader.N);
+							dsmccAdaptationHeader_t* pdsmccAdaptationHeader = &(pdsmccDownloadDataHeader->dsmccAdaptationHeader);
+							BYTES_copy(pdsmccAdaptationHeader->adaptationDataByte, sizeof(pdsmccAdaptationHeader), &bytes, pdsmccAdaptationHeader->N);
 						}
 					}
 

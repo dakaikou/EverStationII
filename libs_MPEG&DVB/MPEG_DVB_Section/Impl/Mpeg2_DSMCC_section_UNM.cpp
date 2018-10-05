@@ -24,7 +24,6 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication(uint8_t *buf, int length, DownloadI
 	U16		descriptor_tag;
 	U8		descriptor_length;
 	S32		move_length;
-	S32		copy_length;
 	S32		tap_index;
 
 	DC_moduleInfo_t*	pDC_moduleInfo;
@@ -53,9 +52,7 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication(uint8_t *buf, int length, DownloadI
 		pcompatibilityDescriptor->compatibilityDescriptorLength = BYTES_get(&bytes, 2);
 		if (pcompatibilityDescriptor->compatibilityDescriptorLength > 0)
 		{
-			copy_length = min(pcompatibilityDescriptor->compatibilityDescriptorLength, sizeof(pcompatibilityDescriptor->compatibilityDescriptorBuf));
-			memcpy(pcompatibilityDescriptor->compatibilityDescriptorBuf, bytes.p_cur, copy_length);
-			BYTES_skip(&bytes, pcompatibilityDescriptor->compatibilityDescriptorLength);
+			BYTES_copy(pcompatibilityDescriptor->compatibilityDescriptorBuf, sizeof(pcompatibilityDescriptor), &bytes, pcompatibilityDescriptor->compatibilityDescriptorLength);
 		}
 
 		//if (pDownloadInfoIndication->compatibilityDescriptor.compatibilityDescriptorLength == 0x0000)
@@ -174,12 +171,9 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication(uint8_t *buf, int length, DownloadI
 						}
 
 						pBIOP_moduleInfo->userInfoLength = BYTES_get(&bytes, 1);
-
 						if (pBIOP_moduleInfo->userInfoLength > 0)
 						{
-							copy_length = min(sizeof(pBIOP_moduleInfo->userInfo_data_byte), pBIOP_moduleInfo->userInfoLength);
-							memcpy(pBIOP_moduleInfo->userInfo_data_byte, bytes.p_cur, copy_length);
-							BYTES_skip(&bytes, pBIOP_moduleInfo->userInfoLength);
+							BYTES_copy(pBIOP_moduleInfo->userInfo_data_byte, sizeof(pBIOP_moduleInfo->userInfo_data_byte), &bytes, pBIOP_moduleInfo->userInfoLength);
 						}
 					}
 					else
@@ -192,9 +186,7 @@ int	MPEG2_DSMCC_DecodeDownloadInfoIndication(uint8_t *buf, int length, DownloadI
 			pDownloadInfoIndication->privateDataLength = BYTES_get(&bytes, 2);
 			if (pDownloadInfoIndication->privateDataLength > 0)
 			{
-				copy_length = min(sizeof(pDownloadInfoIndication->privateDataByte), pDownloadInfoIndication->privateDataLength);
-				memcpy(pDownloadInfoIndication->privateDataByte, bytes.p_cur, copy_length);
-				BYTES_skip(&bytes, pDownloadInfoIndication->privateDataLength);
+				BYTES_copy(pDownloadInfoIndication->privateDataByte, sizeof(pDownloadInfoIndication->privateDataByte), &bytes, pDownloadInfoIndication->privateDataLength);
 			}
 		}
 	}
@@ -213,9 +205,6 @@ int	MPEG2_DSMCC_DSI_DecodeGroupInfoIndication(uint8_t *buf, int length, GroupInf
 	U16		descriptor_tag;
 	U8		descriptor_length;
 	S32		move_length;
-	S32		copy_length;
-	//S32		GroupInfoLength;
-	//S32		compatibilityDescriptorLength;
 
 	if ((buf != NULL) && (length > 0) && (pGroupInfoIndication != NULL))
 	{
@@ -238,9 +227,8 @@ int	MPEG2_DSMCC_DSI_DecodeGroupInfoIndication(uint8_t *buf, int length, GroupInf
 			pGroupInfo->GroupCompatibility.compatibilityDescriptorLength = BYTES_get(&bytes, 2);
 			if (pGroupInfo->GroupCompatibility.compatibilityDescriptorLength > 0)
 			{
-				copy_length = min(pGroupInfo->GroupCompatibility.compatibilityDescriptorLength, sizeof(pGroupInfo->GroupCompatibility.compatibilityDescriptorBuf));
-				memcpy(pGroupInfo->GroupCompatibility.compatibilityDescriptorBuf, bytes.p_cur, copy_length);
-				BYTES_skip(&bytes, pGroupInfo->GroupCompatibility.compatibilityDescriptorLength);
+				compatibilityDescriptor_t* pcompatibilityDescriptor = &(pGroupInfo->GroupCompatibility);
+				BYTES_copy(pcompatibilityDescriptor->compatibilityDescriptorBuf, sizeof(pcompatibilityDescriptor), &bytes, pcompatibilityDescriptor->compatibilityDescriptorLength);
 			}
 
 			pGroupInfo->GroupInfoLength = BYTES_get(&bytes, 2);
@@ -293,9 +281,7 @@ int	MPEG2_DSMCC_DSI_DecodeGroupInfoIndication(uint8_t *buf, int length, GroupInf
 		pGroupInfoIndication->PrivateDataLength = BYTES_get(&bytes, 2);
 		if (pGroupInfoIndication->PrivateDataLength > 0)
 		{
-			copy_length = min(pGroupInfoIndication->PrivateDataLength, sizeof(pGroupInfoIndication->privateDataByte));
-			memcpy(pGroupInfoIndication->privateDataByte, bytes.p_cur, copy_length);
-			BYTES_skip(&bytes, pGroupInfoIndication->PrivateDataLength);
+			BYTES_copy(pGroupInfoIndication->privateDataByte, sizeof(pGroupInfoIndication->privateDataByte), &bytes, pGroupInfoIndication->PrivateDataLength);
 
 			assert(bytes.p_cur == bytes.p_end);
 		}
@@ -359,15 +345,14 @@ int	MPEG2_DSMCC_DecodeDownloadServerInitiate(uint8_t *buf, int length, DownloadS
 		BYTES_t		bytes;
 		BYTES_map(&bytes, buf, length);
 
-		BYTES_copy(pDownloadServerInitiate->serverId, &bytes, 20);
+		BYTES_copy(pDownloadServerInitiate->serverId, sizeof(pDownloadServerInitiate->serverId), &bytes, 20);
 
 		pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength = BYTES_get(&bytes, 2);
 
 		if (pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength > 0)
 		{
-			int copy_length = min(pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength, sizeof(pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorBuf));
-			memcpy(pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorBuf, bytes.p_cur, copy_length);
-			BYTES_skip(&bytes, pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength);
+			compatibilityDescriptor_t* pcompatibilityDescriptor = &(pDownloadServerInitiate->compatibilityDescriptor);
+			BYTES_copy(pcompatibilityDescriptor->compatibilityDescriptorBuf, sizeof(pcompatibilityDescriptor->compatibilityDescriptorBuf), &bytes, pcompatibilityDescriptor->compatibilityDescriptorLength);
 		}
 
 		//if (pDownloadServerInitiate->compatibilityDescriptor.compatibilityDescriptorLength == 0)
@@ -433,7 +418,6 @@ int MPEG2_DSMCC_UNM_DecodeSection(uint8_t *section_buf, int section_size, dsmcc_
 {
 	int						rtcode = SECTION_PARSE_NO_ERROR;
 
-	int						copy_length;
 	uint8_t*				ptemp;
 	int						stream_error;
 
@@ -524,16 +508,12 @@ int MPEG2_DSMCC_UNM_DecodeSection(uint8_t *section_buf, int section_size, dsmcc_
 
 					if (pdsmccMessageHeader->adaptationLength > 0)
 					{
+						dsmccAdaptationHeader_t* pdsmccAdaptationHeader = &(pdsmccMessageHeader->dsmccAdaptationHeader);
 						//½âÎöadaptation
-						pdsmccMessageHeader->dsmccAdaptationHeader.adaptationType = BYTES_get(&bytes, 1);
+						pdsmccAdaptationHeader->adaptationType = BYTES_get(&bytes, 1);
 
-						pdsmccMessageHeader->dsmccAdaptationHeader.N = pdsmccMessageHeader->adaptationLength - 1;
-						copy_length = min(sizeof(pdsmccMessageHeader->dsmccAdaptationHeader.adaptationDataByte), pdsmccMessageHeader->dsmccAdaptationHeader.N);
-						if (copy_length > 0)
-						{
-							memcpy(pdsmccMessageHeader->dsmccAdaptationHeader.adaptationDataByte, bytes.p_cur, copy_length);
-							BYTES_skip(&bytes, pdsmccMessageHeader->dsmccAdaptationHeader.N);
-						}
+						pdsmccAdaptationHeader->N = pdsmccMessageHeader->adaptationLength - 1;
+						BYTES_copy(pdsmccAdaptationHeader->adaptationDataByte, sizeof(pdsmccAdaptationHeader->adaptationDataByte), &bytes, pdsmccAdaptationHeader->N);
 					}
 
 					int msg_payload_length = pdsmccMessageHeader->messageLength - pdsmccMessageHeader->adaptationLength;
