@@ -635,9 +635,10 @@ int CDB_PsiSiTables::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, XMLDocFo
 										{
 											for (profile_index = 0; profile_index < (int)(pIOR->taggedProfiles_count); profile_index++)
 											{
-												if (pIOR->taggedProfile[profile_index].profileId_tag == 0x49534F06)
+												IOP::TaggedProfile_t* pTaggedProfile = pIOR->taggedProfiles + profile_index;
+												if (pTaggedProfile->profileId_tag == 0x49534F06)	//BIOPProfileBody
 												{
-													pBIOPProfileBody = &(pIOR->taggedProfile[profile_index].u.BIOPProfileBody);
+													pBIOPProfileBody = &(pIOR->BIOPProfileBody);
 
 													hIOP_taggedProfileItem = pxmlDoc->NewKeyValuePairElement(hIORItem, "BIOPProfileBody()");
 
@@ -690,19 +691,19 @@ int CDB_PsiSiTables::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, XMLDocFo
 													pxmlDoc->NewKeyValuePairElement(hChildItem, "transactionId", pTap->transactionId, 32);
 													pxmlDoc->NewKeyValuePairElement(hChildItem, "timeout", pTap->timeout, 32);
 												}
-												else if (pIOR->taggedProfile[profile_index].profileId_tag == 0x49534F05)
-												{
-													pLiteOptionsProfileBody = &(pIOR->taggedProfile[profile_index].u.LiteOptionsProfileBody);
+												//else if (pIOR->taggedProfile[profile_index].profileId_tag == 0x49534F05)
+												//{
+												//	pLiteOptionsProfileBody = &(pIOR->taggedProfile[profile_index].u.LiteOptionsProfileBody);
 
-													hIOP_taggedProfileItem = pxmlDoc->NewKeyValuePairElement(hIORItem, "LiteOptionsProfileBody()");
+												//	hIOP_taggedProfileItem = pxmlDoc->NewKeyValuePairElement(hIORItem, "LiteOptionsProfileBody()");
 
-													MPEG2_DSMCC_NumericCoding2Text_tagId(pLiteOptionsProfileBody->profileId_tag, pszTemp, sizeof(pszTemp));
-													hChildItem = pxmlDoc->NewKeyValuePairElement(hIOP_taggedProfileItem, "profileId_tag", pLiteOptionsProfileBody->profileId_tag, 32, pszTemp);
-													hChildItem = pxmlDoc->NewKeyValuePairElement(hIOP_taggedProfileItem, "profile_data_length", pLiteOptionsProfileBody->profile_data_length, 32);
+												//	MPEG2_DSMCC_NumericCoding2Text_tagId(pLiteOptionsProfileBody->profileId_tag, pszTemp, sizeof(pszTemp));
+												//	hChildItem = pxmlDoc->NewKeyValuePairElement(hIOP_taggedProfileItem, "profileId_tag", pLiteOptionsProfileBody->profileId_tag, 32, pszTemp);
+												//	hChildItem = pxmlDoc->NewKeyValuePairElement(hIOP_taggedProfileItem, "profile_data_length", pLiteOptionsProfileBody->profile_data_length, 32);
 
-													MPEG2_DSMCC_NumericCoding2Text_byteOrder(pLiteOptionsProfileBody->profile_data_byte_order, pszTemp, sizeof(pszTemp));
-													hChildItem = pxmlDoc->NewKeyValuePairElement(hIOP_taggedProfileItem, "profile_data_byte_order", pLiteOptionsProfileBody->profile_data_byte_order, 8, NULL, pszTemp);
-												}
+												//	MPEG2_DSMCC_NumericCoding2Text_byteOrder(pLiteOptionsProfileBody->profile_data_byte_order, pszTemp, sizeof(pszTemp));
+												//	hChildItem = pxmlDoc->NewKeyValuePairElement(hIOP_taggedProfileItem, "profile_data_byte_order", pLiteOptionsProfileBody->profile_data_byte_order, 8, NULL, pszTemp);
+												//}
 												else
 												{
 													assert(0);
@@ -807,7 +808,7 @@ int CDB_PsiSiTables::OC_DownloadDirectoryAndFiles(uint16_t PID, uint16_t moduleI
 						{
 							BuildDirectory(pszPath);
 
-							BIOPProfileBody_t* pBIOPProfileBody = pBindings->IOR.pBIOPProfileBodyPortrait;
+							BIOPProfileBody_t* pBIOPProfileBody = &(pBindings->IOR.BIOPProfileBody);
 							pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
 
 							sub_moduleId = pObjectLocation->moduleId;
@@ -821,7 +822,7 @@ int CDB_PsiSiTables::OC_DownloadDirectoryAndFiles(uint16_t PID, uint16_t moduleI
 							fopen_s(&fp, pszPath, "wb");
 							if (fp != NULL)
 							{
-								BIOPProfileBody_t* pBIOPProfileBody = pBindings->IOR.pBIOPProfileBodyPortrait;
+								BIOPProfileBody_t* pBIOPProfileBody = &(pBindings->IOR.BIOPProfileBody);
 								pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
 
 								uint16_t moduleId_for_ddb = pObjectLocation->moduleId;
@@ -901,7 +902,7 @@ int CDB_PsiSiTables::OC_BuildDirectory(uint16_t PID, XMLDocForMpegSyntax* pxmlDo
 
 						if (strcmp(pBindings->IOR.type_id_byte, "dir") == 0)
 						{
-							BIOPProfileBody_t* pBIOPProfileBody = pBindings->IOR.pBIOPProfileBodyPortrait;
+							BIOPProfileBody_t* pBIOPProfileBody = &(pBindings->IOR.BIOPProfileBody);
 							pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
 
 							sub_moduleId = pObjectLocation->moduleId;

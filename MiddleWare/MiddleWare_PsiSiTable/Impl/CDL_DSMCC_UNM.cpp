@@ -13,9 +13,6 @@
 #include "../Include/MiddleWare_PSISI_ErrorCode.h"
 #include "../Include/MiddleWare_DSMCC_Table.h"
 
-#ifndef min
-#define min(a,b)  (((a)<(b))?(a):(b))
-#endif
 /////////////////////////////////////////////
 CDSMCC_UNM::CDSMCC_UNM(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension) : CPVT(Key, PID, table_id, table_id_extension)
 {
@@ -67,71 +64,87 @@ int CDSMCC_UNM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 {
 	int	rtcode = MIDDLEWARE_PSISI_UNKNOWN_ERROR;					//0 -- fail
 	
-	dsmcc_section_t				DSMCC_section;
-	DownloadServerInitiate_t*	pDownloadServerInitiate;
-	DownloadInfoIndication_t*	pDownloadInfoIndication;
+	dsmcc_section_t				dsmcc_section;
 
 	rtcode = CPVT::AddSection(usPID, pprivate_section);
 	if (rtcode == MIDDLEWARE_PSISI_NO_ERROR)
 	{
 		assert(pprivate_section->table_id == 0x3B);
 
-		rtcode = MPEG2_DSMCC_DecodeSection(buf, length, &DSMCC_section);
+		rtcode = MPEG2_DSMCC_DecodeSection(buf, length, &dsmcc_section);
 		if (rtcode == SECTION_PARSE_NO_ERROR)
 		{
-			m_usMessageId = DSMCC_section.dsmccMessageHeader.messageId;
+			m_usMessageId = dsmcc_section.dsmccMessageHeader.messageId;
 
 			if (m_usMessageId == 0x1006)			//DSI
 			{
-				pDownloadServerInitiate = &(DSMCC_section.u.DownloadServerInitiate);
+				DownloadServerInitiate_t downloadServerInitiate;
+				MPEG2_DSMCC_UNM_DecodeDownloadServerInitiate(dsmcc_section.dsmccMessagePayloadBuf, dsmcc_section.dsmccMessagePayloadLength, &downloadServerInitiate);
 
-				u.m_DSI.data_broadcast_type = pDownloadServerInitiate->data_broadcast_type;
+				u.m_DSI.data_broadcast_type = downloadServerInitiate.data_broadcast_type;
 
-				if (pDownloadServerInitiate->data_broadcast_type == 0x0006)		//DC
+				if (downloadServerInitiate.data_broadcast_type == 0x0006)		//DC
 				{
-					u.m_DSI.NumberOfGroups = pDownloadServerInitiate->u.GroupInfoIndication.NumberOfGroups;
+					GroupInfoIndication_t groupInfoIndication;
+					MPEG2_DSMCC_DSI_DC_DecodeGroupInfoIndication(downloadServerInitiate.privateDataByte, downloadServerInitiate.privateDataLength, &groupInfoIndication);
+					u.m_DSI.NumberOfGroups = groupInfoIndication.NumberOfGroups;
 					u.m_DSI.astGroupInfo = (GroupInfo_t*)realloc(u.m_DSI.astGroupInfo, u.m_DSI.NumberOfGroups * sizeof(GroupInfo_t));
 
 					if (u.m_DSI.astGroupInfo != NULL)
 					{
 						m_nMemoryForGroupInfos = u.m_DSI.NumberOfGroups * sizeof(GroupInfo_t);
-						memcpy(u.m_DSI.astGroupInfo, &(pDownloadServerInitiate->u.GroupInfoIndication.GroupInfo), u.m_DSI.NumberOfGroups * sizeof(GroupInfo_t));
+						memcpy(u.m_DSI.astGroupInfo, &(groupInfoIndication.GroupInfo), u.m_DSI.NumberOfGroups * sizeof(GroupInfo_t));
 					}
 				}
-				else if (pDownloadServerInitiate->data_broadcast_type == 0x0007)		//OC
+				else if (downloadServerInitiate.data_broadcast_type == 0x0007)		//OC
 				{
-					BIOPProfileBody_t* pBIOPProfileBody = pDownloadServerInitiate->u.ServiceGatewayInfo.IOR.pBIOPProfileBodyPortrait;
+					ServiceGatewayInfo_t serviceGatewayInfo;
+					MPEG2_DSMCC_DSI_OC_DecodeServiceGatewayInfo(downloadServerInitiate.privateDataByte, downloadServerInitiate.privateDataLength, &serviceGatewayInfo);
+					
+					IOP::IOR_t* pIOR = &(serviceGatewayInfo.IOR);
 
-					BIOP::ObjectLocation_t* pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
-					u.m_DSI.carouselId = pObjectLocation->carouselId;
-					u.m_DSI.moduleId_for_srg = pObjectLocation->moduleId;
-					u.m_DSI.objectKey_data_for_srg = pObjectLocation->objectKey_data;
+					for (int profile_index = 0; profile_index < pIOR->taggedProfiles_count; profile_index++)
+					{
+						IOP::TaggedProfile_t* ptaggedProfile = pIOR->taggedProfiles + profile_index;
 
-					DSM::ConnBinder_t* pConnBinder = &(pBIOPProfileBody->ConnBinder);
-					u.m_DSI.table_id_extension_for_dii = pConnBinder->Tap[0].transactionId & 0x0000ffff;
+						if (ptaggedProfile->profileId_tag == 0x49534F06)		//BIOPProfileBody
+						{
+							BIOPProfileBody_t* pBIOPProfileBody = &(pIOR->BIOPProfileBody);
+							MPEG2_DSMCC_IOP_DecodeBIOPProfileBody(ptaggedProfile->profileId_tag, ptaggedProfile->profile_data_length, ptaggedProfile->profile_data_byte, pBIOPProfileBody);
 
+							BIOP::ObjectLocation_t* pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
+							u.m_DSI.carouselId = pObjectLocation->carouselId;
+							u.m_DSI.moduleId_for_srg = pObjectLocation->moduleId;
+							u.m_DSI.objectKey_data_for_srg = pObjectLocation->objectKey_data;
+
+							DSM::ConnBinder_t* pConnBinder = &(pBIOPProfileBody->ConnBinder);
+							u.m_DSI.table_id_extension_for_dii = pConnBinder->Tap[0].transactionId & 0x0000ffff;
+
+							break;
+						}
+					}
 				}
 			}
 			else if (m_usMessageId == 0x1002)			//DII
 			{
-				pDownloadInfoIndication = &(DSMCC_section.u.DownloadInfoIndication);
+				DownloadInfoIndication_t downloadInfoIndication;
+				MPEG2_DSMCC_UNM_DecodeDownloadInfoIndication(dsmcc_section.dsmccMessagePayloadBuf, dsmcc_section.dsmccMessagePayloadLength, &downloadInfoIndication);
 
-				u.m_DII.downloadId = pDownloadInfoIndication->downloadId;
-				u.m_DII.blockSize = pDownloadInfoIndication->blockSize;
-				u.m_DII.windowSize = pDownloadInfoIndication->windowSize;
-				u.m_DII.ackPeriod = pDownloadInfoIndication->ackPeriod;
-				u.m_DII.tCDownloadWindow = pDownloadInfoIndication->tCDownloadWindow;
-				u.m_DII.tCDownloadScenario = pDownloadInfoIndication->tCDownloadScenario;
+				u.m_DII.downloadId = downloadInfoIndication.downloadId;
+				u.m_DII.blockSize = downloadInfoIndication.blockSize;
+				u.m_DII.windowSize = downloadInfoIndication.windowSize;
+				u.m_DII.ackPeriod = downloadInfoIndication.ackPeriod;
+				u.m_DII.tCDownloadWindow = downloadInfoIndication.tCDownloadWindow;
+				u.m_DII.tCDownloadScenario = downloadInfoIndication.tCDownloadScenario;
 
-				u.m_DII.numberOfModules = pDownloadInfoIndication->N;
+				u.m_DII.numberOfModules = downloadInfoIndication.numberOfModules;
 				u.m_DII.astModuleInfo = (moduleInfo_t*)realloc(u.m_DII.astModuleInfo, u.m_DII.numberOfModules * sizeof(moduleInfo_t));
 				if (u.m_DII.astModuleInfo != NULL)
 				{
 					m_nMemoryForModuleInfos = u.m_DII.numberOfModules * sizeof(moduleInfo_t);
-					memcpy(u.m_DII.astModuleInfo, &(pDownloadInfoIndication->moduleInfo), u.m_DII.numberOfModules * sizeof(moduleInfo_t));
+					memcpy(u.m_DII.astModuleInfo, &(downloadInfoIndication.moduleInfo), u.m_DII.numberOfModules * sizeof(moduleInfo_t));
 				}
 			}
-
 		}
 	}
 

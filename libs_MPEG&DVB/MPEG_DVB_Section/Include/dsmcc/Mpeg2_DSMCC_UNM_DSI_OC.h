@@ -1,6 +1,7 @@
 #ifndef _MPEG_DSMCC_UNM_DSI_OC_H_
 #define _MPEG_DSMCC_UNM_DSI_OC_H_
 
+#include "../../compile.h"
 #include "Mpeg2_DSMCC_BIOP.h"
 
 /*------------------------------------------------------------
@@ -28,6 +29,6 @@ typedef struct _ServiceGatewayInfo_s
 
 } ServiceGatewayInfo_t;
 
-int	MPEG2_DSMCC_DSI_OC_DecodeServiceGatewayInfo(uint8_t *buf, int length, ServiceGatewayInfo_t* pServiceGatewayInfo);
+_CDL_EXPORT int	MPEG2_DSMCC_DSI_OC_DecodeServiceGatewayInfo(uint8_t *buf, int length, ServiceGatewayInfo_t* pServiceGatewayInfo);
 
 #endif

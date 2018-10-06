@@ -27,8 +27,7 @@ typedef struct DownloadInfoIndication_s
 	compatibilityDescriptor_t		compatibilityDescriptor;
 
 	uint16_t		numberOfModules;						//16
-
-	uint16_t		N;
+	//uint16_t		N;
 	moduleInfo_t	moduleInfo[MAX_MODULES_PER_GROUP];
 
 	uint16_t	privateDataLength;
@@ -44,16 +43,17 @@ typedef struct DownloadServerInitiate_s
 {
 	uint8_t							serverId[20];								//20x8
 	compatibilityDescriptor_t		compatibilityDescriptor;
-	uint16_t						privateDataLength;
+	uint16_t						privateDataLength;							//2 bytes
+	uint8_t*						privateDataByte;							//lifecycle is the same as the section buf
 
 	int								data_broadcast_type;						//0x0006		-- DC - GroupInfoIndication
 																				//0x0007		-- OC - ServiceGatewayInfo
-	union
-	{
-		uint8_t							privateDataByte[128];
-		GroupInfoIndication_t			GroupInfoIndication;					//DC所使用到的数据结构
-		ServiceGatewayInfo_t			ServiceGatewayInfo;						//OC所使用到的数据结构
-	} u;
+	//union
+	//{
+	//	uint8_t							privateDataByte[128];
+	//	GroupInfoIndication_t			GroupInfoIndication;					//DC所使用到的数据结构
+	//	ServiceGatewayInfo_t			ServiceGatewayInfo;						//OC所使用到的数据结构
+	//} u;
 
 } DownloadServerInitiate_t, *pDownloadServerInitiate_t;
 

@@ -9,7 +9,25 @@
 #include "../../Include/Mpeg2_DSMCC_Utilities.h"
 #include "../../Include/MPEG_DVB_ErrorCode.h"
 
+#include "../../Include/dsmcc/Mpeg2_DSMCC_DDM_XML.h"
+
 ////////////////////////////////////////////
+int	MPEG2_DSMCC_DDM_DecodeDownloadDataBlock_to_xml(uint8_t* buf, int size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, DownloadDataBlock_t* pDDB)
+{
+	int						rtcode = SECTION_PARSE_NO_ERROR;
+
+	DownloadDataBlock_t* pDownloadDataBlock = (pDDB != NULL) ? pDDB : new DownloadDataBlock_t;
+	rtcode = MPEG2_DSMCC_DDM_DecodeDownloadDataBlock(buf, size, pDownloadDataBlock);
+	rtcode = MPEG2_DSMCC_DDM_PresentDownloadDataBlock_to_xml(pxmlDoc, pxmlParentNode, pDownloadDataBlock);
+
+	if (pDDB == NULL)
+	{
+		//说明pDownloadDataBlock指针临时分配，函数返回前需要释放
+		delete pDownloadDataBlock;
+	}
+
+	return rtcode;
+}
 
 int MPEG2_DSMCC_DDM_PresentDownloadDataBlock_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, DownloadDataBlock_t* pDownloadDataBlock)
 {

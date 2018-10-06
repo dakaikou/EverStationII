@@ -11,18 +11,34 @@
 #include "../../Include/dsmcc/Mpeg2_DSMCC_BIOP_XML.h"
 
 /////////////////////////////////////////////
+int	MPEG2_DSMCC_DSI_OC_DecodeServiceGatewayInfo_to_xml(uint8_t* buf, int size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, ServiceGatewayInfo_t* pSGI)
+{
+	int						rtcode = SECTION_PARSE_NO_ERROR;
+
+	ServiceGatewayInfo_t* pServiceGatewayInfo = (pSGI != NULL) ? pSGI : new ServiceGatewayInfo_t;
+	rtcode = MPEG2_DSMCC_DSI_OC_DecodeServiceGatewayInfo(buf, size, pServiceGatewayInfo);
+	rtcode = MPEG2_DSMCC_DSI_OC_PresentServiceGatewayInfo_to_xml(pxmlDoc, pxmlParentNode, pServiceGatewayInfo);
+
+	if (pSGI == NULL)
+	{
+		//说明pServiceGatewayInfo指针临时分配，函数返回前需要释放
+		delete pServiceGatewayInfo;
+	}
+
+	return rtcode;
+}
 
 int	MPEG2_DSMCC_DSI_OC_PresentServiceGatewayInfo_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, ServiceGatewayInfo_t* pServiceGatewayInfo)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
-	//char	pszTemp[96];
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pServiceGatewayInfo != NULL))
 	{
-		XMLElement* pxmlSGINode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "ServiceGatewayInfo()", NULL);
+		//XMLElement* pxmlSGINode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "ServiceGatewayInfo()", NULL);
+		XMLElement* pxmlSGINode = pxmlParentNode;
 
 		//解析IOP::IOR()
-		MPEG2_DSMCC_PresentIOR_to_xml(pxmlDoc, pxmlSGINode, &(pServiceGatewayInfo->IOR));
+		MPEG2_DSMCC_IOP_PresentIOR_to_xml(pxmlDoc, pxmlSGINode, &(pServiceGatewayInfo->IOR));
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlSGINode, "downloadTaps_count", pServiceGatewayInfo->downloadTaps_count, 8, "uimsbf", "N1");
 		if (pServiceGatewayInfo->downloadTaps_count > 0)

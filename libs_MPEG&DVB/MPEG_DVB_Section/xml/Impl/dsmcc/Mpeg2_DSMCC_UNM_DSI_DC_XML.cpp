@@ -11,10 +11,23 @@
 #include "../../Include/MPEG_DVB_Common_XML.h"
 #include "../../Include/dsmcc/Mpeg2_DSMCC_UNM_DSI_DC_XML.h"
 
-#ifndef min
-#define min(a,b)  (((a)<(b))?(a):(b))
-#endif
 /////////////////////////////////////////////
+int	MPEG2_DSMCC_DSI_DC_DecodeGroupInfoIndication_to_xml(uint8_t* buf, int size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, GroupInfoIndication_t* pGII)
+{
+	int						rtcode = SECTION_PARSE_NO_ERROR;
+
+	GroupInfoIndication_t* pGroupInfoIndication = (pGII != NULL) ? pGII : new GroupInfoIndication_t;
+	rtcode = MPEG2_DSMCC_DSI_DC_DecodeGroupInfoIndication(buf, size, pGroupInfoIndication);
+	rtcode = MPEG2_DSMCC_DSI_DC_PresentGroupInfoIndication_to_xml(pxmlDoc, pxmlParentNode, pGroupInfoIndication);
+
+	if (pGII == NULL)
+	{
+		//说明pGroupInfoIndication指针临时分配，函数返回前需要释放
+		delete pGroupInfoIndication;
+	}
+
+	return rtcode;
+}
 
 int	MPEG2_DSMCC_DSI_DC_PresentGroupInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, GroupInfoIndication_t* pGroupInfoIndication)
 {
@@ -23,7 +36,8 @@ int	MPEG2_DSMCC_DSI_DC_PresentGroupInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, 
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pGroupInfoIndication != NULL))
 	{
-		XMLElement* pxmlGroupsNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "GroupInfoIndication()", NULL);
+		//XMLElement* pxmlGroupsNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "GroupInfoIndication()", NULL);
+		XMLElement* pxmlGroupsNode = pxmlParentNode;
 
 		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlGroupsNode, "NumberOfGroups", pGroupInfoIndication->NumberOfGroups, 2, NULL);
 

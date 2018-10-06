@@ -10,8 +10,8 @@
 #define min(a,b)  (((a)<(b))?(a):(b))
 #endif
 /////////////////////////////////////////////
-//DDM
 
+//DDM
 int	MPEG2_DSMCC_DDM_DecodeDownloadDataBlock(uint8_t *buf, int length, DownloadDataBlock_t* pDownloadDataBlock)
 {
 	int				rtcode = SECTION_PARSE_NO_ERROR;
@@ -38,7 +38,6 @@ int	MPEG2_DSMCC_DDM_DecodeDownloadDataBlock(uint8_t *buf, int length, DownloadDa
 		pDownloadDataBlock->N = length - (unsigned short)(ptemp - buf);
 		if (pDownloadDataBlock->N > 0)
 		{
-			//			memcpy(pDownloadDataBlock->blockDataByte, ptemp, pDownloadDataBlock->N);
 			pDownloadDataBlock->blockDataByte = ptemp;
 			ptemp += pDownloadDataBlock->N;
 		}
@@ -58,22 +57,14 @@ int	MPEG2_DSMCC_DDM_DecodeDirectoryMessage(uint8_t *buf, int length, DirectoryMe
 	int				copy_length;
 	int				i;
 	int				j;
-	int				profile_index;
-	int				component_index;
 	int				binding_index;
 	int				remain_length;
-	uint32_t		tag;
 
-	BIOPProfileBody_t*			pBIOPProfileBody;
-	LiteOptionsProfileBody_t*	pLiteOptionsProfileBody;
 	IOP::IOR_t*					pIOR;
-	BIOP::ObjectLocation_t*		pObjectLocation;
 	Bindings_t*					pBindings;
-	DSM::ConnBinder_t*			pConnBinder;
 
 	if ((buf != NULL) && (length > 0) && (pDirectoryMessage != NULL))
 	{
-		//		memset(pBIOP_DirectoryMessage, 0x00, sizeof(BIOP_DirectoryMessage_t));
 		ptemp = buf;
 
 		memcpy(pDirectoryMessage->magic, ptemp, 4);
@@ -201,198 +192,13 @@ int	MPEG2_DSMCC_DDM_DecodeDirectoryMessage(uint8_t *buf, int length, DirectoryMe
 
 			pIOR = &(pBindings->IOR);
 
-			pIOR->type_id_length = *ptemp++;
-			pIOR->type_id_length <<= 8;
-			pIOR->type_id_length |= *ptemp++;
-			pIOR->type_id_length <<= 8;
-			pIOR->type_id_length |= *ptemp++;
-			pIOR->type_id_length <<= 8;
-			pIOR->type_id_length |= *ptemp++;
+			BITS_t bs;
+			remain_length = length - (int)(ptemp - buf);
+			BITS_map(&bs, ptemp, remain_length);
 
-			if (pIOR->type_id_length == 4)
-			{
-				memcpy(pIOR->type_id_byte, ptemp, pIOR->type_id_length);
-				ptemp += pIOR->type_id_length;
-
-				pIOR->taggedProfiles_count = *ptemp++;
-				pIOR->taggedProfiles_count <<= 8;
-				pIOR->taggedProfiles_count |= *ptemp++;
-				pIOR->taggedProfiles_count <<= 8;
-				pIOR->taggedProfiles_count |= *ptemp++;
-				pIOR->taggedProfiles_count <<= 8;
-				pIOR->taggedProfiles_count |= *ptemp++;
-
-				if (pIOR->taggedProfiles_count > 0)
-				{
-					for (profile_index = 0; profile_index < pIOR->taggedProfiles_count; profile_index++)
-					{
-						tag = *ptemp++;
-						tag <<= 8;
-						tag |= *ptemp++;
-						tag <<= 8;
-						tag |= *ptemp++;
-						tag <<= 8;
-						tag |= *ptemp++;
-
-						pIOR->taggedProfile[profile_index].profileId_tag = tag;
-
-						if (tag == 0x49534F06)				//TAG_BIOP(BIOP Profile Body)
-						{
-							pBIOPProfileBody = &(pIOR->taggedProfile[profile_index].u.BIOPProfileBody);
-
-							pBIOPProfileBody->profileId_tag = tag;
-
-							pBIOPProfileBody->profile_data_length = *ptemp++;
-							pBIOPProfileBody->profile_data_length <<= 8;
-							pBIOPProfileBody->profile_data_length |= *ptemp++;
-							pBIOPProfileBody->profile_data_length <<= 8;
-							pBIOPProfileBody->profile_data_length |= *ptemp++;
-							pBIOPProfileBody->profile_data_length <<= 8;
-							pBIOPProfileBody->profile_data_length |= *ptemp++;
-
-							pBIOPProfileBody->profile_data_byte_order = *ptemp++;
-							pBIOPProfileBody->liteComponents_count = *ptemp++;
-
-							//BIOP Object Location
-							pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
-
-							pObjectLocation->componentId_tag = *ptemp++;
-							pObjectLocation->componentId_tag <<= 8;
-							pObjectLocation->componentId_tag |= *ptemp++;
-							pObjectLocation->componentId_tag <<= 8;
-							pObjectLocation->componentId_tag |= *ptemp++;
-							pObjectLocation->componentId_tag <<= 8;
-							pObjectLocation->componentId_tag |= *ptemp++;
-							assert(pObjectLocation->componentId_tag == 0x49534F50);
-
-							pObjectLocation->component_data_length = *ptemp++;
-
-							pObjectLocation->carouselId = *ptemp++;
-							pObjectLocation->carouselId <<= 8;
-							pObjectLocation->carouselId |= *ptemp++;
-							pObjectLocation->carouselId <<= 8;
-							pObjectLocation->carouselId |= *ptemp++;
-							pObjectLocation->carouselId <<= 8;
-							pObjectLocation->carouselId |= *ptemp++;
-
-							pObjectLocation->moduleId = *ptemp++;
-							pObjectLocation->moduleId <<= 8;
-							pObjectLocation->moduleId |= *ptemp++;
-
-							pObjectLocation->version.major = *ptemp++;
-							pObjectLocation->version.minor = *ptemp++;
-
-							pObjectLocation->objectKey_length = *ptemp++;
-							assert(pObjectLocation->objectKey_length == 4);
-
-							pObjectLocation->objectKey_data = *ptemp++;
-							pObjectLocation->objectKey_data <<= 8;
-							pObjectLocation->objectKey_data |= *ptemp++;
-							pObjectLocation->objectKey_data <<= 8;
-							pObjectLocation->objectKey_data |= *ptemp++;
-							pObjectLocation->objectKey_data <<= 8;
-							pObjectLocation->objectKey_data |= *ptemp++;
-
-							//DSM Conn Binder
-							pConnBinder = &(pBIOPProfileBody->ConnBinder);
-
-							pConnBinder->componentId_tag = *ptemp++;
-							pConnBinder->componentId_tag <<= 8;
-							pConnBinder->componentId_tag |= *ptemp++;
-							pConnBinder->componentId_tag <<= 8;
-							pConnBinder->componentId_tag |= *ptemp++;
-							pConnBinder->componentId_tag <<= 8;
-							pConnBinder->componentId_tag |= *ptemp++;
-							assert(pConnBinder->componentId_tag == 0x49534F40);
-
-							pConnBinder->component_data_length = *ptemp++;
-							pConnBinder->taps_count = *ptemp++;
-
-							for (int tap_index = 0; tap_index < pConnBinder->taps_count; tap_index++)
-							{
-								pConnBinder->Tap[tap_index].id = *ptemp++;
-								pConnBinder->Tap[tap_index].id <<= 8;
-								pConnBinder->Tap[tap_index].id |= *ptemp++;
-								pConnBinder->Tap[tap_index].id <<= 8;
-
-								pConnBinder->Tap[tap_index].use = *ptemp++;
-								pConnBinder->Tap[tap_index].use <<= 8;
-								pConnBinder->Tap[tap_index].use |= *ptemp++;
-
-								pConnBinder->Tap[tap_index].association_tag = *ptemp++;
-								pConnBinder->Tap[tap_index].association_tag <<= 8;
-								pConnBinder->Tap[tap_index].association_tag |= *ptemp++;
-
-								pConnBinder->Tap[tap_index].selector_length = *ptemp++;
-
-								pConnBinder->Tap[tap_index].selector_type = *ptemp++;
-								pConnBinder->Tap[tap_index].selector_type <<= 8;
-								pConnBinder->Tap[tap_index].selector_type |= *ptemp++;
-
-								pConnBinder->Tap[tap_index].transactionId = *ptemp++;
-								pConnBinder->Tap[tap_index].transactionId <<= 8;
-								pConnBinder->Tap[tap_index].transactionId |= *ptemp++;
-								pConnBinder->Tap[tap_index].transactionId <<= 8;
-								pConnBinder->Tap[tap_index].transactionId |= *ptemp++;
-								pConnBinder->Tap[tap_index].transactionId <<= 8;
-								pConnBinder->Tap[tap_index].transactionId |= *ptemp++;
-
-								pConnBinder->Tap[tap_index].timeout = *ptemp++;
-								pConnBinder->Tap[tap_index].timeout <<= 8;
-								pConnBinder->Tap[tap_index].timeout |= *ptemp++;
-								pConnBinder->Tap[tap_index].timeout <<= 8;
-								pConnBinder->Tap[tap_index].timeout |= *ptemp++;
-								pConnBinder->Tap[tap_index].timeout <<= 8;
-								pConnBinder->Tap[tap_index].timeout |= *ptemp++;
-							}
-
-							for (component_index = 0; component_index < pBIOPProfileBody->liteComponents_count - 2; component_index++)
-							{
-								BIOP::LiteComponent_t* pLiteComponent = pBIOPProfileBody->liteComponents + component_index;
-
-								pLiteComponent->componentId_tag = *ptemp++;
-								pLiteComponent->componentId_tag <<= 8;
-								pLiteComponent->componentId_tag |= *ptemp++;
-								pLiteComponent->componentId_tag <<= 8;
-								pLiteComponent->componentId_tag |= *ptemp++;
-								pLiteComponent->componentId_tag <<= 8;
-								pLiteComponent->componentId_tag |= *ptemp++;
-
-								pLiteComponent->component_data_length = *ptemp++;
-
-								copy_length = min(pLiteComponent->component_data_length, sizeof(pLiteComponent->component_data_byte));
-								memcpy(pLiteComponent->component_data_byte, ptemp, copy_length);
-								ptemp += pLiteComponent->component_data_length;
-							}
-
-							pIOR->pBIOPProfileBodyPortrait = pBIOPProfileBody;
-						}
-						else if (tag == 0x49534F05)			//TAG_LITE_OPTIONS(LiteOptionsProfileBody)
-						{
-							pLiteOptionsProfileBody = &(pIOR->taggedProfile[profile_index].u.LiteOptionsProfileBody);
-
-							pLiteOptionsProfileBody->profileId_tag = tag;
-
-							pLiteOptionsProfileBody->profile_data_length = *ptemp++;
-							pLiteOptionsProfileBody->profile_data_length <<= 8;
-							pLiteOptionsProfileBody->profile_data_length |= *ptemp++;
-							pLiteOptionsProfileBody->profile_data_length <<= 8;
-							pLiteOptionsProfileBody->profile_data_length |= *ptemp++;
-							pLiteOptionsProfileBody->profile_data_length <<= 8;
-							pLiteOptionsProfileBody->profile_data_length |= *ptemp++;
-
-							pLiteOptionsProfileBody->profile_data_byte_order = *ptemp++;
-						}
-
-						remain_length = length - (int)(ptemp - buf);
-
-						if (remain_length <= 0)
-						{
-							break;
-						}
-					}
-				}
-			}
+			MPEG2_DSMCC_IOP_DecodeIOR(&bs, pIOR);
+			ptemp += pIOR->total_length;
+			assert(ptemp == bs.p_cur);
 
 			pBindings->objectInfo_length = *ptemp++;
 			pBindings->objectInfo_length <<= 8;

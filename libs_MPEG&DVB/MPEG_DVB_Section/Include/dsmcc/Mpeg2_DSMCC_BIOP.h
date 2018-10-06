@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+#include "../../compile.h"
 #include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 
 /*------------------------------------------------------------
@@ -98,6 +99,14 @@ typedef struct _LiteOptionsProfileBody_s
 
 namespace IOP
 {
+	typedef struct
+	{
+		uint32_t		profileId_tag;						//32
+		int				profile_data_length;				//32
+		uint8_t*		profile_data_byte;
+
+	} TaggedProfile_t;
+
 	typedef struct _IOR_s
 	{
 		uint32_t				type_id_length;						//32
@@ -105,24 +114,18 @@ namespace IOP
 		uint8_t					alignment_gap[4];					//8 x ???
 
 		int					taggedProfiles_count;				//32
-		struct
-		{
-			uint32_t		profileId_tag;
-			int				profile_data_length;
+		TaggedProfile_t		taggedProfiles[4];					//array count why 4?	chendelin 2018.10.6
 
-			union
-			{
-				BIOPProfileBody_t			BIOPProfileBody;
-				LiteOptionsProfileBody_t	LiteOptionsProfileBody;
-			} u;
+		int					taggedProfilesLength;				//just for check chendelin  2018.10.6
+		int					total_length;					//just for check chendelin  2018.10.6
 
-		}taggedProfile[4];
-
-		BIOPProfileBody_t* pBIOPProfileBodyPortrait;
+		BIOPProfileBody_t	BIOPProfileBody;
 
 	} IOR_t;
 };
 
-int	MPEG2_DSMCC_DecodeIOR(BITS_t* pbs, IOP::IOR_t* pIOR);
+_CDL_EXPORT int	MPEG2_DSMCC_IOP_DecodeIOR(BITS_t* pbs, IOP::IOR_t* pIOR);
+_CDL_EXPORT int	MPEG2_DSMCC_IOP_DecodeBIOPProfileBody(uint32_t profileId_tag, uint32_t profile_data_length, uint8_t* profile_data_byte, BIOPProfileBody_t* pBIOPProfileBody);
+_CDL_EXPORT int	MPEG2_DSMCC_IOP_DecodeLiteOptionsProfileBody(uint32_t profileId_tag, uint32_t profile_data_length, uint8_t* profile_data_byte, LiteOptionsProfileBody_t* pLiteOptionsProfileBody);
 
 #endif
