@@ -6,13 +6,7 @@
 #include "../MPEG_DVB_SysCapability.h"
 #include "../MPEG_DVB_Common.h"
 #include "../Mpeg2_DSMCC_Descriptor.h"
-
-//it is not propriateable to defined here
-typedef struct compatibilityDescriptor_s
-{
-	uint16_t	compatibilityDescriptorLength;								//16		
-	uint8_t		compatibilityDescriptorBuf[64];
-} compatibilityDescriptor_t, *pcompatibilityDescriptor_t;
+#include "Mpeg2_DSMCC_UNM.h"
 
 //for DC
 typedef struct GroupInfo_s

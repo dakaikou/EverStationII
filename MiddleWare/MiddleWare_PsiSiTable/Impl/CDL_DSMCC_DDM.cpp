@@ -147,14 +147,14 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 					DownloadDataBlock_t downloadDataBlock;
 					MPEG2_DSMCC_DDM_DecodeDownloadDataBlock(DSMCC_section.dsmccMessagePayloadBuf, DSMCC_section.dsmccMessagePayloadLength, &downloadDataBlock);
 
-					m_astBlockInfo[pprivate_section->section_number].buf = (uint8_t*)malloc(downloadDataBlock.N);
+					m_astBlockInfo[pprivate_section->section_number].buf = (uint8_t*)malloc(downloadDataBlock.blockDataLength);
 					if (m_astBlockInfo[pprivate_section->section_number].buf != NULL)
 					{
-						m_astBlockInfo[pprivate_section->section_number].length = downloadDataBlock.N;
-						memcpy(m_astBlockInfo[pprivate_section->section_number].buf, downloadDataBlock.blockDataByte, downloadDataBlock.N);
+						m_astBlockInfo[pprivate_section->section_number].length = downloadDataBlock.blockDataLength;
+						memcpy(m_astBlockInfo[pprivate_section->section_number].buf, downloadDataBlock.blockDataByte, downloadDataBlock.blockDataLength);
 
-						m_nModuleSize += downloadDataBlock.N;
-						m_nMemAllocatedForModule += downloadDataBlock.N;
+						m_nModuleSize += downloadDataBlock.blockDataLength;
+						m_nMemAllocatedForModule += downloadDataBlock.blockDataLength;
 					}
 				}
 

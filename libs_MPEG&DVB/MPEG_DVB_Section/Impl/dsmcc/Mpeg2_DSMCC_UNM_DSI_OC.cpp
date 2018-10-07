@@ -9,9 +9,6 @@
 #include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 #include "HAL\HAL_ByteStream\Include\HALForByteStream.h"
 
-//#ifndef min
-//#define min(a,b)  (((a)<(b))?(a):(b))
-//#endif
 /////////////////////////////////////////////
 
 int	MPEG2_DSMCC_DSI_OC_DecodeServiceGatewayInfo(uint8_t *buf, int length, ServiceGatewayInfo_t* pServiceGatewayInfo)

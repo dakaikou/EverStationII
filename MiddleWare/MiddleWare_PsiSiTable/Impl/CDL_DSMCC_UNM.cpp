@@ -138,11 +138,11 @@ int CDSMCC_UNM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 				u.m_DII.tCDownloadScenario = downloadInfoIndication.tCDownloadScenario;
 
 				u.m_DII.numberOfModules = downloadInfoIndication.numberOfModules;
-				u.m_DII.astModuleInfo = (moduleInfo_t*)realloc(u.m_DII.astModuleInfo, u.m_DII.numberOfModules * sizeof(moduleInfo_t));
+				u.m_DII.astModuleInfo = (ModuleInfo_t*)realloc(u.m_DII.astModuleInfo, u.m_DII.numberOfModules * sizeof(ModuleInfo_t));
 				if (u.m_DII.astModuleInfo != NULL)
 				{
-					m_nMemoryForModuleInfos = u.m_DII.numberOfModules * sizeof(moduleInfo_t);
-					memcpy(u.m_DII.astModuleInfo, &(downloadInfoIndication.moduleInfo), u.m_DII.numberOfModules * sizeof(moduleInfo_t));
+					m_nMemoryForModuleInfos = u.m_DII.numberOfModules * sizeof(ModuleInfo_t);
+					memcpy(u.m_DII.astModuleInfo, &(downloadInfoIndication.ModuleInfo), u.m_DII.numberOfModules * sizeof(ModuleInfo_t));
 				}
 			}
 		}

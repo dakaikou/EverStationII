@@ -9,8 +9,9 @@
 #include "../../Include/MPEG_DVB_ErrorCode.h"
 
 #include "../Include/Mpeg2_DSMCC_section_XML.h"
-#include "../Include/dsmcc/Mpeg2_DSMCC_UNM_XML.h"
-#include "../Include/dsmcc/Mpeg2_DSMCC_DDM_XML.h"
+#include "../Include/dsmcc/Mpeg2_DSMCC_UNM_DII_XML.h"
+#include "../Include/dsmcc/Mpeg2_DSMCC_UNM_DSI_XML.h"
+#include "../Include/dsmcc/Mpeg2_DSMCC_DDM_DDB_XML.h"
 
 #include "libs_Math/Include/CRC_32.h"
 

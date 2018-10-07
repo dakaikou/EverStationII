@@ -6,8 +6,9 @@
 #include "libs_MPEG&DVB\MPEG_DVB_Section\Include\MPEG_DVB_Common.h"
 #include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_DSMCC_Descriptor.h"
 #include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_DSMCC_Section.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_UNM.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_DDM.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_UNM_DII.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_UNM_DSI.h"
+#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_DDM_DDB.h"
 
 #include "MiddleWare_PSISI_Common.h"
 
@@ -62,7 +63,7 @@ typedef struct DSMCC_DII_s
 	U32			tCDownloadScenario;						//32
 
 	U16				numberOfModules;					//16
-	moduleInfo_t*	astModuleInfo;
+	ModuleInfo_t*	astModuleInfo;
 
 } DSMCC_DII_t;
 

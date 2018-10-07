@@ -58,7 +58,21 @@ namespace BIOP
 		char			id_data_byte[1][65];						//
 		uint8_t			kind_length[1];
 		char			kind_data_byte[1][4];
-	} NAME_t;
+	} Name_t;
+
+	typedef struct _ModuleInfo_s
+	{
+		uint32_t		moduleTimeOut;				//32
+		uint32_t		blockTimeOut;				//32
+		uint32_t		minBlockTime;				//32
+
+		uint8_t			taps_count;					//8
+		TAP_t			TAP[4];
+
+		uint8_t			userInfoLength;				//8
+		uint8_t*		userInfo_data_byte;			//8
+
+	} ModuleInfo_t;
 }
 
 namespace DSM

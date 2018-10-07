@@ -40,11 +40,13 @@ int	MPEG2_DSMCC_DSI_DC_DecodeGroupInfoIndication(uint8_t *buf, int length, Group
 
 			pGroupInfo->GroupSize = BYTES_get(&bytes, 4);
 
-			pGroupInfo->GroupCompatibility.compatibilityDescriptorLength = BYTES_get(&bytes, 2);
-			if (pGroupInfo->GroupCompatibility.compatibilityDescriptorLength > 0)
+			compatibilityDescriptor_t* pcompatibilityDescriptor = &(pGroupInfo->GroupCompatibility);
+			pcompatibilityDescriptor->compatibilityDescriptorLength = BYTES_get(&bytes, 2);
+			if (pcompatibilityDescriptor->compatibilityDescriptorLength > 0)
 			{
-				compatibilityDescriptor_t* pcompatibilityDescriptor = &(pGroupInfo->GroupCompatibility);
-				BYTES_copy(pcompatibilityDescriptor->compatibilityDescriptorBuf, sizeof(pcompatibilityDescriptor), &bytes, pcompatibilityDescriptor->compatibilityDescriptorLength);
+				pcompatibilityDescriptor->compatibilityDescriptorBuf = bytes.p_cur;
+				BYTES_skip(&bytes, pcompatibilityDescriptor->compatibilityDescriptorLength);
+				//BYTES_copy(pcompatibilityDescriptor->compatibilityDescriptorBuf, sizeof(pcompatibilityDescriptor), &bytes, pcompatibilityDescriptor->compatibilityDescriptorLength);
 			}
 
 			pGroupInfo->GroupInfoLength = BYTES_get(&bytes, 2);

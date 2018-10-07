@@ -118,37 +118,6 @@ int MPEG2_DSMCC_DecodeSection(uint8_t *section_buf, int section_size, dsmcc_sect
 					pdsmcc_section->dsmccMessagePayloadLength = pdsmccMessageHeader->messageLength - pdsmccMessageHeader->adaptationLength;
 					if (pdsmcc_section->dsmccMessagePayloadLength > 0)
 					{
-						//if (pdsmccMessageHeader->messageId == 0x1002)			//DII
-						//{
-						//	assert(pdsmcc_section->table_id == TABLE_ID_DSMCC_UNM);
-						//	DownloadInfoIndication_t* pDownloadInfoIndication = &(pdsmcc_section->u.DownloadInfoIndication);
-
-						//	rtcode = MPEG2_DSMCC_UNM_DecodeDownloadInfoIndication(bytes.p_cur, msg_payload_length, pDownloadInfoIndication);
-						//}
-						//else if (pdsmccMessageHeader->messageId == 0x1006)							//DSI
-						//{
-						//	assert(pdsmcc_section->table_id == TABLE_ID_DSMCC_UNM);
-						//	DownloadServerInitiate_t* pDownloadServerInitiate = &(pdsmcc_section->u.DownloadServerInitiate);
-
-						//	rtcode = MPEG2_DSMCC_UNM_DecodeDownloadServerInitiate(bytes.p_cur, msg_payload_length, pDownloadServerInitiate);
-						//}
-						//else if (pdsmccMessageHeader->messageId == 0x1003)					//DDB
-						//{
-						//	assert(pdsmcc_section->table_id == TABLE_ID_DSMCC_DDM);
-						//	DownloadDataBlock_t* pDownloadDataBlock = &(pdsmcc_section->u.DownloadDataBlock);
-						//	rtcode = MPEG2_DSMCC_DDM_DecodeDownloadDataBlock(bytes.p_cur, msg_payload_length, pDownloadDataBlock);
-						//}
-						//else
-						//{
-						//	assert(0);
-						//	rtcode = SECTION_PARSE_SYNTAX_ERROR;
-						//}
-
-						//BYTES_skip(&bytes, msg_payload_length);
-
-						//assert(pdsmcc_section->dsmccMessagePayloadLength <= sizeof(pdsmcc_section->dsmccMessagePayloadBuf));
-						//BYTES_copy(pdsmcc_section->dsmccMessagePayloadBuf, sizeof(pdsmcc_section->dsmccMessagePayloadBuf), &bytes, pdsmcc_section->dsmccMessagePayloadLength);
-
 						assert(pdsmcc_section->dsmccMessagePayloadLength <= 4072);
 						pdsmcc_section->dsmccMessagePayloadBuf = bytes.p_cur;
 						BYTES_skip(&bytes, pdsmcc_section->dsmccMessagePayloadLength);
