@@ -3,10 +3,11 @@
 
 #include "../../compile.h"
 
+#include "Mpeg2_DSMCC_define.h"
+
 #include "../MPEG_DVB_SysCapability.h"
 #include "../MPEG_DVB_Common.h"
 #include "../Mpeg2_DSMCC_Descriptor.h"
-#include "Mpeg2_DSMCC_UNM.h"
 
 //for DC
 typedef struct GroupInfo_s

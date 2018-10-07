@@ -5,7 +5,7 @@
 
 #include "Mpeg2_DSMCC_UNM_DII_DC.h"
 #include "Mpeg2_DSMCC_UNM_DII_OC.h"
-#include "Mpeg2_DSMCC_UNM.h"
+#include "Mpeg2_DSMCC_define.h"
 
 typedef struct ModuleInfo_s
 {

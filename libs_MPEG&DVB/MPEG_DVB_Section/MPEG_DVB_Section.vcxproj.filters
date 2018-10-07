@@ -225,6 +225,9 @@
     <ClInclude Include="xml\Include\dsmcc\Mpeg2_DSMCC_DDM_DDB_XML.h">
       <Filter>头文件\xmlInclude\dsmcc</Filter>
     </ClInclude>
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_define.h">
+      <Filter>头文件\Include\dsmcc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

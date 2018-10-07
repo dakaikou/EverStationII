@@ -177,6 +177,7 @@
     <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_DDM_DDB.h" />
     <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_DDM_DDB_DC.h" />
     <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_DDM_DDB_OC.h" />
+    <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_define.h" />
     <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM.h" />
     <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM_DII.h" />
     <ClInclude Include="Include\dsmcc\Mpeg2_DSMCC_UNM_DII_DC.h" />

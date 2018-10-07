@@ -3,20 +3,8 @@
 
 #include <stdint.h>
 
-/*------------------------------------------------------------
-		common DSM-CC definition for UNM 
--------------------------------------------------------------*/
+#include "Mpeg2_DSMCC_UNM_DII.h"
+#include "Mpeg2_DSMCC_UNM_DSI.h"
 
-//typedef struct DownloadCancel_s
-//{
-//} DownloadCancel_t, *pDownloadCancel_t;
-
-
-//it is not propriateable to defined here
-typedef struct compatibilityDescriptor_s
-{
-	uint16_t	compatibilityDescriptorLength;								//16		
-	uint8_t*	compatibilityDescriptorBuf;
-} compatibilityDescriptor_t, *pcompatibilityDescriptor_t;
 
 #endif
