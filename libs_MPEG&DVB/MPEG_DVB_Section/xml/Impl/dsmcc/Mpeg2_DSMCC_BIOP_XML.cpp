@@ -18,7 +18,7 @@
 /////////////////////////////////////////////
 
 //无法预测IOR()结构体的长度，除非计算一遍，因此第一个参数串入比特串指针
-int	MPEG2_DSMCC_IOP_PresentIOR_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, IOP::IOR_t* pIOR)
+int	MPEG2_DSMCC_BIOP_PresentIOR_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, BIOP::IOR_t* pIOR)
 {
 	int rtcode = SECTION_PARSE_NO_ERROR;
 
@@ -58,7 +58,7 @@ int	MPEG2_DSMCC_IOP_PresentIOR_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlPar
 
 			for (int profile_index = 0; profile_index < pIOR->taggedProfiles_count; profile_index++)
 			{
-				IOP::TaggedProfile_t* ptaggedProfile = pIOR->taggedProfiles + profile_index;
+				BIOP::TaggedProfile_t* ptaggedProfile = pIOR->taggedProfiles + profile_index;
 				uint32_t tag = ptaggedProfile->profileId_tag;
 
 				sprintf_s(pszField, sizeof(pszField), "IOP::taggedProfiles[%d](tag:0x%08X)", profile_index, tag);
@@ -79,7 +79,7 @@ int	MPEG2_DSMCC_IOP_PresentIOR_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlPar
 
 				if (ptaggedProfile->profileId_tag == 0x49534F06)					//TAG_BIOP(BIOP Profile Body)
 				{
-					MPEG2_DSMCC_IOP_DecodeBIOPProfileBody_to_xml(ptaggedProfile->profileId_tag,
+					MPEG2_DSMCC_BIOP_DecodeBIOPProfileBody_to_xml(ptaggedProfile->profileId_tag,
 						ptaggedProfile->profile_data_length,
 						ptaggedProfile->profile_data_byte,
 						pxmlDoc,
@@ -87,7 +87,7 @@ int	MPEG2_DSMCC_IOP_PresentIOR_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlPar
 				}
 				else if (ptaggedProfile->profileId_tag == 0x49534F05)				//TAG_LITE_OPTION(LiteOptionsProfileBody)
 				{
-					MPEG2_DSMCC_IOP_DecodeLiteOptionsProfileBody_to_xml(ptaggedProfile->profileId_tag,
+					MPEG2_DSMCC_BIOP_DecodeLiteOptionsProfileBody_to_xml(ptaggedProfile->profileId_tag,
 						ptaggedProfile->profile_data_length,
 						ptaggedProfile->profile_data_byte,
 						pxmlDoc,
@@ -111,13 +111,13 @@ int	MPEG2_DSMCC_IOP_PresentIOR_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlPar
 }
 
 
-int	MPEG2_DSMCC_IOP_DecodeBIOPProfileBody_to_xml(uint32_t profileId_tag, uint32_t profile_data_length, uint8_t* profile_data_byte, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, BIOPProfileBody_t* pProfileBody)
+int	MPEG2_DSMCC_BIOP_DecodeBIOPProfileBody_to_xml(uint32_t profileId_tag, uint32_t profile_data_length, uint8_t* profile_data_byte, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, BIOP::BIOPProfileBody_t* pProfileBody)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
 
-	BIOPProfileBody_t* pBIOPProfileBody = (pProfileBody != NULL) ? pProfileBody : new BIOPProfileBody_t;
-	rtcode = MPEG2_DSMCC_IOP_DecodeBIOPProfileBody(profileId_tag, profile_data_length, profile_data_byte, pBIOPProfileBody);
-	rtcode = MPEG2_DSMCC_IOP_PresentBIOPProfileBody_to_xml(pxmlDoc, pxmlParentNode, pBIOPProfileBody);
+	BIOP::BIOPProfileBody_t* pBIOPProfileBody = (pProfileBody != NULL) ? pProfileBody : new BIOP::BIOPProfileBody_t;
+	rtcode = MPEG2_DSMCC_BIOP_DecodeBIOPProfileBody(profileId_tag, profile_data_length, profile_data_byte, pBIOPProfileBody);
+	rtcode = MPEG2_DSMCC_BIOP_PresentBIOPProfileBody_to_xml(pxmlDoc, pxmlParentNode, pBIOPProfileBody);
 
 	if (pProfileBody == NULL)
 	{
@@ -128,7 +128,7 @@ int	MPEG2_DSMCC_IOP_DecodeBIOPProfileBody_to_xml(uint32_t profileId_tag, uint32_
 	return rtcode;
 }
 
-int	MPEG2_DSMCC_IOP_PresentBIOPProfileBody_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, BIOPProfileBody_t* pBIOPProfileBody)
+int	MPEG2_DSMCC_BIOP_PresentBIOPProfileBody_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, BIOP::BIOPProfileBody_t* pBIOPProfileBody)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
 	char	pszField[64];
@@ -175,7 +175,7 @@ int	MPEG2_DSMCC_IOP_PresentBIOPProfileBody_to_xml(HALForXMLDoc* pxmlDoc, XMLElem
 			//liteComponent 1
 			{
 				//DSM::ConnBinder
-				DSM::ConnBinder_t* pConnBinder = &(pBIOPProfileBody->ConnBinder);
+				BIOP::ConnBinder_t* pConnBinder = &(pBIOPProfileBody->ConnBinder);
 				sprintf_s(pszField, sizeof(pszField), "DSM::ConnBinder(tag:0x%08X)", pConnBinder->componentId_tag);
 				assert(pConnBinder->componentId_tag == 0x49534F40);
 				XMLElement* pxmlConnBinderNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, pszField, NULL);
@@ -247,13 +247,13 @@ int	MPEG2_DSMCC_IOP_PresentBIOPProfileBody_to_xml(HALForXMLDoc* pxmlDoc, XMLElem
 	return rtcode;
 }
 
-int	MPEG2_DSMCC_IOP_DecodeLiteOptionsProfileBody_to_xml(uint32_t profileId_tag, uint32_t profile_data_length, uint8_t* profile_data_byte, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, LiteOptionsProfileBody_t* pProfileBody)
+int	MPEG2_DSMCC_BIOP_DecodeLiteOptionsProfileBody_to_xml(uint32_t profileId_tag, uint32_t profile_data_length, uint8_t* profile_data_byte, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, BIOP::LiteOptionsProfileBody_t* pProfileBody)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
 
-	LiteOptionsProfileBody_t* pLiteOptionsProfileBody = (pProfileBody != NULL) ? pProfileBody : new LiteOptionsProfileBody_t;
-	rtcode = MPEG2_DSMCC_IOP_DecodeLiteOptionsProfileBody(profileId_tag, profile_data_length, profile_data_byte, pLiteOptionsProfileBody);
-	rtcode = MPEG2_DSMCC_IOP_PresentLiteOptionsProfileBody_to_xml(pxmlDoc, pxmlParentNode, pLiteOptionsProfileBody);
+	BIOP::LiteOptionsProfileBody_t* pLiteOptionsProfileBody = (pProfileBody != NULL) ? pProfileBody : new BIOP::LiteOptionsProfileBody_t;
+	rtcode = MPEG2_DSMCC_BIOP_DecodeLiteOptionsProfileBody(profileId_tag, profile_data_length, profile_data_byte, pLiteOptionsProfileBody);
+	rtcode = MPEG2_DSMCC_BIOP_PresentLiteOptionsProfileBody_to_xml(pxmlDoc, pxmlParentNode, pLiteOptionsProfileBody);
 
 	if (pProfileBody == NULL)
 	{
@@ -264,7 +264,7 @@ int	MPEG2_DSMCC_IOP_DecodeLiteOptionsProfileBody_to_xml(uint32_t profileId_tag, 
 	return rtcode;
 }
 
-int	MPEG2_DSMCC_IOP_PresentLiteOptionsProfileBody_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, LiteOptionsProfileBody_t* pLiteOptionsProfileBody)
+int	MPEG2_DSMCC_BIOP_PresentLiteOptionsProfileBody_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, BIOP::LiteOptionsProfileBody_t* pLiteOptionsProfileBody)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
 
@@ -303,6 +303,148 @@ int	MPEG2_DSMCC_IOP_PresentLiteOptionsProfileBody_to_xml(HALForXMLDoc* pxmlDoc, 
 	return rtcode;
 }
 
+int	MPEG2_DSMCC_BIOP_PresentDirectMessage_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, BIOP::DirectoryMessage_t* pDirectoryMessage)
+{
+	int rtcode = SECTION_PARSE_NO_ERROR;
+
+	char pszField[64];
+	char pszComment[64];
+
+	if (strcmp(pDirectoryMessage->objectKind_data, "srg") == 0)
+	{
+		sprintf_s(pszField, sizeof(pszField), "BIOP::ServiceGatewayMessage (objectKey_data_byte=0x%08X)", pDirectoryMessage->objectKey_data);
+	}
+	else if (strcmp(pDirectoryMessage->objectKind_data, "dir") == 0)
+	{
+		sprintf_s(pszField, sizeof(pszField), "BIOP::DirectoryMessage (objectKey_data_byte=0x%08X)", pDirectoryMessage->objectKey_data);
+	}
+	else
+	{
+		//								assert(0);
+	}
+
+	XMLElement* hDDBItem = pxmlParentNode;
+	XMLElement* hSrgItem = XMLDOC_NewElementForString(pxmlDoc, hDDBItem, pszField, NULL);
+
+	XMLDOC_NewElementForByteBuf(pxmlDoc, hSrgItem, "magic[ ]", (uint8_t*)pDirectoryMessage->magic, 4, pDirectoryMessage->magic);
+	XMLDOC_NewElementForBits(pxmlDoc, hSrgItem, "biop_version.major", pDirectoryMessage->biop_version.major, 8, "uimsbf", NULL);
+	XMLDOC_NewElementForBits(pxmlDoc, hSrgItem, "biop_version.minor", pDirectoryMessage->biop_version.minor, 8, "uimsbf", NULL);
+
+	MPEG2_DSMCC_NumericCoding2Text_byteOrder(pDirectoryMessage->byte_order, pszComment, sizeof(pszComment));
+	XMLDOC_NewElementForBits(pxmlDoc, hSrgItem, "byte_order", pDirectoryMessage->byte_order, 8, "uimsbf", pszComment);
+	XMLDOC_NewElementForBits(pxmlDoc, hSrgItem, "message_type", pDirectoryMessage->message_type, 8, "uimsbf", NULL);
+	XMLDOC_NewElementForBits(pxmlDoc, hSrgItem, "message_size", pDirectoryMessage->message_size, 32, "uimsbf", NULL);
+	XMLDOC_NewElementForBits(pxmlDoc, hSrgItem, "objectKey_length", pDirectoryMessage->objectKey_length, 8, "uimsbf", NULL);
+	XMLDOC_NewElementForBits(pxmlDoc, hSrgItem, "objectKey_data_byte", pDirectoryMessage->objectKey_data, 32, "uimsbf", NULL);
+	XMLDOC_NewElementForBits(pxmlDoc, hSrgItem, "objectKind_length", pDirectoryMessage->objectKind_length, 8, "uimsbf", NULL);
+	XMLDOC_NewElementForByteBuf(pxmlDoc, hSrgItem, "objectKind_data[ ]", (uint8_t*)pDirectoryMessage->objectKind_data, 4, pDirectoryMessage->objectKind_data);
+	XMLDOC_NewElementForBits(pxmlDoc, hSrgItem, "objectInfo_length", pDirectoryMessage->objectInfo_length, 16, "uimsbf", NULL);
+	if (pDirectoryMessage->objectInfo_length > 0)
+	{
+		XMLDOC_NewElementForByteBuf(pxmlDoc, hSrgItem, "objectInfo_data_byte[ ]", pDirectoryMessage->objectInfo_data_byte, pDirectoryMessage->objectInfo_length, NULL);
+	}
+
+	XMLDOC_NewElementForBits(pxmlDoc, hSrgItem, "serviceContextList_count", pDirectoryMessage->serviceContextList_count, 8, "uimsbf", NULL);
+	if (pDirectoryMessage->serviceContextList_count > 0)
+	{
+		assert(0);
+	}
+
+	XMLDOC_NewElementForBits(pxmlDoc, hSrgItem, "messageBody_length", pDirectoryMessage->messageBody_length, 32, "uimsbf", NULL);
+	XMLDOC_NewElementForBits(pxmlDoc, hSrgItem, "bindings_count", pDirectoryMessage->bindings_count, 16, "uimsbf", NULL);
+
+	if (pDirectoryMessage->bindings_count > 0)
+	{
+		for (int binding_index = 0; binding_index < pDirectoryMessage->bindings_count; binding_index++)
+		{
+			BIOP::Binding_t* pBindings = pDirectoryMessage->bindings + binding_index;
+
+			if (pBindings->Name.nameComponents_count > 0)
+			{
+				sprintf_s(pszField, sizeof(pszField), "binding (%d)----%s:%s", binding_index, pBindings->Name.nameComponents[0].kind_data_byte, pBindings->Name.nameComponents[0].id_data_byte);
+			}
+			else
+			{
+				sprintf_s(pszField, sizeof(pszField), "binding (%d)", binding_index);
+			}
+			XMLElement* hBindingItem = XMLDOC_NewElementForString(pxmlDoc, hSrgItem, pszField, NULL);
+
+			sprintf_s(pszField, sizeof(pszField), "BIOP::Name()");
+			XMLElement* hBIOPNameItem = XMLDOC_NewElementForString(pxmlDoc, hBindingItem, pszField, NULL);
+
+			XMLDOC_NewElementForBits(pxmlDoc, hBIOPNameItem, "nameComponents_count", pBindings->Name.nameComponents_count, 8, "uimsbf", NULL);
+
+			for (int component_index = 0; component_index < pBindings->Name.nameComponents_count; component_index++)
+			{
+				sprintf_s(pszField, sizeof(pszField), "nameComponent[%d]()", component_index);
+				XMLElement* hNameComponentItem = XMLDOC_NewElementForString(pxmlDoc, hBIOPNameItem, pszField, NULL);
+
+				XMLDOC_NewElementForBits(pxmlDoc, hNameComponentItem, "id_length", pBindings->Name.nameComponents[component_index].id_length, 8, "uimsbf", NULL);
+				if (pBindings->Name.nameComponents[component_index].id_length > 0)
+				{
+					XMLDOC_NewElementForByteBuf(pxmlDoc, hNameComponentItem, "id_data_byte[]", (uint8_t*)pBindings->Name.nameComponents[component_index].id_data_byte, pBindings->Name.nameComponents[component_index].id_length, pBindings->Name.nameComponents[component_index].id_data_byte);
+				}
+
+				XMLDOC_NewElementForBits(pxmlDoc, hNameComponentItem, "kind_length", pBindings->Name.nameComponents[component_index].kind_length, 8, "uimsbf", NULL);
+				if (pBindings->Name.nameComponents[component_index].kind_length > 0)
+				{
+					XMLDOC_NewElementForByteBuf(pxmlDoc, hNameComponentItem, "kind_data_byte[ ]", (uint8_t*)(pBindings->Name.nameComponents[component_index].kind_data_byte), pBindings->Name.nameComponents[component_index].kind_length, pBindings->Name.nameComponents[component_index].kind_data_byte);
+				}
+			}
+
+			MPEG2_DSMCC_NumericCoding2Text_bindingType(pBindings->bindingType, pszComment, sizeof(pszComment));
+			XMLDOC_NewElementForBits(pxmlDoc, hBindingItem, "bindingType", pBindings->bindingType, 8, "uimsbf", pszComment);
+
+			MPEG2_DSMCC_BIOP_PresentIOR_to_xml(pxmlDoc, hBindingItem, &(pBindings->IOR));
+
+			XMLDOC_NewElementForBits(pxmlDoc, hBindingItem, "objectInfo_length", pBindings->objectInfo_length, 16, "uimsbf", NULL);
+			if (pBindings->objectInfo_length > 0)
+			{
+				XMLDOC_NewElementForByteBuf(pxmlDoc, hBindingItem, "objectInfo_data_byte[ ]", pBindings->objectInfo_data_byte, pBindings->objectInfo_length, NULL);
+			}
+		}
+	}
+
+	return rtcode;
+}
+
+int	MPEG2_DSMCC_BIOP_PresentFileMessage_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, BIOP::FileMessage_t* pFileMessage)
+{
+	int rtcode = SECTION_PARSE_NO_ERROR;
+
+	char pszField[64];
+	char pszComment[64];
+
+	if (pFileMessage != NULL)
+	{
+		XMLElement* hDDBItem = pxmlParentNode;
+
+		sprintf_s(pszField, sizeof(pszField), "BIOP::FileMessage (objectKey_data_byte=0x%08X)", pFileMessage->objectKey_data);
+		XMLElement* hFileItem = XMLDOC_NewElementForString(pxmlDoc, hDDBItem, pszField, NULL);
+
+		XMLDOC_NewElementForByteBuf(pxmlDoc, hFileItem, "magic", (uint8_t*)(pFileMessage->magic), 4, pFileMessage->magic);
+		XMLDOC_NewElementForBits(pxmlDoc, hFileItem, "biop_version.major", pFileMessage->biop_version.major, 8, "uimsbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, hFileItem, "biop_version.minor", pFileMessage->biop_version.minor, 8, "uimsbf", NULL);
+
+		MPEG2_DSMCC_NumericCoding2Text_byteOrder(pFileMessage->byte_order, pszComment, sizeof(pszComment));
+		XMLDOC_NewElementForBits(pxmlDoc, hFileItem, "byte_order", pFileMessage->byte_order, 8, "uimsbf", pszComment);
+
+		XMLDOC_NewElementForBits(pxmlDoc, hFileItem, "message_type", pFileMessage->message_type, 8, "uimsbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, hFileItem, "message_size", pFileMessage->message_size, 32, "uimsbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, hFileItem, "objectKey_length", pFileMessage->objectKey_length, 8, "uimsbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, hFileItem, "objectKey_data_byte", pFileMessage->objectKey_data, 32, "uimsbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, hFileItem, "objectKind_length", pFileMessage->objectKind_length, 8, "uimsbf", NULL);
+		XMLDOC_NewElementForByteBuf(pxmlDoc, hFileItem, "objectKind_data[ ]", (uint8_t*)pFileMessage->objectKind_data, pFileMessage->objectKind_length, pFileMessage->objectKind_data);
+		XMLDOC_NewElementForBits(pxmlDoc, hFileItem, "objectInfo_length", pFileMessage->objectInfo_length, 16, "uimsbf", NULL);
+
+		XMLDOC_NewElementForBits(pxmlDoc, hFileItem, "serviceContextList_count", pFileMessage->serviceContextList_count, 8, "uimsbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, hFileItem, "messageBody_length", pFileMessage->messageBody_length, 32, "uimsbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, hFileItem, "content_length", pFileMessage->content_length, 32, "uimsbf", NULL);
+		XMLDOC_NewElementForByteBuf(pxmlDoc, hFileItem, "content_data_byte[ ]", pFileMessage->content_data_byte, pFileMessage->content_length, "实际文件内容");
+	}
+
+	return rtcode;
+}
 
 
 

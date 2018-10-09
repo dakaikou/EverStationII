@@ -109,18 +109,19 @@ protected:
 
 	int						m_nMemAllocatedForModule;
 
+	uint8_t*				m_ucModuleBuf;
 	int						m_nModuleSize;
 	uint16_t				m_usMessageId;
 
 public:
 
 	int							m_nDirMessageCount;
-	DirectoryMessage_t*			m_pDirectoryMessage[MAX_DOWNLOAD_OBJS];					//OC
+	BIOP::DirectoryMessage_t*	m_pDirectoryMessage[MAX_DOWNLOAD_OBJS];					//OC
 	int							m_nMemAllocatedForDirMessages;
 
-	S32							m_nFileMessageCount;
-	FileMessage_t*				m_pFileMessage[MAX_DOWNLOAD_OBJS];						//OC
-	S32							m_nMemAllocatedForFileMessages;
+	int							m_nFileMessageCount;
+	BIOP::FileMessage_t*		m_pFileMessage[MAX_DOWNLOAD_OBJS];						//OC
+	int							m_nMemAllocatedForFileMessages;
 
 public:
 	void Init(void);

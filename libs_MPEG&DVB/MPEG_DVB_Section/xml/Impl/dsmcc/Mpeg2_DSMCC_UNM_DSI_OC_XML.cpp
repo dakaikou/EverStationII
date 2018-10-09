@@ -38,7 +38,7 @@ int	MPEG2_DSMCC_DSI_OC_PresentServiceGatewayInfo_to_xml(HALForXMLDoc* pxmlDoc, X
 		XMLElement* pxmlSGINode = pxmlParentNode;
 
 		//½âÎöIOP::IOR()
-		MPEG2_DSMCC_IOP_PresentIOR_to_xml(pxmlDoc, pxmlSGINode, &(pServiceGatewayInfo->IOR));
+		MPEG2_DSMCC_BIOP_PresentIOR_to_xml(pxmlDoc, pxmlSGINode, &(pServiceGatewayInfo->IOR));
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlSGINode, "downloadTaps_count", pServiceGatewayInfo->downloadTaps_count, 8, "uimsbf", "N1");
 		if (pServiceGatewayInfo->downloadTaps_count > 0)

@@ -211,7 +211,7 @@ void CNaviTree_Bouquets::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 		CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 		CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
 
-		XMLDocForMpegSyntax xmlDoc;
+		HALForXMLDoc xmlDoc;
 		pDB_PsiSiTables->BuildBouquetTree(code, &xmlDoc);
 		m_pInfoTree->ShowXMLDoc(&xmlDoc);
 

@@ -501,7 +501,7 @@ void CNaviList_DSMCCs::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 		CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 		CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
 
-		XMLDocForMpegSyntax xmlDoc;
+		HALForXMLDoc xmlDoc;
 		pDB_PsiSiTables->BuildDsmccTree(usPID, &xmlDoc);
 		m_pInfoTree->ShowXMLDoc(&xmlDoc);
 

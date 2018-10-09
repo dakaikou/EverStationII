@@ -35,6 +35,8 @@ void CDSMCC_DDM::Init(void)
 
 	CPVT::Init();
 
+	m_ucModuleBuf = NULL;
+
 	for (i = 0; i < 256; i++)
 	{
 		m_astBlockInfo[i].length = 0;
@@ -71,8 +73,13 @@ void CDSMCC_DDM::Reset(void)
 		}
 	}
 
-	m_nModuleSize = 0;
+	if (m_ucModuleBuf != NULL)
+	{
+		free(m_ucModuleBuf);
+		m_ucModuleBuf = NULL;
+	}
 
+	m_nModuleSize = 0;
 	m_nMemAllocatedForModule = 0;
 
 	for (i = 0; i < m_nDirMessageCount; i++)
@@ -117,7 +124,7 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 	U8*							message_buf;
 	S32							message_length;
 
-	U8*							module_buf;
+	//U8*							module_buf;
 	S32							module_length;
 
 	S8							magic[5];
@@ -161,8 +168,8 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 				if (m_bCollectOver)		//m_bCollectOver是基类CPVT的成员变量
 				{
 					//如果搜集齐了
-					module_buf = (uint8_t*)malloc(m_nModuleSize);
-					if (module_buf != NULL)
+					m_ucModuleBuf = (uint8_t*)malloc(m_nModuleSize);
+					if (m_ucModuleBuf != NULL)
 					{
 						//把block里面存储的数据按序倒腾到module缓存里面
 						module_length = 0;
@@ -170,19 +177,19 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 						{
 							if (m_astBlockInfo[i].buf != NULL)
 							{
-								memcpy(module_buf + module_length, m_astBlockInfo[i].buf, m_astBlockInfo[i].length);
+								memcpy(m_ucModuleBuf + module_length, m_astBlockInfo[i].buf, m_astBlockInfo[i].length);
 								module_length += m_astBlockInfo[i].length;
 							}
 						}
 						assert(module_length == m_nModuleSize);		//此处检测没啥必要，实际上是相等的
 
 						//解析DDB
-						memcpy(magic, module_buf, 4);
+						memcpy(magic, m_ucModuleBuf, 4);
 						magic[4] = '\0';
 
 						if (strcmp(magic, "BIOP") == 0)		//说明是OC
 						{
-							message_buf = module_buf;
+							message_buf = m_ucModuleBuf;
 							while (module_length > 0)
 							{
 								message_length = 12 + ((message_buf[8] << 24) | (message_buf[9] << 16) | (message_buf[10] << 8) | message_buf[11]);
@@ -194,26 +201,24 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 								if ((strcmp(objectKind_data, "dir") == 0) ||			//directory
 									(strcmp(objectKind_data, "srg") == 0))				//service gatway message
 								{
-									m_pDirectoryMessage[m_nDirMessageCount] = (DirectoryMessage_t*)malloc(sizeof(DirectoryMessage_t));
+									m_pDirectoryMessage[m_nDirMessageCount] = (BIOP::DirectoryMessage_t*)malloc(sizeof(BIOP::DirectoryMessage_t));
 									if (m_pDirectoryMessage[m_nDirMessageCount] != NULL)
 									{
-										m_nMemAllocatedForDirMessages += sizeof(DirectoryMessage_t);
+										m_nMemAllocatedForDirMessages += sizeof(BIOP::DirectoryMessage_t);
 
-										memset(m_pDirectoryMessage[m_nDirMessageCount], 0x00, sizeof(DirectoryMessage_t));
-										MPEG2_DSMCC_DDM_DecodeDirectoryMessage(message_buf, message_length, m_pDirectoryMessage[m_nDirMessageCount]);
+										MPEG2_DSMCC_BIOP_DecodeDirectoryMessage(message_buf, message_length, m_pDirectoryMessage[m_nDirMessageCount]);
 
 										m_nDirMessageCount++;
 									}
 								}
 								else if (strcmp(objectKind_data, "fil") == 0)
 								{
-									m_pFileMessage[m_nFileMessageCount] = (FileMessage_t*)malloc(sizeof(FileMessage_t));
+									m_pFileMessage[m_nFileMessageCount] = (BIOP::FileMessage_t*)malloc(sizeof(BIOP::FileMessage_t));
 									if (m_pFileMessage[m_nFileMessageCount] != NULL)
 									{
-										memset(m_pFileMessage[m_nFileMessageCount], 0x00, sizeof(FileMessage_t));
-										MPEG2_DSMCC_DDM_DecodeFileMessage(message_buf, message_length, m_pFileMessage[m_nFileMessageCount]);
+										m_nMemAllocatedForFileMessages += (sizeof(BIOP::FileMessage_t) + m_pFileMessage[m_nFileMessageCount]->content_length);
 
-										m_nMemAllocatedForFileMessages += (sizeof(FileMessage_t) + m_pFileMessage[m_nFileMessageCount]->content_length);
+										MPEG2_DSMCC_BIOP_DecodeFileMessage(message_buf, message_length, m_pFileMessage[m_nFileMessageCount]);
 
 										m_nFileMessageCount++;
 									}
@@ -223,9 +228,18 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 								module_length -= message_length;
 							}
 						}
+					}
 
-						//释放module_buf
-						free(module_buf);
+					//释放block_buf
+					for (i = 0; i < m_nSectionCount; i++)
+					{
+						if (m_astBlockInfo[i].buf != NULL)
+						{
+							free(m_astBlockInfo[i].buf);
+							m_astBlockInfo[i].buf = NULL;
+
+							m_astBlockInfo[i].length = 0;
+						}
 					}
 				}
 			}

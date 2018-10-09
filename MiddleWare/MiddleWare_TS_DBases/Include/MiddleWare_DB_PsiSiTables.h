@@ -6,7 +6,7 @@
 #include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_PSISI_Table.h"
 #include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_DSMCC_Table.h"
 
-#include "HAL\HAL_XML\Include\HALForTinyXML2Doc.h"
+#include "HAL\HAL_XML\Include\HALForTinyXML2.h"
 
 #define DEBUG_PAT			1
 #define DEBUG_PMT			1
@@ -49,13 +49,13 @@ protected:
 
 	void ResetRecords(void);
 
-	int DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode);
+	int DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
 	int OC_DownloadDirectoryAndFiles(uint16_t PID, uint16_t moduleId_for_srg, uint32_t objectKey_data, char* pszRootPath);
 
-	int DSMCC_BuildDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t carousel_type_id, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode);
+	int DSMCC_BuildDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t carousel_type_id, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
 	int DSMCC_DownloadDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t carousel_type_id, char* pszRootPath);
 
-	int OC_BuildDirectory(uint16_t PID, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, uint16_t moduleId_for_srg, uint32_t objectKey_data);
+	int OC_BuildDirectory(uint16_t PID, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, uint16_t moduleId_for_srg, uint32_t objectKey_data);
 
 public:
 
@@ -78,10 +78,10 @@ public:
 	CSDT* QueryActualSDT(void);
 	CDSMCC_UNM* QueryDsmccUNM_DSI(uint16_t PID);
 
-	int BuildDsmccTree(uint16_t usPID, XMLDocForMpegSyntax* pxmlDoc);
+	int BuildDsmccTree(uint16_t usPID, HALForXMLDoc* pxmlDoc);
 	int DownloadDsmccTree(uint16_t usPID, char* pszRootPath);
 
-	int BuildBouquetTree(uint32_t uiCode, XMLDocForMpegSyntax* pxmlDoc);
+	int BuildBouquetTree(uint32_t uiCode, HALForXMLDoc* pxmlDoc);
 };
 
 #endif		//_TSMAGIC_DBASE_PSISITABLES_H_

@@ -11,7 +11,7 @@
 //for OC
 typedef struct _ServiceGatewayInfo_s
 {
-	IOP::IOR_t	IOR;
+	BIOP::IOR_t	IOR;
 
 	uint8_t		downloadTaps_count;						//8	, N1
 	BIOP::TAP_t	Taps[1];								//为什么数组长度为1？  chendelin 2018.10.4

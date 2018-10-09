@@ -101,23 +101,23 @@ int CDSMCC_UNM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 					ServiceGatewayInfo_t serviceGatewayInfo;
 					MPEG2_DSMCC_DSI_OC_DecodeServiceGatewayInfo(downloadServerInitiate.privateDataByte, downloadServerInitiate.privateDataLength, &serviceGatewayInfo);
 					
-					IOP::IOR_t* pIOR = &(serviceGatewayInfo.IOR);
+					BIOP::IOR_t* pIOR = &(serviceGatewayInfo.IOR);
 
 					for (int profile_index = 0; profile_index < pIOR->taggedProfiles_count; profile_index++)
 					{
-						IOP::TaggedProfile_t* ptaggedProfile = pIOR->taggedProfiles + profile_index;
+						BIOP::TaggedProfile_t* ptaggedProfile = pIOR->taggedProfiles + profile_index;
 
 						if (ptaggedProfile->profileId_tag == 0x49534F06)		//BIOPProfileBody
 						{
-							BIOPProfileBody_t* pBIOPProfileBody = &(pIOR->BIOPProfileBody);
-							MPEG2_DSMCC_IOP_DecodeBIOPProfileBody(ptaggedProfile->profileId_tag, ptaggedProfile->profile_data_length, ptaggedProfile->profile_data_byte, pBIOPProfileBody);
+							BIOP::BIOPProfileBody_t* pBIOPProfileBody = &(pIOR->BIOPProfileBody);
+							MPEG2_DSMCC_BIOP_DecodeBIOPProfileBody(ptaggedProfile->profileId_tag, ptaggedProfile->profile_data_length, ptaggedProfile->profile_data_byte, pBIOPProfileBody);
 
 							BIOP::ObjectLocation_t* pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
 							u.m_DSI.carouselId = pObjectLocation->carouselId;
 							u.m_DSI.moduleId_for_srg = pObjectLocation->moduleId;
 							u.m_DSI.objectKey_data_for_srg = pObjectLocation->objectKey_data;
 
-							DSM::ConnBinder_t* pConnBinder = &(pBIOPProfileBody->ConnBinder);
+							BIOP::ConnBinder_t* pConnBinder = &(pBIOPProfileBody->ConnBinder);
 							u.m_DSI.table_id_extension_for_dii = pConnBinder->Tap[0].transactionId & 0x0000ffff;
 
 							break;

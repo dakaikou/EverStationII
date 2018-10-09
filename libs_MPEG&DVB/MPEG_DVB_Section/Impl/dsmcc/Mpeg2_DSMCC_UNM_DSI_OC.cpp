@@ -22,8 +22,8 @@ int	MPEG2_DSMCC_DSI_OC_DecodeServiceGatewayInfo(uint8_t *buf, int length, Servic
 		BITS_t bs;
 		BITS_map(&bs, buf, length);
 
-		IOP::IOR_t*	pIOR = &(pServiceGatewayInfo->IOR);
-		MPEG2_DSMCC_IOP_DecodeIOR(&bs, pIOR);
+		BIOP::IOR_t*	pIOR = &(pServiceGatewayInfo->IOR);
+		MPEG2_DSMCC_BIOP_DecodeIOR(&bs, pIOR);
 
 		pServiceGatewayInfo->downloadTaps_count = BITS_get(&bs, 8);
 		if (pServiceGatewayInfo->downloadTaps_count > 0)
