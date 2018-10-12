@@ -27,6 +27,11 @@ int	MPEG2_DSMCC_DII_DC_DecodeModuleInfo(uint8_t *buf, int length, DC_ModuleInfo_
 			descriptor_length = moduleInfoByte[1];
 			move_length = descriptor_length + 2;
 
+			pDC_ModuleInfo->module_descriptors[reserved_count].descriptor_tag = descriptor_tag;
+			pDC_ModuleInfo->module_descriptors[reserved_count].descriptor_length = descriptor_length;
+			pDC_ModuleInfo->module_descriptors[reserved_count].descriptor_buf = moduleInfoByte;
+			pDC_ModuleInfo->module_descriptors[reserved_count].descriptor_size = move_length;
+
 			switch (descriptor_tag)
 			{
 			case MPEG2_DSMCC_NAME_DESCRIPTOR:
@@ -44,26 +49,16 @@ int	MPEG2_DSMCC_DII_DC_DecodeModuleInfo(uint8_t *buf, int length, DC_ModuleInfo_
 						rtcode = MPEG2_DSMCC_decode_name_descriptor(moduleInfoByte, move_length, &(pDC_ModuleInfo->name_descriptor));
 					}
 				}
-				else
-				{
-					if (reserved_count < MAX_RESERVED_DESCRIPTORS)
-					{
-						pDC_ModuleInfo->reserved_descriptor[reserved_count].descriptor_tag = descriptor_tag;
-						pDC_ModuleInfo->reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-						pDC_ModuleInfo->reserved_descriptor[reserved_count].descriptor_buf = moduleInfoByte;
-						pDC_ModuleInfo->reserved_descriptor[reserved_count].descriptor_size = move_length;
-
-						reserved_count++;
-					}
-				}
 
 				break;
 			}
 
+			reserved_count++;
 			moduleInfoByte += move_length;
+			loop_length -= move_length;
 		}
 
-		pDC_ModuleInfo->reserved_count = reserved_count;
+		pDC_ModuleInfo->module_descriptor_count = reserved_count;
 	}
 	else
 	{

@@ -4,7 +4,9 @@
 #include <stdint.h>
 
 #include "../../Include/dsmcc/Mpeg2_DSMCC_UNM_DII_DC_XML.h"
-#include "../../Include/MPEG_DVB_ErrorCode.h"
+#include "../../Include/MPEG_DVB_Common_XML.h"
+
+#include "../../../Include/MPEG_DVB_ErrorCode.h"
 
 /////////////////////////////////////////////
 int	MPEG2_DSMCC_DII_DC_DecodeModuleInfo_to_xml(uint8_t* buf, int size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, DC_ModuleInfo_t* pModuleInfo)
@@ -32,48 +34,26 @@ int	MPEG2_DSMCC_DII_DC_PresentModuleInfo_to_xml(HALForXMLDoc* pxmlDoc, XMLElemen
 	{
 		XMLElement* pxmlModuleNode = pxmlParentNode;
 
-		//while ((remain_length >= 2) && (descriptor_count < MAX_RESERVED_DESCRIPTORS))
-		//{
-		//	descriptor_tag = (ptemp[0] | 0x3000);
-		//	descriptor_length = ptemp[1];
-		//	move_length = descriptor_length + 2;
+		for (int descriptor_index = 0; descriptor_index < pDC_moduleInfo->module_descriptor_count; descriptor_index++)
+		{
+			uint8_t* descriptor_buf = pDC_moduleInfo->module_descriptors[descriptor_index].descriptor_buf;
+			uint16_t descriptor_tag = pDC_moduleInfo->module_descriptors[descriptor_index].descriptor_tag;
+			uint8_t descriptor_length = pDC_moduleInfo->module_descriptors[descriptor_index].descriptor_length;
+			int descriptor_size = descriptor_length + 2;
 
-		//	//截成一段一段的描述符
-		//	pDC_moduleInfo->reserved_descriptor[descriptor_count].descriptor_tag = descriptor_tag;
-		//	pDC_moduleInfo->reserved_descriptor[descriptor_count].descriptor_length = descriptor_length;
-		//	pDC_moduleInfo->reserved_descriptor[descriptor_count].descriptor_buf = ptemp;
-		//	pDC_moduleInfo->reserved_descriptor[descriptor_count].descriptor_size = (uint8_t)move_length;
-
-		//	switch (descriptor_tag)
-		//	{
-		//	case MPEG2_DSMCC_NAME_DESCRIPTOR:
-		//		rtcode = MPEG2_DSMCC_decode_name_descriptor_to_xml(ptemp, move_length, pxmlDoc, pxmlModuleNode, &(pDC_moduleInfo->name_descriptor));
-		//		break;
-		//	case MPEG2_DSMCC_LOCATION_DESCRIPTOR:
-		//		rtcode = MPEG2_DSMCC_decode_location_descriptor_to_xml(ptemp, move_length, pxmlDoc, pxmlModuleNode, &(pDC_moduleInfo->location_descriptor));
-		//		break;
-		//	default:
-
-		//		//if (descriptor_tag == 0x3081)
-		//		//{
-		//		//	if (pDC_moduleInfo->name_descriptor.descriptor_tag == 0x00)
-		//		//	{
-		//		//		rtcode = MPEG2_DSMCC_decode_name_descriptor_to_xml(ptemp, move_length, pxmlDoc, pxmlModuleNode, &(pDC_moduleInfo->name_descriptor));
-		//		//	}
-		//		//}
-		//		//else
-		//	{
-		//		decode_reserved_descriptor_to_xml(ptemp, move_length, pxmlDoc, pxmlModuleNode);
-		//	}
-
-		//	break;
-		//	}
-
-		//	descriptor_count++;
-
-		//	ptemp += move_length;
-		//	remain_length -= move_length;
-		//}
+			switch (descriptor_tag)
+			{
+				//case DVB_SI_NETWORK_NAME_DESCRIPTOR:
+				//	DVB_SI_decode_network_name_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+				//	break;
+				//case DVB_SI_MULTILINGUAL_NETWORK_NAME_DESCRIPTOR:
+				//	DVB_SI_decode_multilingual_network_name_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+				//	break;
+			default:
+				MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlModuleNode, pDC_moduleInfo->module_descriptors + descriptor_index);
+				break;
+			}
+		}
 	}
 	else
 	{

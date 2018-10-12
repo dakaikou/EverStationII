@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 #include <math.h>
 
@@ -9,6 +10,8 @@
 #include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/MPEG_DVB_ErrorCode.h"
 
 #include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_DDM.h"
+
+#include "libs_Utilities\Include\XStream_Utilities.h"
 
 #include "../Include/MiddleWare_PSISI_ErrorCode.h"
 #include "../Include/MiddleWare_DSMCC_Table.h"
@@ -253,3 +256,25 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 	return rtcode;
 }
 
+void CDSMCC_DDM::SaveModuleBufToDisk(char* pszFatherDirectory, char* pszModuleName)
+{
+	char	pszModuleFile[256];
+
+	if (strlen(pszModuleName) > 0)
+	{
+		sprintf_s(pszModuleFile, sizeof(pszModuleFile), "%s\\%s", pszFatherDirectory, pszModuleName);
+	}
+	else
+	{
+		sprintf_s(pszModuleFile, sizeof(pszModuleFile), "%s\\MODULE(ID_0x%04X)", pszFatherDirectory, m_usTableIDExtension);
+	}
+	BuildDirectory(pszModuleFile);
+
+	FILE* fp = NULL;
+	fopen_s(&fp, pszModuleFile, "wb");
+	if (fp != NULL)
+	{
+		fwrite(m_ucModuleBuf, sizeof(uint8_t), m_nModuleSize, fp);
+		fclose(fp);
+	}
+}

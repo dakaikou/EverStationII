@@ -1,7 +1,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-//#include <Windows.h>
 #include <direct.h> //_mkdir函数的头文件
 #include <io.h>     //_access函数的头文件
 

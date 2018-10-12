@@ -14,8 +14,8 @@ typedef struct DC_moduleInfo_s
 	name_descriptor_t			name_descriptor;
 	location_descriptor_t		location_descriptor;
 
-	int							reserved_count;
-	reserved_descriptor_t		reserved_descriptor[MAX_RESERVED_DESCRIPTORS];
+	int							module_descriptor_count;
+	reserved_descriptor_t		module_descriptors[MAX_RESERVED_DESCRIPTORS];
 
 } DC_ModuleInfo_t;
 

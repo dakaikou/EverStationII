@@ -9,10 +9,7 @@
 #include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 #include "HAL\HAL_ByteStream\Include\HALForByteStream.h"
 
-//#ifndef min
-//#define min(a,b)  (((a)<(b))?(a):(b))
-//#endif
-/////////////////////////////////////////////
+////////////////////////////////////////////
 
 int	MPEG2_DSMCC_DSI_DC_DecodeGroupInfoIndication(uint8_t *buf, int length, GroupInfoIndication_t* pGroupInfoIndication)
 {
@@ -80,7 +77,7 @@ int	MPEG2_DSMCC_DSI_DC_DecodeGroupInfoIndication(uint8_t *buf, int length, Group
 					default:
 						if (descriptor_tag == 0x3081)
 						{
-							if (pGroupInfo->name_descriptor.descriptor_tag == 0x00)
+							if (pGroupInfo->name_descriptor.descriptor_tag == 0x0000)
 							{
 								MPEG2_DSMCC_decode_name_descriptor(ptemp, move_length, &(pGroupInfo->name_descriptor));
 							}

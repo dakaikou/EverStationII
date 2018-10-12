@@ -47,6 +47,7 @@ int	MPEG2_DSMCC_DSI_DC_PresentGroupInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, 
 			sprintf_s(pszField, sizeof(pszField), "GROUP[%d](ID:0x%08X)", group_index, pGroupInfo->GroupId);
 
 			XMLElement* pxmlGroupNode = XMLDOC_NewElementForString(pxmlDoc, pxmlGroupsNode, pszField, NULL);
+			XMLNODE_SetFieldLength(pxmlGroupNode, 4 + 4 + 2 + pGroupInfo->GroupCompatibility.compatibilityDescriptorLength + 2 + pGroupInfo->GroupInfoLength);
 
 			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlGroupNode, "GroupId", pGroupInfo->GroupId, 4, NULL);
 
@@ -67,6 +68,7 @@ int	MPEG2_DSMCC_DSI_DC_PresentGroupInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, 
 			if (pGroupInfo->GroupInfoLength > 0)
 			{
 				XMLElement* pxmlDescriptionNode = XMLDOC_NewElementForString(pxmlDoc, pxmlGroupNode, "GroupInfo()", NULL);
+				XMLNODE_SetFieldLength(pxmlDescriptionNode, pGroupInfo->GroupInfoLength);
 
 				for (int descriptor_index = 0; descriptor_index < pGroupInfo->group_descriptor_count; descriptor_index++)
 				{

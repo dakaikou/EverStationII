@@ -14,7 +14,7 @@
 ////////////////////////////////////////////
 int	MPEG2_DSMCC_DDM_DecodeDownloadDataBlock_to_xml(uint8_t* buf, int size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, DownloadDataBlock_t* pDDB)
 {
-	int						rtcode = SECTION_PARSE_NO_ERROR;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
 
 	DownloadDataBlock_t* pDownloadDataBlock = (pDDB != NULL) ? pDDB : new DownloadDataBlock_t;
 	rtcode = MPEG2_DSMCC_DDM_DecodeDownloadDataBlock(buf, size, pDownloadDataBlock);

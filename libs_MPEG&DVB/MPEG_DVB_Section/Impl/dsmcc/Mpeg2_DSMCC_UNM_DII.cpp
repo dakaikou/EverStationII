@@ -85,6 +85,16 @@ int	MPEG2_DSMCC_UNM_DecodeDownloadInfoIndication(uint8_t *buf, int length, Downl
 						}
 					}
 				}
+
+				if (pmoduleInfo->data_broadcast_type == 0x0006)
+				{
+					DC_ModuleInfo_t dcModuleInfo;
+					MPEG2_DSMCC_DII_DC_DecodeModuleInfo(pmoduleInfo->moduleInfoByte, pmoduleInfo->moduleInfoLength, &dcModuleInfo);
+					if (strlen(dcModuleInfo.name_descriptor.text_char) > 0)
+					{
+						strcpy_s(pmoduleInfo->moduleName, sizeof(pmoduleInfo->moduleName), dcModuleInfo.name_descriptor.text_char);
+					}
+				}
 			}
 		}
 

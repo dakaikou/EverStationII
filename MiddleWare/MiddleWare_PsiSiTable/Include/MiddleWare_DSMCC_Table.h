@@ -127,6 +127,8 @@ public:
 	void Init(void);
 	void Reset(void);
 	int	 AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t* pprivate_section);
+
+	void SaveModuleBufToDisk(char* pszFatherDirectory, char* pszModuleName);
 };
 
 //MPE datagram

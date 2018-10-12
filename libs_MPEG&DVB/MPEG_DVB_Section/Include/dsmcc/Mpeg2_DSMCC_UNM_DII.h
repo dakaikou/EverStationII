@@ -16,8 +16,12 @@ typedef struct ModuleInfo_s
 	uint8_t		moduleInfoLength;
 	uint8_t*	moduleInfoByte;
 
-	int								data_broadcast_type;						//0x0006		-- DC - GroupInfoIndication
+	int			data_broadcast_type;						//0x0006		-- DC - GroupInfoIndication
 																				//0x0007		-- OC - ServiceGatewayInfo
+
+	//below members only valid when it is a DC module
+	char		moduleName[128];
+
 } ModuleInfo_t;
 
 typedef struct DownloadInfoRequest_s
