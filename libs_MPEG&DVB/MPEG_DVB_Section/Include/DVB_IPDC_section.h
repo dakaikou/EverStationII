@@ -44,13 +44,17 @@ typedef struct datagram_section_s
 	U8		MAC_address_2;								//8
 	U8		MAC_address_1;								//8
 
-	S32		N1;
-	S32		N2;
+	int			LLC_SNAP_data_length;
+	uint8_t*	LLC_SNAP_data_byte;
 
-	U32		checksum;									//32
-	U32		CRC_32;										//32
+	int			IP_datagram_data_length;
+	uint8_t*	IP_datagram_data_byte;
 
-	U32		CRC_32_verify;								//32
+	int			stuffing_length;
+	uint8_t*	stuffing_byte;
+
+	uint32_t	encodedCheckValue;								//32
+	uint32_t	recalculatedCheckValue;							//32
 
 } datagram_section_t, *pdatagram_section_t;
 

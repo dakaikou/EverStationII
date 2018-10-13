@@ -18,8 +18,8 @@ Application Identifier
 ------------------------------------------------------------*/
 typedef struct application_identifier_s
 {
-	U32		organisation_id;					//32
-	U16		application_id;						//16
+	uint32_t	organisation_id;					//32
+	uint16_t	application_id;						//16
 } application_identifier_t, *papplication_identifier_t;
 
 /*------------------------------------------------------------
@@ -28,17 +28,17 @@ Application Information
 typedef struct application_s
 {
 	application_identifier_t	application_identifier;						//48
-	U8							application_control_code;					//8
-	U8							reserved_future_use;						//4
-	U16							application_descriptors_loop_length;		//12
+	uint8_t						application_control_code;					//8
+	uint8_t						reserved_future_use;						//4
+	uint16_t					application_descriptors_loop_length;		//12
 
 																			//	application_descriptor_t		application_descriptor;
 																			//	application_name_descriptor_t	application_name_descriptor;
 																			//	transport_protocol_descriptor_t	transport_protocol_descriptor;
 																			//	DVB_HTML_application_location_descriptor_t	DVB_HTML_application_location_descriptor;
 
-	S32							reserved_count;
-	reserved_descriptor_t		reserved_descriptor[MAX_RESERVED_DESCRIPTORS];
+	int							descriptor_count;
+	reserved_descriptor_t		descriptors[MAX_RESERVED_DESCRIPTORS];
 
 } application_t, *papplication_t;
 
@@ -68,17 +68,17 @@ typedef struct application_information_section_s
 	U16		reserved_future_use1;						//4
 	U16		common_descriptors_length;					//12
 
-	S32							reserved_count;
-	reserved_descriptor_t		reserved_descriptor[MAX_RESERVED_DESCRIPTORS];
+	int							common_descriptor_count;
+	reserved_descriptor_t		common_descriptors[MAX_RESERVED_DESCRIPTORS];
 
 	U16		reserved_future_use2;						//4
 	U16		application_loop_length;					//12
 
 	application_t	applications[MAX_APPLICATIONS];
-	S8				N;
+	int				application_count;
 
 	U32				CRC_32;										//32
-	U32				CRC_32_verify;								//32
+	U32				CRC_32_recalculated;						//32
 
 } application_information_section_t, *papplication_information_section_t;
 

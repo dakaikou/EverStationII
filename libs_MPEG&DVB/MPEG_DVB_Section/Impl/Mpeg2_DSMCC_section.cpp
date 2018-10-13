@@ -93,37 +93,45 @@ int MPEG2_DSMCC_DecodeSection(uint8_t *section_buf, int section_size, dsmcc_sect
 
 					pdsmccMessageHeader->protocolDiscriminator = BYTES_get(&bytes, 1);
 					pdsmccMessageHeader->dsmccType = BYTES_get(&bytes, 1);
-					pdsmccMessageHeader->messageId = BYTES_get(&bytes, 2);
-					pdsmccMessageHeader->TxOrDnloadID = BYTES_get(&bytes, 4);
-					pdsmccMessageHeader->reserved = BYTES_get(&bytes, 1);
-					pdsmccMessageHeader->adaptationLength = BYTES_get(&bytes, 1);
-					pdsmccMessageHeader->messageLength = BYTES_get(&bytes, 2);
 
-					assert(pdsmccMessageHeader->adaptationLength <= pdsmccMessageHeader->messageLength);
-					//messageLength解析错误，将是灾难性的
-
-					if (pdsmccMessageHeader->adaptationLength > 0)
+					if (pdsmccMessageHeader->dsmccType == 0x03)
 					{
-						dsmccAdaptationHeader_t* pdsmccAdaptationHeader = &(pdsmccMessageHeader->dsmccAdaptationHeader);
-						//解析adaptation
-						pdsmccAdaptationHeader->adaptationType = BYTES_get(&bytes, 1);
+						pdsmccMessageHeader->messageId = BYTES_get(&bytes, 2);
+						pdsmccMessageHeader->TxOrDnloadID = BYTES_get(&bytes, 4);
+						pdsmccMessageHeader->reserved = BYTES_get(&bytes, 1);
+						pdsmccMessageHeader->adaptationLength = BYTES_get(&bytes, 1);
+						pdsmccMessageHeader->messageLength = BYTES_get(&bytes, 2);
 
-						pdsmccAdaptationHeader->adaptationDataLength = pdsmccMessageHeader->adaptationLength - 1;
+						assert(pdsmccMessageHeader->adaptationLength <= pdsmccMessageHeader->messageLength);
+						//messageLength解析错误，将是灾难性的
 
-						//BYTES_copy(pdsmccAdaptationHeader->adaptationDataByte, sizeof(pdsmccAdaptationHeader->adaptationDataByte), &bytes, pdsmccAdaptationHeader->adaptationDataLength);
-						pdsmccAdaptationHeader->adaptationDataByte = bytes.p_cur;
-						BYTES_skip(&bytes, pdsmccAdaptationHeader->adaptationDataLength);
+						if (pdsmccMessageHeader->adaptationLength > 0)
+						{
+							dsmccAdaptationHeader_t* pdsmccAdaptationHeader = &(pdsmccMessageHeader->dsmccAdaptationHeader);
+							//解析adaptation
+							pdsmccAdaptationHeader->adaptationType = BYTES_get(&bytes, 1);
+
+							pdsmccAdaptationHeader->adaptationDataLength = pdsmccMessageHeader->adaptationLength - 1;
+
+							//BYTES_copy(pdsmccAdaptationHeader->adaptationDataByte, sizeof(pdsmccAdaptationHeader->adaptationDataByte), &bytes, pdsmccAdaptationHeader->adaptationDataLength);
+							pdsmccAdaptationHeader->adaptationDataByte = bytes.p_cur;
+							BYTES_skip(&bytes, pdsmccAdaptationHeader->adaptationDataLength);
+						}
+
+						pdsmcc_section->dsmccMessagePayloadLength = pdsmccMessageHeader->messageLength - pdsmccMessageHeader->adaptationLength;
+						if (pdsmcc_section->dsmccMessagePayloadLength > 0)
+						{
+							assert(pdsmcc_section->dsmccMessagePayloadLength <= 4072);
+							pdsmcc_section->dsmccMessagePayloadBuf = bytes.p_cur;
+							BYTES_skip(&bytes, pdsmcc_section->dsmccMessagePayloadLength);
+						}
+
+						assert(bytes.p_cur == bs.p_cur);
 					}
-
-					pdsmcc_section->dsmccMessagePayloadLength = pdsmccMessageHeader->messageLength - pdsmccMessageHeader->adaptationLength;
-					if (pdsmcc_section->dsmccMessagePayloadLength > 0)
+					else
 					{
-						assert(pdsmcc_section->dsmccMessagePayloadLength <= 4072);
-						pdsmcc_section->dsmccMessagePayloadBuf = bytes.p_cur;
-						BYTES_skip(&bytes, pdsmcc_section->dsmccMessagePayloadLength);
+						rtcode = SECTION_PARSE_SYNTAX_ERROR;
 					}
-
-					assert(bytes.p_cur == bs.p_cur);
 				}
 
 				pdsmcc_section->encodedCheckValue = BITS_get(&bs, 32);

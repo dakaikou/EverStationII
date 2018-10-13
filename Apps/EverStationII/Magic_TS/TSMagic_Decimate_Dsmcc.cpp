@@ -37,7 +37,7 @@ void ts_dsmcc_download_loop(pthread_params_t pThreadParams)
 {
 #if OPEN_DSMCC_DOWNLOAD
 
-	S8	  pszDebug[MAX_TXT_CHARS];
+	char  pszDebug[MAX_TXT_CHARS];
 	S32	  old_ratio = 0;
 
 	CDB_PsiSiTables*			pDB_PsiSiTables = NULL;
@@ -137,7 +137,7 @@ void ts_dsmcc_download_loop(pthread_params_t pThreadParams)
 #endif
 }
 
-U32 TSMagic_dsmcc_download_thread(LPVOID lpParam)
+uint32_t TSMagic_dsmcc_download_thread(LPVOID lpParam)
 {
 	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
 	ts_dsmcc_download_loop(pThreadParams);

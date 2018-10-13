@@ -150,7 +150,7 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 				assert(m_usMessageId == usMessageId);		//从messageId是否相等来检验语法，实际上没有多大必要
 			}
 
-			if (usMessageId == 0x1003)			//DDB
+			//if (usMessageId == 0x1003)			//DDB
 			{
 				if (m_astBlockInfo[pprivate_section->section_number].buf == NULL)
 				{
@@ -246,10 +246,10 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 					}
 				}
 			}
-			else
-			{
-				assert(0);
-			}
+			//else
+			//{
+			//	assert(0);
+			//}
 		}
 	}
 
@@ -274,7 +274,11 @@ void CDSMCC_DDM::SaveModuleBufToDisk(char* pszFatherDirectory, char* pszModuleNa
 	fopen_s(&fp, pszModuleFile, "wb");
 	if (fp != NULL)
 	{
-		fwrite(m_ucModuleBuf, sizeof(uint8_t), m_nModuleSize, fp);
+		if (m_ucModuleBuf != NULL)
+		{
+			fwrite(m_ucModuleBuf, sizeof(uint8_t), m_nModuleSize, fp);
+		}
+
 		fclose(fp);
 	}
 }

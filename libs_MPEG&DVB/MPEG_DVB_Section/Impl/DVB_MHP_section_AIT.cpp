@@ -6,156 +6,154 @@
 #include "../../Include/MPEG_DVB_ErrorCode.h"
 
 #include "libs_Math/Include/CRC_32.h"
+#include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 
 /////////////////////////////////////////////
-int DVB_MHP_AIT_DecodeSection(uint8_t *buf, int length, application_information_section_t* pait_section)
+int DVB_MHP_AIT_DecodeSection(uint8_t *section_buf, int section_size, application_information_section_t* pait_section)
 {
-	S32	 rtcode = SECTION_PARSE_NO_ERROR;
-	S32  loop_length;
-	U8*  ptemp;
-	U8*  pend;
-	S32	 inner_loop_length;
-	S8	 N;
-	S8	 reserved_count;
+	int	 rtcode = SECTION_PARSE_NO_ERROR;
+	uint8_t*	 pl1temp;
+	uint8_t*	 pl2temp;
 
-	U16	 descriptor_tag;
-	U8	 descriptor_length;
-	U16	 move_length;
+	uint16_t	 descriptor_tag;
+	uint8_t		 descriptor_length;
+	int			 move_length;
 
 	//AIT section最小长度16字节
-	if ((buf != NULL) && (length >= DVB_MHP_AIT_SECTION_MIN_SIZE) && (pait_section != NULL))
+	if ((section_buf != NULL) &&
+		((section_size >= DVB_MHP_AIT_SECTION_MIN_SIZE) && (section_size <= DVB_MHP_AIT_SECTION_MAX_SIZE)) &&
+		(pait_section != NULL))
 	{
 		memset(pait_section, 0x00, sizeof(application_information_section_t));
 
-		pait_section->CRC_32_verify = Encode_CRC_32(buf, length - 4);
-		pait_section->CRC_32 = (buf[length - 4] << 24) | (buf[length - 3] << 16) | (buf[length - 2] << 8) | buf[length - 1];
+		pait_section->CRC_32_recalculated = Encode_CRC_32(section_buf, section_size - 4);
+		uint32_t CRC_32_encoded = (section_buf[section_size - 4] << 24) | (section_buf[section_size - 3] << 16) | (section_buf[section_size - 2] << 8) | section_buf[section_size - 1];
 
-		if (pait_section->CRC_32 == pait_section->CRC_32_verify)
+		//if (pait_section->CRC_32 == pait_section->CRC_32_verify)
 		{
-			pait_section->table_id = *buf++;
+			BITS_t bs;
+			BITS_map(&bs, section_buf, section_size);
 
-			pait_section->section_syntax_indicator = (*buf & 0x80) >> 7;
-			pait_section->reserved_future_use0 = (*buf & 0x40) >> 6;
-			pait_section->reserved0 = (*buf & 0x30) >> 4;
+			pait_section->table_id = BITS_get(&bs, 8);
 
-			pait_section->section_length = (*buf++ & 0x0f) << 8;
-			pait_section->section_length |= *buf++;
+			pait_section->section_syntax_indicator = BITS_get(&bs, 1);
+			pait_section->reserved_future_use0 = BITS_get(&bs, 1);
+			pait_section->reserved0 = BITS_get(&bs, 2);
+			pait_section->section_length = BITS_get(&bs, 12);
 
 			assert((pait_section->section_length <= 1021));
 
-			pait_section->test_application_flag = (*buf & 0x80) >> 7;
+			pait_section->test_application_flag = BITS_get(&bs, 1);
+			pait_section->application_type = BITS_get(&bs, 15);
 
-			pait_section->application_type = (*buf++ & 0x7f) << 8;
-			pait_section->application_type |= *buf++;
+			pait_section->reserved1 = BITS_get(&bs, 2);
+			pait_section->version_number = BITS_get(&bs, 5);
+			pait_section->current_next_indicator = BITS_get(&bs, 1);
 
-			pait_section->reserved1 = (*buf & 0xC0) >> 6;
-			pait_section->version_number = (*buf & 0x3E) >> 1;
-			pait_section->current_next_indicator = (*buf++ & 0x01);
+			pait_section->section_number = BITS_get(&bs, 8);
+			pait_section->last_section_number = BITS_get(&bs, 8);
 
-			pait_section->section_number = *buf++;
-			pait_section->last_section_number = *buf++;
+			pait_section->reserved_future_use1 = BITS_get(&bs, 4);
+			pait_section->common_descriptors_length = BITS_get(&bs, 12);
 
-			pait_section->reserved_future_use1 = (*buf & 0xf0) >> 4;
-			pait_section->common_descriptors_length = (*buf++ & 0x0f) << 8;
-			pait_section->common_descriptors_length |= *buf++;
-
-			loop_length = pait_section->common_descriptors_length;
-			ptemp = buf;
-			pend = ptemp + loop_length;
-
-			reserved_count = 0;
-			while (ptemp < pend)
+			if (pait_section->common_descriptors_length > 0)
 			{
-				descriptor_tag = ptemp[0];
-				descriptor_length = ptemp[1];
+				pl1temp = bs.p_cur;
+				BITS_byteSkip(&bs, pait_section->common_descriptors_length);
 
-				move_length = descriptor_length + 2;
+				int descriptor_loop_length = pait_section->common_descriptors_length;
 
-				switch (descriptor_tag)
+				int descriptors_count = 0;
+				while ((descriptor_loop_length >= 2) && (descriptors_count < MAX_RESERVED_DESCRIPTORS))
 				{
-				case 0:
-				default:
-					if (reserved_count < MAX_RESERVED_DESCRIPTORS)
-					{
-						pait_section->reserved_descriptor[reserved_count].descriptor_tag = (0x2000 | descriptor_tag);
-						pait_section->reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-						pait_section->reserved_descriptor[reserved_count].descriptor_buf = ptemp;
-						pait_section->reserved_descriptor[reserved_count].descriptor_size = (uint8_t)move_length;
+					descriptor_tag = pl1temp[0];
+					descriptor_length = pl1temp[1];
+					move_length = descriptor_length + 2;
 
-//						decode_reserved_descriptor(ptemp, move_length, &(pait_section->reserved_descriptor[reserved_count]));
-						reserved_count ++;
-					}
-					break;
+					assert(descriptors_count < MAX_RESERVED_DESCRIPTORS);
+
+					pait_section->common_descriptors[descriptors_count].descriptor_buf = pl1temp;
+					pait_section->common_descriptors[descriptors_count].descriptor_size = move_length;
+
+					pait_section->common_descriptors[descriptors_count].descriptor_tag = descriptor_tag;
+					pait_section->common_descriptors[descriptors_count].descriptor_length = descriptor_length;
+
+					descriptors_count++;
+
+					pl1temp += move_length;
+					descriptor_loop_length -= move_length;
 				}
-
-				ptemp += move_length;
+				pait_section->common_descriptor_count = descriptors_count;
 			}
 
-			pait_section->reserved_count = reserved_count;
 
-			buf = pend;
+			pait_section->reserved_future_use2 = BITS_get(&bs, 4);
+			pait_section->application_loop_length = BITS_get(&bs, 12);
 
-			pait_section->reserved_future_use2 = (*buf & 0xf0) >> 4;
-			pait_section->application_loop_length = (*buf++ & 0x0f) << 8;
-			pait_section->application_loop_length |= *buf++;
-
-			loop_length = pait_section->application_loop_length;
-			ptemp = buf;
-			buf += loop_length;
-
-			N = 0;
-			if (loop_length > 0)
+			if (pait_section->application_loop_length > 0)
 			{
-				//解析applications
-				if (N < MAX_APPLICATIONS)
+				pl1temp = bs.p_cur;
+				BITS_byteSkip(&bs, pait_section->application_loop_length);
+
+				int loop_length = pait_section->application_loop_length;
+				int N = 0;
+				while ((loop_length >= 2) && (N < MAX_APPLICATIONS))
 				{
-					pait_section->applications[N].application_identifier.organisation_id = *ptemp++;
-					pait_section->applications[N].application_identifier.organisation_id <<= 8;
-					pait_section->applications[N].application_identifier.organisation_id |= *ptemp++;
-					pait_section->applications[N].application_identifier.organisation_id <<= 8;
-					pait_section->applications[N].application_identifier.organisation_id |= *ptemp++;
-					pait_section->applications[N].application_identifier.organisation_id <<= 8;
-					pait_section->applications[N].application_identifier.organisation_id |= *ptemp++;
+					application_t* papplication = pait_section->applications + N;
 
-					pait_section->applications[N].application_identifier.application_id = *ptemp++;
-					pait_section->applications[N].application_identifier.application_id <<= 8;
-					pait_section->applications[N].application_identifier.application_id |= *ptemp++;
+					//解析applications
+					papplication->application_identifier.organisation_id = *pl1temp++;
+					papplication->application_identifier.organisation_id <<= 8;
+					papplication->application_identifier.organisation_id |= *pl1temp++;
+					papplication->application_identifier.organisation_id <<= 8;
+					papplication->application_identifier.organisation_id |= *pl1temp++;
+					papplication->application_identifier.organisation_id <<= 8;
+					papplication->application_identifier.organisation_id |= *pl1temp++;
 
-					pait_section->applications[N].application_control_code = *ptemp++;
+					papplication->application_identifier.application_id = *pl1temp++;
+					papplication->application_identifier.application_id <<= 8;
+					papplication->application_identifier.application_id |= *pl1temp++;
 
-					pait_section->applications[N].reserved_future_use = (*ptemp & 0xf0) >> 4;
-					pait_section->applications[N].application_descriptors_loop_length = (*ptemp++ & 0x0f) << 8;
-					pait_section->applications[N].application_descriptors_loop_length |= *ptemp++;
+					papplication->application_control_code = *pl1temp++;
 
-					inner_loop_length = pait_section->applications[N].application_descriptors_loop_length;
-					pend = ptemp + inner_loop_length;
+					papplication->reserved_future_use = (*pl1temp & 0xf0) >> 4;
+					papplication->application_descriptors_loop_length = (*pl1temp++ & 0x0f) << 8;
+					papplication->application_descriptors_loop_length |= *pl1temp++;
 
-					reserved_count = 0;
-					while (ptemp < pend)
+					pl2temp = pl1temp;
+					pl1temp += papplication->application_descriptors_loop_length;
+					int descriptors_count = 0;
+					int inner_loop_length = papplication->application_descriptors_loop_length;
+					while ((inner_loop_length >= 2) && (descriptors_count < MAX_RESERVED_DESCRIPTORS))
 					{
-						descriptor_tag = ptemp[0];
-						descriptor_length = ptemp[1];
+						descriptor_tag = pl2temp[0];
+						descriptor_length = pl2temp[1];
 						move_length = descriptor_length + 2;
 
-						pait_section->applications[N].reserved_descriptor[reserved_count].descriptor_tag = (0x2000 | descriptor_tag);
-						pait_section->applications[N].reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-						pait_section->applications[N].reserved_descriptor[reserved_count].descriptor_buf = ptemp;
-						pait_section->applications[N].reserved_descriptor[reserved_count].descriptor_size = (uint8_t)move_length;
-		
-						reserved_count ++;
-						ptemp += move_length;
+						papplication->descriptors[descriptors_count].descriptor_tag = (0x2000 | descriptor_tag);
+						papplication->descriptors[descriptors_count].descriptor_length = descriptor_length;
+						papplication->descriptors[descriptors_count].descriptor_buf = pl2temp;
+						papplication->descriptors[descriptors_count].descriptor_size = move_length;
+
+						descriptors_count++;
+
+						pl2temp += move_length;
+						inner_loop_length -= move_length;
 					}
 
-					ptemp = pend;
-					pait_section->applications[N].reserved_count = reserved_count;
+					papplication->descriptor_count = descriptors_count;
 
-					N ++;
+					loop_length -= (9 + papplication->application_descriptors_loop_length);
+					N++;
 				}
+				pait_section->application_count = N;
 			}
 
-			pait_section->N = N;
+			pait_section->CRC_32 = BITS_get(&bs, 32);
+			assert(pait_section->CRC_32 == CRC_32_encoded);
 		}
-		else
+
+		if (pait_section->CRC_32_recalculated != pait_section->CRC_32)
 		{
 			rtcode = SECTION_PARSE_CRC_ERROR;
 		}

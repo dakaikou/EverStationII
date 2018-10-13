@@ -196,7 +196,7 @@ int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_se
 		if (ppmt_section->CRC_32_recalculated != ppmt_section->CRC_32)
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", ppmt_section->CRC_32_recalculated);
-			pxmlCrcNode->SetAttribute("error", pszComment);
+			XMLNODE_SetAttribute(pxmlCrcNode, "error", pszComment);
 		}
 	}
 	else

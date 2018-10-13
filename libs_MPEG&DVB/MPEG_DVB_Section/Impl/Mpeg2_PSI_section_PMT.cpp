@@ -17,9 +17,9 @@
 int MPEG2_PSI_PMT_DecodeSection(uint8_t *section_buf, int section_size, TS_program_map_section_t* ppmt_section)
 {
 	int	 rtcode = SECTION_PARSE_NO_ERROR;
-	U8*	 pl1temp;
-	U8*	 pl2temp;
-	S32	 N;
+	uint8_t*	 pl1temp;
+	uint8_t*	 pl2temp;
+	int	 N;
 	S32  descriptor_loop_length;
 	S32  es_loop_length;
 	U16	 descriptor_tag;

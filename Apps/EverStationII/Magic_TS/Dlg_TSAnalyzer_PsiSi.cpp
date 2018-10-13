@@ -270,7 +270,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_AIT)
 			{
-				DVB_MHP_AIT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				DVB_MHP_AIT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\AIT-0x%02X.xml", pszXmlDir, table_id);
@@ -278,7 +278,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_DSMCC_MPE)
 			{
-				DVB_IPDC_MPE_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				DVB_IPDC_MPE_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\MPE-0x%02X.xml", pszXmlDir, table_id);

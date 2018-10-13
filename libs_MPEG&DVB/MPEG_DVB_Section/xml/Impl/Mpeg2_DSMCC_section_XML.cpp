@@ -13,7 +13,7 @@
 #include "../Include/dsmcc/Mpeg2_DSMCC_UNM_DSI_XML.h"
 #include "../Include/dsmcc/Mpeg2_DSMCC_DDM_DDB_XML.h"
 
-#include "libs_Math/Include/CRC_32.h"
+//#include "libs_Math/Include/CRC_32.h"
 
 int MPEG2_DSMCC_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, dsmcc_section_t* pDSMCCSection)
 {
@@ -217,7 +217,7 @@ int MPEG2_DSMCC_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, dsmcc_section_t* pd
 		else
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "section syntax error! incorrect table_id = 0x%02X", pdsmcc_section->table_id);
-			pxmlRootNode->SetAttribute("error", pszComment);
+			XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
 			rtcode = SECTION_PARSE_SYNTAX_ERROR;						//table_id½âÎö´íÎó
 		}
 	}
