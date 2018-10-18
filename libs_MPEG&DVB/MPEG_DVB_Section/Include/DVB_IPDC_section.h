@@ -66,39 +66,37 @@ INT definition
 -------------------------------------------------------------*/
 typedef struct platform_descriptor_loop_s
 {
-	U8						reserved;							//4
-	S16						platform_descriptor_loop_length;	//12
+	uint8_t					reserved;							//4
+	int						platform_descriptor_loop_length;	//12
 
 																//	IPMAC_platform_name_descriptor_t			IPMAC_platform_name_descriptor;
 																//	IPMAC_platform_provider_name_descriptor_t	IPMAC_platform_provider_name_descriptor;
 
-	S32						reserved_count;
+	int						reserved_count;
 	reserved_descriptor_t	reserved_descriptor[MAX_RESERVED_DESCRIPTORS];
 
 } platform_descriptor_loop_t;
 
 typedef struct target_descriptor_loop_s
 {
-	U8						reserved;							//4
-	S16						target_descriptor_loop_length;	//12
+	uint8_t					reserved;							//4
+	int						target_descriptor_loop_length;	//12
 
-															//	target_IPv6_slash_descriptor_t	target_IPv6_slash_descriptor;
-
-	S32						reserved_count;
-	reserved_descriptor_t	reserved_descriptor[MAX_RESERVED_DESCRIPTORS];
+	int						target_descriptor_count;
+	reserved_descriptor_t	target_descriptors[MAX_RESERVED_DESCRIPTORS];
 
 } target_descriptor_loop_t;
 
 typedef struct operational_descriptor_loop_s
 {
-	U8						reserved;							//4
-	S16						operational_descriptor_loop_length;	//12
+	uint8_t					reserved;							//4
+	int						operational_descriptor_loop_length;	//12
 
 																//	IPMAC_stream_location_descriptor_t		IPMAC_stream_location_descriptor;
 																//	time_slice_fec_identifier_descriptor_t	time_slice_fec_identifier_descriptor;
 
-	S32						reserved_count;
-	reserved_descriptor_t	reserved_descriptor[MAX_RESERVED_DESCRIPTORS];
+	int						operational_descriptor_count;
+	reserved_descriptor_t	operational_descriptors[MAX_RESERVED_DESCRIPTORS];
 
 } operational_descriptor_loop_t;
 
@@ -121,16 +119,19 @@ typedef struct IP_MAC_notification_section_s
 
 	platform_descriptor_loop_t	platform_descriptor_loop;
 
-	S32								N;
-	target_descriptor_loop_t		target_descriptor_loop[MAX_INT_TARGETS];
-	operational_descriptor_loop_t	operational_descriptor_loop[MAX_INT_TARGETS];
+	int							notification_count;
+	struct
+	{
+		target_descriptor_loop_t		target_descriptor_loop;
+		operational_descriptor_loop_t	operational_descriptor_loop;
+	} notifications[MAX_INT_TARGETS];
 
-	U32								CRC_32;					//32
-	U32								CRC_32_verify;			//32
+	uint32_t						CRC_32;							//32
+	uint32_t						CRC_32_recalculated;			//32
 
 } IP_MAC_notification_section_t, *pIP_MAC_notification_section_t;
 
-_CDL_EXPORT	int	DVB_IPDC_INT_DecodeSection(uint8_t* buf, int length, IP_MAC_notification_section_t* pINTSection);
+_CDL_EXPORT	int	DVB_IPDC_INT_DecodeSection(uint8_t* section_buf, int section_size, IP_MAC_notification_section_t* pINTSection);
 
 
 #endif

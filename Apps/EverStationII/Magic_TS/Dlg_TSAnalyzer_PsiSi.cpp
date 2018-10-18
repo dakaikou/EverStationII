@@ -159,7 +159,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 		uint8_t	table_id;
 		if ((section_buf != NULL) && (section_length >= 3))
 		{
-			XMLDocForMpegSyntax xmlDoc;
+			//XMLDocForMpegSyntax xmlDoc;
 			HALForXMLDoc xml2Doc;
 
 			table_id = section_buf[0];
@@ -262,7 +262,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_INT)
 			{
-				DVB_IPDC_INT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				DVB_IPDC_INT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\INT-0x%02X.xml", pszXmlDir, table_id);
@@ -310,7 +310,6 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 #endif
 			}
 #ifdef _DEBUG
-			xmlDoc.SaveFile(pszFilePath);
 			xml2Doc.SaveFile(pszFilePath);
 #endif
 			m_pSyntaxTree->Reset();

@@ -7,211 +7,189 @@
 #include "../../Include/MPEG_DVB_ErrorCode.h"
 #include "../../Include/DVB_IPDC_section.h"
 #include "../Include/DVB_IPDC_section_XML.h"
+#include "../Include/MPEG_DVB_Common_XML.h"
 
 #include "HAL/HAL_XML/Include/HALForTinyXML2Doc.h"
 
-#include "libs_Math/Include/CRC_32.h"
-
 /////////////////////////////////////////////
 
-int	DVB_IPDC_INT_DecodeSection_to_XML(uint8_t* buf, int length, XMLDocForMpegSyntax* pxmlDoc, IP_MAC_notification_section_t* pINTSection)
+int DVB_IPDC_INT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, IP_MAC_notification_section_t* pint_section)
 {
-	S32		 rtcode = SECTION_PARSE_NO_ERROR;
-	U32		 N = 0;
-	//	U8*		 ptemp;
-	U8*		 pl1temp;
-	//U8*		 pl2temp;
-	U8*		 pend;
+	int	 rtcode = SECTION_PARSE_NO_ERROR;
 
-	U16		 descriptor_tag;
-	U8		 descriptor_length;
-	int		 descriptor_loop_length;
-	U16		 move_length;
-	S32		 reserved_count;
-
-	S32		 target_count = 0;
-
-	if (pxmlDoc != NULL)
+	if ((pxmlDoc != NULL) && (pint_section != NULL))
 	{
-		pxmlDoc->SetOrigin(buf);
+		uint16_t descriptor_tag;
+		int		 descriptor_length;
+		uint8_t* descriptor_buf;
+		int		 descriptor_size;
+		char pszField[128];
+		char pszComment[128];
 
 		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
 
-		tinyxml2::XMLDeclaration* xmlDeclaration = pxmlDoc->NewDeclaration(pszDeclaration);
-		pxmlDoc->InsertFirstChild(xmlDeclaration);
+		XMLDeclaration* pxmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
+		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
 
 		//根节点
-		tinyxml2::XMLElement* pxmlRootNode = ((tinyxml2::XMLDocument*)pxmlDoc)->NewElement("IP/MAC_notifaction_section()");
-		pxmlDoc->InsertEndChild(pxmlRootNode);
-		pxmlDoc->UpdateBufMark(pxmlRootNode, buf, buf + length);
+		sprintf_s(pszField, sizeof(pszField), "IP/MAC_notification_section(table_id=0x%02X)", pint_section->table_id);
+		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
+		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
+		XMLNODE_SetFieldLength(pxmlRootNode, pint_section->section_length + 3);
 
-		if ((buf != NULL) && (length >= DVB_IPDC_INT_SECTION_MIN_SIZE) && (length <= DVB_IPDC_INT_SECTION_MAX_SIZE))
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pint_section->table_id, 8, "uimsbf", NULL);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_syntax_indicator", pint_section->section_syntax_indicator, 1, "bslbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved_for_future_use", pint_section->reserved_for_future_use, 1, "bslbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", pint_section->reserved0, 2, "bslbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_length", pint_section->section_length, 12, "uimsbf", NULL);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "action_type", pint_section->action_type, 8, "uimsbf", NULL);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "platform_id_hash", pint_section->platform_id_hash, 8, "uimsbf", NULL);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", pint_section->reserved1, 2, "bslbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "version_number", pint_section->version_number, 5, "uimsbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "current_next_indicator", pint_section->current_next_indicator, 1, "bslbf", NULL);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_number", pint_section->section_number, 8, "uimsbf", NULL);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "last_section_number", pint_section->last_section_number, 8, "uimsbf", NULL);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "platform_id", pint_section->platform_id, 24, "uimsbf", NULL);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "processing_order", pint_section->processing_order, 8, "uimsbf", NULL);
+
+		platform_descriptor_loop_t* pplatform_descriptor_loop = &(pint_section->platform_descriptor_loop);
+
+		XMLElement* pxmlPlatformDescriptorLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "platform_descriptor_loop()", NULL);
+		XMLNODE_SetFieldLength(pxmlPlatformDescriptorLoopNode, 2 + pplatform_descriptor_loop->platform_descriptor_loop_length);
+
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlPlatformDescriptorLoopNode, "reserved", pplatform_descriptor_loop->reserved, 4, "bslbf", NULL);
+		XMLDOC_NewElementForBits(pxmlDoc, pxmlPlatformDescriptorLoopNode, "platform_descriptor_loop_length", pplatform_descriptor_loop->platform_descriptor_loop_length, 12, "uimsbf", NULL);
+
+		if (pplatform_descriptor_loop->platform_descriptor_loop_length > 0)
 		{
-			//如果外部没有传入参考的CRC32校验码，内部再计算一下，以便判断是否有CRC校验错误
-			//这是内部处理的策略问题，不是必须这么做的
-			unsigned int CRC_32_verify = Encode_CRC_32(buf, length - 4);
-			unsigned int CRC_32_code = (buf[length - 4] << 24) | (buf[length - 3] << 16) | (buf[length - 2] << 8) | buf[length - 1];
-
-			pend = buf + length - 4;
-
-			//if (CRC_32_verify == CRC_32_code)
+			for (int descriptor_index = 0; descriptor_index < pplatform_descriptor_loop->reserved_count; descriptor_index++)
 			{
-				IP_MAC_notification_section_t* pint_section = (pINTSection != NULL) ? pINTSection : new IP_MAC_notification_section_t;
-				memset(pint_section, 0x00, sizeof(IP_MAC_notification_section_t));
+				descriptor_buf = pplatform_descriptor_loop->reserved_descriptor[descriptor_index].descriptor_buf;
+				descriptor_tag = pplatform_descriptor_loop->reserved_descriptor[descriptor_index].descriptor_tag;
+				descriptor_length = pplatform_descriptor_loop->reserved_descriptor[descriptor_index].descriptor_length;
+				descriptor_size = descriptor_length + 2;
 
-				pint_section->table_id = *buf++;
-				pint_section->section_syntax_indicator = (*buf & 0x80) >> 7;
-				pint_section->reserved_for_future_use = (*buf & 0x40) >> 6;
-				pint_section->reserved0 = (*buf & 0x30) >> 4;
-
-				pint_section->section_length = (*buf++ & 0x0f) << 8;
-				pint_section->section_length |= *buf++;
-
-				pint_section->action_type = *buf++;
-				pint_section->platform_id_hash = *buf++;
-
-				pint_section->reserved1 = (*buf & 0xc0) >> 6;
-				pint_section->version_number = (*buf & 0x3E) >> 1;
-				pint_section->current_next_indicator = (*buf++ & 0x01);
-
-				pint_section->section_number = *buf++;
-				pint_section->last_section_number = *buf++;
-
-				pint_section->platform_id = *buf++;
-				pint_section->platform_id <<= 8;
-				pint_section->platform_id |= *buf++;
-				pint_section->platform_id <<= 8;
-				pint_section->platform_id |= *buf++;
-
-				pint_section->processing_order = *buf++;
-
-				//decoding platform_descriptor_loop
-				pint_section->platform_descriptor_loop.reserved = (*buf & 0xf0) >> 4;
-				pint_section->platform_descriptor_loop.platform_descriptor_loop_length = (*buf++ & 0x0f);
-				pint_section->platform_descriptor_loop.platform_descriptor_loop_length <<= 4;
-				pint_section->platform_descriptor_loop.platform_descriptor_loop_length |= *buf++;
-
-				reserved_count = 0;
-				if (pint_section->platform_descriptor_loop.platform_descriptor_loop_length > 0)
+				switch (descriptor_tag)
 				{
-					pl1temp = buf;
-					buf += pint_section->platform_descriptor_loop.platform_descriptor_loop_length;
-
-					descriptor_loop_length = pint_section->platform_descriptor_loop.platform_descriptor_loop_length;
-					while ((descriptor_loop_length >= 2) && (reserved_count < MAX_RESERVED_DESCRIPTORS))
-					{
-						descriptor_tag = pl1temp[0];
-						descriptor_length = pl1temp[1];
-						move_length = descriptor_length + 2;
-
-						pint_section->platform_descriptor_loop.reserved_descriptor[reserved_count].descriptor_tag = (0x1000 | descriptor_tag);
-						pint_section->platform_descriptor_loop.reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-						pint_section->platform_descriptor_loop.reserved_descriptor[reserved_count].descriptor_buf = pl1temp;
-						pint_section->platform_descriptor_loop.reserved_descriptor[reserved_count].descriptor_size = (uint8_t)move_length;
-
-						reserved_count++;
-						pl1temp += move_length;
-						descriptor_loop_length -= move_length;
-					}
-				}
-				pint_section->platform_descriptor_loop.reserved_count = reserved_count;
-
-				//decoding target loop
-				target_count = 0;
-
-				while (buf < pend)
-				{
-					//decoding target_descriptor_loop
-					pint_section->target_descriptor_loop[target_count].reserved = (*buf & 0xf0) >> 4;
-					pint_section->target_descriptor_loop[target_count].target_descriptor_loop_length = (*buf++ & 0x0f);
-					pint_section->target_descriptor_loop[target_count].target_descriptor_loop_length <<= 4;
-					pint_section->target_descriptor_loop[target_count].target_descriptor_loop_length |= *buf++;
-
-					U8* pnext = buf + pint_section->target_descriptor_loop[target_count].target_descriptor_loop_length;
-
-					reserved_count = 0;
-					while (buf < pnext)
-					{
-						descriptor_tag = buf[0];
-						descriptor_length = buf[1];
-						move_length = descriptor_length + 2;
-
-						pint_section->target_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_tag = (0x1000 | descriptor_tag);
-						pint_section->target_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-						pint_section->target_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_buf = buf;
-						pint_section->target_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_size = (uint8_t)move_length;
-
-						reserved_count++;
-						buf += move_length;
-					}
-					pint_section->target_descriptor_loop[target_count].reserved_count = reserved_count;
-
-					//decoding operational_descriptor_loop
-					pint_section->operational_descriptor_loop[target_count].reserved = (*buf & 0xf0) >> 4;
-					pint_section->operational_descriptor_loop[target_count].operational_descriptor_loop_length = (*buf++ & 0x0f);
-					pint_section->operational_descriptor_loop[target_count].operational_descriptor_loop_length <<= 4;
-					pint_section->operational_descriptor_loop[target_count].operational_descriptor_loop_length |= *buf++;
-
-					pnext = buf + pint_section->operational_descriptor_loop[target_count].operational_descriptor_loop_length;
-
-					reserved_count = 0;
-					while (buf < pnext)
-					{
-						descriptor_tag = buf[0];
-						descriptor_length = buf[1];
-						move_length = descriptor_length + 2;
-
-						if (descriptor_tag >= 0x40)
-						{
-							pint_section->operational_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_tag = descriptor_tag;
-						}
-						else
-						{
-							pint_section->operational_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_tag = (0x1000 | descriptor_tag);
-						}
-						pint_section->operational_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-						pint_section->operational_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_buf = buf;
-						pint_section->operational_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_size = (uint8_t)move_length;
-
-						reserved_count++;
-						buf += move_length;
-					}
-
-					pint_section->operational_descriptor_loop[target_count].reserved_count = reserved_count;
-					target_count++;
-				}
-
-				pint_section->N = target_count;
-
-				//tinyxml2::XMLElement* pxmlCrcNode = pxmlDoc->NewElement(pxmlRootNode, "CRC_32", 32, "rpchof", pint_section->CRC_32, old_buf, buf);
-
-				//if (CRC_32_verify != CRC_32_code)
-				//{
-				//	pxmlCrcNode->SetAttribute("error", "Error!");
-				//	pxmlRoot->SetAttribute("error", "Error!");
-				//}
-
-				if (pINTSection == NULL)
-				{
-					//说明pint_section指针临时分配，函数返回前需要释放
-					delete pint_section;
+				default:
+					MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlPlatformDescriptorLoopNode, pplatform_descriptor_loop->reserved_descriptor + descriptor_index);
+					break;
 				}
 			}
-			//else
-			//{
-			//	pxmlDoc->NewTitleElement(pxmlRootNode, "INT section buffer CRC error!");
-			//	rtcode = SECTION_PARSE_CRC_ERROR;
-			//}
 		}
-		else
+
+		int loop_length = pint_section->section_length - 11 - pplatform_descriptor_loop->platform_descriptor_loop_length - 4;
+		if (loop_length > 0)
 		{
-			pxmlDoc->NewKeyValuePairElement(pxmlRootNode, "INT section buffer parameters error!");
-			rtcode = SECTION_PARSE_PARAMETER_ERROR;
+			sprintf_s(pszField, sizeof(pszField), "target & operational descriptor loop(共 %d 个)", pint_section->notification_count);
+			XMLElement* pxmlTargetAndOperationalLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
+			XMLNODE_SetFieldLength(pxmlTargetAndOperationalLoopNode, loop_length);
+
+			for (int notification_index = 0; notification_index < pint_section->notification_count; notification_index++)
+			{
+				target_descriptor_loop_t* ptarget_descriptor_loop = &(pint_section->notifications[notification_index].target_descriptor_loop);
+				operational_descriptor_loop_t* poperational_descriptor_loop = &(pint_section->notifications[notification_index].operational_descriptor_loop);
+
+				sprintf_s(pszField, sizeof(pszField), "target & operational[%d]()", notification_index);
+				XMLElement* pxmlTargetAndOperationalNode = XMLDOC_NewElementForString(pxmlDoc, pxmlTargetAndOperationalLoopNode, pszField, NULL);
+				XMLNODE_SetFieldLength(pxmlTargetAndOperationalNode, 2 + ptarget_descriptor_loop->target_descriptor_loop_length + 2 + poperational_descriptor_loop->operational_descriptor_loop_length);
+
+				sprintf_s(pszField, sizeof(pszField), "target_descriptor_loop()");
+				XMLElement* pxmlTargetNode = XMLDOC_NewElementForString(pxmlDoc, pxmlTargetAndOperationalNode, pszField, NULL);
+				XMLNODE_SetFieldLength(pxmlTargetNode, 2 + ptarget_descriptor_loop->target_descriptor_loop_length);
+
+				XMLDOC_NewElementForBits(pxmlDoc, pxmlTargetNode, "reserved", ptarget_descriptor_loop->reserved, 4, "bslbf", NULL);
+				XMLDOC_NewElementForBits(pxmlDoc, pxmlTargetNode, "target_descriptor_loop_length", ptarget_descriptor_loop->target_descriptor_loop_length, 12, "uimsbf", NULL);
+
+				if (ptarget_descriptor_loop->target_descriptor_loop_length > 0)
+				{
+					//sprintf_s(pszField, sizeof(pszField), "target_descriptor_loop()");
+					//XMLElement* pxmlDescriptorsNode = XMLDOC_NewElementForString(pxmlDoc, pxmlTargetNode, pszField, NULL);
+					//XMLNODE_SetFieldLength(pxmlDescriptorsNode, ptarget_descriptor_loop->target_descriptor_loop_length);
+
+					for (int descriptor_index = 0; descriptor_index < ptarget_descriptor_loop->target_descriptor_count; descriptor_index++)
+					{
+						descriptor_buf = ptarget_descriptor_loop->target_descriptors[descriptor_index].descriptor_buf;
+						descriptor_tag = ptarget_descriptor_loop->target_descriptors[descriptor_index].descriptor_tag;
+						descriptor_length = ptarget_descriptor_loop->target_descriptors[descriptor_index].descriptor_length;
+						descriptor_size = descriptor_length + 2;
+
+						switch (descriptor_tag)
+						{
+						default:
+							MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlTargetNode, ptarget_descriptor_loop->target_descriptors + descriptor_index);
+							break;
+						}
+					}
+				}
+
+				sprintf_s(pszField, sizeof(pszField), "operational_descriptor_loop()");
+				XMLElement* pxmlOperationalNode = XMLDOC_NewElementForString(pxmlDoc, pxmlTargetAndOperationalNode, pszField, NULL);
+				XMLNODE_SetFieldLength(pxmlOperationalNode, 2 + poperational_descriptor_loop->operational_descriptor_loop_length);
+
+				XMLDOC_NewElementForBits(pxmlDoc, pxmlOperationalNode, "reserved", poperational_descriptor_loop->reserved, 4, "bslbf", NULL);
+				XMLDOC_NewElementForBits(pxmlDoc, pxmlOperationalNode, "operational_descriptor_loop_length", poperational_descriptor_loop->operational_descriptor_loop_length, 12, "uimsbf", NULL);
+
+				if (poperational_descriptor_loop->operational_descriptor_loop_length > 0)
+				{
+					//sprintf_s(pszField, sizeof(pszField), "operational_descriptor_loop()");
+					//XMLElement* pxmlDescriptorsNode = XMLDOC_NewElementForString(pxmlDoc, pxmlTargetNode, pszField, NULL);
+					//XMLNODE_SetFieldLength(pxmlDescriptorsNode, poperational_descriptor_loop->operational_descriptor_loop_length);
+
+					for (int descriptor_index = 0; descriptor_index < poperational_descriptor_loop->operational_descriptor_count; descriptor_index++)
+					{
+						descriptor_buf = poperational_descriptor_loop->operational_descriptors[descriptor_index].descriptor_buf;
+						descriptor_tag = poperational_descriptor_loop->operational_descriptors[descriptor_index].descriptor_tag;
+						descriptor_length = poperational_descriptor_loop->operational_descriptors[descriptor_index].descriptor_length;
+						descriptor_size = descriptor_length + 2;
+
+						switch (descriptor_tag)
+						{
+						default:
+							MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlOperationalNode, poperational_descriptor_loop->operational_descriptors + descriptor_index);
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", pint_section->CRC_32, 32, "rpchof", NULL);
+
+		if (pint_section->CRC_32_recalculated != pint_section->CRC_32)
+		{
+			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", pint_section->CRC_32_recalculated);
+			XMLNODE_SetAttribute(pxmlCrcNode, "error", pszComment);
 		}
 	}
 	else
 	{
 		rtcode = SECTION_PARSE_PARAMETER_ERROR;
+	}
+
+	return rtcode;
+}
+
+int DVB_IPDC_INT_DecodeSection_to_XML(uint8_t *section_buf, int section_size, HALForXMLDoc* pxmlDoc, IP_MAC_notification_section_t* pINTSection)
+{
+	int	 rtcode = SECTION_PARSE_NO_ERROR;
+
+	IP_MAC_notification_section_t* pint_section = (pINTSection != NULL) ? pINTSection : new IP_MAC_notification_section_t;
+	rtcode = DVB_IPDC_INT_DecodeSection(section_buf, section_size, pint_section);
+	rtcode = DVB_IPDC_INT_PresentSection_to_XML(pxmlDoc, pint_section);
+
+	if (pINTSection == NULL)
+	{
+		//说明ppmt_section指针临时分配，函数返回前需要释放
+		delete pint_section;
 	}
 
 	return rtcode;
