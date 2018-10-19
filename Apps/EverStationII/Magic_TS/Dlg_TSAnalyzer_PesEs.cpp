@@ -289,16 +289,18 @@ void CDlg_TSAnalyzer_PesEs::Reset(void)
 //	}
 //}
 
-void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(U32 uiPESStyle, U8* pes_buf, S32 pes_length, XMLDocForMpegSyntax* pxmlFatherDoc)
+void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(uint32_t uiPESStyle, uint8_t* pes_buf, int pes_length, HALForXMLDoc* pxmlFatherDoc)
 {
 	if ((m_pList != NULL) && (m_pTree != NULL))
 	{
 		XMLDocForMpegSyntax xmlDoc;
-		PES_packet_t PES_packet;
-		MPEG_decode_PES_packet_to_xml(pes_buf, pes_length, &xmlDoc, &PES_packet);
+		HALForXMLDoc xml2Doc;
 
-		unsigned char* es_buf = PES_packet.es_payload_buf;
-		int es_length = PES_packet.es_payload_length;
+		PES_packet_t PES_packet;
+		MPEG_decode_PES_packet_to_xml(pes_buf, pes_length, &xml2Doc, &PES_packet);
+
+		unsigned char* es_buf = PES_packet.payload_buf;
+		int es_length = PES_packet.payload_length;
 
 		int data_alignment_indicator = PES_packet.data_alignment_indicator;
 		//tinyxml2::XMLElement* pxmlDataAlignmentIndicator = xmlDoc.QueryNodeByName(xmlDoc.RootElement(), "data_alignment_indicator");
@@ -307,7 +309,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(U32 uiPESStyle, U8* pes_buf, S32 pe
 		//	data_alignment_indicator = pxmlDataAlignmentIndicator->IntAttribute("value");
 		//}
 
-		tinyxml2::XMLElement* pxmlPayloadNode = xmlDoc.QueryNodeByKeyName(xmlDoc.RootElement(), "PAYLOAD()");
+		XMLElement* pxmlPayloadNode = xmlDoc.QueryNodeByKeyName(xmlDoc.RootElement(), "PAYLOAD()");
 
 		U8 sub_type = (uiPESStyle & 0x000000ff);
 		U8 stream_type = (uiPESStyle & 0x0000ff00) >> 8;
@@ -383,7 +385,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(U32 uiPESStyle, U8* pes_buf, S32 pe
 		}
 
 		m_pTree->Reset();
-		m_pTree->ShowXMLDoc(&xmlDoc);
+		m_pTree->ShowXMLDoc(&xml2Doc);
 
 #ifdef _DEBUG
 		char	pszExeFile[MAX_PATH];
@@ -399,7 +401,8 @@ void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(U32 uiPESStyle, U8* pes_buf, S32 pe
 		BuildDirectory(pszXmlDir);
 
 		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\PES_packet_0x%04X.xml", pszXmlDir, PID);
-		xmlDoc.SaveFile(pszFilePath);
+		//xmlDoc.SaveFile(pszFilePath);
+		xml2Doc.SaveFile(pszFilePath);
 #endif
 
 		m_pList->Reset();
@@ -407,7 +410,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(U32 uiPESStyle, U8* pes_buf, S32 pe
 	}
 }
 
-void CDlg_TSAnalyzer_PesEs::DisplayMPVPacket(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
+void CDlg_TSAnalyzer_PesEs::DisplayMPVPacket(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	S32			 align_offset = -1;
 	ES_segment_t segment;

@@ -5,13 +5,15 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include <stdint.h>
+
 #include "HAL\HAL_XML\Include\HALForTinyXML2Doc.h"
+#include "HAL\HAL_XML\Include\HALForTinyXML2.h"
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_PesEs dialog
 #include "..\Magic_TS\TSMagic_GuiApi.h"
 
 #include "..\Common\Dlg_ShowVideo.h"
-//#include "..\Common\GuiCommon_TreeFunction.h"
 #include "..\Common\TreeView_XMLBrowser.h"
 #include "..\Common\HexEditView_ByteBuffer.h"
 
@@ -54,7 +56,7 @@ public:
 	void Reset(void);
 	void UpdatePAT(CPAT* pPAT);
 	void UpdatePMT(CPMT* pPMT);
-	void DisplayPESPacket(U32 uiPESStyle, U8* PES_buf, S32 PES_length, XMLDocForMpegSyntax* pxmlDoc = NULL);
+	void DisplayPESPacket(uint32_t uiPESStyle, uint8_t* PES_buf, int PES_length, HALForXMLDoc* pxmlDoc = NULL);
 	void DisplayMPVPacket(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode = NULL);
 	void DisplayAVSPacket(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode = NULL);
 	void DisplayH264Packet(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode = NULL);
