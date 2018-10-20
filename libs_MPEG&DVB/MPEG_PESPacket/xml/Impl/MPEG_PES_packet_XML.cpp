@@ -276,7 +276,7 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 
 			if (pPES_packet->payload_length > 0)
 			{
-				XMLElement* pxmlPayloadNode = pxmlDoc->NewBranchElement(pxmlRootNode, "PAYLOAD()", NULL);
+				XMLElement* pxmlPayloadNode = pxmlDoc->NewBranchElement(pxmlRootNode, "PAYLOAD()", NULL, pPES_packet->payload_length);
 				//XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlPayloadNode, "payload_data_byte[ ]", pPES_packet->payload_buf, pPES_packet->payload_length, NULL);
 			}
 		}

@@ -312,7 +312,7 @@ typedef struct CA_message_section_s
 	uint8_t		ISO_reserved;								//2
 	uint16_t	CA_section_length;							//12
 
-	uint8_t		CA_data_byte[64];							//
+	uint8_t*	CA_data_byte;							//
 
 } CA_message_section_t, *pCA_message_section_t;
 

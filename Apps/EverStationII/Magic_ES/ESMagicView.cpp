@@ -555,7 +555,8 @@ void CESMagicView::OnBtnES2TS(void)
 			if (fp_dst != NULL)
 			{
 				transport_packet_t	TS_packet;
-				unsigned char		buf[188];
+				unsigned char		payload_buf[184];
+				unsigned char		ts_packet_buf[188];
 				int					pklength = 188;
 				size_t				rdlen = 0;
 
@@ -572,12 +573,14 @@ void CESMagicView::OnBtnES2TS(void)
 				TS_packet.adaptation_field_control = 1;
 				TS_packet.transport_scrambling_control = 0;
 
+				TS_packet.payload_buf = payload_buf;
+
 				rdlen = fread(TS_packet.payload_buf, sizeof(char), 184, fp_src);
 				TS_packet.payload_length = (uint8_t)rdlen;
 
-				if (MPEG_encode_TS_packet(buf, pklength, &TS_packet) == 0)
+				if (MPEG_encode_TS_packet(ts_packet_buf, pklength, &TS_packet) == 0)
 				{
-					fwrite(buf, pklength, 1, fp_dst);
+					fwrite(ts_packet_buf, pklength, 1, fp_dst);
 				}
 
 				while (rdlen >= 184)
@@ -590,9 +593,9 @@ void CESMagicView::OnBtnES2TS(void)
 					rdlen = fread(TS_packet.payload_buf, sizeof(char), 184, fp_src);
 					TS_packet.payload_length = (uint8_t)rdlen;
 
-					if (MPEG_encode_TS_packet(buf, pklength, &TS_packet) == 0)
+					if (MPEG_encode_TS_packet(ts_packet_buf, pklength, &TS_packet) == 0)
 					{
-						fwrite(buf, pklength, 1, fp_dst);
+						fwrite(ts_packet_buf, pklength, 1, fp_dst);
 					}
 				}
 

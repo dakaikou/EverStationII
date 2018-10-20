@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <assert.h>
 
-#ifndef min
-#define min(a,b)  (((a)<(b))?(a):(b))
-#endif
+//#ifndef min
+//#define min(a,b)  (((a)<(b))?(a):(b))
+//#endif
 
 #include "../../Include/Mpeg2_TS_ErrorCode.h"
 #include "../../Include/Mpeg2_TS_packet.h"
@@ -15,21 +15,42 @@ int MPEG_decode_TS_packet_to_XML(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc
 {
 	int	 rtcode = TSPACKET_PARSE_NO_ERROR;
 
-	transport_packet_t* ptransport_packet = (pTSPacket == NULL) ? new transport_packet_t : pTSPacket;
+	if ((buf != NULL) && ((length == 188) || (length == 204)) && (pxmlDoc != NULL))
+	{
+		transport_packet_t* ptransport_packet = (pTSPacket == NULL) ? new transport_packet_t : pTSPacket;
 
-	rtcode = MPEG_decode_TS_packet(buf, length, ptransport_packet);
+		rtcode = MPEG_decode_TS_packet(buf, length, ptransport_packet);
+		rtcode = MPEG_present_TS_packet_to_XML(pxmlDoc, ptransport_packet);
 
-	if (pxmlDoc != NULL)
+		if (pTSPacket == NULL)
+		{
+			delete ptransport_packet;
+		}
+	}
+	else
+	{
+		rtcode = TSPACKET_PARSE_PARAMETER_ERROR;
+	}
+
+	return rtcode;
+}
+
+int MPEG_present_TS_packet_to_XML(HALForXMLDoc* pxmlDoc, transport_packet_t* ptransport_packet)
+{
+	int	 rtcode = TSPACKET_PARSE_NO_ERROR;
+
+	if ((pxmlDoc != NULL) && (ptransport_packet != NULL))
 	{
 		char pszComment[64];
 
 		//根据ISO/IEC 13818-1:2000 版本组织XML编排
 
 		//根节点
-		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement("transport_packet()", NULL, length);
+		int ts_packet_length = 4;
+		if ((ptransport_packet->adaptation_field_control & 0b10) == 0b10) ts_packet_length += 1 + ptransport_packet->adaptation_field.adaptation_field_length;
+		if ((ptransport_packet->adaptation_field_control & 0b01) == 0b01) ts_packet_length += ptransport_packet->payload_length;
 
-		sprintf_s(pszComment, sizeof(pszComment), "%d字节", length);
-		pxmlRootNode->SetAttribute("comment", pszComment);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement("transport_packet()", NULL, ts_packet_length);
 
 		if (rtcode != TSPACKET_PARSE_NO_ERROR)
 		{
@@ -92,11 +113,6 @@ int MPEG_decode_TS_packet_to_XML(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc
 			pxmlDoc->SetSyncOffset(payload_start_pos);
 			pxmlDoc->NewElementForByteBuf(pxmlRootNode, "payload_buf[ ]", ptransport_packet->payload_buf, ptransport_packet->payload_length, NULL);
 		}
-	}
-
-	if (pTSPacket == NULL)
-	{
-		delete ptransport_packet;
 	}
 
 	return rtcode;

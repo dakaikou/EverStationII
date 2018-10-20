@@ -134,7 +134,7 @@ int MPEG_decode_TS_packet(uint8_t *buf, int length, transport_packet_t* ptranspo
 			ptransport_packet->adaptation_field_control = BITS_get(&bs, 2);
 			ptransport_packet->continuity_counter = BITS_get(&bs, 4);
 
-			if ((ptransport_packet->adaptation_field_control & 0b10) == 0b10)	//ÅÐ¶ÏÊÇ²»ÊÇÓÐadaptationÓò
+			if ((ptransport_packet->adaptation_field_control & 0b10) == 0b10)	//have adaptation field
 			{
 				rtcode = MPEG_decode_TS_adaptation_field(bs.p_cur, length - 4, &(ptransport_packet->adaptation_field));
 				if (rtcode == TSPACKET_PARSE_NO_ERROR)
@@ -145,12 +145,14 @@ int MPEG_decode_TS_packet(uint8_t *buf, int length, transport_packet_t* ptranspo
 
 			if (rtcode == TSPACKET_PARSE_NO_ERROR)
 			{
-				if ((ptransport_packet->adaptation_field_control & 0b01) == 0b01)	//ÅÐ¶ÏÊÇ·ñÓÐ¾»ºÉ
+				if ((ptransport_packet->adaptation_field_control & 0b01) == 0b01)	//have payload 
 				{
 					ptransport_packet->payload_length = (uint8_t)(188 - (bs.p_cur - bs.p_start));
 					if (ptransport_packet->payload_length > 0)
 					{
-						BITS_byteCopy(ptransport_packet->payload_buf, sizeof(ptransport_packet->payload_buf), &bs, ptransport_packet->payload_length);
+						ptransport_packet->payload_buf = bs.p_cur;
+						BITS_byteSkip(&bs, ptransport_packet->payload_length);
+						//BITS_byteCopy(ptransport_packet->payload_buf, sizeof(ptransport_packet->payload_buf), &bs, ptransport_packet->payload_length);
 					}
 				}
 				else

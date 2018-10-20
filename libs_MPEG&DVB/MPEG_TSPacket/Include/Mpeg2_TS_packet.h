@@ -84,7 +84,7 @@ typedef struct transport_packet_s
 
 	adaptation_field_t adaptation_field;
 
-	uint8_t		payload_buf[200];
+	uint8_t*	payload_buf;				//voltile member
 	uint8_t		payload_length;
 
 } transport_packet_t, *ptransport_packet_t;

@@ -27,7 +27,9 @@ int DVB_SI_CMT_DecodeSection(uint8_t *section_buf, int section_size, CA_message_
 		pcmt_section->ISO_reserved = BITS_get(&bs, 2);
 		pcmt_section->CA_section_length = BITS_get(&bs, 12);
 		
-		BITS_byteCopy(pcmt_section->CA_data_byte, sizeof(pcmt_section->CA_data_byte), &bs, pcmt_section->CA_section_length);
+		pcmt_section->CA_data_byte = bs.p_cur;
+		BITS_byteSkip(&bs, pcmt_section->CA_section_length);
+		//BITS_byteCopy(pcmt_section->CA_data_byte, sizeof(pcmt_section->CA_data_byte), &bs, pcmt_section->CA_section_length);
 	}
 	else
 	{
