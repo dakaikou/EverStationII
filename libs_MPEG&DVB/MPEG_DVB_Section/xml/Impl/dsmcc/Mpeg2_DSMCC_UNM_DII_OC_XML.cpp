@@ -36,37 +36,34 @@ int	MPEG2_DSMCC_DII_OC_PresentModuleInfo_to_xml(HALForXMLDoc* pxmlDoc, XMLElemen
 	{
 		XMLElement* pxmlModuleNode = pxmlParentNode;
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlModuleNode, "moduleTimeOut", pOC_moduleInfo->moduleTimeOut, 4, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlModuleNode, "moduleTimeOut", pOC_moduleInfo->moduleTimeOut, 4, NULL);
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlModuleNode, "blockTimeOut", pOC_moduleInfo->blockTimeOut, 4, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlModuleNode, "blockTimeOut", pOC_moduleInfo->blockTimeOut, 4, NULL);
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlModuleNode, "minBlockTime", pOC_moduleInfo->minBlockTime, 4, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlModuleNode, "minBlockTime", pOC_moduleInfo->minBlockTime, 4, NULL);
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlModuleNode, "taps_count", pOC_moduleInfo->taps_count, 1, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlModuleNode, "taps_count", pOC_moduleInfo->taps_count, 1, NULL);
 
 		for (int tap_index = 0; tap_index < pOC_moduleInfo->taps_count; tap_index++)
 		{
 			sprintf_s(pszField, sizeof(pszField), "TAP[%d]()", tap_index);
-			XMLElement* pxmlTapNode = pxmlDoc->NewBranchElement(pxmlModuleNode, pszField, NULL);
-			pxmlDoc->SetAnchor(pxmlTapNode);
+			XMLElement* pxmlTapNode = pxmlDoc->NewBranchElement(pxmlModuleNode, pszField, NULL, 7 + pOC_moduleInfo->TAP[tap_index].selector_length);
 
-			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlTapNode, "ID", pOC_moduleInfo->TAP[tap_index].id, 2, NULL);
+			pxmlDoc->NewElementForByteMode(pxmlTapNode, "ID", pOC_moduleInfo->TAP[tap_index].id, 2, NULL);
 
 			MPEG2_DSMCC_NumericCoding2Text_tapUse(pOC_moduleInfo->TAP[tap_index].use, pszComment, sizeof(pszComment));
-			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlTapNode, "use", pOC_moduleInfo->TAP[tap_index].use, 2, pszComment);
+			pxmlDoc->NewElementForByteMode(pxmlTapNode, "use", pOC_moduleInfo->TAP[tap_index].use, 2, pszComment);
 
-			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlTapNode, "association_tag", pOC_moduleInfo->TAP[tap_index].association_tag, 2, NULL);
+			pxmlDoc->NewElementForByteMode(pxmlTapNode, "association_tag", pOC_moduleInfo->TAP[tap_index].association_tag, 2, NULL);
 
-			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlTapNode, "selector_length", pOC_moduleInfo->TAP[tap_index].selector_length, 1, NULL);
-
-			pxmlDoc->ClearAnchor(pxmlTapNode);
+			pxmlDoc->NewElementForByteMode(pxmlTapNode, "selector_length", pOC_moduleInfo->TAP[tap_index].selector_length, 1, NULL);
 		}
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlModuleNode, "userInfoLength", pOC_moduleInfo->userInfoLength, 1, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlModuleNode, "userInfoLength", pOC_moduleInfo->userInfoLength, 1, NULL);
 
 		if (pOC_moduleInfo->userInfoLength > 0)
 		{
-			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlModuleNode, "module_info_byte[ ]", pOC_moduleInfo->userInfo_data_byte, pOC_moduleInfo->userInfoLength, NULL);
+			pxmlDoc->NewElementForByteBuf(pxmlModuleNode, "module_info_byte[ ]", pOC_moduleInfo->userInfo_data_byte, pOC_moduleInfo->userInfoLength, NULL);
 		}
 	}
 	else

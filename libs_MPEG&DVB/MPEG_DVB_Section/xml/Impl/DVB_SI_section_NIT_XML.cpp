@@ -29,34 +29,32 @@ int DVB_SI_NIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, network_information_
 	{
 		//根节点
 		sprintf_s(pszField, sizeof(pszField), "network_information_section(table_id=0x%02X)", pnit_section->table_id);
-		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
-		pxmlDoc->SetAnchor(pxmlRootNode);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField, NULL, pnit_section->section_length + 3);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pnit_section->table_id, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "table_id", pnit_section->table_id, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_syntax_indicator", pnit_section->section_syntax_indicator, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved_future_use", pnit_section->reserved_future_use0, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", pnit_section->reserved0, 2, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_length", pnit_section->section_length, 12, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_syntax_indicator", pnit_section->section_syntax_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved_future_use", pnit_section->reserved_future_use0, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved", pnit_section->reserved0, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_length", pnit_section->section_length, 12, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "network_id", pnit_section->network_id, 16, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "network_id", pnit_section->network_id, 16, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", pnit_section->reserved1, 2, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "version_number", pnit_section->version_number, 5, "uimsbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "current_next_indicator", pnit_section->current_next_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved", pnit_section->reserved1, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "version_number", pnit_section->version_number, 5, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "current_next_indicator", pnit_section->current_next_indicator, 1, "bslbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_number", pnit_section->section_number, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_number", pnit_section->section_number, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "last_section_number", pnit_section->last_section_number, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "last_section_number", pnit_section->last_section_number, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved_future_use", pnit_section->reserved_future_use1, 4, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "network_descriptors_length", pnit_section->network_descriptors_length, 12, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved_future_use", pnit_section->reserved_future_use1, 4, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "network_descriptors_length", pnit_section->network_descriptors_length, 12, "uimsbf", NULL);
 
 		if (pnit_section->network_descriptors_length > 0)
 		{
 			sprintf_s(pszField, sizeof(pszField), "network_descriptors()");
-			XMLElement* pxmlNetworkDescriptorsNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
-			pxmlDoc->SetAnchor(pxmlNetworkDescriptorsNode);
+			XMLElement* pxmlNetworkDescriptorsNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL, pnit_section->network_descriptors_length);
 
 			for (int descriptor_index = 0; descriptor_index < pnit_section->network_descriptor_count; descriptor_index++)
 			{
@@ -78,18 +76,15 @@ int DVB_SI_NIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, network_information_
 					break;
 				}
 			}
-
-			pxmlDoc->ClearAnchor(pxmlNetworkDescriptorsNode);
 		}
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved_future_use", pnit_section->reserved_future_use2, 4, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "transport_stream_loop_length", pnit_section->transport_stream_loop_length, 12, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved_future_use", pnit_section->reserved_future_use2, 4, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "transport_stream_loop_length", pnit_section->transport_stream_loop_length, 12, "uimsbf", NULL);
 
 		if (pnit_section->transport_stream_loop_length > 0)
 		{
 			sprintf_s(pszField, sizeof(pszField), "transport_stream_loop(共 %d 个流)", pnit_section->stream_count);
-			XMLElement* pxmlStreamsLoopNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL);
-			pxmlDoc->SetAnchor(pxmlStreamsLoopNode);
+			XMLElement* pxmlStreamsLoopNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL, pnit_section->transport_stream_loop_length);
 
 			for (int stream_index = 0; stream_index < pnit_section->stream_count; stream_index++)
 			{
@@ -97,21 +92,19 @@ int DVB_SI_NIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, network_information_
 
 				int stream_description_length = 6 + pstStream->transport_descriptors_length;
 				sprintf_s(pszField, sizeof(pszField), "transport_stream(<TSID=0x%04X, ONetID=0x%04X>)", pstStream->transport_stream_id, pstStream->original_network_id);
-				XMLElement* pxmlStreamNode = pxmlDoc->NewBranchElement(pxmlStreamsLoopNode, pszField, NULL);
-				pxmlDoc->SetAnchor(pxmlStreamNode);
+				XMLElement* pxmlStreamNode = pxmlDoc->NewBranchElement(pxmlStreamsLoopNode, pszField, NULL, stream_description_length);
 
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlStreamNode, "transport_stream_id", pstStream->transport_stream_id, 16, "uimsbf", NULL);
+				pxmlDoc->NewElementForBits(pxmlStreamNode, "transport_stream_id", pstStream->transport_stream_id, 16, "uimsbf", NULL);
 
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlStreamNode, "original_network_id", pstStream->original_network_id, 16, "uimsbf", NULL);
+				pxmlDoc->NewElementForBits(pxmlStreamNode, "original_network_id", pstStream->original_network_id, 16, "uimsbf", NULL);
 
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlStreamNode, "reserved", pstStream->reserved, 4, "bslbf", NULL);
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlStreamNode, "transport_descriptors_length", pstStream->transport_descriptors_length, 12, "uimsbf", NULL);
+				pxmlDoc->NewElementForBits(pxmlStreamNode, "reserved", pstStream->reserved, 4, "bslbf", NULL);
+				pxmlDoc->NewElementForBits(pxmlStreamNode, "transport_descriptors_length", pstStream->transport_descriptors_length, 12, "uimsbf", NULL);
 
 				if (pstStream->transport_descriptors_length > 0)
 				{
 					sprintf_s(pszField, sizeof(pszField), "transport_descriptors()");
-					XMLElement* pxmlTransportDescriptorNode = pxmlDoc->NewBranchElement(pxmlStreamNode, pszField, NULL);
-					pxmlDoc->SetAnchor(pxmlTransportDescriptorNode);
+					XMLElement* pxmlTransportDescriptorNode = pxmlDoc->NewBranchElement(pxmlStreamNode, pszField, NULL, pstStream->transport_descriptors_length);
 
 					for (int descriptor_index = 0; descriptor_index < pstStream->transport_descriptor_count; descriptor_index++)
 					{
@@ -139,24 +132,16 @@ int DVB_SI_NIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, network_information_
 							break;
 						}
 					}
-
-					pxmlDoc->ClearAnchor(pxmlTransportDescriptorNode);
 				}
-
-				pxmlDoc->ClearAnchor(pxmlStreamNode);
 			}
-
-			pxmlDoc->ClearAnchor(pxmlStreamsLoopNode);
 		}
 
-		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", pnit_section->CRC_32, 32, "rpchof", NULL);
+		XMLElement* pxmlCrcNode = pxmlDoc->NewElementForBits(pxmlRootNode, "CRC_32", pnit_section->CRC_32, 32, "rpchof", NULL);
 		if (pnit_section->CRC_32_recalculated != pnit_section->CRC_32)
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", pnit_section->CRC_32_recalculated);
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
-
-		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	return rtcode;

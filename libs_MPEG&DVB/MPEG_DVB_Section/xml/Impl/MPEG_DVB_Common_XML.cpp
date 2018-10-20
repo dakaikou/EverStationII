@@ -100,18 +100,15 @@ int MPEG_DVB_present_reserved_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElemen
 
 		sprintf_s(pszFiled, sizeof(pszFiled), "unknown descriptor(tag: 0x%02X)", descriptor_tag);
 
-		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszFiled, NULL);
-		pxmlDoc->SetAnchor(pxmlDescriptorNode);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszFiled, NULL, preserved_descriptor->descriptor_size);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_tag", descriptor_tag, 8, "uimsbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_length", preserved_descriptor->descriptor_length, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", descriptor_tag, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", preserved_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
 		if (preserved_descriptor->descriptor_length > 0)
 		{
-			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlDescriptorNode, "descriptor_payload_buf[ ]", preserved_descriptor->descriptor_buf + 2, preserved_descriptor->descriptor_length, NULL);
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "descriptor_payload_buf[ ]", preserved_descriptor->descriptor_buf + 2, preserved_descriptor->descriptor_length, NULL);
 		}
-
-		pxmlDoc->ClearAnchor(pxmlDescriptorNode);
 	}
 	else
 	{

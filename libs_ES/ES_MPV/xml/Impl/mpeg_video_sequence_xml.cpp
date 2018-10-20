@@ -18,7 +18,7 @@ int mpgv_decode_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_length, HALForXML
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
-		XMLElement* pxmlUnknownNalNode = XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlParentNode, "unaligned nal[ ]", nal_buf, nal_length, NULL);
+		XMLElement* pxmlUnknownNalNode = pxmlDoc->NewElementForByteBuf(pxmlParentNode, "unaligned nal[ ]", nal_buf, nal_length, NULL);
 	}
 	else
 	{
@@ -34,7 +34,7 @@ int mpgv_decode_unknown_nal_to_xml(uint8_t* nal_buf, int nal_length, HALForXMLDo
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
-		XMLElement* pxmlUnknownNalNode = XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlParentNode, "unknown nal[ ]", nal_buf, nal_length, NULL);
+		XMLElement* pxmlUnknownNalNode = pxmlDoc->NewElementForByteBuf(pxmlParentNode, "unknown nal[ ]", nal_buf, nal_length, NULL);
 	}
 	else
 	{
@@ -73,11 +73,10 @@ int mpgv_present_sequence_header_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlP
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (psequence_header != NULL))
 	{
-		XMLElement* pxmlSequenceNode = pxmlDoc->NewElementForString(pxmlParentNode, "sequence_header()");
-		//int sequence_header_length = 12;
-		//if (psequence_header->load_intra_quantiser_matrix) sequence_header_length += 64;
-		//if (psequence_header->load_non_intra_quantiser_matrix) sequence_header_length += 64;
-		pxmlDoc->SetAnchor(pxmlSequenceNode);
+		int sequence_header_length = 12;
+		if (psequence_header->load_intra_quantiser_matrix) sequence_header_length += 64;
+		if (psequence_header->load_non_intra_quantiser_matrix) sequence_header_length += 64;
+		XMLElement* pxmlSequenceNode = pxmlDoc->NewBranchElement(pxmlParentNode, "sequence_header()", NULL, sequence_header_length);
 
 		pxmlDoc->NewElementForBits(pxmlSequenceNode, "sequence_header_code", psequence_header->sequence_header_code, 32, "bslbf", NULL);
 
@@ -104,8 +103,6 @@ int mpgv_present_sequence_header_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlP
 		{
 			pxmlDoc->NewElementForByteBuf(pxmlSequenceNode, "non_intra_quantiser_matrix[64]", psequence_header->non_intra_quantiser_matrix, 64);
 		}
-
-		pxmlDoc->ClearAnchor(pxmlSequenceNode);
 	}
 	else
 	{

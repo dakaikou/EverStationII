@@ -37,17 +37,17 @@ int MPEG2_DSMCC_DDM_PresentDownloadDataBlock_to_xml(HALForXMLDoc* pxmlDoc, XMLEl
 	{
 		XMLElement* pxmlSessionNode = pxmlParentNode;
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "moduleId", pDownloadDataBlock->moduleId, 2, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlSessionNode, "moduleId", pDownloadDataBlock->moduleId, 2, NULL);
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "moduleVersion", pDownloadDataBlock->moduleVersion, 1, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlSessionNode, "moduleVersion", pDownloadDataBlock->moduleVersion, 1, NULL);
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "reserved", pDownloadDataBlock->reserved, 1, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlSessionNode, "reserved", pDownloadDataBlock->reserved, 1, NULL);
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "blockNumber", pDownloadDataBlock->blockNumber, 2, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlSessionNode, "blockNumber", pDownloadDataBlock->blockNumber, 2, NULL);
 
 		if (pDownloadDataBlock->blockDataLength > 0)
 		{
-			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlSessionNode, "blockDataByte[ ]", pDownloadDataBlock->blockDataByte, pDownloadDataBlock->blockDataLength, NULL);
+			pxmlDoc->NewElementForByteBuf(pxmlSessionNode, "blockDataByte[ ]", pDownloadDataBlock->blockDataByte, pDownloadDataBlock->blockDataLength, NULL);
 		}
 	}
 	else

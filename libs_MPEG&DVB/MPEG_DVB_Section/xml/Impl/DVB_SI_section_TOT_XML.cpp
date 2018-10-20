@@ -27,28 +27,26 @@ int DVB_SI_TOT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, time_offset_section_
 	{
 		//¸ù½Úµã
 		sprintf_s(pszField, sizeof(pszField), "time_offset_section(table_id=0x%02X)", ptot_section->table_id);
-		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
-		pxmlDoc->SetAnchor(pxmlRootNode);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField, NULL, ptot_section->section_length + 3);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", ptot_section->table_id, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "table_id", ptot_section->table_id, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_syntax_indicator", ptot_section->section_syntax_indicator, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved_future_use", ptot_section->reserved_future_use, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", ptot_section->reserved0, 2, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_length", ptot_section->section_length, 12, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_syntax_indicator", ptot_section->section_syntax_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved_future_use", ptot_section->reserved_future_use, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved", ptot_section->reserved0, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_length", ptot_section->section_length, 12, "uimsbf", NULL);
 
 		DVB_SI_NumericCoding2Text_UTCTime(ptot_section->UTC_time, pszComment, sizeof(pszComment));
-		XMLDOC_NewElementForX64Bits(pxmlDoc, pxmlRootNode, "UTC_time", ptot_section->UTC_time, 40, "bslbf", pszComment);
+		pxmlDoc->NewElementForX64Bits(pxmlRootNode, "UTC_time", ptot_section->UTC_time, 40, "bslbf", pszComment);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved1", ptot_section->reserved1, 4, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "descriptors_loop_length", ptot_section->descriptors_loop_length, 12, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved1", ptot_section->reserved1, 4, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "descriptors_loop_length", ptot_section->descriptors_loop_length, 12, "uimsbf", NULL);
 
 		if (ptot_section->descriptors_loop_length > 0)
 		{
 			sprintf_s(pszField, sizeof(pszField), "descriptors_loop()");
 
-			XMLElement* pxmlDescriptorsLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
-			pxmlDoc->SetAnchor(pxmlDescriptorsLoopNode);
+			XMLElement* pxmlDescriptorsLoopNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL, ptot_section->descriptors_loop_length);
 
 			for (int descriptor_index = 0; descriptor_index < ptot_section->descriptor_count; descriptor_index++)
 			{
@@ -67,18 +65,14 @@ int DVB_SI_TOT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, time_offset_section_
 					break;
 				}
 			}
-
-			pxmlDoc->ClearAnchor(pxmlDescriptorsLoopNode);
 		}
 
-		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", ptot_section->CRC_32, 32, "rpchof", NULL);
+		XMLElement* pxmlCrcNode = pxmlDoc->NewElementForBits(pxmlRootNode, "CRC_32", ptot_section->CRC_32, 32, "rpchof", NULL);
 		if (ptot_section->CRC_32_recalculated != ptot_section->CRC_32)
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", ptot_section->CRC_32_recalculated);
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
-
-		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	return rtcode;

@@ -18,20 +18,17 @@ int DVB_SI_TDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, time_date_section_t*
 	{
 		//¸ù½Úµã
 		sprintf_s(pszField, sizeof(pszField), "time_date_section(table_id=0x%02X)", ptdt_section->table_id);
-		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
-		pxmlDoc->SetAnchor(pxmlRootNode);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField, NULL, ptdt_section->section_length + 3);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", ptdt_section->table_id, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "table_id", ptdt_section->table_id, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_syntax_indicator", ptdt_section->section_syntax_indicator, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved_future_use", ptdt_section->reserved_future_use, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", ptdt_section->reserved, 2, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_length", ptdt_section->section_length, 12, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_syntax_indicator", ptdt_section->section_syntax_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved_future_use", ptdt_section->reserved_future_use, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved", ptdt_section->reserved, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_length", ptdt_section->section_length, 12, "uimsbf", NULL);
 
 		DVB_SI_NumericCoding2Text_UTCTime(ptdt_section->UTC_time, pszComment, sizeof(pszComment));
-		XMLDOC_NewElementForX64Bits(pxmlDoc, pxmlRootNode, "UTC_time", ptdt_section->UTC_time, 40, "bslbf", pszComment);
-
-		pxmlDoc->ClearAnchor(pxmlRootNode);
+		pxmlDoc->NewElementForX64Bits(pxmlRootNode, "UTC_time", ptdt_section->UTC_time, 40, "bslbf", pszComment);
 	}
 
 	return rtcode;

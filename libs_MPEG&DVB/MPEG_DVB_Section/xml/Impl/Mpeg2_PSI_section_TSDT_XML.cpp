@@ -23,23 +23,22 @@ int MPEG2_PSI_TSDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_description_s
 
 		//¸ù½Úµã
 		sprintf_s(pszField, sizeof(pszField), "TS_description_section(table_id=0x%02X)", ptsdt_section->table_id);
-		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
-		pxmlDoc->SetAnchor(pxmlRootNode);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField, NULL, ptsdt_section->section_length + 3);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", ptsdt_section->table_id, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "table_id", ptsdt_section->table_id, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_syntax_indicator", ptsdt_section->section_syntax_indicator, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved_future_use", ptsdt_section->reserved_future_use, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved0", ptsdt_section->reserved0, 2, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_length", ptsdt_section->section_length, 12, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_syntax_indicator", ptsdt_section->section_syntax_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved_future_use", ptsdt_section->reserved_future_use, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved0", ptsdt_section->reserved0, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_length", ptsdt_section->section_length, 12, "bslbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved1", ptsdt_section->section_length, 18, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "version_number", ptsdt_section->version_number, 5, "uimsbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "current_next_indicator", ptsdt_section->current_next_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved1", ptsdt_section->section_length, 18, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "version_number", ptsdt_section->version_number, 5, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "current_next_indicator", ptsdt_section->current_next_indicator, 1, "bslbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_number", ptsdt_section->section_number, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_number", ptsdt_section->section_number, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "last_section_number", ptsdt_section->last_section_number, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "last_section_number", ptsdt_section->last_section_number, 8, "uimsbf", NULL);
 
 		int loop_length = ptsdt_section->section_length - 9;
 		if (loop_length > 0)
@@ -50,8 +49,7 @@ int MPEG2_PSI_TSDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_description_s
 			int		 descriptor_size;
 
 			sprintf_s(pszField, sizeof(pszField), "TS_description()");
-			XMLElement* pxmlDescriptionNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL);
-			pxmlDoc->SetAnchor(pxmlDescriptionNode);
+			XMLElement* pxmlDescriptionNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL, loop_length);
 
 			for (int descriptor_index = 0; descriptor_index < ptsdt_section->TS_descriptor_count; descriptor_index++)
 			{
@@ -70,19 +68,15 @@ int MPEG2_PSI_TSDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_description_s
 					break;
 				}
 			}
-
-			pxmlDoc->ClearAnchor(pxmlDescriptionNode);
 		}
 
-		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", ptsdt_section->CRC_32, 32, "rpchof", NULL);
+		XMLElement* pxmlCrcNode = pxmlDoc->NewElementForBits(pxmlRootNode, "CRC_32", ptsdt_section->CRC_32, 32, "rpchof", NULL);
 
 		if (ptsdt_section->CRC_32_recalculated != ptsdt_section->CRC_32)
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08x", ptsdt_section->CRC_32_recalculated);
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
-
-		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	return rtcode;

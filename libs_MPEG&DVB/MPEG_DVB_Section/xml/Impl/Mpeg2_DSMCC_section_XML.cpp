@@ -45,27 +45,26 @@ int MPEG2_DSMCC_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, dsmcc_section_t* pd
 	{
 		//根节点
 		sprintf_s(pszField, sizeof(pszField), "DSMCC_section(table_id=0x%02X)", pdsmcc_section->table_id);
-		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
-		pxmlDoc->SetAnchor(pxmlRootNode);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField, NULL, pdsmcc_section->dsmcc_section_length + 3);
 
 		if ((pdsmcc_section->table_id >= 0x38) && (pdsmcc_section->table_id <= 0x3F))
 		{
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pdsmcc_section->table_id, 8, "uimsbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "table_id", pdsmcc_section->table_id, 8, "uimsbf", NULL);
 
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_syntax_indicator", pdsmcc_section->section_syntax_indicator, 1, "bslbf", NULL);
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "private_indicator", pdsmcc_section->private_indicator, 1, "bslbf", NULL);
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", pdsmcc_section->reserved0, 2, "bslbf", NULL);
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "dsmcc_section_length", pdsmcc_section->dsmcc_section_length, 12, "uimsbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "section_syntax_indicator", pdsmcc_section->section_syntax_indicator, 1, "bslbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "private_indicator", pdsmcc_section->private_indicator, 1, "bslbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "reserved", pdsmcc_section->reserved0, 2, "bslbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "dsmcc_section_length", pdsmcc_section->dsmcc_section_length, 12, "uimsbf", NULL);
 
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id_extension", pdsmcc_section->table_id_extension, 16, "uimsbf", "transaction_id<15:0>");
+			pxmlDoc->NewElementForBits(pxmlRootNode, "table_id_extension", pdsmcc_section->table_id_extension, 16, "uimsbf", "transaction_id<15:0>");
 
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", pdsmcc_section->reserved1, 2, "bslbf", NULL);
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "version_number", pdsmcc_section->version_number, 5, "uimsbf", NULL);
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "current_next_indicator", pdsmcc_section->current_next_indicator, 1, "bslbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "reserved", pdsmcc_section->reserved1, 2, "bslbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "version_number", pdsmcc_section->version_number, 5, "uimsbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "current_next_indicator", pdsmcc_section->current_next_indicator, 1, "bslbf", NULL);
 
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_number", pdsmcc_section->section_number, 8, "uimsbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "section_number", pdsmcc_section->section_number, 8, "uimsbf", NULL);
 
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "last_section_number", pdsmcc_section->last_section_number, 8, "uimsbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "last_section_number", pdsmcc_section->last_section_number, 8, "uimsbf", NULL);
 
 			int section_payload_length = pdsmcc_section->dsmcc_section_length - 4 - 5;
 
@@ -80,8 +79,7 @@ int MPEG2_DSMCC_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, dsmcc_section_t* pd
 				{
 					sprintf_s(pszField, sizeof(pszField), "userNetworkMessage()");
 				}
-				XMLElement* pxmlMessageNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL);
-				pxmlDoc->SetAnchor(pxmlMessageNode);
+				XMLElement* pxmlMessageNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL, section_payload_length);
 
 				//包含DownloadServerInitiate、DownloadInfoIndication、DownloadCancel
 
@@ -96,16 +94,15 @@ int MPEG2_DSMCC_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, dsmcc_section_t* pd
 				{
 					sprintf_s(pszField, sizeof(pszField), "dsmccMessageHeader()");
 				}
-				XMLElement* pxmlMessageHeaderNode = pxmlDoc->NewBranchElement(pxmlMessageNode, pszField, NULL);
-				pxmlDoc->SetAnchor(pxmlMessageHeaderNode);
+				XMLElement* pxmlMessageHeaderNode = pxmlDoc->NewBranchElement(pxmlMessageNode, pszField, NULL, message_header_length);
 
-				XMLDOC_NewElementForByteMode(pxmlDoc, pxmlMessageHeaderNode, "protocolDiscriminator", pdsmccMessageHeader->protocolDiscriminator, 1, NULL);
+				pxmlDoc->NewElementForByteMode(pxmlMessageHeaderNode, "protocolDiscriminator", pdsmccMessageHeader->protocolDiscriminator, 1, NULL);
 
 				MPEG2_DSMCC_NumericCoding2Text_dsmccType(pdsmccMessageHeader->dsmccType, pszComment, sizeof(pszComment));
-				XMLDOC_NewElementForByteMode(pxmlDoc, pxmlMessageHeaderNode, "dsmccType", pdsmccMessageHeader->dsmccType, 1, pszComment);
+				pxmlDoc->NewElementForByteMode(pxmlMessageHeaderNode, "dsmccType", pdsmccMessageHeader->dsmccType, 1, pszComment);
 
 				MPEG2_DSMCC_NumericCoding2Text_messageId(pdsmccMessageHeader->messageId, pszComment, sizeof(pszComment));
-				XMLDOC_NewElementForByteMode(pxmlDoc, pxmlMessageHeaderNode, "messageId", pdsmccMessageHeader->messageId, 2, pszComment);
+				pxmlDoc->NewElementForByteMode(pxmlMessageHeaderNode, "messageId", pdsmccMessageHeader->messageId, 2, pszComment);
 
 				if (pdsmcc_section->table_id == TABLE_ID_DSMCC_DDM)
 				{
@@ -115,33 +112,28 @@ int MPEG2_DSMCC_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, dsmcc_section_t* pd
 				{
 					sprintf_s(pszField, sizeof(pszField), "transactionId()");
 				}
-				XMLDOC_NewElementForByteMode(pxmlDoc, pxmlMessageHeaderNode, pszField, pdsmccMessageHeader->TxOrDnloadID, 4, NULL);
+				pxmlDoc->NewElementForByteMode(pxmlMessageHeaderNode, pszField, pdsmccMessageHeader->TxOrDnloadID, 4, NULL);
 
-				XMLDOC_NewElementForByteMode(pxmlDoc, pxmlMessageHeaderNode, "reserved", pdsmccMessageHeader->reserved, 1, NULL);
+				pxmlDoc->NewElementForByteMode(pxmlMessageHeaderNode, "reserved", pdsmccMessageHeader->reserved, 1, NULL);
 
-				XMLDOC_NewElementForByteMode(pxmlDoc, pxmlMessageHeaderNode, "adaptationLength", pdsmccMessageHeader->adaptationLength, 1, NULL);
+				pxmlDoc->NewElementForByteMode(pxmlMessageHeaderNode, "adaptationLength", pdsmccMessageHeader->adaptationLength, 1, NULL);
 
-				XMLDOC_NewElementForByteMode(pxmlDoc, pxmlMessageHeaderNode, "messageLength", pdsmccMessageHeader->messageLength, 2, NULL);
+				pxmlDoc->NewElementForByteMode(pxmlMessageHeaderNode, "messageLength", pdsmccMessageHeader->messageLength, 2, NULL);
 
 				assert(pdsmccMessageHeader->adaptationLength <= pdsmccMessageHeader->messageLength);
 				//messageLength解析错误，将是灾难性的
 
 				if (pdsmccMessageHeader->adaptationLength > 0)
 				{
-					XMLElement* pxmlAdaptationHeaderNode = pxmlDoc->NewBranchElement(pxmlMessageHeaderNode, "dsmccAdaptationHeader()", NULL);
-					pxmlDoc->SetAnchor(pxmlAdaptationHeaderNode);
+					XMLElement* pxmlAdaptationHeaderNode = pxmlDoc->NewBranchElement(pxmlMessageHeaderNode, "dsmccAdaptationHeader()", NULL, pdsmccMessageHeader->adaptationLength);
 
-					XMLDOC_NewElementForByteMode(pxmlDoc, pxmlAdaptationHeaderNode, "adaptationType", pdsmccMessageHeader->dsmccAdaptationHeader.adaptationType, 1, NULL);
+					pxmlDoc->NewElementForByteMode(pxmlAdaptationHeaderNode, "adaptationType", pdsmccMessageHeader->dsmccAdaptationHeader.adaptationType, 1, NULL);
 
 					if (pdsmccMessageHeader->dsmccAdaptationHeader.adaptationDataLength > 0)
 					{
-						XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlAdaptationHeaderNode, "adaptationDataByte[ ]", pdsmccMessageHeader->dsmccAdaptationHeader.adaptationDataByte, pdsmccMessageHeader->dsmccAdaptationHeader.adaptationDataLength, NULL);
+						pxmlDoc->NewElementForByteBuf(pxmlAdaptationHeaderNode, "adaptationDataByte[ ]", pdsmccMessageHeader->dsmccAdaptationHeader.adaptationDataByte, pdsmccMessageHeader->dsmccAdaptationHeader.adaptationDataLength, NULL);
 					}
-
-					pxmlDoc->ClearAnchor(pxmlAdaptationHeaderNode);
 				}
-
-				pxmlDoc->ClearAnchor(pxmlMessageHeaderNode);
 
 				if (pdsmcc_section->dsmccMessagePayloadLength > 0)
 				{
@@ -168,8 +160,7 @@ int MPEG2_DSMCC_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, dsmcc_section_t* pd
 						sprintf_s(pszField, sizeof(pszField), "dsmccMessagePayload[ ]");
 					}
 
-					XMLElement* pxmlMessagePayloadNode = pxmlDoc->NewBranchElement(pxmlMessageNode, pszField, NULL);
-					pxmlDoc->SetAnchor(pxmlMessagePayloadNode);
+					XMLElement* pxmlMessagePayloadNode = pxmlDoc->NewBranchElement(pxmlMessageNode, pszField, NULL, pdsmcc_section->dsmccMessagePayloadLength);
 
 					if (pdsmccMessageHeader->messageId == 0x1002)			//DII
 					{
@@ -185,13 +176,9 @@ int MPEG2_DSMCC_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, dsmcc_section_t* pd
 					}
 					else
 					{
-						XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlMessagePayloadNode, "byte_char[ ]", pdsmcc_section->dsmccMessagePayloadBuf, pdsmcc_section->dsmccMessagePayloadLength, NULL);
+						pxmlDoc->NewElementForByteBuf(pxmlMessagePayloadNode, "byte_char[ ]", pdsmcc_section->dsmccMessagePayloadBuf, pdsmcc_section->dsmccMessagePayloadLength, NULL);
 					}
-
-					pxmlDoc->ClearAnchor(pxmlMessagePayloadNode);
 				}
-
-				pxmlDoc->ClearAnchor(pxmlMessageNode);
 			}
 			else
 			{
@@ -209,7 +196,7 @@ int MPEG2_DSMCC_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, dsmcc_section_t* pd
 				sprintf_s(pszMnemonic, sizeof(pszMnemonic), "uimsbf");
 			}
 
-			XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, pszField, pdsmcc_section->encodedCheckValue, 32, pszMnemonic, NULL);
+			XMLElement* pxmlCrcNode = pxmlDoc->NewElementForBits(pxmlRootNode, pszField, pdsmcc_section->encodedCheckValue, 32, pszMnemonic, NULL);
 			if (pdsmcc_section->recalculatedCheckValue != pdsmcc_section->encodedCheckValue)
 			{
 				sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", pdsmcc_section->recalculatedCheckValue);
@@ -222,8 +209,6 @@ int MPEG2_DSMCC_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, dsmcc_section_t* pd
 			pxmlRootNode->SetAttribute("error", pszComment);
 			rtcode = SECTION_PARSE_SYNTAX_ERROR;						//table_id解析错误
 		}
-
-		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 	else
 	{

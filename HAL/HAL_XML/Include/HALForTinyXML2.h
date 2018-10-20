@@ -14,16 +14,12 @@ typedef struct
 {
 	int offset;
 	int i_left;
+
+	int max_length;
+
 } BITS_TRACER_t;
 
 using namespace tinyxml2;
-
-#define XMLDOC_NewElementForString(pxmlDoc,pxmlParentNode,pszField,comment)							 pxmlDoc->NewElementForString(pxmlParentNode, pszField,comment)
-#define XMLDOC_NewElementForBits(pxmlDoc,pxmlParentNode,pszField,value,bits,mnemonic,comment)		 pxmlDoc->NewElementForBits(pxmlParentNode, pszField, value, bits, mnemonic, comment)
-#define XMLDOC_NewElementForX64Bits(pxmlDoc,pxmlParentNode,pszField,value,bits,mnemonic,comment)	 pxmlDoc->NewElementForX64Bits(pxmlParentNode, pszField, value, bits, mnemonic, comment)
-#define XMLDOC_NewElementForByteBuf(pxmlDoc,pxmlParentNode,pszField,buf,length,comment)				 pxmlDoc->NewElementForByteBuf(pxmlParentNode, pszField, buf, length, comment)
-
-#define XMLDOC_NewElementForByteMode(pxmlDoc,pxmlParentNode,pszField,value,bytes,comment)			 pxmlDoc->NewElementForByteMode(pxmlParentNode, pszField, value, bytes, comment)
 
 class _CDL_EXPORT HALForXMLDoc : public tinyxml2::XMLDocument
 {
@@ -53,15 +49,12 @@ public:
 	//int GetSyncOffset(void);
 	void Align(void);
 
-	void SetAnchor(XMLElement* pxmlBranchNode, int offset = -1);
+	void SetAnchor(XMLElement* pxmlBranchNode);
 	void ClearAnchor(XMLElement* pxmlBranchNode);
 
 	//New branch node
-	XMLElement* NewRootElement(const char* key_name, const char* pszComment = NULL);
-	//XMLElement* CloseRootElement(void);
-
-	XMLElement* NewBranchElement(XMLElement* pxmlParent, const char* key_name, const char* pszComment = NULL);
-	//void CloseBranchElement(XMLElement* pxmlBranchNode);
+	XMLElement* NewRootElement(const char* key_name, const char* pszComment = NULL, int field_length = -1);
+	XMLElement* NewBranchElement(XMLElement* pxmlParent, const char* key_name, const char* pszComment = NULL, int field_length = -1, int sync_offset = -1);
 
 	//New leaf node
 	XMLElement * NewElementForString(XMLElement* pxmlParent, const char* key_name, const char* pszComment = NULL);

@@ -10,6 +10,7 @@ HALForXMLDoc::HALForXMLDoc(void)
 {
 	m_bs_tracer.offset = 0;
 	m_bs_tracer.i_left = 8;
+	m_bs_tracer.max_length = -1;
 
 	m_nTreeLevel = 0;
 	for (int i = 0; i < MAX_TREE_LEVEL; i++)
@@ -40,7 +41,8 @@ void HALForXMLDoc::SetSyncOffset(int offset)
 //	return m_bs_tracer.offset;
 //}
 
-void HALForXMLDoc::SetAnchor(XMLElement* pxmlBranchNode, int offset)
+//if we don't know the field length, then we can use SetAnchor() and ClearAncher() paire to trake it 
+void HALForXMLDoc::SetAnchor(XMLElement* pxmlBranchNode)
 {
 	if (pxmlBranchNode != NULL)
 	{
@@ -51,12 +53,12 @@ void HALForXMLDoc::SetAnchor(XMLElement* pxmlBranchNode, int offset)
 
 		m_stBranchStack[m_nTreeLevel-1].pxmlBranchNode = pxmlBranchNode;
 
-		if (offset >= 0)
-		{
-			SetSyncOffset(offset);
-		}
+		//if (offset >= 0)
+		//{
+		//	SetSyncOffset(offset);
+		//}
 
-		pxmlBranchNode->SetAttribute("offset", m_bs_tracer.offset);
+		//pxmlBranchNode->SetAttribute("offset", m_bs_tracer.offset);
 		//m_stBranchStack[m_nTreeLevel-1].nOffset = m_bs_tracer.offset;
 	}
 }
@@ -96,34 +98,38 @@ void HALForXMLDoc::Align(void)
 	}
 }
 
-XMLElement* HALForXMLDoc::NewRootElement(const char* key_name, const char* pszComment)
+XMLElement* HALForXMLDoc::NewRootElement(const char* key_name, const char* pszComment, int field_length)
 {
-	//XMLElement* pxmlNewElement = XMLDocument::NewElement(key_name);
-
-	//if (pszComment != NULL)
-	//{
-	//	pxmlNewElement->SetAttribute("comment", pszComment);
-	//}
-
-	//InsertEndChild(pxmlNewElement);
-
 	m_nTreeLevel = 0;
 	for (int i = 0; i < MAX_TREE_LEVEL; i++)
 	{
 		m_stBranchStack[i].pxmlBranchNode = NULL;
 	}
-	//m_lastBranchNode = NULL;
 
-	return NewBranchElement(NULL, key_name, pszComment);
+	return NewBranchElement(NULL, key_name, pszComment, field_length, 0);
 }
 
-XMLElement * HALForXMLDoc::NewElementForString(XMLElement* pxmlParent, const char* key_name, const char* pszComment)
+// field_length -- the branch element length, default value is -1
+// sync_offset -- the branch element offset, default value is -1, at this chance we can reset the offset
+XMLElement * HALForXMLDoc::NewBranchElement(XMLElement* pxmlParent, const char* key_name, const char* pszComment, int field_length, int sync_offset)
 {
 	XMLElement* pxmlNewElement = XMLDocument::NewElement(key_name);
 
 	if (pszComment != NULL)
 	{
 		pxmlNewElement->SetAttribute("comment", pszComment);
+	}
+
+	if (sync_offset >= 0)	//at this chance, we can resync the offset.
+	{
+		SetSyncOffset(sync_offset);
+	}
+	pxmlNewElement->SetAttribute("offset", m_bs_tracer.offset);
+
+	if (field_length > 0)	//if the field length is known, then set it.
+	{
+		pxmlNewElement->SetAttribute("length", field_length);
+		pxmlNewElement->SetAttribute("field_length", field_length);
 	}
 
 	if (pxmlParent != NULL)
@@ -140,7 +146,7 @@ XMLElement * HALForXMLDoc::NewElementForString(XMLElement* pxmlParent, const cha
 	return pxmlNewElement;
 }
 
-XMLElement * HALForXMLDoc::NewBranchElement(XMLElement* pxmlParent, const char* key_name, const char* pszComment)
+XMLElement * HALForXMLDoc::NewElementForString(XMLElement* pxmlParent, const char* key_name, const char* pszComment)
 {
 	XMLElement* pxmlNewElement = XMLDocument::NewElement(key_name);
 

@@ -38,8 +38,7 @@ int MPEG2_PSI_decode_video_stream_descriptor_to_xml(uint8_t *buf, int length, HA
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
-		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, "video_stream_descriptor()", NULL);
-		pxmlDoc->SetAnchor(pxmlDescriptorNode);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, "video_stream_descriptor()", NULL, pvideo_stream_descriptor->descriptor_length + 2);
 
 		sprintf_s(pszComment, sizeof(pszComment), "tag: 0x%02X, %d×Ö½Ú", pvideo_stream_descriptor->descriptor_tag, length);
 		pxmlDescriptorNode->SetAttribute("comment", pszComment);
@@ -50,31 +49,29 @@ int MPEG2_PSI_decode_video_stream_descriptor_to_xml(uint8_t *buf, int length, HA
 			pxmlDescriptorNode->SetAttribute("error", pszComment);
 		}
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_tag", pvideo_stream_descriptor->descriptor_tag, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pvideo_stream_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_length", pvideo_stream_descriptor->descriptor_length, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pvideo_stream_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "multiple_frame_rate_flag", pvideo_stream_descriptor->multiple_frame_rate_flag, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "multiple_frame_rate_flag", pvideo_stream_descriptor->multiple_frame_rate_flag, 1, "bslbf", NULL);
 		MPGV_DecodeFrameRateCodetoText(pvideo_stream_descriptor->frame_rate_code, pszComment, sizeof(pszComment));
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "frame_rate_code", pvideo_stream_descriptor->frame_rate_code, 4, "uimsbf", pszComment);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "MPEG_1_only_flag", pvideo_stream_descriptor->MPEG_1_only_flag, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "constrained_parameter_flag", pvideo_stream_descriptor->constrained_parameter_flag, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "still_picture_flag", pvideo_stream_descriptor->still_picture_flag, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "frame_rate_code", pvideo_stream_descriptor->frame_rate_code, 4, "uimsbf", pszComment);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "MPEG_1_only_flag", pvideo_stream_descriptor->MPEG_1_only_flag, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "constrained_parameter_flag", pvideo_stream_descriptor->constrained_parameter_flag, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "still_picture_flag", pvideo_stream_descriptor->still_picture_flag, 1, "bslbf", NULL);
 
 		if (pvideo_stream_descriptor->MPEG_1_only_flag == 0)
 		{
 			MPGV_DecodeProfileCodetoText((pvideo_stream_descriptor->profile_and_level_indication & 0x70) >> 4, pszProfile, sizeof(pszProfile));
 			MPGV_DecodeLevelCodetoText((pvideo_stream_descriptor->profile_and_level_indication & 0x0F), pszLevel, sizeof(pszLevel));
 			sprintf_s(pszComment, sizeof(pszComment), "%s profile @ %s level", pszProfile, pszLevel);
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "profile_and_level_indication", pvideo_stream_descriptor->profile_and_level_indication, 8, "uimsbf", pszComment);
+			pxmlDoc->NewElementForBits(pxmlDescriptorNode, "profile_and_level_indication", pvideo_stream_descriptor->profile_and_level_indication, 8, "uimsbf", pszComment);
 
 			MPGV_DecodeChromaFormatCodetoText(pvideo_stream_descriptor->chroma_format, pszComment, sizeof(pszComment));
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "chroma_format", pvideo_stream_descriptor->chroma_format, 2, "uimsbf", pszComment);
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "frame_rate_extension_flag", pvideo_stream_descriptor->frame_rate_extension_flag, 1, "uimsbf", NULL);
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "reserved", pvideo_stream_descriptor->reserved, 5, "uimsbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlDescriptorNode, "chroma_format", pvideo_stream_descriptor->chroma_format, 2, "uimsbf", pszComment);
+			pxmlDoc->NewElementForBits(pxmlDescriptorNode, "frame_rate_extension_flag", pvideo_stream_descriptor->frame_rate_extension_flag, 1, "uimsbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlDescriptorNode, "reserved", pvideo_stream_descriptor->reserved, 5, "uimsbf", NULL);
 		}
-
-		pxmlDoc->ClearAnchor(pxmlDescriptorNode);
 	}
 
 	if (pVideoStreamDescriptor == NULL)
@@ -282,24 +279,21 @@ int MPEG2_PSI_decode_CA_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc
 		MPEG_DVB_NumericCoding2Text_CASystemID(pCA_descriptor->CA_system_ID, pszCASystem, sizeof(pszCASystem));
 		sprintf_s(pszField, sizeof(pszField), "CA_descriptor(<tag: 0x%02X, %d×Ö½Ú, CA_PID=0x%04X, %s>)", pCA_descriptor->descriptor_tag, length, pCA_descriptor->CA_PID, pszCASystem);
 
-		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL);
-		pxmlDoc->SetAnchor(pxmlDescriptorNode);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, pCA_descriptor->descriptor_length + 2);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_tag", pCA_descriptor->descriptor_tag, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pCA_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_length", pCA_descriptor->descriptor_length, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pCA_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "CA_system_ID", pCA_descriptor->CA_system_ID, 16, "uimsbf", pszCASystem);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "CA_system_ID", pCA_descriptor->CA_system_ID, 16, "uimsbf", pszCASystem);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "reserved", pCA_descriptor->reserved, 3, "uimsbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "CA_PID", pCA_descriptor->CA_PID, 13, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "reserved", pCA_descriptor->reserved, 3, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "CA_PID", pCA_descriptor->CA_PID, 13, "uimsbf", NULL);
 
 		if (pCA_descriptor->private_data_length > 0)
 		{
-			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlDescriptorNode, "private_data_byte[ ]", pCA_descriptor->private_data_byte, pCA_descriptor->private_data_length, NULL);
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "private_data_byte[ ]", pCA_descriptor->private_data_byte, pCA_descriptor->private_data_length, NULL);
 		}
-
-		pxmlDoc->ClearAnchor(pxmlDescriptorNode);
 	}
 
 	if (pCADescriptor == NULL)

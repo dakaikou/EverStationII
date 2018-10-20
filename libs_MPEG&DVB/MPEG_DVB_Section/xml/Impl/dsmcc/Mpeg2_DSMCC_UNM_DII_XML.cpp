@@ -38,32 +38,30 @@ int	MPEG2_DSMCC_UNM_PresentDownloadInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, 
 		//XMLElement* pxmlSessionNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "DownloadInfoIndication()", NULL);
 		XMLElement* pxmlSessionNode = pxmlParentNode;
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "downloadId", pDownloadInfoIndication->downloadId, 4, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlSessionNode, "downloadId", pDownloadInfoIndication->downloadId, 4, NULL);
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "blockSize", pDownloadInfoIndication->blockSize, 2, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlSessionNode, "blockSize", pDownloadInfoIndication->blockSize, 2, NULL);
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "windowSize", pDownloadInfoIndication->windowSize, 1, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlSessionNode, "windowSize", pDownloadInfoIndication->windowSize, 1, NULL);
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "ackPeriod", pDownloadInfoIndication->ackPeriod, 1, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlSessionNode, "ackPeriod", pDownloadInfoIndication->ackPeriod, 1, NULL);
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "tCDownloadWindow", pDownloadInfoIndication->tCDownloadWindow, 4, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlSessionNode, "tCDownloadWindow", pDownloadInfoIndication->tCDownloadWindow, 4, NULL);
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "tCDownloadScenario", pDownloadInfoIndication->tCDownloadScenario, 4, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlSessionNode, "tCDownloadScenario", pDownloadInfoIndication->tCDownloadScenario, 4, NULL);
 
 		compatibilityDescriptor_t* pcompatibilityDescriptor = &(pDownloadInfoIndication->compatibilityDescriptor);
-		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlSessionNode, "compatibilityDescriptor()", NULL);
-		pxmlDoc->SetAnchor(pxmlDescriptorNode);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlSessionNode, "compatibilityDescriptor()", NULL, 2 + pcompatibilityDescriptor->compatibilityDescriptorLength);
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlDescriptorNode, "compatibilityDescriptorLength", pcompatibilityDescriptor->compatibilityDescriptorLength, 2, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlDescriptorNode, "compatibilityDescriptorLength", pcompatibilityDescriptor->compatibilityDescriptorLength, 2, NULL);
 
 		if (pDownloadInfoIndication->compatibilityDescriptor.compatibilityDescriptorLength > 0)
 		{
-			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlDescriptorNode, "compatibilityDescriptorBuf[ ]", pcompatibilityDescriptor->compatibilityDescriptorBuf, pcompatibilityDescriptor->compatibilityDescriptorLength, NULL);
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "compatibilityDescriptorBuf[ ]", pcompatibilityDescriptor->compatibilityDescriptorBuf, pcompatibilityDescriptor->compatibilityDescriptorLength, NULL);
 		}
-		pxmlDoc->ClearAnchor(pxmlDescriptorNode);
 
 		//defined in EN 301192
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "numberOfModules", pDownloadInfoIndication->numberOfModules, 2, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlSessionNode, "numberOfModules", pDownloadInfoIndication->numberOfModules, 2, NULL);
 
 		if (pDownloadInfoIndication->numberOfModules > 0)
 		{
@@ -73,16 +71,15 @@ int	MPEG2_DSMCC_UNM_PresentDownloadInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, 
 
 				sprintf_s(pszField, sizeof(pszField), "MODULE[%d]()", moduleIndex);
 				sprintf_s(pszComment, "ID=0x%04X, size=%d, ver=%d", pmoduleInfo->moduleId, pmoduleInfo->moduleSize, pmoduleInfo->moduleVersion);
-				XMLElement* pxmlModuleNode = pxmlDoc->NewBranchElement(pxmlSessionNode, pszField, pszComment);
-				pxmlDoc->SetAnchor(pxmlModuleNode);
+				XMLElement* pxmlModuleNode = pxmlDoc->NewBranchElement(pxmlSessionNode, pszField, pszComment, 8 + pmoduleInfo->moduleInfoLength);
 
-				XMLDOC_NewElementForByteMode(pxmlDoc, pxmlModuleNode, "moduleId", pmoduleInfo->moduleId, 2, NULL);
+				pxmlDoc->NewElementForByteMode(pxmlModuleNode, "moduleId", pmoduleInfo->moduleId, 2, NULL);
 
-				XMLDOC_NewElementForByteMode(pxmlDoc, pxmlModuleNode, "moduleSize", pmoduleInfo->moduleSize, 4, NULL);
+				pxmlDoc->NewElementForByteMode(pxmlModuleNode, "moduleSize", pmoduleInfo->moduleSize, 4, NULL);
 
-				XMLDOC_NewElementForByteMode(pxmlDoc, pxmlModuleNode, "moduleVersion", pmoduleInfo->moduleVersion, 1, NULL);
+				pxmlDoc->NewElementForByteMode(pxmlModuleNode, "moduleVersion", pmoduleInfo->moduleVersion, 1, NULL);
 
-				XMLDOC_NewElementForByteMode(pxmlDoc, pxmlModuleNode, "moduleInfoLength", pmoduleInfo->moduleInfoLength, 1, NULL);
+				pxmlDoc->NewElementForByteMode(pxmlModuleNode, "moduleInfoLength", pmoduleInfo->moduleInfoLength, 1, NULL);
 
 				if (pmoduleInfo->moduleInfoLength > 0)
 				{
@@ -99,8 +96,7 @@ int	MPEG2_DSMCC_UNM_PresentDownloadInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, 
 						sprintf_s(pszField, sizeof(pszField), "Unknown");
 					}
 
-					XMLElement* pxmlModuleInfoByte = pxmlDoc->NewBranchElement(pxmlModuleNode, pszField, NULL);
-					pxmlDoc->SetAnchor(pxmlModuleInfoByte);
+					XMLElement* pxmlModuleInfoByte = pxmlDoc->NewBranchElement(pxmlModuleNode, pszField, NULL, pmoduleInfo->moduleInfoLength);
 
 					if (pmoduleInfo->data_broadcast_type == 0x0006)			//DC
 					{
@@ -112,21 +108,17 @@ int	MPEG2_DSMCC_UNM_PresentDownloadInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, 
 					}
 					else
 					{
-						XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlModuleInfoByte, "moduleInfoByte[ ]", pmoduleInfo->moduleInfoByte, pmoduleInfo->moduleInfoLength, NULL);
+						pxmlDoc->NewElementForByteBuf(pxmlModuleInfoByte, "moduleInfoByte[ ]", pmoduleInfo->moduleInfoByte, pmoduleInfo->moduleInfoLength, NULL);
 					}
-
-					pxmlDoc->ClearAnchor(pxmlModuleInfoByte);
 				}
-
-				pxmlDoc->ClearAnchor(pxmlModuleNode);
 			}
 		}
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "privateDataLength", pDownloadInfoIndication->privateDataLength, 2, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlSessionNode, "privateDataLength", pDownloadInfoIndication->privateDataLength, 2, NULL);
 
 		if (pDownloadInfoIndication->privateDataLength > 0)
 		{
-			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlSessionNode, "privateDataByte[ ]", pDownloadInfoIndication->privateDataByte, pDownloadInfoIndication->privateDataLength, NULL);
+			pxmlDoc->NewElementForByteBuf(pxmlSessionNode, "privateDataByte[ ]", pDownloadInfoIndication->privateDataByte, pDownloadInfoIndication->privateDataLength, NULL);
 		}
 	}
 	else

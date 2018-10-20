@@ -43,39 +43,37 @@ int DVB_MHP_AIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, application_informa
 	if ((pxmlDoc != NULL) && (pait_section != NULL))
 	{
 		//根节点
-		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement("application_information_section()");
-		pxmlDoc->SetAnchor(pxmlRootNode);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement("application_information_section()", NULL, pait_section->section_length + 3);
 
 		//AIT section最小长度16字节
 		if (pait_section->table_id == TABLE_ID_AIT)
 		{
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pait_section->table_id, 8, "uimsbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "table_id", pait_section->table_id, 8, "uimsbf", NULL);
 
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_syntax_indicator", pait_section->section_syntax_indicator, 1, "bslbf", NULL);
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved_future_use", pait_section->reserved_future_use0, 1, "bslbf", NULL);
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", pait_section->reserved0, 2, "bslbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "section_syntax_indicator", pait_section->section_syntax_indicator, 1, "bslbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "reserved_future_use", pait_section->reserved_future_use0, 1, "bslbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "reserved", pait_section->reserved0, 2, "bslbf", NULL);
 
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_length", pait_section->section_length, 12, "uimsbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "section_length", pait_section->section_length, 12, "uimsbf", NULL);
 
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "test_application_flag", pait_section->test_application_flag, 1, "bslbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "test_application_flag", pait_section->test_application_flag, 1, "bslbf", NULL);
 
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "application_type", pait_section->application_type, 15, "uimsbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "application_type", pait_section->application_type, 15, "uimsbf", NULL);
 
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", pait_section->reserved1, 2, "bslbf", NULL);
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "version_number", pait_section->version_number, 5, "uimsbf", NULL);
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "current_next_indicator", pait_section->current_next_indicator, 1, "bslbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "reserved", pait_section->reserved1, 2, "bslbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "version_number", pait_section->version_number, 5, "uimsbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "current_next_indicator", pait_section->current_next_indicator, 1, "bslbf", NULL);
 
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_number", pait_section->section_number, 8, "uimsbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "section_number", pait_section->section_number, 8, "uimsbf", NULL);
 
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "last_section_number", pait_section->last_section_number, 8, "uimsbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "last_section_number", pait_section->last_section_number, 8, "uimsbf", NULL);
 
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved_future_use1", pait_section->reserved_future_use1, 4, "bslbf", NULL);
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "common_descriptors_length", pait_section->common_descriptors_length, 12, "uimsbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "reserved_future_use1", pait_section->reserved_future_use1, 4, "bslbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "common_descriptors_length", pait_section->common_descriptors_length, 12, "uimsbf", NULL);
 
 			if (pait_section->common_descriptors_length > 0)
 			{
-				XMLElement* pxmlDescriptorsNode = pxmlDoc->NewBranchElement(pxmlRootNode, "AIT描述符循环()", NULL);
-				pxmlDoc->SetAnchor(pxmlDescriptorsNode);
+				XMLElement* pxmlDescriptorsNode = pxmlDoc->NewBranchElement(pxmlRootNode, "AIT描述符循环()", NULL, pait_section->common_descriptors_length);
 
 				for (int descriptor_index = 0; descriptor_index < pait_section->common_descriptor_count; descriptor_index++)
 				{
@@ -95,45 +93,36 @@ int DVB_MHP_AIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, application_informa
 						break;
 					}
 				}
-
-				pxmlDoc->ClearAnchor(pxmlDescriptorsNode);
 			}
 
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved_future_use", pait_section->reserved_future_use2, 4, "bslbf", NULL);
-			XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "application_loop_length", pait_section->application_loop_length, 12, "uimsbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "reserved_future_use", pait_section->reserved_future_use2, 4, "bslbf", NULL);
+			pxmlDoc->NewElementForBits(pxmlRootNode, "application_loop_length", pait_section->application_loop_length, 12, "uimsbf", NULL);
 
 			if (pait_section->application_loop_length > 0)
 			{
-				XMLElement* pxmlApplicationsLoopNode = pxmlDoc->NewBranchElement(pxmlRootNode, "应用循环()", NULL);
-				pxmlDoc->SetAnchor(pxmlApplicationsLoopNode);
+				XMLElement* pxmlApplicationsLoopNode = pxmlDoc->NewBranchElement(pxmlRootNode, "应用循环()", NULL, pait_section->application_loop_length);
 
 				for (int application_index = 0; application_index < pait_section->application_count; application_index ++)
 				{
 					application_t* papplication = pait_section->applications + application_index;
 
+					int application_description_length = 9 + papplication->application_descriptors_loop_length;
 					sprintf_s(pszField, sizeof(pszField), "应用[%d](ID:0x%04X)", application_index, papplication->application_identifier.application_id);
-					XMLElement* pxmlApplicationNode = pxmlDoc->NewBranchElement(pxmlApplicationsLoopNode, pszField, NULL);
-					pxmlDoc->SetAnchor(pxmlApplicationNode);
+					XMLElement* pxmlApplicationNode = pxmlDoc->NewBranchElement(pxmlApplicationsLoopNode, pszField, NULL, application_description_length);
 
 					//解析applications
-					XMLElement* pxmlIdentifierNode = XMLDOC_NewElementForString(pxmlDoc, pxmlApplicationNode, "application_identifier()", NULL);
-					pxmlDoc->SetAnchor(pxmlIdentifierNode);
+					XMLElement* pxmlIdentifierNode = pxmlDoc->NewBranchElement(pxmlApplicationNode, "application_identifier()", NULL, 6);
+					pxmlDoc->NewElementForBits(pxmlIdentifierNode, "organisation_id", papplication->application_identifier.organisation_id, 32, "uimsbf", NULL);
+					pxmlDoc->NewElementForBits(pxmlIdentifierNode, "application_id", papplication->application_identifier.application_id, 16, "uimsbf", NULL);
 
-					XMLDOC_NewElementForBits(pxmlDoc, pxmlIdentifierNode, "organisation_id", papplication->application_identifier.organisation_id, 32, "uimsbf", NULL);
+					pxmlDoc->NewElementForBits(pxmlApplicationNode, "application_control_code", papplication->application_control_code, 8, "uimsbf", NULL);
 
-					XMLDOC_NewElementForBits(pxmlDoc, pxmlIdentifierNode, "application_id", papplication->application_identifier.application_id, 16, "uimsbf", NULL);
-
-					pxmlDoc->ClearAnchor(pxmlIdentifierNode);
-
-					XMLDOC_NewElementForBits(pxmlDoc, pxmlApplicationNode, "application_control_code", papplication->application_control_code, 8, "uimsbf", NULL);
-
-					XMLDOC_NewElementForBits(pxmlDoc, pxmlApplicationNode, "reserved_future_use", papplication->reserved_future_use, 4, "bslbf", NULL);
-					XMLDOC_NewElementForBits(pxmlDoc, pxmlApplicationNode, "application_descriptors_loop_length", papplication->application_descriptors_loop_length, 12, "uimsbf", NULL);
+					pxmlDoc->NewElementForBits(pxmlApplicationNode, "reserved_future_use", papplication->reserved_future_use, 4, "bslbf", NULL);
+					pxmlDoc->NewElementForBits(pxmlApplicationNode, "application_descriptors_loop_length", papplication->application_descriptors_loop_length, 12, "uimsbf", NULL);
 
 					if (papplication->application_descriptors_loop_length > 0)
 					{
-						XMLElement* pxmlDescriptorsLoopNode = pxmlDoc->NewBranchElement(pxmlApplicationNode, "应用描述符循环()", NULL);
-						pxmlDoc->SetAnchor(pxmlDescriptorsLoopNode);
+						XMLElement* pxmlDescriptorsLoopNode = pxmlDoc->NewBranchElement(pxmlApplicationNode, "应用描述符循环()", NULL, papplication->application_descriptors_loop_length);
 
 						for (int descriptor_index = 0; descriptor_index < papplication->descriptor_count; descriptor_index ++)
 						{
@@ -162,17 +151,11 @@ int DVB_MHP_AIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, application_informa
 								break;
 							}
 						}
-
-						pxmlDoc->ClearAnchor(pxmlDescriptorsLoopNode);
 					}
-
-					pxmlDoc->ClearAnchor(pxmlApplicationNode);
 				}
-
-				pxmlDoc->ClearAnchor(pxmlApplicationsLoopNode);
 			}
 
-			XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", pait_section->CRC_32, 32, "rpchof", NULL);
+			XMLElement* pxmlCrcNode = pxmlDoc->NewElementForBits(pxmlRootNode, "CRC_32", pait_section->CRC_32, 32, "rpchof", NULL);
 
 			if (pait_section->CRC_32_recalculated != pait_section->CRC_32)
 			{
@@ -186,8 +169,6 @@ int DVB_MHP_AIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, application_informa
 			pxmlRootNode->SetAttribute("error", pszComment);
 			rtcode = SECTION_PARSE_SYNTAX_ERROR;						//table_id解析错误
 		}
-
-		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 	else
 	{

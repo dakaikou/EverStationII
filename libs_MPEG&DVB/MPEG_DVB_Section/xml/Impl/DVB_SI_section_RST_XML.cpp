@@ -22,15 +22,14 @@ int DVB_SI_RST_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, running_status_secti
 	{
 		//¸ù½Úµã
 		sprintf_s(pszField, sizeof(pszField), "running_status_section(table_id=0x%02X)", prst_section->table_id);
-		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
-		pxmlDoc->SetAnchor(pxmlRootNode);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField, NULL, prst_section->section_length + 3);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", prst_section->table_id, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "table_id", prst_section->table_id, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_syntax_indicator", prst_section->section_syntax_indicator, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved_future_use", prst_section->reserved_future_use, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", prst_section->reserved, 2, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_length", prst_section->section_length, 12, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_syntax_indicator", prst_section->section_syntax_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved_future_use", prst_section->reserved_future_use, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved", prst_section->reserved, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_length", prst_section->section_length, 12, "uimsbf", NULL);
 
 		if (prst_section->section_length > 0)
 		{
@@ -39,21 +38,6 @@ int DVB_SI_RST_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, running_status_secti
 				RUNSTATUS_DESCRIPTION_t* pstRunStatus = prst_section->astRunStatus + loop_index;
 
 				sprintf_s(pszField, sizeof(pszField), "status[%d]()", loop_index);
-				XMLElement* pxmlStatusNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL);
-				pxmlDoc->SetAnchor(pxmlStatusNode);
-
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlStatusNode, "transport_stream_id", pstRunStatus->transport_stream_id, 16, "uimsbf", NULL);
-
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlStatusNode, "original_network_id", pstRunStatus->original_network_id, 16, "uimsbf", NULL);
-
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlStatusNode, "service_id", pstRunStatus->service_id, 16, "uimsbf", NULL);
-
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlStatusNode, "event_id", pstRunStatus->event_id, 16, "uimsbf", NULL);
-
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlStatusNode, "reserved_future_use", pstRunStatus->reserved_future_use, 5, "bslbf", NULL);
-				DVB_SI_NumericCoding2Text_RunningStatus(pstRunStatus->running_status, pszStatus, sizeof(pszStatus));
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlStatusNode, "running_status", pstRunStatus->running_status, 3, "uimsbf", pszStatus);
-
 				sprintf_s(pszComment, sizeof(pszComment), "ONetID=0x%04X, TsID=0x%04X, service_id = 0x%04X, event_id = 0x%04X, status = %s",
 					pstRunStatus->original_network_id,
 					pstRunStatus->transport_stream_id,
@@ -61,13 +45,21 @@ int DVB_SI_RST_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, running_status_secti
 					pstRunStatus->event_id,
 					pszStatus);
 
-				pxmlStatusNode->SetAttribute("comment", pszComment);
+				XMLElement* pxmlStatusNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, pszComment, 9);
 
-				pxmlDoc->ClearAnchor(pxmlStatusNode);
+				pxmlDoc->NewElementForBits(pxmlStatusNode, "transport_stream_id", pstRunStatus->transport_stream_id, 16, "uimsbf", NULL);
+
+				pxmlDoc->NewElementForBits(pxmlStatusNode, "original_network_id", pstRunStatus->original_network_id, 16, "uimsbf", NULL);
+
+				pxmlDoc->NewElementForBits(pxmlStatusNode, "service_id", pstRunStatus->service_id, 16, "uimsbf", NULL);
+
+				pxmlDoc->NewElementForBits(pxmlStatusNode, "event_id", pstRunStatus->event_id, 16, "uimsbf", NULL);
+
+				pxmlDoc->NewElementForBits(pxmlStatusNode, "reserved_future_use", pstRunStatus->reserved_future_use, 5, "bslbf", NULL);
+				DVB_SI_NumericCoding2Text_RunningStatus(pstRunStatus->running_status, pszStatus, sizeof(pszStatus));
+				pxmlDoc->NewElementForBits(pxmlStatusNode, "running_status", pstRunStatus->running_status, 3, "uimsbf", pszStatus);
 			}
 		}
-
-		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	return rtcode;

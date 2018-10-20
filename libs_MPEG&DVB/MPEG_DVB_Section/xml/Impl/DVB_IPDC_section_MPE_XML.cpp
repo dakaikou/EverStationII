@@ -35,52 +35,51 @@ int DVB_IPDC_MPE_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, datagram_section_t
 	if ((pxmlDoc != NULL) && (pmpe_section != NULL))
 	{
 		//¸ù½Úµã
-		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement("MPE_datagram_section()");
-		pxmlDoc->SetAnchor(pxmlRootNode);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement("MPE_datagram_section()", NULL, pmpe_section->section_length + 3);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pmpe_section->table_id, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "table_id", pmpe_section->table_id, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_syntax_indicator", pmpe_section->section_syntax_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_syntax_indicator", pmpe_section->section_syntax_indicator, 1, "bslbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "private_indicator", pmpe_section->private_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "private_indicator", pmpe_section->private_indicator, 1, "bslbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved0", pmpe_section->reserved0, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved0", pmpe_section->reserved0, 2, "bslbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_length", pmpe_section->section_length, 12, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_length", pmpe_section->section_length, 12, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "MAC_address_6", pmpe_section->MAC_address_6, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "MAC_address_6", pmpe_section->MAC_address_6, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "MAC_address_5", pmpe_section->MAC_address_5, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "MAC_address_5", pmpe_section->MAC_address_5, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved1", pmpe_section->reserved1, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved1", pmpe_section->reserved1, 2, "bslbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "payload_scrambling_control", pmpe_section->payload_scrambling_control, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "payload_scrambling_control", pmpe_section->payload_scrambling_control, 2, "bslbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "address_scrambling_control", pmpe_section->address_scrambling_control, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "address_scrambling_control", pmpe_section->address_scrambling_control, 2, "bslbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "LLC_SNAP_flag", pmpe_section->LLC_SNAP_flag, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "LLC_SNAP_flag", pmpe_section->LLC_SNAP_flag, 1, "bslbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "current_next_indicator", pmpe_section->current_next_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "current_next_indicator", pmpe_section->current_next_indicator, 1, "bslbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_number", pmpe_section->section_number, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_number", pmpe_section->section_number, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "last_section_number", pmpe_section->last_section_number, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "last_section_number", pmpe_section->last_section_number, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "MAC_address_4", pmpe_section->MAC_address_4, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "MAC_address_4", pmpe_section->MAC_address_4, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "MAC_address_3", pmpe_section->MAC_address_3, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "MAC_address_3", pmpe_section->MAC_address_3, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "MAC_address_2", pmpe_section->MAC_address_2, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "MAC_address_2", pmpe_section->MAC_address_2, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "MAC_address_1", pmpe_section->MAC_address_1, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "MAC_address_1", pmpe_section->MAC_address_1, 8, "uimsbf", NULL);
 
 		if (pmpe_section->LLC_SNAP_flag == 1)
 		{
-			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlRootNode, "LLC_SNAP[ ]", pmpe_section->LLC_SNAP_data_byte, pmpe_section->LLC_SNAP_data_length, NULL);
+			pxmlDoc->NewElementForByteBuf(pxmlRootNode, "LLC_SNAP[ ]", pmpe_section->LLC_SNAP_data_byte, pmpe_section->LLC_SNAP_data_length, NULL);
 		}
 		else
 		{
-			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlRootNode, "IP_datagram_data_byte[ ]", pmpe_section->IP_datagram_data_byte, pmpe_section->IP_datagram_data_length, NULL);
+			pxmlDoc->NewElementForByteBuf(pxmlRootNode, "IP_datagram_data_byte[ ]", pmpe_section->IP_datagram_data_byte, pmpe_section->IP_datagram_data_length, NULL);
 		}
 
 		if (pmpe_section->section_syntax_indicator == 1)
@@ -94,14 +93,12 @@ int DVB_IPDC_MPE_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, datagram_section_t
 			sprintf_s(pszMnemonic, sizeof(pszMnemonic), "uimsbf");
 		}
 
-		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, pszField, pmpe_section->encodedCheckValue, 32, pszMnemonic, NULL);
+		XMLElement* pxmlCrcNode = pxmlDoc->NewElementForBits(pxmlRootNode, pszField, pmpe_section->encodedCheckValue, 32, pszMnemonic, NULL);
 		if (pmpe_section->recalculatedCheckValue != pmpe_section->encodedCheckValue)
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", pmpe_section->recalculatedCheckValue);
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
-
-		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 	else
 	{

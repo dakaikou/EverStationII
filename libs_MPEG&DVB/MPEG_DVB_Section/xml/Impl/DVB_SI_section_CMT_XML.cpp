@@ -15,22 +15,19 @@ int DVB_SI_CMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, CA_message_section_t
 	{
 		//¸ù½Úµã
 		sprintf_s(pszField, sizeof(pszField), "CA_message_section(table_id=0x%02X)", pcmt_section->table_id);
-		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
-		pxmlDoc->SetAnchor(pxmlRootNode);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField, NULL, pcmt_section->CA_section_length + 3);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pcmt_section->table_id, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "table_id", pcmt_section->table_id, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_syntax_indicator", pcmt_section->section_syntax_indicator, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "DVB_reserved", pcmt_section->DVB_reserved, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "ISO_reserved", pcmt_section->ISO_reserved, 2, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CA_section_length", pcmt_section->CA_section_length, 12, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_syntax_indicator", pcmt_section->section_syntax_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "DVB_reserved", pcmt_section->DVB_reserved, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "ISO_reserved", pcmt_section->ISO_reserved, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "CA_section_length", pcmt_section->CA_section_length, 12, "uimsbf", NULL);
 
 		if (pcmt_section->CA_section_length > 0)
 		{
-			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlRootNode, "CA_data_byte[ ]", pcmt_section->CA_data_byte, pcmt_section->CA_section_length, NULL);
+			pxmlDoc->NewElementForByteBuf(pxmlRootNode, "CA_data_byte[ ]", pcmt_section->CA_data_byte, pcmt_section->CA_section_length, NULL);
 		}
-
-		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	return rtcode;

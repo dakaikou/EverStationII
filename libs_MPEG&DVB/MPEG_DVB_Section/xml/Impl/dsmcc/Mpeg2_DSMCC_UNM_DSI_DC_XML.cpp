@@ -39,37 +39,33 @@ int	MPEG2_DSMCC_DSI_DC_PresentGroupInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, 
 		//XMLElement* pxmlGroupsNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "GroupInfoIndication()", NULL);
 		XMLElement* pxmlGroupsNode = pxmlParentNode;
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlGroupsNode, "NumberOfGroups", pGroupInfoIndication->NumberOfGroups, 2, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlGroupsNode, "NumberOfGroups", pGroupInfoIndication->NumberOfGroups, 2, NULL);
 
 		for (int group_index = 0; group_index < pGroupInfoIndication->NumberOfGroups; group_index++)
 		{
 			GroupInfo_t* pGroupInfo = pGroupInfoIndication->GroupInfo + group_index;
 			sprintf_s(pszField, sizeof(pszField), "GROUP[%d](ID:0x%08X)", group_index, pGroupInfo->GroupId);
 
-			XMLElement* pxmlGroupNode = pxmlDoc->NewBranchElement(pxmlGroupsNode, pszField, NULL);
-			pxmlDoc->SetAnchor(pxmlGroupNode);
+			XMLElement* pxmlGroupNode = pxmlDoc->NewBranchElement(pxmlGroupsNode, pszField, NULL, 4 + 4 + 2 + pGroupInfo->GroupCompatibility.compatibilityDescriptorLength + 2 + pGroupInfo->GroupInfoLength);
 
-			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlGroupNode, "GroupId", pGroupInfo->GroupId, 4, NULL);
+			pxmlDoc->NewElementForByteMode(pxmlGroupNode, "GroupId", pGroupInfo->GroupId, 4, NULL);
 
-			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlGroupNode, "GroupSize", pGroupInfo->GroupSize, 4, NULL);
+			pxmlDoc->NewElementForByteMode(pxmlGroupNode, "GroupSize", pGroupInfo->GroupSize, 4, NULL);
 
 			compatibilityDescriptor_t* pcompatibilityDescriptor = &(pGroupInfo->GroupCompatibility);
-			XMLElement* pxmlGroupCompatibilityNode = pxmlDoc->NewBranchElement(pxmlGroupNode, "GroupCompatibility()", NULL);
-			pxmlDoc->SetAnchor(pxmlGroupCompatibilityNode);
+			XMLElement* pxmlGroupCompatibilityNode = pxmlDoc->NewBranchElement(pxmlGroupNode, "GroupCompatibility()", NULL, 2 + pcompatibilityDescriptor->compatibilityDescriptorLength);
 
-			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlGroupCompatibilityNode, "compatibilityDescriptorLength", pcompatibilityDescriptor->compatibilityDescriptorLength, 2, NULL);
+			pxmlDoc->NewElementForByteMode(pxmlGroupCompatibilityNode, "compatibilityDescriptorLength", pcompatibilityDescriptor->compatibilityDescriptorLength, 2, NULL);
 			if (pcompatibilityDescriptor->compatibilityDescriptorLength > 0)
 			{
-				XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlGroupCompatibilityNode, "compatibilityDescriptorBuf[ ]", pcompatibilityDescriptor->compatibilityDescriptorBuf, pcompatibilityDescriptor->compatibilityDescriptorLength, NULL);
+				pxmlDoc->NewElementForByteBuf(pxmlGroupCompatibilityNode, "compatibilityDescriptorBuf[ ]", pcompatibilityDescriptor->compatibilityDescriptorBuf, pcompatibilityDescriptor->compatibilityDescriptorLength, NULL);
 			}
-			pxmlDoc->ClearAnchor(pxmlGroupCompatibilityNode);
 
-			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlGroupNode, "GroupInfoLength", pGroupInfo->GroupInfoLength, 2, NULL);
+			pxmlDoc->NewElementForByteMode(pxmlGroupNode, "GroupInfoLength", pGroupInfo->GroupInfoLength, 2, NULL);
 
 			if (pGroupInfo->GroupInfoLength > 0)
 			{
-				XMLElement* pxmlDescriptionNode = pxmlDoc->NewBranchElement(pxmlGroupNode, "GroupInfo()", NULL);
-				pxmlDoc->SetAnchor(pxmlDescriptionNode);
+				XMLElement* pxmlDescriptionNode = pxmlDoc->NewBranchElement(pxmlGroupNode, "GroupInfo()", NULL, pGroupInfo->GroupInfoLength);
 
 				for (int descriptor_index = 0; descriptor_index < pGroupInfo->group_descriptor_count; descriptor_index++)
 				{
@@ -91,17 +87,13 @@ int	MPEG2_DSMCC_DSI_DC_PresentGroupInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, 
 						break;
 					}
 				}
-
-				pxmlDoc->ClearAnchor(pxmlDescriptionNode);
 			}
-
-			pxmlDoc->ClearAnchor(pxmlGroupNode);
 		}
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlGroupsNode, "PrivateDataLength", pGroupInfoIndication->PrivateDataLength, 2, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlGroupsNode, "PrivateDataLength", pGroupInfoIndication->PrivateDataLength, 2, NULL);
 		if (pGroupInfoIndication->PrivateDataLength > 0)
 		{
-			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlGroupsNode, "privateDataByte[ ]", pGroupInfoIndication->privateDataByte, pGroupInfoIndication->PrivateDataLength, NULL);
+			pxmlDoc->NewElementForByteBuf(pxmlGroupsNode, "privateDataByte[ ]", pGroupInfoIndication->privateDataByte, pGroupInfoIndication->PrivateDataLength, NULL);
 		}
 	}
 	else

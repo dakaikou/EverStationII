@@ -37,23 +37,20 @@ int	MPEG2_DSMCC_UNM_PresentDownloadServerInitiate_to_xml(HALForXMLDoc* pxmlDoc, 
 		//XMLElement* pxmlSessionNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "DownloadServerInitiate()", NULL);
 		XMLElement* pxmlSessionNode = pxmlParentNode;
 
-		XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlSessionNode, "serverId", pDownloadServerInitiate->serverId, 20, NULL);
+		pxmlDoc->NewElementForByteBuf(pxmlSessionNode, "serverId", pDownloadServerInitiate->serverId, 20, NULL);
 
 		compatibilityDescriptor_t* pcompatibilityDescriptor = &(pDownloadServerInitiate->compatibilityDescriptor);
-		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlSessionNode, "compatibilityDescriptor()", NULL);
-		pxmlDoc->SetAnchor(pxmlDescriptorNode);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlSessionNode, "compatibilityDescriptor()", NULL, 2 + pcompatibilityDescriptor->compatibilityDescriptorLength);
 
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlDescriptorNode, "compatibilityDescriptorLength", pcompatibilityDescriptor->compatibilityDescriptorLength, 2, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlDescriptorNode, "compatibilityDescriptorLength", pcompatibilityDescriptor->compatibilityDescriptorLength, 2, NULL);
 
 		if (pcompatibilityDescriptor->compatibilityDescriptorLength > 0)
 		{
-			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlDescriptorNode, "compatibilityDescriptorBuf[ ]",
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "compatibilityDescriptorBuf[ ]",
 				pcompatibilityDescriptor->compatibilityDescriptorBuf, pcompatibilityDescriptor->compatibilityDescriptorLength, NULL);
 		}
 
-		pxmlDoc->ClearAnchor(pxmlDescriptorNode);
-
-		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "privateDataLength", pDownloadServerInitiate->privateDataLength, 2, NULL);
+		pxmlDoc->NewElementForByteMode(pxmlSessionNode, "privateDataLength", pDownloadServerInitiate->privateDataLength, 2, NULL);
 
 		//defined in EN 301 192
 		//若privateDataLength解析错误，将导致灾难性错误
@@ -71,8 +68,7 @@ int	MPEG2_DSMCC_UNM_PresentDownloadServerInitiate_to_xml(HALForXMLDoc* pxmlDoc, 
 			{
 				sprintf_s(pszComment, sizeof(pszComment), "Unknown");
 			}
-			XMLElement* pxmlPayloadNode = pxmlDoc->NewBranchElement(pxmlSessionNode, "privateDataByte[ ]", pszComment);
-			pxmlDoc->SetAnchor(pxmlPayloadNode);
+			XMLElement* pxmlPayloadNode = pxmlDoc->NewBranchElement(pxmlSessionNode, "privateDataByte[ ]", pszComment, pDownloadServerInitiate->privateDataLength);
 
 			if (pDownloadServerInitiate->data_broadcast_type == 0x0006)		//DC
 			{
@@ -85,10 +81,8 @@ int	MPEG2_DSMCC_UNM_PresentDownloadServerInitiate_to_xml(HALForXMLDoc* pxmlDoc, 
 			else
 			{
 				//如何判断privateDataByte载荷的类型？
-				XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlPayloadNode, "privateDataByte[ ]", pDownloadServerInitiate->privateDataByte, pDownloadServerInitiate->privateDataLength, NULL);
+				pxmlDoc->NewElementForByteBuf(pxmlPayloadNode, "privateDataByte[ ]", pDownloadServerInitiate->privateDataByte, pDownloadServerInitiate->privateDataLength, NULL);
 			}
-
-			pxmlDoc->ClearAnchor(pxmlPayloadNode);
 		}
 	}
 	else

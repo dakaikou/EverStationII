@@ -6,8 +6,6 @@
 #include "../../Include/MPEG_DVB_ErrorCode.h"
 #include "../Include/Mpeg2_PSI_section_XML.h"
 
-#include "libs_Math/Include/CRC_32.h"
-
 int MPEG2_PSI_PAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, program_association_section_t* ppat_section)
 {
 	int rtcode = SECTION_PARSE_NO_ERROR;
@@ -20,36 +18,35 @@ int MPEG2_PSI_PAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, program_associati
 
 		//根节点
 		sprintf_s(pszField, sizeof(pszField), "program_association_section(table_id=0x%02X)", ppat_section->table_id);
-		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
-		pxmlDoc->SetAnchor(pxmlRootNode);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField, NULL, ppat_section->section_length + 3);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", ppat_section->table_id, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "table_id", ppat_section->table_id, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_syntax_indicator", ppat_section->section_syntax_indicator, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "'0'", ppat_section->reserved_future_use, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", ppat_section->reserved0, 2, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_length", ppat_section->section_length, 12, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_syntax_indicator", ppat_section->section_syntax_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "'0'", ppat_section->reserved_future_use, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved", ppat_section->reserved0, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_length", ppat_section->section_length, 12, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "transport_stream_id", ppat_section->transport_stream_id, 16, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "transport_stream_id", ppat_section->transport_stream_id, 16, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", ppat_section->reserved1, 2, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "version_number", ppat_section->version_number, 5, "uimsbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "current_next_indicator", ppat_section->current_next_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved", ppat_section->reserved1, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "version_number", ppat_section->version_number, 5, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "current_next_indicator", ppat_section->current_next_indicator, 1, "bslbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_number", ppat_section->section_number, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_number", ppat_section->section_number, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "last_section_number", ppat_section->last_section_number, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "last_section_number", ppat_section->last_section_number, 8, "uimsbf", NULL);
 
-		int loop_length = ppat_section->section_length - 5 - 4;
-		if (loop_length > 0)
+		int program_map_length = ppat_section->section_length - 5 - 4;
+		if (program_map_length > 0)
 		{
 			sprintf_s(pszField, sizeof(pszField), "节目映射循环(共 %d 项)\0", ppat_section->program_map_count);
-			XMLElement* pxmlPmtLoopNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL);
-			pxmlDoc->SetAnchor(pxmlPmtLoopNode);
+			XMLElement* pxmlPmtLoopNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL, program_map_length);
 
-			PROGRAM_MAP_DESCRIPTION_t* pstProgram = ppat_section->astProgramMaps;
-			for (int i = 0; i < ppat_section->program_map_count; i++)
+			for (int map_index = 0; map_index < ppat_section->program_map_count; map_index++)
 			{
+				PROGRAM_MAP_DESCRIPTION_t* pstProgram = ppat_section->astProgramMaps + map_index;
+
 				if (pstProgram->program_number == 0)
 				{
 					sprintf_s(pszPidStyle, sizeof(pszPidStyle), "NIT_PID\0");
@@ -58,32 +55,23 @@ int MPEG2_PSI_PAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, program_associati
 				{
 					sprintf_s(pszPidStyle, sizeof(pszPidStyle), "PMT_PID\0");
 				}
-				sprintf_s(pszField, sizeof(pszField), "节目映射[%d](<program_number=%d, %s=0x%04X>)\0", i, pstProgram->program_number, pszPidStyle, pstProgram->program_map_PID);
+				sprintf_s(pszField, sizeof(pszField), "节目映射[%d](<program_number=%d, %s=0x%04X>)\0", map_index, pstProgram->program_number, pszPidStyle, pstProgram->program_map_PID);
 
-				XMLElement* pxmlMapNode = pxmlDoc->NewBranchElement(pxmlPmtLoopNode, pszField, NULL);
-				pxmlDoc->SetAnchor(pxmlMapNode);
+				XMLElement* pxmlMapNode = pxmlDoc->NewBranchElement(pxmlPmtLoopNode, pszField, NULL, 4);
 
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlMapNode, "program_number", pstProgram->program_number, 16, "uimsbf", NULL);
+				pxmlDoc->NewElementForBits(pxmlMapNode, "program_number", pstProgram->program_number, 16, "uimsbf", NULL);
 
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlMapNode, "reserved", pstProgram->reserved, 3, "bslbf", NULL);
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlMapNode, pszPidStyle, pstProgram->program_map_PID, 13, "uimsbf", NULL);
-
-				pxmlDoc->ClearAnchor(pxmlMapNode);
-
-				pstProgram++;
+				pxmlDoc->NewElementForBits(pxmlMapNode, "reserved", pstProgram->reserved, 3, "bslbf", NULL);
+				pxmlDoc->NewElementForBits(pxmlMapNode, pszPidStyle, pstProgram->program_map_PID, 13, "uimsbf", NULL);
 			}
-
-			pxmlDoc->ClearAnchor(pxmlPmtLoopNode);
 		}
 
-		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", ppat_section->CRC_32, 32, "rpchof", NULL);
+		XMLElement* pxmlCrcNode = pxmlDoc->NewElementForBits(pxmlRootNode, "CRC_32", ppat_section->CRC_32, 32, "rpchof", NULL);
 		if (ppat_section->CRC_32_recalculated != ppat_section->CRC_32)
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08x", ppat_section->CRC_32_recalculated);
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
-
-		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 	else
 	{

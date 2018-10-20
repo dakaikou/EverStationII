@@ -1587,8 +1587,7 @@ int DVB_SI_decode_transport_stream_descriptor_to_xml(uint8_t* buf, int length, H
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
 		sprintf_s(pszField, sizeof(pszField), "transport_stream_descriptor(tag: 0x%02X)", ptransport_stream_descriptor->descriptor_tag);
-		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL);
-		pxmlDoc->SetAnchor(pxmlDescriptorNode);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, ptransport_stream_descriptor->descriptor_length + 2);
 
 		if (rtcode != SECTION_PARSE_NO_ERROR)
 		{
@@ -1596,13 +1595,11 @@ int DVB_SI_decode_transport_stream_descriptor_to_xml(uint8_t* buf, int length, H
 			pxmlDescriptorNode->SetAttribute("error", pszComment);
 		}
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_tag", ptransport_stream_descriptor->descriptor_tag, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", ptransport_stream_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_length", ptransport_stream_descriptor->descriptor_length, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", ptransport_stream_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlDescriptorNode, "byte_char", (uint8_t*)(ptransport_stream_descriptor->byte_char), ptransport_stream_descriptor->descriptor_length, ptransport_stream_descriptor->byte_char);
-
-		pxmlDoc->ClearAnchor(pxmlDescriptorNode);
+		pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "byte_char", (uint8_t*)(ptransport_stream_descriptor->byte_char), ptransport_stream_descriptor->descriptor_length, ptransport_stream_descriptor->byte_char);
 	}
 
 	if (pTSDescriptor == NULL)

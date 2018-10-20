@@ -31,8 +31,7 @@ int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_se
 
 		//根节点
 		sprintf_s(pszField, sizeof(pszField), "program_map_section(table_id=0x%02X)", ppmt_section->table_id);
-		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
-		pxmlDoc->SetAnchor(pxmlRootNode);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField, NULL, ppmt_section->section_length + 3);
 
 		pxmlDoc->NewElementForBits(pxmlRootNode, "table_id", ppmt_section->table_id, 8, "uimsbf");
 
@@ -60,8 +59,7 @@ int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_se
 		if (ppmt_section->program_info_length > 0)
 		{
 			sprintf_s(pszField, sizeof(pszField), "program_info()");
-			XMLElement* pxmlProgramInfoNode = pxmlDoc->NewElementForString(pxmlRootNode, pszField, NULL);
-			pxmlDoc->SetAnchor(pxmlProgramInfoNode);
+			XMLElement* pxmlProgramInfoNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL, ppmt_section->program_info_length);
 
 			for (int descriptor_index = 0; descriptor_index < ppmt_section->program_descriptor_count; descriptor_index++)
 			{
@@ -95,16 +93,13 @@ int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_se
 					break;
 				}
 			}
-
-			pxmlDoc->ClearAnchor(pxmlProgramInfoNode);
 		}
 
 		int es_loop_length = ppmt_section->section_length - 9 - ppmt_section->program_info_length - 4;
 		if (es_loop_length > 0)
 		{
 			sprintf_s(pszField, sizeof(pszField), "ES流循环(共 %d 个流)", ppmt_section->ES_map_count);
-			XMLElement* pxmlESInfoLoopNode = pxmlDoc->NewElementForString(pxmlRootNode, pszField);
-			pxmlDoc->SetAnchor(pxmlESInfoLoopNode);
+			XMLElement* pxmlESLoopNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL, es_loop_length);
 
 			for (int es_index = 0; es_index < ppmt_section->ES_map_count; es_index++)
 			{
@@ -113,8 +108,7 @@ int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_se
 				int es_description_length = 5 + pstESMap->ES_info_length;
 				sprintf_s(pszField, sizeof(pszField), "ES流[%d](PID=0x%04X)", es_index, pstESMap->elementary_PID);
 				MPEG2_PSI_NumericCoding2Text_StreamType(pstESMap->stream_type, STREAM_SUBTYPE_UNKNOWN, pszComment, sizeof(pszComment));
-				XMLElement* pxmlESNode = pxmlDoc->NewElementForString(pxmlESInfoLoopNode, pszField, pszComment);
-				pxmlDoc->SetAnchor(pxmlESNode);
+				XMLElement* pxmlESNode = pxmlDoc->NewBranchElement(pxmlESLoopNode, pszField, pszComment, es_description_length);
 
 				pxmlDoc->NewElementForBits(pxmlESNode, "stream_type", pstESMap->stream_type, 8, "uimsbf", pszComment);
 
@@ -127,8 +121,7 @@ int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_se
 				if (pstESMap->ES_info_length > 0)
 				{
 					sprintf_s(pszField, sizeof(pszField), "ES_info()");
-					XMLElement* pxmlESInfoNode = pxmlDoc->NewElementForString(pxmlESNode, pszField, NULL);
-					pxmlDoc->SetAnchor(pxmlESInfoNode);
+					XMLElement* pxmlESInfoNode = pxmlDoc->NewBranchElement(pxmlESNode, pszField, NULL, pstESMap->ES_info_length);
 
 					for (int descriptor_index = 0; descriptor_index < pstESMap->ES_descriptor_count; descriptor_index++)
 					{
@@ -183,14 +176,8 @@ int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_se
 							break;
 						}
 					}
-
-					pxmlDoc->ClearAnchor(pxmlESInfoNode);
 				}
-
-				pxmlDoc->ClearAnchor(pxmlESNode);
 			}
-
-			pxmlDoc->ClearAnchor(pxmlESInfoLoopNode);
 		}
 
 		XMLElement* pxmlCrcNode = pxmlDoc->NewElementForBits(pxmlRootNode, "CRC_32", ppmt_section->CRC_32, 32, "rpchof");
@@ -200,8 +187,6 @@ int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_se
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", ppmt_section->CRC_32_recalculated);
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
-
-		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 	else
 	{

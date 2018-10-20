@@ -40,23 +40,23 @@ int	MPEG2_DSMCC_DSI_OC_PresentServiceGatewayInfo_to_xml(HALForXMLDoc* pxmlDoc, X
 		//½âÎöIOP::IOR()
 		MPEG2_DSMCC_BIOP_PresentIOR_to_xml(pxmlDoc, pxmlSGINode, &(pServiceGatewayInfo->IOR));
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlSGINode, "downloadTaps_count", pServiceGatewayInfo->downloadTaps_count, 8, "uimsbf", "N1");
+		pxmlDoc->NewElementForBits(pxmlSGINode, "downloadTaps_count", pServiceGatewayInfo->downloadTaps_count, 8, "uimsbf", "N1");
 		if (pServiceGatewayInfo->downloadTaps_count > 0)
 		{
 			assert(0);
 		}
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlSGINode, "serviceContextList_count", pServiceGatewayInfo->serviceContextList_count, 8, "uimsbf", "N2");
+		pxmlDoc->NewElementForBits(pxmlSGINode, "serviceContextList_count", pServiceGatewayInfo->serviceContextList_count, 8, "uimsbf", "N2");
 		if (pServiceGatewayInfo->serviceContextList_count > 0)
 		{
 			//pxmlDoc->NewKeyValuePairElement(pxmlSGINode, "serviceContextList_data_byte()", ptemp, pServiceGatewayInfo->serviceContextList_count, NULL, &bs);
 			assert(0);
 		}
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlSGINode, "userInfoLength", pServiceGatewayInfo->userInfoLength, 16, "uimsbf", "N3");
+		pxmlDoc->NewElementForBits(pxmlSGINode, "userInfoLength", pServiceGatewayInfo->userInfoLength, 16, "uimsbf", "N3");
 		if (pServiceGatewayInfo->userInfoLength > 0)
 		{
-			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlSGINode, "userInfo_data_byte[ ]", pServiceGatewayInfo->userInfo_data_byte, pServiceGatewayInfo->userInfoLength, NULL);
+			pxmlDoc->NewElementForByteBuf(pxmlSGINode, "userInfo_data_byte[ ]", pServiceGatewayInfo->userInfo_data_byte, pServiceGatewayInfo->userInfoLength, NULL);
 		}
 	}
 	else

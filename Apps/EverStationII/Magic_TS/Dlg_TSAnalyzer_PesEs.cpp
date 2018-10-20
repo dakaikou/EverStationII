@@ -1142,7 +1142,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayUnknownESPacket(uint8_t* es_buf, int es_size,
 			pxmlPESPayloadNode->SetAttribute("comment", pszComment);
 		}
 
-		pxmlNalNode = XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlPESPayloadNode, "es_buf[ ]", es_buf, es_size, NULL);
+		pxmlNalNode = pxmlDoc->NewElementForByteBuf(pxmlPESPayloadNode, "es_buf[ ]", es_buf, es_size, NULL);
 	}
 }
 

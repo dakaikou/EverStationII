@@ -495,18 +495,18 @@ int CDB_PsiSiTables::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, HALForXM
 			XMLElement*	hIORItem;
 			XMLElement*	hIOP_taggedProfileItem;
 
-			hSessionItem = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "下载会话（DSI/DII/DDB）", NULL);
+			hSessionItem = pxmlDoc->NewBranchElement(pxmlParentNode, "下载会话（DSI/DII/DDB）", NULL);
 
-			XMLElement* hDSIItem = XMLDOC_NewElementForString(pxmlDoc, hSessionItem, "DownloadServerInitiate(DSI) - 获知业务网关的IOR", NULL);
+			XMLElement* hDSIItem = pxmlDoc->NewBranchElement(hSessionItem, "DownloadServerInitiate(DSI) - 获知业务网关的IOR", NULL);
 
 			//从DSI获得的信息，包括轮播ID、srg所在的模块、DII的table_id_extension
-			hChildItem = XMLDOC_NewElementForBits(pxmlDoc, hDSIItem, "carouselId", pDSI->carouselId, 32, NULL, NULL);
-			hChildItem = XMLDOC_NewElementForBits(pxmlDoc, hDSIItem, "moduleId_for_srg", pDSI->moduleId_for_srg, 16, NULL, NULL);
-			hChildItem = XMLDOC_NewElementForBits(pxmlDoc, hDSIItem, "objectKey_data_for_srg", pDSI->objectKey_data_for_srg, 32, NULL, NULL);
+			hChildItem = pxmlDoc->NewElementForBits(hDSIItem, "carouselId", pDSI->carouselId, 32, NULL, NULL);
+			hChildItem = pxmlDoc->NewElementForBits(hDSIItem, "moduleId_for_srg", pDSI->moduleId_for_srg, 16, NULL, NULL);
+			hChildItem = pxmlDoc->NewElementForBits(hDSIItem, "objectKey_data_for_srg", pDSI->objectKey_data_for_srg, 32, NULL, NULL);
 
-			hChildItem = XMLDOC_NewElementForBits(pxmlDoc, hDSIItem, "table_id_extension_for_dii", pDSI->table_id_extension_for_dii, 16, NULL, NULL);
+			hChildItem = pxmlDoc->NewElementForBits(hDSIItem, "table_id_extension_for_dii", pDSI->table_id_extension_for_dii, 16, NULL, NULL);
 
-			XMLElement* hDIIItem = XMLDOC_NewElementForString(pxmlDoc, hSessionItem, "DownloadInfoIndication(DII) - 获知模块的传输参数", NULL);
+			XMLElement* hDIIItem = pxmlDoc->NewBranchElement(hSessionItem, "DownloadInfoIndication(DII) - 获知模块的传输参数", NULL);
 			//从DII获得的信息，包括下载ID、模块数量、模块ID
 			//模块ID同时也是DDB的table_id_extension
 			pDSMCC_DII = (CDSMCC_UNM*)QueryBy3ID(PID, TABLE_ID_DSMCC_UNM, pDSI->table_id_extension_for_dii);
@@ -514,29 +514,29 @@ int CDB_PsiSiTables::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, HALForXM
 			{
 				pDII = &(pDSMCC_DII->u.m_DII);
 
-				hChildItem = XMLDOC_NewElementForBits(pxmlDoc, hDIIItem, "downloadId", pDII->downloadId, 32, NULL, NULL);
-				hChildItem = XMLDOC_NewElementForBits(pxmlDoc, hDIIItem, "blockSize", pDII->blockSize, 16, NULL, NULL);
-				//hChildItem = XMLDOC_NewElementForBits(pxmlDoc, hDIIItem, "windowSize", pDII->windowSize, 8, NULL, NULL);
-				//hChildItem = XMLDOC_NewElementForBits(pxmlDoc, hDIIItem, "ackPeriod", pDII->ackPeriod, 8, NULL, NULL);
-				//hChildItem = XMLDOC_NewElementForBits(pxmlDoc, hDIIItem, "tCDownloadWindow", pDII->tCDownloadWindow, 32, NULL, NULL);
-				//hChildItem = XMLDOC_NewElementForBits(pxmlDoc, hDIIItem, "tCDownloadScenario", pDII->tCDownloadScenario, 32, NULL, NULL);
+				hChildItem = pxmlDoc->NewElementForBits(hDIIItem, "downloadId", pDII->downloadId, 32, NULL, NULL);
+				hChildItem = pxmlDoc->NewElementForBits(hDIIItem, "blockSize", pDII->blockSize, 16, NULL, NULL);
+				//hChildItem = pxmlDoc->NewElementForBits(hDIIItem, "windowSize", pDII->windowSize, 8, NULL, NULL);
+				//hChildItem = pxmlDoc->NewElementForBits(hDIIItem, "ackPeriod", pDII->ackPeriod, 8, NULL, NULL);
+				//hChildItem = pxmlDoc->NewElementForBits(hDIIItem, "tCDownloadWindow", pDII->tCDownloadWindow, 32, NULL, NULL);
+				//hChildItem = pxmlDoc->NewElementForBits(hDIIItem, "tCDownloadScenario", pDII->tCDownloadScenario, 32, NULL, NULL);
 
-				hChildItem = XMLDOC_NewElementForBits(pxmlDoc, hDIIItem, "numberOfModules", pDII->numberOfModules, -1, NULL, NULL);
+				hChildItem = pxmlDoc->NewElementForBits(hDIIItem, "numberOfModules", pDII->numberOfModules, -1, NULL, NULL);
 
 				for (module_index = 0; module_index < pDII->numberOfModules; module_index++)
 				{
 					sprintf_s(pszText, sizeof(pszText), "MODULE[%d] - ID=0x%04X)", module_index, pDII->astModuleInfo[module_index].moduleId);
-					hModuleItem = XMLDOC_NewElementForString(pxmlDoc, hDIIItem, pszText, NULL);
+					hModuleItem = pxmlDoc->NewBranchElement(hDIIItem, pszText, NULL);
 
-					hChildItem = XMLDOC_NewElementForBits(pxmlDoc, hModuleItem, "moduleId", pDII->astModuleInfo[module_index].moduleId, 16, NULL, NULL);
-					hChildItem = XMLDOC_NewElementForBits(pxmlDoc, hModuleItem, "moduleSize", pDII->astModuleInfo[module_index].moduleSize, 32, NULL, NULL);
-					hChildItem = XMLDOC_NewElementForBits(pxmlDoc, hModuleItem, "moduleVersion", pDII->astModuleInfo[module_index].moduleVersion, 8, NULL, NULL);
+					hChildItem = pxmlDoc->NewElementForBits(hModuleItem, "moduleId", pDII->astModuleInfo[module_index].moduleId, 16, NULL, NULL);
+					hChildItem = pxmlDoc->NewElementForBits(hModuleItem, "moduleSize", pDII->astModuleInfo[module_index].moduleSize, 32, NULL, NULL);
+					hChildItem = pxmlDoc->NewElementForBits(hModuleItem, "moduleVersion", pDII->astModuleInfo[module_index].moduleVersion, 8, NULL, NULL);
 
 					//计算参数
 					blockCount = (int)(ceil((double)pDII->astModuleInfo[module_index].moduleSize / pDII->blockSize));
-					hChildItem = XMLDOC_NewElementForBits(pxmlDoc, hModuleItem, "blockCount", blockCount, -1, NULL, NULL);
+					hChildItem = pxmlDoc->NewElementForBits(hModuleItem, "blockCount", blockCount, -1, NULL, NULL);
 
-					XMLElement* hDDBItem = XMLDOC_NewElementForString(pxmlDoc, hModuleItem, "DownloadDataBlock(DDB)", NULL);
+					XMLElement* hDDBItem = pxmlDoc->NewBranchElement(hModuleItem, "DownloadDataBlock(DDB)", NULL);
 
 					////DDB信息
 					pDSMCC_DDM = (CDSMCC_DDM*)QueryBy3ID(PID, TABLE_ID_DSMCC_DDM, pDII->astModuleInfo[module_index].moduleId);
@@ -565,7 +565,7 @@ int CDB_PsiSiTables::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, HALForXM
 				}
 			}
 
-			hDirItem = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "下载文件目录结构", NULL);
+			hDirItem = pxmlDoc->NewBranchElement(pxmlParentNode, "下载文件目录结构", NULL);
 			OC_BuildDirectory(PID, pxmlDoc, hDirItem, pDSI->moduleId_for_srg, pDSI->objectKey_data_for_srg);
 		}
 
@@ -704,7 +704,7 @@ int CDB_PsiSiTables::OC_BuildDirectory(uint16_t PID, HALForXMLDoc* pxmlDoc, XMLE
 						pName = &(pBindings->Name);
 
 						sprintf_s(pszText, sizeof(pszText), "%s:%s", pName->nameComponents[0].kind_data_byte, pName->nameComponents[0].id_data_byte);
-						XMLElement* pxmlChildNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, pszText, NULL);
+						XMLElement* pxmlChildNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszText, NULL);
 
 						if (strcmp(pBindings->IOR.type_id_byte, "dir") == 0)
 						{
@@ -751,19 +751,19 @@ int CDB_PsiSiTables::DSMCC_BuildDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t 
 
 			if (carousel_type_id == 0x02)			//2层数据轮播
 			{
-				pxmlDsiItem = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "SuperGroup()", NULL);
+				pxmlDsiItem = pxmlDoc->NewBranchElement(pxmlParentNode, "SuperGroup()", NULL);
 
-				XMLDOC_NewElementForBits(pxmlDoc, pxmlDsiItem, "NumberOfGroups", pDSI->NumberOfGroups, 16, "uimsbf", NULL);
+				pxmlDoc->NewElementForBits(pxmlDsiItem, "NumberOfGroups", pDSI->NumberOfGroups, 16, "uimsbf", NULL);
 
 				for (group_index = 0; group_index < pDSI->NumberOfGroups; group_index++)
 				{
 					sprintf_s(pszField, sizeof(pszField), "GROUP[%d]()", group_index);
-					pxmlGroupItem = XMLDOC_NewElementForString(pxmlDoc, pxmlDsiItem, pszField, NULL);
+					pxmlGroupItem = pxmlDoc->NewBranchElement(pxmlDsiItem, pszField, NULL);
 
-					XMLDOC_NewElementForBits(pxmlDoc, pxmlGroupItem, "GroupId", pDSI->astGroupInfo[group_index].GroupId, 32, "uimsbf", NULL);
-					XMLDOC_NewElementForBits(pxmlDoc, pxmlGroupItem, "GroupSize", pDSI->astGroupInfo[group_index].GroupSize, 32, "uimsbf", NULL);
+					pxmlDoc->NewElementForBits(pxmlGroupItem, "GroupId", pDSI->astGroupInfo[group_index].GroupId, 32, "uimsbf", NULL);
+					pxmlDoc->NewElementForBits(pxmlGroupItem, "GroupSize", pDSI->astGroupInfo[group_index].GroupSize, 32, "uimsbf", NULL);
 
-					XMLDOC_NewElementForString(pxmlDoc, pxmlGroupItem, "GroupName", pDSI->astGroupInfo[group_index].name_descriptor.text_char);
+					pxmlDoc->NewBranchElement(pxmlGroupItem, "GroupName", pDSI->astGroupInfo[group_index].name_descriptor.text_char);
 
 					pDSMCC_DII = (CDSMCC_UNM*)QueryBy3ID(PID, TABLE_ID_DSMCC_UNM, (pDSI->astGroupInfo[group_index].GroupId & 0x0000ffff));
 
@@ -771,36 +771,36 @@ int CDB_PsiSiTables::DSMCC_BuildDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t 
 					{
 						pDII = &(pDSMCC_DII->u.m_DII);
 
-						XMLDOC_NewElementForBits(pxmlDoc, pxmlGroupItem, "downloadId", pDII->downloadId, 32, "uimsbf", NULL);
-						XMLDOC_NewElementForBits(pxmlDoc, pxmlGroupItem, "blockSize", pDII->blockSize, 16, "uimsbf", NULL);
-						XMLDOC_NewElementForBits(pxmlDoc, pxmlGroupItem, "windowSize", pDII->windowSize, 8, "uimsbf", NULL);
-						XMLDOC_NewElementForBits(pxmlDoc, pxmlGroupItem, "ackPeriod", pDII->ackPeriod, 8, "uimsbf", NULL);
-						XMLDOC_NewElementForBits(pxmlDoc, pxmlGroupItem, "tCDownloadWindow", pDII->tCDownloadWindow, 32, "uimsbf", NULL);
-						XMLDOC_NewElementForBits(pxmlDoc, pxmlGroupItem, "tCDownloadScenario", pDII->tCDownloadScenario, 32, "uimsbf", NULL);
+						pxmlDoc->NewElementForBits(pxmlGroupItem, "downloadId", pDII->downloadId, 32, "uimsbf", NULL);
+						pxmlDoc->NewElementForBits(pxmlGroupItem, "blockSize", pDII->blockSize, 16, "uimsbf", NULL);
+						pxmlDoc->NewElementForBits(pxmlGroupItem, "windowSize", pDII->windowSize, 8, "uimsbf", NULL);
+						pxmlDoc->NewElementForBits(pxmlGroupItem, "ackPeriod", pDII->ackPeriod, 8, "uimsbf", NULL);
+						pxmlDoc->NewElementForBits(pxmlGroupItem, "tCDownloadWindow", pDII->tCDownloadWindow, 32, "uimsbf", NULL);
+						pxmlDoc->NewElementForBits(pxmlGroupItem, "tCDownloadScenario", pDII->tCDownloadScenario, 32, "uimsbf", NULL);
 
-						XMLDOC_NewElementForBits(pxmlDoc, pxmlGroupItem, "numberOfModules", pDII->numberOfModules, 16, "uimsbf", NULL);
+						pxmlDoc->NewElementForBits(pxmlGroupItem, "numberOfModules", pDII->numberOfModules, 16, "uimsbf", NULL);
 
 						for (module_index = 0; module_index < pDII->numberOfModules; module_index++)
 						{
 							ModuleInfo_t* pmoduleInfo = pDII->astModuleInfo + module_index;
 							sprintf_s(pszField, sizeof(pszField), "MODULE(%d - 0x%04X)", module_index, pmoduleInfo->moduleId);
-							pxmlModuleItem = XMLDOC_NewElementForString(pxmlDoc, pxmlGroupItem, pszField, NULL);
+							pxmlModuleItem = pxmlDoc->NewBranchElement(pxmlGroupItem, pszField, NULL);
 
-							XMLDOC_NewElementForBits(pxmlDoc, pxmlModuleItem, "moduleId", pmoduleInfo->moduleId, 16, "uimsbf", NULL);
-							XMLDOC_NewElementForBits(pxmlDoc, pxmlModuleItem, "moduleSize", pmoduleInfo->moduleSize, 32, "uimsbf", NULL);
-							XMLDOC_NewElementForBits(pxmlDoc, pxmlModuleItem, "moduleVersion", pmoduleInfo->moduleVersion, 8, "uimsbf", NULL);
+							pxmlDoc->NewElementForBits(pxmlModuleItem, "moduleId", pmoduleInfo->moduleId, 16, "uimsbf", NULL);
+							pxmlDoc->NewElementForBits(pxmlModuleItem, "moduleSize", pmoduleInfo->moduleSize, 32, "uimsbf", NULL);
+							pxmlDoc->NewElementForBits(pxmlModuleItem, "moduleVersion", pmoduleInfo->moduleVersion, 8, "uimsbf", NULL);
 
 							//计算参数
 							blockCount = (S32)(ceil((double)pmoduleInfo->moduleSize / pDII->blockSize));
-							XMLDOC_NewElementForBits(pxmlDoc, pxmlModuleItem, "blockCount", blockCount, -1, "uimsbf", NULL);
+							pxmlDoc->NewElementForBits(pxmlModuleItem, "blockCount", blockCount, -1, "uimsbf", NULL);
 
 							if (strlen(pmoduleInfo->moduleName) > 0)
 							{
-								XMLDOC_NewElementForString(pxmlDoc, pxmlModuleItem, "moduleName", pmoduleInfo->moduleName);
+								pxmlDoc->NewElementForString(pxmlModuleItem, "moduleName", pmoduleInfo->moduleName);
 							}
 							else
 							{
-								XMLDOC_NewElementForString(pxmlDoc, pxmlModuleItem, "moduleName", "Unknown");
+								pxmlDoc->NewElementForString(pxmlModuleItem, "moduleName", "Unknown");
 							}
 						}
 					}
@@ -1083,7 +1083,8 @@ int CDB_PsiSiTables::BuildBouquetTree(uint32_t uiCode, HALForXMLDoc* pxmlDoc)
 								sprintf_s(pszText, sizeof(pszText), "%s  [service_id = 0x%04X(%d),  %s]",
 									stServiceInfo.pszServiceName, service_id, service_id, pszTSInfo);
 
-								XMLElement* pxmlServiceNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszText, NULL);
+								//XMLElement* pxmlServiceNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszText, NULL);
+								pxmlDoc->NewElementForString(pxmlRootNode, pszText, NULL);
 							}
 						}
 					}

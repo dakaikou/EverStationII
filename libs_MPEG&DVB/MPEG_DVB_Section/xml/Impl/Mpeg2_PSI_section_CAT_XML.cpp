@@ -21,26 +21,25 @@ int MPEG2_PSI_CAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, CA_section_t* pca
 	{
 		//¸ù½Úµã
 		sprintf_s(pszField, sizeof(pszField), "CA_section(table_id=0x%02X)", pcat_section->table_id);
-		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
-		pxmlDoc->SetAnchor(pxmlRootNode);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField, NULL, pcat_section->section_length + 3);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pcat_section->table_id, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "table_id", pcat_section->table_id, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_syntax_indicator", pcat_section->section_syntax_indicator, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "'0'", pcat_section->reserved_future_use, 1, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", pcat_section->reserved0, 2, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_length", pcat_section->section_length, 12, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_syntax_indicator", pcat_section->section_syntax_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "'0'", pcat_section->reserved_future_use, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved", pcat_section->reserved0, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_length", pcat_section->section_length, 12, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved", pcat_section->reserved1, 18, "bslbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "version_number", pcat_section->version_number, 5, "uimsbf", NULL);
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "current_next_indicator", pcat_section->current_next_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "reserved", pcat_section->reserved1, 18, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "version_number", pcat_section->version_number, 5, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "current_next_indicator", pcat_section->current_next_indicator, 1, "bslbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "section_number", pcat_section->section_number, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "section_number", pcat_section->section_number, 8, "uimsbf", NULL);
 
-		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "last_section_number", pcat_section->last_section_number, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlRootNode, "last_section_number", pcat_section->last_section_number, 8, "uimsbf", NULL);
 
-		int loop_length = pcat_section->section_length - 9;
-		if (loop_length > 0)
+		int ca_loop_length = pcat_section->section_length - 9;
+		if (ca_loop_length > 0)
 		{
 			uint16_t descriptor_tag;
 			int		 descriptor_length;
@@ -48,8 +47,7 @@ int MPEG2_PSI_CAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, CA_section_t* pca
 			int		 descriptor_size;
 
 			sprintf_s(pszField, sizeof(pszField), "CA_description()");
-			XMLElement* pxmlCADescriptorsLoopNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL);
-			pxmlDoc->SetAnchor(pxmlCADescriptorsLoopNode);
+			XMLElement* pxmlCADescriptorsLoopNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL, ca_loop_length);
 
 			for (int descriptor_index = 0; descriptor_index < pcat_section->CA_descriptor_count; descriptor_index++)
 			{
@@ -68,18 +66,14 @@ int MPEG2_PSI_CAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, CA_section_t* pca
 					break;
 				}
 			}
-
-			pxmlDoc->ClearAnchor(pxmlCADescriptorsLoopNode);
 		}
 
-		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", pcat_section->CRC_32, 32, "rpchof", NULL);
+		XMLElement* pxmlCrcNode = pxmlDoc->NewElementForBits(pxmlRootNode, "CRC_32", pcat_section->CRC_32, 32, "rpchof", NULL);
 		if (pcat_section->CRC_32_recalculated != pcat_section->CRC_32)
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08x", pcat_section->CRC_32_recalculated);
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
-
-		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	return rtcode;
