@@ -1,6 +1,8 @@
 #ifndef _KERNEL_MPEG_VIDEO_DECODER_H_
 #define _KERNEL_MPEG_VIDEO_DECODER_H_
 
+#include <stdint.h>
+
 #include "../compile.h"
 
 #include "HAL\HAL_Sys\Include\IntTypes.h"
@@ -123,23 +125,23 @@ typedef struct
 typedef struct MPGV_sequence_header
 {
 	/*syntax part*/
-	U32		sequence_header_code;				//32
+	uint32_t	sequence_header_code;				//32
 
-	S16		horizontal_size_value;				//12
-	S16		vertical_size_value;				//12
-	S8		aspect_ratio_information;			//4
-	S8		frame_rate_code;					//4
+	uint16_t	horizontal_size_value;				//12
+	uint16_t	vertical_size_value;				//12
+	uint8_t		aspect_ratio_information;			//4
+	uint8_t		frame_rate_code;					//4
 
-	S32		bit_rate_value;						//18
-	S8		marker_bit;							//1
-	S16		vbv_buffer_size_value;				//10
-	S8		constrained_parameters_flag;		//1
+	uint16_t	bit_rate_value;						//18
+	uint8_t		marker_bit;							//1
+	uint16_t	vbv_buffer_size_value;				//10
+	uint8_t		constrained_parameters_flag;		//1
 	
-	S8		load_intra_quantiser_matrix;		//1
-	S16		intra_quantiser_matrix[64];			//8 * 64
+	uint8_t		load_intra_quantiser_matrix;		//1
+	uint8_t		intra_quantiser_matrix[64];			//8 * 64
 
-	S8		load_non_intra_quantiser_matrix;	//1
-	S16		non_intra_quantiser_matrix[64];		//8 * 64
+	uint8_t		load_non_intra_quantiser_matrix;	//1
+	uint8_t		non_intra_quantiser_matrix[64];		//8 * 64
 
 } MPGV_sequence_header_t, *pMPGV_sequence_header_t;
 
@@ -414,12 +416,13 @@ typedef struct
 
 _CDL_EXPORT int mpgv_decode_sequence_header(uint8_t* nal_buf, int nal_length, MPGV_sequence_header_t* psequence_header);
 _CDL_EXPORT int	mpgv_decode_sequence_extension(uint8_t* nal_buf, int nal_length, MPGV_sequence_extension_t* psequence_extension);
+_CDL_EXPORT int mpgv_decode_sequence_display_extension(uint8_t* nal_buf, int nal_length, MPGV_sequence_display_extension_t* psequence_display_extension);
 _CDL_EXPORT int	mpgv_decode_group_of_pictures_header(uint8_t* nal_buf, int nal_length, MPGV_group_of_pictures_header_t* pgroup_of_pictures_header);
 _CDL_EXPORT int mpgv_decode_picture_header(uint8_t* nal_buf, int nal_length, MPGV_picture_header_t* ppicture_header);
 _CDL_EXPORT int	mpgv_decode_picture_coding_extension(uint8_t* nal_buf, int nal_length, MPGV_picture_coding_extension_t* ppicture_coding_extension);
 _CDL_EXPORT int	mpgv_decode_slice(uint8_t* nal_buf, int nal_length, MPGV_slice_t* pslice);
+_CDL_EXPORT int	mpgv_decode_user_data(uint8_t* nal_buf, int nal_length, MPGV_user_data_t* puser_data);
 
-//_CDL_EXPORT int	mpgv_picture_type_lookup(uint8_t code, char* pszTemp, int strSize);
 
 #endif
 

@@ -13,16 +13,10 @@ int DVB_SI_CMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, CA_message_section_t
 
 	if ((pxmlDoc != NULL) && (pcmt_section != NULL))
 	{
-		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
-
-		XMLDeclaration* xmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
-		XMLDOC_InsertFirstChild(pxmlDoc, xmlDeclaration);
-
 		//¸ù½Úµã
 		sprintf_s(pszField, sizeof(pszField), "CA_message_section(table_id=0x%02X)", pcmt_section->table_id);
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
-		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, pcmt_section->CA_section_length + 3);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
+		pxmlDoc->SetAnchor(pxmlRootNode);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pcmt_section->table_id, 8, "uimsbf", NULL);
 
@@ -35,6 +29,8 @@ int DVB_SI_CMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, CA_message_section_t
 		{
 			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlRootNode, "CA_data_byte[ ]", pcmt_section->CA_data_byte, pcmt_section->CA_section_length, NULL);
 		}
+
+		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	return rtcode;

@@ -28,16 +28,10 @@ int DVB_SI_SDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, service_description_
 
 	if ((pxmlDoc != NULL) && (psdt_section != NULL))
 	{
-		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
-
-		XMLDeclaration* pxmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
-		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
-
 		//根节点
 		sprintf_s(pszField, sizeof(pszField), "service_description_section(table_id=0x%02X)", psdt_section->table_id);
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
-		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, psdt_section->section_length + 3);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
+		pxmlDoc->SetAnchor(pxmlRootNode);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", psdt_section->table_id, 8, "uimsbf", NULL);
 
@@ -64,8 +58,8 @@ int DVB_SI_SDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, service_description_
 		if (service_loop_length > 0)
 		{
 			sprintf_s(pszField, sizeof(pszField), "业务循环(共 %d 个业务)", psdt_section->service_count);
-			XMLElement* pxmlServiceLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
-			XMLNODE_SetFieldLength(pxmlServiceLoopNode, service_loop_length);
+			XMLElement* pxmlServiceLoopNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL);
+			pxmlDoc->SetAnchor(pxmlServiceLoopNode);
 
 			for (int service_index = 0; service_index < psdt_section->service_count; service_index++)
 			{
@@ -73,8 +67,8 @@ int DVB_SI_SDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, service_description_
 
 				int service_description_length = 5 + pstServiceDescription->descriptors_loop_length;
 				sprintf_s(pszField, sizeof(pszField), "业务(ID=0x%04X)", pstServiceDescription->service_id);
-				XMLElement* pxmlServiceNode = XMLDOC_NewElementForString(pxmlDoc, pxmlServiceLoopNode, pszField, NULL);
-				XMLNODE_SetFieldLength(pxmlServiceNode, service_description_length);
+				XMLElement* pxmlServiceNode = pxmlDoc->NewBranchElement(pxmlServiceLoopNode, pszField, NULL);
+				pxmlDoc->SetAnchor(pxmlServiceNode);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlServiceNode, "service_id", pstServiceDescription->service_id, 16, "uimsbf", NULL);
 
@@ -90,8 +84,8 @@ int DVB_SI_SDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, service_description_
 				if (pstServiceDescription->descriptors_loop_length > 0)
 				{
 					sprintf_s(pszField, sizeof(pszField), "service_descriptors()");
-					XMLElement* pxmlServiceDescriptorsLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlServiceNode, pszField, NULL);
-					XMLNODE_SetFieldLength(pxmlServiceDescriptorsLoopNode, pstServiceDescription->descriptors_loop_length);
+					XMLElement* pxmlServiceDescriptorsLoopNode = pxmlDoc->NewBranchElement(pxmlServiceNode, pszField, NULL);
+					pxmlDoc->SetAnchor(pxmlServiceDescriptorsLoopNode);
 
 					for (int descriptor_index = 0; descriptor_index < pstServiceDescription->service_descriptor_count; descriptor_index++)
 					{
@@ -125,11 +119,17 @@ int DVB_SI_SDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, service_description_
 							break;
 						}
 					}
+
+					pxmlDoc->ClearAnchor(pxmlServiceDescriptorsLoopNode);
 				}
+
+				pxmlDoc->ClearAnchor(pxmlServiceNode);
 			}
 
 			//sprintf_s(pszComment, sizeof(pszComment), "ID=0x%04X, %s", pServiceDescription->service_id, service_descriptor.trimmed_service_name);
 			//pxmlServiceNode->SetAttribute("comment", pszTemp);
+
+			pxmlDoc->ClearAnchor(pxmlServiceLoopNode);
 		}
 
 		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", psdt_section->CRC_32, 32, "rpchof", NULL);
@@ -138,6 +138,8 @@ int DVB_SI_SDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, service_description_
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", psdt_section->CRC_32_recalculated);
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
+
+		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	return rtcode;

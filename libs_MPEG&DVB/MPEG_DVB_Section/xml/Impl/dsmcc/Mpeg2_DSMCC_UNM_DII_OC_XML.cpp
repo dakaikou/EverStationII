@@ -47,8 +47,8 @@ int	MPEG2_DSMCC_DII_OC_PresentModuleInfo_to_xml(HALForXMLDoc* pxmlDoc, XMLElemen
 		for (int tap_index = 0; tap_index < pOC_moduleInfo->taps_count; tap_index++)
 		{
 			sprintf_s(pszField, sizeof(pszField), "TAP[%d]()", tap_index);
-			XMLElement* pxmlTapNode = XMLDOC_NewElementForString(pxmlDoc, pxmlModuleNode, pszField, NULL);
-			XMLNODE_SetFieldLength(pxmlTapNode, 7 + pOC_moduleInfo->TAP[tap_index].selector_length);
+			XMLElement* pxmlTapNode = pxmlDoc->NewBranchElement(pxmlModuleNode, pszField, NULL);
+			pxmlDoc->SetAnchor(pxmlTapNode);
 
 			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlTapNode, "ID", pOC_moduleInfo->TAP[tap_index].id, 2, NULL);
 
@@ -58,6 +58,8 @@ int	MPEG2_DSMCC_DII_OC_PresentModuleInfo_to_xml(HALForXMLDoc* pxmlDoc, XMLElemen
 			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlTapNode, "association_tag", pOC_moduleInfo->TAP[tap_index].association_tag, 2, NULL);
 
 			XMLDOC_NewElementForByteMode(pxmlDoc, pxmlTapNode, "selector_length", pOC_moduleInfo->TAP[tap_index].selector_length, 1, NULL);
+
+			pxmlDoc->ClearAnchor(pxmlTapNode);
 		}
 
 		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlModuleNode, "userInfoLength", pOC_moduleInfo->userInfoLength, 1, NULL);

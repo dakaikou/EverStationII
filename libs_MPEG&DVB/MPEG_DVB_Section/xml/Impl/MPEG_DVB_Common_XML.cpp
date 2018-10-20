@@ -100,8 +100,8 @@ int MPEG_DVB_present_reserved_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElemen
 
 		sprintf_s(pszFiled, sizeof(pszFiled), "unknown descriptor(tag: 0x%02X)", descriptor_tag);
 
-		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, pszFiled, NULL);
-		XMLNODE_SetFieldLength(pxmlDescriptorNode, preserved_descriptor->descriptor_size);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszFiled, NULL);
+		pxmlDoc->SetAnchor(pxmlDescriptorNode);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_tag", descriptor_tag, 8, "uimsbf", NULL);
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_length", preserved_descriptor->descriptor_length, 8, "uimsbf", NULL);
@@ -110,6 +110,8 @@ int MPEG_DVB_present_reserved_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElemen
 		{
 			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlDescriptorNode, "descriptor_payload_buf[ ]", preserved_descriptor->descriptor_buf + 2, preserved_descriptor->descriptor_length, NULL);
 		}
+
+		pxmlDoc->ClearAnchor(pxmlDescriptorNode);
 	}
 	else
 	{

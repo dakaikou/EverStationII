@@ -51,8 +51,8 @@ int	MPEG2_DSMCC_UNM_PresentDownloadInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, 
 		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "tCDownloadScenario", pDownloadInfoIndication->tCDownloadScenario, 4, NULL);
 
 		compatibilityDescriptor_t* pcompatibilityDescriptor = &(pDownloadInfoIndication->compatibilityDescriptor);
-		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlSessionNode, "compatibilityDescriptor()", NULL);
-		XMLNODE_SetFieldLength(pxmlDescriptorNode, 2 + pcompatibilityDescriptor->compatibilityDescriptorLength);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlSessionNode, "compatibilityDescriptor()", NULL);
+		pxmlDoc->SetAnchor(pxmlDescriptorNode);
 
 		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlDescriptorNode, "compatibilityDescriptorLength", pcompatibilityDescriptor->compatibilityDescriptorLength, 2, NULL);
 
@@ -60,6 +60,7 @@ int	MPEG2_DSMCC_UNM_PresentDownloadInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, 
 		{
 			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlDescriptorNode, "compatibilityDescriptorBuf[ ]", pcompatibilityDescriptor->compatibilityDescriptorBuf, pcompatibilityDescriptor->compatibilityDescriptorLength, NULL);
 		}
+		pxmlDoc->ClearAnchor(pxmlDescriptorNode);
 
 		//defined in EN 301192
 		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "numberOfModules", pDownloadInfoIndication->numberOfModules, 2, NULL);
@@ -72,8 +73,8 @@ int	MPEG2_DSMCC_UNM_PresentDownloadInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, 
 
 				sprintf_s(pszField, sizeof(pszField), "MODULE[%d]()", moduleIndex);
 				sprintf_s(pszComment, "ID=0x%04X, size=%d, ver=%d", pmoduleInfo->moduleId, pmoduleInfo->moduleSize, pmoduleInfo->moduleVersion);
-				XMLElement* pxmlModuleNode = XMLDOC_NewElementForString(pxmlDoc, pxmlSessionNode, pszField, pszComment);
-				XMLNODE_SetFieldLength(pxmlModuleNode, 8 + pmoduleInfo->moduleInfoLength);
+				XMLElement* pxmlModuleNode = pxmlDoc->NewBranchElement(pxmlSessionNode, pszField, pszComment);
+				pxmlDoc->SetAnchor(pxmlModuleNode);
 
 				XMLDOC_NewElementForByteMode(pxmlDoc, pxmlModuleNode, "moduleId", pmoduleInfo->moduleId, 2, NULL);
 
@@ -98,8 +99,8 @@ int	MPEG2_DSMCC_UNM_PresentDownloadInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, 
 						sprintf_s(pszField, sizeof(pszField), "Unknown");
 					}
 
-					XMLElement* pxmlModuleInfoByte = XMLDOC_NewElementForString(pxmlDoc, pxmlModuleNode, pszField, NULL);
-					XMLNODE_SetFieldLength(pxmlModuleInfoByte, pmoduleInfo->moduleInfoLength);
+					XMLElement* pxmlModuleInfoByte = pxmlDoc->NewBranchElement(pxmlModuleNode, pszField, NULL);
+					pxmlDoc->SetAnchor(pxmlModuleInfoByte);
 
 					if (pmoduleInfo->data_broadcast_type == 0x0006)			//DC
 					{
@@ -113,7 +114,11 @@ int	MPEG2_DSMCC_UNM_PresentDownloadInfoIndication_to_xml(HALForXMLDoc* pxmlDoc, 
 					{
 						XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlModuleInfoByte, "moduleInfoByte[ ]", pmoduleInfo->moduleInfoByte, pmoduleInfo->moduleInfoLength, NULL);
 					}
+
+					pxmlDoc->ClearAnchor(pxmlModuleInfoByte);
 				}
+
+				pxmlDoc->ClearAnchor(pxmlModuleNode);
 			}
 		}
 

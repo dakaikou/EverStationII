@@ -16,22 +16,10 @@ int DVB_SI_TDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, time_date_section_t*
 
 	if ((pxmlDoc != NULL) && (ptdt_section != NULL))
 	{
-		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
-
-		XMLDeclaration* pxmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
-		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
-
 		//¸ù½Úµã
 		sprintf_s(pszField, sizeof(pszField), "time_date_section(table_id=0x%02X)", ptdt_section->table_id);
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
-		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, ptdt_section->section_length + 3);
-
-		//if (rtcode != SECTION_PARSE_NO_ERROR)
-		//{
-		//	sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
-		//	XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
-		//}
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
+		pxmlDoc->SetAnchor(pxmlRootNode);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", ptdt_section->table_id, 8, "uimsbf", NULL);
 
@@ -42,6 +30,8 @@ int DVB_SI_TDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, time_date_section_t*
 
 		DVB_SI_NumericCoding2Text_UTCTime(ptdt_section->UTC_time, pszComment, sizeof(pszComment));
 		XMLDOC_NewElementForX64Bits(pxmlDoc, pxmlRootNode, "UTC_time", ptdt_section->UTC_time, 40, "bslbf", pszComment);
+
+		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	return rtcode;

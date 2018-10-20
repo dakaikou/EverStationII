@@ -34,15 +34,9 @@ int DVB_IPDC_MPE_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, datagram_section_t
 
 	if ((pxmlDoc != NULL) && (pmpe_section != NULL))
 	{
-		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
-
-		XMLDeclaration* xmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
-		XMLDOC_InsertFirstChild(pxmlDoc, xmlDeclaration);
-
 		//¸ù½Úµã
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, "MPE_datagram_section()");
-		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, pmpe_section->section_length + 3);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement("MPE_datagram_section()");
+		pxmlDoc->SetAnchor(pxmlRootNode);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pmpe_section->table_id, 8, "uimsbf", NULL);
 
@@ -104,8 +98,10 @@ int DVB_IPDC_MPE_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, datagram_section_t
 		if (pmpe_section->recalculatedCheckValue != pmpe_section->encodedCheckValue)
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", pmpe_section->recalculatedCheckValue);
-			XMLNODE_SetAttribute(pxmlCrcNode, "error", pszComment);
+			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
+
+		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 	else
 	{

@@ -21,16 +21,10 @@ int MPEG2_PSI_TSDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_description_s
 		char pszField[48];
 		char pszComment[128];
 
-		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
-
-		XMLDeclaration* xmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
-		XMLDOC_InsertFirstChild(pxmlDoc, xmlDeclaration);
-
 		//¸ù½Úµã
 		sprintf_s(pszField, sizeof(pszField), "TS_description_section(table_id=0x%02X)", ptsdt_section->table_id);
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
-		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, ptsdt_section->section_length + 3);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
+		pxmlDoc->SetAnchor(pxmlRootNode);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", ptsdt_section->table_id, 8, "uimsbf", NULL);
 
@@ -56,8 +50,8 @@ int MPEG2_PSI_TSDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_description_s
 			int		 descriptor_size;
 
 			sprintf_s(pszField, sizeof(pszField), "TS_description()");
-			XMLElement* pxmlDescriptionNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
-			XMLNODE_SetFieldLength(pxmlDescriptionNode, loop_length);
+			XMLElement* pxmlDescriptionNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL);
+			pxmlDoc->SetAnchor(pxmlDescriptionNode);
 
 			for (int descriptor_index = 0; descriptor_index < ptsdt_section->TS_descriptor_count; descriptor_index++)
 			{
@@ -76,6 +70,8 @@ int MPEG2_PSI_TSDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_description_s
 					break;
 				}
 			}
+
+			pxmlDoc->ClearAnchor(pxmlDescriptionNode);
 		}
 
 		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", ptsdt_section->CRC_32, 32, "rpchof", NULL);
@@ -83,8 +79,10 @@ int MPEG2_PSI_TSDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_description_s
 		if (ptsdt_section->CRC_32_recalculated != ptsdt_section->CRC_32)
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08x", ptsdt_section->CRC_32_recalculated);
-			XMLNODE_SetAttribute(pxmlCrcNode, "error", pszComment);
+			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
+
+		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	return rtcode;

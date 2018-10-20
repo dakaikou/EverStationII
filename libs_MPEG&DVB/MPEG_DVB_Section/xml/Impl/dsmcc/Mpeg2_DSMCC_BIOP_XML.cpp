@@ -38,8 +38,8 @@ int	MPEG2_DSMCC_BIOP_PresentIOR_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlPa
 		//}
 		//ior_field_length += profile_total_length;
 
-		XMLElement* pxmlIORNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "IOP::IOR()", NULL);
-		XMLNODE_SetFieldLength(pxmlIORNode, pIOR->total_length);
+		XMLElement* pxmlIORNode = pxmlDoc->NewBranchElement(pxmlParentNode, "IOP::IOR()", NULL);
+		pxmlDoc->SetAnchor(pxmlIORNode);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlIORNode, "type_id_length", pIOR->type_id_length, 32, "uimsbf", "N1");
 
@@ -74,8 +74,8 @@ int	MPEG2_DSMCC_BIOP_PresentIOR_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlPa
 				{
 					sprintf_s(pszComment, sizeof(pszComment), "Unknown Profile Body");
 				}
-				XMLElement* pxmlProfileNode = XMLDOC_NewElementForString(pxmlDoc, pxmlIORNode, pszField, pszComment);
-				XMLNODE_SetFieldLength(pxmlProfileNode, 8 + ptaggedProfile->profile_data_length);
+				XMLElement* pxmlProfileNode = pxmlDoc->NewBranchElement(pxmlIORNode, pszField, pszComment);
+				pxmlDoc->SetAnchor(pxmlProfileNode);
 
 				if (ptaggedProfile->profileId_tag == 0x49534F06)					//TAG_BIOP(BIOP Profile Body)
 				{
@@ -99,8 +99,12 @@ int	MPEG2_DSMCC_BIOP_PresentIOR_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlPa
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlProfileNode, "profile_data_length", ptaggedProfile->profile_data_length, 32, "uimsbf", "N3");
 					XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlProfileNode, "profile_data_byte[ ]", ptaggedProfile->profile_data_byte, ptaggedProfile->profile_data_length, NULL);
 				}
+
+				pxmlDoc->ClearAnchor(pxmlProfileNode);
 			}
 		}
+
+		pxmlDoc->ClearAnchor(pxmlIORNode);
 	}
 	else
 	{
@@ -152,8 +156,8 @@ int	MPEG2_DSMCC_BIOP_PresentBIOPProfileBody_to_xml(HALForXMLDoc* pxmlDoc, XMLEle
 				assert(pObjectLocation->componentId_tag == 0x49534F50);
 
 				sprintf_s(pszField, sizeof(pszField), "BIOP::ObjectLocation(tag:0x%08X)", pObjectLocation->componentId_tag);
-				XMLElement* pxmlObjectLocationNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, pszField, NULL);
-				XMLNODE_SetFieldLength(pxmlObjectLocationNode, 5 + pObjectLocation->component_data_length);
+				XMLElement* pxmlObjectLocationNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL);
+				pxmlDoc->SetAnchor(pxmlObjectLocationNode);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlObjectLocationNode, "componentId_tag", pObjectLocation->componentId_tag, 32, "uimsbf", NULL);
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlObjectLocationNode, "component_data_length", pObjectLocation->component_data_length, 8, "uimsbf", NULL);
@@ -170,6 +174,8 @@ int	MPEG2_DSMCC_BIOP_PresentBIOPProfileBody_to_xml(HALForXMLDoc* pxmlDoc, XMLEle
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlObjectLocationNode, "objectKey_length", pObjectLocation->objectKey_length, 8, "uimsbf", NULL);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlObjectLocationNode, "objectKey_data", pObjectLocation->objectKey_data, 32, "uimsbf", NULL);
+
+				pxmlDoc->ClearAnchor(pxmlObjectLocationNode);
 			}
 
 			//liteComponent 1
@@ -178,8 +184,8 @@ int	MPEG2_DSMCC_BIOP_PresentBIOPProfileBody_to_xml(HALForXMLDoc* pxmlDoc, XMLEle
 				BIOP::ConnBinder_t* pConnBinder = &(pBIOPProfileBody->ConnBinder);
 				sprintf_s(pszField, sizeof(pszField), "DSM::ConnBinder(tag:0x%08X)", pConnBinder->componentId_tag);
 				assert(pConnBinder->componentId_tag == 0x49534F40);
-				XMLElement* pxmlConnBinderNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, pszField, NULL);
-				XMLNODE_SetFieldLength(pxmlConnBinderNode, 5 + pConnBinder->component_data_length);
+				XMLElement* pxmlConnBinderNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL);
+				pxmlDoc->SetAnchor(pxmlConnBinderNode);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlConnBinderNode, "componentId_tag", pConnBinder->componentId_tag, 32, "uimsbf", NULL);
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlConnBinderNode, "component_data_length", pConnBinder->component_data_length, 8, "uimsbf", NULL);
@@ -191,8 +197,8 @@ int	MPEG2_DSMCC_BIOP_PresentBIOPProfileBody_to_xml(HALForXMLDoc* pxmlDoc, XMLEle
 					BIOP::TAP_t* pTap = pConnBinder->Tap + tap_index;
 
 					sprintf_s(pszField, sizeof(pszField), "BIOP::Tap[%d]()", tap_index);
-					XMLElement* pxmlTapNode = XMLDOC_NewElementForString(pxmlDoc, pxmlConnBinderNode, pszField, NULL);
-					XMLNODE_SetFieldLength(pxmlTapNode, 7 + pTap->selector_length);
+					XMLElement* pxmlTapNode = pxmlDoc->NewBranchElement(pxmlConnBinderNode, pszField, NULL);
+					pxmlDoc->SetAnchor(pxmlTapNode);
 
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlTapNode, "id", pTap->id, 16, "uimsbf", NULL);
 
@@ -218,7 +224,11 @@ int	MPEG2_DSMCC_BIOP_PresentBIOPProfileBody_to_xml(HALForXMLDoc* pxmlDoc, XMLEle
 						assert(0);
 						XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlTapNode, "selector_data_byte[]", NULL, pTap->selector_length, NULL);
 					}
+
+					pxmlDoc->ClearAnchor(pxmlTapNode);
 				}
+
+				pxmlDoc->ClearAnchor(pxmlConnBinderNode);
 			}
 
 			//liteComponent 2 ~ (liteComponents_count - 1)
@@ -227,8 +237,8 @@ int	MPEG2_DSMCC_BIOP_PresentBIOPProfileBody_to_xml(HALForXMLDoc* pxmlDoc, XMLEle
 				BIOP::LiteComponent_t* pliteComponent = pBIOPProfileBody->liteComponents + component_index;
 
 				sprintf_s(pszField, sizeof(pszField), "liteComponent[%d](tag:0x%08X)", component_index, pliteComponent->componentId_tag);
-				XMLElement* pxmlComponentNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, pszField, NULL);
-				XMLNODE_SetFieldLength(pxmlComponentNode, 5 + pliteComponent->component_data_length);
+				XMLElement* pxmlComponentNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL);
+				pxmlDoc->SetAnchor(pxmlComponentNode);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlComponentNode, "componentId_tag", pliteComponent->componentId_tag, 32, "uimsbf", NULL);
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlComponentNode, "component_data_length", pliteComponent->component_data_length, 8, "uimsbf", NULL);
@@ -236,6 +246,8 @@ int	MPEG2_DSMCC_BIOP_PresentBIOPProfileBody_to_xml(HALForXMLDoc* pxmlDoc, XMLEle
 				{
 					XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlComponentNode, "component_data_byte[ ]", pliteComponent->component_data_byte, pliteComponent->component_data_length, NULL);
 				}
+
+				pxmlDoc->ClearAnchor(pxmlComponentNode);
 			}
 		}
 		else

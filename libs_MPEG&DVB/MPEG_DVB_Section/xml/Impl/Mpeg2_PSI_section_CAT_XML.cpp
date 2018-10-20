@@ -19,22 +19,10 @@ int MPEG2_PSI_CAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, CA_section_t* pca
 
 	if ((pxmlDoc != NULL) && (pcat_section != NULL))
 	{
-		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
-
-		XMLDeclaration* pxmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
-		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
-
 		//¸ù½Úµã
 		sprintf_s(pszField, sizeof(pszField), "CA_section(table_id=0x%02X)", pcat_section->table_id);
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
-		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, pcat_section->section_length + 3);
-
-		//if (rtcode != SECTION_PARSE_NO_ERROR)
-		//{
-		//	sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
-		//	XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
-		//}
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
+		pxmlDoc->SetAnchor(pxmlRootNode);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pcat_section->table_id, 8, "uimsbf", NULL);
 
@@ -60,8 +48,8 @@ int MPEG2_PSI_CAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, CA_section_t* pca
 			int		 descriptor_size;
 
 			sprintf_s(pszField, sizeof(pszField), "CA_description()");
-			XMLElement* pxmlCADescriptorsLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
-			XMLNODE_SetFieldLength(pxmlCADescriptorsLoopNode, loop_length);
+			XMLElement* pxmlCADescriptorsLoopNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL);
+			pxmlDoc->SetAnchor(pxmlCADescriptorsLoopNode);
 
 			for (int descriptor_index = 0; descriptor_index < pcat_section->CA_descriptor_count; descriptor_index++)
 			{
@@ -80,14 +68,18 @@ int MPEG2_PSI_CAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, CA_section_t* pca
 					break;
 				}
 			}
+
+			pxmlDoc->ClearAnchor(pxmlCADescriptorsLoopNode);
 		}
 
 		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", pcat_section->CRC_32, 32, "rpchof", NULL);
 		if (pcat_section->CRC_32_recalculated != pcat_section->CRC_32)
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08x", pcat_section->CRC_32_recalculated);
-			XMLNODE_SetAttribute(pxmlCrcNode, "error", pszComment);
+			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
+
+		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	return rtcode;

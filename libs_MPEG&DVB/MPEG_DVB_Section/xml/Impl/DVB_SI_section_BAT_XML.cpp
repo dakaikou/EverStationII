@@ -26,16 +26,10 @@ int DVB_SI_BAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, bouquet_association_
 
 	if ((pxmlDoc != NULL) && (pbat_section != NULL))
 	{
-		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
-
-		XMLDeclaration* pxmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
-		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
-
 		//根节点
 		sprintf_s(pszField, sizeof(pszField), "bouquet_association_section(table_id=0x%02X)", pbat_section->table_id);
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
-		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, pbat_section->section_length + 3);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
+		pxmlDoc->SetAnchor(pxmlRootNode);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", pbat_section->table_id, 8, "uimsbf", NULL);
 
@@ -61,8 +55,8 @@ int DVB_SI_BAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, bouquet_association_
 		if (pbat_section->bouquet_descriptors_length > 0)
 		{
 			sprintf_s(pszField, sizeof(pszField), "bouquet_descriptors()");
-			XMLElement* pxmlBouquetDescriptorsNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
-			XMLNODE_SetFieldLength(pxmlBouquetDescriptorsNode, pbat_section->bouquet_descriptors_length);
+			XMLElement* pxmlBouquetDescriptorsNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL);
+			pxmlDoc->SetAnchor(pxmlBouquetDescriptorsNode);
 
 			for (int descriptor_index = 0; descriptor_index < pbat_section->bouquet_descriptor_count; descriptor_index++)
 			{
@@ -84,6 +78,8 @@ int DVB_SI_BAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, bouquet_association_
 					break;
 				}
 			}
+
+			pxmlDoc->ClearAnchor(pxmlBouquetDescriptorsNode);
 		}
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "reserved_future_use", pbat_section->reserved_future_use2, 4, "bslbf", NULL);
@@ -92,8 +88,8 @@ int DVB_SI_BAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, bouquet_association_
 		if (pbat_section->transport_stream_loop_length > 0)
 		{
 			sprintf_s(pszField, sizeof(pszField), "transport_stream_loop(<共 %d 个流, %d字节>)", pbat_section->stream_count, pbat_section->transport_stream_loop_length);
-			XMLElement* pxmlStreamsLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
-			XMLNODE_SetFieldLength(pxmlStreamsLoopNode, pbat_section->transport_stream_loop_length);
+			XMLElement* pxmlStreamsLoopNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL);
+			pxmlDoc->SetAnchor(pxmlStreamsLoopNode);
 
 			for (int stream_index = 0; stream_index < pbat_section->stream_count; stream_index++)
 			{
@@ -101,8 +97,8 @@ int DVB_SI_BAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, bouquet_association_
 
 				int stream_description_length = 6 + pstStream->transport_descriptors_length;
 				sprintf_s(pszField, sizeof(pszField), "transport_stream(<TSID=0x%04X, ONetID=0x%04X, %d字节>)", pstStream->transport_stream_id, pstStream->original_network_id, stream_description_length);
-				XMLElement* pxmlStreamNode = XMLDOC_NewElementForString(pxmlDoc, pxmlStreamsLoopNode, pszField, NULL);
-				XMLNODE_SetFieldLength(pxmlStreamNode, stream_description_length);
+				XMLElement* pxmlStreamNode = pxmlDoc->NewBranchElement(pxmlStreamsLoopNode, pszField, NULL);
+				pxmlDoc->SetAnchor(pxmlStreamNode);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlStreamNode, "transport_stream_id", pstStream->transport_stream_id, 16, "uimsbf", NULL);
 
@@ -114,8 +110,8 @@ int DVB_SI_BAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, bouquet_association_
 				if (pstStream->transport_descriptors_length > 0)
 				{
 					sprintf_s(pszField, sizeof(pszField), "transport_descriptors(%d字节)", pstStream->transport_descriptors_length);
-					XMLElement* pxmlTransportDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlStreamNode, pszField, NULL);
-					XMLNODE_SetFieldLength(pxmlTransportDescriptorNode, pstStream->transport_descriptors_length);
+					XMLElement* pxmlTransportDescriptorNode = pxmlDoc->NewBranchElement(pxmlStreamNode, pszField, NULL);
+					pxmlDoc->SetAnchor(pxmlTransportDescriptorNode);
 
 					for (int descriptor_index = 0; descriptor_index < pstStream->transport_descriptor_count; descriptor_index++)
 					{
@@ -143,8 +139,14 @@ int DVB_SI_BAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, bouquet_association_
 							break;
 						}
 					}
+
+					pxmlDoc->ClearAnchor(pxmlTransportDescriptorNode);
 				}
+
+				pxmlDoc->ClearAnchor(pxmlStreamNode);
 			}
+
+			pxmlDoc->ClearAnchor(pxmlStreamsLoopNode);
 		}
 
 		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", pbat_section->CRC_32, 32, "rpchof", NULL);
@@ -154,6 +156,8 @@ int DVB_SI_BAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, bouquet_association_
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", pbat_section->CRC_32_recalculated);
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
+
+		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	return rtcode;

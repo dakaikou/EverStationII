@@ -1,10 +1,7 @@
-#include <windows.h>
 #include <assert.h>
 #include <string.h>
-#include <malloc.h>
+#include <stdint.h>
 #include <stdio.h>
-
-#include <mmsystem.h>
 
 #include "../Include/mpeg_video_sequence.h"
 #include "../Include/mpeg_video_errorcode.h"
@@ -13,9 +10,8 @@
 
 int mpgv_decode_sequence_header(uint8_t* nal_buf, int nal_length, MPGV_sequence_header_t* psequence_header)
 {
-	int rtcode = MPV_NO_ERROR;
-	S32		i;
-	//S32		v, u;
+	int		rtcode = MPV_NO_ERROR;
+	int		i;
 	BITS_t	bs;
 
 	if ((nal_buf != NULL) && (nal_length >= 4) && (psequence_header != NULL))
@@ -95,7 +91,7 @@ int mpgv_decode_sequence_header(uint8_t* nal_buf, int nal_length, MPGV_sequence_
 
 int	mpgv_decode_group_of_pictures_header(uint8_t* nal_buf, int nal_length, MPGV_group_of_pictures_header_t* pgroup_of_pictures_header)
 {
-	S32		rtcode = MPV_UNKNOWN_ERROR;
+	int			rtcode = MPV_UNKNOWN_ERROR;
 	BITS_t		bs;
 
 	if ((nal_buf != NULL) && (nal_length >= 4) && (pgroup_of_pictures_header != NULL))
@@ -272,9 +268,73 @@ int mpgv_decode_picture_coding_extension(uint8_t* nal_buf, int nal_length, MPGV_
 	return rtcode;
 }
 
+int mpgv_decode_sequence_display_extension(uint8_t* nal_buf, int nal_length, MPGV_sequence_display_extension_t* psequence_display_extension)
+{
+	int		rtcode = MPV_UNKNOWN_ERROR;
+	BITS_t		bs;
+
+	if ((nal_buf != NULL) && (nal_length >= 4) && (psequence_display_extension != NULL))
+	{
+		memset(psequence_display_extension, 0x00, sizeof(MPGV_sequence_display_extension_t));
+		BITS_map(&bs, nal_buf, nal_length);
+
+		psequence_display_extension->extension_start_code = BITS_get(&bs, 32);			//bytes 0~3
+
+		psequence_display_extension->extension_start_code_identifier = BITS_get(&bs, 4);		//byte 4
+		psequence_display_extension->video_format = BITS_get(&bs, 3);
+		psequence_display_extension->colour_description = BITS_get(&bs, 1);
+
+		if (psequence_display_extension->colour_description)
+		{
+			psequence_display_extension->colour_primaries = BITS_get(&bs, 8);
+
+			psequence_display_extension->transfer_characteristics = BITS_get(&bs, 8);
+
+			psequence_display_extension->matrix_coefficients = BITS_get(&bs, 8);
+		}
+
+		psequence_display_extension->display_horizontal_size = BITS_get(&bs, 14);
+		psequence_display_extension->marker_bit = BITS_get(&bs, 1);
+		psequence_display_extension->display_vertical_size = BITS_get(&bs, 14);
+
+		rtcode = MPV_NO_ERROR;
+	}
+	else
+	{
+		rtcode = MPV_PARAMETER_ERROR;
+	}
+
+	return rtcode;
+}
+
+int	mpgv_decode_user_data(uint8_t* nal_buf, int nal_length, MPGV_user_data_t* puser_data)
+{
+	int rtcode = MPV_NO_ERROR;
+	BITS_t			bs;
+
+	if ((nal_buf != NULL) && (nal_length >= 4) && (puser_data != NULL))
+	{
+		memset(puser_data, 0x00, sizeof(MPGV_user_data_t));
+
+		BITS_map(&bs, nal_buf, nal_length);
+
+		puser_data->user_data_start_code = BITS_get(&bs, 32);
+
+		int user_data_length = nal_length - 4;
+		uint8_t* user_data_buf = bs.p_cur;
+		BITS_byteSkip(&bs, user_data_length);
+	}
+	else
+	{
+		rtcode = MPV_PARAMETER_ERROR;
+	}
+
+	return rtcode;
+}
+
 int mpgv_decode_slice(uint8_t* nal_buf, int nal_length, MPGV_slice_t* pslice)
 {
-	S32		rtcode = MPV_UNKNOWN_ERROR;
+	int		rtcode = MPV_UNKNOWN_ERROR;
 	BITS_t	 bs;
 	//S32		 quantiser_scale_code;
 

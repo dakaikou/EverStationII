@@ -38,16 +38,16 @@ int MPEG2_PSI_decode_video_stream_descriptor_to_xml(uint8_t *buf, int length, HA
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
-		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, "video_stream_descriptor()", NULL);
-		XMLNODE_SetFieldLength(pxmlDescriptorNode, length);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, "video_stream_descriptor()", NULL);
+		pxmlDoc->SetAnchor(pxmlDescriptorNode);
 
 		sprintf_s(pszComment, sizeof(pszComment), "tag: 0x%02X, %d×Ö½Ú", pvideo_stream_descriptor->descriptor_tag, length);
-		XMLNODE_SetAttribute(pxmlDescriptorNode, "comment", pszComment);
+		pxmlDescriptorNode->SetAttribute("comment", pszComment);
 
 		if (rtcode != SECTION_PARSE_NO_ERROR)
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
-			XMLNODE_SetAttribute(pxmlDescriptorNode, "error", pszComment);
+			pxmlDescriptorNode->SetAttribute("error", pszComment);
 		}
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_tag", pvideo_stream_descriptor->descriptor_tag, 8, "uimsbf", NULL);
@@ -73,6 +73,8 @@ int MPEG2_PSI_decode_video_stream_descriptor_to_xml(uint8_t *buf, int length, HA
 			XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "frame_rate_extension_flag", pvideo_stream_descriptor->frame_rate_extension_flag, 1, "uimsbf", NULL);
 			XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "reserved", pvideo_stream_descriptor->reserved, 5, "uimsbf", NULL);
 		}
+
+		pxmlDoc->ClearAnchor(pxmlDescriptorNode);
 	}
 
 	if (pVideoStreamDescriptor == NULL)
@@ -280,8 +282,8 @@ int MPEG2_PSI_decode_CA_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc
 		MPEG_DVB_NumericCoding2Text_CASystemID(pCA_descriptor->CA_system_ID, pszCASystem, sizeof(pszCASystem));
 		sprintf_s(pszField, sizeof(pszField), "CA_descriptor(<tag: 0x%02X, %d×Ö½Ú, CA_PID=0x%04X, %s>)", pCA_descriptor->descriptor_tag, length, pCA_descriptor->CA_PID, pszCASystem);
 
-		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlParentNode, pszField, NULL);
-		XMLNODE_SetFieldLength(pxmlDescriptorNode, length);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL);
+		pxmlDoc->SetAnchor(pxmlDescriptorNode);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlDescriptorNode, "descriptor_tag", pCA_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
@@ -296,6 +298,8 @@ int MPEG2_PSI_decode_CA_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc
 		{
 			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlDescriptorNode, "private_data_byte[ ]", pCA_descriptor->private_data_byte, pCA_descriptor->private_data_length, NULL);
 		}
+
+		pxmlDoc->ClearAnchor(pxmlDescriptorNode);
 	}
 
 	if (pCADescriptor == NULL)

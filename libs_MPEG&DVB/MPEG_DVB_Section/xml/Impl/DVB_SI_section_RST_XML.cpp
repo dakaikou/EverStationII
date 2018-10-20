@@ -20,16 +20,10 @@ int DVB_SI_RST_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, running_status_secti
 
 	if ((pxmlDoc != NULL) && (prst_section != NULL))
 	{
-		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
-
-		XMLDeclaration* pxmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
-		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
-
 		//¸ù½Úµã
 		sprintf_s(pszField, sizeof(pszField), "running_status_section(table_id=0x%02X)", prst_section->table_id);
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
-		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, prst_section->section_length + 3);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
+		pxmlDoc->SetAnchor(pxmlRootNode);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", prst_section->table_id, 8, "uimsbf", NULL);
 
@@ -45,8 +39,8 @@ int DVB_SI_RST_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, running_status_secti
 				RUNSTATUS_DESCRIPTION_t* pstRunStatus = prst_section->astRunStatus + loop_index;
 
 				sprintf_s(pszField, sizeof(pszField), "status[%d]()", loop_index);
-				XMLElement* pxmlStatusNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
-				XMLNODE_SetFieldLength(pxmlStatusNode, 9);
+				XMLElement* pxmlStatusNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL);
+				pxmlDoc->SetAnchor(pxmlStatusNode);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlStatusNode, "transport_stream_id", pstRunStatus->transport_stream_id, 16, "uimsbf", NULL);
 
@@ -67,9 +61,13 @@ int DVB_SI_RST_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, running_status_secti
 					pstRunStatus->event_id,
 					pszStatus);
 
-				XMLNODE_SetAttribute(pxmlStatusNode, "comment", pszComment);
+				pxmlStatusNode->SetAttribute("comment", pszComment);
+
+				pxmlDoc->ClearAnchor(pxmlStatusNode);
 			}
 		}
+
+		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	return rtcode;

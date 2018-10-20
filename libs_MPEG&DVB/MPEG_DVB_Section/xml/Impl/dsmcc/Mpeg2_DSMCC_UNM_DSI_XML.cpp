@@ -40,8 +40,8 @@ int	MPEG2_DSMCC_UNM_PresentDownloadServerInitiate_to_xml(HALForXMLDoc* pxmlDoc, 
 		XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlSessionNode, "serverId", pDownloadServerInitiate->serverId, 20, NULL);
 
 		compatibilityDescriptor_t* pcompatibilityDescriptor = &(pDownloadServerInitiate->compatibilityDescriptor);
-		XMLElement* pxmlDescriptorNode = XMLDOC_NewElementForString(pxmlDoc, pxmlSessionNode, "compatibilityDescriptor()", NULL);
-		XMLNODE_SetFieldLength(pxmlDescriptorNode, 2 + pcompatibilityDescriptor->compatibilityDescriptorLength);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlSessionNode, "compatibilityDescriptor()", NULL);
+		pxmlDoc->SetAnchor(pxmlDescriptorNode);
 
 		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlDescriptorNode, "compatibilityDescriptorLength", pcompatibilityDescriptor->compatibilityDescriptorLength, 2, NULL);
 
@@ -50,6 +50,8 @@ int	MPEG2_DSMCC_UNM_PresentDownloadServerInitiate_to_xml(HALForXMLDoc* pxmlDoc, 
 			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlDescriptorNode, "compatibilityDescriptorBuf[ ]",
 				pcompatibilityDescriptor->compatibilityDescriptorBuf, pcompatibilityDescriptor->compatibilityDescriptorLength, NULL);
 		}
+
+		pxmlDoc->ClearAnchor(pxmlDescriptorNode);
 
 		XMLDOC_NewElementForByteMode(pxmlDoc, pxmlSessionNode, "privateDataLength", pDownloadServerInitiate->privateDataLength, 2, NULL);
 
@@ -69,8 +71,8 @@ int	MPEG2_DSMCC_UNM_PresentDownloadServerInitiate_to_xml(HALForXMLDoc* pxmlDoc, 
 			{
 				sprintf_s(pszComment, sizeof(pszComment), "Unknown");
 			}
-			XMLElement* pxmlPayloadNode = XMLDOC_NewElementForString(pxmlDoc, pxmlSessionNode, "privateDataByte[ ]", pszComment);
-			XMLNODE_SetFieldLength(pxmlPayloadNode, pDownloadServerInitiate->privateDataLength);
+			XMLElement* pxmlPayloadNode = pxmlDoc->NewBranchElement(pxmlSessionNode, "privateDataByte[ ]", pszComment);
+			pxmlDoc->SetAnchor(pxmlPayloadNode);
 
 			if (pDownloadServerInitiate->data_broadcast_type == 0x0006)		//DC
 			{
@@ -85,6 +87,8 @@ int	MPEG2_DSMCC_UNM_PresentDownloadServerInitiate_to_xml(HALForXMLDoc* pxmlDoc, 
 				//如何判断privateDataByte载荷的类型？
 				XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlPayloadNode, "privateDataByte[ ]", pDownloadServerInitiate->privateDataByte, pDownloadServerInitiate->privateDataLength, NULL);
 			}
+
+			pxmlDoc->ClearAnchor(pxmlPayloadNode);
 		}
 	}
 	else

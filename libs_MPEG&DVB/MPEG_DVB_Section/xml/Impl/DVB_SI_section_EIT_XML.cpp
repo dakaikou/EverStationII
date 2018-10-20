@@ -30,16 +30,10 @@ int DVB_SI_EIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, event_information_se
 
 	if ((pxmlDoc != NULL) && (peit_section != NULL))
 	{
-		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
-
-		XMLDeclaration* pxmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
-		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
-
 		//根节点
 		sprintf_s(pszField, sizeof(pszField), "event_information_section(table_id=0x%02X)", peit_section->table_id);
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
-		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, peit_section->section_length + 3);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
+		pxmlDoc->SetAnchor(pxmlRootNode);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", peit_section->table_id, 8, "uimsbf", NULL);
 
@@ -70,8 +64,8 @@ int DVB_SI_EIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, event_information_se
 		if (event_loop_length > 0)
 		{
 			sprintf_s(pszField, sizeof(pszField), "事件循环(共 %d条)", peit_section->event_count);
-			XMLElement* pxmlEventsLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
-			XMLNODE_SetFieldLength(pxmlEventsLoopNode, event_loop_length);
+			XMLElement* pxmlEventsLoopNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL);
+			pxmlDoc->SetAnchor(pxmlEventsLoopNode);
 
 			for (int event_index = 0; event_index < peit_section->event_count; event_index++)
 			{
@@ -81,8 +75,8 @@ int DVB_SI_EIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, event_information_se
 				DVB_SI_NumericCoding2Text_UTCTime(pstEvent->start_time, pszStartTime, sizeof(pszStartTime));
 				DVB_SI_NumericCoding2Text_BCDTime(pstEvent->duration, pszDuration, sizeof(pszDuration));
 				sprintf_s(pszField, sizeof(pszField), "事件[%d](<ID=0x%04X, start_time=%s, duration=%s>)", event_index, pstEvent->event_id, pszStartTime, pszDuration);
-				XMLElement* pxmlEventNode = XMLDOC_NewElementForString(pxmlDoc, pxmlEventsLoopNode, pszField, NULL);
-				XMLNODE_SetFieldLength(pxmlEventNode, event_description_length);
+				XMLElement* pxmlEventNode = pxmlDoc->NewBranchElement(pxmlEventsLoopNode, pszField, NULL);
+				pxmlDoc->SetAnchor(pxmlEventNode);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlEventNode, "event_id", pstEvent->event_id, 16, "uimsbf", NULL);
 
@@ -98,8 +92,8 @@ int DVB_SI_EIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, event_information_se
 				if (pstEvent->descriptors_loop_length > 0)
 				{
 					sprintf_s(pszField, sizeof(pszField), "事件描述符循环()");
-					XMLElement* pxmlEventDescriptorsLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlEventNode, pszField, NULL);
-					XMLNODE_SetFieldLength(pxmlEventDescriptorsLoopNode, pstEvent->descriptors_loop_length);
+					XMLElement* pxmlEventDescriptorsLoopNode = pxmlDoc->NewBranchElement(pxmlEventNode, pszField, NULL);
+					pxmlDoc->SetAnchor(pxmlEventDescriptorsLoopNode);
 
 					for (int descriptor_index = 0; descriptor_index < pstEvent->event_descriptor_count; descriptor_index++)
 					{
@@ -124,9 +118,14 @@ int DVB_SI_EIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, event_information_se
 							break;
 						}
 					}
+
+					pxmlDoc->ClearAnchor(pxmlEventDescriptorsLoopNode);
 				}
 
+				pxmlDoc->ClearAnchor(pxmlEventNode);
 			}
+
+			pxmlDoc->ClearAnchor(pxmlEventsLoopNode);
 		}
 
 		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", peit_section->CRC_32, 32, "rpchof", NULL);
@@ -135,6 +134,8 @@ int DVB_SI_EIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, event_information_se
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", peit_section->CRC_32_recalculated);
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
+
+		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	return rtcode;

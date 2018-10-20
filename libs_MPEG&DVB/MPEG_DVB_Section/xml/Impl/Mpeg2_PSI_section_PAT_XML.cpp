@@ -18,16 +18,10 @@ int MPEG2_PSI_PAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, program_associati
 		char pszPidStyle[16];
 		char pszComment[128];
 
-		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
-
-		XMLDeclaration* pxmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
-		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
-
 		//根节点
 		sprintf_s(pszField, sizeof(pszField), "program_association_section(table_id=0x%02X)", ppat_section->table_id);
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
-		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, ppat_section->section_length + 3);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
+		pxmlDoc->SetAnchor(pxmlRootNode);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", ppat_section->table_id, 8, "uimsbf", NULL);
 
@@ -50,8 +44,8 @@ int MPEG2_PSI_PAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, program_associati
 		if (loop_length > 0)
 		{
 			sprintf_s(pszField, sizeof(pszField), "节目映射循环(共 %d 项)\0", ppat_section->program_map_count);
-			XMLElement* pxmlPmtLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
-			XMLNODE_SetFieldLength(pxmlPmtLoopNode, loop_length);
+			XMLElement* pxmlPmtLoopNode = pxmlDoc->NewBranchElement(pxmlRootNode, pszField, NULL);
+			pxmlDoc->SetAnchor(pxmlPmtLoopNode);
 
 			PROGRAM_MAP_DESCRIPTION_t* pstProgram = ppat_section->astProgramMaps;
 			for (int i = 0; i < ppat_section->program_map_count; i++)
@@ -66,24 +60,30 @@ int MPEG2_PSI_PAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, program_associati
 				}
 				sprintf_s(pszField, sizeof(pszField), "节目映射[%d](<program_number=%d, %s=0x%04X>)\0", i, pstProgram->program_number, pszPidStyle, pstProgram->program_map_PID);
 
-				XMLElement* pxmlMapNode = XMLDOC_NewElementForString(pxmlDoc, pxmlPmtLoopNode, pszField, NULL);
-				XMLNODE_SetFieldLength(pxmlMapNode, 4);
+				XMLElement* pxmlMapNode = pxmlDoc->NewBranchElement(pxmlPmtLoopNode, pszField, NULL);
+				pxmlDoc->SetAnchor(pxmlMapNode);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlMapNode, "program_number", pstProgram->program_number, 16, "uimsbf", NULL);
 
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlMapNode, "reserved", pstProgram->reserved, 3, "bslbf", NULL);
 				XMLDOC_NewElementForBits(pxmlDoc, pxmlMapNode, pszPidStyle, pstProgram->program_map_PID, 13, "uimsbf", NULL);
 
+				pxmlDoc->ClearAnchor(pxmlMapNode);
+
 				pstProgram++;
 			}
+
+			pxmlDoc->ClearAnchor(pxmlPmtLoopNode);
 		}
 
 		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", ppat_section->CRC_32, 32, "rpchof", NULL);
 		if (ppat_section->CRC_32_recalculated != ppat_section->CRC_32)
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08x", ppat_section->CRC_32_recalculated);
-			XMLNODE_SetAttribute(pxmlCrcNode, "error", pszComment);
+			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
+
+		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 	else
 	{

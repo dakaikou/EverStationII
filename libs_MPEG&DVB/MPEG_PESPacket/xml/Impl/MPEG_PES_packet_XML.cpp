@@ -12,14 +12,17 @@ int	MPEG_decode_PES_packet_to_xml(uint8_t *pes_buf, int pes_size, HALForXMLDoc* 
 {
 	int	 rtcode = PES_PACKET_NO_ERROR;
 
-	PES_packet_t* ppes_packet = (pPesPacket != NULL) ? pPesPacket : new PES_packet_t;
-	rtcode = MPEG_decode_PES_packet(pes_buf, pes_size, ppes_packet);
-	rtcode = MPEG_present_PES_packet_to_xml(pxmlDoc, ppes_packet);
-
-	if (pPesPacket == NULL)
+	if ((pes_buf != NULL) && (pes_size > 4) && (pxmlDoc != NULL))
 	{
-		//说明ppat_section指针临时分配，函数返回前需要释放
-		delete ppes_packet;
+		PES_packet_t* ppes_packet = (pPesPacket != NULL) ? pPesPacket : new PES_packet_t;
+		rtcode = MPEG_decode_PES_packet(pes_buf, pes_size, ppes_packet);
+		rtcode = MPEG_present_PES_packet_to_xml(pxmlDoc, ppes_packet);
+
+		if (pPesPacket == NULL)
+		{
+			//说明ppat_section指针临时分配，函数返回前需要释放
+			delete ppes_packet;
+		}
 	}
 
 	return rtcode;
@@ -34,15 +37,9 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 
 	if ((pxmlDoc != NULL) && (pPES_packet != NULL))
 	{
-		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
-
-		XMLDeclaration* xmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
-		XMLDOC_InsertFirstChild(pxmlDoc, xmlDeclaration);
-
 		//根节点
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, "PES_packet()");
-		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, 6 + pPES_packet->PES_packet_data_length);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement("PES_packet()");
+		pxmlDoc->SetAnchor(pxmlRootNode);
 
 		if ((pPES_packet->stream_id != PROGRAM_STREAM_MAP) &&
 			(pPES_packet->stream_id != PADDING_STREAM) &&
@@ -54,8 +51,8 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 			(pPES_packet->stream_id != TYPE_E_STREAM))
 		{
 			//PES包头
-			XMLElement* pxmlHeaderNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "HEADER()", NULL);
-			XMLNODE_SetFieldLength(pxmlHeaderNode, 6 + 3 + pPES_packet->PES_header_data_length);
+			XMLElement* pxmlHeaderNode = pxmlDoc->NewBranchElement(pxmlRootNode, "HEADER()", NULL);
+			pxmlDoc->SetAnchor(pxmlHeaderNode);
 
 			XMLDOC_NewElementForBits(pxmlDoc, pxmlHeaderNode, "packet_start_code_prefix", pPES_packet->packet_start_code_prefix, 24, "bslbf", NULL);
 
@@ -97,8 +94,8 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 			{
 				if ((pPES_packet->PTS_DTS_flags & 0b10) == 0b10)			//have PTS，5个字节
 				{
-					XMLElement* pxmlPtsNode = XMLDOC_NewElementForString(pxmlDoc, pxmlHeaderNode, "PTS()", NULL);
-					XMLNODE_SetFieldLength(pxmlPtsNode, 5);
+					XMLElement* pxmlPtsNode = pxmlDoc->NewBranchElement(pxmlHeaderNode, "PTS()", NULL);
+					pxmlDoc->SetAnchor(pxmlPtsNode);
 
 					if (pPES_packet->PTS_DTS_flags == 0b10)
 					{
@@ -118,10 +115,12 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlPtsNode, "PTS[14..0]", pPES_packet->PTS_14_0, 15, "bslbf", NULL);
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlPtsNode, "marker_bit", pPES_packet->PTS_marker_bit3, 1, "bslbf", NULL);
 
+					pxmlDoc->ClearAnchor(pxmlPtsNode);
+
 					if ((pPES_packet->PTS_DTS_flags & 0b01) == 0b01)			// DTS，5个字节
 					{
-						XMLElement* pxmlDtsNode = XMLDOC_NewElementForString(pxmlDoc, pxmlHeaderNode, "DTS()", NULL);
-						XMLNODE_SetFieldLength(pxmlDtsNode, 5);
+						XMLElement* pxmlDtsNode = pxmlDoc->NewBranchElement(pxmlHeaderNode, "DTS()", NULL);
+						pxmlDoc->SetAnchor(pxmlDtsNode);
 
 						XMLDOC_NewElementForBits(pxmlDoc, pxmlDtsNode, "'0001'", pPES_packet->DTS_marker, 4, "bslbf", NULL);
 						XMLDOC_NewElementForBits(pxmlDoc, pxmlDtsNode, "DTS[32..30]", pPES_packet->DTS_32_30, 3, "bslbf", NULL);
@@ -132,6 +131,8 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 
 						XMLDOC_NewElementForBits(pxmlDoc, pxmlDtsNode, "DTS[14..0]", pPES_packet->DTS_14_0, 15, "bslbf", NULL);
 						XMLDOC_NewElementForBits(pxmlDoc, pxmlDtsNode, "marker_bit", pPES_packet->DTS_marker_bit3, 1, "bslbf", NULL);
+
+						pxmlDoc->ClearAnchor(pxmlDtsNode);
 					}
 				}
 
@@ -139,8 +140,8 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 				{
 					assert(0);
 
-					XMLElement* pxmlESCRNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "ESCR()", NULL);
-					XMLNODE_SetFieldLength(pxmlESCRNode, 6);
+					XMLElement* pxmlESCRNode = pxmlDoc->NewBranchElement(pxmlRootNode, "ESCR()", NULL);
+					pxmlDoc->SetAnchor(pxmlESCRNode);
 
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlESCRNode, "reserved", pPES_packet->ESCR_reserved, 2, "bslbf", NULL);
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlESCRNode, "ESCR_base[32..30]", pPES_packet->ESCR_base_32_30, 3, "bslbf", NULL);
@@ -151,24 +152,28 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlESCRNode, "marker_bit", pPES_packet->ESCR_marker_bit2, 1, "bslbf", NULL);
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlESCRNode, "ESCR_extension", pPES_packet->ESCR_extension, 9, "uimsbf", NULL);
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlESCRNode, "marker_bit", pPES_packet->ESCR_marker_bit3, 1, "bslbf", NULL);
+
+					pxmlDoc->ClearAnchor(pxmlESCRNode);
 				}
 
 				if (pPES_packet->ES_rate_flag)
 				{
 					assert(0);
-					XMLElement* pxmlESRateNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "ES_rate()", NULL);
-					XMLNODE_SetFieldLength(pxmlESRateNode, 3);
+					XMLElement* pxmlESRateNode = pxmlDoc->NewBranchElement(pxmlRootNode, "ES_rate()", NULL);
+					pxmlDoc->SetAnchor(pxmlESRateNode);
 
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlESRateNode, "marker_bit", pPES_packet->ES_rate_marker_bit0, 1, "bslbf", NULL);
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlESRateNode, "ES_rate", pPES_packet->ES_rate, 22, "uimsbf", NULL);
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlESRateNode, "marker_bit", pPES_packet->ES_rate_marker_bit1, 1, "bslbf", NULL);
+
+					pxmlDoc->ClearAnchor(pxmlESRateNode);
 				}
 
 				if (pPES_packet->DSM_trick_mode_flag)
 				{
 					assert(0);
-					XMLElement* pxmlTrickModeNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "DSM_trick_mode()", NULL);
-					XMLNODE_SetFieldLength(pxmlTrickModeNode, 1);
+					XMLElement* pxmlTrickModeNode = pxmlDoc->NewBranchElement(pxmlRootNode, "DSM_trick_mode()", NULL);
+					pxmlDoc->SetAnchor(pxmlTrickModeNode);
 
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlTrickModeNode, "trick_mode_control", pPES_packet->trick_mode_control, 3, "uimsbf", NULL);
 
@@ -202,16 +207,20 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 					{
 						XMLDOC_NewElementForBits(pxmlDoc, pxmlTrickModeNode, "reserved", pPES_packet->trick_mode.reserved, 5, "uimsbf", NULL);
 					}
+
+					pxmlDoc->ClearAnchor(pxmlTrickModeNode);
 				}
 
 				if (pPES_packet->additional_copy_info_flag) 
 				{
-					XMLElement* pxmlCopyInfoNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "additional_copy_info()", NULL);
-					XMLNODE_SetFieldLength(pxmlCopyInfoNode, 1);
+					XMLElement* pxmlCopyInfoNode = pxmlDoc->NewBranchElement(pxmlRootNode, "additional_copy_info()", NULL);
+					pxmlDoc->SetAnchor(pxmlCopyInfoNode);
 
 					assert(0);
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlCopyInfoNode, "marker_bit", pPES_packet->additional_copy_info_marker_bit, 1, "bslbf", NULL);
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlCopyInfoNode, "additional_copy_info", pPES_packet->additional_copy_info, 7, "bslbf", NULL);
+
+					pxmlDoc->ClearAnchor(pxmlCopyInfoNode);
 				}
 
 				if (pPES_packet->PES_CRC_flag) 
@@ -224,16 +233,17 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 				{
 					assert(0);
 
-					XMLElement* pxmlPesExtensionNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "PES_extension()", NULL);
+					XMLElement* pxmlPesExtensionNode = pxmlDoc->NewBranchElement(pxmlRootNode, "PES_extension()", NULL);
+					pxmlDoc->SetAnchor(pxmlPesExtensionNode);
 
-					int pes_extension_length = 1;
-					if (pPES_packet->PES_private_data_flag == 1) pes_extension_length += 16;
-					if (pPES_packet->pack_header_field_flag == 1) pes_extension_length += (1 + pPES_packet->pack_field_length);
-					if (pPES_packet->program_packet_sequence_counter_flag == 1) pes_extension_length += 2;
-					if (pPES_packet->P_STD_buffer_flag == 1) pes_extension_length += 2;
-					if (pPES_packet->PES_extension_flag_2 == 1) pes_extension_length += (1 + pPES_packet->PES_extension_field_length);
+					//int pes_extension_length = 1;
+					//if (pPES_packet->PES_private_data_flag == 1) pes_extension_length += 16;
+					//if (pPES_packet->pack_header_field_flag == 1) pes_extension_length += (1 + pPES_packet->pack_field_length);
+					//if (pPES_packet->program_packet_sequence_counter_flag == 1) pes_extension_length += 2;
+					//if (pPES_packet->P_STD_buffer_flag == 1) pes_extension_length += 2;
+					//if (pPES_packet->PES_extension_flag_2 == 1) pes_extension_length += (1 + pPES_packet->PES_extension_field_length);
 
-					XMLNODE_SetFieldLength(pxmlPesExtensionNode, pes_extension_length);
+					//XMLNODE_SetFieldLength(pxmlPesExtensionNode, pes_extension_length);
 
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlPesExtensionNode, "PES_private_data_flag", pPES_packet->PES_private_data_flag, 1, "bslbf", NULL);
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlPesExtensionNode, "pack_header_field_flag", pPES_packet->pack_header_field_flag, 1, "bslbf", NULL);
@@ -279,6 +289,8 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 							XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlHeaderNode, "reserved[ ]", pPES_packet->PES_extension_field_data_byte, pPES_packet->PES_extension_field_length, NULL);
 						}
 					}
+
+					pxmlDoc->ClearAnchor(pxmlPesExtensionNode);
 				}
 
 				if (pPES_packet->stuffing_length > 0)
@@ -287,12 +299,13 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 				}
 			}
 
+			pxmlDoc->ClearAnchor(pxmlHeaderNode);
+
 			if (pPES_packet->payload_length > 0)
 			{
-				XMLElement* pxmlPayloadNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "PAYLOAD()", NULL);
-				XMLNODE_SetFieldLength(pxmlPayloadNode, pPES_packet->payload_length);
-
-				XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlPayloadNode, "payload_data_byte[ ]", pPES_packet->payload_buf, pPES_packet->payload_length, NULL);
+				XMLElement* pxmlPayloadNode = pxmlDoc->NewBranchElement(pxmlRootNode, "PAYLOAD()", NULL);
+				//pxmlDoc->SetAnchor(pxmlPayloadNode);
+				//XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlPayloadNode, "payload_data_byte[ ]", pPES_packet->payload_buf, pPES_packet->payload_length, NULL);
 			}
 		}
 		else
@@ -337,6 +350,8 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 		//	sprintf_s(pszComment, sizeof(pszComment), "stream_id=0x%02X", pPES_packet->stream_id);
 		//	XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlRootNode, "PES_packet_data_byte[ ]", pPES_packet->payload_buf, pPES_packet->payload_length, pszComment);
 		//}
+
+		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 	else
 	{

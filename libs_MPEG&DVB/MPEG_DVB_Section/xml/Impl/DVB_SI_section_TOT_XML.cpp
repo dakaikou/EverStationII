@@ -25,16 +25,10 @@ int DVB_SI_TOT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, time_offset_section_
 
 	if ((pxmlDoc != NULL) && (ptot_section != NULL))
 	{
-		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
-
-		XMLDeclaration* pxmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
-		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
-
 		//¸ù½Úµã
 		sprintf_s(pszField, sizeof(pszField), "time_offset_section(table_id=0x%02X)", ptot_section->table_id);
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, pszField);
-		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, ptot_section->section_length + 3);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement(pszField);
+		pxmlDoc->SetAnchor(pxmlRootNode);
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "table_id", ptot_section->table_id, 8, "uimsbf", NULL);
 
@@ -52,8 +46,9 @@ int DVB_SI_TOT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, time_offset_section_
 		if (ptot_section->descriptors_loop_length > 0)
 		{
 			sprintf_s(pszField, sizeof(pszField), "descriptors_loop()");
+
 			XMLElement* pxmlDescriptorsLoopNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszField, NULL);
-			XMLNODE_SetFieldLength(pxmlDescriptorsLoopNode, ptot_section->descriptors_loop_length);
+			pxmlDoc->SetAnchor(pxmlDescriptorsLoopNode);
 
 			for (int descriptor_index = 0; descriptor_index < ptot_section->descriptor_count; descriptor_index++)
 			{
@@ -72,6 +67,8 @@ int DVB_SI_TOT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, time_offset_section_
 					break;
 				}
 			}
+
+			pxmlDoc->ClearAnchor(pxmlDescriptorsLoopNode);
 		}
 
 		XMLElement* pxmlCrcNode = XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "CRC_32", ptot_section->CRC_32, 32, "rpchof", NULL);
@@ -80,6 +77,8 @@ int DVB_SI_TOT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, time_offset_section_
 			sprintf_s(pszComment, sizeof(pszComment), "Should be 0x%08X", ptot_section->CRC_32_recalculated);
 			pxmlCrcNode->SetAttribute("error", pszComment);
 		}
+
+		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	return rtcode;

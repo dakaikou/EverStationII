@@ -10,6 +10,19 @@ HALForXMLDoc::HALForXMLDoc(void)
 {
 	m_bs_tracer.offset = 0;
 	m_bs_tracer.i_left = 8;
+
+	m_nTreeLevel = 0;
+	for (int i = 0; i < MAX_TREE_LEVEL; i++)
+	{
+		m_stBranchStack[i].pxmlBranchNode = NULL;
+		//m_stBranchStack[i].nOffset = 0;
+	}
+	//m_lastBranchNode = NULL;
+
+	const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
+
+	XMLDeclaration* pxmlDeclaration = NewDeclaration(pszDeclaration);
+	InsertFirstChild(pxmlDeclaration);
 }
 
 HALForXMLDoc::~HALForXMLDoc(void)
@@ -27,14 +40,86 @@ void HALForXMLDoc::SetSyncOffset(int offset)
 //	return m_bs_tracer.offset;
 //}
 
+void HALForXMLDoc::SetAnchor(XMLElement* pxmlBranchNode, int offset)
+{
+	if (pxmlBranchNode != NULL)
+	{
+		//m_lastBranchNode = pxmlBranchNode;
+
+		m_nTreeLevel++;
+		assert(m_nTreeLevel <= MAX_TREE_LEVEL);
+
+		m_stBranchStack[m_nTreeLevel-1].pxmlBranchNode = pxmlBranchNode;
+
+		if (offset >= 0)
+		{
+			SetSyncOffset(offset);
+		}
+
+		pxmlBranchNode->SetAttribute("offset", m_bs_tracer.offset);
+		//m_stBranchStack[m_nTreeLevel-1].nOffset = m_bs_tracer.offset;
+	}
+}
+
+void HALForXMLDoc::ClearAnchor(XMLElement* pxmlBranchNode)
+{
+	if (pxmlBranchNode != NULL)
+	{
+		//assert(pxmlBranchNode == m_lastBranchNode);
+		assert(pxmlBranchNode == m_stBranchStack[m_nTreeLevel - 1].pxmlBranchNode);
+
+		int offset = pxmlBranchNode->IntAttribute("offset", -1);
+		int field_length = m_bs_tracer.offset - offset;
+		pxmlBranchNode->SetAttribute("length", field_length);
+		pxmlBranchNode->SetAttribute("field_length", field_length);
+
+		m_stBranchStack[m_nTreeLevel - 1].pxmlBranchNode = NULL;
+		m_nTreeLevel--;
+
+		//if (m_nTreeLevel > 0)
+		//{
+		//	m_lastBranchNode = m_stBranchStack[m_nTreeLevel - 1].pxmlBranchNode;
+		//}
+		//else
+		//{
+		//	m_lastBranchNode = NULL;
+		//}
+	}
+}
+
+void HALForXMLDoc::Align(void)
+{
+	if (m_bs_tracer.i_left < 8)		// 1~7
+	{
+		m_bs_tracer.i_left = 8;
+		m_bs_tracer.offset++;
+	}
+}
+
+XMLElement* HALForXMLDoc::NewRootElement(const char* key_name, const char* pszComment)
+{
+	//XMLElement* pxmlNewElement = XMLDocument::NewElement(key_name);
+
+	//if (pszComment != NULL)
+	//{
+	//	pxmlNewElement->SetAttribute("comment", pszComment);
+	//}
+
+	//InsertEndChild(pxmlNewElement);
+
+	m_nTreeLevel = 0;
+	for (int i = 0; i < MAX_TREE_LEVEL; i++)
+	{
+		m_stBranchStack[i].pxmlBranchNode = NULL;
+	}
+	//m_lastBranchNode = NULL;
+
+	return NewBranchElement(NULL, key_name, pszComment);
+}
+
 XMLElement * HALForXMLDoc::NewElementForString(XMLElement* pxmlParent, const char* key_name, const char* pszComment)
 {
 	XMLElement* pxmlNewElement = XMLDocument::NewElement(key_name);
-
-	//if (string != NULL)
-	//{
-	//	pxmlNewElement->SetAttribute("value", string);
-	//}
 
 	if (pszComment != NULL)
 	{
@@ -43,7 +128,36 @@ XMLElement * HALForXMLDoc::NewElementForString(XMLElement* pxmlParent, const cha
 
 	if (pxmlParent != NULL)
 	{
+		//this is a child node
 		pxmlParent->InsertEndChild(pxmlNewElement);
+	}
+	else
+	{
+		// this is a root node
+		InsertEndChild(pxmlNewElement);
+	}
+
+	return pxmlNewElement;
+}
+
+XMLElement * HALForXMLDoc::NewBranchElement(XMLElement* pxmlParent, const char* key_name, const char* pszComment)
+{
+	XMLElement* pxmlNewElement = XMLDocument::NewElement(key_name);
+
+	if (pszComment != NULL)
+	{
+		pxmlNewElement->SetAttribute("comment", pszComment);
+	}
+
+	if (pxmlParent != NULL)
+	{
+		//this is a child node
+		pxmlParent->InsertEndChild(pxmlNewElement);
+	}
+	else
+	{
+		// this is a root node
+		InsertEndChild(pxmlNewElement);
 	}
 
 	return pxmlNewElement;
@@ -51,6 +165,8 @@ XMLElement * HALForXMLDoc::NewElementForString(XMLElement* pxmlParent, const cha
 
 XMLElement * HALForXMLDoc::NewElementForBits(XMLElement* pxmlParent, const char* key_name, uint32_t key_value, int bits, const char* mnemonic, const char* pszComment)
 {
+	TrackTheBranchNode(pxmlParent);
+
 	XMLElement* pxmlNewElement = XMLDocument::NewElement(key_name);
 
 	if (bits > 0)
@@ -251,5 +367,10 @@ XMLElement* HALForXMLDoc::QueryNodeByKeyName(XMLElement* pxmlParentNode, const c
 	}
 
 	return pxmlMatchNode;
+}
+
+void HALForXMLDoc::TrackTheBranchNode(XMLElement* pxmlBranchNode)
+{
+
 }
 

@@ -23,25 +23,19 @@ int MPEG_decode_TS_packet_to_XML(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc
 	{
 		char pszComment[64];
 
-		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
-
-		XMLDeclaration* pxmlDeclaration = XMLDOC_NewDeclaration(pxmlDoc, pszDeclaration);
-		XMLDOC_InsertFirstChild(pxmlDoc, pxmlDeclaration);
-
 		//根据ISO/IEC 13818-1:2000 版本组织XML编排
 
 		//根节点
-		XMLElement* pxmlRootNode = XMLDOC_NewRootElement(pxmlDoc, "transport_packet()");
-		XMLDOC_InsertEndChild(pxmlDoc, pxmlRootNode);
-		XMLNODE_SetFieldLength(pxmlRootNode, length);
+		XMLElement* pxmlRootNode = pxmlDoc->NewRootElement("transport_packet()");
+		pxmlDoc->SetAnchor(pxmlRootNode);
 
 		sprintf_s(pszComment, sizeof(pszComment), "%d字节", length);
-		XMLNODE_SetAttribute(pxmlRootNode, "comment", pszComment);
+		pxmlRootNode->SetAttribute("comment", pszComment);
 
 		if (rtcode != TSPACKET_PARSE_NO_ERROR)
 		{
 			sprintf_s(pszComment, sizeof(pszComment), "ErrorCode=0x%08x", rtcode);
-			XMLNODE_SetAttribute(pxmlRootNode, "error", pszComment);
+			pxmlRootNode->SetAttribute("error", pszComment);
 		}
 
 		XMLDOC_NewElementForBits(pxmlDoc, pxmlRootNode, "sync_byte", ptransport_packet->sync_byte, 8, "bslbf", NULL);
@@ -64,8 +58,8 @@ int MPEG_decode_TS_packet_to_XML(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc
 
 			int adaptation_field_length = 1 + padaptation_field->adaptation_field_length;
 
-			XMLElement* pxmlAdaptationNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, "adaptation_field()", NULL);
-			XMLNODE_SetFieldLength(pxmlAdaptationNode, adaptation_field_length);
+			XMLElement* pxmlAdaptationNode = pxmlDoc->NewBranchElement(pxmlRootNode, "adaptation_field()", NULL);
+			pxmlDoc->SetAnchor(pxmlAdaptationNode);
 
 			XMLDOC_NewElementForBits(pxmlDoc, pxmlAdaptationNode, "adaptation_field_length", padaptation_field->adaptation_field_length, 8, "uimsbf", NULL);
 
@@ -92,14 +86,18 @@ int MPEG_decode_TS_packet_to_XML(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc
 					XMLDOC_NewElementForBits(pxmlDoc, pxmlAdaptationNode, "program_clock_reference_extension", padaptation_field->program_clock_reference_extension, 9, "uimsbf", NULL);
 				}
 			}
+
+			pxmlDoc->ClearAnchor(pxmlAdaptationNode);
 		}
 
 		//TS包净荷
 		if ((ptransport_packet->adaptation_field_control & 0b01) == 0b01)	//判断是否有净荷
 		{
-			XMLDOC_SetSyncOffset(pxmlDoc, payload_start_pos);
+			pxmlDoc->SetSyncOffset(payload_start_pos);
 			XMLDOC_NewElementForByteBuf(pxmlDoc, pxmlRootNode, "payload_buf[ ]", ptransport_packet->payload_buf, ptransport_packet->payload_length, NULL);
 		}
+
+		pxmlDoc->ClearAnchor(pxmlRootNode);
 	}
 
 	if (pTSPacket == NULL)

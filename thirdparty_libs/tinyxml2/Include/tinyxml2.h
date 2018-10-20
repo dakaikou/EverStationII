@@ -42,7 +42,6 @@ distribution.
 #endif
 
 #include <stdint.h>
-#include "tinyxml2_ext.h"
 /*
    TODO: intern strings instead of allocation.
 */
@@ -1251,7 +1250,7 @@ class TINYXML2_LIB XMLElement : public XMLNode
 public:
 
 	//void SetStartEndPtr(int offset, int length);
-	void SetFieldLength(int length);
+	//void SetFieldLength(int length);
 
     /// Get the name of an element (which is the Value() of the node.)
     const char* Name() const		{
@@ -1672,14 +1671,14 @@ class TINYXML2_LIB XMLDocument : public XMLNode
 
 protected:
 
-	BITS_TRACER_t m_bs_tracer;				//added by chendelin 2018.9.29
+	//BITS_TRACER_t m_bs_tracer;				//added by chendelin 2018.9.29
 
 public:
     /// constructor
     XMLDocument( bool processEntities = true, Whitespace whitespaceMode = PRESERVE_WHITESPACE );
     ~XMLDocument();
 
-	void GetBitsTracer(BITS_TRACER_t* pbs_tracer);
+	//void GetBitsTracer(BITS_TRACER_t* pbs_tracer);
 
     virtual XMLDocument* ToDocument()				{
         TIXMLASSERT( this == _document );

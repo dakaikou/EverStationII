@@ -885,7 +885,7 @@ int CDB_PsiSiTables::BuildDsmccTree(uint16_t usPID, HALForXMLDoc* pxmlDoc)
 	{
 		const char* pszDeclaration = "xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"";
 
-		tinyxml2::XMLDeclaration* xmlDeclaration = pxmlDoc->NewDeclaration(pszDeclaration);
+		XMLDeclaration* xmlDeclaration = pxmlDoc->NewDeclaration(pszDeclaration);
 		pxmlDoc->InsertFirstChild(xmlDeclaration);
 
 		CDSMCC_UNM*		pDSMCC_DSI;
@@ -906,7 +906,7 @@ int CDB_PsiSiTables::BuildDsmccTree(uint16_t usPID, HALForXMLDoc* pxmlDoc)
 			//设置标题
 
 			//根节点
-			tinyxml2::XMLElement* pxmlRootNode = ((tinyxml2::XMLDocument*)pxmlDoc)->NewElement(pszTitle);
+			XMLElement* pxmlRootNode = pxmlDoc->NewElement(pszTitle);
 			pxmlDoc->InsertEndChild(pxmlRootNode);
 
 			if (pDSI->data_broadcast_type == 0x0006)		//DC
@@ -1008,7 +1008,7 @@ int CDB_PsiSiTables::BuildBouquetTree(uint32_t uiCode, HALForXMLDoc* pxmlDoc)
 			//设置标题
 
 			//根节点
-			tinyxml2::XMLElement* pxmlRootNode = ((tinyxml2::XMLDocument*)pxmlDoc)->NewElement(pszText);
+			XMLElement* pxmlRootNode = pxmlDoc->NewElement(pszText);
 			pxmlDoc->InsertEndChild(pxmlRootNode);
 
 			int nStreamCount = pBAT->GetStreamCount();
