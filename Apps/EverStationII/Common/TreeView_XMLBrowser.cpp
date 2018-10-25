@@ -350,6 +350,15 @@ HTREEITEM CTreeView_PacketSyntax::DisplaySingleNode(HTREEITEM hParent, tinyxml2:
 		treeCtrl.SetItemState(hItem, TVIS_BOLD, TVIS_BOLD);
 	}
 
+	const char* pszDisplayOptions = pxmlNode->Attribute("display_options");
+	if (pszDisplayOptions != NULL)
+	{
+		if (strcmp(pszDisplayOptions, "expanded") == 0)
+		{
+			treeCtrl.Expand(hItem, TVE_EXPAND);
+		}
+	}
+
 	int offset = pxmlNode->IntAttribute("offset", -1);
 	int length = pxmlNode->IntAttribute("length", -1);
 

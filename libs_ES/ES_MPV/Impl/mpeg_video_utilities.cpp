@@ -9,7 +9,7 @@
 
 #define CHINESE_VERSION		1
 
-void MPGV_DecodeProgressiveSequenceCodetoText(U8 code, S8* pszText, S32 size)
+void MPGV_DecodeProgressiveSequenceCodetoText(uint8_t code, char* pszText, int size)
 {
 	if (pszText)
 	{
@@ -24,7 +24,7 @@ void MPGV_DecodeProgressiveSequenceCodetoText(U8 code, S8* pszText, S32 size)
 	}
 }
 
-void MPGV_DecodeProgressiveFrameCodetoText(U8 code, S8* pszText, S32 size)
+void MPGV_DecodeProgressiveFrameCodetoText(uint8_t code, char* pszText, int size)
 {
 	if (pszText)
 	{
@@ -39,7 +39,7 @@ void MPGV_DecodeProgressiveFrameCodetoText(U8 code, S8* pszText, S32 size)
 	}
 }
 
-void MPGV_DecodeFrameRateCodetoText(U8 code, S8* pszText, S32 size)
+void MPGV_DecodeFrameRateCodetoText(uint8_t code, char* pszText, int size)
 {
 #if CHINESE_VERSION
 	switch (code)
@@ -113,7 +113,7 @@ void MPGV_DecodeFrameRateCodetoText(U8 code, S8* pszText, S32 size)
 
 }
 
-void MPGV_DecodeAspectRatioCodetoText(U8 code, S8* pszText, S32 size)
+void MPGV_DecodeAspectRatioCodetoText(uint8_t code, char* pszText, int size)
 {
 #if CHINESE_VERSION
 	switch (code)
@@ -163,7 +163,7 @@ void MPGV_DecodeAspectRatioCodetoText(U8 code, S8* pszText, S32 size)
 
 }
 
-void MPGV_DecodePictureStructureCodetoText(U8 code, S8* pszText, S32 size)
+void MPGV_DecodePictureStructureCodetoText(uint8_t code, char* pszText, int size)
 {
 	switch (code)
 	{
@@ -185,7 +185,7 @@ void MPGV_DecodePictureStructureCodetoText(U8 code, S8* pszText, S32 size)
 	}
 }
 
-void MPGV_DecodeChromaFormatCodetoText(U8 code, S8* pszText, S32 size)
+void MPGV_DecodeChromaFormatCodetoText(uint8_t code, char* pszText, int size)
 {
 	switch (code)
 	{
@@ -207,7 +207,7 @@ void MPGV_DecodeChromaFormatCodetoText(U8 code, S8* pszText, S32 size)
 	}
 }
 
-void MPGV_DecodeVideoFormatCodetoText(U8 code, S8* pszText, S32 size)
+void MPGV_DecodeVideoFormatCodetoText(uint8_t code, char* pszText, int size)
 {
 	switch (code)
 	{
@@ -241,7 +241,7 @@ void MPGV_DecodeVideoFormatCodetoText(U8 code, S8* pszText, S32 size)
 	}
 }
 
-void MPGV_DecodeColourPrimariesCodetoText(U8 code, S8* pszText, S32 size)
+void MPGV_DecodeColourPrimariesCodetoText(uint8_t code, char* pszText, int size)
 {
 	switch (code)
 	{
@@ -276,7 +276,7 @@ void MPGV_DecodeColourPrimariesCodetoText(U8 code, S8* pszText, S32 size)
 	}
 }
 
-void MPGV_DecodeTransferCharacteristicsCodetoText(U8 code, S8* pszText, S32 size)
+void MPGV_DecodeTransferCharacteristicsCodetoText(uint8_t code, char* pszText, int size)
 {
 	switch (code)
 	{
@@ -314,7 +314,7 @@ void MPGV_DecodeTransferCharacteristicsCodetoText(U8 code, S8* pszText, S32 size
 	}
 }
 
-void MPGV_DecodeMatrixCoefficientsCodetoText(U8 code, S8* pszText, S32 size)
+void MPGV_DecodeMatrixCoefficientsCodetoText(uint8_t code, char* pszText, int size)
 {
 	switch (code)
 	{
@@ -349,7 +349,7 @@ void MPGV_DecodeMatrixCoefficientsCodetoText(U8 code, S8* pszText, S32 size)
 	}
 }
 
-void MPGV_DecodeProfileCodetoText(U8 code, S8* pszText, S32 size)
+void MPGV_DecodeProfileCodetoText(uint8_t code, char* pszText, int size)
 {
 	switch (code)
 	{
@@ -379,7 +379,7 @@ void MPGV_DecodeProfileCodetoText(U8 code, S8* pszText, S32 size)
 	}
 }
 
-void MPGV_DecodeLevelCodetoText(U8 code, S8* pszText, S32 size)
+void MPGV_DecodeLevelCodetoText(uint8_t code, char* pszText, int size)
 {
 	switch (code)
 	{
@@ -401,7 +401,7 @@ void MPGV_DecodeLevelCodetoText(U8 code, S8* pszText, S32 size)
 	}
 }
 
-void MPGV_DecodeExtensionStartCodeIdentifiertoText(U8 code, S8* pszText, S32 size)
+void MPGV_DecodeExtensionStartCodeIdentifiertoText(uint8_t code, char* pszText, int size)
 {
 	switch (code)
 	{
@@ -449,7 +449,7 @@ void MPGV_DecodeExtensionStartCodeIdentifiertoText(U8 code, S8* pszText, S32 siz
 	}
 }
 
-void MPGV_DecodePictureCodingTypetoText(U8 code, S8* pszText, S32 size)
+void MPGV_DecodePictureCodingTypetoText(uint8_t code, char* pszText, int size)
 {
 #if CHINESE_VERSION
 	switch (code)

@@ -122,8 +122,18 @@ typedef struct
 #define MPGV_PICTURE_TEMPORAL_SCALABLE_EXTENSION_ID	0xA
 //  0xB ~ 0xF reserved
 
+//define this struct is used to save the original nal segment buffer information
+typedef struct
+{
+	uint8_t* buf;					//volatilable
+	int		 length;
+} MPGV_nal_snapshot_t;
+
 typedef struct MPGV_sequence_header
 {
+	//original buffer snapshot
+	MPGV_nal_snapshot_t nal_snapshot;
+
 	/*syntax part*/
 	uint32_t	sequence_header_code;				//32
 
@@ -143,10 +153,18 @@ typedef struct MPGV_sequence_header
 	uint8_t		load_non_intra_quantiser_matrix;	//1
 	uint8_t		non_intra_quantiser_matrix[64];		//8 * 64
 
+	uint8_t		padding_bits_value;					//8
+	int			padding_bits_length;
+	uint8_t*    padding_bytes;
+	int			padding_length;
+
 } MPGV_sequence_header_t, *pMPGV_sequence_header_t;
 
 typedef struct MPGV_sequence_extension
 {
+	//original buffer snapshot
+	MPGV_nal_snapshot_t nal_snapshot;
+
 	U32		extension_start_code;				//32
 
 	S8		extension_start_code_identifier;		//4
@@ -164,10 +182,18 @@ typedef struct MPGV_sequence_extension
 	S8		frame_rate_extension_n;		//2
 	S8		frame_rate_extension_d;		//5
 
+	uint8_t		padding_bits_value;								//8
+	int			padding_bits_length;
+	uint8_t*    padding_bytes;
+	int			padding_length;
+
 } MPGV_sequence_extension_t, *pMPGV_sequence_extension_t;
 
 typedef struct MPGV_sequence_display_extension
 {
+	//original buffer snapshot
+	MPGV_nal_snapshot_t nal_snapshot;
+
 	U32		extension_start_code;						//32
 
 	U8		extension_start_code_identifier;		//4
@@ -186,6 +212,9 @@ typedef struct MPGV_sequence_display_extension
 
 typedef struct MPGV_sequence_scalable_extension
 {
+	//original buffer snapshot
+	MPGV_nal_snapshot_t nal_snapshot;
+
 	U32		extension_start_code;						//32
 
 	S8		extension_start_code_identifier;		//4
@@ -197,6 +226,9 @@ typedef struct MPGV_sequence_scalable_extension
 
 typedef struct MPGV_quant_matrix_extension
 {
+	//original buffer snapshot
+	MPGV_nal_snapshot_t nal_snapshot;
+
 	U32		extension_start_code;						//32
 
 	S8		extension_start_code_identifier;		//4
@@ -218,6 +250,9 @@ typedef struct MPGV_quant_matrix_extension
 
 typedef struct MPGV_picture_display_extension
 {
+	//original buffer snapshot
+	MPGV_nal_snapshot_t nal_snapshot;
+
 	U32		extension_start_code;						//32
 
 	S8		extension_start_code_identifier;		//4
@@ -226,6 +261,9 @@ typedef struct MPGV_picture_display_extension
 
 typedef struct MPGV_picture_temporal_scalable_extension
 {
+	//original buffer snapshot
+	MPGV_nal_snapshot_t nal_snapshot;
+
 	U32		extension_start_code;						//32
 
 	U8		extension_start_code_identifier;		//4
@@ -239,6 +277,9 @@ typedef struct MPGV_picture_temporal_scalable_extension
 
 typedef struct MPGV_picture_spatial_scalable_extension
 {
+	//original buffer snapshot
+	MPGV_nal_snapshot_t nal_snapshot;
+
 	U32		extension_start_code;						//32
 
 	U8		extension_start_code_identifier;		//4
@@ -247,6 +288,9 @@ typedef struct MPGV_picture_spatial_scalable_extension
 
 typedef struct MPGV_copyright_extension
 {
+	//original buffer snapshot
+	MPGV_nal_snapshot_t nal_snapshot;
+
 	U32		extension_start_code;						//32
 
 	U8		extension_start_code_identifier;		//4
@@ -255,12 +299,18 @@ typedef struct MPGV_copyright_extension
 
 typedef struct MPGV_sequence_end
 {
+	//original buffer snapshot
+	MPGV_nal_snapshot_t nal_snapshot;
+
 	U32		sequence_end_code;						//32
 
 } MPGV_sequence_end_t, *pMPGV_sequence_end_t;
 
 typedef struct MPGV_group_of_pictures_header
 {
+	//original buffer snapshot
+	MPGV_nal_snapshot_t nal_snapshot;
+
 	U32		group_start_code;							//32
 
 	U8		drop_frame_flag;
@@ -272,11 +322,19 @@ typedef struct MPGV_group_of_pictures_header
 	U8		closed_gop;				//1
 	U8		broken_link;			//1
 
+	uint8_t		padding_bits_value;								//8
+	int			padding_bits_length;
+	uint8_t*    padding_bytes;
+	int			padding_length;
+
 } MPGV_group_of_pictures_header_t, *pMPGV_group_of_pictures_header_t;
 
 typedef struct MPGV_picture_header
 {
-	U32		picture_start_code;							//32
+	//original buffer snapshot
+	MPGV_nal_snapshot_t nal_snapshot;
+
+	uint32_t picture_start_code;							//32
 
 	S16		temporal_reference;						//10
 	S8		picture_coding_type;					//3
@@ -290,10 +348,18 @@ typedef struct MPGV_picture_header
 	uint8_t extra_bit_picture;				//1
 	uint8_t extra_information_picture;		//8
 
+	uint8_t		padding_bits_value;								//8
+	int			padding_bits_length;
+	uint8_t*    padding_bytes;
+	int			padding_length;
+
 } MPGV_picture_header_t, *pMPGV_picture_header_t;
 
 typedef struct MPGV_picture_coding_extension
 {
+	//original buffer snapshot
+	MPGV_nal_snapshot_t nal_snapshot;
+
 	U32		extension_start_code;						//32
 
 	U8		extension_start_code_identifier;			//4
@@ -320,34 +386,56 @@ typedef struct MPGV_picture_coding_extension
 	U8		burst_amplitude;							//7
 	U8		sub_carrier_phase;							//8
 
+	uint8_t		padding_bits_value;								//8
+	int			padding_bits_length;
+	uint8_t*    padding_bytes;
+	int			padding_length;
+
 } MPGV_picture_coding_extension_t, *pMPGV_picture_coding_extension_t;
 
-typedef struct MPGV_unknown_nal
-{
-	U32		start_code;
-
-} MPGV_unknown_nal_t, *pMPGV_unknown_nal_t;
+//typedef struct MPGV_unknown_nal
+//{
+//	U32		start_code;
+//
+//} MPGV_unknown_nal_t, *pMPGV_unknown_nal_t;
 
 typedef struct MPGV_user_data
 {
-	U32		user_data_start_code;
+	//original buffer snapshot
+	MPGV_nal_snapshot_t nal_snapshot;
+
+	uint32_t	user_data_start_code;
+
+	uint8_t*	user_data_buf;
+	int			user_data_length;
 
 } MPGV_user_data_t, *pMPGV_user_data_t;
 
 typedef struct MPGV_slice
 {
-	U32		slice_start_code;							//32
-	U8		slice_vertical_position;
-	U8		slice_vertical_position_extension;			//3
-	U8		priority_breakpoint;						//7
-	U8		quantiser_scale_code;						//5
-	U8		intra_slice_flag;							//1
-	U8		intra_slice;								//1
-//	U8		reserved_bits;								//7
-	U8		slice_picture_id_enable;					//1
-	U8		slice_picture_id;							//6
-	U8		extra_bit_slice;							//1
-	U8		extra_information_slice;					//8
+	//original buffer snapshot
+	MPGV_nal_snapshot_t nal_snapshot;
+
+	//sematic part
+	uint8_t		slice_vertical_position;
+
+	//syntax part
+	uint32_t	slice_start_code;							//32
+	uint8_t		slice_vertical_position_extension;			//3
+	uint8_t		priority_breakpoint;						//7
+	uint8_t		quantiser_scale_code;						//5
+	uint8_t		intra_slice_flag;							//1
+	uint8_t		intra_slice;								//1
+//	uint8_t		reserved_bits;								//7
+	uint8_t		slice_picture_id_enable;					//1
+	uint8_t		slice_picture_id;							//6
+	uint8_t		extra_bit_slice;							//1
+	uint8_t		extra_information_slice;					//8
+
+	uint8_t		padding_bits_value;							//8
+	int			padding_bits_length;
+	uint8_t*    padding_bytes;
+	int			padding_length;
 
 } MPGV_slice_t, *pMPGV_slice_t;
 

@@ -294,6 +294,11 @@ void CDlg_TSAnalyzer_PesEs::Reset(void)
 
 void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(uint32_t uiPESStyle, uint8_t* pes_buf, int pes_size, HALForXMLDoc* pxmlFatherDoc)
 {
+	uint8_t sub_type = (uiPESStyle & 0x000000ff);
+	uint8_t stream_type = (uiPESStyle & 0x0000ff00) >> 8;
+	uint16_t PID = (uiPESStyle & 0x1fff0000) >> 16;
+	uint8_t class_type = (uiPESStyle & 0xE0000000) >> 29;
+
 	if ((m_pList != NULL) && (m_pTree != NULL))
 	{
 		HALForXMLDoc xml2Doc;
@@ -312,78 +317,77 @@ void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(uint32_t uiPESStyle, uint8_t* pes_b
 		//}
 
 		XMLElement* pxmlPayloadNode = xml2Doc.QueryNodeByKeyName(xml2Doc.RootElement(), "PAYLOAD()");
-
-		U8 sub_type = (uiPESStyle & 0x000000ff);
-		U8 stream_type = (uiPESStyle & 0x0000ff00) >> 8;
-		U16 PID = (uiPESStyle & 0x1fff0000) >> 16;
-		U8 class_type = (uiPESStyle & 0xE0000000) >> 29;
-
-		if (class_type == TSPAYLOAD_CLASS_PES_VIDEO)
+		if (pxmlPayloadNode != NULL)
 		{
-			if ((stream_type == 0x01) || (stream_type == 0x02))
+			if (class_type == TSPAYLOAD_CLASS_PES_VIDEO)
 			{
-				DisplayMPVPacket(es_buf, es_length, &xml2Doc, pxmlPayloadNode);
+				if ((stream_type == 0x01) || (stream_type == 0x02))
+				{
+					DisplayMPVPacket(es_buf, es_length, &xml2Doc, pxmlPayloadNode);
+				}
+				////else if (stream_type == 0x10)
+				////{
+				////	//MP4  ”∆µ
+				////	DisplayMP4VPacket(es_buf, es_length);
+				////}
+				//else if (stream_type == 0x1B)
+				//{
+				//	DisplayH264Packet(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
+				//}
+				//else if (stream_type == 0x42)
+				//{
+				//	DisplayAVSPacket(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
+				//}
+				else
+				{
+					DisplayUnknownESPacket(es_buf, es_length, &xml2Doc, pxmlPayloadNode);
+				}
 			}
-			////else if (stream_type == 0x10)
-			////{
-			////	//MP4  ”∆µ
-			////	DisplayMP4VPacket(es_buf, es_length);
-			////}
-			//else if (stream_type == 0x1B)
-			//{
-			//	DisplayH264Packet(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
-			//}
-			//else if (stream_type == 0x42)
-			//{
-			//	DisplayAVSPacket(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
-			//}
+			else if (class_type == TSPAYLOAD_CLASS_PES_AUDIO)
+			{
+				//if ((stream_type == 0x03) || (stream_type == 0x04))
+				//{
+				//	uint16_t sync_word = 0x0000;
+				//	uint16_t sync_mask = 0xffff;
+				//	int sync_length = -1;
+				//	if (data_alignment_indicator)
+				//	{
+				//		sync_word = (es_buf[0] << 8) | es_buf[1];
+				//		sync_mask = 0xffff;
+				//		sync_length = 2;
+				//	}
+				//	DisplayMPAPacket(es_buf, es_length, &xmlDoc, pxmlPayloadNode, sync_word, sync_mask, sync_length);
+				//}
+				//else if ((stream_type == 0x0F) || (stream_type == 0x11))
+				//{
+				//	DisplayAACPacket(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
+				//}
+				//else if ((stream_type == 0x06) || (stream_type == 0x81))
+				//{
+				//	if (sub_type == STREAM_SUBTYPE_AC3)
+				//	{
+				//		DisplayAC3Packet(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
+				//	}
+				//	else if (sub_type == STREAM_SUBTYPE_DRA)
+				//	{
+				//		DisplayDRAPacket(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
+				//	}
+				//	else
+				//	{
+				//		DisplayUnknownESPacket(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
+				//	}
+				//}
+				//else
+				//{
+				DisplayUnknownESPacket(es_buf, es_length, &xml2Doc, pxmlPayloadNode);
+				//}
+			}
 			else
 			{
 				DisplayUnknownESPacket(es_buf, es_length, &xml2Doc, pxmlPayloadNode);
 			}
-		}
-		else if (class_type == TSPAYLOAD_CLASS_PES_AUDIO)
-		{
-			//if ((stream_type == 0x03) || (stream_type == 0x04))
-			//{
-			//	uint16_t sync_word = 0x0000;
-			//	uint16_t sync_mask = 0xffff;
-			//	int sync_length = -1;
-			//	if (data_alignment_indicator)
-			//	{
-			//		sync_word = (es_buf[0] << 8) | es_buf[1];
-			//		sync_mask = 0xffff;
-			//		sync_length = 2;
-			//	}
-			//	DisplayMPAPacket(es_buf, es_length, &xmlDoc, pxmlPayloadNode, sync_word, sync_mask, sync_length);
-			//}
-			//else if ((stream_type == 0x0F) || (stream_type == 0x11))
-			//{
-			//	DisplayAACPacket(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
-			//}
-			//else if ((stream_type == 0x06) || (stream_type == 0x81))
-			//{
-			//	if (sub_type == STREAM_SUBTYPE_AC3)
-			//	{
-			//		DisplayAC3Packet(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
-			//	}
-			//	else if (sub_type == STREAM_SUBTYPE_DRA)
-			//	{
-			//		DisplayDRAPacket(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
-			//	}
-			//	else
-			//	{
-			//		DisplayUnknownESPacket(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
-			//	}
-			//}
-			//else
-			//{
-				DisplayUnknownESPacket(es_buf, es_length, &xml2Doc, pxmlPayloadNode);
-			//}
-		}
-		else
-		{
-			DisplayUnknownESPacket(es_buf, es_length, &xml2Doc, pxmlPayloadNode);
+
+			pxmlPayloadNode->SetAttribute("display_options", "expanded");
 		}
 
 		m_pTree->Reset();
@@ -424,7 +428,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPVPacket(uint8_t* es_buf, int es_size, HALFo
 	U8*			rd_ptr;
 	S32			remain_length;
 
-	//char	pszComment[64];
+	char	pszComment[128];
 	char	pszField[64];
 
 	if ((es_buf != NULL) && (es_size > 0) && (pxmlDoc != NULL))
@@ -485,23 +489,23 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPVPacket(uint8_t* es_buf, int es_size, HALFo
 				start_code = segment.nal_buf[3];
 				switch (start_code)
 				{
-				//case MPGV_USER_DATA_START_CODE:
-				//	mpgv_decode_user_data_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
-				//	break;
+				case MPGV_USER_DATA_START_CODE:
+					mpgv_decode_user_data_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+					break;
 
-				//case MPGV_SEQUENCE_HEADER_CODE:
-				//	mpgv_decode_sequence_header_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
-				//	break;
+				case MPGV_SEQUENCE_HEADER_CODE:
+					mpgv_decode_sequence_header_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+					break;
 
-				//case MPGV_EXTENSION_START_CODE:
-				//	extension_start_code_identifier = (segment.nal_buf[4] & 0xf0) >> 4;
+				case MPGV_EXTENSION_START_CODE:
+					extension_start_code_identifier = (segment.nal_buf[4] & 0xf0) >> 4;
 
-				//	switch (extension_start_code_identifier)
-				//	{
-				//	case MPGV_SEQUENCE_EXTENSION_ID:
+					switch (extension_start_code_identifier)
+					{
+					case MPGV_SEQUENCE_EXTENSION_ID:
 
-				//		mpgv_decode_sequence_extension_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
-				//		break;
+						mpgv_decode_sequence_extension_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+						break;
 
 				//	case MPGV_SEQUENCE_DISPLAY_EXTENSION_ID:
 
@@ -513,10 +517,10 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPVPacket(uint8_t* es_buf, int es_size, HALFo
 					//	mpgv_decode_quant_matrix_extension(nal_unit.rbsp_byte, nal_unit.NumBytesInRBSP);
 					//	break;
 
-					//case MPGV_PICTURE_CODING_EXTENSION_ID:
+					case MPGV_PICTURE_CODING_EXTENSION_ID:
 
-					//	mpgv_decode_picture_coding_extension_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
-					//	break;
+						mpgv_decode_picture_coding_extension_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+						break;
 
 					//case MPGV_SEQUENCE_SCALABLE_EXTENSION_ID:
 
@@ -543,44 +547,46 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPVPacket(uint8_t* es_buf, int es_size, HALFo
 					//	mpgv_decode_picture_temporal_scalable_extension(nal_unit.rbsp_byte, nal_unit.NumBytesInRBSP);
 					//	break;
 
-					//default:
-					//	mpgv_decode_unknown_nal_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
-					//	break;
-					//}
+					default:
+						mpgv_decode_unknown_nal_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+						break;
+					}
 
-					//break;
+					break;
 
-				//case MPGV_GROUP_START_CODE:
-				//	mpgv_decode_group_of_pictures_header_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
-				//	break;
+				case MPGV_GROUP_START_CODE:
+					mpgv_decode_group_of_pictures_header_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+					break;
 
-				//case MPGV_PICTURE_START_CODE:
-				//	mpgv_decode_picture_header_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
-				//	slices_length = 0;
-				//	pxmlSlicesNode = NULL;
-				//	break;
+				case MPGV_PICTURE_START_CODE:
+					mpgv_decode_picture_header_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+					slices_length = 0;
+					pxmlSlicesNode = NULL;
+					break;
 
 				default:
 
-					//if ((start_code >= MPGV_SLICE_START_CODE_MIN) && (start_code <= MPGV_SLICE_START_CODE_MAX))
-					//{
-					//	slices_length += segment.nal_length;
-					//	if (pxmlSlicesNode == NULL)
-					//	{
-					//		slices_start_ptr = segment.nal_buf;
-					//		slices_start_code = start_code;
+					if ((start_code >= MPGV_SLICE_START_CODE_MIN) && (start_code <= MPGV_SLICE_START_CODE_MAX))
+					{
+						if (pxmlSlicesNode == NULL)
+						{
+							slices_start_ptr = segment.nal_buf;
+							slices_start_code = start_code;
 
-					//		pxmlSlicesNode = pxmlDoc->NewElementForString(pxmlPESPayloadNode, "SLICES()");
-					//	}
+							slices_length = 0;
 
-					//	pxmlSlicesNode->SetFieldLength(slices_length);
+							pxmlSlicesNode = pxmlDoc->NewBranchElement(pxmlPESPayloadNode, "SLICES()");
+						}
+						slices_length += segment.nal_length;
 
-					//	sprintf_s(pszComment, sizeof(pszComment), "%d◊÷Ω⁄ - vertical_postion 0x%02X~0x%02X", slices_length, slices_start_code, start_code);
-					//	pxmlSlicesNode->SetAttribute("comment", pszComment);
+						sprintf_s(pszComment, sizeof(pszComment), "vertical_postion 0x%02X~0x%02X", slices_start_code, start_code);
+						pxmlSlicesNode->SetAttribute("comment", pszComment);
+						pxmlSlicesNode->SetAttribute("length", slices_length);
+						pxmlSlicesNode->SetAttribute("field_length", slices_length);
 
-					//	mpgv_decode_slice_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlSlicesNode);
-					//}
-					//else
+						mpgv_decode_slice_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlSlicesNode);
+					}
+					else
 					{
 						mpgv_decode_unknown_nal_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
 					}

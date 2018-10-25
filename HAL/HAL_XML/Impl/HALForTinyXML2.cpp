@@ -281,13 +281,15 @@ XMLElement * HALForXMLDoc::NewElementForByteBuf(XMLElement* pxmlParent, const ch
 		pxmlNewElement->SetAttribute("value", pszTemp);
 	}
 
-	assert(m_bs_tracer.i_left == 8);
+	//assert(m_bs_tracer.i_left == 8);
 
 	int next_offset = m_bs_tracer.offset + byte_length;
 	int length = byte_length;
+	if (m_bs_tracer.i_left != 8) length += 1;
 
 	pxmlNewElement->SetAttribute("offset", m_bs_tracer.offset);
 	pxmlNewElement->SetAttribute("length", length);
+	pxmlNewElement->SetAttribute("field_length", byte_length);
 
 	m_bs_tracer.offset = next_offset;
 

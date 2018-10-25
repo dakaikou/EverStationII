@@ -130,8 +130,6 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 
 				if (pPES_packet->ESCR_flag)
 				{
-					assert(0);
-
 					XMLElement* pxmlESCRNode = pxmlDoc->NewBranchElement(pxmlRootNode, "ESCR()", NULL, 6);
 
 					pxmlDoc->NewElementForBits(pxmlESCRNode, "reserved", pPES_packet->ESCR_reserved, 2, "bslbf", NULL);
