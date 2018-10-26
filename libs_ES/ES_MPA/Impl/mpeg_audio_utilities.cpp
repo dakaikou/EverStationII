@@ -132,7 +132,8 @@ int M2A_DecodeID(uint8_t ID, char* pszText, int size)
 			strcpy_s(pszText, size, "ISO/IEC 11172-3");
 			break;
 		default:
-			strcpy_s(pszText, size, "extension to lower sampling frequencies");
+			//strcpy_s(pszText, size, "extension to lower sampling frequencies");
+			strcpy_s(pszText, size, "unknown std.");
 			break;
 		}
 	}

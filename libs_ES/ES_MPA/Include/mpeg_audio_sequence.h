@@ -120,9 +120,21 @@ typedef struct MPEG1_layer3_audio_data_s
 
 } MPEG1_layer3_audio_data_t, *pMEPG1_layer3_audio_data_t;
 
+//define this struct is used to save the original nal segment buffer information
+typedef struct
+{
+	uint8_t* buf;					//volatilable
+	int		 length;
+} MPA_frame_snapshot_t;
+
 typedef struct MPA_frame_s
 {
+	MPA_frame_snapshot_t snapshot;
+
 	MPA_header_t header;
+	uint8_t*	audio_data_buf;
+	int			audio_data_length;
+
 } MPA_frame_t;
 
 typedef struct MpegAudioSynData_s
@@ -154,7 +166,8 @@ typedef struct MpegAudioSynData_s
 //
 ////S32		mpeg_audio_resync(FIFO_t* pbs);
 //
-_CDL_EXPORT int	mpeg_audio_decode_frame_header(unsigned char* es_header_buf, int es_header_length, MPA_header_t* pmpa_header);
+_CDL_EXPORT int	mpeg_audio_decode_frame_header(uint8_t* es_header_buf, int es_header_length, MPA_header_t* pmpa_header);
+_CDL_EXPORT int	mpga_decode_frame(uint8_t* frame_buf, int frame_size, MPA_frame_t* pmpa_frame);
 //
 //S32		mpeg_audio_decode_layer1_audio_data(FIFO_t* pbs);
 //S32		mpeg_audio_decode_layer2_audio_data(FIFO_t* pbs);

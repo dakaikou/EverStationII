@@ -130,7 +130,7 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 
 				if (pPES_packet->ESCR_flag)
 				{
-					XMLElement* pxmlESCRNode = pxmlDoc->NewBranchElement(pxmlRootNode, "ESCR()", NULL, 6);
+					XMLElement* pxmlESCRNode = pxmlDoc->NewBranchElement(pxmlHeaderNode, "ESCR()", NULL, 6);
 
 					pxmlDoc->NewElementForBits(pxmlESCRNode, "reserved", pPES_packet->ESCR_reserved, 2, "bslbf", NULL);
 					pxmlDoc->NewElementForBits(pxmlESCRNode, "ESCR_base[32..30]", pPES_packet->ESCR_base_32_30, 3, "bslbf", NULL);
@@ -145,18 +145,19 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 
 				if (pPES_packet->ES_rate_flag)
 				{
-					assert(0);
-					XMLElement* pxmlESRateNode = pxmlDoc->NewBranchElement(pxmlRootNode, "ES_rate()", NULL, 3);
+					//assert(0);
+					sprintf_s(pszComment, sizeof(pszComment), "%d bps", pPES_packet->ES_rate * 400);
+					XMLElement* pxmlESRateNode = pxmlDoc->NewBranchElement(pxmlHeaderNode, "ES_rate()", pszComment, 3);
 
 					pxmlDoc->NewElementForBits(pxmlESRateNode, "marker_bit", pPES_packet->ES_rate_marker_bit0, 1, "bslbf", NULL);
-					pxmlDoc->NewElementForBits(pxmlESRateNode, "ES_rate", pPES_packet->ES_rate, 22, "uimsbf", NULL);
+					pxmlDoc->NewElementForBits(pxmlESRateNode, "ES_rate", pPES_packet->ES_rate, 22, "uimsbf", pszComment);
 					pxmlDoc->NewElementForBits(pxmlESRateNode, "marker_bit", pPES_packet->ES_rate_marker_bit1, 1, "bslbf", NULL);
 				}
 
 				if (pPES_packet->DSM_trick_mode_flag)
 				{
 					assert(0);
-					XMLElement* pxmlTrickModeNode = pxmlDoc->NewBranchElement(pxmlRootNode, "DSM_trick_mode()", NULL, 1);
+					XMLElement* pxmlTrickModeNode = pxmlDoc->NewBranchElement(pxmlHeaderNode, "DSM_trick_mode()", NULL, 1);
 
 					pxmlDoc->NewElementForBits(pxmlTrickModeNode, "trick_mode_control", pPES_packet->trick_mode_control, 3, "uimsbf", NULL);
 
@@ -194,7 +195,7 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 
 				if (pPES_packet->additional_copy_info_flag) 
 				{
-					XMLElement* pxmlCopyInfoNode = pxmlDoc->NewBranchElement(pxmlRootNode, "additional_copy_info()", NULL, 1);
+					XMLElement* pxmlCopyInfoNode = pxmlDoc->NewBranchElement(pxmlHeaderNode, "additional_copy_info()", NULL, 1);
 
 					assert(0);
 					pxmlDoc->NewElementForBits(pxmlCopyInfoNode, "marker_bit", pPES_packet->additional_copy_info_marker_bit, 1, "bslbf", NULL);
@@ -218,7 +219,7 @@ int	MPEG_present_PES_packet_to_xml(HALForXMLDoc* pxmlDoc, PES_packet_t* pPES_pac
 					if (pPES_packet->P_STD_buffer_flag == 1) pes_extension_length += 2;
 					if (pPES_packet->PES_extension_flag_2 == 1) pes_extension_length += (1 + pPES_packet->PES_extension_field_length);
 
-					XMLElement* pxmlPesExtensionNode = pxmlDoc->NewBranchElement(pxmlRootNode, "PES_extension()", NULL, pes_extension_length);
+					XMLElement* pxmlPesExtensionNode = pxmlDoc->NewBranchElement(pxmlHeaderNode, "PES_extension()", NULL, pes_extension_length);
 
 					pxmlDoc->NewElementForBits(pxmlPesExtensionNode, "PES_private_data_flag", pPES_packet->PES_private_data_flag, 1, "bslbf", NULL);
 					pxmlDoc->NewElementForBits(pxmlPesExtensionNode, "pack_header_field_flag", pPES_packet->pack_header_field_flag, 1, "bslbf", NULL);

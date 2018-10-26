@@ -24,6 +24,13 @@
 #include "..\MFCExt\SplitWnd\SplitWnd.h"
 #include "NaviTree_ESs.h"
 
+typedef struct
+{
+	uint32_t	syncword;
+	uint32_t	mask;
+	int			length;
+} REF_SYNC_t;
+
 class CDlg_TSAnalyzer_PesEs : public CDialog
 {
 // Construction
@@ -57,13 +64,13 @@ public:
 	void UpdatePAT(CPAT* pPAT);
 	void UpdatePMT(CPMT* pPMT);
 	void DisplayPESPacket(uint32_t uiPESStyle, uint8_t* PES_buf, int PES_length, HALForXMLDoc* pxmlDoc = NULL);
-	void DisplayMPVPacket(U8* es_buf, S32 es_length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
-	void DisplayAVSPacket(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode = NULL);
-	void DisplayH264Packet(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode = NULL);
-	void DisplayMPAPacket(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode = NULL, uint32_t ref_sync_word = 0, uint32_t ref_sync_mask = 0, int ref_sync_length = 0);
-	void DisplayAACPacket(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode = NULL);
-	void DisplayAC3Packet(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode = NULL);
-	void DisplayDRAPacket(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode = NULL);
+	void DisplayMPVPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
+	void DisplayAVSPacket(uint8_t* es_buf, int es_size, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode = NULL);
+	void DisplayH264Packet(uint8_t* es_buf, int es_size, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode = NULL);
+	void DisplayMPAPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL, REF_SYNC_t* pref_sync = NULL);
+	void DisplayAACPacket(uint8_t* es_buf, int es_size, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode = NULL);
+	void DisplayAC3Packet(uint8_t* es_buf, int es_size, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode = NULL);
+	void DisplayDRAPacket(uint8_t* es_buf, int es_size, XMLDocForMpegSyntax* pxmlDoc, XMLElement* pxmlParentNode = NULL);
 	void DisplayUnknownESPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
 
 protected:
