@@ -8,21 +8,13 @@
 
 #include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 
-#ifndef min
-#define min(a,b)  (((a)<(b))?(a):(b))
-#endif
-
-int aac_decode_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
+int aac_present_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	int rtcode = AAC_NO_ERROR;
-	char			pszTemp[64];
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
-		tinyxml2::XMLElement* pxmlUnknownNalNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "unaligned nal()", nal_buf, nal_length);
-		pxmlDoc->UpdateBufMark(pxmlUnknownNalNode, nal_buf, nal_buf + nal_length);
-		sprintf_s(pszTemp, sizeof(pszTemp), "%d字节", nal_length);
-		pxmlUnknownNalNode->SetAttribute("comment", pszTemp);
+		XMLElement* pxmlUnknownNalNode = pxmlDoc->NewElementForByteBuf(pxmlParentNode, "unaligned nal[]", nal_buf, nal_length);
 	}
 	else
 	{
@@ -32,17 +24,13 @@ int aac_decode_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForM
 	return rtcode;
 }
 
-int aac_decode_unknown_nal_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
+int aac_present_unknown_nal_to_xml(uint8_t* nal_buf, int nal_length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	int rtcode = AAC_NO_ERROR;
-	char			pszTemp[64];
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
-		tinyxml2::XMLElement* pxmlUnknownNalNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "unknown nal()", nal_buf, nal_length);
-		pxmlDoc->UpdateBufMark(pxmlUnknownNalNode, nal_buf, nal_buf + nal_length);
-		sprintf_s(pszTemp, sizeof(pszTemp), "%d字节", nal_length);
-		pxmlUnknownNalNode->SetAttribute("comment", pszTemp);
+		XMLElement* pxmlUnknownNalNode = pxmlDoc->NewElementForByteBuf(pxmlParentNode, "unknown nal[]", nal_buf, nal_length);
 	}
 	else
 	{
@@ -60,36 +48,35 @@ int aac_decode_unknown_nal_to_xml(uint8_t* nal_buf, int nal_length, XMLDocForMpe
 	返回：0					-- 信息头未发生变化
 		  1					-- 信息头发生变化
 *********************************************************************************/
-int	aac_decode_adts_fixed_header_to_xml(uint8_t* adts_fixed_header_buf, int adts_fixed_header_length, XMLDocForMpegSyntax* pxmlDoc, AAC_adts_fixed_header_t* padts_fixed_header)
+int	aac_decode_adts_fixed_header_to_xml(uint8_t* adts_fixed_header_buf, int adts_fixed_header_length, HALForXMLDoc* pxmlDoc, AAC_adts_fixed_header_t* padts_fixed_header)
 {
-	BITS_t	bs;
 	int		rtcode = AAC_UNKNOWN_ERROR;
-	int     header_size = 4;
+	//int     header_size = 4;
 
-	if ((adts_fixed_header_buf != NULL) && (adts_fixed_header_length >= 4) && (padts_fixed_header != NULL))
-	{
-		memset(padts_fixed_header, 0x00, sizeof(AAC_adts_fixed_header_t));
-		BITS_map(&bs, adts_fixed_header_buf, adts_fixed_header_length);
+	//if ((adts_fixed_header_buf != NULL) && (adts_fixed_header_length >= 4) && (padts_fixed_header != NULL))
+	//{
+	//	memset(padts_fixed_header, 0x00, sizeof(AAC_adts_fixed_header_t));
+	//	BITS_map(&bs, adts_fixed_header_buf, adts_fixed_header_length);
 
-		padts_fixed_header->Syncword = BITS_get(&bs, 12);
-		padts_fixed_header->ID = BITS_get(&bs, 1);
-		padts_fixed_header->Layer = BITS_get(&bs, 2);
-		padts_fixed_header->protection_absent = BITS_get(&bs, 1);
+	//	padts_fixed_header->Syncword = BITS_get(&bs, 12);
+	//	padts_fixed_header->ID = BITS_get(&bs, 1);
+	//	padts_fixed_header->Layer = BITS_get(&bs, 2);
+	//	padts_fixed_header->protection_absent = BITS_get(&bs, 1);
 
-		padts_fixed_header->Profile = BITS_get(&bs, 2);
-		padts_fixed_header->sampling_frequency_index = BITS_get(&bs, 4);
-		padts_fixed_header->private_bit = BITS_get(&bs, 1);
-		padts_fixed_header->channel_configuration = BITS_get(&bs, 3);
-		padts_fixed_header->original_or_copy = BITS_get(&bs, 1);
-		padts_fixed_header->Home = BITS_get(&bs, 1);
-		padts_fixed_header->Emphasis = BITS_get(&bs, 2);
+	//	padts_fixed_header->Profile = BITS_get(&bs, 2);
+	//	padts_fixed_header->sampling_frequency_index = BITS_get(&bs, 4);
+	//	padts_fixed_header->private_bit = BITS_get(&bs, 1);
+	//	padts_fixed_header->channel_configuration = BITS_get(&bs, 3);
+	//	padts_fixed_header->original_or_copy = BITS_get(&bs, 1);
+	//	padts_fixed_header->Home = BITS_get(&bs, 1);
+	//	padts_fixed_header->Emphasis = BITS_get(&bs, 2);
 
-		rtcode = AAC_NO_ERROR;
-	}
-	else
-	{
-		rtcode = AAC_PARAMETER_ERROR;
-	}
+	//	rtcode = AAC_NO_ERROR;
+	//}
+	//else
+	//{
+	//	rtcode = AAC_PARAMETER_ERROR;
+	//}
 
 	return rtcode;
 }

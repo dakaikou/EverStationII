@@ -104,9 +104,9 @@ int DVB_SI_SDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, service_description_
 							//case DVB_SI_MULTILINGUAL_SERVICE_NAME_DESCRIPTOR:
 							//	DVB_SI_decode_multilingual_service_name_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
 							//	break;
-							//case DVB_SI_PRIVATE_DATA_SPECIFIER_DESCRIPTOR:
-							//	DVB_SI_decode_private_data_specifier_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-							//	break;
+						case DVB_SI_PRIVATE_DATA_SPECIFIER_DESCRIPTOR:
+							DVB_SI_decode_private_data_specifier_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlServiceDescriptorsLoopNode);
+							break;
 							//case DVB_SI_DATA_BROADCAST_DESCRIPTOR:
 							//	DVB_SI_decode_data_broadcast_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
 							//	break;

@@ -43,9 +43,9 @@ int	MPEG2_DSMCC_DII_DC_PresentModuleInfo_to_xml(HALForXMLDoc* pxmlDoc, XMLElemen
 
 			switch (descriptor_tag)
 			{
-				//case DVB_SI_NETWORK_NAME_DESCRIPTOR:
-				//	DVB_SI_decode_network_name_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-				//	break;
+			//case DVB_SI_NETWORK_NAME_DESCRIPTOR:
+			//	DVB_SI_decode_network_name_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlModuleNode);
+			//	break;
 				//case DVB_SI_MULTILINGUAL_NETWORK_NAME_DESCRIPTOR:
 				//	DVB_SI_decode_multilingual_network_name_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
 				//	break;

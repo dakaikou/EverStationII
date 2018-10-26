@@ -115,18 +115,18 @@ int DVB_SI_BAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, bouquet_association_
 
 						switch (descriptor_tag)
 						{
-							//case DVB_SI_SERVICE_LIST_DESCRIPTOR:
-							//	DVB_SI_decode_service_list_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-							//	break;
+						case DVB_SI_SERVICE_LIST_DESCRIPTOR:
+							DVB_SI_decode_service_list_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlTransportDescriptorNode);
+							break;
 							//case DVB_SI_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR:
 							//	DVB_SI_decode_satellite_delivery_system_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
 							//	break;
-							//case DVB_SI_CABLE_DELIVERY_SYSTEM_DESCRIPTOR:
-							//	DVB_SI_decode_cable_delivery_system_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-							//	break;
-							//case DVB_SI_PRIVATE_DATA_SPECIFIER_DESCRIPTOR:
-							//	DVB_SI_decode_private_data_specifier_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-							//	break;
+						case DVB_SI_CABLE_DELIVERY_SYSTEM_DESCRIPTOR:
+							DVB_SI_decode_cable_delivery_system_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlTransportDescriptorNode);
+							break;
+						case DVB_SI_PRIVATE_DATA_SPECIFIER_DESCRIPTOR:
+							DVB_SI_decode_private_data_specifier_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlTransportDescriptorNode);
+							break;
 						default:
 							MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlTransportDescriptorNode, pstStream->transport_descriptors + descriptor_index);
 							break;

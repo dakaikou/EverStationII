@@ -9,7 +9,7 @@ int DVB_SI_CMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, CA_message_section_t
 {
 	int  rtcode = SECTION_PARSE_NO_ERROR;
 	char pszField[128];
-	char pszComment[128];
+	//char pszComment[128];
 
 	if ((pxmlDoc != NULL) && (pcmt_section != NULL))
 	{

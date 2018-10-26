@@ -8,7 +8,7 @@
 #include "../../Include/mpeg_video_utilities.h"
 #include "../Include/mpeg_video_sequence_xml.h"
 
-int mpgv_decode_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
+int mpgv_present_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	int rtcode = MPV_NO_ERROR;
 
@@ -24,7 +24,7 @@ int mpgv_decode_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_length, HALForXML
 	return rtcode;
 }
 
-int mpgv_decode_unknown_nal_to_xml(uint8_t* nal_buf, int nal_length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
+int mpgv_present_unknown_nal_to_xml(uint8_t* nal_buf, int nal_length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	int rtcode = MPV_NO_ERROR;
 

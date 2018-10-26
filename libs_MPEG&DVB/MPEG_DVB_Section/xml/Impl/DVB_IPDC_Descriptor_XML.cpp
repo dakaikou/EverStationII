@@ -5,10 +5,6 @@
 #include "../../Include/DVB_IPDC_Descriptor.h"
 #include "../../Include/MPEG_DVB_ErrorCode.h"
 
-#ifndef min
-#define min(a,b)  (((a)<(b))?(a):(b))
-#endif
-
 //0x0C
 
 

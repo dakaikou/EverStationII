@@ -5,13 +5,13 @@
 
 #include "../../compile.h"
 #include "../../Include/avs_video_sequence.h"
-#include "HAL\HAL_XML\Include\HALForTinyXML2Doc.h"
+#include "HAL\HAL_XML\Include\HALForTinyXML2.h"
 
-_CDL_EXPORT int avs_decode_unaligned_nal_to_xml(uint8_t *nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode);
-_CDL_EXPORT int avs_decode_unknown_nal_to_xml(uint8_t *nal_buf, int nal_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode);
+_CDL_EXPORT int avs_present_unaligned_nal_to_xml(uint8_t *nal_buf, int nal_length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
+_CDL_EXPORT int avs_present_unknown_nal_to_xml(uint8_t *nal_buf, int nal_length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
 
-_CDL_EXPORT int	avs_decode_pb_picture_header_to_xml(uint8_t* nal_buf, int nal_length, AVS_global_param_t* pparam, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, AVS_pb_picture_header_t* ppb_picture_header = NULL);
-_CDL_EXPORT int	avs_decode_slice_to_xml(uint8_t* nal_buf, int nal_length, AVS_global_param_t* pparam, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, AVS_slice_t* pslice = NULL);
+_CDL_EXPORT int	avs_decode_pb_picture_header_to_xml(uint8_t* nal_buf, int nal_length, AVS_global_param_t* pparam, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, AVS_pb_picture_header_t* ppb_picture_header = NULL);
+_CDL_EXPORT int	avs_decode_slice_to_xml(uint8_t* nal_buf, int nal_length, AVS_global_param_t* pparam, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, AVS_slice_t* pslice = NULL);
 
 
 #endif

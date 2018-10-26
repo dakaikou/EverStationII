@@ -8,7 +8,7 @@
 
 #include "../Include/mpeg_audio_sequence_xml.h"
 
-int mpga_decode_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
+int mpga_present_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	int rtcode = MPA_NO_ERROR;
 
@@ -24,7 +24,7 @@ int mpga_decode_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_size, HALForXMLDo
 	return rtcode;
 }
 
-int mpga_decode_unknown_nal_to_xml(uint8_t* nal_buf, int nal_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
+int mpga_present_unknown_nal_to_xml(uint8_t* nal_buf, int nal_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	int rtcode = MPA_NO_ERROR;
 

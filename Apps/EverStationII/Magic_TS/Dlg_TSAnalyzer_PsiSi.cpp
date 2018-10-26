@@ -159,7 +159,6 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 		uint8_t	table_id;
 		if ((section_buf != NULL) && (section_length >= 3))
 		{
-			//XMLDocForMpegSyntax xmlDoc;
 			HALForXMLDoc xml2Doc;
 
 			table_id = section_buf[0];

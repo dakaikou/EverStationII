@@ -6,8 +6,8 @@
 #include "../../Include/mpeg_video_sequence.h"
 #include "HAL\HAL_XML\Include\HALForTinyXML2.h"
 
-_CDL_EXPORT int mpgv_decode_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
-_CDL_EXPORT int mpgv_decode_unknown_nal_to_xml(uint8_t* nal_buf, int nal_length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
+_CDL_EXPORT int mpgv_present_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
+_CDL_EXPORT int mpgv_present_unknown_nal_to_xml(uint8_t* nal_buf, int nal_length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
 
 _CDL_EXPORT int mpgv_decode_sequence_header_to_xml(uint8_t* nal_buf, int nal_length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, MPGV_sequence_header_t* psequence_header = NULL);
 _CDL_EXPORT int mpgv_present_sequence_header_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, MPGV_sequence_header_t* psequence_header);

@@ -359,27 +359,26 @@ void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(uint32_t uiPESStyle, uint8_t* pes_b
 						ref_sync.length = 2;
 					}
 					DisplayMPAPacket(es_buf, es_length, &xml2Doc, pxmlPayloadNode, &ref_sync);
-					//DisplayMPAPacket(es_buf, es_length, &xml2Doc, pxmlPayloadNode);
 				}
-				//else if ((stream_type == 0x0F) || (stream_type == 0x11))
-				//{
-				//	DisplayAACPacket(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
-				//}
-				//else if ((stream_type == 0x06) || (stream_type == 0x81))
-				//{
-				//	if (sub_type == STREAM_SUBTYPE_AC3)
-				//	{
-				//		DisplayAC3Packet(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
-				//	}
-				//	else if (sub_type == STREAM_SUBTYPE_DRA)
-				//	{
-				//		DisplayDRAPacket(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
-				//	}
-				//	else
-				//	{
-				//		DisplayUnknownESPacket(es_buf, es_length, &xmlDoc, pxmlPayloadNode);
-				//	}
-				//}
+				else if ((stream_type == 0x0F) || (stream_type == 0x11))
+				{
+					DisplayAACPacket(es_buf, es_length, &xml2Doc, pxmlPayloadNode);
+				}
+				else if ((stream_type == 0x06) || (stream_type == 0x81))
+				{
+					if (sub_type == STREAM_SUBTYPE_AC3)
+					{
+						DisplayAC3Packet(es_buf, es_length, &xml2Doc, pxmlPayloadNode);
+					}
+					//else if (sub_type == STREAM_SUBTYPE_DRA)
+					//{
+					//	DisplayDRAPacket(es_buf, es_length, &xml2Doc, pxmlPayloadNode);
+					//}
+					else
+					{
+						DisplayUnknownESPacket(es_buf, es_length, &xml2Doc, pxmlPayloadNode);
+					}
+				}
 				else
 				{
 					DisplayUnknownESPacket(es_buf, es_length, &xml2Doc, pxmlPayloadNode);
@@ -481,7 +480,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPVPacket(uint8_t* es_buf, int es_size, HALFo
 			{
 				if (align_offset > 0)		//发生在找第一个对齐的时候，头部未对齐数据的处理
 				{
-					mpgv_decode_unaligned_nal_to_xml(rd_ptr, align_offset, pxmlDoc, pxmlPESPayloadNode);
+					mpgv_present_unaligned_nal_to_xml(rd_ptr, align_offset, pxmlDoc, pxmlPESPayloadNode);
 				}
 
 				rd_ptr += align_offset;
@@ -552,7 +551,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPVPacket(uint8_t* es_buf, int es_size, HALFo
 					//	break;
 
 					default:
-						mpgv_decode_unknown_nal_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+						mpgv_present_unknown_nal_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
 						break;
 					}
 
@@ -592,7 +591,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPVPacket(uint8_t* es_buf, int es_size, HALFo
 					}
 					else
 					{
-						mpgv_decode_unknown_nal_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+						mpgv_present_unknown_nal_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
 					}
 					break;
 				}
@@ -605,7 +604,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPVPacket(uint8_t* es_buf, int es_size, HALFo
 	}
 }
 
-void CDlg_TSAnalyzer_PesEs::DisplayAVSPacket(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
+void CDlg_TSAnalyzer_PesEs::DisplayAVSPacket(U8* es_buf, S32 es_size, HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
 {
 	S32			 align_offset;
 	ES_segment_t segment;
@@ -615,28 +614,27 @@ void CDlg_TSAnalyzer_PesEs::DisplayAVSPacket(U8* es_buf, S32 es_length, XMLDocFo
 	uint8_t*     slices_start_ptr = NULL;
 
 	uint8_t     *rd_ptr;
-	int			left_length;
+	int			remain_length;
 
-	char	pszTemp[64];
-	char	pszItem[128];
-	//int		i;
+	char	pszComment[32];
+	char	pszField[32];
 
-	if ((es_buf != NULL) && (es_length > 0) && (pxmlDoc != NULL))
+	if ((es_buf != NULL) && (es_size > 0) && (pxmlDoc != NULL))
 	{
-		sprintf_s(pszItem, sizeof(pszItem), "%d字节 - AVS视频", es_length);
+		sprintf_s(pszField, sizeof(pszField), "AVS视频");
+		sprintf_s(pszComment, sizeof(pszComment), "AVS视频");
 
-		tinyxml2::XMLElement* pxmlSlicesNode = NULL;
-		tinyxml2::XMLElement* pxmlPESPayloadNode = pxmlParentNode;
+		XMLElement* pxmlSlicesNode = NULL;
+		XMLElement* pxmlPESPayloadNode = pxmlParentNode;
 		if (pxmlPESPayloadNode == NULL)
 		{
-			pxmlPESPayloadNode = ((tinyxml2::XMLDocument*)pxmlDoc)->NewElement(pszItem);
+			pxmlPESPayloadNode = pxmlDoc->NewRootElement(pszField, NULL, es_size);
 			pxmlDoc->InsertEndChild(pxmlPESPayloadNode);
 		}
 		else
 		{
-			pxmlPESPayloadNode->SetAttribute("comment", pszItem);
+			pxmlPESPayloadNode->SetAttribute("comment", pszComment);
 		}
-		pxmlDoc->UpdateBufMark(pxmlPESPayloadNode, es_buf, es_buf + es_length);  //开源HexView长度超过65536会有BUG  chendelin 20180523
 
 		memset(&segment, 0x00, sizeof(ES_segment_t));
 		strcpy_s(segment.pszFourCC, sizeof(segment.pszFourCC), "AVS");
@@ -646,7 +644,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayAVSPacket(U8* es_buf, S32 es_length, XMLDocFo
 		segment.match_mask = 0xFFFFFF00;
 
 		rd_ptr = es_buf;
-		left_length = es_length;
+		remain_length = es_size;
 
 		AVS_global_param_t avs_param;
 		memset(&avs_param, 0x00, sizeof(AVS_global_param_t));
@@ -654,63 +652,63 @@ void CDlg_TSAnalyzer_PesEs::DisplayAVSPacket(U8* es_buf, S32 es_length, XMLDocFo
 		{
 			segment.nal_buf = NULL;
 			segment.nal_length = 0;
-			align_offset = ES_get_next_segment(rd_ptr, left_length, &segment);		//返回同步字相对于当前指针的偏移量
+			align_offset = ES_get_next_segment(rd_ptr, remain_length, &segment);		//返回同步字相对于当前指针的偏移量
 			if (align_offset >= 0)
 			{
 				if (align_offset > 0)
 				{
-					avs_decode_unaligned_nal_to_xml(rd_ptr, align_offset, pxmlDoc, pxmlPESPayloadNode);
+					avs_present_unaligned_nal_to_xml(rd_ptr, align_offset, pxmlDoc, pxmlPESPayloadNode);
 				}
 
 				rd_ptr += align_offset;
-				left_length -= align_offset;
+				remain_length -= align_offset;
 
 				assert(rd_ptr == segment.nal_buf);
-				assert(left_length >= segment.nal_length);
+				assert(remain_length >= segment.nal_length);
 
 				start_code = segment.nal_buf[3];
 				switch (start_code)
 				{
-				case AVS_PB_PICTURE_START_CODE:
-					avs_decode_pb_picture_header_to_xml(segment.nal_buf, segment.nal_length, &avs_param, pxmlDoc, pxmlPESPayloadNode);
-					break;
+				//case AVS_PB_PICTURE_START_CODE:
+				//	avs_decode_pb_picture_header_to_xml(segment.nal_buf, segment.nal_length, &avs_param, pxmlDoc, pxmlPESPayloadNode);
+				//	break;
 				default:
 
-					if ((start_code >= AVS_SLICE_START_CODE_MIN) && (start_code <= AVS_SLICE_START_CODE_MAX))
-					{
-						slices_length += segment.nal_length;
-						if (pxmlSlicesNode == NULL)
-						{
-							slices_start_ptr = segment.nal_buf;
-							slices_start_code = start_code;
+					//if ((start_code >= AVS_SLICE_START_CODE_MIN) && (start_code <= AVS_SLICE_START_CODE_MAX))
+					//{
+					//	slices_length += segment.nal_length;
+					//	if (pxmlSlicesNode == NULL)
+					//	{
+					//		slices_start_ptr = segment.nal_buf;
+					//		slices_start_code = start_code;
 
-							pxmlSlicesNode = pxmlDoc->NewKeyValuePairElement(pxmlPESPayloadNode, "SLICES()");
-						}
+					//		pxmlSlicesNode = pxmlDoc->NewKeyValuePairElement(pxmlPESPayloadNode, "SLICES()");
+					//	}
 
-						pxmlDoc->UpdateBufMark(pxmlSlicesNode, slices_start_ptr, slices_start_ptr + slices_length);
+					//	pxmlDoc->UpdateBufMark(pxmlSlicesNode, slices_start_ptr, slices_start_ptr + slices_length);
 
-						sprintf_s(pszTemp, sizeof(pszTemp), "%d字节 - vertical_postion 0x%02X~0x%02X", slices_length, slices_start_code, start_code);
-						pxmlSlicesNode->SetAttribute("comment", pszTemp);
+					//	sprintf_s(pszTemp, sizeof(pszTemp), "%d字节 - vertical_postion 0x%02X~0x%02X", slices_length, slices_start_code, start_code);
+					//	pxmlSlicesNode->SetAttribute("comment", pszTemp);
 
-						avs_decode_slice_to_xml(segment.nal_buf, segment.nal_length, &avs_param, pxmlDoc, pxmlSlicesNode);
-					}
-					else
-					{
-						avs_decode_unknown_nal_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
-					}
+					//	avs_decode_slice_to_xml(segment.nal_buf, segment.nal_length, &avs_param, pxmlDoc, pxmlSlicesNode);
+					//}
+					//else
+					//{
+						avs_present_unknown_nal_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+					//}
 
 					break;
 				}
 
 				//指向下一个segment的位置
 				rd_ptr += segment.nal_length;
-				left_length -= segment.nal_length;
+				remain_length -= segment.nal_length;
 			}
 		} while (align_offset >= 0);
 	}
 }
 
-void CDlg_TSAnalyzer_PesEs::DisplayH264Packet(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
+void CDlg_TSAnalyzer_PesEs::DisplayH264Packet(U8* es_buf, S32 es_size, HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
 {
 	S32			 align_offset;
 	ES_segment_t segment;
@@ -719,25 +717,24 @@ void CDlg_TSAnalyzer_PesEs::DisplayH264Packet(U8* es_buf, S32 es_length, XMLDocF
 	U8*			rd_ptr;
 	S32			left_length;
 
-	char	pszItem[128];
-	//int		i;
+	char	pszComment[32];
+	char	pszField[32];
 
-	if ((es_buf != NULL) && (es_length > 0) && (pxmlDoc != NULL))
+	if ((es_buf != NULL) && (es_size > 0) && (pxmlDoc != NULL))
 	{
-		sprintf_s(pszItem, sizeof(pszItem), "%d字节 - H264视频", es_length);
+		sprintf_s(pszField, sizeof(pszField), "H264视频");
+		sprintf_s(pszComment, sizeof(pszComment), "H264视频");
 
-		tinyxml2::XMLElement* pxmlSlicesNode = NULL;
-		tinyxml2::XMLElement* pxmlPESPayloadNode = pxmlParentNode;
+		XMLElement* pxmlSlicesNode = NULL;
+		XMLElement* pxmlPESPayloadNode = pxmlParentNode;
 		if (pxmlPESPayloadNode == NULL)
 		{
-			pxmlPESPayloadNode = ((tinyxml2::XMLDocument*)pxmlDoc)->NewElement(pszItem);
-			pxmlDoc->InsertEndChild(pxmlPESPayloadNode);
+			pxmlPESPayloadNode = pxmlDoc->NewRootElement(pszField, NULL, es_size);
 		}
 		else
 		{
-			pxmlPESPayloadNode->SetAttribute("comment", pszItem);
+			pxmlPESPayloadNode->SetAttribute("comment", pszComment);
 		}
-		pxmlDoc->UpdateBufMark(pxmlPESPayloadNode, es_buf, es_buf + es_length);  //开源HexView长度超过65536会有BUG  chendelin 20180523
 
 		memset(&segment, 0x00, sizeof(ES_segment_t));
 		strcpy_s(segment.pszFourCC, sizeof(segment.pszFourCC), "H264");
@@ -747,7 +744,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayH264Packet(U8* es_buf, S32 es_length, XMLDocF
 		segment.match_mask = 0xFFFFFF00;
 
 		rd_ptr = es_buf;
-		left_length = es_length;
+		left_length = es_size;
 		do
 		{
 			segment.nal_buf = NULL;
@@ -757,7 +754,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayH264Packet(U8* es_buf, S32 es_length, XMLDocF
 			{
 				if (align_offset > 0)
 				{
-					h264_decode_unaligned_nal_to_xml(rd_ptr, 0, align_offset, pxmlDoc, pxmlPESPayloadNode);
+					h264_present_unaligned_nal_to_xml(rd_ptr, 0, align_offset, pxmlDoc, pxmlPESPayloadNode);
 				}
 
 				rd_ptr += align_offset;
@@ -799,7 +796,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayH264Packet(U8* es_buf, S32 es_length, XMLDocF
 						//}
 						//else
 						//{
-						h264_decode_unknown_nal_to_xml(segment.segment_start_ptr, segment.prefix_length, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+						h264_present_unknown_nal_to_xml(segment.segment_start_ptr, segment.prefix_length, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
 						//}
 
 						break;
@@ -880,7 +877,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPAPacket(uint8_t* es_buf, int es_size, HALFo
 			{
 				if (align_offset > 0)
 				{
-					mpga_decode_unaligned_nal_to_xml(rd_ptr, align_offset, pxmlDoc, pxmlPESPayloadNode);
+					mpga_present_unaligned_nal_to_xml(rd_ptr, align_offset, pxmlDoc, pxmlPESPayloadNode);
 
 					//需要猜测同步字
 				}
@@ -931,7 +928,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPAPacket(uint8_t* es_buf, int es_size, HALFo
 				}
 				else
 				{
-					mpga_decode_unknown_nal_to_xml(rd_ptr, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+					mpga_present_unknown_nal_to_xml(rd_ptr, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
 
 					//指向下一个segment的位置
 					rd_ptr += segment.nal_length;
@@ -943,7 +940,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPAPacket(uint8_t* es_buf, int es_size, HALFo
 				//failed in finding syncword
 				if (remain_length > 0)
 				{
-					mpga_decode_unaligned_nal_to_xml(rd_ptr, remain_length, pxmlDoc, pxmlPESPayloadNode);
+					mpga_present_unaligned_nal_to_xml(rd_ptr, remain_length, pxmlDoc, pxmlPESPayloadNode);
 				}
 				break;
 			}
@@ -951,36 +948,34 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPAPacket(uint8_t* es_buf, int es_size, HALFo
 	}
 }
 
-void CDlg_TSAnalyzer_PesEs::DisplayAACPacket(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
+void CDlg_TSAnalyzer_PesEs::DisplayAACPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
-	S32			 align_offset;
+	int			 align_offset;
 	ES_segment_t segment;
 
-	U8*			rd_ptr;
-	S32			left_length;
+	uint8_t*	rd_ptr;
+	int			left_length;
 
-	//char	pszTemp[128];
-	char	pszItem[256];
-	//int		i;
+	char	pszComment[32];
+	char	pszField[32];
 
 	//AAC_adts_fixed_header_t		aac_adts_fixed_header;
 
-	if ((es_buf != NULL) && (es_length > 0) && (pxmlDoc != NULL))
+	if ((es_buf != NULL) && (es_size > 0) && (pxmlDoc != NULL))
 	{
-		sprintf_s(pszItem, sizeof(pszItem), "%d字节 - AAC音频", es_length);
+		sprintf_s(pszField, sizeof(pszField), "AAC音频");
+		sprintf_s(pszComment, sizeof(pszComment), "AAC音频");
 
-		tinyxml2::XMLElement* pxmlSlicesNode = NULL;
-		tinyxml2::XMLElement* pxmlPESPayloadNode = pxmlParentNode;
+		//XMLElement* pxmlSlicesNode = NULL;
+		XMLElement* pxmlPESPayloadNode = pxmlParentNode;
 		if (pxmlPESPayloadNode == NULL)
 		{
-			pxmlPESPayloadNode = ((tinyxml2::XMLDocument*)pxmlDoc)->NewElement(pszItem);
-			pxmlDoc->InsertEndChild(pxmlPESPayloadNode);
+			pxmlPESPayloadNode = pxmlDoc->NewRootElement(pszField, NULL, es_size);
 		}
 		else
 		{
-			pxmlPESPayloadNode->SetAttribute("comment", pszItem);
+			pxmlPESPayloadNode->SetAttribute("comment", pszComment);
 		}
-		pxmlDoc->UpdateBufMark(pxmlPESPayloadNode, es_buf, es_buf + es_length);  //开源HexView长度超过65536会有BUG  chendelin 20180523
 
 		memset(&segment, 0x00, sizeof(ES_segment_t));
 		strcpy_s(segment.pszFourCC, sizeof(segment.pszFourCC), "AAC");
@@ -990,7 +985,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayAACPacket(U8* es_buf, S32 es_length, XMLDocFo
 		segment.match_mask = 0xFFF0;
 
 		rd_ptr = es_buf;
-		left_length = es_length;
+		left_length = es_size;
 		do
 		{
 			segment.nal_buf = NULL;
@@ -1000,7 +995,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayAACPacket(U8* es_buf, S32 es_length, XMLDocFo
 			{
 				if (align_offset > 0)
 				{
-					aac_decode_unaligned_nal_to_xml(rd_ptr, align_offset, pxmlDoc, pxmlPESPayloadNode);
+					aac_present_unaligned_nal_to_xml(rd_ptr, align_offset, pxmlDoc, pxmlPESPayloadNode);
 				}
 
 				rd_ptr += align_offset;
@@ -1009,27 +1004,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayAACPacket(U8* es_buf, S32 es_length, XMLDocFo
 				assert(rd_ptr == segment.nal_buf);
 				assert(left_length >= segment.nal_length);
 
-				aac_decode_unknown_nal_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
-
-				//if (m_hESItem != NULL)
-				//{
-				//	for (i = 0; i < min(12, segment.nal_length); i++)
-				//	{
-				//		sprintf_s(pszTemp + 3 * i, 4, "%02X ", segment.nal_buf[i]);
-				//	}
-				//	if (segment.nal_length > 12)
-				//	{
-				//		sprintf_s(pszTemp + 3 * i, 5, "...\0");
-				//	}
-				//	sprintf_s(pszItem, sizeof(pszItem), "%s -adts_frame(): %d字节\0", pszTemp, segment.nal_length);
-				//	hSegmentItem = TreeFun_InsertItem(&treeCtrl, m_hESItem, pszItem, -1, 0, NULL);
-
-					//aac_decode_adts_fixed_header_xml(segment.nal_buf, segment.nal_length, pxmlDoc);
-					//					AAC_AUDIO_ES_ADTS_FIXED_HEADER(&treeCtrl, hSegmentItem, &aac_adts_fixed_header, segment.nal_buf, segment.nal_length);
-				//	AAC_AUDIO_ES_ADTS_FIXED_HEADER(&treeCtrl, hSegmentItem, &aac_adts_fixed_header, segment.nal_buf, 5);
-
-				//	treeCtrl.Expand(m_hESItem, TVE_EXPAND);
-				//}
+				aac_present_unknown_nal_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
 
 				//指向下一个segment的位置
 				rd_ptr += segment.nal_length;
@@ -1040,36 +1015,34 @@ void CDlg_TSAnalyzer_PesEs::DisplayAACPacket(U8* es_buf, S32 es_length, XMLDocFo
 	}
 }
 
-void CDlg_TSAnalyzer_PesEs::DisplayAC3Packet(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
+void CDlg_TSAnalyzer_PesEs::DisplayAC3Packet(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
-	S32			 align_offset;
+	int			 align_offset;
 	ES_segment_t segment;
 
 	U8*			rd_ptr;
 	S32			left_length;
 
-	//char	pszTemp[128];
-	char	pszItem[256];
-	//int		i;
+	char	pszComment[32];
+	char	pszField[32];
 
 	//AC3_syncinfo_t		AC3_syncinfo;
 
-	if ((es_buf != NULL) && (es_length > 0))
+	if ((es_buf != NULL) && (es_size > 0))
 	{
-		sprintf_s(pszItem, sizeof(pszItem), "%d字节 - AC3音频", es_length);
+		sprintf_s(pszField, sizeof(pszField), "AC3音频");
+		sprintf_s(pszComment, sizeof(pszComment), "AC3音频");
 
-		tinyxml2::XMLElement* pxmlNalNode = NULL;
-		tinyxml2::XMLElement* pxmlPESPayloadNode = pxmlParentNode;
+		XMLElement* pxmlNalNode = NULL;
+		XMLElement* pxmlPESPayloadNode = pxmlParentNode;
 		if (pxmlPESPayloadNode == NULL)
 		{
-			pxmlPESPayloadNode = ((tinyxml2::XMLDocument*)pxmlDoc)->NewElement(pszItem);
-			pxmlDoc->InsertEndChild(pxmlPESPayloadNode);
+			pxmlPESPayloadNode = pxmlDoc->NewRootElement(pszField, NULL, es_size);
 		}
 		else
 		{
-			pxmlPESPayloadNode->SetAttribute("comment", pszItem);
+			pxmlPESPayloadNode->SetAttribute("comment", pszComment);
 		}
-		pxmlDoc->UpdateBufMark(pxmlPESPayloadNode, es_buf, es_buf + es_length);  //开源HexView长度超过65536会有BUG  chendelin 20180523
 
 		memset(&segment, 0x00, sizeof(ES_segment_t));
 		strcpy_s(segment.pszFourCC, sizeof(segment.pszFourCC), "AC3");
@@ -1079,7 +1052,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayAC3Packet(U8* es_buf, S32 es_length, XMLDocFo
 		segment.match_mask = 0xFFFF;
 
 		rd_ptr = es_buf;
-		left_length = es_length;
+		left_length = es_size;
 		do
 		{
 			segment.nal_buf = NULL;
@@ -1089,7 +1062,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayAC3Packet(U8* es_buf, S32 es_length, XMLDocFo
 			{
 				if (align_offset > 0)
 				{
-					ac3_decode_unaligned_nal_to_xml(rd_ptr, align_offset, pxmlDoc, pxmlPESPayloadNode);
+					ac3_present_unaligned_nal_to_xml(rd_ptr, align_offset, pxmlDoc, pxmlPESPayloadNode);
 				}
 
 				rd_ptr += align_offset;
@@ -1098,7 +1071,8 @@ void CDlg_TSAnalyzer_PesEs::DisplayAC3Packet(U8* es_buf, S32 es_length, XMLDocFo
 				assert(rd_ptr == segment.nal_buf);
 				assert(left_length >= segment.nal_length);
 
-				ac3_decode_syncframe_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+				ac3_present_unknown_nal_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+				//ac3_decode_syncframe_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
 
 				//指向下一个segment的位置
 				rd_ptr += segment.nal_length;
@@ -1109,34 +1083,32 @@ void CDlg_TSAnalyzer_PesEs::DisplayAC3Packet(U8* es_buf, S32 es_length, XMLDocFo
 	}
 }
 
-void CDlg_TSAnalyzer_PesEs::DisplayDRAPacket(U8* es_buf, S32 es_length, XMLDocForMpegSyntax* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
+void CDlg_TSAnalyzer_PesEs::DisplayDRAPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
-	S32			 align_offset;
+	int			 align_offset;
 	ES_segment_t segment;
 
-	U8*			rd_ptr;
-	S32			left_length;
+	uint8_t*	rd_ptr;
+	int			left_length;
 
-	//char	pszTemp[128];
-	char	pszItem[256];
-	//int		i;
+	char	pszComment[32];
+	char	pszField[32];
 
-	if ((es_buf != NULL) && (es_length > 0))
+	if ((es_buf != NULL) && (es_size > 0))
 	{
-		sprintf_s(pszItem, sizeof(pszItem), "%d字节 - DRA音频", es_length);
+		sprintf_s(pszField, sizeof(pszField), "DRA音频");
+		sprintf_s(pszComment, sizeof(pszComment), "DRA音频");
 
-		tinyxml2::XMLElement* pxmlNalNode = NULL;
-		tinyxml2::XMLElement* pxmlPESPayloadNode = pxmlParentNode;
+		XMLElement* pxmlNalNode = NULL;
+		XMLElement* pxmlPESPayloadNode = pxmlParentNode;
 		if (pxmlPESPayloadNode == NULL)
 		{
-			pxmlPESPayloadNode = ((tinyxml2::XMLDocument*)pxmlDoc)->NewElement(pszItem);
-			pxmlDoc->InsertEndChild(pxmlPESPayloadNode);
+			pxmlPESPayloadNode = pxmlDoc->NewRootElement(pszField, NULL, es_size);
 		}
 		else
 		{
-			pxmlPESPayloadNode->SetAttribute("comment", pszItem);
+			pxmlPESPayloadNode->SetAttribute("comment", pszComment);
 		}
-		pxmlDoc->UpdateBufMark(pxmlPESPayloadNode, es_buf, es_buf + es_length);  //开源HexView长度超过65536会有BUG  chendelin 20180523
 
 		memset(&segment, 0x00, sizeof(ES_segment_t));
 		strcpy_s(segment.pszFourCC, sizeof(segment.pszFourCC), "DRA");
@@ -1146,7 +1118,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayDRAPacket(U8* es_buf, S32 es_length, XMLDocFo
 		segment.match_mask = 0xFFFF;
 
 		rd_ptr = es_buf;
-		left_length = es_length;
+		left_length = es_size;
 		do
 		{
 			segment.nal_buf = NULL;
@@ -1156,7 +1128,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayDRAPacket(U8* es_buf, S32 es_length, XMLDocFo
 			{
 				if (align_offset > 0)
 				{
-					dra_decode_unaligned_nal_to_xml(rd_ptr, align_offset, pxmlDoc, pxmlPESPayloadNode);
+					dra_present_unaligned_nal_to_xml(rd_ptr, align_offset, pxmlDoc, pxmlPESPayloadNode);
 				}
 
 				rd_ptr += align_offset;
@@ -1165,7 +1137,8 @@ void CDlg_TSAnalyzer_PesEs::DisplayDRAPacket(U8* es_buf, S32 es_length, XMLDocFo
 				assert(rd_ptr == segment.nal_buf);
 				assert(left_length >= segment.nal_length);
 
-				dra_decode_frame_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+				//dra_decode_frame_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+				dra_present_unknown_nal_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
 
 				//指向下一个segment的位置
 				rd_ptr += segment.nal_length;

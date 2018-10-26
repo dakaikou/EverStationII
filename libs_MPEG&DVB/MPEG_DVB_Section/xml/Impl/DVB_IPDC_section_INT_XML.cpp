@@ -9,7 +9,7 @@
 #include "../Include/DVB_IPDC_section_XML.h"
 #include "../Include/MPEG_DVB_Common_XML.h"
 
-#include "HAL/HAL_XML/Include/HALForTinyXML2Doc.h"
+#include "HAL/HAL_XML/Include/HALForTinyXML2.h"
 
 /////////////////////////////////////////////
 
