@@ -30,7 +30,7 @@ int mpga_decode_unknown_nal_to_xml(uint8_t* nal_buf, int nal_size, HALForXMLDoc*
 
 	if ((nal_buf != NULL) && (nal_size > 0) && (pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	{
-		XMLElement* pxmlUnknownNalNode = pxmlDoc->NewElementForByteBuf(pxmlParentNode, "unknown nal[ ]", nal_buf, nal_size);
+		XMLElement* pxmlUnknownNalNode = pxmlDoc->NewElementForByteBuf(pxmlParentNode, "uncompleted nal[ ]", nal_buf, nal_size);
 	}
 	else
 	{
@@ -87,6 +87,10 @@ int	mpga_present_frame_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode,
 		sprintf_s(pszComment, sizeof(pszComment), "%s, %s, %s, %s, %s", pszID, pszLayer, pszBitrate, pszSampling, pszMode);
 
 		XMLElement* pxmlFrameNode = pxmlDoc->NewBranchElement(pxmlParentNode, "frame()", pszComment, pmpa_frame->snapshot.length);
+		if (pmpa_frame->snapshot.length < pmpa_header->data_length)
+		{
+			pxmlFrameNode->SetAttribute("error", "frame buffer not complete!");
+		}
 
 		XMLElement* pxmlHeaderNode = pxmlDoc->NewBranchElement(pxmlFrameNode, "header()", NULL, 4 + pmpa_header->crc_length);
 

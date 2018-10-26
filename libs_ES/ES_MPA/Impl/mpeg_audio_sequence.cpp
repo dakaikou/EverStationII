@@ -242,26 +242,31 @@ int	mpga_decode_frame(uint8_t* frame_buf, int frame_size, MPA_frame_t* pmpa_fram
 		pmpa_header->original_or_copy = BITS_get(&bs, 1);
 		pmpa_header->emphasis = BITS_get(&bs, 2);
 
+		if (pmpa_header->protection_bit == 0)
+		{
+			pmpa_header->crc_check = BITS_get(&bs, 16);
+
+			pmpa_header->crc_length = 2;
+			header_size += 2;
+		}
+		else
+		{
+			pmpa_header->crc_length = 0;
+		}
+
+		assert(bs.i_left == 8);
+		pmpa_frame->audio_data_buf = bs.p_cur;
+		pmpa_frame->audio_data_length = (int)(bs.p_end - bs.p_cur);
+
 		if ((pmpa_header->syncword == 0xFFF) &&
 			(pmpa_header->layer != 0b00) && 
-			(pmpa_header->bitrate_index != 0b1111))
+			(pmpa_header->bitrate_index != 0b1111) &&
+			(pmpa_header->sampling_frequency != 0b11))
 		{
 			/*sematic part*/
 			pmpa_header->layer_index = 3 - pmpa_header->layer;
 			pmpa_header->bit_rate = MPA_bit_rate_table[pmpa_header->ID][pmpa_header->layer_index][pmpa_header->bitrate_index];
 			pmpa_header->sampling_rate = MPA_sampling_rate_table[pmpa_header->ID][pmpa_header->sampling_frequency];
-
-			if (pmpa_header->protection_bit == 0)
-			{
-				pmpa_header->crc_check = BITS_get(&bs, 16);
-
-				pmpa_header->crc_length = 2;
-				header_size += 2;
-			}
-			else
-			{
-				pmpa_header->crc_length = 0;
-			}
 
 			pmpa_header->num_of_slots = (int)(144 * pmpa_header->bit_rate / pmpa_header->sampling_rate) + pmpa_header->padding_bit;
 			pmpa_header->data_length = pmpa_header->num_of_slots - header_size;
@@ -276,10 +281,6 @@ int	mpga_decode_frame(uint8_t* frame_buf, int frame_size, MPA_frame_t* pmpa_fram
 			{
 				pmpa_header->nch = 2;
 			}
-
-			assert(bs.i_left == 8);
-			pmpa_frame->audio_data_buf = bs.p_cur;
-			pmpa_frame->audio_data_length = (int)(bs.p_end - bs.p_cur);
 
 			//assert(pmpa_frame->audio_data_length == pmpa_header->data_length);
 			if (pmpa_frame->audio_data_length < pmpa_header->data_length)

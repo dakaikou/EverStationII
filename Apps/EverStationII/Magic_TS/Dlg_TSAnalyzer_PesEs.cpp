@@ -830,6 +830,8 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPAPacket(uint8_t* es_buf, int es_size, HALFo
 	char	pszComment[32];
 	char	pszField[32];
 
+	MPA_frame_t	mpa_frame;
+
 	if ((es_buf != NULL) && (es_size > 128) && (pxmlDoc != NULL))
 	{
 		sprintf_s(pszField, sizeof(pszField), "MPEG音频");
@@ -889,28 +891,52 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPAPacket(uint8_t* es_buf, int es_size, HALFo
 				assert(rd_ptr == segment.nal_buf);
 				assert(remain_length >= segment.nal_length);
 
-				int rtcode = mpga_decode_frame_to_xml(segment.nal_buf, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
+				int rtcode = mpga_decode_frame(segment.nal_buf, segment.nal_length, &mpa_frame);
 				if (rtcode == MPA_NO_ERROR)		//if parse success, we can save the sync word
 				{
+					mpga_present_frame_to_xml(pxmlDoc, pxmlPESPayloadNode, &mpa_frame);
+
 					//save the sync word for this calling 
-					//segment.sync_word = (segment.nal_buf[0] << 8) | (segment.nal_buf[1] << 0);
-					//segment.match_mask = 0xFFFF;
-					//segment.match_bytes = 2;
+					uint32_t sync_word = (segment.nal_buf[0] << 8) | (segment.nal_buf[1] << 0);
 
-					uint32_t sync_word = (segment.nal_buf[0] << 24) | (segment.nal_buf[1] << 16) | (segment.nal_buf[2] << 8) | segment.nal_buf[3];
-
-					segment.match_mask = 0xFFFFFDFF;
 					segment.sync_word = (sync_word & segment.match_mask);
-					segment.match_bytes = 4;
+					segment.match_mask = 0xFFF0;
+					segment.match_bytes = 2;
+
+					//uint32_t sync_word = (segment.nal_buf[0] << 24) | (segment.nal_buf[1] << 16) | (segment.nal_buf[2] << 8) | segment.nal_buf[3];
+
+					//segment.match_mask = 0xFFFFFDFF;
+					//segment.sync_word = (sync_word & segment.match_mask);
+					//segment.match_bytes = 4;
+
+					segment.min_length = 144;			//why reset to 144 bytes?
+
+					//指向下一个segment的位置
+					rd_ptr += segment.nal_length;
+					remain_length -= segment.nal_length;
 				}
-				//else if (rtcode == MPA_NO_ERROR)
-				//{
+				else if (rtcode == MPA_PARSE_LENGTH_ERROR)
+				{
+					if (remain_length > segment.nal_length)
+					{
+						//search again from current pos, but enlarge the search range
+						segment.min_length = (segment.nal_length + 1);
+					}
+					else
+					{
+						mpga_present_frame_to_xml(pxmlDoc, pxmlPESPayloadNode, &mpa_frame);
+						rd_ptr += segment.nal_length;
+						remain_length -= segment.nal_length;
+					}
+				}
+				else
+				{
+					mpga_decode_unknown_nal_to_xml(rd_ptr, segment.nal_length, pxmlDoc, pxmlPESPayloadNode);
 
-				//}
-
-				//指向下一个segment的位置
-				rd_ptr += segment.nal_length;
-				remain_length -= segment.nal_length;
+					//指向下一个segment的位置
+					rd_ptr += segment.nal_length;
+					remain_length -= segment.nal_length;
+				}
 			}
 			else
 			{
@@ -921,7 +947,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPAPacket(uint8_t* es_buf, int es_size, HALFo
 				}
 				break;
 			}
-		} while (align_offset >= 0);
+		} while ((align_offset >= 0) && (remain_length > 0));
 	}
 }
 
