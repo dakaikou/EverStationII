@@ -56,12 +56,12 @@ int CCAT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 		if (rtcode == SECTION_PARSE_NO_ERROR)
 		{
 			CA_descriptor_t CA_descriptor;
-			for (int descriptor_index = 0; descriptor_index < cat_section.reserved_count; descriptor_index++)
+			for (int descriptor_index = 0; descriptor_index < cat_section.CA_descriptor_count; descriptor_index++)
 			{
-				if (cat_section.reserved_descriptor[descriptor_index].descriptor_tag == MPEG2_PSI_CA_DESCRIPTOR)
+				if (cat_section.CA_descriptors[descriptor_index].descriptor_tag == MPEG2_PSI_CA_DESCRIPTOR)
 				{
-					uint8_t* descriptor_buf = cat_section.reserved_descriptor[descriptor_index].descriptor_buf;
-					int		 descriptor_size = cat_section.reserved_descriptor[descriptor_index].descriptor_size;
+					uint8_t* descriptor_buf = cat_section.CA_descriptors[descriptor_index].descriptor_buf;
+					int		 descriptor_size = cat_section.CA_descriptors[descriptor_index].descriptor_size;
 
 					if (MPEG2_PSI_decode_CA_descriptor(descriptor_buf, descriptor_size, &CA_descriptor) == SECTION_PARSE_NO_ERROR)
 					{

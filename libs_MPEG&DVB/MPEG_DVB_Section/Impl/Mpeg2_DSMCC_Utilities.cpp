@@ -2,8 +2,8 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "../Include/Mpeg2_DSMCC_Utilities.h"
-#include "../Include/MPEG_DVB_ErrorCode.h"
+#include "../../Include/Mpeg2_DSMCC_Utilities.h"
+#include "../../Include/MPEG_DVB_ErrorCode.h"
 
 #include "HAL\HAL_Sys\Include\INTTYPES.H"
 

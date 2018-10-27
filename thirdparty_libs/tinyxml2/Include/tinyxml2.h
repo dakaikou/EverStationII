@@ -40,8 +40,8 @@ distribution.
 #   include <cstdlib>
 #   include <cstring>
 #endif
-#include <stdint.h>
 
+#include <stdint.h>
 /*
    TODO: intern strings instead of allocation.
 */
@@ -93,7 +93,6 @@ distribution.
 #else
 #   define TIXMLASSERT( x )               {}
 #endif
-
 
 /* Versioning, past 1.0.14:
 	http://semver.org/
@@ -1249,6 +1248,10 @@ class TINYXML2_LIB XMLElement : public XMLNode
 {
     friend class XMLDocument;
 public:
+
+	//void SetStartEndPtr(int offset, int length);
+	//void SetFieldLength(int length);
+
     /// Get the name of an element (which is the Value() of the node.)
     const char* Name() const		{
         return Value();
@@ -1665,10 +1668,17 @@ class TINYXML2_LIB XMLDocument : public XMLNode
     friend class XMLComment;
     friend class XMLDeclaration;
     friend class XMLUnknown;
+
+protected:
+
+	//BITS_TRACER_t m_bs_tracer;				//added by chendelin 2018.9.29
+
 public:
     /// constructor
     XMLDocument( bool processEntities = true, Whitespace whitespaceMode = PRESERVE_WHITESPACE );
     ~XMLDocument();
+
+	//void GetBitsTracer(BITS_TRACER_t* pbs_tracer);
 
     virtual XMLDocument* ToDocument()				{
         TIXMLASSERT( this == _document );

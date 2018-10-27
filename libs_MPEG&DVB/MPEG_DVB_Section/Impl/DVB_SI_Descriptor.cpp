@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "../Include/DVB_SI_Descriptor.h"
-#include "../Include/DVB_SI_Utilities.h"
-#include "../Include/MPEG_DVB_ErrorCode.h"
+#include "../../Include/DVB_SI_Descriptor.h"
+#include "../../Include/DVB_SI_Utilities.h"
+#include "../../Include/MPEG_DVB_ErrorCode.h"
 
 #include "DVB_SI_Utilities_Inner.h"
 
@@ -1787,8 +1787,10 @@ int DVB_SI_decode_data_broadcast_id_descriptor(uint8_t* buf, int length, data_br
 //功能：解传送流描述符					0x67
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-S32 DVB_SI_decode_transport_stream_descriptor(U8* buf, S32 length, ptransport_stream_descriptor_t ptransport_stream_descriptor)
+int DVB_SI_decode_transport_stream_descriptor(uint8_t* buf, int length, transport_stream_descriptor_t* ptransport_stream_descriptor)
 {
+	int rtcode = SECTION_PARSE_NO_ERROR;
+
 	if ((buf != NULL) && (length > 0) && (ptransport_stream_descriptor != NULL))
 	{
 		ptransport_stream_descriptor->descriptor_tag = *buf++;
@@ -1801,14 +1803,14 @@ S32 DVB_SI_decode_transport_stream_descriptor(U8* buf, S32 length, ptransport_st
 		ptransport_stream_descriptor->byte_char[2] = *buf++;
 		ptransport_stream_descriptor->byte_char[3] = '\0';
 
-		ptransport_stream_descriptor->byte_code = ptransport_stream_descriptor->byte_char[0];
-		ptransport_stream_descriptor->byte_code <<= 8;
-		ptransport_stream_descriptor->byte_code |= ptransport_stream_descriptor->byte_char[1];
-		ptransport_stream_descriptor->byte_code <<= 8;
-		ptransport_stream_descriptor->byte_code |= ptransport_stream_descriptor->byte_char[2];
+		//ptransport_stream_descriptor->byte_code = ptransport_stream_descriptor->byte_char[0];
+		//ptransport_stream_descriptor->byte_code <<= 8;
+		//ptransport_stream_descriptor->byte_code |= ptransport_stream_descriptor->byte_char[1];
+		//ptransport_stream_descriptor->byte_code <<= 8;
+		//ptransport_stream_descriptor->byte_code |= ptransport_stream_descriptor->byte_char[2];
 	}
 
-	return 0;
+	return rtcode;
 }
 
 

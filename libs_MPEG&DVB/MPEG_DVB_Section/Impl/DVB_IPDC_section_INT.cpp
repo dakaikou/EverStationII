@@ -3,158 +3,182 @@
 #include <assert.h>
 #include <string.h>
 
-#include "../Include/DVB_IPDC_section.h"
-#include "../Include/MPEG_DVB_ErrorCode.h"
+#include "../../Include/DVB_IPDC_section.h"
+#include "../../Include/MPEG_DVB_ErrorCode.h"
 
 #include "libs_Math/Include/CRC_32.h"
+#include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 
 /////////////////////////////////////////////
-int DVB_IPDC_INT_DecodeSection(uint8_t *buf, int length, IP_MAC_notification_section_t* pint_section)
+int DVB_IPDC_INT_DecodeSection(uint8_t *section_buf, int section_size, IP_MAC_notification_section_t* pint_section)
 {
-	S32		rtcode = SECTION_PARSE_NO_ERROR;
-	U32		 N = 0;
-//	U8*		 ptemp;
-	U8*		 pnext;
-	U8*		 pend;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
 
-	U16		 descriptor_tag;
-	U8		 descriptor_length;
-	U16		 move_length;
-	S32		 reserved_count;
+	uint16_t	 descriptor_tag;
+	uint8_t		 descriptor_length;
+	int			 move_length;
+	int			 reserved_count;
+	int			 loop_length;
 
-	S32		 target_count = 0;
+	//int		 target_count = 0;
 
-	if ((buf != NULL) && (length >= DVB_IPDC_INT_SECTION_MIN_SIZE) && (pint_section != NULL))
+	if ((section_buf != NULL) && 
+		((section_size >= DVB_IPDC_INT_SECTION_MIN_SIZE) && (section_size <= DVB_IPDC_INT_SECTION_MAX_SIZE)) &&
+		(pint_section != NULL))
 	{
 		memset(pint_section, 0x00, sizeof(IP_MAC_notification_section_t));
 
-		pint_section->CRC_32_verify = Encode_CRC_32(buf, length - 4);
-		pint_section->CRC_32 = (buf[length - 4] << 24) | (buf[length - 3] << 16) | (buf[length - 2] << 8) | buf[length - 1];
+		pint_section->CRC_32_recalculated = Encode_CRC_32(section_buf, section_size - 4);
+		uint32_t CRC_32_encoded = (section_buf[section_size - 4] << 24) | (section_buf[section_size - 3] << 16) | (section_buf[section_size - 2] << 8) | section_buf[section_size - 1];
 
-		if (pint_section->CRC_32 == pint_section->CRC_32_verify)
+		//if (pint_section->CRC_32 == CRC_32_encoded)
 		{
-			pend = buf + length - 4;			//exclude CRC32
+			BITS_t  bs;			//exclude CRC32
+			BITS_map(&bs, section_buf, section_size);
 
-			pint_section->table_id = *buf++;
-			pint_section->section_syntax_indicator = (*buf & 0x80) >> 7;
-			pint_section->reserved_for_future_use = (*buf & 0x40) >> 6;
-			pint_section->reserved0 = (*buf & 0x30) >> 4;
+			pint_section->table_id = BITS_get(&bs, 8);
 
-			pint_section->section_length = (*buf++ & 0x0f) << 8;
-			pint_section->section_length |= *buf++;
+			pint_section->section_syntax_indicator = BITS_get(&bs, 1);
+			pint_section->reserved_for_future_use = BITS_get(&bs, 1);
+			pint_section->reserved0 = BITS_get(&bs, 2);
+			pint_section->section_length = BITS_get(&bs, 12);
 
-			pint_section->action_type = *buf++;
-			pint_section->platform_id_hash = *buf++;
+			pint_section->action_type = BITS_get(&bs, 8);
 
-			pint_section->reserved1 = (*buf & 0xc0) >> 6;
-			pint_section->version_number = (*buf & 0x3E) >> 1;
-			pint_section->current_next_indicator = (*buf++ & 0x01);
+			pint_section->platform_id_hash = BITS_get(&bs, 8);
 
-			pint_section->section_number = *buf++;
-			pint_section->last_section_number = *buf++;
+			pint_section->reserved1 = BITS_get(&bs, 2);
+			pint_section->version_number = BITS_get(&bs, 5);
+			pint_section->current_next_indicator = BITS_get(&bs, 1);
 
-			pint_section->platform_id = *buf++;
-			pint_section->platform_id <<= 8;
-			pint_section->platform_id |= *buf++;
-			pint_section->platform_id <<= 8;
-			pint_section->platform_id |= *buf++;
+			pint_section->section_number = BITS_get(&bs, 8);
 
-			pint_section->processing_order = *buf++;
+			pint_section->last_section_number = BITS_get(&bs, 8);
+
+			pint_section->platform_id = BITS_get(&bs, 24);
+
+			pint_section->processing_order = BITS_get(&bs, 8);
 
 			//decoding platform_descriptor_loop
-			pint_section->platform_descriptor_loop.reserved = (*buf & 0xf0) >> 4;
-			pint_section->platform_descriptor_loop.platform_descriptor_loop_length = (*buf++ & 0x0f);
-			pint_section->platform_descriptor_loop.platform_descriptor_loop_length <<= 4;
-			pint_section->platform_descriptor_loop.platform_descriptor_loop_length |= *buf++;
+			platform_descriptor_loop_t* pplatform_descriptor_loop = &(pint_section->platform_descriptor_loop);
+			pplatform_descriptor_loop->reserved = BITS_get(&bs, 4);
+			pplatform_descriptor_loop->platform_descriptor_loop_length = BITS_get(&bs, 12);
 
-			pnext = buf + pint_section->platform_descriptor_loop.platform_descriptor_loop_length;
-
-			reserved_count = 0;
-			while (buf < pnext)
+			if (pplatform_descriptor_loop->platform_descriptor_loop_length > 0)
 			{
-				descriptor_tag = buf[0];
-				descriptor_length = buf[1];
-				move_length = descriptor_length + 2;
-
-				pint_section->platform_descriptor_loop.reserved_descriptor[reserved_count].descriptor_tag = (0x1000 | descriptor_tag);
-				pint_section->platform_descriptor_loop.reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-				pint_section->platform_descriptor_loop.reserved_descriptor[reserved_count].descriptor_buf = buf;
-				pint_section->platform_descriptor_loop.reserved_descriptor[reserved_count].descriptor_size = (uint8_t)move_length;
-
-				reserved_count ++;
-				buf += move_length;
-			}
-
-			pint_section->platform_descriptor_loop.reserved_count = reserved_count;
-
-			//decoding target loop
-			target_count = 0;
-
-			while (buf < pend)
-			{
-				//decoding target_descriptor_loop
-				pint_section->target_descriptor_loop[target_count].reserved = (*buf & 0xf0) >> 4;
-				pint_section->target_descriptor_loop[target_count].target_descriptor_loop_length = (*buf++ & 0x0f);
-				pint_section->target_descriptor_loop[target_count].target_descriptor_loop_length <<= 4;
-				pint_section->target_descriptor_loop[target_count].target_descriptor_loop_length |= *buf++;
-
-				pnext = buf + pint_section->target_descriptor_loop[target_count].target_descriptor_loop_length;
+				uint8_t* ptemp = bs.p_cur;
+				BITS_byteSkip(&bs, pplatform_descriptor_loop->platform_descriptor_loop_length);
 
 				reserved_count = 0;
-				while (buf < pnext)
+				loop_length = pplatform_descriptor_loop->platform_descriptor_loop_length;
+				while ((loop_length >= 2) && (reserved_count < MAX_RESERVED_DESCRIPTORS))
 				{
-					descriptor_tag = buf[0];
-					descriptor_length = buf[1];
+					descriptor_tag = ptemp[0];
+					descriptor_length = ptemp[1];
 					move_length = descriptor_length + 2;
 
-					pint_section->target_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_tag = (0x1000 | descriptor_tag);
-					pint_section->target_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-					pint_section->target_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_buf = buf;
-					pint_section->target_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_size = (uint8_t)move_length;
+					pplatform_descriptor_loop->reserved_descriptor[reserved_count].descriptor_tag = (0x1000 | descriptor_tag);
+					pplatform_descriptor_loop->reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
+					pplatform_descriptor_loop->reserved_descriptor[reserved_count].descriptor_buf = ptemp;
+					pplatform_descriptor_loop->reserved_descriptor[reserved_count].descriptor_size = move_length;
 
-					reserved_count ++;
-					buf += move_length;
-				}
-				pint_section->target_descriptor_loop[target_count].reserved_count = reserved_count;
-
-				//decoding operational_descriptor_loop
-				pint_section->operational_descriptor_loop[target_count].reserved = (*buf & 0xf0) >> 4;
-				pint_section->operational_descriptor_loop[target_count].operational_descriptor_loop_length = (*buf++ & 0x0f);
-				pint_section->operational_descriptor_loop[target_count].operational_descriptor_loop_length <<= 4;
-				pint_section->operational_descriptor_loop[target_count].operational_descriptor_loop_length |= *buf++;
-
-				pnext = buf + pint_section->operational_descriptor_loop[target_count].operational_descriptor_loop_length;
-
-				reserved_count = 0;
-				while (buf < pnext)
-				{
-					descriptor_tag = buf[0];
-					descriptor_length = buf[1];
-					move_length = descriptor_length + 2;
-
-					if (descriptor_tag >= 0x40)
-					{
-						pint_section->operational_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_tag = descriptor_tag;
-					}
-					else
-					{
-						pint_section->operational_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_tag = (0x1000 | descriptor_tag);
-					}
-					pint_section->operational_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-					pint_section->operational_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_buf = buf;
-					pint_section->operational_descriptor_loop[target_count].reserved_descriptor[reserved_count].descriptor_size = (uint8_t)move_length;
-
-					reserved_count ++;
-					buf += move_length;
+					reserved_count++;
+					ptemp += move_length;
+					loop_length -= move_length;
 				}
 
-				pint_section->operational_descriptor_loop[target_count].reserved_count = reserved_count;
-				target_count ++;
+				pplatform_descriptor_loop->reserved_count = reserved_count;
 			}
 
-			pint_section->N = target_count;
+			loop_length = section_size - 14 - pplatform_descriptor_loop->platform_descriptor_loop_length - 4;
+			if (loop_length > 0)
+			{
+				uint8_t* ptemp = bs.p_cur;
+				BITS_byteSkip(&bs, loop_length);
+
+				int	notification_count = 0;
+
+				while ((loop_length >= 4) && (notification_count < MAX_INT_TARGETS))
+				{
+					target_descriptor_loop_t* ptarget_descriptor_loop = &(pint_section->notifications[notification_count].target_descriptor_loop);
+
+					//decoding target_descriptor_loop
+					ptarget_descriptor_loop->reserved = (*ptemp & 0xf0) >> 4;
+					ptarget_descriptor_loop->target_descriptor_loop_length = (*ptemp++ & 0x0f);
+					ptarget_descriptor_loop->target_descriptor_loop_length <<= 4;
+					ptarget_descriptor_loop->target_descriptor_loop_length |= *ptemp++;
+
+					uint8_t* pnext = ptemp + ptarget_descriptor_loop->target_descriptor_loop_length;
+
+					reserved_count = 0;
+					int target_descriptor_loop_length = ptarget_descriptor_loop->target_descriptor_loop_length;
+					while ((target_descriptor_loop_length >= 2) && (reserved_count < MAX_RESERVED_DESCRIPTORS))
+					{
+						descriptor_tag = ptemp[0];
+						descriptor_length = ptemp[1];
+						move_length = descriptor_length + 2;
+
+						ptarget_descriptor_loop->target_descriptors[reserved_count].descriptor_tag = (0x1000 | descriptor_tag);
+						ptarget_descriptor_loop->target_descriptors[reserved_count].descriptor_length = descriptor_length;
+						ptarget_descriptor_loop->target_descriptors[reserved_count].descriptor_buf = ptemp;
+						ptarget_descriptor_loop->target_descriptors[reserved_count].descriptor_size = move_length;
+
+						reserved_count++;
+						ptemp += move_length;
+						target_descriptor_loop_length -= move_length;
+					}
+					ptarget_descriptor_loop->target_descriptor_count = reserved_count;
+
+					//decoding operational_descriptor_loop
+					ptemp = pnext;									
+					operational_descriptor_loop_t* poperational_descriptor_loop = &(pint_section->notifications[notification_count].operational_descriptor_loop);
+
+					poperational_descriptor_loop->reserved = (*ptemp & 0xf0) >> 4;
+					poperational_descriptor_loop->operational_descriptor_loop_length = (*ptemp++ & 0x0f);
+					poperational_descriptor_loop->operational_descriptor_loop_length <<= 4;
+					poperational_descriptor_loop->operational_descriptor_loop_length |= *ptemp++;
+
+					pnext = ptemp + poperational_descriptor_loop->operational_descriptor_loop_length;
+
+					reserved_count = 0;
+					int operational_descriptor_loop_length = poperational_descriptor_loop->operational_descriptor_loop_length;
+					while ((operational_descriptor_loop_length >= 2) && (reserved_count < MAX_RESERVED_DESCRIPTORS))
+					{
+						descriptor_tag = ptemp[0];
+						descriptor_length = ptemp[1];
+						move_length = descriptor_length + 2;
+
+						if (descriptor_tag >= 0x40)
+						{
+							poperational_descriptor_loop->operational_descriptors[reserved_count].descriptor_tag = descriptor_tag;
+						}
+						else
+						{
+							poperational_descriptor_loop->operational_descriptors[reserved_count].descriptor_tag = (0x1000 | descriptor_tag);
+						}
+						poperational_descriptor_loop->operational_descriptors[reserved_count].descriptor_length = descriptor_length;
+						poperational_descriptor_loop->operational_descriptors[reserved_count].descriptor_buf = ptemp;
+						poperational_descriptor_loop->operational_descriptors[reserved_count].descriptor_size = move_length;
+
+						reserved_count++;
+						ptemp += move_length;
+						operational_descriptor_loop_length -= move_length;
+					}
+
+					poperational_descriptor_loop->operational_descriptor_count = reserved_count;
+
+					notification_count++;
+					loop_length -= ((2 + ptarget_descriptor_loop->target_descriptor_loop_length) + (2 + poperational_descriptor_loop->operational_descriptor_loop_length));
+				}
+
+				pint_section->notification_count = notification_count;
+			}
+
+			pint_section->CRC_32 = BITS_get(&bs, 32);
+			assert(pint_section->CRC_32 == CRC_32_encoded);		//检验比特流读取指针是否发生错误
 		}
-		else
+
+		if (pint_section->CRC_32_recalculated != pint_section->CRC_32)
 		{
 			rtcode = SECTION_PARSE_CRC_ERROR;
 		}

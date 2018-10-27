@@ -3,13 +3,11 @@
 #include <stdint.h>
 
 #include "libs_MPEG&DVB\MPEG_TSPacket\Include\Mpeg2_TS_Utilities.h"
-#include "../Include/Mpeg2_StreamType.h"
-#include "../Include/Mpeg2_PSI_Utilities.h"
-#include "../Include/Mpeg2_PSI_section.h"
+#include "../../Include/Mpeg2_StreamType.h"
+#include "../../Include/Mpeg2_PSI_Utilities.h"
+#include "../../Include/Mpeg2_PSI_section.h"
 
-#include "../Include/MPEG_DVB_ErrorCode.h"
-
-#include "HAL\HAL_Sys\Include\INTTYPES.H"
+#include "../../Include/MPEG_DVB_ErrorCode.h"
 
 void MPGV_DecodeFrameRateCodetoText(uint8_t code, char* pszText, int size)
 {
@@ -385,7 +383,7 @@ int MPEG2_PSI_NumericCoding2Text_StreamType(uint8_t stream_type, uint8_t subtype
 
 uint8_t GetTSPayloadClassByStreamType(uint8_t stream_type, uint8_t sub_type)
 {
-	U8 class_type = TSPAYLOAD_CLASS_UNKNOWN;
+	uint8_t class_type = TSPAYLOAD_CLASS_UNKNOWN;
 
 	if ((stream_type == 0x01) ||				//ISO/IEC 11172-2 Video
 		(stream_type == 0x02) ||				//ISO/IEC 13818-2 Video

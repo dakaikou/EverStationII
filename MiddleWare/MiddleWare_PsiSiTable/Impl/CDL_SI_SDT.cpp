@@ -72,15 +72,15 @@ int CSDT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 			m_usOriginalNetworkID = sdt_section.original_network_id;
 			m_usTransportStreamID = sdt_section.transport_stream_id;
 
-			nServiceCount = m_nServiceCount + sdt_section.N;
+			nServiceCount = m_nServiceCount + sdt_section.service_count;
 			m_astServiceInfo = (SERVICE_INFO_t*)realloc(m_astServiceInfo, nServiceCount * sizeof(SERVICE_INFO_t));
 			if (m_astServiceInfo != NULL)
 			{
 				m_nMemoryForServiceInfos = nServiceCount * sizeof(SERVICE_INFO_t);
 
-				for (service_index = 0; service_index < sdt_section.N; service_index ++)
+				for (service_index = 0; service_index < sdt_section.service_count; service_index ++)
 				{
-					pServiceDescription = sdt_section.astServiceDescription + service_index;
+					pServiceDescription = sdt_section.astServiceDescriptions + service_index;
 
 					m_astServiceInfo[m_nServiceCount].service_id = pServiceDescription->service_id;
 					m_astServiceInfo[m_nServiceCount].EIT_schedule_flag = pServiceDescription->EIT_schedule_flag;
@@ -92,9 +92,9 @@ int CSDT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 					memset(&(m_astServiceInfo[m_nServiceCount].pszServiceProviderName), 0x00, MAX_SERVICE_PROVIDER_NAME_LENGTH + 1);
 
 					data_broadcast_count = 0;
-					for (descriptor_index = 0; descriptor_index < pServiceDescription->reserved_count; descriptor_index++)
+					for (descriptor_index = 0; descriptor_index < pServiceDescription->service_descriptor_count; descriptor_index++)
 					{
-						preserved_descriptor = pServiceDescription->reserved_descriptor + descriptor_index;
+						preserved_descriptor = pServiceDescription->service_descriptors + descriptor_index;
 
 						if (preserved_descriptor->descriptor_tag == DVB_SI_SERVICE_DESCRIPTOR)
 						{

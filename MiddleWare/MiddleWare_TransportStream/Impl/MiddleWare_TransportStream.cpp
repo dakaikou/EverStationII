@@ -834,10 +834,10 @@ S32 CTransportStream::StopGetBitrate(void)
 	return rtcode;
 }
 
-S32 CTransportStream::GetBitrateMap(ULONG pbitrate_map[], S32 count)
+int CTransportStream::GetBitrateMap(ULONG pbitrate_map[], int count)
 {
-	S32		rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
-	S32		readcount;
+	int		rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
+	int		readcount;
 	double	coeff = 8.0;
 	
 	if (m_hFile == -1)
@@ -859,7 +859,7 @@ S32 CTransportStream::GetBitrateMap(ULONG pbitrate_map[], S32 count)
 
 		if (rtcode > 0)
 		{
-			for (i = 0; i < readcount; i++)
+			for (int i = 0; i < readcount; i++)
 			{
 				temp = pbitrate_map[i];
 				temp *= coeff;

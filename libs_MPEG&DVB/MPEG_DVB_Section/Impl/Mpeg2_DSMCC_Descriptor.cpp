@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include <assert.h>
 
-#include "../Include/Mpeg2_DSMCC_Descriptor.h"
-#include "../Include/MPEG_DVB_ErrorCode.h"
+#include "../../Include/Mpeg2_DSMCC_Descriptor.h"
+#include "../../Include/MPEG_DVB_ErrorCode.h"
 #include "HAL\HAL_Sys\Include\INTTYPES.H"
 
 #ifndef min

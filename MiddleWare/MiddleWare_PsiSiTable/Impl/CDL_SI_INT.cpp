@@ -49,6 +49,7 @@ int CINT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 		rtcode = DVB_IPDC_INT_DecodeSection(buf, length, &int_section);
 		if (rtcode == SECTION_PARSE_NO_ERROR)
 		{
+			m_uiPlatformID = int_section.platform_id;
 		}
 	}
 

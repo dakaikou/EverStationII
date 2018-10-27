@@ -9,10 +9,10 @@
 
 #include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/Mpeg2_TS_packet.h"
 #include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/Mpeg2_TS_Utilities.h"
-#include "libs_Mpeg&DVB/Mpeg_TSPacket\Include\Mpeg2_TS_PID.h"
+#include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/Mpeg2_TS_PID.h"
 #include "libs_Mpeg&DVB/Mpeg_PESPacket/Include/MPEG_stream_id.h"
 #include "libs_Mpeg&DVB/Mpeg_PESPacket/Include/MPEG_PES_Utilities.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\Mpeg2_table_id.h"
+#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
 #include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_StreamType.h"
 #include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
 #include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/MPEG_DVB_Common.h"
@@ -443,8 +443,8 @@ int CDB_TSPackets::AddPacket(transport_packet_t* pTS_packet)
 
 									//if ((pTS_packet->payload_buf[iTableStartPos + 1] & 0xC0) == 0x80)			//判断条件更严格一点，降低识别错误
 									{
-										S32 min_length, max_length;
-										GetSectionMinMaxLength(table_id, &min_length, &max_length);
+										int min_length, max_length;
+										MPEG_DVB_GetSectionMinMaxLength(table_id, &min_length, &max_length);
 
 										section_length = (section_buf[1] & 0x0f);
 										section_length <<= 8;

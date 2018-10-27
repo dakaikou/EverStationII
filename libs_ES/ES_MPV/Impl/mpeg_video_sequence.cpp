@@ -1,26 +1,25 @@
-#include <windows.h>
 #include <assert.h>
 #include <string.h>
-#include <malloc.h>
+#include <stdint.h>
 #include <stdio.h>
-
-#include <mmsystem.h>
 
 #include "../Include/mpeg_video_sequence.h"
 #include "../Include/mpeg_video_errorcode.h"
 
 #include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 
-int mpgv_decode_sequence_header(unsigned char* nal_buf, int nal_length, MPGV_sequence_header_t* psequence_header)
+int mpgv_decode_sequence_header(uint8_t* nal_buf, int nal_length, MPGV_sequence_header_t* psequence_header)
 {
-	int rtcode = MPV_NO_ERROR;
-	S32		i;
-	//S32		v, u;
+	int		rtcode = MPV_NO_ERROR;
+	int		i;
 	BITS_t	bs;
 
 	if ((nal_buf != NULL) && (nal_length >= 4) && (psequence_header != NULL))
 	{
 		memset(psequence_header, 0x00, sizeof(MPGV_sequence_header_t));
+		psequence_header->nal_snapshot.buf = nal_buf;
+		psequence_header->nal_snapshot.length = nal_length;
+
 		BITS_map(&bs, nal_buf, nal_length);
 
 		/*syntax part parse*/
@@ -83,6 +82,20 @@ int mpgv_decode_sequence_header(unsigned char* nal_buf, int nal_length, MPGV_seq
 		//memcpy(W[2], W[0], 64 * sizeof(S16));
 		//memcpy(W[3], W[1], 64 * sizeof(S16));
 
+		if (!BITS_beAligned(&bs))
+		{
+			psequence_header->padding_bits_length = bs.i_left;
+			psequence_header->padding_bits_value = BITS_get(&bs, psequence_header->padding_bits_length);
+		}
+
+		if (!BITS_beEOF(&bs))
+		{
+			assert(BITS_beAligned(&bs));
+			psequence_header->padding_length = (int)(bs.p_end - bs.p_cur);
+			psequence_header->padding_bytes = bs.p_cur;
+			BITS_byteSkip(&bs, psequence_header->padding_length);
+		}
+
 		rtcode = MPV_NO_ERROR;
 	}
 	else
@@ -95,12 +108,14 @@ int mpgv_decode_sequence_header(unsigned char* nal_buf, int nal_length, MPGV_seq
 
 int	mpgv_decode_group_of_pictures_header(uint8_t* nal_buf, int nal_length, MPGV_group_of_pictures_header_t* pgroup_of_pictures_header)
 {
-	S32		rtcode = MPV_UNKNOWN_ERROR;
+	int			rtcode = MPV_UNKNOWN_ERROR;
 	BITS_t		bs;
 
 	if ((nal_buf != NULL) && (nal_length >= 4) && (pgroup_of_pictures_header != NULL))
 	{
 		memset(pgroup_of_pictures_header, 0x00, sizeof(MPGV_group_of_pictures_header_t));
+		pgroup_of_pictures_header->nal_snapshot.buf = nal_buf;
+		pgroup_of_pictures_header->nal_snapshot.length = nal_length;
 
 		BITS_map(&bs, nal_buf, nal_length);
 
@@ -114,6 +129,20 @@ int	mpgv_decode_group_of_pictures_header(uint8_t* nal_buf, int nal_length, MPGV_
 		pgroup_of_pictures_header->time_code_pictures = BITS_get(&bs, 6);
 		pgroup_of_pictures_header->closed_gop = BITS_get(&bs, 1);
 		pgroup_of_pictures_header->broken_link = BITS_get(&bs, 1);
+
+		if (!BITS_beAligned(&bs))
+		{
+			pgroup_of_pictures_header->padding_bits_length = bs.i_left;
+			pgroup_of_pictures_header->padding_bits_value = BITS_get(&bs, pgroup_of_pictures_header->padding_bits_length);
+		}
+
+		if (!BITS_beEOF(&bs))
+		{
+			assert(BITS_beAligned(&bs));
+			pgroup_of_pictures_header->padding_length = (int)(bs.p_end - bs.p_cur);
+			pgroup_of_pictures_header->padding_bytes = bs.p_cur;
+			BITS_byteSkip(&bs, pgroup_of_pictures_header->padding_length);
+		}
 
 		rtcode = MPV_NO_ERROR;
 	}
@@ -133,6 +162,9 @@ int mpgv_decode_picture_header(uint8_t* nal_buf, int nal_length, MPGV_picture_he
 	if ((nal_buf != NULL) && (nal_length >= 4) && (ppicture_header != NULL))
 	{
 		memset(ppicture_header, 0x00, sizeof(MPGV_picture_header_t));
+		ppicture_header->nal_snapshot.buf = nal_buf;
+		ppicture_header->nal_snapshot.length = nal_length;
+
 		BITS_map(&bs, nal_buf, nal_length);
 
 		ppicture_header->picture_start_code = BITS_get(&bs, 32);			//bytes 0~3
@@ -161,6 +193,21 @@ int mpgv_decode_picture_header(uint8_t* nal_buf, int nal_length, MPGV_picture_he
 			ppicture_header->backward_f_code = BITS_get(&bs, 3);
 		}
 
+		if (!BITS_beAligned(&bs))
+		{
+			ppicture_header->padding_bits_length = bs.i_left;
+			ppicture_header->padding_bits_value = BITS_get(&bs, ppicture_header->padding_bits_length);
+		}
+
+		if (!BITS_beEOF(&bs))
+		{
+			assert(BITS_beAligned(&bs));
+			ppicture_header->padding_length = (int)(bs.p_end - bs.p_cur);
+			ppicture_header->padding_bytes = bs.p_cur;
+			BITS_byteSkip(&bs, ppicture_header->padding_length);
+		}
+		//ppicture_header->extra_bit_picture = BITS_show(&bs, 1);
+
 		//如果是mpeg-1视频，则在图像头后就进行解码帧重排序，否则要等到解picture_coding_extension之后
 		//if (m_mpeg2_video_stream == 0)
 		//{
@@ -175,14 +222,17 @@ int mpgv_decode_picture_header(uint8_t* nal_buf, int nal_length, MPGV_picture_he
 	return rtcode;
 }
 
-S32 mpgv_decode_sequence_extension(U8* nal_buf, S32 nal_length, MPGV_sequence_extension_t* psequence_extension)
+int mpgv_decode_sequence_extension(uint8_t* nal_buf, int nal_length, MPGV_sequence_extension_t* psequence_extension)
 {
-	S32		rtcode = MPV_UNKNOWN_ERROR;
+	int		rtcode = MPV_UNKNOWN_ERROR;
 	BITS_t		bs;
 
 	if ((nal_buf != NULL) && (nal_length >= 4) && (psequence_extension != NULL))
 	{
 		memset(psequence_extension, 0x00, sizeof(MPGV_sequence_extension_t));
+		psequence_extension->nal_snapshot.buf = nal_buf;
+		psequence_extension->nal_snapshot.length = nal_length;
+
 		BITS_map(&bs, nal_buf, nal_length);
 
 		psequence_extension->extension_start_code = BITS_get(&bs, 32);			//bytes 0~3
@@ -202,6 +252,20 @@ S32 mpgv_decode_sequence_extension(U8* nal_buf, S32 nal_length, MPGV_sequence_ex
 		psequence_extension->frame_rate_extension_n = BITS_get(&bs, 2);
 		psequence_extension->frame_rate_extension_d = BITS_get(&bs, 5);
 
+		if (!BITS_beAligned(&bs))
+		{
+			psequence_extension->padding_bits_length = bs.i_left;
+			psequence_extension->padding_bits_value = BITS_get(&bs, psequence_extension->padding_bits_length);
+		}
+
+		if (!BITS_beEOF(&bs))
+		{
+			assert(BITS_beAligned(&bs));
+			psequence_extension->padding_length = (int)(bs.p_end - bs.p_cur);
+			psequence_extension->padding_bytes = bs.p_cur;
+			BITS_byteSkip(&bs, psequence_extension->padding_length);
+		}
+
 		rtcode = MPV_NO_ERROR;
 	}
 	else
@@ -212,14 +276,17 @@ S32 mpgv_decode_sequence_extension(U8* nal_buf, S32 nal_length, MPGV_sequence_ex
 	return rtcode;
 }
 
-S32 mpgv_decode_picture_coding_extension(U8* nal_buf, S32 nal_length, MPGV_picture_coding_extension_t* ppicture_coding_extension)
+int mpgv_decode_picture_coding_extension(uint8_t* nal_buf, int nal_length, MPGV_picture_coding_extension_t* ppicture_coding_extension)
 {
-	S32		rtcode = MPV_UNKNOWN_ERROR;
+	int		rtcode = MPV_UNKNOWN_ERROR;
 	BITS_t		bs;
 
 	if ((nal_buf != NULL) && (nal_length >= 4) && (ppicture_coding_extension != NULL))
 	{
 		memset(ppicture_coding_extension, 0x00, sizeof(MPGV_picture_coding_extension_t));
+		ppicture_coding_extension->nal_snapshot.buf = nal_buf;
+		ppicture_coding_extension->nal_snapshot.length = nal_length;
+
 		BITS_map(&bs, nal_buf, nal_length);
 
 		ppicture_coding_extension->extension_start_code = BITS_get(&bs, 32);
@@ -256,6 +323,20 @@ S32 mpgv_decode_picture_coding_extension(U8* nal_buf, S32 nal_length, MPGV_pictu
 			ppicture_coding_extension->sub_carrier_phase = BITS_get(&bs, 8);
 		}
 
+		if (!BITS_beAligned(&bs))
+		{
+			ppicture_coding_extension->padding_bits_length = bs.i_left;
+			ppicture_coding_extension->padding_bits_value = BITS_get(&bs, ppicture_coding_extension->padding_bits_length);
+		}
+
+		if (!BITS_beEOF(&bs))
+		{
+			assert(BITS_beAligned(&bs));
+			ppicture_coding_extension->padding_length = (int)(bs.p_end - bs.p_cur);
+			ppicture_coding_extension->padding_bytes = bs.p_cur;
+			BITS_byteSkip(&bs, ppicture_coding_extension->padding_length);
+		}
+
 		//如果是mpeg-2视频，在此重排序解码帧缓存，否则需要在解picture_header时就要重排序
 		//if (m_mpeg2_video_stream == 1)
 		//{
@@ -272,19 +353,107 @@ S32 mpgv_decode_picture_coding_extension(U8* nal_buf, S32 nal_length, MPGV_pictu
 	return rtcode;
 }
 
+int mpgv_decode_sequence_display_extension(uint8_t* nal_buf, int nal_length, MPGV_sequence_display_extension_t* psequence_display_extension)
+{
+	int		rtcode = MPV_UNKNOWN_ERROR;
+	BITS_t		bs;
+
+	if ((nal_buf != NULL) && (nal_length >= 4) && (psequence_display_extension != NULL))
+	{
+		memset(psequence_display_extension, 0x00, sizeof(MPGV_sequence_display_extension_t));
+		psequence_display_extension->nal_snapshot.buf = nal_buf;
+		psequence_display_extension->nal_snapshot.length = nal_length;
+
+		BITS_map(&bs, nal_buf, nal_length);
+
+		psequence_display_extension->extension_start_code = BITS_get(&bs, 32);			//bytes 0~3
+
+		psequence_display_extension->extension_start_code_identifier = BITS_get(&bs, 4);		//byte 4
+		psequence_display_extension->video_format = BITS_get(&bs, 3);
+		psequence_display_extension->colour_description = BITS_get(&bs, 1);
+
+		if (psequence_display_extension->colour_description)
+		{
+			psequence_display_extension->colour_primaries = BITS_get(&bs, 8);
+
+			psequence_display_extension->transfer_characteristics = BITS_get(&bs, 8);
+
+			psequence_display_extension->matrix_coefficients = BITS_get(&bs, 8);
+		}
+
+		psequence_display_extension->display_horizontal_size = BITS_get(&bs, 14);
+		psequence_display_extension->marker_bit = BITS_get(&bs, 1);
+		psequence_display_extension->display_vertical_size = BITS_get(&bs, 14);
+
+		rtcode = MPV_NO_ERROR;
+	}
+	else
+	{
+		rtcode = MPV_PARAMETER_ERROR;
+	}
+
+	return rtcode;
+}
+
+int	mpgv_decode_user_data(uint8_t* nal_buf, int nal_length, MPGV_user_data_t* puser_data)
+{
+	int rtcode = MPV_NO_ERROR;
+	BITS_t			bs;
+
+	if ((nal_buf != NULL) && (nal_length >= 4) && (puser_data != NULL))
+	{
+		memset(puser_data, 0x00, sizeof(MPGV_user_data_t));
+
+		puser_data->nal_snapshot.buf = nal_buf;
+		puser_data->nal_snapshot.length = nal_length;
+
+		BITS_map(&bs, nal_buf, nal_length);
+
+		puser_data->user_data_start_code = BITS_get(&bs, 32);
+
+		puser_data->user_data_length = nal_length - 4;
+		puser_data->user_data_buf = bs.p_cur;
+		BITS_byteSkip(&bs, puser_data->user_data_length);
+	}
+	else
+	{
+		rtcode = MPV_PARAMETER_ERROR;
+	}
+
+	return rtcode;
+}
+
 int mpgv_decode_slice(uint8_t* nal_buf, int nal_length, MPGV_slice_t* pslice)
 {
-	S32		rtcode = MPV_UNKNOWN_ERROR;
+	int		rtcode = MPV_UNKNOWN_ERROR;
 	BITS_t	 bs;
 	//S32		 quantiser_scale_code;
 
 	if ((nal_buf != NULL) && (nal_length >= 4) && (pslice != NULL))
 	{
+		memset(pslice, 0x00, sizeof(MPGV_slice_t));
+
+		pslice->nal_snapshot.buf = nal_buf;
+		pslice->nal_snapshot.length = nal_length;
+
 		BITS_map(&bs, nal_buf, nal_length);
 
 		pslice->slice_start_code = BITS_get(&bs, 32);
-		//BITS_skip(&bs, 24);
 		pslice->slice_vertical_position = (pslice->slice_start_code & 0x000000ff);
+
+		if (!BITS_beAligned(&bs))
+		{
+			pslice->padding_bits_length = bs.i_left;
+			pslice->padding_bits_value = BITS_get(&bs, pslice->padding_bits_length);
+		}
+
+		if (!BITS_beEOF(&bs))
+		{
+			assert(BITS_beAligned(&bs));
+			pslice->padding_length = (int)(bs.p_end - bs.p_cur);
+			pslice->padding_bytes = bs.p_cur;
+			BITS_byteSkip(&bs, pslice->padding_length);
+		}
 
 //		if (gbInitDecoder
 //#if MPEG_VID_DECODER_I

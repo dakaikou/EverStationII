@@ -19,10 +19,10 @@
     <Filter Include="源文件\Impl">
       <UniqueIdentifier>{403ac709-7ff2-43db-8e43-5cc41758e6af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\Include\xml">
+    <Filter Include="头文件\xmlInclude">
       <UniqueIdentifier>{f1dc5944-9f1d-41ad-a481-900ac50ed948}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Impl\xml">
+    <Filter Include="源文件\xmlImpl">
       <UniqueIdentifier>{62126f6c-4b4d-4d58-9e1d-f7bfeded39ae}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -39,14 +39,14 @@
     <ClInclude Include="Include\mpeg_video_table.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="Include\xml\mpeg_video_sequence_xml.h">
-      <Filter>头文件\Include\xml</Filter>
-    </ClInclude>
     <ClInclude Include="Include\mpeg_video_utilities.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
     <ClInclude Include="Include\mpeg_video_errorcode.h">
       <Filter>头文件\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\mpeg_video_sequence_xml.h">
+      <Filter>头文件\xmlInclude</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -59,11 +59,11 @@
     <ClCompile Include="Impl\mpeg_video_sequence.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\xml\mpeg_video_sequence_xml.cpp">
-      <Filter>源文件\Impl\xml</Filter>
-    </ClCompile>
     <ClCompile Include="Impl\mpeg_video_utilities.cpp">
       <Filter>源文件\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\mpeg_video_sequence_xml.cpp">
+      <Filter>源文件\xmlImpl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

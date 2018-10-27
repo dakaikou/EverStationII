@@ -1,15 +1,17 @@
 #include <string.h>
 
-#include "../Include/MPEG_DVB_Common.h"
-#include "../Include/MPEG_DVB_ErrorCode.h"
+#include "../../Include/MPEG_DVB_Common.h"
+#include "../../Include/MPEG_DVB_ErrorCode.h"
 
-#include "../Include/DVB_SI_section.h"
-#include "../Include/DVB_MHP_section.h"
-#include "../Include/DVB_IPDC_section.h"
-#include "../Include/DVB_table_id.h"
-#include "../Include/Mpeg2_table_id.h"
-#include "../Include/Mpeg2_PSI_section.h"
-#include "../Include/Mpeg2_DSMCC_section.h"
+#include "../../Include/DVB_SI_section.h"
+#include "../../Include/DVB_MHP_section.h"
+#include "../../Include/DVB_IPDC_section.h"
+#include "../../Include/DVB_table_id.h"
+#include "../../Include/Mpeg2_table_id.h"
+#include "../../Include/Mpeg2_PSI_section.h"
+#include "../../Include/Mpeg2_DSMCC_section.h"
+
+#include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 
 /////////////////////////////////////////////
 
@@ -106,9 +108,9 @@ int MPEG_DVB_PVT_DecodeSection(uint8_t *section_buf, int section_size, private_s
 }
 
 
-S32 GetSectionMinMaxLength(U8 table_id, S32* pmin_length, S32* pmax_length)
+int MPEG_DVB_GetSectionMinMaxLength(uint8_t table_id, int* pmin_length, int* pmax_length)
 {
-	S32		rtcode = SECTION_PARSE_UNKNOWN_ERROR;
+	int		rtcode = SECTION_PARSE_UNKNOWN_ERROR;
 
 	if ((pmin_length != NULL) && (pmax_length != NULL))
 	{

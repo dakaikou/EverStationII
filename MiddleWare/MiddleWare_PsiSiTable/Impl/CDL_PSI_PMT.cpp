@@ -70,16 +70,16 @@ int CPMT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 			}
 
 			//the max stream is just limited by PC's memory
-			m_astEsInfo = (ES_INFO_t*)realloc(m_astEsInfo, (m_nEsCount + pmt_section.N) * sizeof(ES_INFO_t));
+			m_astEsInfo = (ES_INFO_t*)realloc(m_astEsInfo, (m_nEsCount + pmt_section.ES_map_count) * sizeof(ES_INFO_t));
 			if (m_astEsInfo != NULL)
 			{
-				m_nMemoryForEsInfos = (m_nEsCount + pmt_section.N) * sizeof(ES_INFO_t);
+				m_nMemoryForEsInfos = (m_nEsCount + pmt_section.ES_map_count) * sizeof(ES_INFO_t);
 
-				for (es_index = 0; es_index < pmt_section.N; es_index ++)
+				for (es_index = 0; es_index < pmt_section.ES_map_count; es_index ++)
 				{
-					m_astEsInfo[m_nEsCount].stream_type = pmt_section.astESMap[es_index].stream_type;
-					m_astEsInfo[m_nEsCount].stream_subtype = pmt_section.astESMap[es_index].stream_subtype;
-					m_astEsInfo[m_nEsCount].elementary_PID = pmt_section.astESMap[es_index].elementary_PID;
+					m_astEsInfo[m_nEsCount].stream_type = pmt_section.astESMaps[es_index].stream_type;
+					m_astEsInfo[m_nEsCount].stream_subtype = pmt_section.astESMaps[es_index].stream_subtype;
+					m_astEsInfo[m_nEsCount].elementary_PID = pmt_section.astESMaps[es_index].elementary_PID;
 
 					//DVB_SI_STREAM_IDENTIFIER_DESCRIPTOR在ES流第二层循环不一定出现
 					m_astEsInfo[m_nEsCount].component_tag = 0xFF;				//默认值
@@ -93,33 +93,33 @@ int CPMT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 					m_astEsInfo[m_nEsCount].carousel_type_id = 0xFFFF;
 					m_astEsInfo[m_nEsCount].carousel_id = 0xFFFFFFFF;
 
-					for (descriptor_index = 0; descriptor_index < pmt_section.astESMap[es_index].reserved_count; descriptor_index ++)
+					for (descriptor_index = 0; descriptor_index < pmt_section.astESMaps[es_index].ES_descriptor_count; descriptor_index ++)
 					{
-						uint8_t* descriptor_buf = pmt_section.astESMap[es_index].reserved_descriptor[descriptor_index].descriptor_buf;
-						int		 descriptor_size = pmt_section.astESMap[es_index].reserved_descriptor[descriptor_index].descriptor_size;
+						uint8_t* descriptor_buf = pmt_section.astESMaps[es_index].ES_descriptors[descriptor_index].descriptor_buf;
+						int		 descriptor_size = pmt_section.astESMaps[es_index].ES_descriptors[descriptor_index].descriptor_size;
 
-						if (pmt_section.astESMap[es_index].reserved_descriptor[descriptor_index].descriptor_tag == DVB_SI_DATA_BROADCAST_ID_DESCRIPTOR)
+						if (pmt_section.astESMaps[es_index].ES_descriptors[descriptor_index].descriptor_tag == DVB_SI_DATA_BROADCAST_ID_DESCRIPTOR)
 						{
 							if (DVB_SI_decode_data_broadcast_id_descriptor(descriptor_buf, descriptor_size, &data_broadcast_id_descriptor) == SECTION_PARSE_NO_ERROR)
 							{
 								m_astEsInfo[m_nEsCount].data_broadcast_id = data_broadcast_id_descriptor.data_broadcast_id;
 							}
 						}
-						else if (pmt_section.astESMap[es_index].reserved_descriptor[descriptor_index].descriptor_tag == DVB_SI_STREAM_IDENTIFIER_DESCRIPTOR)
+						else if (pmt_section.astESMaps[es_index].ES_descriptors[descriptor_index].descriptor_tag == DVB_SI_STREAM_IDENTIFIER_DESCRIPTOR)
 						{
 							if (DVB_SI_decode_stream_identifier_descriptor(descriptor_buf, descriptor_size, &stream_identifier_descriptor) == SECTION_PARSE_NO_ERROR)
 							{
 								m_astEsInfo[m_nEsCount].component_tag = stream_identifier_descriptor.component_tag;
 							}
 						}
-						else if (pmt_section.astESMap[es_index].reserved_descriptor[descriptor_index].descriptor_tag == MPEG2_DSMCC_CAROUSEL_IDENTIFIER_DESCRIPTOR)
+						else if (pmt_section.astESMaps[es_index].ES_descriptors[descriptor_index].descriptor_tag == MPEG2_DSMCC_CAROUSEL_IDENTIFIER_DESCRIPTOR)
 						{
 							if (MPEG2_DSMCC_decode_carousel_identifier_descriptor(descriptor_buf, descriptor_size, &carousel_identifier_descriptor) == SECTION_PARSE_NO_ERROR)
 							{
 								m_astEsInfo[m_nEsCount].carousel_id = carousel_identifier_descriptor.carousel_id;
 							}
 						}
-						else if (pmt_section.astESMap[es_index].reserved_descriptor[descriptor_index].descriptor_tag == MPEG2_DSMCC_ASSOCIATION_TAG_DESCRIPTOR)
+						else if (pmt_section.astESMaps[es_index].ES_descriptors[descriptor_index].descriptor_tag == MPEG2_DSMCC_ASSOCIATION_TAG_DESCRIPTOR)
 						{
 							if (MPEG2_DSMCC_decode_association_tag_descriptor(descriptor_buf, descriptor_size, &association_tag_descriptor) == SECTION_PARSE_NO_ERROR)
 							{

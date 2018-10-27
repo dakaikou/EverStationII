@@ -15,12 +15,13 @@ static char THIS_FILE[] = __FILE__;
 // CDlg_TSAnalyzer_PsiSi dialog
 
 #include "libs_MPEG&DVB\MPEG_DVB_Section\Include\Mpeg2_table_id.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\xml\Mpeg2_DSMCC_section_XML.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\xml\Mpeg2_PSI_section_XML.h"
 #include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_table_id.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\xml\DVB_SI_section_XML.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\xml\DVB_IPDC_section_XML.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\xml\DVB_MHP_section_XML.h"
+
+#include "libs_MPEG&DVB\MPEG_DVB_Section\xml\Include\Mpeg2_DSMCC_section_XML.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\xml\Include\Mpeg2_PSI_section_XML.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\xml\Include\DVB_SI_section_XML.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\xml\Include\DVB_IPDC_section_XML.h"
+#include "libs_MPEG&DVB\MPEG_DVB_Section\xml\Include\DVB_MHP_section_XML.h"
 
 #include "libs_Utilities\Include\XStream_Utilities.h"
 
@@ -158,13 +159,13 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 		uint8_t	table_id;
 		if ((section_buf != NULL) && (section_length >= 3))
 		{
-			XMLDocForMpegSyntax xmlDoc;
+			HALForXMLDoc xml2Doc;
 
 			table_id = section_buf[0];
 
 			if (table_id == TABLE_ID_PAT)
 			{
-				MPEG2_PSI_PAT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				MPEG2_PSI_PAT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\PAT-0x%02X.xml", pszXmlDir, table_id);
@@ -172,7 +173,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_PMT)
 			{
-				MPEG2_PSI_PMT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				MPEG2_PSI_PMT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\PMT-0x%02X.xml", pszXmlDir, table_id);
@@ -180,7 +181,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_CAT)
 			{
-				MPEG2_PSI_CAT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				MPEG2_PSI_CAT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\CAT-0x%02X.xml", pszXmlDir, table_id);
@@ -188,7 +189,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_NIT_ACTUAL || table_id == TABLE_ID_NIT_OTHER)
 			{
-				DVB_SI_NIT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				DVB_SI_NIT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\NIT-0x%02X.xml", pszXmlDir, table_id);
@@ -196,7 +197,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_SDT_ACTUAL || table_id == TABLE_ID_SDT_OTHER)
 			{
-				DVB_SI_SDT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				DVB_SI_SDT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\SDT-0x%02X.xml", pszXmlDir, table_id);
@@ -204,7 +205,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_BAT)
 			{
-				DVB_SI_BAT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				DVB_SI_BAT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\BAT-0x%02X.xml", pszXmlDir, table_id);
@@ -212,7 +213,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if ((table_id >= TABLE_ID_EIT_PF_ACTUAL) && (table_id <= TABLE_ID_EIT_SCH_OTHER_F))
 			{
-				DVB_SI_EIT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				DVB_SI_EIT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\EIT-0x%02X.xml", pszXmlDir, table_id);
@@ -220,7 +221,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_TSDT)
 			{
-				MPEG2_PSI_TSDT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				MPEG2_PSI_TSDT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\TSDT-0x%02X.xml", pszXmlDir, table_id);
@@ -228,7 +229,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_TDT)
 			{
-				DVB_SI_TDT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				DVB_SI_TDT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\TDT-0x%02X.xml", pszXmlDir, table_id);
@@ -236,7 +237,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_TOT)
 			{
-				DVB_SI_TOT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				DVB_SI_TOT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\TOT-0x%02X.xml", pszXmlDir, table_id);
@@ -244,7 +245,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_RST)
 			{
-				DVB_SI_RST_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				DVB_SI_RST_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\RST-0x%02X.xml", pszXmlDir, table_id);
@@ -252,7 +253,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if ((table_id >= TABLE_ID_ECM_MIN) && (table_id <= TABLE_ID_EMM_MAX))
 			{
-				DVB_SI_CMT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				DVB_SI_CMT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\CMT-0x%02X.xml", pszXmlDir, table_id);
@@ -260,7 +261,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_INT)
 			{
-				DVB_IPDC_INT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				DVB_IPDC_INT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\INT-0x%02X.xml", pszXmlDir, table_id);
@@ -268,7 +269,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_AIT)
 			{
-				DVB_MHP_AIT_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				DVB_MHP_AIT_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\AIT-0x%02X.xml", pszXmlDir, table_id);
@@ -276,7 +277,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_DSMCC_MPE)
 			{
-				DVB_IPDC_MPE_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				DVB_IPDC_MPE_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\MPE-0x%02X.xml", pszXmlDir, table_id);
@@ -284,7 +285,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_DSMCC_UNM)
 			{
-				MPEG2_DSMCC_UNM_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				MPEG2_DSMCC_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\DSMCC_UNM-0x%02X.xml", pszXmlDir, table_id);
@@ -292,7 +293,7 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if (table_id == TABLE_ID_DSMCC_DDM)
 			{
-				MPEG2_DSMCC_DDM_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				MPEG2_DSMCC_DecodeSection_to_XML(section_buf, section_length, &xml2Doc);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\DSMCC_DDM-0x%02X.xml", pszXmlDir, table_id);
@@ -300,17 +301,18 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 			}
 			else if ((table_id >= TABLE_ID_DSMCC_SD) && (table_id <= TABLE_ID_DSMCC_RSV))
 			{
-				MPEG2_DSMCC_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				//MPEG2_DSMCC_DecodeSection_to_XML(section_buf, section_length, &xmlDoc);
+				assert(0);
 
 #ifdef _DEBUG
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\DSMCC_RSV-0x%02X.xml", pszXmlDir, table_id);
 #endif
 			}
 #ifdef _DEBUG
-			xmlDoc.SaveFile(pszFilePath);
+			xml2Doc.SaveFile(pszFilePath);
 #endif
 			m_pSyntaxTree->Reset();
-			m_pSyntaxTree->ShowXMLDoc(&xmlDoc);
+			m_pSyntaxTree->ShowXMLDoc(&xml2Doc);
 		}
 	}
 }

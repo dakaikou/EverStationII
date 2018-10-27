@@ -448,12 +448,7 @@ void CNaviList_DSMCCs::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
 	// TODO: 在此添加控件通知处理程序代码
-	//char	    pszTemp[48];
 	uint32_t	usPID;
-	//uint32_t	dwTransactionID;
-	//uint32_t	usBroadcastID;
-	//uint32_t	usServiceID = 0xFFFF;
-	//uint8_t		ucCarouselTypeID = 0xFF;
 
 	CListCtrl& listCtrl = GetListCtrl();
 	int nSel = listCtrl.GetSelectionMark();
@@ -467,41 +462,10 @@ void CNaviList_DSMCCs::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 		//sscanf_s(pszTemp, "0x%04X", &usPID);
 		usPID = (uint16_t)listCtrl.GetItemData(nSel);
 
-		//listCtrl.GetItemText(nSel, LISTITEM_COL_INDEX_SERVICE_ID, pszTemp, sizeof(pszTemp));
-		//if (strlen(pszTemp) > 0)
-		//{
-		//	//usServiceID = (uint16_t)strtol(pszTemp, &str, 16);
-		//	sscanf_s(pszTemp, "0x%04X", &usServiceID);
-		//}
-
-		//listCtrl.GetItemText(nSel, LISTITEM_COL_INDEX_TRANSACTION_ID, pszTemp, sizeof(pszTemp));
-		////dwTransactionID = (uint32_t)strtol(pszTemp, &str, 16);
-		//sscanf_s(pszTemp, "0x%08X", &dwTransactionID);
-
-		//listCtrl.GetItemText(nSel, LISTITEM_COL_INDEX_CAROUSEL_TYPE_ID, pszTemp, sizeof(pszTemp));
-		//if (strlen(pszTemp) > 0)
-		//{
-		//	if (strcmp(pszTemp, "one layer carousel") == 0)
-		//	{
-		//		ucCarouselTypeID = 1;
-		//	}
-		//	else if (strcmp(pszTemp, "two layer carousel") == 0)
-		//	{
-		//		ucCarouselTypeID = 2;
-		//	}
-		//	else
-		//	{
-		//		ucCarouselTypeID = 0;
-		//	}
-		//}
-
-		//listCtrl.GetItemText(nSel, LISTITEM_COL_INDEX_BROADCAST_ID, pszTemp, sizeof(pszTemp));
-		//sscanf_s(pszTemp, "0x%04X", &usBroadcastID);
-
 		CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 		CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
 
-		XMLDocForMpegSyntax xmlDoc;
+		HALForXMLDoc xmlDoc;
 		pDB_PsiSiTables->BuildDsmccTree(usPID, &xmlDoc);
 		m_pInfoTree->ShowXMLDoc(&xmlDoc);
 
@@ -568,7 +532,7 @@ void CNaviList_DSMCCs::OnOcdcDownload(void)
 	uint32_t	usPID;
 
 	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
+	//CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
 	CDB_OCDCs* pDB_OCDCs = pTSMagicView->GetOCDCsDBase();
 
 	pDB_OCDCs->Reset();

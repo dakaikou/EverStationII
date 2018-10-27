@@ -176,21 +176,21 @@
     <ClInclude Include="Include\Mpeg2_TS_packet.h" />
     <ClInclude Include="Include\Mpeg2_TS_PID.h" />
     <ClInclude Include="Include\Mpeg2_TS_Utilities.h" />
-    <ClInclude Include="Include\xml\Mpeg2_TS_packet_XML.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="xml\Include\Mpeg2_TS_packet_XML.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Impl\Mpeg2_TS_packet.cpp" />
     <ClCompile Include="Impl\Mpeg2_TS_Utilities.cpp" />
-    <ClCompile Include="Impl\xml\Mpeg2_TS_packet_XML.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="xml\Impl\Mpeg2_TS_packet_XML.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

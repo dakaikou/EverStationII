@@ -26,7 +26,8 @@ int	ES_get_next_segment(uint8_t* es_buf, int es_length, ES_segment_t* psegment)
 		start_rdptr = es_buf;
 		remain_length = es_length;
 
-		while (remain_length >= psegment->min_length)
+		//while (remain_length >= psegment->min_length)
+		while (remain_length >= psegment->match_bytes)
 		{
 			sync_word = start_rdptr[0];
 			for (int i = 1; i < psegment->match_bytes; i++)

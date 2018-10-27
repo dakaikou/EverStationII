@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "../Include/DVB_SI_section.h"
-#include "../Include/DVB_table_id.h"
-#include "../Include/DVB_SI_Utilities.h"
-#include "../Include/MPEG_DVB_ErrorCode.h"
+#include "../../Include/DVB_SI_section.h"
+#include "../../Include/DVB_table_id.h"
+#include "../../Include/DVB_SI_Utilities.h"
+#include "../../Include/MPEG_DVB_ErrorCode.h"
 
 #include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 
@@ -28,13 +28,17 @@ int DVB_SI_SDT_DecodeSection(uint8_t *section_buf, int section_size, service_des
 
 	BITS_t   bs;
 
-	SERVICE_DESCRIPTION_t*	pServiceDescription;
+	SERVICE_DESCRIPTION_t*	pstServiceDescription;
 
 	//SDT表的最小长度为15字节
-	if ((section_buf != NULL) && (section_size >= DVB_SI_SDT_SECTION_MIN_SIZE) && (section_size <= DVB_SI_SDT_SECTION_MAX_SIZE) && (psdt_section != NULL))
+	if ((section_buf != NULL) && 
+		((section_size >= DVB_SI_SDT_SECTION_MIN_SIZE) && (section_size <= DVB_SI_SDT_SECTION_MAX_SIZE)) && 
+		(psdt_section != NULL))
 	{
-		unsigned int CRC_32_verify = Encode_CRC_32(section_buf, section_size - 4);
-		unsigned int CRC_32_code = (section_buf[section_size - 4] << 24) | (section_buf[section_size - 3] << 16) | (section_buf[section_size - 2] << 8) | section_buf[section_size - 1];
+		memset(psdt_section, 0x00, sizeof(service_description_section_t));
+
+		psdt_section->CRC_32_recalculated = Encode_CRC_32(section_buf, section_size - 4);
+		uint32_t CRC_32_encoded = (section_buf[section_size - 4] << 24) | (section_buf[section_size - 3] << 16) | (section_buf[section_size - 2] << 8) | section_buf[section_size - 1];
 
 		//if (CRC_32_verify == CRC_32_code)
 		{
@@ -43,8 +47,6 @@ int DVB_SI_SDT_DecodeSection(uint8_t *section_buf, int section_size, service_des
 			if ((table_id == TABLE_ID_SDT_ACTUAL) ||
 				(table_id == TABLE_ID_SDT_OTHER))
 			{
-				memset(psdt_section, 0x00, sizeof(service_description_section_t));
-
 				BITS_map(&bs, section_buf, section_size);
 
 				psdt_section->table_id = BITS_get(&bs, 8);
@@ -88,30 +90,30 @@ int DVB_SI_SDT_DecodeSection(uint8_t *section_buf, int section_size, service_des
 							{
 								unsigned char* old_service_ptr = service_loop_bs.p_cur;
 
-								pServiceDescription = psdt_section->astServiceDescription + N;
+								pstServiceDescription = psdt_section->astServiceDescriptions + N;
 
-								pServiceDescription->service_id = BITS_get(&service_loop_bs, 16);
+								pstServiceDescription->service_id = BITS_get(&service_loop_bs, 16);
 
-								pServiceDescription->reserved_future_use = BITS_get(&service_loop_bs, 6);
+								pstServiceDescription->reserved_future_use = BITS_get(&service_loop_bs, 6);
 
-								pServiceDescription->EIT_schedule_flag = BITS_get(&service_loop_bs, 1);
-								pServiceDescription->EIT_present_following_flag = BITS_get(&service_loop_bs, 1);
+								pstServiceDescription->EIT_schedule_flag = BITS_get(&service_loop_bs, 1);
+								pstServiceDescription->EIT_present_following_flag = BITS_get(&service_loop_bs, 1);
 
-								pServiceDescription->running_status = BITS_get(&service_loop_bs, 3);
-								pServiceDescription->free_CA_mode = BITS_get(&service_loop_bs, 1);
+								pstServiceDescription->running_status = BITS_get(&service_loop_bs, 3);
+								pstServiceDescription->free_CA_mode = BITS_get(&service_loop_bs, 1);
 
-								pServiceDescription->descriptors_loop_length = BITS_get(&service_loop_bs, 12);
+								pstServiceDescription->descriptors_loop_length = BITS_get(&service_loop_bs, 12);
 
 								reserved_count = 0;
-								if (pServiceDescription->descriptors_loop_length > 0)
+								if (pstServiceDescription->descriptors_loop_length > 0)
 								{
-									if (pServiceDescription->descriptors_loop_length <= (service_loop_length - 5))
+									if (pstServiceDescription->descriptors_loop_length <= (service_loop_length - 5))
 									{
 										pl2temp = service_loop_bs.p_cur;
-										BITS_byteSkip(&service_loop_bs, pServiceDescription->descriptors_loop_length);
+										BITS_byteSkip(&service_loop_bs, pstServiceDescription->descriptors_loop_length);
 										uint8_t* pend = service_loop_bs.p_cur;
 
-										descriptor_loop_length = pServiceDescription->descriptors_loop_length;
+										descriptor_loop_length = pstServiceDescription->descriptors_loop_length;
 										while ((pl2temp <= (pend - 2)) && (descriptor_loop_length >= 2) && (reserved_count < MAX_RESERVED_DESCRIPTORS))
 										{
 											descriptor_tag = pl2temp[0];
@@ -121,10 +123,10 @@ int DVB_SI_SDT_DecodeSection(uint8_t *section_buf, int section_size, service_des
 											if (move_length <= descriptor_loop_length)
 											{
 
-												pServiceDescription->reserved_descriptor[reserved_count].descriptor_tag = descriptor_tag;
-												pServiceDescription->reserved_descriptor[reserved_count].descriptor_length = descriptor_length;
-												pServiceDescription->reserved_descriptor[reserved_count].descriptor_buf = pl2temp;
-												pServiceDescription->reserved_descriptor[reserved_count].descriptor_size = move_length;
+												pstServiceDescription->service_descriptors[reserved_count].descriptor_tag = descriptor_tag;
+												pstServiceDescription->service_descriptors[reserved_count].descriptor_length = descriptor_length;
+												pstServiceDescription->service_descriptors[reserved_count].descriptor_buf = pl2temp;
+												pstServiceDescription->service_descriptors[reserved_count].descriptor_size = move_length;
 
 												reserved_count++;
 											}
@@ -143,23 +145,16 @@ int DVB_SI_SDT_DecodeSection(uint8_t *section_buf, int section_size, service_des
 										//rtcode = SECTION_PARSE_SYNTAX_ERROR;
 									}
 								}
-								pServiceDescription->reserved_count = reserved_count;
+								pstServiceDescription->service_descriptor_count = reserved_count;
 
-								service_loop_length -= (pServiceDescription->descriptors_loop_length + 5);
+								service_loop_length -= (pstServiceDescription->descriptors_loop_length + 5);
 								N++;
 							}
 						}
-						psdt_section->N = N;
+						psdt_section->service_count = N;
 
-						unsigned int CRC_32 = BITS_get(&bs, 32);
-						assert(CRC_32 == CRC_32_code);			//再次校验，检验解析过程中指针偏移是否有错
-						psdt_section->CRC_32 = CRC_32_code;
-						psdt_section->CRC_32_verify = CRC_32_verify;
-
-						if (CRC_32_verify != CRC_32_code)
-						{
-							//rtcode = SECTION_PARSE_CRC_ERROR;
-						}
+						psdt_section->CRC_32 = BITS_get(&bs, 32);
+						assert(psdt_section->CRC_32 == CRC_32_encoded);			//再次校验，检验解析过程中指针偏移是否有错
 					}
 					else
 					{
@@ -176,11 +171,11 @@ int DVB_SI_SDT_DecodeSection(uint8_t *section_buf, int section_size, service_des
 				//rtcode = SECTION_PARSE_SYNTAX_ERROR;						//table_id解析错误
 			}
 		}
-		//else
-		//{
-		//	pxmlDoc->NewTitleElement(pxmlRoot, "section buffer CRC error!");
-		//	rtcode = SECTION_PARSE_CRC_ERROR;
-		//}
+
+		if (psdt_section->CRC_32_recalculated != psdt_section->CRC_32)
+		{
+			rtcode = SECTION_PARSE_CRC_ERROR;
+		}
 	}
 	else
 	{

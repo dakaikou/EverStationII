@@ -200,6 +200,113 @@ int	mpeg_audio_decode_frame_header(unsigned char* es_header_buf, int es_header_l
 	return rtcode;
 }
 
+
+/*********************************************************************************
+函数：Decode_header()
+描述：解析MPEG音频数据流，要求数据必须帧对齐
+输入：pbs				-- 音频数据流
+pheader			-- 参考的信息头数据，并将解析后的数据返回
+返回：0					-- 信息头未发生变化
+1					-- 信息头发生变化
+*********************************************************************************/
+int	mpga_decode_frame(uint8_t* frame_buf, int frame_size, MPA_frame_t* pmpa_frame)
+{
+	BITS_t	bs;
+	int		rtcode = MPA_UNKNOWN_ERROR;
+	int     header_size = 4;
+
+	if ((frame_buf != NULL) && (frame_size >= 4) && (pmpa_frame != NULL))
+	{
+		memset(pmpa_frame, 0x00, sizeof(MPA_frame_t));
+
+		pmpa_frame->snapshot.buf = frame_buf;
+		pmpa_frame->snapshot.length = frame_size;
+
+		BITS_map(&bs, frame_buf, frame_size);
+
+		MPA_header_t* pmpa_header = &(pmpa_frame->header);
+
+		pmpa_header->syncword = BITS_get(&bs, 12);
+		pmpa_header->ID = BITS_get(&bs, 1);
+		pmpa_header->layer = BITS_get(&bs, 2);
+		pmpa_header->protection_bit = BITS_get(&bs, 1);
+
+		pmpa_header->bitrate_index = BITS_get(&bs, 4);
+		pmpa_header->sampling_frequency = BITS_get(&bs, 2);
+		pmpa_header->padding_bit = BITS_get(&bs, 1);
+		pmpa_header->private_bit = BITS_get(&bs, 1);
+
+		pmpa_header->mode = BITS_get(&bs, 2);
+		pmpa_header->mode_extension = BITS_get(&bs, 2);
+		pmpa_header->copyright = BITS_get(&bs, 1);
+		pmpa_header->original_or_copy = BITS_get(&bs, 1);
+		pmpa_header->emphasis = BITS_get(&bs, 2);
+
+		if (pmpa_header->protection_bit == 0)
+		{
+			pmpa_header->crc_check = BITS_get(&bs, 16);
+
+			pmpa_header->crc_length = 2;
+			header_size += 2;
+		}
+		else
+		{
+			pmpa_header->crc_length = 0;
+		}
+
+		assert(bs.i_left == 8);
+		pmpa_frame->audio_data_buf = bs.p_cur;
+		pmpa_frame->audio_data_length = (int)(bs.p_end - bs.p_cur);
+
+		if ((pmpa_header->syncword == 0xFFF) &&
+			(pmpa_header->layer != 0b00) && 
+			(pmpa_header->bitrate_index != 0b1111) &&
+			(pmpa_header->sampling_frequency != 0b11))
+		{
+			/*sematic part*/
+			pmpa_header->layer_index = 3 - pmpa_header->layer;
+			pmpa_header->bit_rate = MPA_bit_rate_table[pmpa_header->ID][pmpa_header->layer_index][pmpa_header->bitrate_index];
+			pmpa_header->sampling_rate = MPA_sampling_rate_table[pmpa_header->ID][pmpa_header->sampling_frequency];
+
+			pmpa_header->num_of_slots = (int)(144 * pmpa_header->bit_rate / pmpa_header->sampling_rate) + pmpa_header->padding_bit;
+			pmpa_header->data_length = pmpa_header->num_of_slots - header_size;
+
+			pmpa_header->bitspersample = MPEG_AUDIO_BITS_PER_SAMPLE;
+
+			if (pmpa_header->mode == MPEG_AUDIO_SINGLE_CHANNEL)				//singla channel
+			{
+				pmpa_header->nch = 1;
+			}
+			else
+			{
+				pmpa_header->nch = 2;
+			}
+
+			//assert(pmpa_frame->audio_data_length == pmpa_header->data_length);
+			if (pmpa_frame->audio_data_length < pmpa_header->data_length)
+			{
+				//indicats the frame data is not complete
+				rtcode = MPA_PARSE_LENGTH_ERROR;
+			}
+			else
+			{
+				rtcode = MPA_NO_ERROR;
+			}
+		}
+		else
+		{
+			rtcode = MPA_PARSE_SYNTAX_ERROR;
+		}
+	}
+	else
+	{
+		rtcode = MPA_PARAMETER_ERROR;
+	}
+
+	return rtcode;
+}
+
+
 /*
  * Two tables for dequantization of layer 2 audio data
  */

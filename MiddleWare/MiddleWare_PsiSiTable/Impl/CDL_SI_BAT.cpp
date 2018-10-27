@@ -72,19 +72,19 @@ int CBAT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 		{
 			m_usBouquetID = bat_section.bouquet_id;
 
-			for (descriptor_index = 0; descriptor_index < bat_section.reserved_count; descriptor_index ++)
+			for (descriptor_index = 0; descriptor_index < bat_section.bouquet_descriptor_count; descriptor_index ++)
 			{
-				uint8_t* descriptor_buf = bat_section.reserved_descriptor[descriptor_index].descriptor_buf;
-				int descriptor_size = bat_section.reserved_descriptor[descriptor_index].descriptor_size;
+				uint8_t* descriptor_buf = bat_section.bouquet_descriptors[descriptor_index].descriptor_buf;
+				int descriptor_size = bat_section.bouquet_descriptors[descriptor_index].descriptor_size;
 
-				if (bat_section.reserved_descriptor[descriptor_index].descriptor_tag == DVB_SI_BOUQUET_NAME_DESCRIPTOR)
+				if (bat_section.bouquet_descriptors[descriptor_index].descriptor_tag == DVB_SI_BOUQUET_NAME_DESCRIPTOR)
 				{
 					DVB_SI_decode_bouquet_name_descriptor(descriptor_buf, descriptor_size, &bouquet_name_descriptor);
 					strcpy_s(m_pszBouquetName, sizeof(m_pszBouquetName), bouquet_name_descriptor.trimmed_bouquet_name);
 
 					break;
 				}
-				else if (bat_section.reserved_descriptor[descriptor_index].descriptor_tag == DVB_SI_MULTILINGUAL_BOUQUET_NAME_DESCRIPTOR)
+				else if (bat_section.bouquet_descriptors[descriptor_index].descriptor_tag == DVB_SI_MULTILINGUAL_BOUQUET_NAME_DESCRIPTOR)
 				{
 					if (strlen(m_pszBouquetName) == 0)
 					{
@@ -97,15 +97,15 @@ int CBAT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 				}
 			}
 				
-			nStreamCount = m_nStreamCount + bat_section.N;
+			nStreamCount = m_nStreamCount + bat_section.stream_count;
 			m_astStreamInfo = (STREAM_INFO_t*)realloc(m_astStreamInfo, nStreamCount * sizeof(STREAM_INFO_t));
 			if (m_astStreamInfo != NULL)
 			{
 				m_nMemoryForStreamInfos = nStreamCount * sizeof(STREAM_INFO_t);
 
-				for (stream_index = 0; stream_index < bat_section.N; stream_index ++)
+				for (stream_index = 0; stream_index < bat_section.stream_count; stream_index ++)
 				{
-					pStreamDescription = bat_section.astStream + stream_index;
+					pStreamDescription = bat_section.astStreams + stream_index;
 					pStreamInfo = m_astStreamInfo + m_nStreamCount;
 
 					pStreamInfo->original_network_id = pStreamDescription->original_network_id;
@@ -113,12 +113,12 @@ int CBAT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 
 					memset(&(pStreamInfo->service_list_descriptor), 0x00, sizeof(service_list_descriptor));
 
-					for (descriptor_index = 0; descriptor_index < pStreamDescription->reserved_count; descriptor_index ++)
+					for (descriptor_index = 0; descriptor_index < pStreamDescription->transport_descriptor_count; descriptor_index ++)
 					{
-						if (pStreamDescription->reserved_descriptor[descriptor_index].descriptor_tag == DVB_SI_SERVICE_LIST_DESCRIPTOR)
+						if (pStreamDescription->transport_descriptors[descriptor_index].descriptor_tag == DVB_SI_SERVICE_LIST_DESCRIPTOR)
 						{
-							DVB_SI_decode_service_list_descriptor(pStreamDescription->reserved_descriptor[descriptor_index].descriptor_buf,
-																pStreamDescription->reserved_descriptor[descriptor_index].descriptor_size,
+							DVB_SI_decode_service_list_descriptor(pStreamDescription->transport_descriptors[descriptor_index].descriptor_buf,
+																pStreamDescription->transport_descriptors[descriptor_index].descriptor_size,
 																&service_list_descriptor);
 							memcpy(&(pStreamInfo->service_list_descriptor), &service_list_descriptor, sizeof(service_list_descriptor_t));
 

@@ -19,13 +19,13 @@
     <Filter Include="源文件\Impl">
       <UniqueIdentifier>{403ac709-7ff2-43db-8e43-5cc41758e6af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\Include\xml">
-      <UniqueIdentifier>{278177ba-2902-4696-a120-bbef27f8b7c1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="源文件\Impl\kernel">
       <UniqueIdentifier>{dab57837-6ac2-48f6-86d0-b315ed5037d0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Impl\xml">
+    <Filter Include="头文件\xmlInclude">
+      <UniqueIdentifier>{278177ba-2902-4696-a120-bbef27f8b7c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\xmlImpl">
       <UniqueIdentifier>{5208d1f5-4a73-4962-b7b5-6daa28a87991}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -54,14 +54,14 @@
     <ClInclude Include="compile.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\xml\mpeg_audio_sequence_xml.h">
-      <Filter>头文件\Include\xml</Filter>
-    </ClInclude>
     <ClInclude Include="Include\mpeg_audio_utilities.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
     <ClInclude Include="Include\mpeg_audio_errorcode.h">
       <Filter>头文件\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\Include\mpeg_audio_sequence_xml.h">
+      <Filter>头文件\xmlInclude</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -80,11 +80,11 @@
     <ClCompile Include="Impl\kernel\Mpeg_audiotables.cpp">
       <Filter>源文件\Impl\kernel</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\xml\mpeg_audio_sequence_xml.cpp">
-      <Filter>源文件\Impl\xml</Filter>
-    </ClCompile>
     <ClCompile Include="Impl\mpeg_audio_utilities.cpp">
       <Filter>源文件\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\Impl\mpeg_audio_sequence_xml.cpp">
+      <Filter>源文件\xmlImpl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

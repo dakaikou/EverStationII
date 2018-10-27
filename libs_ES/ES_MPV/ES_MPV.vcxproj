@@ -175,21 +175,21 @@
     <ClInclude Include="Include\mpeg_video_sequence.h" />
     <ClInclude Include="Include\mpeg_video_table.h" />
     <ClInclude Include="Include\mpeg_video_utilities.h" />
-    <ClInclude Include="Include\xml\mpeg_video_sequence_xml.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="xml\Include\mpeg_video_sequence_xml.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Impl\mpeg_video_sequence.cpp" />
     <ClCompile Include="Impl\mpeg_video_utilities.cpp" />
-    <ClCompile Include="Impl\xml\mpeg_video_sequence_xml.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="xml\Impl\mpeg_video_sequence_xml.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

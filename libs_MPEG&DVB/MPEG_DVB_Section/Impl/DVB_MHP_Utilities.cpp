@@ -2,8 +2,8 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "../Include/DVB_SI_Utilities.h"
-#include "../Include/MPEG_DVB_ErrorCode.h"
+#include "../../Include/DVB_SI_Utilities.h"
+#include "../../Include/MPEG_DVB_ErrorCode.h"
 
 int DVB_MHP_NumericCoding2Text_ApplicationServiceBoundFlag(int service_bound_flag, char* pszText, int strSize)
 {

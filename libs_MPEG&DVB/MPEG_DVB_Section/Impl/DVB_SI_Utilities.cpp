@@ -2,8 +2,8 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "../Include/DVB_SI_Utilities.h"
-#include "../Include/MPEG_DVB_ErrorCode.h"
+#include "../../Include/DVB_SI_Utilities.h"
+#include "../../Include/MPEG_DVB_ErrorCode.h"
 
 int DVB_SI_NumericCoding2Text_UTCTime(uint64_t time_code, char* pszText, int size)
 {

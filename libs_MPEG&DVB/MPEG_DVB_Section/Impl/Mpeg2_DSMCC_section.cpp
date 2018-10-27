@@ -3,48 +3,43 @@
 #include <assert.h>
 #include <math.h>
 
-//#include "../Include/Mpeg2_DSMCC_Descriptor.h"
-//#include "../Include/Mpeg2_PSI_section.h"
-#include "../Include/Mpeg2_DSMCC_section.h"
-#include "../Include/Mpeg2_table_id.h"
-#include "../Include/MPEG_DVB_ErrorCode.h"
+#include "../../Include/Mpeg2_DSMCC_section.h"
+#include "../../Include/Mpeg2_table_id.h"
+#include "../../Include/MPEG_DVB_ErrorCode.h"
 
 #include "libs_Math/Include/CRC_32.h"
 
-#ifndef min
-#define min(a,b)  (((a)<(b))?(a):(b))
-#endif
+#include "HAL\HAL_BitStream\Include\HALForBitStream.h"
+#include "HAL\HAL_ByteStream\Include\HALForByteStream.h"
+
 /////////////////////////////////////////////
-int MPEG2_DSMCC_DecodeSection(uint8_t *buf, int length, dsmcc_section_t* pDSMCC_section)
+int MPEG2_DSMCC_DecodeSection(uint8_t *section_buf, int section_size, dsmcc_section_t* pdsmcc_section)
 {
 	int						rtcode = SECTION_PARSE_NO_ERROR;
-	int						payload_length;
-	int						copy_length;
+
 	uint8_t*				ptemp;
-	uint32_t				tempId;
 	int						stream_error;
 
 	uint8_t					section_syntax_indicator;
+	uint32_t				encodedCheckValue;
 
 	dsmccMessageHeader_t*				pdsmccMessageHeader;
 
-	//DownloadServerInitiate_t*			pDownloadServerInitiate;
-	//DownloadInfoIndication_t*			pDownloadInfoIndication;
-	//DownloadDataBlock_t*				pDownloadDataBlock;
-
-	if ((buf != NULL) && (length >= MPEG2_DSMCC_SECTION_MIN_SIZE) && (pDSMCC_section != NULL))
+	if ((section_buf != NULL) &&
+		((section_size >= MPEG2_DSMCC_SECTION_MIN_SIZE) && (section_size <= MPEG2_DSMCC_SECTION_MAX_SIZE)) &&
+		(pdsmcc_section != NULL))
 	{
-		memset(pDSMCC_section, 0x00, sizeof(dsmcc_section_t));
+		memset(pdsmcc_section, 0x00, sizeof(dsmcc_section_t));
 
-		pDSMCC_section->CRC_32_verify = Encode_CRC_32(buf, length - 4);
-		pDSMCC_section->CRC_32 = ((buf[length - 4] << 24) | (buf[length - 3] << 16) | (buf[length - 2] << 8) | buf[length - 1]);
-
-		section_syntax_indicator = (buf[1] & 0x80) >> 7;
+		section_syntax_indicator = (section_buf[1] & 0x80) >> 7;
 
 		stream_error = 0;
 		if (section_syntax_indicator == 1)
 		{
-			if (pDSMCC_section->CRC_32_verify != pDSMCC_section->CRC_32)
+			pdsmcc_section->recalculatedCheckValue = Encode_CRC_32(section_buf, section_size - 4);
+			encodedCheckValue = ((section_buf[section_size - 4] << 24) | (section_buf[section_size - 3] << 16) | (section_buf[section_size - 2] << 8) | section_buf[section_size - 1]);
+
+			if (pdsmcc_section->recalculatedCheckValue != encodedCheckValue)
 			{
 				stream_error = 1;
 			}
@@ -52,141 +47,103 @@ int MPEG2_DSMCC_DecodeSection(uint8_t *buf, int length, dsmcc_section_t* pDSMCC_
 		else
 		{
 			//没有校验checksum, 以后增加
+			pdsmcc_section->recalculatedCheckValue = Encode_CRC_32(section_buf, section_size - 4);
+			encodedCheckValue = ((section_buf[section_size - 4] << 24) | (section_buf[section_size - 3] << 16) | (section_buf[section_size - 2] << 8) | section_buf[section_size - 1]);
 
-//			assert((length % 4) == 0);
+			if (pdsmcc_section->recalculatedCheckValue != encodedCheckValue)
+			{
+				stream_error = 1;
+			}
 		}
 
-		if (stream_error == 0)
+		//if (stream_error == 0)
 		{
-			pDSMCC_section->table_id = *buf++;
-			pDSMCC_section->section_syntax_indicator = (*buf & 0x80) >> 7;
+			BITS_t bs;
+			BITS_map(&bs, section_buf, section_size);
 
-			pDSMCC_section->dsmcc_section_length = (*buf++ & 0x0f) << 8;
-			pDSMCC_section->dsmcc_section_length |= *buf++;
+			pdsmcc_section->table_id = BITS_get(&bs, 8);
+			//assert(pdsmcc_section->table_id == TABLE_ID_DSMCC_UNM);
 
-			if ((pDSMCC_section->dsmcc_section_length + 3) == length)
+			pdsmcc_section->section_syntax_indicator = BITS_get(&bs, 1);
+			pdsmcc_section->private_indicator = BITS_get(&bs, 1);
+			pdsmcc_section->reserved0 = BITS_get(&bs, 2);
+			pdsmcc_section->dsmcc_section_length = BITS_get(&bs, 12);
+
+			if ((pdsmcc_section->dsmcc_section_length + 3) == section_size)
 			{
-				pDSMCC_section->table_id_extension = (*buf++) << 8;
-				pDSMCC_section->table_id_extension |= *buf++;
+				pdsmcc_section->table_id_extension = BITS_get(&bs, 16);
 
-				pDSMCC_section->version_number = (*buf & 0x3E) >> 1;
-				pDSMCC_section->current_next_indicator = (*buf++ & 0x01);
+				pdsmcc_section->reserved1 = BITS_get(&bs, 2);
+				pdsmcc_section->version_number = BITS_get(&bs, 5);
+				pdsmcc_section->current_next_indicator = BITS_get(&bs, 1);
 
-				pDSMCC_section->section_number = *buf++;
-				pDSMCC_section->last_section_number = *buf++;
+				pdsmcc_section->section_number = BITS_get(&bs, 8);
+				pdsmcc_section->last_section_number = BITS_get(&bs, 8);
 
-				ptemp = buf;
-				buf += (pDSMCC_section->dsmcc_section_length - 9);
-
-				if (pDSMCC_section->table_id == TABLE_ID_DSMCC_MPE)
+				int section_payload_length = pdsmcc_section->dsmcc_section_length - 4 - 5;
+				if (section_payload_length > 0)
 				{
-//					rtcode = SECTION_PARSE_SYNTAX_ERROR;
-				}
-				else if ((pDSMCC_section->table_id == TABLE_ID_DSMCC_UNM) ||
-						 (pDSMCC_section->table_id == TABLE_ID_DSMCC_DDM))
-				{
-					pdsmccMessageHeader = &(pDSMCC_section->dsmccMessageHeader);
+					ptemp = bs.p_cur;
+					BITS_byteSkip(&bs, section_payload_length);
 
-					pdsmccMessageHeader->protocolDiscriminator = *ptemp++;
-					pdsmccMessageHeader->dsmccType = *ptemp ++;
+					pdsmccMessageHeader = &(pdsmcc_section->dsmccMessageHeader);
 
-					pdsmccMessageHeader->messageId = *ptemp ++;
-					pdsmccMessageHeader->messageId <<= 8;
-					pdsmccMessageHeader->messageId |= *ptemp ++;
+					BYTES_t bytes;
+					BYTES_map(&bytes, ptemp, section_payload_length);
 
-					tempId = *ptemp ++;
-					tempId <<= 8;
-					tempId |= *ptemp ++;
-					tempId <<= 8;
-					tempId |= *ptemp ++;
-					tempId <<= 8;
-					tempId |= *ptemp ++;
+					pdsmccMessageHeader->protocolDiscriminator = BYTES_get(&bytes, 1);
+					pdsmccMessageHeader->dsmccType = BYTES_get(&bytes, 1);
 
-					if (pDSMCC_section->table_id == TABLE_ID_DSMCC_UNM)
+					if (pdsmccMessageHeader->dsmccType == 0x03)
 					{
-						pdsmccMessageHeader->transactionId = tempId;
-					}
-					//else if (pDSMCC_section->table_id == TABLE_ID_DSM_CC_DDM)
-					//{
-					//	pdsmccMessageHeader->u.downloadId = tempId;
-					//}
+						pdsmccMessageHeader->messageId = BYTES_get(&bytes, 2);
+						pdsmccMessageHeader->TxOrDnloadID = BYTES_get(&bytes, 4);
+						pdsmccMessageHeader->reserved = BYTES_get(&bytes, 1);
+						pdsmccMessageHeader->adaptationLength = BYTES_get(&bytes, 1);
+						pdsmccMessageHeader->messageLength = BYTES_get(&bytes, 2);
 
-					pdsmccMessageHeader->reserved = *ptemp ++;
+						assert(pdsmccMessageHeader->adaptationLength <= pdsmccMessageHeader->messageLength);
+						//messageLength解析错误，将是灾难性的
 
-					pdsmccMessageHeader->adaptationLength = *ptemp ++;
-
-					pdsmccMessageHeader->messageLength = *ptemp ++;
-					pdsmccMessageHeader->messageLength <<= 8;
-					pdsmccMessageHeader->messageLength |= *ptemp ++;
-
-					assert(pdsmccMessageHeader->adaptationLength <= pdsmccMessageHeader->messageLength);
-					//messageLength解析错误，将是灾难性的
-
-					if (pdsmccMessageHeader->adaptationLength > 0)
-					{
-						//解析adaptation
-						pdsmccMessageHeader->dsmccAdaptationHeader.adaptationType = *ptemp ++;
-
-						copy_length = min(64, pdsmccMessageHeader->adaptationLength - 1);
-						pdsmccMessageHeader->dsmccAdaptationHeader.N = copy_length;
-						if (copy_length > 0)
+						if (pdsmccMessageHeader->adaptationLength > 0)
 						{
-							memcpy(pdsmccMessageHeader->dsmccAdaptationHeader.adaptationDataByte, ptemp, copy_length);
-							ptemp += (pdsmccMessageHeader->adaptationLength - 1);
+							dsmccAdaptationHeader_t* pdsmccAdaptationHeader = &(pdsmccMessageHeader->dsmccAdaptationHeader);
+							//解析adaptation
+							pdsmccAdaptationHeader->adaptationType = BYTES_get(&bytes, 1);
+
+							pdsmccAdaptationHeader->adaptationDataLength = pdsmccMessageHeader->adaptationLength - 1;
+
+							//BYTES_copy(pdsmccAdaptationHeader->adaptationDataByte, sizeof(pdsmccAdaptationHeader->adaptationDataByte), &bytes, pdsmccAdaptationHeader->adaptationDataLength);
+							pdsmccAdaptationHeader->adaptationDataByte = bytes.p_cur;
+							BYTES_skip(&bytes, pdsmccAdaptationHeader->adaptationDataLength);
 						}
-					}
 
-//					payload_length = pdsmccMessageHeader->messageLength - pdsmccMessageHeader->adaptationLength;
-					payload_length = (int)(buf - ptemp);
-
-					if (payload_length >= pdsmccMessageHeader->messageLength)
-					{
-						if (pdsmccMessageHeader->messageId == 0x1002)			//DII
+						pdsmcc_section->dsmccMessagePayloadLength = pdsmccMessageHeader->messageLength - pdsmccMessageHeader->adaptationLength;
+						if (pdsmcc_section->dsmccMessagePayloadLength > 0)
 						{
-							//pDownloadInfoIndication = &(pDSMCC_section->u.DownloadInfoIndication);
-
-							//rtcode = MPEG2_DSMCC_DecodeDownloadInfoIndication(ptemp, payload_length, pDownloadInfoIndication);
+							assert(pdsmcc_section->dsmccMessagePayloadLength <= 4072);
+							pdsmcc_section->dsmccMessagePayloadBuf = bytes.p_cur;
+							BYTES_skip(&bytes, pdsmcc_section->dsmccMessagePayloadLength);
 						}
-						else if (pdsmccMessageHeader->messageId == 0x1003)					//DDB
-						{
-							//pDownloadDataBlock = &(pDSMCC_section->u.DownloadDataBlock);
 
-							//rtcode = MPEG2_DSMCC_DecodeDownloadDataBlock(ptemp, payload_length, pDownloadDataBlock);
-
-						}
-						else if (pdsmccMessageHeader->messageId == 0x1006)							//DSI
-						{
-							//pDownloadServerInitiate = &(pDSMCC_section->u.DownloadServerInitiate);
-
-							//rtcode = MPEG2_DSMCC_DecodeDownloadServerInitiate(ptemp, payload_length, pDownloadServerInitiate);
-						}
-						else
-						{
-							rtcode = SECTION_PARSE_SYNTAX_ERROR;
-						}
+						assert(bytes.p_cur == bs.p_cur);
 					}
 					else
 					{
 						rtcode = SECTION_PARSE_SYNTAX_ERROR;
 					}
 				}
-				else if (pDSMCC_section->table_id == TABLE_ID_DSMCC_SD)
-				{
-//					rtcode = SECTION_PARSE_SYNTAX_ERROR;
-				}
-//				else if (pDSMCC_section->table_id == TABLE_ID_DSMCC_PVT)
-//				{
-////					rtcode = SECTION_PARSE_SYNTAX_ERROR;
-//				}
 
-				buf += 4;
+				pdsmcc_section->encodedCheckValue = BITS_get(&bs, 32);
+				assert(pdsmcc_section->encodedCheckValue == encodedCheckValue);
 			}
 			else
 			{
 				rtcode = SECTION_PARSE_LENGTH_ERROR;				//section长度错误
 			}
 		}
-		else
+
+		if (pdsmcc_section->recalculatedCheckValue != pdsmcc_section->encodedCheckValue)
 		{
 			rtcode = SECTION_PARSE_CRC_ERROR;						//校验错误
 		}
@@ -198,4 +155,3 @@ int MPEG2_DSMCC_DecodeSection(uint8_t *buf, int length, dsmcc_section_t* pDSMCC_
 
 	return rtcode;
 }
-

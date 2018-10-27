@@ -84,7 +84,7 @@
 //user defined												0x0082~0x00FE
 //Forbidden													0x00FF
 
-/*TAG = SI_NETWORK_NAME_DESCRIPTOR						0x40	*/
+/*TAG = DVB_SI_NETWORK_NAME_DESCRIPTOR						0x40	*/
 typedef struct _network_name_descriptor_s
 {
 	uint16_t		descriptor_tag;						//8
@@ -97,16 +97,16 @@ typedef struct _network_name_descriptor_s
 
 _CDL_EXPORT int DVB_SI_decode_network_name_descriptor(uint8_t* buf, int length, network_name_descriptor_t* pnetwork_name_descriptor);
 
-/*TAG = SI_SERVICE_LIST_DESCRIPTOR						0x41	*/
+/*TAG = DVB_SI_SERVICE_LIST_DESCRIPTOR						0x41	*/
 typedef struct _service_list_descriptor_s
 {
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t		descriptor_tag;						//8
+	uint8_t			descriptor_length;					//8
 
-	S32 N;
+	int		 N;
 
-	U16 service_id[MAX_SERVICES_PER_STREAM];								//16 * N
-	U8  service_type[MAX_SERVICES_PER_STREAM];							//8 * N
+	uint16_t service_id[MAX_SERVICES_PER_STREAM];								//16 * N
+	uint8_t  service_type[MAX_SERVICES_PER_STREAM];							//8 * N
 
 } service_list_descriptor_t, *pservice_list_descriptor_t;
 
@@ -146,27 +146,24 @@ typedef struct _satellite_delivery_system_descriptor_s
 
 } satellite_delivery_system_descriptor_t, *psatellite_delivery_system_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_satellite_delivery_system_descriptor(U8* buf, S32 length, psatellite_delivery_system_descriptor_t psatellite_delivery_system_descriptor);
+_CDL_EXPORT int DVB_SI_decode_satellite_delivery_system_descriptor(U8* buf, S32 length, psatellite_delivery_system_descriptor_t psatellite_delivery_system_descriptor);
 
-/*TAG = SI_CABLE_DELIVERY_SYSTEM_DESCRIPTOR				0x44	*/
+/*TAG = DVB_SI_CABLE_DELIVERY_SYSTEM_DESCRIPTOR				0x44	*/
 typedef struct _cable_delivery_system_descriptor_s
 {
-	//U8*			descriptor_buf;						//8
-	//U8			descriptor_size;					//8
+	uint16_t	descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
-
-	U32 frequency;								//32
-	U16 reserved_future_use;					//12
-	U8  FEC_outer;								//4
-	U8  modulation;							//8
-	U32 symbol_rate;							//28
-	U8  FEC_inner;								//4
+	uint32_t	frequency;								//32
+	uint16_t	reserved_future_use;					//12
+	uint8_t		FEC_outer;								//4
+	uint8_t		modulation;							//8
+	uint32_t	symbol_rate;							//28
+	uint8_t		FEC_inner;								//4
 
 } cable_delivery_system_descriptor_t, *pcable_delivery_system_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_cable_delivery_system_descriptor(U8* buf, S32 length, pcable_delivery_system_descriptor_t pcable_delivery_system_descriptor);
+_CDL_EXPORT int DVB_SI_decode_cable_delivery_system_descriptor(uint8_t* buf, int length, cable_delivery_system_descriptor_t* pcable_delivery_system_descriptor);
 
 /* TAG = SI_VBI_DATA_DESCRIPTOR			0x45	*/
 typedef struct _VBI_data_descriptor_s
@@ -190,7 +187,7 @@ _CDL_EXPORT S32 DVB_SI_decode_VBI_data_descriptor(U8* buf, S32 length, pVBI_data
 /* TAG = SI_VBI_TELETEXT_DESCRIPTOR			0x46		*/
 
 
-/*TAG = SI_BOUQUET_NAME_DESCRIPTOR				0x47		*/
+/*TAG = DVB_SI_BOUQUET_NAME_DESCRIPTOR				0x47		*/
 typedef struct _bouquet_name_descriptor_s
 {
 	uint16_t	descriptor_tag;						//8
@@ -201,7 +198,7 @@ typedef struct _bouquet_name_descriptor_s
 
 } bouquet_name_descriptor_t, *pbouquet_name_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_bouquet_name_descriptor(U8* buf, S32 length, pbouquet_name_descriptor_t pbouquet_name_descriptor);
+_CDL_EXPORT int DVB_SI_decode_bouquet_name_descriptor(uint8_t* buf, int length, bouquet_name_descriptor_t* pbouquet_name_descriptor);
 
 /*TAG = SI_SERVICE_DESCRIPTOR				0x48	*/
 typedef struct _service_descriptor_s
@@ -704,10 +701,10 @@ _CDL_EXPORT S32 DVB_SI_decode_multilingual_component_descriptor(U8* buf, S32 len
 /*TAG = DVB_SI_PRIVATE_DATA_SPECIFIER_DESCRIPTOR			0x5F	*/
 typedef struct _private_data_specifier_descriptor_s
 {
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t	descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
-	U32 private_data_specifier;						//32
+	uint32_t	private_data_specifier;						//32
 } private_data_specifier_descriptor_t, *pprivate_data_specifier_descriptor_t;
 
 _CDL_EXPORT int DVB_SI_decode_private_data_specifier_descriptor(uint8_t* buf, int length, private_data_specifier_descriptor_t* pprivate_data_specifier_descriptor);
@@ -863,19 +860,14 @@ _CDL_EXPORT int DVB_SI_decode_data_broadcast_id_descriptor(uint8_t* buf, int len
 /*TAG = SI_TRANSPORT_STREAM_DESCRIPTOR		0x67*/
 typedef struct _transport_stream_descriptor_s
 {
-	//U8*			descriptor_buf;						//8
-	//U8			descriptor_size;					//8
+	uint16_t	descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
-
-
-	U32 byte_code;
-	S8 byte_char[4];						//
+	char		byte_char[4];						//
 
 } transport_stream_descriptor_t, *ptransport_stream_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_transport_stream_descriptor(U8* buf, S32 length, ptransport_stream_descriptor_t ptransport_stream_descriptor);
+_CDL_EXPORT int DVB_SI_decode_transport_stream_descriptor(uint8_t* buf, int length, transport_stream_descriptor_t* ptransport_stream_descriptor);
 
 /*TAG = SI_DSNG_DESCRIPTOR			0x68*/
 

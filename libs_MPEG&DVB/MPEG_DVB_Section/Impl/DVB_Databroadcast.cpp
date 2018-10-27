@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "../Include/DVB_SI_Descriptor.h"
-#include "../Include/MPEG_DVB_ErrorCode.h"
+#include "../../Include/DVB_SI_Descriptor.h"
+#include "../../Include/MPEG_DVB_ErrorCode.h"
 
 using namespace std;
 #ifndef min
