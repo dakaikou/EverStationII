@@ -58,7 +58,7 @@
 #define MPEG2_PSI_MPEG4_TEXT_EXTENSION_DESCRIPTOR					0x002E
 //														0x002F~0x003F			ISO/IEC 13818-1 Reserved		
 
-/*TAG = PSI_VIDEO_STREAM_DESCRIPTOR			0x02*/
+/*TAG = MPEG2_PSI_VIDEO_STREAM_DESCRIPTOR			0x02*/
 typedef struct _video_stream_descriptor_s
 {
 	U16			descriptor_tag;						//8
@@ -79,7 +79,7 @@ typedef struct _video_stream_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_video_stream_descriptor(U8 *buf, S32 length, pvideo_stream_descriptor_t pvideo_stream_descriptor);
 
-/*TAG = PSI_AUDIO_STREAM_DESCRIPTOR			0x03*/
+/*TAG = MPEG2_PSI_AUDIO_STREAM_DESCRIPTOR			0x03*/
 typedef struct _audio_stream_descriptor_s
 {
 	U16			descriptor_tag;						//8
@@ -95,7 +95,7 @@ typedef struct _audio_stream_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_audio_stream_descriptor(U8 *buf, S32 length, paudio_stream_descriptor_t paudio_stream_descriptor);
 
-/*TAG = PSI_HIERARCHY_DESCRIPTOR		0x04*/
+/*TAG = MPEG2_PSI_HIERARCHY_DESCRIPTOR		0x04*/
 typedef struct _hierarchy_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -120,7 +120,7 @@ typedef struct _hierarchy_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_hierarchy_descriptor(U8 *buf, S32 length, phierarchy_descriptor_t phierarchy_descriptor);
 
-/*TAG = PSI_REGISTRATION_DESCRIPTOR		0x05*/
+/*TAG = MPEG2_PSI_REGISTRATION_DESCRIPTOR		0x05*/
 typedef struct _registration_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -137,7 +137,7 @@ typedef struct _registration_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_registration_descriptor(U8* buf, S32 length, pregistration_descriptor_t pregistration_descriptor);
 
-/*TAG = PSI_DATA_STREAM_ALIGNMENT_DESCRIPTOR		0x06*/
+/*TAG = MPEG2_PSI_DATA_STREAM_ALIGNMENT_DESCRIPTOR		0x06*/
 typedef struct _data_stream_alignment_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -152,7 +152,7 @@ typedef struct _data_stream_alignment_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_data_stream_alignment_descriptor(U8* buf, S32 length, pdata_stream_alignment_descriptor_t pdata_stream_alignment_descriptor);
 
-/*TAG = PSI_TARGET_BACKGROUND_GRID_DESCRIPTOR		0x07*/
+/*TAG = MPEG2_PSI_TARGET_BACKGROUND_GRID_DESCRIPTOR		0x07*/
 typedef struct _target_background_grid_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -169,7 +169,7 @@ typedef struct _target_background_grid_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_target_background_grid_descriptor(U8* buf, S32 length, ptarget_background_grid_descriptor_t ptarget_background_grid_descriptor);
 
-/*TAG = PSI_VIDEO_WINDOW_DESCRIPTOR				0x08*/
+/*TAG = MPEG2_PSI_VIDEO_WINDOW_DESCRIPTOR				0x08*/
 typedef struct _video_window_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -186,26 +186,26 @@ typedef struct _video_window_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_video_window_descriptor(U8* buf, S32 length, pvideo_window_descriptor_t pvideo_window_descriptor);
 
-/*TAG = PSI_CA_DESCRIPTOR				0x09*/
+/*TAG = MPEG2_PSI_CA_DESCRIPTOR				0x09*/
 typedef struct _CA_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
 	//U8			descriptor_size;					//8
 
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint8_t		descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
-	U16 CA_system_ID;								//16
+	uint16_t	CA_system_ID;								//16
 	
-	U8  reserved;									//3
-	U16 CA_PID;										//13
+	uint8_t		reserved;									//3
+	uint16_t	CA_PID;										//13
 
-	S8	private_data_length;
-	U8	private_data_byte[MAX_PRIVATE_DATA_LENGTH];
+	int		private_data_length;
+	uint8_t	private_data_byte[MAX_PRIVATE_DATA_LENGTH];
 
 } CA_descriptor_t, *pCA_descriptor_t;
 
-_CDL_EXPORT S32 MPEG2_PSI_decode_CA_descriptor(U8* buf, S32 length, pCA_descriptor_t pCA_descriptor);
+_CDL_EXPORT int MPEG2_PSI_decode_CA_descriptor(uint8_t* buf, int length, CA_descriptor_t* pCA_descriptor);
 
 typedef struct _ISO_639_language_s
 {
@@ -215,7 +215,7 @@ typedef struct _ISO_639_language_s
 
 } ISO_639_language_t, *pISO_639_language_t;
 
-/*TAG = PSI_ISO_639_LANGUAGE_DESCRIPTOR				0x0A*/
+/*TAG = MPEG2_PSI_ISO_639_LANGUAGE_DESCRIPTOR				0x0A*/
 typedef struct _ISO_639_language_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -231,7 +231,7 @@ typedef struct _ISO_639_language_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_ISO_639_language_descriptor(U8* buf, S32 length, pISO_639_language_descriptor_t pISO_639_language_descriptor);
 
-/*TAG = PSI_SYSTEM_CLOCK_DESCRIPTOR			0x0B*/
+/*TAG = MPEG2_PSI_SYSTEM_CLOCK_DESCRIPTOR			0x0B*/
 typedef struct _system_clock_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -251,7 +251,7 @@ typedef struct _system_clock_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_system_clock_descriptor(U8 *buf, S32 length, psystem_clock_descriptor_t psystem_clock_descriptor);
 
-/*TAG = PSI_MULTIPLEX_BUFFER_UTILIZATION_DESCRIPTOR		0x0C*/
+/*TAG = MPEG2_PSI_MULTIPLEX_BUFFER_UTILIZATION_DESCRIPTOR		0x0C*/
 typedef struct _multiplex_buffer_utilization_descriptor
 {
 	//U8*			descriptor_buf;						//8
@@ -269,7 +269,7 @@ typedef struct _multiplex_buffer_utilization_descriptor
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_multiplex_buffer_utilization_descriptor(U8 *buf, S32 length, pmultiplex_buffer_utilization_descriptor_t pmultiplex_buffer_utilization_descriptor);
 
-/*TAG = PSI_COPYRIGHT_DESCRIPTOR				0x0D*/
+/*TAG = MPEG2_PSI_COPYRIGHT_DESCRIPTOR				0x0D*/
 typedef struct _copyright_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -285,7 +285,7 @@ typedef struct _copyright_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_copyright_descriptor(U8* buf, S32 length, pcopyright_descriptor_t pcopyright_descriptor);
 
-/*TAB = PSI_MAXIMUM_BITRATE_DESCRIPTOR				0x0E*/
+/*TAB = MPEG2_PSI_MAXIMUM_BITRATE_DESCRIPTOR				0x0E*/
 typedef struct _maximum_bitrate_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -301,7 +301,7 @@ typedef struct _maximum_bitrate_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_maximum_bitrate_descriptor(U8 *buf, S32 length, pmaximum_bitrate_descriptor_t pmaximum_bitrate_descriptor);
 
-/*TAG = PSI_PRIVATE_DATA_INDICATOR_DESCRIPTOR			0x0F*/
+/*TAG = MPEG2_PSI_PRIVATE_DATA_INDICATOR_DESCRIPTOR			0x0F*/
 typedef struct _private_data_indicator_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -316,7 +316,7 @@ typedef struct _private_data_indicator_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_private_data_indicator_descriptor(U8* buf, S32 length, pprivate_data_indicator_descriptor_t pprivate_data_indicator_descriptor);
 
-/*TAG = PSI_SMOOTHING_BUFFER_DESCRIPTOR					0x10*/
+/*TAG = MPEG2_PSI_SMOOTHING_BUFFER_DESCRIPTOR					0x10*/
 typedef struct _smoothing_buffer_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -333,7 +333,7 @@ typedef struct _smoothing_buffer_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_smoothing_buffer_descriptor(U8* buf, S32 length, psmoothing_buffer_descriptor_t psmoothing_buffer_descriptor);
 
-/*TAG = PSI_STD_DESCRIPTOR						0x11*/
+/*TAG = MPEG2_PSI_STD_DESCRIPTOR						0x11*/
 typedef struct _STD_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -349,7 +349,7 @@ typedef struct _STD_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_STD_descriptor(U8* buf, S32 length, pSTD_descriptor_t pSTD_descriptor);
 
-/*TAG = PSI_IBP_DESCRIPTOR					0x12*/
+/*TAG = MPEG2_PSI_IBP_DESCRIPTOR					0x12*/
 typedef struct _IBP_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -366,7 +366,7 @@ typedef struct _IBP_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_IBP_descriptor(U8* buf, S32 length, pIBP_descriptor_t pIBP_descriptor);
 
-/*TAG = DSMCC_CAROUSEL_IDENTIFIER_DESCRIPTOR						0x13*/
+/*TAG = MPEG2_DSMCC_CAROUSEL_IDENTIFIER_DESCRIPTOR						0x13*/
 typedef struct _carousel_identifier_descriptor_s
 {
 	uint16_t		descriptor_tag;						//8
@@ -381,7 +381,7 @@ typedef struct _carousel_identifier_descriptor_s
 
 _CDL_EXPORT int MPEG2_DSMCC_decode_carousel_identifier_descriptor(uint8_t* buf, int length, carousel_identifier_descriptor_t* pcarousel_identifier_descriptor);
 
-/*TAG = DSMCC_ASSOCIATION_TAG_DESCRIPTOR					0x14*/
+/*TAG = MPEG2_DSMCC_ASSOCIATION_TAG_DESCRIPTOR					0x14*/
 typedef struct _association_tag_descriptor_s
 {
 	uint16_t	descriptor_tag;						//8
@@ -411,7 +411,7 @@ typedef struct _association_tag_descriptor_s
 
 _CDL_EXPORT int MPEG2_DSMCC_decode_association_tag_descriptor(uint8_t* buf, int length, association_tag_descriptor_t* passociation_tag_descriptor);
 
-/*TAG = DSMCC_DEFERRED_ASSOCIATION_TAGS_DESCRIPTOR					0x15*/
+/*TAG = MPEG2_DSMCC_DEFERRED_ASSOCIATION_TAGS_DESCRIPTOR					0x15*/
 typedef struct _deferred_association_tags_descriptor_s
 {
 	U16			descriptor_tag;						//8
@@ -429,7 +429,7 @@ typedef struct _deferred_association_tags_descriptor_s
 
 _CDL_EXPORT S32 DSMCC_decode_deferred_association_tags_descriptor(U8* buf, S32 length, pdeferred_association_tags_descriptor_t pdeferred_association_tags_descriptor);
 
-/*TAG = PSI_MPEG4_VIDEO_DESCRIPTOR				0x1B	*/
+/*TAG = MPEG2_PSI_MPEG4_VIDEO_DESCRIPTOR				0x1B	*/
 typedef struct _MPEG4_video_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -444,7 +444,7 @@ typedef struct _MPEG4_video_descriptor_s
 
 _CDL_EXPORT	S32 MPEG2_PSI_decode_MPEG4_video_descriptor(U8* buf, S32 length, pMPEG4_video_descriptor_t pMPEG4_video_descriptor);
 
-/*TAG = MPEG4_AUDIO_DESCRIPTOR				0x1C	*/
+/*TAG = MPEG2_MPEG4_AUDIO_DESCRIPTOR				0x1C	*/
 typedef struct _MPEG4_audio_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -459,7 +459,7 @@ typedef struct _MPEG4_audio_descriptor_s
 
 _CDL_EXPORT	S32 MPEG2_PSI_decode_MPEG4_audio_descriptor(U8* buf, S32 length, pMPEG4_audio_descriptor_t pMPEG4_audio_descriptor);
 
-/*TAG = IOD_DESCRIPTOR						0x1D	*/
+/*TAG = MPEG2_IOD_DESCRIPTOR						0x1D	*/
 typedef struct _IOD_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -477,7 +477,7 @@ typedef struct _IOD_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_IOD_descriptor(U8* buf, S32 length, pIOD_descriptor_t pIOD_descriptor);
 
-/*TAG = SL_DESCRIPTOR						0x1E	*/
+/*TAG = MPEG2_SL_DESCRIPTOR						0x1E	*/
 typedef struct _SL_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -492,7 +492,7 @@ typedef struct _SL_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_SL_descriptor(U8* buf, S32 length, pSL_descriptor_t pSL_descriptor);
 
-/*TAG = FMC_DESCRIPTOR						0x1F	*/
+/*TAG = MPEG2_FMC_DESCRIPTOR						0x1F	*/
 typedef struct _FMC_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -509,7 +509,7 @@ typedef struct _FMC_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_FMC_descriptor(U8* buf, S32 length, pFMC_descriptor_t pFMC_descriptor);
 
-/*TAG = EXTERNAL_ES_ID_DESCRIPTOR		0x20	*/
+/*TAG = MPEG2_EXTERNAL_ES_ID_DESCRIPTOR		0x20	*/
 typedef struct _External_ES_ID_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -523,7 +523,7 @@ typedef struct _External_ES_ID_descriptor_s
 
 _CDL_EXPORT S32 MPEG2_PSI_decode_External_ES_ID_descriptor(U8* buf, S32 length, pExternal_ES_ID_descriptor_t pExternal_ES_ID_descriptor);
 
-/*TAG = MUXCODE_DESCRIPTOR						0x21	*/
+/*TAG = MPEG2_MUXCODE_DESCRIPTOR						0x21	*/
 typedef struct _Muxcode_descriptor_s
 {
 	//U8*			descriptor_buf;						//8

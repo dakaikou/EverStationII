@@ -306,39 +306,56 @@ int MPEG2_PSI_decode_data_stream_alignment_descriptor_to_xml(uint8_t* buf, int l
 int MPEG2_PSI_decode_CA_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, CA_descriptor_t* pCADescriptor)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
-	//char   pszField[128];
-	//char   pszCASystem[64];
-	////char   pszComment[128];
 
-	//CA_descriptor_t* pCA_descriptor = (pCADescriptor == NULL) ? new CA_descriptor_t : pCADescriptor;
-	//rtcode = MPEG2_PSI_decode_CA_descriptor(buf, length, pCA_descriptor);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
+	{
+		CA_descriptor_t* pCA_descriptor = (pCADescriptor == NULL) ? new CA_descriptor_t : pCADescriptor;
+		rtcode = MPEG2_PSI_decode_CA_descriptor(buf, length, pCA_descriptor);
+		MPEG2_PSI_present_CA_descriptor_to_xml(pxmlDoc, pxmlParentNode, pCA_descriptor);
 
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
-	//{
-	//	MPEG_DVB_NumericCoding2Text_CASystemID(pCA_descriptor->CA_system_ID, pszCASystem, sizeof(pszCASystem));
-	//	sprintf_s(pszField, sizeof(pszField), "CA_descriptor(<tag: 0x%02X, %d×Ö½Ú, CA_PID=0x%04X, %s>)", pCA_descriptor->descriptor_tag, length, pCA_descriptor->CA_PID, pszCASystem);
+		if (pCADescriptor == NULL)
+		{
+			delete pCA_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
+	}
 
-	//	XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, pCA_descriptor->descriptor_length + 2);
+	return rtcode;
+}
 
-	//	pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pCA_descriptor->descriptor_tag, 8, "uimsbf", NULL);
+int MPEG2_PSI_present_CA_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, CA_descriptor_t* pCA_descriptor)
+{
+	int		rtcode = SECTION_PARSE_NO_ERROR;
+	char   pszField[32];
+	char   pszCASystem[64];
+	char   pszComment[128];
 
-	//	pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pCA_descriptor->descriptor_length, 8, "uimsbf", NULL);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pCA_descriptor != NULL))
+	{
+		sprintf_s(pszField, sizeof(pszField), "CA_descriptor(tag: 0x%02X)", pCA_descriptor->descriptor_tag);
 
-	//	pxmlDoc->NewElementForBits(pxmlDescriptorNode, "CA_system_ID", pCA_descriptor->CA_system_ID, 16, "uimsbf", pszCASystem);
+		MPEG_DVB_NumericCoding2Text_CASystemID(pCA_descriptor->CA_system_ID, pszCASystem, sizeof(pszCASystem));
+		sprintf_s(pszComment, sizeof(pszComment), "CA_system_ID=0x%04X, CA_PID=0x%04X, %s", pCA_descriptor->CA_system_ID, pCA_descriptor->CA_PID, pszCASystem);
 
-	//	pxmlDoc->NewElementForBits(pxmlDescriptorNode, "reserved", pCA_descriptor->reserved, 3, "uimsbf", NULL);
-	//	pxmlDoc->NewElementForBits(pxmlDescriptorNode, "CA_PID", pCA_descriptor->CA_PID, 13, "uimsbf", NULL);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, pszComment, pCA_descriptor->descriptor_length + 2);
 
-	//	if (pCA_descriptor->private_data_length > 0)
-	//	{
-	//		pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "private_data_byte[ ]", pCA_descriptor->private_data_byte, pCA_descriptor->private_data_length, NULL);
-	//	}
-	//}
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pCA_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-	//if (pCADescriptor == NULL)
-	//{
-	//	delete pCA_descriptor;
-	//}
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pCA_descriptor->descriptor_length, 8, "uimsbf", NULL);
+
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "CA_system_ID", pCA_descriptor->CA_system_ID, 16, "uimsbf", pszCASystem);
+
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "reserved", pCA_descriptor->reserved, 3, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "CA_PID", pCA_descriptor->CA_PID, 13, "uimsbf", NULL);
+
+		if (pCA_descriptor->private_data_length > 0)
+		{
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "private_data_byte[ ]", pCA_descriptor->private_data_byte, pCA_descriptor->private_data_length, NULL);
+		}
+	}
 
 	return rtcode;
 }

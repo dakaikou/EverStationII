@@ -73,9 +73,9 @@ int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_se
 					//case MPEG2_PSI_REGISTRATION_DESCRIPTOR:
 					//	MPEG2_PSI_decode_registration_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
 					//	break;
-					//case MPEG2_PSI_CA_DESCRIPTOR:
-					//	MPEG2_PSI_decode_CA_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-					//	break;
+				case MPEG2_PSI_CA_DESCRIPTOR:
+					MPEG2_PSI_decode_CA_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+					break;
 					//case MPEG2_PSI_SYSTEM_CLOCK_DESCRIPTOR:
 					//	MPEG2_PSI_decode_system_clock_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
 					//	break;
