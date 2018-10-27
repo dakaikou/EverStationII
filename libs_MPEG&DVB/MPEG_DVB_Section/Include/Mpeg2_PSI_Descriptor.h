@@ -209,9 +209,9 @@ _CDL_EXPORT int MPEG2_PSI_decode_CA_descriptor(uint8_t* buf, int length, CA_desc
 
 typedef struct _ISO_639_language_s
 {
-	U32		ISO_639_language_code;
-	S8		ISO_639_language_code_char[4];			//24
-	U8		audio_type;								//8
+	//uint32_t	ISO_639_language_code;
+	char			ISO_639_language_code_char[4];			//24
+	uint8_t			audio_type;								//8
 
 } ISO_639_language_t, *pISO_639_language_t;
 
@@ -221,15 +221,15 @@ typedef struct _ISO_639_language_descriptor_s
 	//U8*			descriptor_buf;						//8
 	//U8			descriptor_size;					//8
 
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t		descriptor_tag;						//8
+	uint8_t			descriptor_length;					//8
 
-	S32 N;
+	int					N;
     ISO_639_language_t  ISO_639_language[MAX_LANGUAGES];
 
 } ISO_639_language_descriptor_t, *pISO_639_language_descriptor_t;
 
-_CDL_EXPORT S32 MPEG2_PSI_decode_ISO_639_language_descriptor(U8* buf, S32 length, pISO_639_language_descriptor_t pISO_639_language_descriptor);
+_CDL_EXPORT int MPEG2_PSI_decode_ISO_639_language_descriptor(uint8_t* buf, int length, ISO_639_language_descriptor_t* pISO_639_language_descriptor);
 
 /*TAG = MPEG2_PSI_SYSTEM_CLOCK_DESCRIPTOR			0x0B*/
 typedef struct _system_clock_descriptor_s
@@ -237,19 +237,19 @@ typedef struct _system_clock_descriptor_s
 	//U8*			descriptor_buf;						//8
 	//U8			descriptor_size;					//8
 
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t	descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
-	U8 external_clock_reference_indicator;			//1
-	U8 reserved0;									//1
-	U8 clock_accuracy_integer;						//6
+	uint8_t		external_clock_reference_indicator;			//1
+	uint8_t		reserved0;									//1
+	uint8_t		clock_accuracy_integer;						//6
 
-	U8 clock_accuracy_exponent;						//3
-	U8 reserved1;									//5
+	uint8_t		clock_accuracy_exponent;					//3
+	uint8_t		reserved1;									//5
 
 } system_clock_descriptor_t, *psystem_clock_descriptor_t;
 
-_CDL_EXPORT S32 MPEG2_PSI_decode_system_clock_descriptor(U8 *buf, S32 length, psystem_clock_descriptor_t psystem_clock_descriptor);
+_CDL_EXPORT int MPEG2_PSI_decode_system_clock_descriptor(uint8_t *buf, int length, system_clock_descriptor_t* psystem_clock_descriptor);
 
 /*TAG = MPEG2_PSI_MULTIPLEX_BUFFER_UTILIZATION_DESCRIPTOR		0x0C*/
 typedef struct _multiplex_buffer_utilization_descriptor

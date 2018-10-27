@@ -292,42 +292,36 @@ int MPEG2_PSI_decode_CA_descriptor(uint8_t* buf, int length, CA_descriptor_t* pC
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
 //备注：2000.11 chendelin
-S32 MPEG2_PSI_decode_ISO_639_language_descriptor(U8* buf, S32 length, pISO_639_language_descriptor_t pISO_639_language_descriptor)
+int MPEG2_PSI_decode_ISO_639_language_descriptor(uint8_t* buf, int length, ISO_639_language_descriptor_t* pISO_639_language_descriptor)
 {
-	S32 rtcode = SECTION_PARSE_UNKNOWN_ERROR;
-	S32 loop_length;
-	S32 N = 0;
+	int rtcode = SECTION_PARSE_UNKNOWN_ERROR;
 
 	if ((buf != NULL) &&
 		(length >= 2) &&
 		(pISO_639_language_descriptor != NULL))
 	{
+		memset(pISO_639_language_descriptor, 0x00, sizeof(ISO_639_language_descriptor_t));
+
 		pISO_639_language_descriptor->descriptor_tag = *buf++; 
 		pISO_639_language_descriptor->descriptor_length = *buf++;
 
-		loop_length = pISO_639_language_descriptor->descriptor_length;
+		int loop_length = pISO_639_language_descriptor->descriptor_length;
+		int N = 0;
 
-		while (loop_length >= 4)
+		while ((loop_length >= 4) && (N < MAX_LANGUAGES))
 		{
-			if (N < MAX_LANGUAGES)
-			{
-				pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code = buf[0];
-				pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code <<= 8;
-				pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code |= buf[1];
-				pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code <<= 8;
-				pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code |= buf[2];
+			//pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code = buf[0];
+			//pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code <<= 8;
+			//pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code |= buf[1];
+			//pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code <<= 8;
+			//pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code |= buf[2];
 
-				memcpy(pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code_char, buf, 3);
-				pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code_char[3] = '\0';
-				buf += 3;
+			memcpy(pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code_char, buf, 3);
+			pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code_char[3] = '\0';
+			buf += 3;
 
-				pISO_639_language_descriptor->ISO_639_language[N].audio_type = *buf++;
-				N ++;
-			}
-			else
-			{
-				break;
-			}
+			pISO_639_language_descriptor->ISO_639_language[N].audio_type = *buf++;
+			N ++;
 
 			loop_length -= 4;
 		}

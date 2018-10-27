@@ -29,8 +29,8 @@ _CDL_EXPORT int MPEG2_PSI_decode_CA_descriptor_to_xml(uint8_t* buf, int length, 
 _CDL_EXPORT int MPEG2_PSI_present_CA_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, CA_descriptor_t* pCA_descriptor);
 
 /*TAG = PSI_ISO_639_LANGUAGE_DESCRIPTOR				0x0A*/
-_CDL_EXPORT int MPEG2_PSI_decode_ISO_639_language_descriptor(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, ISO_639_language_descriptor_t* pISO_639_language_descriptor = NULL);
-_CDL_EXPORT int MPEG2_PSI_present_ISO_639_language_descriptor(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, ISO_639_language_descriptor_t* pISO_639_language_descriptor);
+_CDL_EXPORT int MPEG2_PSI_decode_ISO_639_language_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, ISO_639_language_descriptor_t* pISO_639_language_descriptor = NULL);
+_CDL_EXPORT int MPEG2_PSI_present_ISO_639_language_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, ISO_639_language_descriptor_t* pISO_639_language_descriptor);
 
 /*TAG = PSI_SYSTEM_CLOCK_DESCRIPTOR			0x0B*/
 _CDL_EXPORT int MPEG2_PSI_decode_system_clock_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, system_clock_descriptor_t* psystem_clock_descriptor = NULL);

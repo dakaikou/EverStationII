@@ -364,66 +364,68 @@ int MPEG2_PSI_present_CA_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* px
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
 //备注：2000.11 chendelin
-int MPEG2_PSI_decode_ISO_639_language_descriptor(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, ISO_639_language_descriptor_t* p639LanguageDescriptor)
+int MPEG2_PSI_decode_ISO_639_language_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, ISO_639_language_descriptor_t* p639LanguageDescriptor)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
-	//char   pszTemp[64];
-	//BITS_t bs;
 
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
-	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "ISO_639_language_descriptor()");
-	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
+	{
+		ISO_639_language_descriptor_t* pISO_639_language_descriptor = (p639LanguageDescriptor == NULL) ? new ISO_639_language_descriptor_t : p639LanguageDescriptor;
 
-	//	ISO_639_language_descriptor_t* pISO_639_language_descriptor = (p639LanguageDescriptor == NULL) ? new ISO_639_language_descriptor_t : p639LanguageDescriptor;
-	//	memset(pISO_639_language_descriptor, 0x00, sizeof(ISO_639_language_descriptor_t));
+		rtcode = MPEG2_PSI_decode_ISO_639_language_descriptor(buf, length, pISO_639_language_descriptor);
+		MPEG2_PSI_present_ISO_639_language_descriptor_to_xml(pxmlDoc, pxmlParentNode, pISO_639_language_descriptor);
 
-	//	BITS_map(&bs, buf, length);
+		if (p639LanguageDescriptor == NULL)
+		{
+			delete pISO_639_language_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
-	//	pISO_639_language_descriptor->descriptor_tag = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pISO_639_language_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+	return rtcode;
+}
 
-	//	pISO_639_language_descriptor->descriptor_length = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pISO_639_language_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+int MPEG2_PSI_present_ISO_639_language_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, ISO_639_language_descriptor_t* pISO_639_language_descriptor)
+{
+	int		rtcode = SECTION_PARSE_NO_ERROR;
+	char	pszField[48];
 
-	//	int N = 0;
-	//	if (pISO_639_language_descriptor->descriptor_length > 0)
-	//	{
-	//		tinyxml2::XMLElement* pxmlLangsLoopNode = pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "LANGUAGES()");
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pISO_639_language_descriptor != NULL))
+	{
+		sprintf_s(pszField, sizeof(pszField), "ISO_639_language_descriptor(tag: 0x%02X)", pISO_639_language_descriptor->descriptor_tag);
 
-	//		int loop_length = pISO_639_language_descriptor->descriptor_length;
-	//		while ((loop_length >= 4) && (N < MAX_LANGUAGES))
-	//		{
-	//			memcpy(pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code_char, bs.p_cur, 3);
-	//			pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code_char[3] = '\0';
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, pISO_639_language_descriptor->descriptor_length + 2);
 
-	//			tinyxml2::XMLElement* pxmlLangNode = pxmlDoc->NewKeyValuePairElement(pxmlLangsLoopNode, "LANGUAGE()");
-	//			pxmlLangNode->SetAttribute("comment", pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code_char);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pISO_639_language_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-	//			pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code = BITS_get(&bs, 24);
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLangNode, "ISO_639_language_code", pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code, 24, "uimsbf", pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code_char, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pISO_639_language_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-	//			pISO_639_language_descriptor->ISO_639_language[N].audio_type = BITS_get(&bs, 8);
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLangNode, "audio_type", pISO_639_language_descriptor->ISO_639_language[N].audio_type, 8, "uimsbf", NULL, &bs);
+		if (pISO_639_language_descriptor->descriptor_length > 0)
+		{
+			sprintf_s(pszField, sizeof(pszField), "LANGUAGES(%d 个)", pISO_639_language_descriptor->N);
+			XMLElement* pxmlLangsLoopNode = pxmlDoc->NewBranchElement(pxmlDescriptorNode, pszField, NULL, pISO_639_language_descriptor->descriptor_length);
 
-	//			N++;
-	//			loop_length -= 4;
-	//		}
-	//	}
-	//	pISO_639_language_descriptor->N = N;
+			for (int lang_index = 0; lang_index < pISO_639_language_descriptor->N; lang_index++)
+			{
+				sprintf_s(pszField, sizeof(pszField), "LANGUAGE[%d]()", lang_index);
 
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", pISO_639_language_descriptor->descriptor_tag, length);
-	//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
+				XMLElement* pxmlLangNode = pxmlDoc->NewBranchElement(pxmlLangsLoopNode, pszField, pISO_639_language_descriptor->ISO_639_language[lang_index].ISO_639_language_code_char, 4);
 
-	//	if (p639LanguageDescriptor == NULL)
-	//	{
-	//		delete pISO_639_language_descriptor;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	//}
+				pxmlDoc->NewElementForByteBuf(pxmlLangNode, "ISO_639_language_code[ ]", 
+					(uint8_t*)pISO_639_language_descriptor->ISO_639_language[lang_index].ISO_639_language_code_char, 3, 
+					pISO_639_language_descriptor->ISO_639_language[lang_index].ISO_639_language_code_char);
+
+				pxmlDoc->NewElementForBits(pxmlLangNode, "audio_type", pISO_639_language_descriptor->ISO_639_language[lang_index].audio_type, 8, "uimsbf", NULL);
+			}
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
 	return rtcode;
 }
@@ -436,51 +438,52 @@ int MPEG2_PSI_decode_ISO_639_language_descriptor(uint8_t* buf, int length, HALFo
 int MPEG2_PSI_decode_system_clock_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, system_clock_descriptor_t* pSystemClockDescriptor)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
-	//char  pszTemp[64];
-	//BITS_t bs;
 
-	//assert(length == 4);
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 4))
-	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "system_clock_descriptor()");
-	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 4))
+	{
+		system_clock_descriptor_t* psystem_clock_descriptor = (pSystemClockDescriptor == NULL) ? new system_clock_descriptor_t : pSystemClockDescriptor;
 
-	//	uint8_t descriptor_tag = buf[0];
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", descriptor_tag, length);
-	//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
+		rtcode = MPEG2_PSI_decode_system_clock_descriptor(buf, length, psystem_clock_descriptor);
+		MPEG2_PSI_present_system_clock_descriptor_to_xml(pxmlDoc, pxmlParentNode, psystem_clock_descriptor);
 
-	//	system_clock_descriptor_t* psystem_clock_descriptor = (pSystemClockDescriptor == NULL) ? new system_clock_descriptor_t : pSystemClockDescriptor;
-	//	memset(psystem_clock_descriptor, 0x00, sizeof(system_clock_descriptor_t));
+		if (pSystemClockDescriptor == NULL)
+		{
+			delete psystem_clock_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
-	//	BITS_map(&bs, buf, length);
+	return rtcode;
+}
 
-	//	psystem_clock_descriptor->descriptor_tag = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", psystem_clock_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+int MPEG2_PSI_present_system_clock_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, system_clock_descriptor_t* psystem_clock_descriptor)
+{
+	int		rtcode = SECTION_PARSE_NO_ERROR;
+	char	pszField[48];
 
-	//	psystem_clock_descriptor->descriptor_length = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", psystem_clock_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (psystem_clock_descriptor != NULL))
+	{
+		sprintf_s(pszField, sizeof(pszField), "system_clock_descriptor(tag: 0x%02X)", psystem_clock_descriptor->descriptor_tag);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, psystem_clock_descriptor->descriptor_length + 2);
 
-	//	psystem_clock_descriptor->external_clock_reference_indicator = BITS_get(&bs, 1);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "external_clock_reference_indicator", psystem_clock_descriptor->external_clock_reference_indicator, 1, "bslbf", NULL, &bs);
-	//	psystem_clock_descriptor->reserved0 = BITS_get(&bs, 1);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "reserved", psystem_clock_descriptor->reserved0, 1, "bslbf", NULL, &bs);
-	//	psystem_clock_descriptor->clock_accuracy_integer = BITS_get(&bs, 6);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "clock_accuracy_integer", psystem_clock_descriptor->clock_accuracy_integer, 6, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", psystem_clock_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-	//	psystem_clock_descriptor->clock_accuracy_exponent = BITS_get(&bs, 3);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "clock_accuracy_exponent", psystem_clock_descriptor->clock_accuracy_exponent, 3, "uimsbf", NULL, &bs);
-	//	psystem_clock_descriptor->reserved1 = BITS_get(&bs, 5);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "reserved", psystem_clock_descriptor->reserved1, 5, "bslbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", psystem_clock_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-	//	if (pSystemClockDescriptor == NULL)
-	//	{
-	//		delete psystem_clock_descriptor;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	//}
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "external_clock_reference_indicator", psystem_clock_descriptor->external_clock_reference_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "reserved", psystem_clock_descriptor->reserved0, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "clock_accuracy_integer", psystem_clock_descriptor->clock_accuracy_integer, 6, "uimsbf", NULL);
+
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "clock_accuracy_exponent", psystem_clock_descriptor->clock_accuracy_exponent, 3, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "reserved", psystem_clock_descriptor->reserved1, 5, "bslbf", NULL);
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
 	return rtcode;
 }

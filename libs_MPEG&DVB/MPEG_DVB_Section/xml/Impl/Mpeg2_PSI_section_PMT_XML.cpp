@@ -76,9 +76,9 @@ int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_se
 				case MPEG2_PSI_CA_DESCRIPTOR:
 					MPEG2_PSI_decode_CA_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
 					break;
-					//case MPEG2_PSI_SYSTEM_CLOCK_DESCRIPTOR:
-					//	MPEG2_PSI_decode_system_clock_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-					//	break;
+				case MPEG2_PSI_SYSTEM_CLOCK_DESCRIPTOR:
+					MPEG2_PSI_decode_system_clock_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+					break;
 					//case MPEG2_PSI_MULTIPLEX_BUFFER_UTILIZATION_DESCRIPTOR:
 					//	MPEG2_PSI_decode_multiplex_buffer_utilization_descriptor(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
 					//	break;
@@ -144,9 +144,9 @@ int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_se
 							//case MPEG2_PSI_DATA_STREAM_ALIGNMENT_DESCRIPTOR:
 							//	MPEG2_PSI_decode_data_stream_alignment_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
 							//	break;
-							//case MPEG2_PSI_ISO_639_LANGUAGE_DESCRIPTOR:
-							//	MPEG2_PSI_decode_ISO_639_language_descriptor(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-							//	break;
+						case MPEG2_PSI_ISO_639_LANGUAGE_DESCRIPTOR:
+							MPEG2_PSI_decode_ISO_639_language_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlESInfoNode);
+							break;
 							//case MPEG2_PSI_MAXIMUM_BITRATE_DESCRIPTOR:
 							//	MPEG2_PSI_decode_maximum_bitrate_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
 							//	break;
@@ -156,9 +156,9 @@ int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_se
 							//case MPEG2_DSMCC_ASSOCIATION_TAG_DESCRIPTOR:
 							//	MPEG2_DSMCC_decode_association_tag_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
 							//	break;
-							//case DVB_SI_STREAM_IDENTIFIER_DESCRIPTOR:
-							//	DVB_SI_decode_stream_identifier_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-							//	break;
+						case DVB_SI_STREAM_IDENTIFIER_DESCRIPTOR:
+							DVB_SI_decode_stream_identifier_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlESInfoNode);
+							break;
 							//case DVB_SI_TELETEXT_DESCRIPTOR:
 							//	DVB_SI_decode_teletext_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
 							//	break;
