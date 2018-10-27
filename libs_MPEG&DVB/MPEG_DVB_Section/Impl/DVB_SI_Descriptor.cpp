@@ -548,11 +548,11 @@ int DVB_SI_decode_short_event_descriptor(uint8_t* buf, int length, short_event_d
 		pshort_event_descriptor->descriptor_tag = *buf++; 
 		pshort_event_descriptor->descriptor_length = *buf++;
 
-		pshort_event_descriptor->ISO_639_language_code = buf[0];
-		pshort_event_descriptor->ISO_639_language_code <<= 8;
-		pshort_event_descriptor->ISO_639_language_code |= buf[1];
-		pshort_event_descriptor->ISO_639_language_code <<= 8;
-		pshort_event_descriptor->ISO_639_language_code |= buf[2];
+		//pshort_event_descriptor->ISO_639_language_code = buf[0];
+		//pshort_event_descriptor->ISO_639_language_code <<= 8;
+		//pshort_event_descriptor->ISO_639_language_code |= buf[1];
+		//pshort_event_descriptor->ISO_639_language_code <<= 8;
+		//pshort_event_descriptor->ISO_639_language_code |= buf[2];
 
 		memcpy(pshort_event_descriptor->ISO_639_language_code_char, buf, 3);
 		pshort_event_descriptor->ISO_639_language_code_char[3] = '\0';
@@ -849,44 +849,58 @@ S32 DVB_SI_decode_mosaic_descriptor(U8* buf, S32 length, pmosaic_descriptor_t pm
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
 //备注：2000.11 chendelin；
-S32 DVB_SI_decode_stream_identifier_descriptor(U8* buf, S32 length, pstream_identifier_descriptor_t pstream_identifier_descriptor)
+int DVB_SI_decode_stream_identifier_descriptor(uint8_t* buf, int length, stream_identifier_descriptor_t* pstream_identifier_descriptor)
 {
+	int rtcode = SECTION_PARSE_NO_ERROR;
+
 	if ((buf != NULL) &&
 		(length >= 2) &&
 		(pstream_identifier_descriptor != NULL))
 	{
+		memset(pstream_identifier_descriptor, 0x00, sizeof(stream_identifier_descriptor_t));
+
 		pstream_identifier_descriptor->descriptor_tag = *buf++;
 		pstream_identifier_descriptor->descriptor_length = *buf++;
 		pstream_identifier_descriptor->component_tag = *buf++;
 	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
+	}
 
-	return 0;
+	return rtcode;
 }
 
 //功能：解CA标识描述子				0x53
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-S32 DVB_SI_decode_CA_identifier_descriptor(U8* buf, S32 length, pCA_identifier_descriptor_t pCA_identifier_descriptor)
+int DVB_SI_decode_CA_identifier_descriptor(uint8_t* buf, int length, CA_identifier_descriptor_t* pCA_identifier_descriptor)
 {
-	S32 i;
+	int rtcode = SECTION_PARSE_NO_ERROR;
 
 	if ((buf != NULL) &&
 		(length >= 2) &&
 		(pCA_identifier_descriptor != NULL))
 	{
-		pCA_identifier_descriptor->descriptor_tag = *buf++; 
+		memset(pCA_identifier_descriptor, 0x00, sizeof(CA_identifier_descriptor_t));
+
+		pCA_identifier_descriptor->descriptor_tag = *buf++;
 		pCA_identifier_descriptor->descriptor_length = *buf++;
 
 		pCA_identifier_descriptor->N = pCA_identifier_descriptor->descriptor_length / 2;
 
-		for (i = 0; i < pCA_identifier_descriptor->N; i++)
+		for (int i = 0; i < pCA_identifier_descriptor->N; i++)
 		{
-			pCA_identifier_descriptor->CA_system_id[i] = *buf++ << 8;
-			pCA_identifier_descriptor->CA_system_id[i] |= *buf++;
+			pCA_identifier_descriptor->CA_system_ID[i] = *buf++ << 8;
+			pCA_identifier_descriptor->CA_system_ID[i] |= *buf++;
 		}
 	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
+	}
 
-	return 0;
+	return rtcode;
 }
 
 //功能：解内容描述子				0x54
@@ -934,16 +948,18 @@ S32 DVB_SI_decode_content_descriptor(U8* buf, S32 length, pcontent_descriptor_t 
 //功能：解家长级别描述子				0x55
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-S32 DVB_SI_decode_parental_rating_descriptor(U8* buf, S32 length, pparental_rating_descriptor_t pparental_rating_descriptor)
+int DVB_SI_decode_parental_rating_descriptor(uint8_t* buf, int length, parental_rating_descriptor_t* pparental_rating_descriptor)
 {	
-	S32 rtcode = SECTION_PARSE_UNKNOWN_ERROR;
-	S32 N = 0;
-	S32 loop_length;
+	int rtcode = SECTION_PARSE_UNKNOWN_ERROR;
+	int N = 0;
+	int loop_length;
 
 	if ((buf != NULL) &&
 		(length >= 2) &&
 		(pparental_rating_descriptor != NULL))
 	{
+		memset(pparental_rating_descriptor, 0x00, sizeof(parental_rating_descriptor_t));
+
 		pparental_rating_descriptor->descriptor_tag = *buf++;
 		pparental_rating_descriptor->descriptor_length = *buf++;
 
@@ -953,11 +969,11 @@ S32 DVB_SI_decode_parental_rating_descriptor(U8* buf, S32 length, pparental_rati
 		{
 			if (N < MAX_COUNTRIES)
 			{
-				pparental_rating_descriptor->country_code[N] = buf[0];
-				pparental_rating_descriptor->country_code[N] <<= 8;
-				pparental_rating_descriptor->country_code[N] |= buf[1];
-				pparental_rating_descriptor->country_code[N] <<= 8;
-				pparental_rating_descriptor->country_code[N] |= buf[2];
+				//pparental_rating_descriptor->country_code[N] = buf[0];
+				//pparental_rating_descriptor->country_code[N] <<= 8;
+				//pparental_rating_descriptor->country_code[N] |= buf[1];
+				//pparental_rating_descriptor->country_code[N] <<= 8;
+				//pparental_rating_descriptor->country_code[N] |= buf[2];
 
 				memcpy(pparental_rating_descriptor->country_code_char[N], buf, 3);
 				buf += 3;
@@ -1087,11 +1103,11 @@ S32 DVB_SI_decode_telephone_descriptor(U8* buf, S32 length, ptelephone_descripto
 //返回：LPVOID指针
 int DVB_SI_decode_local_time_offset_descriptor(uint8_t* buf, int length, local_time_offset_descriptor_t* plocal_time_offset_descriptor)
 {
-	S32		rtcode = SECTION_PARSE_NO_ERROR;
-	S32 N = 0;
-	S32 loop_length;
-	U8*		ptemp;
-	char   pszCountry[4];
+	int			rtcode = SECTION_PARSE_NO_ERROR;
+	int			N = 0;
+	int			loop_length;
+	uint8_t*	ptemp;
+	//char   pszCountry[4];
 
 	if ((buf != NULL) &&
 		(length >= 2) &&
@@ -1111,34 +1127,38 @@ int DVB_SI_decode_local_time_offset_descriptor(uint8_t* buf, int length, local_t
 			loop_length = plocal_time_offset_descriptor->descriptor_length;
 			while ((loop_length >= 13) && (N < MAX_LOCAL_TIME_AREA))
 			{
-				memcpy(pszCountry, ptemp, 3);
-				pszCountry[3] = '\0';
+				//memcpy(pszCountry, ptemp, 3);
+				//pszCountry[3] = '\0';
 
-				unsigned int country_code = *ptemp++;
-				country_code <<= 8;
-				country_code |= *ptemp++;
-				country_code <<= 8;
-				country_code |= *ptemp++;
-				plocal_time_offset_descriptor->local_time_offset[N].country_code = country_code;
-				plocal_time_offset_descriptor->local_time_offset[N].country_region_id = (*ptemp & 0xFC) >> 2;
-				plocal_time_offset_descriptor->local_time_offset[N].reserved = (*ptemp & 0x02) >> 1;
-				plocal_time_offset_descriptor->local_time_offset[N].local_time_offset_polarity = (*ptemp++ & 0x01);
-				plocal_time_offset_descriptor->local_time_offset[N].local_time_offset = *ptemp++ << 8;
-				plocal_time_offset_descriptor->local_time_offset[N].local_time_offset |= *ptemp++;
+				//unsigned int country_code = *ptemp++;
+				//country_code <<= 8;
+				//country_code |= *ptemp++;
+				//country_code <<= 8;
+				//country_code |= *ptemp++;
+				memcpy(plocal_time_offset_descriptor->st[N].country_code_char, ptemp, 3);
+				plocal_time_offset_descriptor->st[N].country_code_char[3] = '\0';
+				ptemp += 3;
 
-				int64_t time_of_change = *ptemp++;
-				time_of_change <<= 8;
-				time_of_change |= *ptemp++;
-				time_of_change <<= 8;
-				time_of_change |= *ptemp++;
-				time_of_change <<= 8;
-				time_of_change |= *ptemp++;
-				time_of_change <<= 8;
-				time_of_change |= *ptemp++;
-				plocal_time_offset_descriptor->local_time_offset[N].time_of_change = time_of_change;
+				plocal_time_offset_descriptor->st[N].country_region_id = (*ptemp & 0xFC) >> 2;
+				plocal_time_offset_descriptor->st[N].reserved = (*ptemp & 0x02) >> 1;
+				plocal_time_offset_descriptor->st[N].local_time_offset_polarity = (*ptemp++ & 0x01);
 
-				plocal_time_offset_descriptor->local_time_offset[N].next_time_offset = *ptemp++ << 8;
-				plocal_time_offset_descriptor->local_time_offset[N].next_time_offset |= *ptemp++;
+				plocal_time_offset_descriptor->st[N].local_time_offset = *ptemp++ << 8;
+				plocal_time_offset_descriptor->st[N].local_time_offset |= *ptemp++;
+
+				uint64_t time_of_change = *ptemp++;
+				time_of_change <<= 8;
+				time_of_change |= *ptemp++;
+				time_of_change <<= 8;
+				time_of_change |= *ptemp++;
+				time_of_change <<= 8;
+				time_of_change |= *ptemp++;
+				time_of_change <<= 8;
+				time_of_change |= *ptemp++;
+				plocal_time_offset_descriptor->st[N].time_of_change = time_of_change;
+
+				plocal_time_offset_descriptor->st[N].next_time_offset = *ptemp++ << 8;
+				plocal_time_offset_descriptor->st[N].next_time_offset |= *ptemp++;
 
 				loop_length -= 13;
 				N++;
@@ -1270,53 +1290,48 @@ S32 DVB_SI_decode_terrestrial_delivery_system_descriptor(U8* buf, S32 length, pt
 //功能：解多语言网络名称描述子				0x5B
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-S32 DVB_SI_decode_multilingual_network_name_descriptor(U8* buf, S32 length, pmultilingual_network_name_descriptor_t pmultilingual_network_name_descriptor)
+int DVB_SI_decode_multilingual_network_name_descriptor(uint8_t* buf, int length, multilingual_network_name_descriptor_t* pmultilingual_network_name_descriptor)
 {
-	S32 rtcode = SECTION_PARSE_UNKNOWN_ERROR;
-	S32 N = 0;
-	S32 loop_length;
-	S32 copy_length;
+	int rtcode = SECTION_PARSE_UNKNOWN_ERROR;
+	int N = 0;
+	int loop_length;
+	int copy_length;
 
 	if ((buf != NULL) &&
 		(length >= 2) &&
 		(pmultilingual_network_name_descriptor != NULL))
 	{
+		memset(pmultilingual_network_name_descriptor, 0x00, sizeof(multilingual_network_name_descriptor_t));
+
 		pmultilingual_network_name_descriptor->descriptor_tag = *buf++;
 		pmultilingual_network_name_descriptor->descriptor_length = *buf++;
 
 		loop_length = pmultilingual_network_name_descriptor->descriptor_length;
-		while (loop_length >= 4)
+		while ((loop_length >= 4) && (N < MAX_LANGUAGES))
 		{
-			if (N < MAX_LANGUAGES)
-			{
-				pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code = buf[0];
-				pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code <<= 8;
-				pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code |= buf[1];
-				pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code <<= 8;
-				pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code |= buf[2];
+			//pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code = buf[0];
+			//pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code <<= 8;
+			//pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code |= buf[1];
+			//pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code <<= 8;
+			//pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code |= buf[2];
 
-				memcpy(pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code_char, buf, 3);
-				pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code_char[3] = '\0';
-				buf += 3;
+			memcpy(pmultilingual_network_name_descriptor->st[N].ISO_639_language_code_char, buf, 3);
+			pmultilingual_network_name_descriptor->st[N].ISO_639_language_code_char[3] = '\0';
+			buf += 3;
 
-				pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_length = *buf++;
+			pmultilingual_network_name_descriptor->st[N].network_name_length = *buf++;
 
-				copy_length = min(pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_length, MAX_NETWORK_NAME_LENGTH);
+			copy_length = min(pmultilingual_network_name_descriptor->st[N].network_name_length, MAX_NETWORK_NAME_LENGTH);
 
-				memcpy(pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_char, buf, copy_length);
-				pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_char[copy_length] = '\0';
+			memcpy(pmultilingual_network_name_descriptor->st[N].network_name_char, buf, copy_length);
+			pmultilingual_network_name_descriptor->st[N].network_name_char[copy_length] = '\0';
 
-				pmultilingual_network_name_descriptor->LANGUAGE[N].trimmed_network_name_char = DVB_SI_StringPrefixTrim(pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_char);
+			pmultilingual_network_name_descriptor->st[N].trimmed_network_name_char = DVB_SI_StringPrefixTrim(pmultilingual_network_name_descriptor->st[N].network_name_char);
 
-				buf += pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_length;
+			buf += pmultilingual_network_name_descriptor->st[N].network_name_length;
 
-				N ++;
-			}
-			else
-			{
-				break;
-			}
-			loop_length -= (4 + pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_length);
+			loop_length -= (4 + pmultilingual_network_name_descriptor->st[N].network_name_length);
+			N ++;
 		}
 
 		pmultilingual_network_name_descriptor->N = N;
@@ -1330,134 +1345,136 @@ S32 DVB_SI_decode_multilingual_network_name_descriptor(U8* buf, S32 length, pmul
 //功能：解多语言业务群名称描述子			0x5C
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-S32 DVB_SI_decode_multilingual_bouquet_name_descriptor(U8* buf, S32 length, pmultilingual_bouquet_name_descriptor_t pmultilingual_bouquet_name_descriptor)
+int DVB_SI_decode_multilingual_bouquet_name_descriptor(uint8_t* buf, int length, multilingual_bouquet_name_descriptor_t* pmultilingual_bouquet_name_descriptor)
 {
-	S32 N = 0;
-	S32 loop_length;
-	S32 copy_length;
+	int rtcode = SECTION_PARSE_NO_ERROR;
+	int N = 0;
+	int loop_length;
+	int copy_length;
 
 	if ((buf != NULL) &&
 		(length >= 2) &&
 		(pmultilingual_bouquet_name_descriptor != NULL))
 	{
+		memset(pmultilingual_bouquet_name_descriptor, 0x00, sizeof(multilingual_bouquet_name_descriptor_t));
+
 		pmultilingual_bouquet_name_descriptor->descriptor_tag = *buf++;
 		pmultilingual_bouquet_name_descriptor->descriptor_length = *buf++;
 
 		loop_length = pmultilingual_bouquet_name_descriptor->descriptor_length;
-		while (loop_length >= 4)
+		while ((loop_length >= 4) && (N < MAX_LANGUAGES))
 		{
-			if (N < MAX_LANGUAGES)
-			{
-				pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code = buf[0];
-				pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code <<= 8;
-				pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code |= buf[1];
-				pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code <<= 8;
-				pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code |= buf[2];
+			//pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code = buf[0];
+			//pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code <<= 8;
+			//pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code |= buf[1];
+			//pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code <<= 8;
+			//pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code |= buf[2];
 
-				memcpy(pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code_char, buf, 3);
-				pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code_char[3] = '\0';
-				buf += 3;
+			memcpy(pmultilingual_bouquet_name_descriptor->st[N].ISO_639_language_code_char, buf, 3);
+			pmultilingual_bouquet_name_descriptor->st[N].ISO_639_language_code_char[3] = '\0';
+			buf += 3;
 
-				pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_length = *buf++;
-				copy_length = min(pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_length, MAX_BOUQUET_NAME_LENGTH);
+			pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_length = *buf++;
+			copy_length = min(pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_length, MAX_BOUQUET_NAME_LENGTH);
 
-				memcpy(pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_char, buf, copy_length);
-				pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_char[copy_length] = '\0';
+			memcpy(pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_char, buf, copy_length);
+			pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_char[copy_length] = '\0';
 
-				pmultilingual_bouquet_name_descriptor->LANGUAGE[N].trimmed_bouquet_name_char = DVB_SI_StringPrefixTrim(pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_char);
+			pmultilingual_bouquet_name_descriptor->st[N].trimmed_bouquet_name_char = DVB_SI_StringPrefixTrim(pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_char);
 
-				buf += pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_length;
+			buf += pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_length;
 
-				N ++;
-			}
-			else
-			{
-				break;
-			}
-			loop_length -= (4 + pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_length);
+			loop_length -= (4 + pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_length);
+			N++;
 		}
 
 		pmultilingual_bouquet_name_descriptor->N = N;
 	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
+	}
 
-	return 0;
+	return rtcode;
 }
 
 //功能：解多语言业务名称描述子				0x5D
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-S32 DVB_SI_decode_multilingual_service_name_descriptor(U8* buf, S32 length, pmultilingual_service_name_descriptor_t pmultilingual_service_name_descriptor)
+int DVB_SI_decode_multilingual_service_name_descriptor(uint8_t* buf, int length, multilingual_service_name_descriptor_t* pmultilingual_service_name_descriptor)
 {
-	S32 N = 0;
-	S32 loop_length;
-	S32	copy_length;
+	int rtcode = SECTION_PARSE_NO_ERROR;
+	int N = 0;
+	int loop_length;
+	int	copy_length;
 
 	if ((buf != NULL) &&
 		(length >= 2) &&
 		(pmultilingual_service_name_descriptor != NULL))
 	{
+		memset(pmultilingual_service_name_descriptor, 0x00, sizeof(multilingual_service_name_descriptor_t));
+
 		pmultilingual_service_name_descriptor->descriptor_tag = *buf++;
 		pmultilingual_service_name_descriptor->descriptor_length = *buf++;
 
 		loop_length = pmultilingual_service_name_descriptor->descriptor_length;
-		while (loop_length >= 4)
+		while ((loop_length >= 4) && (N < MAX_LANGUAGES))
 		{
-			if (N < MAX_LANGUAGES)
-			{
-				pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code = buf[0];
-				pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code <<= 8;
-				pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code |= buf[1];
-				pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code <<= 8;
-				pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code |= buf[2];
+			//pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code = buf[0];
+			//pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code <<= 8;
+			//pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code |= buf[1];
+			//pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code <<= 8;
+			//pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code |= buf[2];
 
-				memcpy(pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code_char, buf, 3);
-				pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code_char[3] = '\0';
-				buf += 3;
+			memcpy(pmultilingual_service_name_descriptor->st[N].ISO_639_language_code_char, buf, 3);
+			pmultilingual_service_name_descriptor->st[N].ISO_639_language_code_char[3] = '\0';
+			buf += 3;
 
-				pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_length = *buf++;
-				copy_length = min(pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_length, MAX_SERVICE_PROVIDER_NAME_LENGTH);
+			pmultilingual_service_name_descriptor->st[N].service_provider_name_length = *buf++;
+			copy_length = min(pmultilingual_service_name_descriptor->st[N].service_provider_name_length, MAX_SERVICE_PROVIDER_NAME_LENGTH);
 
-				memcpy(pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_char, buf, copy_length);
-				pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_char[copy_length] = '\0';
-				pmultilingual_service_name_descriptor->LANGUAGE[N].trimmed_service_provider_name_char = DVB_SI_StringPrefixTrim(pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_char);
-				buf += pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_length;
+			memcpy(pmultilingual_service_name_descriptor->st[N].service_provider_name_char, buf, copy_length);
+			pmultilingual_service_name_descriptor->st[N].service_provider_name_char[copy_length] = '\0';
+			pmultilingual_service_name_descriptor->st[N].trimmed_service_provider_name_char = DVB_SI_StringPrefixTrim(pmultilingual_service_name_descriptor->st[N].service_provider_name_char);
+			buf += pmultilingual_service_name_descriptor->st[N].service_provider_name_length;
 
-				pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_length = *buf++;
-				copy_length = min(pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_length, MAX_SERVICE_NAME_LENGTH);
+			pmultilingual_service_name_descriptor->st[N].service_name_length = *buf++;
+			copy_length = min(pmultilingual_service_name_descriptor->st[N].service_name_length, MAX_SERVICE_NAME_LENGTH);
 
-				memcpy(pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_char, buf, copy_length);
-				pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_char[copy_length] = '\0';
-				pmultilingual_service_name_descriptor->LANGUAGE[N].trimmed_service_name_char = DVB_SI_StringPrefixTrim(pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_char);
-				buf += pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_length;
+			memcpy(pmultilingual_service_name_descriptor->st[N].service_name_char, buf, copy_length);
+			pmultilingual_service_name_descriptor->st[N].service_name_char[copy_length] = '\0';
+			pmultilingual_service_name_descriptor->st[N].trimmed_service_name_char = DVB_SI_StringPrefixTrim(pmultilingual_service_name_descriptor->st[N].service_name_char);
+			buf += pmultilingual_service_name_descriptor->st[N].service_name_length;
 
-				N ++;
-			}
-			else
-			{
-				break;
-			}
-
-			loop_length -= 5 + pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_length + pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_length;
+			loop_length -= (5 + pmultilingual_service_name_descriptor->st[N].service_name_length + pmultilingual_service_name_descriptor->st[N].service_provider_name_length);
+			N ++;
 		}
 
 		pmultilingual_service_name_descriptor->N = N;
 	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
+	}
 
-	return 0;
+	return rtcode;
 }
 
 
 //功能：解多语言组成描述子					0x5E
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-S32 DVB_SI_decode_multilingual_component_descriptor(U8* buf, S32 length, pmultilingual_component_descriptor_t pmultilingual_component_descriptor)
+int DVB_SI_decode_multilingual_component_descriptor(uint8_t* buf, int length, multilingual_component_descriptor_t* pmultilingual_component_descriptor)
 {
-	S32	copy_length;
-	S32 loop_length;
-	S32 N = 0;
+	int rtcode = SECTION_PARSE_NO_ERROR;
+	int	copy_length;
+	int loop_length;
+	int N = 0;
 
 	if ((buf != NULL) && (length >= 2) && (pmultilingual_component_descriptor != NULL))
 	{
+		memset(pmultilingual_component_descriptor, 0x00, sizeof(multilingual_component_descriptor_t));
+
 		pmultilingual_component_descriptor->descriptor_tag = *buf++;
 		pmultilingual_component_descriptor->descriptor_length = *buf++;
 
@@ -1465,43 +1482,39 @@ S32 DVB_SI_decode_multilingual_component_descriptor(U8* buf, S32 length, pmultil
 
 		loop_length = pmultilingual_component_descriptor->descriptor_length - 1;
 
-		while (loop_length > 0)
+		while ((loop_length >= 4) && (N < MAX_LANGUAGES))
 		{
-			if (N < MAX_LANGUAGES)
-			{
-				pmultilingual_component_descriptor->ISO_639_language_code[N] = buf[0];
-				pmultilingual_component_descriptor->ISO_639_language_code[N] <<= 8;
-				pmultilingual_component_descriptor->ISO_639_language_code[N] |= buf[1];
-				pmultilingual_component_descriptor->ISO_639_language_code[N] <<= 8;
-				pmultilingual_component_descriptor->ISO_639_language_code[N] |= buf[2];
+			//pmultilingual_component_descriptor->ISO_639_language_code[N] = buf[0];
+			//pmultilingual_component_descriptor->ISO_639_language_code[N] <<= 8;
+			//pmultilingual_component_descriptor->ISO_639_language_code[N] |= buf[1];
+			//pmultilingual_component_descriptor->ISO_639_language_code[N] <<= 8;
+			//pmultilingual_component_descriptor->ISO_639_language_code[N] |= buf[2];
 
-				memcpy(pmultilingual_component_descriptor->ISO_639_language_code_char[N], buf, 3);
-				pmultilingual_component_descriptor->ISO_639_language_code_char[N][3] = '\0';
-				buf += 3;
+			memcpy(pmultilingual_component_descriptor->st[N].ISO_639_language_code_char, buf, 3);
+			pmultilingual_component_descriptor->st[N].ISO_639_language_code_char[3] = '\0';
+			buf += 3;
 
-				pmultilingual_component_descriptor->text_description_length[N] = *buf++;
+			pmultilingual_component_descriptor->st[N].text_description_length = *buf++;
 
-				copy_length = (pmultilingual_component_descriptor->text_description_length[N] < MAX_COMPONENT_TEXT_LENGTH) ? 
-										pmultilingual_component_descriptor->text_description_length[N] : MAX_COMPONENT_TEXT_LENGTH;
+			copy_length = (pmultilingual_component_descriptor->st[N].text_description_length < MAX_COMPONENT_TEXT_LENGTH) ?
+									pmultilingual_component_descriptor->st[N].text_description_length : MAX_COMPONENT_TEXT_LENGTH;
 
-				memcpy(pmultilingual_component_descriptor->text_char[N], buf, copy_length);
-				pmultilingual_component_descriptor->text_char[N][copy_length] = '\0';
-				buf += pmultilingual_component_descriptor->text_description_length[N];
+			memcpy(pmultilingual_component_descriptor->st[N].text_char, buf, copy_length);
+			pmultilingual_component_descriptor->st[N].text_char[copy_length] = '\0';
+			buf += pmultilingual_component_descriptor->st[N].text_description_length;
 
-				N ++;
-			}
-			else
-			{
-				break;
-			}
-
-			loop_length -= 4 + pmultilingual_component_descriptor->text_description_length[N];
+			loop_length -= (4 + pmultilingual_component_descriptor->st[N].text_description_length);
+			N ++;
 		}
 
 		pmultilingual_component_descriptor->N = N;
 	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
+	}
 
-	return 0;
+	return rtcode;
 }
 
 //SI_PRIVATE_DATA_SPECIFIER_DESCRIPTOR			0x5F

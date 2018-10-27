@@ -92,18 +92,18 @@ int DVB_SI_SDT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, service_description_
 
 						switch (descriptor_tag)
 						{
-							//case DVB_SI_BOUQUET_NAME_DESCRIPTOR:
-							//	DVB_SI_decode_bouquet_name_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-							//	break;
-							//case DVB_SI_SERVICE_DESCRIPTOR:
-							//	DVB_SI_decode_service_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode, &service_descriptor);
-							//	break;
-							//case DVB_SI_CA_IDENTIFIER_DESCRIPTOR:
-							//	DVB_SI_decode_CA_identifier_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-							//	break;
-							//case DVB_SI_MULTILINGUAL_SERVICE_NAME_DESCRIPTOR:
-							//	DVB_SI_decode_multilingual_service_name_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-							//	break;
+						case DVB_SI_BOUQUET_NAME_DESCRIPTOR:
+							DVB_SI_decode_bouquet_name_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlServiceDescriptorsLoopNode);
+							break;
+						case DVB_SI_SERVICE_DESCRIPTOR:
+							DVB_SI_decode_service_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlServiceDescriptorsLoopNode);
+							break;
+						case DVB_SI_CA_IDENTIFIER_DESCRIPTOR:
+							DVB_SI_decode_CA_identifier_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlServiceDescriptorsLoopNode);
+							break;
+						case DVB_SI_MULTILINGUAL_SERVICE_NAME_DESCRIPTOR:
+							DVB_SI_decode_multilingual_service_name_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlServiceDescriptorsLoopNode);
+							break;
 						case DVB_SI_PRIVATE_DATA_SPECIFIER_DESCRIPTOR:
 							DVB_SI_decode_private_data_specifier_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlServiceDescriptorsLoopNode);
 							break;

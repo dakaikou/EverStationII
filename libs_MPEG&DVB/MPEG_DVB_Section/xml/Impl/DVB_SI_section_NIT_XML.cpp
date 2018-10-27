@@ -68,9 +68,9 @@ int DVB_SI_NIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, network_information_
 				case DVB_SI_NETWORK_NAME_DESCRIPTOR:
 					DVB_SI_decode_network_name_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlNetworkDescriptorsNode);
 					break;
-					//case DVB_SI_MULTILINGUAL_NETWORK_NAME_DESCRIPTOR:
-					//	DVB_SI_decode_multilingual_network_name_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-					//	break;
+				case DVB_SI_MULTILINGUAL_NETWORK_NAME_DESCRIPTOR:
+					DVB_SI_decode_multilingual_network_name_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlNetworkDescriptorsNode);
+					break;
 				default:
 					MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlNetworkDescriptorsNode, pnit_section->network_descriptors + descriptor_index);
 					break;

@@ -57,9 +57,9 @@ int DVB_SI_TOT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, time_offset_section_
 
 				switch (descriptor_tag)
 				{
-					//case DVB_SI_LOCAL_TIME_OFFSET_DESCRIPTOR:
-					//	DVB_SI_decode_local_time_offset_descriptor_to_xml(ptemp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-					//	break;
+				case DVB_SI_LOCAL_TIME_OFFSET_DESCRIPTOR:
+					DVB_SI_decode_local_time_offset_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlDescriptorsLoopNode);
+					break;
 				default:
 					MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlDescriptorsLoopNode, ptot_section->descriptors + descriptor_index);
 					break;

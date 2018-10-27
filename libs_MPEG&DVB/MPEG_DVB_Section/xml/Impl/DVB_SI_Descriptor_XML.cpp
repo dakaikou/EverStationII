@@ -326,43 +326,22 @@ int DVB_SI_decode_bouquet_name_descriptor_to_xml(uint8_t* buf, int length, HALFo
 int DVB_SI_present_bouquet_name_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, bouquet_name_descriptor_t* pbouquet_name_descriptor)
 {
 	int  rtcode = SECTION_PARSE_NO_ERROR;
+	char pszField[48];
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pbouquet_name_descriptor != NULL))
 	{
-		//tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "bouquet_name_descriptor()");
+		sprintf_s(pszField, sizeof(pszField), "bouquet_name_descriptor(tag: 0x%02X)", pbouquet_name_descriptor->descriptor_tag);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, pbouquet_name_descriptor->trimmed_bouquet_name, pbouquet_name_descriptor->descriptor_length + 2);
 
-		//pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pbouquet_name_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-		//bouquet_name_descriptor_t* pbouquet_name_descriptor = (pBouquetNameDescriptor == NULL) ? new bouquet_name_descriptor_t : pBouquetNameDescriptor;
-		//memset(pbouquet_name_descriptor, 0x00, sizeof(bouquet_name_descriptor_t));
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pbouquet_name_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-		//BITS_map(&bs, buf, length);
-
-		//pbouquet_name_descriptor->descriptor_tag = BITS_get(&bs, 8);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pbouquet_name_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
-
-		//pbouquet_name_descriptor->descriptor_length = BITS_get(&bs, 8);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pbouquet_name_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
-
-		//if ((pbouquet_name_descriptor->descriptor_length > 0) && (pbouquet_name_descriptor->descriptor_length <= (length - 2)))
-		//{
-		//	copy_length = min(pbouquet_name_descriptor->descriptor_length, MAX_BOUQUET_NAME_LENGTH);
-		//	memcpy(pbouquet_name_descriptor->bouquet_name, bs.p_cur, copy_length);
-		//	pbouquet_name_descriptor->bouquet_name[copy_length] = '\0';
-
-		//	pbouquet_name_descriptor->trimmed_bouquet_name = DVB_SI_StringPrefixTrim(pbouquet_name_descriptor->bouquet_name);
-		//	BITS_byteSkip(&bs, pbouquet_name_descriptor->descriptor_length);
-
-		//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "bouquet_name", (uint8_t*)pbouquet_name_descriptor->bouquet_name,
-		//		copy_length, pbouquet_name_descriptor->trimmed_bouquet_name, &bs);
-
-		//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节, %s", pbouquet_name_descriptor->descriptor_tag, length, pbouquet_name_descriptor->trimmed_bouquet_name);
-		//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
-		//}
-		//else
-		//{
-		//	pxmlDescriptorNode->SetAttribute("error", "descriptor_length parameter error!");
-		//}
+		if (pbouquet_name_descriptor->descriptor_length > 0)
+		{
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "bouquet_name[ ]", (uint8_t*)pbouquet_name_descriptor->bouquet_name,
+				pbouquet_name_descriptor->descriptor_length, pbouquet_name_descriptor->trimmed_bouquet_name);
+		}
 	}
 	else
 	{
@@ -401,59 +380,39 @@ int DVB_SI_decode_service_descriptor_to_xml(uint8_t *buf, int length, HALForXMLD
 int DVB_SI_present_service_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, service_descriptor_t* pservice_descriptor)
 {
 	int  rtcode = SECTION_PARSE_NO_ERROR;
+	char  pszField[48];
+	char  pszSrvType[48];
+	char  pszComment[128];
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pservice_descriptor != NULL))
 	{
-		//tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "service_descriptor()");
+		DVB_SI_NumericCoding2Text_ServiceType(pservice_descriptor->service_type, pszSrvType, sizeof(pszSrvType));
+		sprintf_s(pszField, sizeof(pszField), "service_descriptor(tag: 0x%02X)", pservice_descriptor->descriptor_tag);
+		sprintf_s(pszComment, sizeof(pszComment), "Type:%s, Name:%s, Provider:%s", pszSrvType, pservice_descriptor->trimmed_service_name, pservice_descriptor->trimmed_service_provider_name);
 
-		//pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, pszComment, pservice_descriptor->descriptor_length + 2);
 
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pservice_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pservice_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-		//pservice_descriptor->descriptor_length = BITS_get(&bs, 8);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pservice_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pservice_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-		//pservice_descriptor->service_type = BITS_get(&bs, 8);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "service_type", pservice_descriptor->service_type, 8, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "service_type", pservice_descriptor->service_type, 8, "uimsbf", pszSrvType);
 
-		//pservice_descriptor->service_provider_name_length = BITS_get(&bs, 8);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "service_provider_name_length", pservice_descriptor->service_provider_name_length, 8, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "service_provider_name_length", pservice_descriptor->service_provider_name_length, 8, "uimsbf", NULL);
 
-		//if (pservice_descriptor->service_provider_name_length > 0)
-		//{
-		//	copy_length = min(pservice_descriptor->service_provider_name_length, MAX_SERVICE_PROVIDER_NAME_LENGTH);
-		//	memcpy(pservice_descriptor->service_provider_name, bs.p_cur, copy_length);
-		//	pservice_descriptor->service_provider_name[copy_length] = '\0';
+		if (pservice_descriptor->service_provider_name_length > 0)
+		{
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "service_provider_name", (uint8_t*)pservice_descriptor->service_provider_name, pservice_descriptor->service_provider_name_length,
+				pservice_descriptor->trimmed_service_provider_name);
+		}
 
-		//	pservice_descriptor->trimmed_service_provider_name = DVB_SI_StringPrefixTrim(pservice_descriptor->service_provider_name);
-		//	BITS_byteSkip(&bs, pservice_descriptor->service_provider_name_length);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "service_name_length", pservice_descriptor->service_name_length, 8, "uimsbf", NULL);
 
-		//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "service_provider_name", (uint8_t*)pservice_descriptor->service_provider_name, copy_length,
-		//		pservice_descriptor->trimmed_service_provider_name, &bs);
-		//}
-
-		//pservice_descriptor->service_name_length = BITS_get(&bs, 8);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "service_name_length", pservice_descriptor->service_name_length, 8, "uimsbf", NULL, &bs);
-
-		//if (pservice_descriptor->service_name_length > 0)
-		//{
-		//	copy_length = min(pservice_descriptor->service_name_length, MAX_SERVICE_NAME_LENGTH);
-
-		//	memcpy(pservice_descriptor->service_name, bs.p_cur, copy_length);
-		//	pservice_descriptor->service_name[copy_length] = '\0';
-
-		//	pservice_descriptor->trimmed_service_name = DVB_SI_StringPrefixTrim(pservice_descriptor->service_name);
-		//	BITS_byteSkip(&bs, pservice_descriptor->service_name_length);
-
-		//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "service_name", (uint8_t*)pservice_descriptor->service_name, copy_length,
-		//		pservice_descriptor->trimmed_service_name, &bs);
-
-		//	sprintf_s(pszTemp, sizeof(pszTemp), "业务名称：%s", pservice_descriptor->trimmed_service_name);
-		//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
-		//}
-
-		//sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节, %s", pservice_descriptor->descriptor_tag, length, DVB_SI_StringPrefixTrim(pservice_descriptor->trimmed_service_name));
-		//pxmlDescriptorNode->SetAttribute("comment", pszTemp);
+		if (pservice_descriptor->service_name_length > 0)
+		{
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "service_name", (uint8_t*)pservice_descriptor->service_name, pservice_descriptor->service_name_length,
+				pservice_descriptor->trimmed_service_name);
+		}
 	}
 	else
 	{
@@ -508,105 +467,34 @@ int DVB_SI_decode_short_event_descriptor_to_xml(uint8_t* buf, int length, HALFor
 int DVB_SI_present_short_event_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, short_event_descriptor_t* pshort_event_descriptor)
 {
 	int  rtcode = SECTION_PARSE_NO_ERROR;
+	char pszField[48];
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pshort_event_descriptor != NULL))
 	{
-		//XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "short_event_descriptor()");
+		sprintf_s(pszField, sizeof(pszField), "short_event_descriptor(tag: 0x%02X)", pshort_event_descriptor->descriptor_tag);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, pshort_event_descriptor->descriptor_length + 2);
 
-		//pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pshort_event_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-		//short_event_descriptor_t* pshort_event_descriptor = (pShortEventDescriptor == NULL) ? new short_event_descriptor_t : pShortEventDescriptor;
-		//memset(pshort_event_descriptor, 0x00, sizeof(short_event_descriptor_t));
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pshort_event_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-		//BITS_map(&bs, buf, length);
+		pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "ISO_639_language_code[ ]", (uint8_t*)pshort_event_descriptor->ISO_639_language_code_char, 3, pshort_event_descriptor->ISO_639_language_code_char);
 
-		//pshort_event_descriptor->descriptor_tag = BITS_get(&bs, 8);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pshort_event_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "event_name_length", pshort_event_descriptor->event_name_length, 8, "uimsbf", NULL);
 
-		//pshort_event_descriptor->descriptor_length = BITS_get(&bs, 8);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pshort_event_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+		if (pshort_event_descriptor->event_name_length > 0)
+		{
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "event_name_char[ ]", (uint8_t*)pshort_event_descriptor->event_name_char, pshort_event_descriptor->event_name_length,
+				pshort_event_descriptor->trimmed_event_name_char);
+		}
 
-		//if (pshort_event_descriptor->descriptor_length <= (length - 2))
-		//{
-		//	memcpy(pshort_event_descriptor->ISO_639_language_code_char, bs.p_cur, 3);
-		//	pshort_event_descriptor->ISO_639_language_code_char[3] = '\0';
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "text_length", pshort_event_descriptor->text_length, 8, "uimsbf", NULL);
 
-		//	pshort_event_descriptor->ISO_639_language_code = BITS_get(&bs, 24);
-		//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "ISO_639_language_code", pshort_event_descriptor->ISO_639_language_code, 24, "bslbf", pshort_event_descriptor->ISO_639_language_code_char, &bs);
-
-		//	pshort_event_descriptor->event_name_length = BITS_get(&bs, 8);
-		//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "event_name_length", pshort_event_descriptor->event_name_length, 8, "uimsbf", NULL, &bs);
-
-		//	if (pshort_event_descriptor->event_name_length <= (pshort_event_descriptor->descriptor_length - 5))
-		//	{
-		//		if (pshort_event_descriptor->event_name_length > 0)
-		//		{
-		//			uint8_t* ptemp = bs.p_cur;
-		//			BITS_byteSkip(&bs, pshort_event_descriptor->event_name_length);
-
-		//			copy_length = min(pshort_event_descriptor->event_name_length, MAX_EVENT_NAME_LENGTH);
-
-		//			memcpy(pshort_event_descriptor->event_name_char, ptemp, copy_length);
-		//			pshort_event_descriptor->event_name_char[copy_length] = '\0';
-
-		//			pshort_event_descriptor->trimmed_event_name_char = DVB_SI_StringPrefixTrim(pshort_event_descriptor->event_name_char);
-
-		//			pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "event_name_char[ ]", (uint8_t*)pshort_event_descriptor->event_name_char, copy_length,
-		//				pshort_event_descriptor->trimmed_event_name_char, &bs);
-		//		}
-
-		//		pshort_event_descriptor->text_length = BITS_get(&bs, 8);
-		//		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "text_length", pshort_event_descriptor->text_length, 8, "uimsbf", NULL, &bs);
-
-		//		if (pshort_event_descriptor->text_length <= (pshort_event_descriptor->descriptor_length - 5 - pshort_event_descriptor->event_name_length))
-		//		{
-		//			uint8_t* ptemp = bs.p_cur;
-		//			BITS_byteSkip(&bs, pshort_event_descriptor->text_length);
-
-		//			if (pshort_event_descriptor->text_length > 0)
-		//			{
-		//				copy_length = min(pshort_event_descriptor->text_length, MAX_EVENT_TEXT_LENGTH);
-
-		//				memcpy(pshort_event_descriptor->text_char, ptemp, copy_length);
-		//				pshort_event_descriptor->text_char[copy_length] = '\0';
-
-		//				pshort_event_descriptor->trimmed_text_char = DVB_SI_StringPrefixTrim(pshort_event_descriptor->text_char);
-
-		//				pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "text_char[ ]", (uint8_t*)pshort_event_descriptor->text_char, copy_length,
-		//					pshort_event_descriptor->trimmed_text_char, &bs);
-		//			}
-		//		}
-		//		else
-		//		{
-		//			sprintf_s(pszTemp, sizeof(pszTemp), "text_length error!");
-		//			pxmlDescriptorNode->SetAttribute("error", pszTemp);
-
-		//			rtcode = SECTION_PARSE_SYNTAX_ERROR;
-		//		}
-		//	}
-		//	else
-		//	{
-		//		sprintf_s(pszTemp, sizeof(pszTemp), "event_name_length error!");
-		//		pxmlDescriptorNode->SetAttribute("error", pszTemp);
-
-		//		rtcode = SECTION_PARSE_SYNTAX_ERROR;
-		//	}
-		//}
-		//else
-		//{
-		//	sprintf_s(pszTemp, sizeof(pszTemp), "descriptor length error!");
-		//	pxmlDescriptorNode->SetAttribute("error", pszTemp);
-
-		//	rtcode = SECTION_PARSE_SYNTAX_ERROR;
-		//}
-
-		//sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", pshort_event_descriptor->descriptor_tag, length);
-		//pxmlDescriptorNode->SetAttribute("comment", pszTemp);
-
-		//if (pShortEventDescriptor == NULL)
-		//{
-		//	delete pshort_event_descriptor;
-		//}
+		if (pshort_event_descriptor->text_length > 0)
+		{
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "text_char[ ]", (uint8_t*)pshort_event_descriptor->text_char, pshort_event_descriptor->text_length,
+				pshort_event_descriptor->trimmed_text_char);
+		}
 	}
 	else
 	{
@@ -686,61 +574,65 @@ int DVB_SI_present_stream_identifier_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XM
 //功能：解CA标识描述子				0x53
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-int DVB_SI_decode_CA_identifier_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, CA_identifier_descriptor_t* pCAIdentifierDescriptor)
+int DVB_SI_decode_CA_identifier_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, CA_identifier_descriptor_t* pCAIdentifierDescriptor)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
-	//char   pszTemp[64];
-	//BITS_t bs;
-	////int    N;
 
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
-	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "CA_identifier_descriptor()");
-	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
+	{
+		CA_identifier_descriptor_t* pCA_identifier_descriptor = (pCAIdentifierDescriptor == NULL) ? new CA_identifier_descriptor_t : pCAIdentifierDescriptor;
 
-	//	CA_identifier_descriptor_t* pCA_identifier_descriptor = (pCAIdentifierDescriptor == NULL) ? new CA_identifier_descriptor_t : pCAIdentifierDescriptor;
-	//	memset(pCA_identifier_descriptor, 0x00, sizeof(CA_identifier_descriptor_t));
+		rtcode = DVB_SI_decode_CA_identifier_descriptor(buf, length, pCA_identifier_descriptor);
+		DVB_SI_present_CA_identifier_descriptor_to_xml(pxmlDoc, pxmlParentNode, pCA_identifier_descriptor);
 
-	//	BITS_map(&bs, buf, length);
+		if (pCAIdentifierDescriptor == NULL)
+		{
+			delete pCA_identifier_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
-	//	pCA_identifier_descriptor->descriptor_tag = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pCA_identifier_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
-	//	pCA_identifier_descriptor->descriptor_length = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pCA_identifier_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+	return rtcode;
+}
 
-	//	if (pCA_identifier_descriptor->descriptor_length > 0)
-	//	{
-	//		tinyxml2::XMLElement* pxmlLoopNode = pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "CA_system_loop()");
-	//		pxmlDoc->UpdateBufMark(pxmlLoopNode, bs.p_cur, bs.p_cur + pCA_identifier_descriptor->descriptor_length);
+int DVB_SI_present_CA_identifier_descriptor_to_xml(HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, CA_identifier_descriptor_t* pCA_identifier_descriptor)
+{
+	int		rtcode = SECTION_PARSE_NO_ERROR;
+	char	pszField[48];
+	char	pszCAVendor[48];
 
-	//		pCA_identifier_descriptor->N = pCA_identifier_descriptor->descriptor_length / 2;
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pCA_identifier_descriptor != NULL))
+	{
+		sprintf_s(pszField, sizeof(pszField), "CA_identifier_descriptor(tag: 0x%02X)", pCA_identifier_descriptor->descriptor_tag);
 
-	//		for (int i = 0; i < pCA_identifier_descriptor->N; i++)
-	//		{
-	//			sprintf_s(pszTemp, sizeof(pszTemp), "CA_system %d", i);
-	//			tinyxml2::XMLElement* pxmlCANode = pxmlDoc->NewKeyValuePairElement(pxmlLoopNode, pszTemp);
-	//			pxmlDoc->UpdateBufMark(pxmlCANode, bs.p_cur, bs.p_cur + 2);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, pCA_identifier_descriptor->descriptor_length + 2);
 
-	//			pCA_identifier_descriptor->CA_system_id[i] = BITS_get(&bs, 16);
-	//			MPEG_DVB_NumericCoding2Text_CASystemID(pCA_identifier_descriptor->CA_system_id[i], pszTemp, sizeof(pszTemp));
-	//			pxmlDoc->NewKeyValuePairElement(pxmlCANode, "CA_system_id", pCA_identifier_descriptor->CA_system_id[i], 16, "uimsbf", pszTemp, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pCA_identifier_descriptor->descriptor_tag, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pCA_identifier_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-	//			pxmlCANode->SetAttribute("comment", pszTemp);
-	//		}
-	//	}
+		if (pCA_identifier_descriptor->descriptor_length > 0)
+		{
+			sprintf_s(pszField, sizeof(pszField), "CA_system_loop(共 %d个)", pCA_identifier_descriptor->N);
+			XMLElement* pxmlLoopNode = pxmlDoc->NewBranchElement(pxmlDescriptorNode, pszField, NULL, pCA_identifier_descriptor->descriptor_length);
 
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", pCA_identifier_descriptor->descriptor_tag, length);
-	//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
+			for (int i = 0; i < pCA_identifier_descriptor->N; i++)
+			{
+				//sprintf_s(pszField, sizeof(pszField), "CA_system[%d](ID: 0x%04X)", i, pCA_identifier_descriptor->CA_system_ID[i]);
+				MPEG_DVB_NumericCoding2Text_CASystemID(pCA_identifier_descriptor->CA_system_ID[i], pszCAVendor, sizeof(pszCAVendor));
 
-	//	if (pCAIdentifierDescriptor == NULL)
-	//	{
-	//		delete pCA_identifier_descriptor;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	//}
+				//XMLElement* pxmlCANode = pxmlDoc->NewBranchElement(pxmlLoopNode, pszField, pszCAVendor, 2);
+
+				pxmlDoc->NewElementForBits(pxmlLoopNode, "CA_system_ID", pCA_identifier_descriptor->CA_system_ID[i], 16, "uimsbf", pszCAVendor);
+			}
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
 	return rtcode;
 }
@@ -748,81 +640,64 @@ int DVB_SI_decode_CA_identifier_descriptor_to_xml(uint8_t* buf, int length, HALF
 //功能：解内容描述子				0x54
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-int DVB_SI_decode_content_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, content_descriptor_t* pContentDescriptor)
+int DVB_SI_decode_content_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, content_descriptor_t* pContentDescriptor)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
-	//char   pszTemp[64];
-	//BITS_t bs;
-	//int    N;
 
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
-	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "content_descriptor()");
-	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
+	{
+		content_descriptor_t* pcontent_descriptor = (pContentDescriptor == NULL) ? new content_descriptor_t : pContentDescriptor;
+		rtcode = DVB_SI_decode_content_descriptor(buf, length, pcontent_descriptor);
+		DVB_SI_present_content_descriptor_to_xml(pxmlDoc, pxmlParentNode, pcontent_descriptor);
 
-	//	content_descriptor_t* pcontent_descriptor = (pContentDescriptor == NULL) ? new content_descriptor_t : pContentDescriptor;
-	//	memset(pcontent_descriptor, 0x00, sizeof(content_descriptor_t));
+		if (pContentDescriptor == NULL)
+		{
+			delete pcontent_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
-	//	BITS_map(&bs, buf, length);
+	return rtcode;
+}
 
-	//	pcontent_descriptor->descriptor_tag = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pcontent_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+int DVB_SI_present_content_descriptor_to_xml(HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, content_descriptor_t* pcontent_descriptor)
+{
+	int		rtcode = SECTION_PARSE_NO_ERROR;
+	char	pszField[32];
 
-	//	pcontent_descriptor->descriptor_length = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pcontent_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pcontent_descriptor != NULL))
+	{
+		sprintf_s(pszField, sizeof(pszField), "content_descriptor(tag: 0x%02X)", pcontent_descriptor->descriptor_tag);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, pcontent_descriptor->descriptor_length + 2);
 
-	//	if (pcontent_descriptor->descriptor_length <= (length - 2))
-	//	{
-	//		if (pcontent_descriptor->descriptor_length > 0)
-	//		{
-	//			sprintf_s(pszTemp, sizeof(pszTemp), "content_nibble_loop()");
-	//			tinyxml2::XMLElement* pxmlLoopNode = pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, pszTemp);
-	//			pxmlDoc->UpdateBufMark(pxmlLoopNode, bs.p_cur, bs.p_cur + pcontent_descriptor->descriptor_length);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pcontent_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-	//			int loop_length = pcontent_descriptor->descriptor_length;
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pcontent_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-	//			N = 0;
-	//			while ((loop_length >= 2) && (N < MAX_NIBBLES))
-	//			{
-	//				sprintf_s(pszTemp, sizeof(pszTemp), "content nibble %d", N);
-	//				tinyxml2::XMLElement* pxmlNibbleNode = pxmlDoc->NewKeyValuePairElement(pxmlLoopNode, pszTemp);
-	//				pxmlDoc->UpdateBufMark(pxmlNibbleNode, bs.p_cur, bs.p_cur + 2);
+		if (pcontent_descriptor->descriptor_length > 0)
+		{
+			sprintf_s(pszField, sizeof(pszField), "content_nibble_loop(共 %d个)", pcontent_descriptor->N);
+			XMLElement* pxmlLoopNode = pxmlDoc->NewBranchElement(pxmlDescriptorNode, pszField, NULL, pcontent_descriptor->descriptor_length);
 
-	//				pcontent_descriptor->content_nibble_level_1[N] = BITS_get(&bs, 4);
-	//				pxmlDoc->NewKeyValuePairElement(pxmlNibbleNode, "content_nibble_level_1", pcontent_descriptor->content_nibble_level_1[N], 4, "uimsbf", NULL, &bs);
-	//				pcontent_descriptor->content_nibble_level_2[N] = BITS_get(&bs, 4);
-	//				pxmlDoc->NewKeyValuePairElement(pxmlNibbleNode, "content_nibble_level_2", pcontent_descriptor->content_nibble_level_2[N], 4, "uimsbf", NULL, &bs);
-	//				pcontent_descriptor->user_nibble_1[N] = BITS_get(&bs, 4);
-	//				pxmlDoc->NewKeyValuePairElement(pxmlNibbleNode, "user_nibble_1", pcontent_descriptor->user_nibble_1[N], 4, "uimsbf", NULL, &bs);
-	//				pcontent_descriptor->user_nibble_2[N] = BITS_get(&bs, 4);
-	//				pxmlDoc->NewKeyValuePairElement(pxmlNibbleNode, "user_nibble_2", pcontent_descriptor->user_nibble_2[N], 4, "uimsbf", NULL, &bs);
+			for (int content_index = 0; content_index < pcontent_descriptor->N; content_index++)
+			{
+				sprintf_s(pszField, sizeof(pszField), "content nibble[%d]()", content_index);
+				XMLElement* pxmlNibbleNode = pxmlDoc->NewBranchElement(pxmlLoopNode, pszField, NULL, 2);
 
-	//				N++;
-	//				loop_length -= 2;
-	//			}
-	//			pcontent_descriptor->N = N;
-	//		}
-	//	}
-	//	else
-	//	{
-	//		sprintf_s(pszTemp, sizeof(pszTemp), "descriptor length error!");
-	//		pxmlDescriptorNode->SetAttribute("error", pszTemp);
-
-	//		rtcode = SECTION_PARSE_SYNTAX_ERROR;
-	//	}
-
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", pcontent_descriptor->descriptor_tag, length);
-	//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
-
-	//	if (pContentDescriptor == NULL)
-	//	{
-	//		delete pcontent_descriptor;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	//}
+				pxmlDoc->NewElementForBits(pxmlNibbleNode, "content_nibble_level_1", pcontent_descriptor->content_nibble_level_1[content_index], 4, "uimsbf", NULL);
+				pxmlDoc->NewElementForBits(pxmlNibbleNode, "content_nibble_level_2", pcontent_descriptor->content_nibble_level_2[content_index], 4, "uimsbf", NULL);
+				pxmlDoc->NewElementForBits(pxmlNibbleNode, "user_nibble_1", pcontent_descriptor->user_nibble_1[content_index], 4, "uimsbf", NULL);
+				pxmlDoc->NewElementForBits(pxmlNibbleNode, "user_nibble_2", pcontent_descriptor->user_nibble_2[content_index], 4, "uimsbf", NULL);
+			}
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
 	return rtcode;
 }
@@ -833,79 +708,63 @@ int DVB_SI_decode_content_descriptor_to_xml(uint8_t* buf, int length, HALForXMLD
 int DVB_SI_decode_parental_rating_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, parental_rating_descriptor_t* pParentalRatingDescriptor)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
-	//char   pszTemp[64];
-	//BITS_t bs;
-	//int    N;
 
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
-	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "parental_rating_descriptor()");
-	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
+	{
+		parental_rating_descriptor_t* pparental_rating_descriptor = (pParentalRatingDescriptor == NULL) ? new parental_rating_descriptor_t : pParentalRatingDescriptor;
 
-	//	parental_rating_descriptor_t* pparental_rating_descriptor = (pParentalRatingDescriptor == NULL) ? new parental_rating_descriptor_t : pParentalRatingDescriptor;
-	//	memset(pparental_rating_descriptor, 0x00, sizeof(parental_rating_descriptor_t));
+		rtcode = DVB_SI_decode_parental_rating_descriptor(buf, length, pparental_rating_descriptor);
+		DVB_SI_present_parental_rating_descriptor_to_xml(pxmlDoc, pxmlParentNode, pparental_rating_descriptor);
 
-	//	BITS_map(&bs, buf, length);
+		if (pParentalRatingDescriptor == NULL)
+		{
+			delete pparental_rating_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
-	//	pparental_rating_descriptor->descriptor_tag = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pparental_rating_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
-	//	pparental_rating_descriptor->descriptor_length = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pparental_rating_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+	return rtcode;
+}
 
-	//	if (pparental_rating_descriptor->descriptor_length <= (length - 2))
-	//	{
-	//		if (pparental_rating_descriptor->descriptor_length > 0)
-	//		{
-	//			//uint8_t* old_loop_ptr = bs.p_cur;
-	//			sprintf_s(pszTemp, sizeof(pszTemp), "parental_rating_loop()");
-	//			tinyxml2::XMLElement* pxmlLoopNode = pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, pszTemp);
-	//			pxmlDoc->UpdateBufMark(pxmlLoopNode, bs.p_cur, bs.p_cur + pparental_rating_descriptor->descriptor_length);
+int DVB_SI_present_parental_rating_descriptor_to_xml(HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, parental_rating_descriptor_t* pparental_rating_descriptor)
+{
+	int		rtcode = SECTION_PARSE_NO_ERROR;
+	char	pszField[48];
 
-	//			int loop_length = pparental_rating_descriptor->descriptor_length;
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pparental_rating_descriptor != NULL))
+	{
+		sprintf_s(pszField, sizeof(pszField), "parental_rating_descriptor(tag: 0x%02X)", pparental_rating_descriptor->descriptor_tag);
 
-	//			N = 0;
-	//			while ((loop_length >= 4) && (N < MAX_COUNTRIES))
-	//			{
-	//				sprintf_s(pszTemp, sizeof(pszTemp), "parental rating %d", N);
-	//				tinyxml2::XMLElement* pxmlRatingNode = pxmlDoc->NewKeyValuePairElement(pxmlLoopNode, pszTemp);
-	//				pxmlDoc->UpdateBufMark(pxmlRatingNode, bs.p_cur, bs.p_cur + 4);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, pparental_rating_descriptor->descriptor_length + 2);
 
-	//				memcpy(pparental_rating_descriptor->country_code_char[N], bs.p_cur, 3);
-	//				pparental_rating_descriptor->country_code_char[N][3] = '\0';
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pparental_rating_descriptor->descriptor_tag, 8, "uimsbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pparental_rating_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-	//				pparental_rating_descriptor->country_code[N] = BITS_get(&bs, 24);
-	//				pxmlDoc->NewKeyValuePairElement(pxmlRatingNode, "country_code", pparental_rating_descriptor->country_code[N], 24, "bslbf", pparental_rating_descriptor->country_code_char[N], &bs);
+		if (pparental_rating_descriptor->descriptor_length > 0)
+		{
+			//uint8_t* old_loop_ptr = bs.p_cur;
+			sprintf_s(pszField, sizeof(pszField), "parental_rating_loop(共 %d个)", pparental_rating_descriptor->N);
+			XMLElement* pxmlLoopNode = pxmlDoc->NewBranchElement(pxmlDescriptorNode, pszField, NULL, pparental_rating_descriptor->descriptor_length);
 
-	//				pparental_rating_descriptor->rating[N] = BITS_get(&bs, 8);
-	//				pxmlDoc->NewKeyValuePairElement(pxmlRatingNode, "rating", pparental_rating_descriptor->rating[N], 8, "uimsbf", NULL, &bs);
+			for (int country_index = 0; country_index < pparental_rating_descriptor->N; country_index++)
+			{
+				sprintf_s(pszField, sizeof(pszField), "parental rating[%d]()", country_index);
+				XMLElement* pxmlRatingNode = pxmlDoc->NewBranchElement(pxmlLoopNode, pszField, NULL, 4);
 
-	//				N++;
-	//				loop_length -= 4;
-	//			}
+				pxmlDoc->NewElementForByteBuf(pxmlRatingNode, "country_code[ ]", (uint8_t*)pparental_rating_descriptor->country_code_char[country_index], 3, 
+					pparental_rating_descriptor->country_code_char[country_index]);
 
-	//			pparental_rating_descriptor->N = N;
-	//		}
-	//	}
-	//	else
-	//	{
-	//		sprintf_s(pszTemp, sizeof(pszTemp), "descriptor length error!");
-	//		pxmlDescriptorNode->SetAttribute("error", pszTemp);
-
-	//		rtcode = SECTION_PARSE_SYNTAX_ERROR;
-	//	}
-
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", pparental_rating_descriptor->descriptor_tag, length);
-	//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
-
-	//	if (pParentalRatingDescriptor == NULL)
-	//	{
-	//		delete pparental_rating_descriptor;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	//}
+				pxmlDoc->NewElementForBits(pxmlRatingNode, "rating", pparental_rating_descriptor->rating[country_index], 8, "uimsbf", NULL);
+			}
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
 	return rtcode;
 }
@@ -1010,91 +869,74 @@ int DVB_SI_decode_teletext_descriptor_to_xml(uint8_t* buf, int length, HALForXML
 int DVB_SI_decode_local_time_offset_descriptor_to_xml(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, local_time_offset_descriptor_t* pLocalTimeOffsetDescriptor)
 {
 	int  rtcode = SECTION_PARSE_NO_ERROR;
-	//int  N = 0;
-	//int  loop_length;
-	//char   pszTemp[64];
-	//char   pszCountry[4];
-	//BITS_t bs;
 
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
-	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "local_time_offset_descriptor()");
-	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
+	{
+		local_time_offset_descriptor_t* plocal_time_offset_descriptor = (pLocalTimeOffsetDescriptor == NULL) ? new local_time_offset_descriptor_t : pLocalTimeOffsetDescriptor;
 
-	//	local_time_offset_descriptor_t* plocal_time_offset_descriptor = (pLocalTimeOffsetDescriptor == NULL) ? new local_time_offset_descriptor_t : pLocalTimeOffsetDescriptor;
-	//	memset(plocal_time_offset_descriptor, 0x00, sizeof(local_time_offset_descriptor_t));
+		rtcode = DVB_SI_decode_local_time_offset_descriptor(buf, length, plocal_time_offset_descriptor);
+		DVB_SI_present_local_time_offset_descriptor_to_xml(pxmlDoc, pxmlParentNode, plocal_time_offset_descriptor);
 
-	//	BITS_map(&bs, buf, length);
+		if (pLocalTimeOffsetDescriptor == NULL)
+		{
+			delete plocal_time_offset_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
-	//	plocal_time_offset_descriptor->descriptor_tag = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", plocal_time_offset_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+	return rtcode;
+}
 
-	//	plocal_time_offset_descriptor->descriptor_length = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", plocal_time_offset_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+int DVB_SI_present_local_time_offset_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, local_time_offset_descriptor_t* plocal_time_offset_descriptor)
+{
+	int  rtcode = SECTION_PARSE_NO_ERROR;
+	char   pszField[48];
+	char   pszComment[48];
 
-	//	N = 0;
-	//	if (plocal_time_offset_descriptor->descriptor_length > 0)
-	//	{
-	//		tinyxml2::XMLElement* pxmlLoopsNode = pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "本地时间偏移循环()");
-	//		pxmlDoc->UpdateBufMark(pxmlLoopsNode, bs.p_cur, bs.p_cur + plocal_time_offset_descriptor->descriptor_length);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (plocal_time_offset_descriptor != NULL))
+	{
+		sprintf_s(pszField, sizeof(pszField), "local_time_offset_descriptor(tag: 0x%02X)", plocal_time_offset_descriptor->descriptor_tag);
 
-	//		loop_length = plocal_time_offset_descriptor->descriptor_length;
-	//		while ((loop_length >= 13) && (N < MAX_LOCAL_TIME_AREA))
-	//		{
-	//			unsigned char* old_local_ptr = bs.p_cur;
-	//			tinyxml2::XMLElement* pxmlLocalNode = pxmlDoc->NewKeyValuePairElement(pxmlLoopsNode, "本地时间偏移()");
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, plocal_time_offset_descriptor->descriptor_length + 2);
 
-	//			plocal_time_offset_descriptor->local_time_offset[N].country_code = BITS_get(&bs, 24);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", plocal_time_offset_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-	//			unsigned int country_code = plocal_time_offset_descriptor->local_time_offset[N].country_code;
-	//			pszCountry[0] = (char)((country_code & 0xff0000) >> 16);
-	//			pszCountry[1] = (char)((country_code & 0x00ff00) >> 8);
-	//			pszCountry[2] = (char)(country_code & 0x0000ff);
-	//			pszCountry[3] = '\0';
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", plocal_time_offset_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLocalNode, "country_code", plocal_time_offset_descriptor->local_time_offset[N].country_code, 24, "bslbf", pszCountry, &bs);
+		if (plocal_time_offset_descriptor->descriptor_length > 0)
+		{
+			sprintf_s(pszField, sizeof(pszField), "本地时间偏移循环(共 %d个)", plocal_time_offset_descriptor->N);
+			XMLElement* pxmlLoopsNode = pxmlDoc->NewBranchElement(pxmlDescriptorNode, pszField, NULL, plocal_time_offset_descriptor->descriptor_length);
 
-	//			plocal_time_offset_descriptor->local_time_offset[N].country_region_id = BITS_get(&bs, 6);
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLocalNode, "country_region_id", plocal_time_offset_descriptor->local_time_offset[N].country_region_id, 6, "bslbf", NULL, &bs);
+			for (int local_index = 0; local_index < plocal_time_offset_descriptor->N; local_index++)
+			{
+				sprintf_s(pszField, sizeof(pszField), "本地时间偏移[%d]()", local_index);
+				XMLElement* pxmlLocalNode = pxmlDoc->NewBranchElement(pxmlLoopsNode, pszField, plocal_time_offset_descriptor->st[local_index].country_code_char, 13);
 
-	//			plocal_time_offset_descriptor->local_time_offset[N].reserved = BITS_get(&bs, 1);
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLocalNode, "reserved", plocal_time_offset_descriptor->local_time_offset[N].reserved, 1, "bslbf", NULL, &bs);
+				pxmlDoc->NewElementForByteBuf(pxmlLocalNode, "country_code[ ]", (uint8_t*)plocal_time_offset_descriptor->st[local_index].country_code_char, 3,
+					plocal_time_offset_descriptor->st[local_index].country_code_char);
 
-	//			plocal_time_offset_descriptor->local_time_offset[N].local_time_offset_polarity = BITS_get(&bs, 1);
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLocalNode, "local_time_offset_polarity", plocal_time_offset_descriptor->local_time_offset[N].local_time_offset_polarity, 1, "bslbf", NULL, &bs);
+				pxmlDoc->NewElementForBits(pxmlLocalNode, "country_region_id", plocal_time_offset_descriptor->st[local_index].country_region_id, 6, "bslbf", NULL);
+				pxmlDoc->NewElementForBits(pxmlLocalNode, "reserved", plocal_time_offset_descriptor->st[local_index].reserved, 1, "bslbf", NULL);
+				pxmlDoc->NewElementForBits(pxmlLocalNode, "local_time_offset_polarity", plocal_time_offset_descriptor->st[local_index].local_time_offset_polarity, 1, "bslbf", NULL);
 
-	//			plocal_time_offset_descriptor->local_time_offset[N].local_time_offset = BITS_get(&bs, 16);
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLocalNode, "local_time_offset", plocal_time_offset_descriptor->local_time_offset[N].local_time_offset, 16, "bslbf", NULL, &bs);
+				pxmlDoc->NewElementForBits(pxmlLocalNode, "local_time_offset", plocal_time_offset_descriptor->st[local_index].local_time_offset, 16, "bslbf", NULL);
 
-	//			int64_t time_of_change = BITS_x64_get(&bs, 40);
-	//			plocal_time_offset_descriptor->local_time_offset[N].time_of_change = time_of_change;
-	//			DVB_SI_NumericCoding2Text_UTCTime(time_of_change, pszTemp, sizeof(pszTemp));
-	//			pxmlDoc->NewKeyValuePairElementX64Mode(pxmlLocalNode, "time_of_change", plocal_time_offset_descriptor->local_time_offset[N].time_of_change, 40, "bslbf", pszTemp, &bs);
+				DVB_SI_NumericCoding2Text_UTCTime(plocal_time_offset_descriptor->st[local_index].time_of_change, pszComment, sizeof(pszComment));
+				pxmlDoc->NewElementForX64Bits(pxmlLocalNode, "time_of_change", plocal_time_offset_descriptor->st[local_index].time_of_change, 40, "bslbf", pszComment);
 
-	//			plocal_time_offset_descriptor->local_time_offset[N].next_time_offset = BITS_get(&bs, 16);
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLocalNode, "next_time_offset", plocal_time_offset_descriptor->local_time_offset[N].next_time_offset, 16, "bslbf", NULL, &bs);
-
-	//			pxmlDoc->UpdateBufMark(pxmlLocalNode, old_local_ptr, bs.p_cur);
-	//			pxmlLocalNode->SetAttribute("comment", pszCountry);
-
-	//			loop_length -= 13;
-	//			N++;
-	//		}
-	//	}
-	//	plocal_time_offset_descriptor->N = N;
-
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", plocal_time_offset_descriptor->descriptor_tag, length);
-	//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
-
-	//	if (pLocalTimeOffsetDescriptor == NULL)
-	//	{
-	//		delete plocal_time_offset_descriptor;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	//}
+				DVB_SI_NumericCoding2Text_BCDTime(plocal_time_offset_descriptor->st[local_index].next_time_offset, pszComment, sizeof(pszComment));
+				pxmlDoc->NewElementForBits(pxmlLocalNode, "next_time_offset", plocal_time_offset_descriptor->st[local_index].next_time_offset, 16, "bslbf", pszComment);
+			}
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
 	return rtcode;
 }
@@ -1195,88 +1037,70 @@ int DVB_SI_decode_subtitling_descriptor_to_xml(uint8_t* buf, int length, HALForX
 //功能：解多语言网络名称描述子				0x5B
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-int DVB_SI_decode_multilingual_network_name_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, multilingual_network_name_descriptor_t* pMultilingualNetworkNameDescriptor)
+int DVB_SI_decode_multilingual_network_name_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multilingual_network_name_descriptor_t* pMultilingualNetworkNameDescriptor)
 {
 	int rtcode = SECTION_PARSE_NO_ERROR;
-	//int N = 0;
-	//int loop_length;
-	//char   pszTemp[128];
-	//BITS_t bs;
 
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
-	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "multilingual_network_name_descriptor()");
-	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
+	{
+		multilingual_network_name_descriptor_t* pmultilingual_network_name_descriptor = (pMultilingualNetworkNameDescriptor == NULL) ? new multilingual_network_name_descriptor_t : pMultilingualNetworkNameDescriptor;
 
-	//	multilingual_network_name_descriptor_t* pmultilingual_network_name_descriptor = (pMultilingualNetworkNameDescriptor == NULL) ? new multilingual_network_name_descriptor_t : pMultilingualNetworkNameDescriptor;
-	//	memset(pmultilingual_network_name_descriptor, 0x00, sizeof(multilingual_network_name_descriptor_t));
+		rtcode = DVB_SI_decode_multilingual_network_name_descriptor(buf, length, pmultilingual_network_name_descriptor);
+		DVB_SI_present_multilingual_network_name_descriptor_to_xml(pxmlDoc, pxmlParentNode, pmultilingual_network_name_descriptor);
 
-	//	BITS_map(&bs, buf, length);
+		if (pMultilingualNetworkNameDescriptor == NULL)
+		{
+			delete pmultilingual_network_name_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
-	//	pmultilingual_network_name_descriptor->descriptor_tag = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pmultilingual_network_name_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+	return rtcode;
+}
 
-	//	pmultilingual_network_name_descriptor->descriptor_length = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pmultilingual_network_name_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+int DVB_SI_present_multilingual_network_name_descriptor_to_xml(HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, multilingual_network_name_descriptor_t* pmultilingual_network_name_descriptor)
+{
+	int rtcode = SECTION_PARSE_NO_ERROR;
+	char   pszField[64];
+	char   pszComment[128];
 
-	//	if (pmultilingual_network_name_descriptor->descriptor_length > 0)
-	//	{
-	//		loop_length = pmultilingual_network_name_descriptor->descriptor_length;
-	//		while ((loop_length >= 4) && (N < MAX_LANGUAGES))
-	//		{
-	//			uint8_t* old_loop_ptr = bs.p_cur;
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pmultilingual_network_name_descriptor != NULL))
+	{
+		sprintf_s(pszField, sizeof(pszField), "multilingual_network_name_descriptor(tag: 0x%02X)", pmultilingual_network_name_descriptor->descriptor_tag);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, pmultilingual_network_name_descriptor->descriptor_length + 2);
 
-	//			sprintf_s(pszTemp, sizeof(pszTemp), "language %d", N);
-	//			tinyxml2::XMLElement* pxmlLangNode = pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, pszTemp);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pmultilingual_network_name_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-	//			memcpy(pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code_char, bs.p_cur, 3);
-	//			pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code_char[3] = '\0';
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pmultilingual_network_name_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-	//			pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code = BITS_get(&bs, 24);
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLangNode, "ISO_639_language_code", pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code,
-	//				24, "bslbf", pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code_char, &bs);
+		if (pmultilingual_network_name_descriptor->descriptor_length > 0)
+		{
+			for (int lang_index = 0; lang_index < pmultilingual_network_name_descriptor->N; lang_index++)
+			{
+				sprintf_s(pszField, sizeof(pszField), "language[%d]", lang_index);
+				sprintf_s(pszComment, sizeof(pszComment), "%s - %s", pmultilingual_network_name_descriptor->st[lang_index].ISO_639_language_code_char, pmultilingual_network_name_descriptor->st[lang_index].trimmed_network_name_char);
+				XMLElement* pxmlLangNode = pxmlDoc->NewBranchElement(pxmlDescriptorNode, pszField, pszComment, 3 + 1 + pmultilingual_network_name_descriptor->st[lang_index].network_name_length);
 
-	//			pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_length = BITS_get(&bs, 8);
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLangNode, "network_name_length", pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_length, 8, "uimsbf", NULL, &bs);
+				pxmlDoc->NewElementForByteBuf(pxmlLangNode, "ISO_639_language_code[ ]", (uint8_t*)pmultilingual_network_name_descriptor->st[lang_index].ISO_639_language_code_char,
+					3, pmultilingual_network_name_descriptor->st[lang_index].ISO_639_language_code_char);
 
-	//			int copy_length = (pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_length < MAX_NETWORK_NAME_LENGTH) ?
-	//				pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_length : MAX_NETWORK_NAME_LENGTH;
+				pxmlDoc->NewElementForBits(pxmlLangNode, "network_name_length", pmultilingual_network_name_descriptor->st[lang_index].network_name_length, 8, "uimsbf", NULL);
 
-	//			memcpy(pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_char, bs.p_cur, copy_length);
-	//			pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_char[copy_length] = '\0';
-	//			BITS_byteSkip(&bs, pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_length);
-
-	//			pmultilingual_network_name_descriptor->LANGUAGE[N].trimmed_network_name_char = DVB_SI_StringPrefixTrim(pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_char);
-
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLangNode, "network_name",
-	//				(uint8_t*)pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_char, pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_length, 
-	//				pmultilingual_network_name_descriptor->LANGUAGE[N].trimmed_network_name_char, &bs);
-
-	//			pxmlDoc->UpdateBufMark(pxmlLangNode, old_loop_ptr, bs.p_cur);
-
-	//			sprintf_s(pszTemp, sizeof(pszTemp), "%s:%s", pmultilingual_network_name_descriptor->LANGUAGE[N].ISO_639_language_code_char, 
-	//				pmultilingual_network_name_descriptor->LANGUAGE[N].trimmed_network_name_char);
-	//			pxmlLangNode->SetAttribute("comment", pszTemp);
-
-	//			loop_length -= (4 + pmultilingual_network_name_descriptor->LANGUAGE[N].network_name_length);
-	//			N++;
-	//		}
-
-	//		pmultilingual_network_name_descriptor->N = N;
-	//	}
-
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", pmultilingual_network_name_descriptor->descriptor_tag, length);
-	//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
-
-	//	if (pMultilingualNetworkNameDescriptor == NULL)
-	//	{
-	//		delete pmultilingual_network_name_descriptor;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	//}
+				if (pmultilingual_network_name_descriptor->st[lang_index].network_name_length > 0)
+				{
+					pxmlDoc->NewElementForByteBuf(pxmlLangNode, "network_name[ ]", (uint8_t*)pmultilingual_network_name_descriptor->st[lang_index].network_name_char,
+						pmultilingual_network_name_descriptor->st[lang_index].network_name_length, pmultilingual_network_name_descriptor->st[lang_index].trimmed_network_name_char);
+				}
+			}
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
 	return rtcode;
 }
@@ -1284,86 +1108,71 @@ int DVB_SI_decode_multilingual_network_name_descriptor_to_xml(uint8_t* buf, int 
 //功能：解多语言业务群名称描述子			0x5C
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-int DVB_SI_decode_multilingual_bouquet_name_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, multilingual_bouquet_name_descriptor_t* pMultilingualBouquetNameDescriptor)
+int DVB_SI_decode_multilingual_bouquet_name_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multilingual_bouquet_name_descriptor_t* pMultilingualBouquetNameDescriptor)
 {
 	int rtcode = SECTION_PARSE_NO_ERROR;
-	//int N = 0;
-	//int loop_length;
-	//char   pszTemp[128];
-	//BITS_t bs;
 
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
-	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "multilingual_bouquet_name_descriptor()");
-	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
+	{
+		multilingual_bouquet_name_descriptor_t* pmultilingual_bouquet_name_descriptor = (pMultilingualBouquetNameDescriptor == NULL) ? new multilingual_bouquet_name_descriptor_t : pMultilingualBouquetNameDescriptor;
 
-	//	multilingual_bouquet_name_descriptor_t* pmultilingual_bouquet_name_descriptor = (pMultilingualBouquetNameDescriptor == NULL) ? new multilingual_bouquet_name_descriptor_t : pMultilingualBouquetNameDescriptor;
-	//	memset(pmultilingual_bouquet_name_descriptor, 0x00, sizeof(multilingual_bouquet_name_descriptor_t));
+		rtcode = DVB_SI_decode_multilingual_bouquet_name_descriptor(buf, length, pmultilingual_bouquet_name_descriptor);
+		DVB_SI_present_multilingual_bouquet_name_descriptor_to_xml(pxmlDoc, pxmlParentNode, pmultilingual_bouquet_name_descriptor);
 
-	//	BITS_map(&bs, buf, length);
+		if (pMultilingualBouquetNameDescriptor == NULL)
+		{
+			delete pmultilingual_bouquet_name_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
-	//	pmultilingual_bouquet_name_descriptor->descriptor_tag = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pmultilingual_bouquet_name_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+	return rtcode;
+}
 
-	//	pmultilingual_bouquet_name_descriptor->descriptor_length = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pmultilingual_bouquet_name_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+int DVB_SI_present_multilingual_bouquet_name_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multilingual_bouquet_name_descriptor_t* pmultilingual_bouquet_name_descriptor)
+{
+	int rtcode = SECTION_PARSE_NO_ERROR;
+	char   pszField[64];
+	char   pszComment[128];
 
-	//	if (pmultilingual_bouquet_name_descriptor->descriptor_length > 0)
-	//	{
-	//		loop_length = pmultilingual_bouquet_name_descriptor->descriptor_length;
-	//		while ((loop_length >= 4) && (N < MAX_LANGUAGES))
-	//		{
-	//			uint8_t* old_loop_ptr = bs.p_cur;
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pmultilingual_bouquet_name_descriptor != NULL))
+	{
+		sprintf_s(pszField, sizeof(pszField), "multilingual_bouquet_name_descriptor(tag: 0x%02X)", pmultilingual_bouquet_name_descriptor->descriptor_tag);
 
-	//			sprintf_s(pszTemp, sizeof(pszTemp), "language %d", N);
-	//			tinyxml2::XMLElement* pxmlLangNode = pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, pszTemp);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, pmultilingual_bouquet_name_descriptor->descriptor_length + 2);
 
-	//			memcpy(pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code_char, bs.p_cur, 3);
-	//			pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code_char[3] = '\0';
-	//			pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code = BITS_get(&bs, 24);
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLangNode, "ISO_639_language_code", pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code,
-	//				24, "bslbf", pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code_char, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pmultilingual_bouquet_name_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-	//			pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_length = BITS_get(&bs, 8);
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLangNode, "bouquet_name_length", pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_length, 8, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pmultilingual_bouquet_name_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-	//			int copy_length = (pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_length < MAX_BOUQUET_NAME_LENGTH) ?
-	//				pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_length : MAX_BOUQUET_NAME_LENGTH;
+		if (pmultilingual_bouquet_name_descriptor->descriptor_length > 0)
+		{
+			for (int lang_index = 0; lang_index < pmultilingual_bouquet_name_descriptor->N; lang_index ++)
+			{
+				sprintf_s(pszField, sizeof(pszField), "language[%d]", lang_index);
+				sprintf_s(pszComment, sizeof(pszComment), "%s - %s", pmultilingual_bouquet_name_descriptor->st[lang_index].ISO_639_language_code_char, pmultilingual_bouquet_name_descriptor->st[lang_index].trimmed_bouquet_name_char);
+				XMLElement* pxmlLangNode = pxmlDoc->NewBranchElement(pxmlDescriptorNode, pszField, pszComment, 3 + 1 + pmultilingual_bouquet_name_descriptor->st[lang_index].bouquet_name_length);
 
-	//			memcpy(pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_char, bs.p_cur, copy_length);
-	//			pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_char[copy_length] = '\0';
-	//			pmultilingual_bouquet_name_descriptor->LANGUAGE[N].trimmed_bouquet_name_char = DVB_SI_StringPrefixTrim(pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_char);
-	//			BITS_byteSkip(&bs, pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_length);
+				pxmlDoc->NewElementForByteBuf(pxmlLangNode, "ISO_639_language_code[ ]", (uint8_t*)pmultilingual_bouquet_name_descriptor->st[lang_index].ISO_639_language_code_char,
+					3, pmultilingual_bouquet_name_descriptor->st[lang_index].ISO_639_language_code_char);
 
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLangNode, "bouquet_name[ ]", (uint8_t*)pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_char,
-	//				copy_length, pmultilingual_bouquet_name_descriptor->LANGUAGE[N].trimmed_bouquet_name_char, &bs);
+				pxmlDoc->NewElementForBits(pxmlLangNode, "bouquet_name_length", pmultilingual_bouquet_name_descriptor->st[lang_index].bouquet_name_length, 8, "uimsbf", NULL);
 
-	//			pxmlDoc->UpdateBufMark(pxmlLangNode, old_loop_ptr, bs.p_cur);
-
-	//			sprintf_s(pszTemp, sizeof(pszTemp), "%s:%s", pmultilingual_bouquet_name_descriptor->LANGUAGE[N].ISO_639_language_code_char, 
-	//				pmultilingual_bouquet_name_descriptor->LANGUAGE[N].trimmed_bouquet_name_char);
-
-	//			pxmlLangNode->SetAttribute("comment", pszTemp);
-
-	//			loop_length -= (4 + pmultilingual_bouquet_name_descriptor->LANGUAGE[N].bouquet_name_length);
-	//			N++;
-	//		}
-
-	//		pmultilingual_bouquet_name_descriptor->N = N;
-	//	}
-
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", pmultilingual_bouquet_name_descriptor->descriptor_tag, length);
-	//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
-
-	//	if (pMultilingualBouquetNameDescriptor == NULL)
-	//	{
-	//		delete pmultilingual_bouquet_name_descriptor;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	//}
+				if (pmultilingual_bouquet_name_descriptor->st[lang_index].bouquet_name_length > 0)
+				{
+					pxmlDoc->NewElementForByteBuf(pxmlLangNode, "bouquet_name[ ]", (uint8_t*)pmultilingual_bouquet_name_descriptor->st[lang_index].bouquet_name_char,
+						pmultilingual_bouquet_name_descriptor->st[lang_index].bouquet_name_length, pmultilingual_bouquet_name_descriptor->st[lang_index].trimmed_bouquet_name_char);
+				}
+			}
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
 	return rtcode;
 }
@@ -1371,104 +1180,83 @@ int DVB_SI_decode_multilingual_bouquet_name_descriptor_to_xml(uint8_t* buf, int 
 //功能：解多语言业务名称描述子				0x5D
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-int DVB_SI_decode_multilingual_service_name_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, multilingual_service_name_descriptor_t* pMultilingualServiceNameDescriptor)
+int DVB_SI_decode_multilingual_service_name_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multilingual_service_name_descriptor_t* pMultilingualServiceNameDescriptor)
 {
 	int rtcode = SECTION_PARSE_NO_ERROR;
-	//int N = 0;
-	//int loop_length;
-	//char   pszTemp[128];
-	//BITS_t bs;
 
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
-	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "multilingual_service_name_descriptor()");
-	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
+	{
+		multilingual_service_name_descriptor_t* pmultilingual_service_name_descriptor = (pMultilingualServiceNameDescriptor == NULL) ? new multilingual_service_name_descriptor_t : pMultilingualServiceNameDescriptor;
 
-	//	multilingual_service_name_descriptor_t* pmultilingual_service_name_descriptor = (pMultilingualServiceNameDescriptor == NULL) ? new multilingual_service_name_descriptor_t : pMultilingualServiceNameDescriptor;
-	//	memset(pmultilingual_service_name_descriptor, 0x00, sizeof(multilingual_service_name_descriptor_t));
+		rtcode = DVB_SI_decode_multilingual_service_name_descriptor(buf, length, pmultilingual_service_name_descriptor);
+		DVB_SI_present_multilingual_service_name_descriptor_to_xml(pxmlDoc, pxmlParentNode, pmultilingual_service_name_descriptor);
 
-	//	BITS_map(&bs, buf, length);
+		if (pMultilingualServiceNameDescriptor == NULL)
+		{
+			delete pmultilingual_service_name_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
-	//	pmultilingual_service_name_descriptor->descriptor_tag = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pmultilingual_service_name_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+	return rtcode;
+}
 
-	//	pmultilingual_service_name_descriptor->descriptor_length = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pmultilingual_service_name_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+int DVB_SI_present_multilingual_service_name_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multilingual_service_name_descriptor_t* pmultilingual_service_name_descriptor)
+{
+	int rtcode = SECTION_PARSE_NO_ERROR;
+	char   pszField[64];
+	char   pszComment[128];
 
-	//	if (pmultilingual_service_name_descriptor->descriptor_length > 0)
-	//	{
-	//		loop_length = pmultilingual_service_name_descriptor->descriptor_length;
-	//		while ((loop_length >= 5) && (N < MAX_LANGUAGES))
-	//		{
-	//			uint8_t* old_loop_ptr = bs.p_cur;
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pmultilingual_service_name_descriptor != NULL))
+	{
+		sprintf_s(pszField, sizeof(pszField), "multilingual_service_name_descriptor(tag: 0x%02X)", pmultilingual_service_name_descriptor->descriptor_tag);
 
-	//			sprintf_s(pszTemp, sizeof(pszTemp), "language %d", N);
-	//			tinyxml2::XMLElement* pxmlLangNode = pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, pszTemp);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, pmultilingual_service_name_descriptor->descriptor_length + 2);
 
-	//			memcpy(pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code_char, bs.p_cur, 3);
-	//			pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code_char[3] = '\0';
-	//			pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code = BITS_get(&bs, 24);
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLangNode, "ISO_639_language_code", pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code,
-	//				24, "bslbf", pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code_char, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pmultilingual_service_name_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-	//			pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_length = BITS_get(&bs, 8);
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLangNode, "service_provider_name_length", pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_length,
-	//				8, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pmultilingual_service_name_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-	//			int copy_length = (pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_length < MAX_SERVICE_PROVIDER_NAME_LENGTH) ?
-	//				pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_length : MAX_SERVICE_PROVIDER_NAME_LENGTH;
+		if (pmultilingual_service_name_descriptor->descriptor_length > 0)
+		{
+			for (int lang_index = 0; lang_index < pmultilingual_service_name_descriptor->N; lang_index ++)
+			{
+				sprintf_s(pszField, sizeof(pszField), "language[%d]", lang_index);
+				sprintf_s(pszComment, sizeof(pszComment), "%s - Name:%s, Provider:%s", pmultilingual_service_name_descriptor->st[lang_index].ISO_639_language_code_char, 
+					pmultilingual_service_name_descriptor->st[lang_index].trimmed_service_name_char,
+					pmultilingual_service_name_descriptor->st[lang_index].trimmed_service_provider_name_char);
 
-	//			memcpy(pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_char, bs.p_cur, copy_length);
-	//			pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_char[copy_length] = '\0';
-	//			pmultilingual_service_name_descriptor->LANGUAGE[N].trimmed_service_provider_name_char = DVB_SI_StringPrefixTrim(pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_char);
+				XMLElement* pxmlLangNode = pxmlDoc->NewBranchElement(pxmlDescriptorNode, pszField, pszComment, 
+					3 + 1 + pmultilingual_service_name_descriptor->st[lang_index].service_provider_name_length + 1 + pmultilingual_service_name_descriptor->st[lang_index].service_name_length);
 
-	//			BITS_byteSkip(&bs, pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_length);
+				pxmlDoc->NewElementForByteBuf(pxmlLangNode, "ISO_639_language_code[ ]", (uint8_t*)pmultilingual_service_name_descriptor->st[lang_index].ISO_639_language_code_char,
+					3, pmultilingual_service_name_descriptor->st[lang_index].ISO_639_language_code_char);
 
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLangNode, "service_provider_name",
-	//				(uint8_t*)pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_char, 
-	//				pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_length, 
-	//				pmultilingual_service_name_descriptor->LANGUAGE[N].trimmed_service_provider_name_char, &bs);
+				pxmlDoc->NewElementForBits(pxmlLangNode, "service_provider_name_length", pmultilingual_service_name_descriptor->st[lang_index].service_provider_name_length, 8, "uimsbf", NULL);
 
-	//			pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_length = BITS_get(&bs, 8);
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLangNode, "service_name_length", pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_length, 8, "uimsbf", NULL, &bs);
+				if (pmultilingual_service_name_descriptor->st[lang_index].service_provider_name_length > 0)
+				{
+					pxmlDoc->NewElementForByteBuf(pxmlLangNode, "service_provider_name[ ]", (uint8_t*)pmultilingual_service_name_descriptor->st[lang_index].service_provider_name_char,
+						pmultilingual_service_name_descriptor->st[lang_index].service_provider_name_length, pmultilingual_service_name_descriptor->st[lang_index].trimmed_service_provider_name_char);
+				}
 
-	//			copy_length = (pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_length < MAX_SERVICE_NAME_LENGTH) ?
-	//				pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_length : MAX_SERVICE_NAME_LENGTH;
+				pxmlDoc->NewElementForBits(pxmlLangNode, "service_name_length", pmultilingual_service_name_descriptor->st[lang_index].service_name_length, 8, "uimsbf", NULL);
 
-	//			memcpy(pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_char, bs.p_cur, copy_length);
-	//			pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_char[copy_length] = '\0';
-	//			pmultilingual_service_name_descriptor->LANGUAGE[N].trimmed_service_name_char = DVB_SI_StringPrefixTrim(pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_char);
-
-	//			BITS_byteSkip(&bs, pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_length);
-
-	//			pxmlDoc->NewKeyValuePairElement(pxmlLangNode, "service_name[ ]",
-	//				(uint8_t*)pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_char, 
-	//				pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_length, 
-	//				pmultilingual_service_name_descriptor->LANGUAGE[N].trimmed_service_name_char, &bs);
-
-	//			pxmlDoc->UpdateBufMark(pxmlLangNode, old_loop_ptr, bs.p_cur);
-	//			sprintf_s(pszTemp, sizeof(pszTemp), "%s:%s", pmultilingual_service_name_descriptor->LANGUAGE[N].ISO_639_language_code_char, pmultilingual_service_name_descriptor->LANGUAGE[N].trimmed_service_name_char);
-	//			pxmlLangNode->SetAttribute("comment", pszTemp);
-
-	//			loop_length -= (5 + pmultilingual_service_name_descriptor->LANGUAGE[N].service_name_length + pmultilingual_service_name_descriptor->LANGUAGE[N].service_provider_name_length);
-	//			N++;
-	//		}
-
-	//		pmultilingual_service_name_descriptor->N = N;
-	//	}
-
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", pmultilingual_service_name_descriptor->descriptor_tag, length);
-	//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
-
-	//	if (pMultilingualServiceNameDescriptor == NULL)
-	//	{
-	//		delete pmultilingual_service_name_descriptor;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	//}
+				if (pmultilingual_service_name_descriptor->st[lang_index].service_name_length > 0)
+				{
+					pxmlDoc->NewElementForByteBuf(pxmlLangNode, "service_name[ ]", (uint8_t*)pmultilingual_service_name_descriptor->st[lang_index].service_name_char,
+						pmultilingual_service_name_descriptor->st[lang_index].service_name_length, pmultilingual_service_name_descriptor->st[lang_index].trimmed_service_name_char);
+				}
+			}
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
 	return rtcode;
 }
@@ -1476,79 +1264,74 @@ int DVB_SI_decode_multilingual_service_name_descriptor_to_xml(uint8_t* buf, int 
 //功能：解多语言组成描述子					0x5E
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-int DVB_SI_decode_multilingual_component_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, multilingual_component_descriptor_t* pMultilingualComponentDescriptor)
+int DVB_SI_decode_multilingual_component_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multilingual_component_descriptor_t* pMultilingualComponentDescriptor)
 {
 	int rtcode = SECTION_PARSE_NO_ERROR;
-	//int N = 0;
-	//int loop_length;
-	//char   pszTemp[128];
-	//BITS_t bs;
 
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
-	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "multilingual_component_descriptor()");
-	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
+	{
+		multilingual_component_descriptor_t* pmultilingual_component_descriptor = (pMultilingualComponentDescriptor == NULL) ? new multilingual_component_descriptor_t : pMultilingualComponentDescriptor;
 
-	//	multilingual_component_descriptor_t* pmultilingual_component_descriptor = (pMultilingualComponentDescriptor == NULL) ? new multilingual_component_descriptor_t : pMultilingualComponentDescriptor;
-	//	memset(pmultilingual_component_descriptor, 0x00, sizeof(multilingual_component_descriptor_t));
+		rtcode = DVB_SI_decode_multilingual_component_descriptor(buf, length, pmultilingual_component_descriptor);
+		DVB_SI_present_multilingual_component_descriptor_to_xml(pxmlDoc, pxmlParentNode, pmultilingual_component_descriptor);
 
-	//	BITS_map(&bs, buf, length);
+		if (pMultilingualComponentDescriptor == NULL)
+		{
+			delete pmultilingual_component_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
-	//	pmultilingual_component_descriptor->descriptor_tag = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pmultilingual_component_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+	return rtcode;
+}
 
-	//	pmultilingual_component_descriptor->descriptor_length = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pmultilingual_component_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+int DVB_SI_present_multilingual_component_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multilingual_component_descriptor_t* pmultilingual_component_descriptor)
+{
+	int rtcode = SECTION_PARSE_NO_ERROR;
+	char   pszField[64];
+	char   pszComment[128];
 
-	//	pmultilingual_component_descriptor->component_tag = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "component_tag", pmultilingual_component_descriptor->component_tag, 8, "uimsbf", NULL, &bs);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pmultilingual_component_descriptor != NULL))
+	{
+		sprintf_s(pszField, sizeof(pszField), "multilingual_component_descriptor(tag: 0x%02X)", pmultilingual_component_descriptor->descriptor_tag);
+		sprintf_s(pszComment, sizeof(pszComment), "component_tag: 0x%02X", pmultilingual_component_descriptor->component_tag);
 
-	//	loop_length = pmultilingual_component_descriptor->descriptor_length - 1;
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, pszComment, pmultilingual_component_descriptor->descriptor_length + 2);
 
-	//	while ((loop_length >= 4) && (N < MAX_LANGUAGES))
-	//	{
-	//		uint8_t* old_loop_ptr = bs.p_cur;
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pmultilingual_component_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-	//		sprintf_s(pszTemp, sizeof(pszTemp), "language %d", N);
-	//		tinyxml2::XMLElement* pxmlLangNode = pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, pszTemp);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pmultilingual_component_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-	//		memcpy(pmultilingual_component_descriptor->ISO_639_language_code_char[N], bs.p_cur, 3);
-	//		pmultilingual_component_descriptor->ISO_639_language_code_char[N][3] = '\0';
-	//		pmultilingual_component_descriptor->ISO_639_language_code[N] = BITS_get(&bs, 24);
-	//		pxmlDoc->NewKeyValuePairElement(pxmlLangNode, "ISO_639_language_code", pmultilingual_component_descriptor->ISO_639_language_code[N], 24, "bslbf", pmultilingual_component_descriptor->ISO_639_language_code_char[N], &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "component_tag", pmultilingual_component_descriptor->component_tag, 8, "uimsbf", NULL);
 
-	//		pmultilingual_component_descriptor->text_description_length[N] = BITS_get(&bs, 8);
+		if (pmultilingual_component_descriptor->descriptor_length > 1)
+		{
+			for (int lang_index = 0; lang_index < pmultilingual_component_descriptor->N; lang_index++)
+			{
+				sprintf_s(pszField, sizeof(pszField), "language[%d]", lang_index);
+				sprintf_s(pszComment, sizeof(pszComment), "%s - %s", pmultilingual_component_descriptor->st[lang_index].ISO_639_language_code_char, pmultilingual_component_descriptor->st[lang_index].text_char);
+				XMLElement* pxmlLangNode = pxmlDoc->NewBranchElement(pxmlDescriptorNode, pszField, pszComment, 3 + 1 + pmultilingual_component_descriptor->st[lang_index].text_description_length);
 
-	//		int copy_length = (pmultilingual_component_descriptor->text_description_length[N] < MAX_COMPONENT_TEXT_LENGTH) ?
-	//			pmultilingual_component_descriptor->text_description_length[N] : MAX_COMPONENT_TEXT_LENGTH;
+				pxmlDoc->NewElementForByteBuf(pxmlLangNode, "ISO_639_language_code[ ]", (uint8_t*)pmultilingual_component_descriptor->st[lang_index].ISO_639_language_code_char,
+					3, pmultilingual_component_descriptor->st[lang_index].ISO_639_language_code_char);
 
-	//		memcpy(pmultilingual_component_descriptor->text_char[N], bs.p_cur, copy_length);
-	//		pmultilingual_component_descriptor->text_char[N][copy_length] = '\0';
-	//		BITS_byteSkip(&bs, pmultilingual_component_descriptor->text_description_length[N]);
-	//		pxmlDoc->NewKeyValuePairElement(pxmlLangNode, "text_description", -1, -1, NULL, pmultilingual_component_descriptor->text_char[N], &bs);
+				pxmlDoc->NewElementForBits(pxmlLangNode, "text_description_length", pmultilingual_component_descriptor->st[lang_index].text_description_length, 8, "uimsbf", NULL);
 
-	//		pxmlDoc->UpdateBufMark(pxmlLangNode, old_loop_ptr, bs.p_cur);
-	//		sprintf_s(pszTemp, sizeof(pszTemp), "%s:%s", pmultilingual_component_descriptor->ISO_639_language_code_char[N], pmultilingual_component_descriptor->text_char[N]);
-	//		pxmlLangNode->SetAttribute("comment", pszTemp);
-
-	//		loop_length -= (4 + pmultilingual_component_descriptor->text_description_length[N]);
-	//		N++;
-	//	}
-
-	//	pmultilingual_component_descriptor->N = N;
-
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", pmultilingual_component_descriptor->descriptor_tag, length);
-	//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
-
-	//	if (pMultilingualComponentDescriptor == NULL)
-	//	{
-	//		delete pmultilingual_component_descriptor;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	//}
+				if (pmultilingual_component_descriptor->st[lang_index].text_description_length > 0)
+				{
+					pxmlDoc->NewElementForByteBuf(pxmlLangNode, "text_char[ ]", (uint8_t*)pmultilingual_component_descriptor->st[lang_index].text_char,
+						pmultilingual_component_descriptor->st[lang_index].text_description_length, pmultilingual_component_descriptor->st[lang_index].text_char);
+				}
+			}
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
 	return rtcode;
 }

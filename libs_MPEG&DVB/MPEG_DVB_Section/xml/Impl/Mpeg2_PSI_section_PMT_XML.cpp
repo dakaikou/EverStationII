@@ -70,24 +70,24 @@ int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_se
 
 				switch (descriptor_tag)
 				{
-					//case MPEG2_PSI_REGISTRATION_DESCRIPTOR:
-					//	MPEG2_PSI_decode_registration_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-					//	break;
+				case MPEG2_PSI_REGISTRATION_DESCRIPTOR:
+					MPEG2_PSI_decode_registration_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+					break;
 				case MPEG2_PSI_CA_DESCRIPTOR:
 					MPEG2_PSI_decode_CA_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
 					break;
 				case MPEG2_PSI_SYSTEM_CLOCK_DESCRIPTOR:
 					MPEG2_PSI_decode_system_clock_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
 					break;
-					//case MPEG2_PSI_MULTIPLEX_BUFFER_UTILIZATION_DESCRIPTOR:
-					//	MPEG2_PSI_decode_multiplex_buffer_utilization_descriptor(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-					//	break;
-					//case MPEG2_PSI_MAXIMUM_BITRATE_DESCRIPTOR:
-					//	MPEG2_PSI_decode_maximum_bitrate_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-					//	break;
-					//case MPEG2_PSI_SMOOTHING_BUFFER_DESCRIPTOR:
-					//	MPEG2_PSI_decode_smoothing_buffer_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-					//	break;
+				case MPEG2_PSI_MULTIPLEX_BUFFER_UTILIZATION_DESCRIPTOR:
+					MPEG2_PSI_decode_multiplex_buffer_utilization_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+					break;
+				case MPEG2_PSI_MAXIMUM_BITRATE_DESCRIPTOR:
+					MPEG2_PSI_decode_maximum_bitrate_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+					break;
+				case MPEG2_PSI_SMOOTHING_BUFFER_DESCRIPTOR:
+					MPEG2_PSI_decode_smoothing_buffer_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
+					break;
 				default:
 					MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlProgramInfoNode, ppmt_section->program_descriptors + descriptor_index);
 					break;
@@ -132,24 +132,27 @@ int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_se
 
 						switch (descriptor_tag)
 						{
-							//case MPEG2_PSI_VIDEO_STREAM_DESCRIPTOR:
-							//	MPEG2_PSI_decode_video_stream_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlESInfoNode);
-							//	break;
-							//case MPEG2_PSI_AUDIO_STREAM_DESCRIPTOR:
-							//	MPEG2_PSI_decode_audio_stream_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-							//	break;
-							//case MPEG2_PSI_REGISTRATION_DESCRIPTOR:
-							//	MPEG2_PSI_decode_registration_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode, &registration_descriptor);
-							//	break;
+						case MPEG2_PSI_VIDEO_STREAM_DESCRIPTOR:
+							MPEG2_PSI_decode_video_stream_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlESInfoNode);
+							break;
+						case MPEG2_PSI_AUDIO_STREAM_DESCRIPTOR:
+							MPEG2_PSI_decode_audio_stream_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlESInfoNode);
+							break;
+						case MPEG2_PSI_REGISTRATION_DESCRIPTOR:
+							MPEG2_PSI_decode_registration_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlESInfoNode);
+							break;
 							//case MPEG2_PSI_DATA_STREAM_ALIGNMENT_DESCRIPTOR:
 							//	MPEG2_PSI_decode_data_stream_alignment_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
 							//	break;
 						case MPEG2_PSI_ISO_639_LANGUAGE_DESCRIPTOR:
 							MPEG2_PSI_decode_ISO_639_language_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlESInfoNode);
 							break;
-							//case MPEG2_PSI_MAXIMUM_BITRATE_DESCRIPTOR:
-							//	MPEG2_PSI_decode_maximum_bitrate_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-							//	break;
+						//case MPEG2_PSI_MULTIPLEX_BUFFER_UTILIZATION_DESCRIPTOR:
+						//	MPEG2_PSI_decode_multiplex_buffer_utilization_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlESInfoNode);
+						//	break;
+						case MPEG2_PSI_MAXIMUM_BITRATE_DESCRIPTOR:
+							MPEG2_PSI_decode_maximum_bitrate_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlESInfoNode);
+							break;
 							//case MPEG2_DSMCC_CAROUSEL_IDENTIFIER_DESCRIPTOR:
 							//	MPEG2_DSMCC_decode_carousel_identifier_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
 							//	break;

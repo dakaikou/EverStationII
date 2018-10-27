@@ -37,8 +37,8 @@ _CDL_EXPORT int MPEG2_PSI_decode_system_clock_descriptor_to_xml(uint8_t* buf, in
 _CDL_EXPORT int MPEG2_PSI_present_system_clock_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, system_clock_descriptor_t* psystem_clock_descriptor);
 
 /*TAG = PSI_MULTIPLEX_BUFFER_UTILIZATION_DESCRIPTOR		0x0C*/
-_CDL_EXPORT int MPEG2_PSI_decode_multiplex_buffer_utilization_descriptor(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multiplex_buffer_utilization_descriptor_t* pmultiplex_buffer_utilization_descriptor = NULL);
-_CDL_EXPORT int MPEG2_PSI_present_multiplex_buffer_utilization_descriptor(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multiplex_buffer_utilization_descriptor_t* pmultiplex_buffer_utilization_descriptor);
+_CDL_EXPORT int MPEG2_PSI_decode_multiplex_buffer_utilization_descriptor_to_xml(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multiplex_buffer_utilization_descriptor_t* pmultiplex_buffer_utilization_descriptor = NULL);
+_CDL_EXPORT int MPEG2_PSI_present_multiplex_buffer_utilization_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multiplex_buffer_utilization_descriptor_t* pmultiplex_buffer_utilization_descriptor);
 
 /*TAB = PSI_MAXIMUM_BITRATE_DESCRIPTOR				0x0E*/
 _CDL_EXPORT int MPEG2_PSI_decode_maximum_bitrate_descriptor_to_xml(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, maximum_bitrate_descriptor_t* pmaximum_bitrate_descriptor = NULL);

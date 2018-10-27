@@ -85,7 +85,6 @@ int CNIT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 				{
 					DVB_SI_decode_network_name_descriptor(descriptor_buf, descriptor_size, &network_name_descriptor);
 					strcpy_s(m_pszNetworkName, sizeof(m_pszNetworkName), network_name_descriptor.trimmed_network_name);
-					//memcpy_s(m_pszNetworkName, sizeof(m_pszNetworkName), network_name_descriptor.trimmed_network_name, sizeof(network_name_descriptor.network_name));
 
 					break;
 				}
@@ -94,8 +93,7 @@ int CNIT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 					if (strlen(m_pszNetworkName) == 0)
 					{
 						DVB_SI_decode_multilingual_network_name_descriptor(descriptor_buf, descriptor_size, &multilingual_network_name_descriptor);
-//						strcpy_s(m_pszNetworkName, sizeof(m_pszNetworkName), multilingual_network_name_descriptor.network_name_char[0]);
-						memcpy_s(m_pszNetworkName, sizeof(m_pszNetworkName), multilingual_network_name_descriptor.LANGUAGE[0].trimmed_network_name_char, sizeof(multilingual_network_name_descriptor.LANGUAGE[0].trimmed_network_name_char));
+						memcpy_s(m_pszNetworkName, sizeof(m_pszNetworkName), multilingual_network_name_descriptor.st[0].trimmed_network_name_char, sizeof(multilingual_network_name_descriptor.st[0].trimmed_network_name_char));
 
 						break;
 					}

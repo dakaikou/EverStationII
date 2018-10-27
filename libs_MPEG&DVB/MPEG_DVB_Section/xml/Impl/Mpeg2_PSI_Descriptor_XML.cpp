@@ -84,7 +84,8 @@ int MPEG2_PSI_present_video_stream_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLE
 }
 
 //功能：解音频流描述子			0x03
-//输入：buffer, 起始位置nIndex
+//输入：buf -- 描述符首地址
+//      length -- 描述符长度
 //返回：LPVOID指针
 //备注：2000.11 chendelin
 int MPEG2_PSI_decode_audio_stream_descriptor_to_xml(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, audio_stream_descriptor_t* pAudioStreamDescriptor)
@@ -113,42 +114,23 @@ int MPEG2_PSI_decode_audio_stream_descriptor_to_xml(uint8_t *buf, int length, HA
 int MPEG2_PSI_present_audio_stream_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, audio_stream_descriptor_t* paudio_stream_descriptor)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
+	char	pszField[48];
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (paudio_stream_descriptor != NULL))
 	{
-		//tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "audio_stream_descriptor()");
-		//pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+		sprintf_s(pszField, sizeof(pszField), "audio_stream_descriptor(tag: 0x%02X)", paudio_stream_descriptor->descriptor_tag);
 
-		//audio_stream_descriptor_t* paudio_stream_descriptor = (pAudioStreamDescriptor == NULL) ? new audio_stream_descriptor_t : pAudioStreamDescriptor;
-		//memset(paudio_stream_descriptor, 0x00, sizeof(audio_stream_descriptor_t));
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, paudio_stream_descriptor->descriptor_length + 2);
 
-		//BITS_map(&bs, buf, length);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", paudio_stream_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-		//paudio_stream_descriptor->descriptor_tag = BITS_get(&bs, 8);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", paudio_stream_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", paudio_stream_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-		//paudio_stream_descriptor->descriptor_length = BITS_get(&bs, 8);
-		//assert(paudio_stream_descriptor->descriptor_length == 1);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", paudio_stream_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
-
-		//paudio_stream_descriptor->free_format_flag = BITS_get(&bs, 1);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "free_format_flag", paudio_stream_descriptor->free_format_flag, 1, "bslbf", NULL, &bs);
-		//paudio_stream_descriptor->ID = BITS_get(&bs, 1);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "ID", paudio_stream_descriptor->ID, 1, "bslbf", NULL, &bs);
-		//paudio_stream_descriptor->layer = BITS_get(&bs, 2);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "layer", paudio_stream_descriptor->layer, 2, "bslbf", NULL, &bs);
-		//paudio_stream_descriptor->variable_rate_audio_indicator = BITS_get(&bs, 1);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "variable_rate_audio_indicator", paudio_stream_descriptor->variable_rate_audio_indicator, 1, "bslbf", NULL, &bs);
-		//paudio_stream_descriptor->reserved = BITS_get(&bs, 3);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "reserved", paudio_stream_descriptor->reserved, 3, "bslbf", NULL, &bs);
-
-		//sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", paudio_stream_descriptor->descriptor_tag, length);
-		//pxmlDescriptorNode->SetAttribute("comment", pszTemp);
-
-		//if (pAudioStreamDescriptor == NULL)
-		//{
-		//	delete paudio_stream_descriptor;
-		//}
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "free_format_flag", paudio_stream_descriptor->free_format_flag, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "ID", paudio_stream_descriptor->ID, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "layer", paudio_stream_descriptor->layer, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "variable_rate_audio_indicator", paudio_stream_descriptor->variable_rate_audio_indicator, 1, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "reserved", paudio_stream_descriptor->reserved, 3, "bslbf", NULL);
 	}
 	else
 	{
@@ -193,50 +175,26 @@ int MPEG2_PSI_decode_registration_descriptor_to_xml(uint8_t *buf, int length, HA
 int MPEG2_PSI_present_registration_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, registration_descriptor_t* pregistration_descriptor)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
+	char	pszField[48];
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pregistration_descriptor != NULL))
 	{
-		//tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "registration_descriptor()");
-		//pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+		sprintf_s(pszField, sizeof(pszField), "registration_descriptor(tag: 0x%02X)", pregistration_descriptor->descriptor_tag);
 
-		//registration_descriptor_t* pregistration_descriptor = (pRegistrationDescriptor == NULL) ? new registration_descriptor_t : pRegistrationDescriptor;
-		//memset(pregistration_descriptor, 0x00, sizeof(registration_descriptor_t));
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, pregistration_descriptor->format_identifier_char, pregistration_descriptor->descriptor_length + 2);
 
-		//BITS_map(&bs, buf, length);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pregistration_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-		//pregistration_descriptor->descriptor_tag = BITS_get(&bs, 8);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pregistration_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pregistration_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-		//pregistration_descriptor->descriptor_length = BITS_get(&bs, 8);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pregistration_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "format_identifier[ ]", (uint8_t*)pregistration_descriptor->format_identifier_char, 4, pregistration_descriptor->format_identifier_char);
 
-		//memcpy(pregistration_descriptor->format_identifier_char, bs.p_cur, 4);
-		////pregistration_descriptor->format_identifier_char[0] = (char)((pregistration_descriptor->format_identifier & 0xff000000) >> 24);
-		////pregistration_descriptor->format_identifier_char[1] = (char)((pregistration_descriptor->format_identifier & 0x00ff0000) >> 16);
-		////pregistration_descriptor->format_identifier_char[2] = (char)((pregistration_descriptor->format_identifier & 0x0000ff00) >> 8);
-		////pregistration_descriptor->format_identifier_char[3] = (char)(pregistration_descriptor->format_identifier & 0x000000ff);
-		//pregistration_descriptor->format_identifier_char[4] = '\0';
-		//pregistration_descriptor->format_identifier = BITS_get(&bs, 32);
-		//pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "format_identifier", pregistration_descriptor->format_identifier, 32, "uimsbf", pregistration_descriptor->format_identifier_char, &bs);
-
-		//int info_length = pregistration_descriptor->descriptor_length - 4;
-		//if (info_length > 0)
-		//{
-		//	BITS_byteCopy(pregistration_descriptor->additional_identification_info, sizeof(pregistration_descriptor->additional_identification_info), &bs, info_length);
-		//	pregistration_descriptor->additional_identification_info[info_length] = '\0';
-		//}
-		////else
-		////{
-		////	memset(pregistration_descriptor->additional_identification_info, 0x00, sizeof(pregistration_descriptor->additional_identification_info));
-		////}
-
-		//sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节, %s", pregistration_descriptor->descriptor_tag, length, pregistration_descriptor->format_identifier_char);
-		//pxmlDescriptorNode->SetAttribute("comment", pszTemp);
-
-		//if (pRegistrationDescriptor == NULL)
-		//{
-		//	delete pregistration_descriptor;
-		//}
+		if (pregistration_descriptor->info_length > 0)
+		{
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "additional_identification_info[ ]", 
+				(uint8_t*)pregistration_descriptor->additional_identification_info, pregistration_descriptor->info_length, 
+				pregistration_descriptor->additional_identification_info);
+		}
 	}
 	else
 	{
@@ -338,7 +296,7 @@ int MPEG2_PSI_present_CA_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* px
 		sprintf_s(pszField, sizeof(pszField), "CA_descriptor(tag: 0x%02X)", pCA_descriptor->descriptor_tag);
 
 		MPEG_DVB_NumericCoding2Text_CASystemID(pCA_descriptor->CA_system_ID, pszCASystem, sizeof(pszCASystem));
-		sprintf_s(pszComment, sizeof(pszComment), "CA_system_ID=0x%04X, CA_PID=0x%04X, %s", pCA_descriptor->CA_system_ID, pCA_descriptor->CA_PID, pszCASystem);
+		sprintf_s(pszComment, sizeof(pszComment), "%s, CA_system_ID=0x%04X, CA_PID=0x%04X", pszCASystem, pCA_descriptor->CA_system_ID, pCA_descriptor->CA_PID);
 
 		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, pszComment, pCA_descriptor->descriptor_length + 2);
 
@@ -412,13 +370,13 @@ int MPEG2_PSI_present_ISO_639_language_descriptor_to_xml(HALForXMLDoc* pxmlDoc, 
 			{
 				sprintf_s(pszField, sizeof(pszField), "LANGUAGE[%d]()", lang_index);
 
-				XMLElement* pxmlLangNode = pxmlDoc->NewBranchElement(pxmlLangsLoopNode, pszField, pISO_639_language_descriptor->ISO_639_language[lang_index].ISO_639_language_code_char, 4);
+				XMLElement* pxmlLangNode = pxmlDoc->NewBranchElement(pxmlLangsLoopNode, pszField, pISO_639_language_descriptor->st[lang_index].ISO_639_language_code_char, 4);
 
 				pxmlDoc->NewElementForByteBuf(pxmlLangNode, "ISO_639_language_code[ ]", 
-					(uint8_t*)pISO_639_language_descriptor->ISO_639_language[lang_index].ISO_639_language_code_char, 3, 
-					pISO_639_language_descriptor->ISO_639_language[lang_index].ISO_639_language_code_char);
+					(uint8_t*)pISO_639_language_descriptor->st[lang_index].ISO_639_language_code_char, 3, 
+					pISO_639_language_descriptor->st[lang_index].ISO_639_language_code_char);
 
-				pxmlDoc->NewElementForBits(pxmlLangNode, "audio_type", pISO_639_language_descriptor->ISO_639_language[lang_index].audio_type, 8, "uimsbf", NULL);
+				pxmlDoc->NewElementForBits(pxmlLangNode, "audio_type", pISO_639_language_descriptor->st[lang_index].audio_type, 8, "uimsbf", NULL);
 			}
 		}
 	}
@@ -491,53 +449,59 @@ int MPEG2_PSI_present_system_clock_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLE
 //功能：解复用缓冲器使用描述子				0x0C
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-int MPEG2_PSI_decode_multiplex_buffer_utilization_descriptor(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multiplex_buffer_utilization_descriptor_t* pMultiplexBufferUtilizationDescriptor)
+int MPEG2_PSI_decode_multiplex_buffer_utilization_descriptor_to_xml(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multiplex_buffer_utilization_descriptor_t* pMultiplexBufferUtilizationDescriptor)
 {
 	int	  rtcode = SECTION_PARSE_NO_ERROR;
-	//char  pszTemp[64];
-	//BITS_t bs;
 
-	//assert(length == 6);
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 6))
-	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "multiplex_buffer_utilization_descriptor()");
-	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+	assert(length == 6);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 6))
+	{
+		multiplex_buffer_utilization_descriptor_t* pmultiplex_buffer_utilization_descriptor = (pMultiplexBufferUtilizationDescriptor == NULL) ? new multiplex_buffer_utilization_descriptor_t : pMultiplexBufferUtilizationDescriptor;
 
-	//	multiplex_buffer_utilization_descriptor_t* pmultiplex_buffer_utilization_descriptor = (pMultiplexBufferUtilizationDescriptor == NULL) ? new multiplex_buffer_utilization_descriptor_t : pMultiplexBufferUtilizationDescriptor;
-	//	memset(pmultiplex_buffer_utilization_descriptor, 0x00, sizeof(multiplex_buffer_utilization_descriptor_t));
+		rtcode = MPEG2_PSI_decode_multiplex_buffer_utilization_descriptor(buf, length, pmultiplex_buffer_utilization_descriptor);
+		MPEG2_PSI_present_multiplex_buffer_utilization_descriptor_to_xml(pxmlDoc, pxmlParentNode, pmultiplex_buffer_utilization_descriptor);
 
-	//	BITS_map(&bs, buf, length);
+		if (pMultiplexBufferUtilizationDescriptor == NULL)
+		{
+			delete pmultiplex_buffer_utilization_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
-	//	pmultiplex_buffer_utilization_descriptor->descriptor_tag = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pmultiplex_buffer_utilization_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+	return rtcode;
+}
 
-	//	pmultiplex_buffer_utilization_descriptor->descriptor_length = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pmultiplex_buffer_utilization_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+int MPEG2_PSI_present_multiplex_buffer_utilization_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multiplex_buffer_utilization_descriptor_t* pmultiplex_buffer_utilization_descriptor)
+{
+	int	  rtcode = SECTION_PARSE_NO_ERROR;
+	char  pszField[64];
+	char  pszComment[64];
 
-	//	pmultiplex_buffer_utilization_descriptor->bound_valid_flag = BITS_get(&bs, 1);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "bound_valid_flag", pmultiplex_buffer_utilization_descriptor->bound_valid_flag, 1, "bslbf", NULL, &bs);
-	//	pmultiplex_buffer_utilization_descriptor->LTW_offset_lower_bound = BITS_get(&bs, 15);
-	//	DVB_SI_NumericCoding2Text_FrequencyCode(pmultiplex_buffer_utilization_descriptor->LTW_offset_lower_bound, pszTemp, sizeof(pszTemp));
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "LTW_offset_lower_bound", pmultiplex_buffer_utilization_descriptor->LTW_offset_lower_bound, 15, "uimsbf", pszTemp, &bs);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pmultiplex_buffer_utilization_descriptor != NULL))
+	{
+		sprintf_s(pszField, sizeof(pszField), "multiplex_buffer_utilization_descriptor(tag: 0x%02X)", pmultiplex_buffer_utilization_descriptor->descriptor_tag);
 
-	//	pmultiplex_buffer_utilization_descriptor->reserved = BITS_get(&bs, 1);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "reserved", 8, pmultiplex_buffer_utilization_descriptor->reserved, "bslbf", NULL, &bs);
-	//	pmultiplex_buffer_utilization_descriptor->LTW_offset_upper_bound = BITS_get(&bs, 15);
-	//	DVB_SI_NumericCoding2Text_FrequencyCode(pmultiplex_buffer_utilization_descriptor->LTW_offset_upper_bound, pszTemp, sizeof(pszTemp));
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "LTW_offset_upper_bound", pmultiplex_buffer_utilization_descriptor->LTW_offset_upper_bound, 15, "uimsbf", pszTemp, &bs);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, pmultiplex_buffer_utilization_descriptor->descriptor_length + 2);
 
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", pmultiplex_buffer_utilization_descriptor->descriptor_tag, length);
-	//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pmultiplex_buffer_utilization_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-	//	if (pMultiplexBufferUtilizationDescriptor == NULL)
-	//	{
-	//		delete pmultiplex_buffer_utilization_descriptor;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	//}
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pmultiplex_buffer_utilization_descriptor->descriptor_length, 8, "uimsbf", NULL);
+
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "bound_valid_flag", pmultiplex_buffer_utilization_descriptor->bound_valid_flag, 1, "bslbf", NULL);
+		DVB_SI_NumericCoding2Text_FrequencyCode(pmultiplex_buffer_utilization_descriptor->LTW_offset_lower_bound, pszComment, sizeof(pszComment));
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "LTW_offset_lower_bound", pmultiplex_buffer_utilization_descriptor->LTW_offset_lower_bound, 15, "uimsbf", pszComment);
+
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "reserved", 8, pmultiplex_buffer_utilization_descriptor->reserved, "bslbf", NULL);
+		DVB_SI_NumericCoding2Text_FrequencyCode(pmultiplex_buffer_utilization_descriptor->LTW_offset_upper_bound, pszComment, sizeof(pszComment));
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "LTW_offset_upper_bound", pmultiplex_buffer_utilization_descriptor->LTW_offset_upper_bound, 15, "uimsbf", pszComment);
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
 	return rtcode;
 }
@@ -553,45 +517,55 @@ int MPEG2_PSI_decode_multiplex_buffer_utilization_descriptor(uint8_t *buf, int l
 int MPEG2_PSI_decode_maximum_bitrate_descriptor_to_xml(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, maximum_bitrate_descriptor_t* pMaximumBitrateDescriptor)
 {
 	int	  rtcode = SECTION_PARSE_NO_ERROR;
-	//char  pszTemp[64];
-	//BITS_t bs;
 
-	//assert(length == 5);
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 5))
-	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "maximum_bitrate_descriptor()");
-	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+	assert(length == 5);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 5))
+	{
+		maximum_bitrate_descriptor_t* pmaximum_bitrate_descriptor = (pMaximumBitrateDescriptor == NULL) ? new maximum_bitrate_descriptor_t : pMaximumBitrateDescriptor;
 
-	//	maximum_bitrate_descriptor_t* pmaximum_bitrate_descriptor = (pMaximumBitrateDescriptor == NULL) ? new maximum_bitrate_descriptor_t : pMaximumBitrateDescriptor;
-	//	memset(pmaximum_bitrate_descriptor, 0x00, sizeof(maximum_bitrate_descriptor_t));
+		rtcode = MPEG2_PSI_decode_maximum_bitrate_descriptor(buf, length, pmaximum_bitrate_descriptor);
+		MPEG2_PSI_present_maximum_bitrate_descriptor_to_xml(pxmlDoc, pxmlParentNode, pmaximum_bitrate_descriptor);
 
-	//	BITS_map(&bs, buf, length);
+		if (pMaximumBitrateDescriptor == NULL)
+		{
+			delete pmaximum_bitrate_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
-	//	pmaximum_bitrate_descriptor->descriptor_tag = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pmaximum_bitrate_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+	return rtcode;
+}
 
-	//	pmaximum_bitrate_descriptor->descriptor_length = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pmaximum_bitrate_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+int MPEG2_PSI_present_maximum_bitrate_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, maximum_bitrate_descriptor_t* pmaximum_bitrate_descriptor)
+{
+	int	  rtcode = SECTION_PARSE_NO_ERROR;
+	char  pszField[48];
+	char  pszMaxium[48];
+	char  pszComment[64];
 
-	//	pmaximum_bitrate_descriptor->reserved = BITS_get(&bs, 2);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "reserved", pmaximum_bitrate_descriptor->reserved, 2, "bslbf", NULL, &bs);
-	//	pmaximum_bitrate_descriptor->maximum_bitrate = BITS_get(&bs, 22);
-	//	int maximum_bitrate = pmaximum_bitrate_descriptor->maximum_bitrate * 400; //bps
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "%d bps", maximum_bitrate);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "maximum_bitrate", pmaximum_bitrate_descriptor->maximum_bitrate, 22, "uimsbf", pszTemp, &bs);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pmaximum_bitrate_descriptor != NULL))
+	{
+		sprintf_s(pszField, sizeof(pszField), "maximum_bitrate_descriptor(tag: 0x%02X)", pmaximum_bitrate_descriptor->descriptor_tag);
+		int maximum_bitrate = pmaximum_bitrate_descriptor->maximum_bitrate * 400; //bps
+		sprintf_s(pszMaxium, sizeof(pszMaxium), "%d bps", maximum_bitrate);
+		sprintf_s(pszComment, sizeof(pszComment), "Max: %s", pszMaxium);
 
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节, maximum_bitrate = %d bps", pmaximum_bitrate_descriptor->descriptor_tag, length, maximum_bitrate);
-	//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, pszComment, pmaximum_bitrate_descriptor->descriptor_length + 2);
 
-	//	if (pMaximumBitrateDescriptor == NULL)
-	//	{
-	//		delete pmaximum_bitrate_descriptor;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	//}
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pmaximum_bitrate_descriptor->descriptor_tag, 8, "uimsbf", NULL);
+
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pmaximum_bitrate_descriptor->descriptor_length, 8, "uimsbf", NULL);
+
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "reserved", pmaximum_bitrate_descriptor->reserved, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "maximum_bitrate", pmaximum_bitrate_descriptor->maximum_bitrate, 22, "uimsbf", pszMaxium);
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
 	return rtcode;
 }
@@ -607,50 +581,55 @@ int MPEG2_PSI_decode_maximum_bitrate_descriptor_to_xml(uint8_t *buf, int length,
 int MPEG2_PSI_decode_smoothing_buffer_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, smoothing_buffer_descriptor_t* pSmoothingBufferDescriptor)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
-	//char  pszTemp[64];
-	//BITS_t bs;
 
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
-	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "smoothing_buffer_descriptor()");
-	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
+	{
+		smoothing_buffer_descriptor_t* psmoothing_buffer_descriptor = (pSmoothingBufferDescriptor == NULL) ? new smoothing_buffer_descriptor_t : pSmoothingBufferDescriptor;
 
-	//	uint8_t descriptor_tag = buf[0];
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", descriptor_tag, length);
-	//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
+		rtcode = MPEG2_PSI_decode_smoothing_buffer_descriptor(buf, length, psmoothing_buffer_descriptor);
+		MPEG2_PSI_present_smoothing_buffer_descriptor_to_xml(pxmlDoc, pxmlParentNode, psmoothing_buffer_descriptor);
 
-	//	smoothing_buffer_descriptor_t* psmoothing_buffer_descriptor = (pSmoothingBufferDescriptor == NULL) ? new smoothing_buffer_descriptor_t : pSmoothingBufferDescriptor;
-	//	memset(psmoothing_buffer_descriptor, 0x00, sizeof(smoothing_buffer_descriptor_t));
+		if (pSmoothingBufferDescriptor == NULL)
+		{
+			delete psmoothing_buffer_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
-	//	BITS_map(&bs, buf, length);
+	return rtcode;
+}
 
-	//	psmoothing_buffer_descriptor->descriptor_tag = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", psmoothing_buffer_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+int MPEG2_PSI_present_smoothing_buffer_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, smoothing_buffer_descriptor_t* psmoothing_buffer_descriptor)
+{
+	int		rtcode = SECTION_PARSE_NO_ERROR;
+	char	pszField[48];
+	char	pszComment[48];
 
-	//	psmoothing_buffer_descriptor->descriptor_length = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", psmoothing_buffer_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (psmoothing_buffer_descriptor != NULL))
+	{
+		sprintf_s(pszField, sizeof(pszField), "smoothing_buffer_descriptor(tag: 0x%02X)", psmoothing_buffer_descriptor->descriptor_tag);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, psmoothing_buffer_descriptor->descriptor_length + 2);
 
-	//	psmoothing_buffer_descriptor->reserved0 = BITS_get(&bs, 2);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "reserved", psmoothing_buffer_descriptor->reserved0, 2, "bslbf", NULL, &bs);
-	//	psmoothing_buffer_descriptor->sb_leak_rate = BITS_get(&bs, 22);
-	//	int sb_leak_rate = psmoothing_buffer_descriptor->sb_leak_rate * 400; //bps
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "%d bps", sb_leak_rate);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "sb_leak_rate", psmoothing_buffer_descriptor->sb_leak_rate, 22, "uimsbf", pszTemp, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", psmoothing_buffer_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-	//	psmoothing_buffer_descriptor->reserved1 = BITS_get(&bs, 2);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "reserved", psmoothing_buffer_descriptor->reserved1, 2, "bslbf", NULL, &bs);
-	//	psmoothing_buffer_descriptor->sb_size = BITS_get(&bs, 22);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "sb_size", psmoothing_buffer_descriptor->sb_size, 22, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", psmoothing_buffer_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-	//	if (pSmoothingBufferDescriptor == NULL)
-	//	{
-	//		delete psmoothing_buffer_descriptor;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	//}
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "reserved", psmoothing_buffer_descriptor->reserved0, 2, "bslbf", NULL);
+
+		int sb_leak_rate = psmoothing_buffer_descriptor->sb_leak_rate * 400; //bps
+		sprintf_s(pszComment, sizeof(pszComment), "%d bps", sb_leak_rate);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "sb_leak_rate", psmoothing_buffer_descriptor->sb_leak_rate, 22, "uimsbf", pszComment);
+
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "reserved", psmoothing_buffer_descriptor->reserved1, 2, "bslbf", NULL);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "sb_size", psmoothing_buffer_descriptor->sb_size, 22, "uimsbf", NULL);
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
 	return rtcode;
 }
@@ -672,7 +651,7 @@ int MPEG2_DSMCC_decode_carousel_identifier_descriptor_to_xml(uint8_t* buf, int l
 
 	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
 	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "carousel_identifier_descriptor()");
+	//	XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "carousel_identifier_descriptor()");
 	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
 
 	//	if ((buf != NULL) && (length >= 6))

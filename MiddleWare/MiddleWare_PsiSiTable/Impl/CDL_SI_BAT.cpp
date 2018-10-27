@@ -90,7 +90,7 @@ int CBAT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 					{
 						DVB_SI_decode_multilingual_bouquet_name_descriptor(descriptor_buf, descriptor_size, &multilingual_bouquet_name_descriptor);
 //						strcpy_s(m_pszBouquetName, sizeof(m_pszBouquetName), multilingual_bouquet_name_descriptor.bouquet_name_char[0]);
-						memcpy_s(m_pszBouquetName, sizeof(m_pszBouquetName), multilingual_bouquet_name_descriptor.LANGUAGE[0].trimmed_bouquet_name_char, sizeof(multilingual_bouquet_name_descriptor.LANGUAGE[0].trimmed_bouquet_name_char));
+						memcpy_s(m_pszBouquetName, sizeof(m_pszBouquetName), multilingual_bouquet_name_descriptor.st[0].trimmed_bouquet_name_char, sizeof(multilingual_bouquet_name_descriptor.st[0].trimmed_bouquet_name_char));
 
 						break;
 					}

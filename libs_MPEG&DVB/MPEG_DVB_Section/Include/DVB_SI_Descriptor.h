@@ -242,35 +242,35 @@ typedef struct _linkage_descriptor_s
 	//U8*			descriptor_buf;						//8
 	//U8			descriptor_size;					//8
 
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t	descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
-	U16 transport_stream_id;					//16
-	U16 original_network_id;					//16
-	U16 service_id;								//16
-	U8 linkage_type;							//8
+	uint16_t transport_stream_id;					//16
+	uint16_t original_network_id;					//16
+	uint16_t service_id;								//16
+	uint8_t  linkage_type;							//8
 
 	//linkage_type == 0x0B		ref: EN301192 clause 8.2.1 Linkage descriptor for an IP/MAC Notification Table
-	U8	platform_id_data_length;				//8
-	S8  platform_N;
-	U32 platform_id[MAX_IP_PLATFORMS];			//24 x
-	U8	platform_name_loop_length[MAX_IP_PLATFORMS];		//8 x
+	uint8_t	 platform_id_data_length;				//8
+	int		 platform_N;
+	uint32_t platform_id[MAX_IP_PLATFORMS];			//24 x
+	uint8_t	 platform_name_loop_length[MAX_IP_PLATFORMS];		//8 x
 
-	S8	platform_name_N[MAX_LANGUAGES];
-	U32	ISO_639_language_code[MAX_IP_PLATFORMS][MAX_LANGUAGES];
-	S8	ISO_639_language_code_char[MAX_IP_PLATFORMS][MAX_LANGUAGES][4];
-	U8  platform_name_length[MAX_IP_PLATFORMS][MAX_LANGUAGES];				//8 x
-	S8	platform_name_text_char[MAX_IP_PLATFORMS][MAX_LANGUAGES][MAX_IP_PLATFORM_NAME_LENGTH];
+	int			platform_name_N[MAX_LANGUAGES];
+	uint32_t	ISO_639_language_code[MAX_IP_PLATFORMS][MAX_LANGUAGES];
+	char		ISO_639_language_code_char[MAX_IP_PLATFORMS][MAX_LANGUAGES][4];
+	uint8_t		platform_name_length[MAX_IP_PLATFORMS][MAX_LANGUAGES];				//8 x
+	char		platform_name_text_char[MAX_IP_PLATFORMS][MAX_LANGUAGES][MAX_IP_PLATFORM_NAME_LENGTH];
 
 	//linkage_type == 0x0C
 
 	//stuffing bytes
-	S32 private_data_length;
-	U8	private_data_byte[MAX_PRIVATE_DATA_LENGTH];
+	int		private_data_length;
+	uint8_t	private_data_byte[MAX_PRIVATE_DATA_LENGTH];
 
 } linkage_descriptor_t, *plinkage_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_linkage_descriptor(U8* buf, S32 length, plinkage_descriptor_t plinkage_descriptor);
+_CDL_EXPORT int DVB_SI_decode_linkage_descriptor(uint8_t* buf, int length, linkage_descriptor_t* plinkage_descriptor);
 
 /*TAG = DVB_SI_NOVD_REFERENCE_DESCRIPTOR					0x4B		*/
 typedef struct _NVOD_reference_descriptor_s
@@ -290,14 +290,14 @@ _CDL_EXPORT S32 DVB_SI_decode_NVOD_reference_descriptor(U8* buf, S32 length, pNV
 /*TAG = DVB_SI_TIME_SHIFTED_SERVICE_DESCRIPTOR				0x4C	*/
 typedef struct _time_shifted_service_descriptor_s
 {
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t	descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
-	U16	reference_service_id;
+	uint16_t	reference_service_id;
 
 } time_shifted_service_descriptor_t, *ptime_shifted_service_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_time_shifted_service_descriptor(U8* buf, S32 length, ptime_shifted_service_descriptor_t ptime_shifted_service_descriptor);
+_CDL_EXPORT int DVB_SI_decode_time_shifted_service_descriptor(uint8_t* buf, int length, time_shifted_service_descriptor_t* ptime_shifted_service_descriptor);
 
 /*TAG = SI_SHORT_EVENT_DESCRIPTOR					0x4D	*/
 typedef struct _short_event_descriptor_s
@@ -305,7 +305,7 @@ typedef struct _short_event_descriptor_s
 	uint16_t	descriptor_tag;						//8
 	uint8_t		descriptor_length;					//8
 
-	uint32_t	ISO_639_language_code;
+	//uint32_t	ISO_639_language_code;
 	char		ISO_639_language_code_char[4];				//24
 
 	uint8_t		event_name_length;							//8
@@ -318,7 +318,7 @@ typedef struct _short_event_descriptor_s
 
 } short_event_descriptor_t, *pshort_event_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_short_event_descriptor(U8* buf, S32 length, pshort_event_descriptor_t pshort_event_descriptor);
+_CDL_EXPORT int DVB_SI_decode_short_event_descriptor(uint8_t* buf, int length, short_event_descriptor_t* pshort_event_descriptor);
 
 /*TAG = DVB_SI_EXTENDED_EVENT_DESCRIPTOR				0x4E	*/
 typedef struct _extended_event_descriptor_s
@@ -436,15 +436,15 @@ _CDL_EXPORT int DVB_SI_decode_stream_identifier_descriptor(uint8_t* buf, int len
 /*TAG = DVB_SI_CA_IDENTIFIER_DESCRIPTOR					0x53	*/
 typedef struct _CA_identifier_descriptor_s
 {
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t		descriptor_tag;						//8
+	uint8_t			descriptor_length;					//8
 
-	S32  N;
-	U16 CA_system_id[MAX_CAS];					//16x
+	int		 N;
+	uint16_t CA_system_ID[MAX_CAS];					//16x
 
 } CA_identifier_descriptor_t, *pCA_identifier_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_CA_identifier_descriptor(U8* buf, S32 length, pCA_identifier_descriptor_t pCA_identifier_descriptor);
+_CDL_EXPORT int DVB_SI_decode_CA_identifier_descriptor(uint8_t* buf, int length, CA_identifier_descriptor_t* pCA_identifier_descriptor);
 
 /*TAG = DVB_SI_CONTENT_DESCRIPTOR				0x54	*/
 typedef struct _content_descriptor_s
@@ -452,36 +452,36 @@ typedef struct _content_descriptor_s
 	//U8*			descriptor_buf;						//8
 	//U8			descriptor_size;					//8
 
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t	descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
 
-	S32		N;
+	int		N;
 
-	U8 content_nibble_level_1[MAX_NIBBLES];				//4
-	U8 content_nibble_level_2[MAX_NIBBLES];				//4
-	U8 user_nibble_1[MAX_NIBBLES];						//4
-	U8 user_nibble_2[MAX_NIBBLES];						//4
+	uint8_t content_nibble_level_1[MAX_NIBBLES];				//4
+	uint8_t content_nibble_level_2[MAX_NIBBLES];				//4
+	uint8_t user_nibble_1[MAX_NIBBLES];						//4
+	uint8_t user_nibble_2[MAX_NIBBLES];						//4
 
 }content_descriptor_t, *pcontent_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_content_descriptor(U8* buf, S32 length, pcontent_descriptor_t pcontent_descriptor);
+_CDL_EXPORT int DVB_SI_decode_content_descriptor(uint8_t* buf, int length, content_descriptor_t* pcontent_descriptor);
 
 /*TAG = DVB_SI_PARENTAL_RATING_DESCRIPTOR			0x55	*/
 typedef struct _parental_rating_descriptor_s
 {
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t	descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
 
-	S32		N;
-	U32		country_code[MAX_COUNTRIES];
-	S8		country_code_char[MAX_COUNTRIES][4];			//24
-	U8		rating[MAX_COUNTRIES];					//8
+	int			N;
+	//U32		country_code[MAX_COUNTRIES];
+	char		country_code_char[MAX_COUNTRIES][4];			//24
+	uint8_t		rating[MAX_COUNTRIES];					//8
 
 } parental_rating_descriptor_t, *pparental_rating_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_parental_rating_descriptor(U8* buf, S32 length, pparental_rating_descriptor_t pparental_rating_descriptor);
+_CDL_EXPORT int DVB_SI_decode_parental_rating_descriptor(uint8_t* buf, int length, parental_rating_descriptor_t* pparental_rating_descriptor);
 
 /*TAG = DVB_SI_TELETEXT_DESCRIPTOR				0x56		*/
 typedef struct _teletext_descriptor_s
@@ -535,29 +535,27 @@ typedef struct _telephone_descriptor_s
 
 } telephone_descriptor_t, *ptelephone_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_telephone_descriptor(U8* buf, S32 length, ptelephone_descriptor_t ptelephone_descriptor);
+_CDL_EXPORT int DVB_SI_decode_telephone_descriptor(uint8_t* buf, int length, telephone_descriptor_t* ptelephone_descriptor);
 
 
-typedef struct
-{
-	uint32_t country_code;										//24
-	uint8_t	 country_region_id;									//6
-	uint8_t  reserved;											//1
-	uint8_t  local_time_offset_polarity;						//1
-	uint8_t  local_time_offset;									//16
-	int64_t  time_of_change;									//40
-	uint16_t next_time_offset;									//16
-
-} local_time_offset_t;
-
-/*TAG = SI_LOCAL_TIME_OFFSET_DESCRIPTOR   0x58*/							 
+/*TAG = DVB_SI_LOCAL_TIME_OFFSET_DESCRIPTOR   0x58*/							 
 typedef struct _local_time_offset_descriptor_s
 {
 	uint16_t			descriptor_tag;						//8
 	uint8_t				descriptor_length;					//8
 
 	int					N;
-	local_time_offset_t local_time_offset[MAX_LOCAL_TIME_AREA];
+	struct
+	{
+		char	 country_code_char[4];								//24
+		uint8_t	 country_region_id;									//6
+		uint8_t  reserved;											//1
+		uint8_t  local_time_offset_polarity;						//1
+		uint8_t  local_time_offset;									//16
+		int64_t  time_of_change;									//40
+		uint16_t next_time_offset;									//16
+
+	} st[MAX_LOCAL_TIME_AREA];
 
 } local_time_offset_descriptor_t, *plocal_time_offset_descriptor_t;
 
@@ -623,18 +621,18 @@ typedef struct _multilingual_network_name_descriptor
 	int N;
 	struct
 	{
-		uint32_t ISO_639_language_code;
+		//uint32_t ISO_639_language_code;
 		char	 ISO_639_language_code_char[4];				//24
 		
 		uint8_t	 network_name_length;							//8
 		char	 network_name_char[MAX_NETWORK_NAME_LENGTH + 1];
 		char*	trimmed_network_name_char;
 
-	} LANGUAGE[MAX_LANGUAGES];
+	} st[MAX_LANGUAGES];
 
 } multilingual_network_name_descriptor_t, *pmultilingual_network_name_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_multilingual_network_name_descriptor(U8* buf, S32 length, pmultilingual_network_name_descriptor_t pmultilingual_network_name_descriptor);
+_CDL_EXPORT int DVB_SI_decode_multilingual_network_name_descriptor(uint8_t* buf, int length, multilingual_network_name_descriptor_t* pmultilingual_network_name_descriptor);
 
 /*TAG = SI_MULTILINGUAL_BOUQUET_NAME_DESCRIPTOR				0x5C*/
 typedef struct _multilingual_bouquet_name_descriptor
@@ -645,16 +643,17 @@ typedef struct _multilingual_bouquet_name_descriptor
 	int N;
 	struct
 	{
-		uint32_t ISO_639_language_code;
+		//uint32_t ISO_639_language_code;
 		char	 ISO_639_language_code_char[4];				//24
+
 		uint8_t	 bouquet_name_length;							//8
 		char	 bouquet_name_char[MAX_BOUQUET_NAME_LENGTH + 1];
 		char*	 trimmed_bouquet_name_char;
-	} LANGUAGE[MAX_LANGUAGES];
+	} st[MAX_LANGUAGES];
 
 } multilingual_bouquet_name_descriptor_t, *pmultilingual_bouquet_name_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_multilingual_bouquet_name_descriptor(U8* buf, S32 length, pmultilingual_bouquet_name_descriptor_t pmultilingual_bouquet_name_descriptor);
+_CDL_EXPORT int DVB_SI_decode_multilingual_bouquet_name_descriptor(uint8_t* buf, int length, multilingual_bouquet_name_descriptor_t* pmultilingual_bouquet_name_descriptor);
 
 /*TAG = SI_MULTILINGUAL_SERVICE_NAME_DESCRIPTOR			0x5D*/
 typedef struct _multilingual_service_name_descriptor_s
@@ -665,8 +664,9 @@ typedef struct _multilingual_service_name_descriptor_s
 	int		 N;
 	struct
 	{
-		uint32_t ISO_639_language_code;
+		//uint32_t ISO_639_language_code;
 		char	 ISO_639_language_code_char[4];				//8
+
 		uint8_t	 service_provider_name_length;				//8
 		char	 service_provider_name_char[MAX_SERVICE_PROVIDER_NAME_LENGTH + 1];
 		char*	 trimmed_service_provider_name_char;
@@ -674,29 +674,31 @@ typedef struct _multilingual_service_name_descriptor_s
 		uint8_t	 service_name_length;						//8
 		char	 service_name_char[MAX_SERVICE_NAME_LENGTH + 1];
 		char*	 trimmed_service_name_char;
-	} LANGUAGE[MAX_LANGUAGES];
+	} st[MAX_LANGUAGES];
 
 } multilingual_service_name_descriptor_t, *pmultilingual_service_name_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_multilingual_service_name_descriptor(U8* buf, S32 length, pmultilingual_service_name_descriptor_t pmultilingual_service_name_descriptor);
+_CDL_EXPORT int DVB_SI_decode_multilingual_service_name_descriptor(uint8_t* buf, int length, multilingual_service_name_descriptor_t* pmultilingual_service_name_descriptor);
 
 /*TAG = SI_MULTILINGUAL_COMPONENT_DESCRIPTOR			0x5E	*/
 typedef struct _multilingual_component_descriptor_s
 {
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t	descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
-	U8	 component_tag;						//8
+	uint8_t		component_tag;						//8
 
-	S32	 N;
-	U32	 ISO_639_language_code[MAX_LANGUAGES];
-	S8	 ISO_639_language_code_char[MAX_LANGUAGES][4];		//24
-	U8	 text_description_length[MAX_LANGUAGES];			//8
-	S8	 text_char[MAX_LANGUAGES][MAX_COMPONENT_TEXT_LENGTH + 1];
+	int		 N;
+	struct
+	{
+		char	 ISO_639_language_code_char[4];		//24
+		uint8_t	 text_description_length;			//8
+		char	 text_char[MAX_COMPONENT_TEXT_LENGTH + 1];
+	}st[MAX_LANGUAGES];
 
 } multilingual_component_descriptor_t, *pmultilingual_component_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_multilingual_component_descriptor(U8* buf, S32 length, pmultilingual_component_descriptor_t pmultilingual_component_descriptor);
+_CDL_EXPORT int DVB_SI_decode_multilingual_component_descriptor(uint8_t* buf, int length, multilingual_component_descriptor_t* pmultilingual_component_descriptor);
 
 /*TAG = DVB_SI_PRIVATE_DATA_SPECIFIER_DESCRIPTOR			0x5F	*/
 typedef struct _private_data_specifier_descriptor_s

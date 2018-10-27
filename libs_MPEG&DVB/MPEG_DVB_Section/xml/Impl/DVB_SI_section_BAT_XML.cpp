@@ -65,12 +65,15 @@ int DVB_SI_BAT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, bouquet_association_
 
 				switch (descriptor_tag)
 				{
-					//case DVB_SI_BOUQUET_NAME_DESCRIPTOR:
-					//	DVB_SI_decode_bouquet_name_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-					//	break;
-					//case DVB_SI_MULTILINGUAL_BOUQUET_NAME_DESCRIPTOR:
-					//	DVB_SI_decode_multilingual_bouquet_name_descriptor_to_xml(pl1temp, descriptor_size, pxmlDoc, pxmlProgramInfoNode);
-					//	break;
+				case DVB_SI_BOUQUET_NAME_DESCRIPTOR:
+					DVB_SI_decode_bouquet_name_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlBouquetDescriptorsNode);
+					break;
+				case DVB_SI_MULTILINGUAL_BOUQUET_NAME_DESCRIPTOR:
+					DVB_SI_decode_multilingual_bouquet_name_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlBouquetDescriptorsNode);
+					break;
+				case DVB_SI_PRIVATE_DATA_SPECIFIER_DESCRIPTOR:
+					DVB_SI_decode_private_data_specifier_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlBouquetDescriptorsNode);
+					break;
 				default:
 					MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlBouquetDescriptorsNode, pbat_section->bouquet_descriptors + descriptor_index);
 					break;

@@ -100,15 +100,15 @@ int DVB_SI_EIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, event_information_se
 
 						switch (descriptor_tag)
 						{
-							//case DVB_SI_SHORT_EVENT_DESCRIPTOR:
-							//	DVB_SI_decode_short_event_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-							//	break;
-							//case DVB_SI_CONTENT_DESCRIPTOR:
-							//	DVB_SI_decode_content_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-							//	break;
-							//case DVB_SI_PARENTAL_RATING_DESCRIPTOR:
-							//	DVB_SI_decode_parental_rating_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-							//	break;
+						case DVB_SI_SHORT_EVENT_DESCRIPTOR:
+							DVB_SI_decode_short_event_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlEventDescriptorsLoopNode);
+							break;
+						case DVB_SI_CONTENT_DESCRIPTOR:
+							DVB_SI_decode_content_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlEventDescriptorsLoopNode);
+							break;
+						case DVB_SI_PARENTAL_RATING_DESCRIPTOR:
+							DVB_SI_decode_parental_rating_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlEventDescriptorsLoopNode);
+							break;
 						default:
 							MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlEventDescriptorsLoopNode, pstEvent->event_descriptors + descriptor_index);
 							break;

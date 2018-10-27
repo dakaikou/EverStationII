@@ -62,7 +62,7 @@ _CDL_EXPORT int DVB_SI_present_subtitling_descriptor_to_xml(HALForXMLDoc* pxmlDo
 
 /*TAG = DVB_SI_LOCAL_TIME_OFFSET_DESCRIPTOR   0x58*/
 _CDL_EXPORT int DVB_SI_decode_local_time_offset_descriptor_to_xml(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, local_time_offset_descriptor_t* plocal_time_offset_descriptor = NULL);
-_CDL_EXPORT int DVB_SI_present_local_time_offset_descriptor_to_xml(uint8_t *buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, local_time_offset_descriptor_t* plocal_time_offset_descriptor);
+_CDL_EXPORT int DVB_SI_present_local_time_offset_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, local_time_offset_descriptor_t* plocal_time_offset_descriptor);
 
 /*TAG = DVB_SI_MULTILINGUAL_NETWORK_NAME_DESCRIPTOR				0x5B*/
 _CDL_EXPORT int DVB_SI_decode_multilingual_network_name_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multilingual_network_name_descriptor_t* pmultilingual_network_name_descriptor = NULL);

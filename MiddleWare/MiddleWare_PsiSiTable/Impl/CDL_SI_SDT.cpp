@@ -124,18 +124,18 @@ int CSDT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 																				preserved_descriptor->descriptor_size,
 																				&multilingual_service_name_descriptor);
 
-								if (multilingual_service_name_descriptor.LANGUAGE[0].service_name_length > 0)
+								if (multilingual_service_name_descriptor.st[0].service_name_length > 0)
 								{
 									strcpy_s(m_astServiceInfo[m_nServiceCount].pszServiceName,
 										sizeof(m_astServiceInfo[m_nServiceCount].pszServiceName),
-										multilingual_service_name_descriptor.LANGUAGE[0].trimmed_service_name_char);
+										multilingual_service_name_descriptor.st[0].trimmed_service_name_char);
 								}
 
-								if (multilingual_service_name_descriptor.LANGUAGE[0].service_provider_name_length > 0)
+								if (multilingual_service_name_descriptor.st[0].service_provider_name_length > 0)
 								{
 									strcpy_s(m_astServiceInfo[m_nServiceCount].pszServiceProviderName,
 										sizeof(m_astServiceInfo[m_nServiceCount].pszServiceProviderName),
-										multilingual_service_name_descriptor.LANGUAGE[0].trimmed_service_provider_name_char);
+										multilingual_service_name_descriptor.st[0].trimmed_service_provider_name_char);
 								}
 							}
 

@@ -123,15 +123,16 @@ S32 MPEG2_PSI_decode_hierarchy_descriptor(U8 *buf, S32 length, phierarchy_descri
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
 //备注：2000.11 chendelin
-S32 MPEG2_PSI_decode_registration_descriptor(U8* buf, S32 length, pregistration_descriptor_t pregistration_descriptor)
+int MPEG2_PSI_decode_registration_descriptor(uint8_t* buf, int length, registration_descriptor_t* pregistration_descriptor)
 {
-	S32		rtcode = SECTION_PARSE_NO_ERROR;
-	S32		info_length;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
 
 	if ((buf != NULL) &&
 		(length >= 6) &&
 		(pregistration_descriptor != NULL))
 	{
+		memset(pregistration_descriptor, 0x00, sizeof(registration_descriptor_t));
+
 		pregistration_descriptor->descriptor_tag = *buf++;
 
 		pregistration_descriptor->descriptor_length = *buf++;
@@ -142,30 +143,26 @@ S32 MPEG2_PSI_decode_registration_descriptor(U8* buf, S32 length, pregistration_
 		pregistration_descriptor->format_identifier_char[3] = *buf++;
 		pregistration_descriptor->format_identifier_char[4] = '\0';
 
-		pregistration_descriptor->format_identifier = pregistration_descriptor->format_identifier_char[0];
-		pregistration_descriptor->format_identifier <<= 8;
-		pregistration_descriptor->format_identifier |= pregistration_descriptor->format_identifier_char[1];
-		pregistration_descriptor->format_identifier <<= 8;
-		pregistration_descriptor->format_identifier |= pregistration_descriptor->format_identifier_char[2];
-		pregistration_descriptor->format_identifier <<= 8;
-		pregistration_descriptor->format_identifier |= pregistration_descriptor->format_identifier_char[3];
+		//pregistration_descriptor->format_identifier = pregistration_descriptor->format_identifier_char[0];
+		//pregistration_descriptor->format_identifier <<= 8;
+		//pregistration_descriptor->format_identifier |= pregistration_descriptor->format_identifier_char[1];
+		//pregistration_descriptor->format_identifier <<= 8;
+		//pregistration_descriptor->format_identifier |= pregistration_descriptor->format_identifier_char[2];
+		//pregistration_descriptor->format_identifier <<= 8;
+		//pregistration_descriptor->format_identifier |= pregistration_descriptor->format_identifier_char[3];
 
-		info_length = pregistration_descriptor->descriptor_length - 4;
+		pregistration_descriptor->info_length = pregistration_descriptor->descriptor_length - 4;
 
-		if (info_length > 0)
+		if (pregistration_descriptor->info_length > 0)
 		{
-			memcpy(pregistration_descriptor->additional_identification_info, buf, info_length);
-			pregistration_descriptor->additional_identification_info[info_length] = '\0';
-			buf += info_length;
-		}
-		else
-		{
-			memset(pregistration_descriptor->additional_identification_info, 0x00, sizeof(pregistration_descriptor->additional_identification_info));
+			memcpy(pregistration_descriptor->additional_identification_info, buf, pregistration_descriptor->info_length);
+			pregistration_descriptor->additional_identification_info[pregistration_descriptor->info_length] = '\0';
+			buf += pregistration_descriptor->info_length;
 		}
 	}
 	else
 	{
-		rtcode = 1;
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
 	}
 
 	return rtcode;
@@ -316,14 +313,14 @@ int MPEG2_PSI_decode_ISO_639_language_descriptor(uint8_t* buf, int length, ISO_6
 			//pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code <<= 8;
 			//pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code |= buf[2];
 
-			memcpy(pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code_char, buf, 3);
-			pISO_639_language_descriptor->ISO_639_language[N].ISO_639_language_code_char[3] = '\0';
+			memcpy(pISO_639_language_descriptor->st[N].ISO_639_language_code_char, buf, 3);
+			pISO_639_language_descriptor->st[N].ISO_639_language_code_char[3] = '\0';
 			buf += 3;
 
-			pISO_639_language_descriptor->ISO_639_language[N].audio_type = *buf++;
-			N ++;
+			pISO_639_language_descriptor->st[N].audio_type = *buf++;
 
 			loop_length -= 4;
+			N ++;
 		}
 
 		pISO_639_language_descriptor->N = N;
