@@ -5,7 +5,8 @@
 #include "../../Include/DVB_SI_Descriptor.h"
 #include "../../Include/MPEG_DVB_ErrorCode.h"
 
-using namespace std;
+#include "DVB_SI_Utilities_Inner.h"
+
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
 #endif
@@ -84,13 +85,16 @@ int DVB_Databroadcast_decode_data_carousel_info(uint8_t* buf, int length, data_c
 
 int DVB_Databroadcast_decode_object_carousel_info(uint8_t* buf, int length, object_carousel_info_t* pobject_carousel_info)
 {
-	S8		N;
-	U8*		ptemp;
-	U8*		pend;
-	S8		copy_length;
+	int			rtcode = SECTION_PARSE_NO_ERROR;
+	int			N;
+	uint8_t*	ptemp;
+	uint8_t*	pend;
+	//int			copy_length;
 
-	if ((buf != NULL) && (length >= 2) && (pobject_carousel_info != NULL))
+	if ((buf != NULL) && (length >= 16) && (pobject_carousel_info != NULL))
 	{
+		memset(pobject_carousel_info, 0x00, sizeof(object_carousel_info_t));
+
 		pend = buf + length;
 
 		pobject_carousel_info->carousel_type_id = (*buf & 0xC0) >> 6;
@@ -120,7 +124,7 @@ int DVB_Databroadcast_decode_object_carousel_info(uint8_t* buf, int length, obje
 		pobject_carousel_info->time_out_value_DII <<= 8;
 		pobject_carousel_info->time_out_value_DII |= *buf++;
 
-		pobject_carousel_info->reserved0 = (*buf & 0xC0) >> 6;
+		pobject_carousel_info->reserved1 = (*buf & 0xC0) >> 6;
 
 		pobject_carousel_info->leak_rate = (*buf++ & 0x3F);
 		pobject_carousel_info->leak_rate <<= 8;
@@ -131,46 +135,41 @@ int DVB_Databroadcast_decode_object_carousel_info(uint8_t* buf, int length, obje
 		ptemp = buf;
 
 		N = 0;
-		while (ptemp < pend)
+		while ((ptemp < pend) && (N < MAX_OBJECTS_PER_SERVICE))
 		{
-			if (N < 16)
+			//pobject_carousel_info->ISO_639_language_code[N] = ptemp[0];
+			//pobject_carousel_info->ISO_639_language_code[N] <<= 8;
+			//pobject_carousel_info->ISO_639_language_code[N] |= ptemp[1];
+			//pobject_carousel_info->ISO_639_language_code[N] <<= 8;
+			//pobject_carousel_info->ISO_639_language_code[N] |= ptemp[2];
+
+			memcpy(pobject_carousel_info->st[N].ISO_639_language_code_char, ptemp, 3);
+			pobject_carousel_info->st[N].ISO_639_language_code_char[3] = '\0';
+			ptemp += 3;
+
+			pobject_carousel_info->st[N].object_name_length = *ptemp ++;
+
+			if (pobject_carousel_info->st[N].object_name_length > 0)
 			{
-				pobject_carousel_info->ISO_639_language_code[N] = ptemp[0];
-				pobject_carousel_info->ISO_639_language_code[N] <<= 8;
-				pobject_carousel_info->ISO_639_language_code[N] |= ptemp[1];
-				pobject_carousel_info->ISO_639_language_code[N] <<= 8;
-				pobject_carousel_info->ISO_639_language_code[N] |= ptemp[2];
+				pobject_carousel_info->st[N].object_name_char = ptemp;
+				ptemp += pobject_carousel_info->st[N].object_name_length;
 
-				memcpy(pobject_carousel_info->ISO_639_language_code_char[N], ptemp, 3);
-				pobject_carousel_info->ISO_639_language_code_char[N][3] = '\0';
-				ptemp += 3;
-
-				pobject_carousel_info->object_name_length[N] = *ptemp ++;
-
-				if (pobject_carousel_info->object_name_length[N] > 0)
-				{
-					copy_length = pobject_carousel_info->object_name_length[N];
-					if (copy_length > 31)
-					{
-						copy_length = 31;
-					}
-					memcpy(pobject_carousel_info->object_name_char[N], ptemp, copy_length);
-					pobject_carousel_info->object_name_char[N][copy_length] = '\0';
-					ptemp += pobject_carousel_info->object_name_length[N];
-				}
-
-				N++;
+				pobject_carousel_info->st[N].trimmed_object_name_char = DVB_SI_StringPrefixTrim(pobject_carousel_info->st[N].object_name_char);
+				pobject_carousel_info->st[N].trimmed_object_name_length = pobject_carousel_info->st[N].object_name_length -
+					(int)(pobject_carousel_info->st[N].trimmed_object_name_char - pobject_carousel_info->st[N].object_name_char);
 			}
-			else
-			{
-				break;
-			}
+
+			N++;
 		}
 
 		pobject_carousel_info->N = N;
 	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
+	}
 
-	return 0;
+	return rtcode;
 }
 
 //

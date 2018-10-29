@@ -40,12 +40,21 @@ int DVB_SI_decode_network_name_descriptor_to_xml(uint8_t *buf, int length, HALFo
 int DVB_SI_present_network_name_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, network_name_descriptor_t* pnetwork_name_descriptor)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
-	char   pszField[64];
+	char    pszField[64];
+	char*	pszNetworkName = NULL;
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pnetwork_name_descriptor != NULL))
 	{
 		sprintf_s(pszField, sizeof(pszField), "network_name_descriptor(tag: 0x%02X)", pnetwork_name_descriptor->descriptor_tag);
-		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, pnetwork_name_descriptor->trimmed_network_name, pnetwork_name_descriptor->descriptor_length + 2);
+
+		if (pnetwork_name_descriptor->trimmed_network_name_length > 0)
+		{
+			pszNetworkName = (char*)malloc(pnetwork_name_descriptor->trimmed_network_name_length + 1);
+			memcpy(pszNetworkName, pnetwork_name_descriptor->trimmed_network_name, pnetwork_name_descriptor->trimmed_network_name_length);
+			pszNetworkName[pnetwork_name_descriptor->trimmed_network_name_length] = '\0';
+		}
+
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, pszNetworkName, pnetwork_name_descriptor->descriptor_length + 2);
 
 		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pnetwork_name_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
@@ -53,7 +62,13 @@ int DVB_SI_present_network_name_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElem
 
 		if (pnetwork_name_descriptor->descriptor_length > 0)
 		{
-			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "network_name", (uint8_t*)pnetwork_name_descriptor->network_name, pnetwork_name_descriptor->descriptor_length, pnetwork_name_descriptor->trimmed_network_name);
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "network_name", pnetwork_name_descriptor->network_name, 
+				pnetwork_name_descriptor->descriptor_length, pszNetworkName);
+		}
+
+		if (pszNetworkName != NULL)
+		{
+			free(pszNetworkName);
 		}
 	}
 	else
@@ -327,20 +342,34 @@ int DVB_SI_present_bouquet_name_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElem
 {
 	int  rtcode = SECTION_PARSE_NO_ERROR;
 	char pszField[48];
+	//char pszComment[64];
+	char* pszBouquetName = NULL;
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pbouquet_name_descriptor != NULL))
 	{
+		if (pbouquet_name_descriptor->trimmed_bouquet_name_length > 0)
+		{
+			pszBouquetName = (char*)malloc(pbouquet_name_descriptor->trimmed_bouquet_name_length + 1);
+			memcpy(pszBouquetName, pbouquet_name_descriptor->trimmed_bouquet_name, pbouquet_name_descriptor->trimmed_bouquet_name_length);
+			pszBouquetName[pbouquet_name_descriptor->trimmed_bouquet_name_length] = '\0';
+		}
+
 		sprintf_s(pszField, sizeof(pszField), "bouquet_name_descriptor(tag: 0x%02X)", pbouquet_name_descriptor->descriptor_tag);
-		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, pbouquet_name_descriptor->trimmed_bouquet_name, pbouquet_name_descriptor->descriptor_length + 2);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, pszBouquetName, pbouquet_name_descriptor->descriptor_length + 2);
 
 		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pbouquet_name_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
 		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pbouquet_name_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-		if (pbouquet_name_descriptor->descriptor_length > 0)
+		if (pbouquet_name_descriptor->bouquet_name_length > 0)
 		{
-			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "bouquet_name[ ]", (uint8_t*)pbouquet_name_descriptor->bouquet_name,
-				pbouquet_name_descriptor->descriptor_length, pbouquet_name_descriptor->trimmed_bouquet_name);
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "bouquet_name[ ]", pbouquet_name_descriptor->bouquet_name,
+				pbouquet_name_descriptor->bouquet_name_length, pszBouquetName);
+		}
+
+		if (pszBouquetName != NULL)
+		{
+			free(pszBouquetName);
 		}
 	}
 	else
@@ -384,11 +413,30 @@ int DVB_SI_present_service_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* 
 	char  pszSrvType[48];
 	char  pszComment[128];
 
+	char* pszServiceName = NULL;
+	char* pszServiceProvider = NULL;
+
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pservice_descriptor != NULL))
 	{
+		if (pservice_descriptor->trimmed_service_name_length > 0)
+		{
+			pszServiceName = (char*)malloc(pservice_descriptor->trimmed_service_name_length + 1);
+			memcpy(pszServiceName, pservice_descriptor->trimmed_service_name, pservice_descriptor->trimmed_service_name_length);
+			pszServiceName[pservice_descriptor->trimmed_service_name_length] = '\0';
+		}
+
+		if (pservice_descriptor->trimmed_service_provider_name_length > 0)
+		{
+			pszServiceProvider = (char*)malloc(pservice_descriptor->trimmed_service_provider_name_length + 1);
+			memcpy(pszServiceProvider, pservice_descriptor->trimmed_service_provider_name, pservice_descriptor->trimmed_service_provider_name_length);
+			pszServiceProvider[pservice_descriptor->trimmed_service_provider_name_length] = '\0';
+		}
+
 		DVB_SI_NumericCoding2Text_ServiceType(pservice_descriptor->service_type, pszSrvType, sizeof(pszSrvType));
+
 		sprintf_s(pszField, sizeof(pszField), "service_descriptor(tag: 0x%02X)", pservice_descriptor->descriptor_tag);
-		sprintf_s(pszComment, sizeof(pszComment), "Type:%s, Name:%s, Provider:%s", pszSrvType, pservice_descriptor->trimmed_service_name, pservice_descriptor->trimmed_service_provider_name);
+
+		sprintf_s(pszComment, sizeof(pszComment), "Type:%s, Name:%s, Provider:%s", pszSrvType, pszServiceName, pszServiceProvider);
 
 		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, pszComment, pservice_descriptor->descriptor_length + 2);
 
@@ -402,17 +450,22 @@ int DVB_SI_present_service_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* 
 
 		if (pservice_descriptor->service_provider_name_length > 0)
 		{
-			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "service_provider_name", (uint8_t*)pservice_descriptor->service_provider_name, pservice_descriptor->service_provider_name_length,
-				pservice_descriptor->trimmed_service_provider_name);
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "service_provider_name", pservice_descriptor->service_provider_name, 
+				pservice_descriptor->service_provider_name_length,
+				pszServiceProvider);
 		}
 
 		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "service_name_length", pservice_descriptor->service_name_length, 8, "uimsbf", NULL);
 
 		if (pservice_descriptor->service_name_length > 0)
 		{
-			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "service_name", (uint8_t*)pservice_descriptor->service_name, pservice_descriptor->service_name_length,
-				pservice_descriptor->trimmed_service_name);
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "service_name", pservice_descriptor->service_name, 
+				pservice_descriptor->service_name_length,
+				pszServiceName);
 		}
+
+		if (pszServiceName != NULL) free(pszServiceName);
+		if (pszServiceProvider != NULL) free(pszServiceProvider);
 	}
 	else
 	{
@@ -468,11 +521,20 @@ int DVB_SI_present_short_event_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLEleme
 {
 	int  rtcode = SECTION_PARSE_NO_ERROR;
 	char pszField[48];
+	char* pszEventName = NULL;
+	char* pszEventText = NULL;
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pshort_event_descriptor != NULL))
 	{
+		if (pshort_event_descriptor->trimmed_event_name_length > 0)
+		{
+			pszEventName = (char*)malloc(pshort_event_descriptor->trimmed_event_name_length + 1);
+			memcpy(pszEventName, pshort_event_descriptor->trimmed_event_name_char, pshort_event_descriptor->trimmed_event_name_length);
+			pszEventName[pshort_event_descriptor->trimmed_event_name_length] = '\0';
+		}
+
 		sprintf_s(pszField, sizeof(pszField), "short_event_descriptor(tag: 0x%02X)", pshort_event_descriptor->descriptor_tag);
-		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, pshort_event_descriptor->descriptor_length + 2);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, pszEventName, pshort_event_descriptor->descriptor_length + 2);
 
 		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pshort_event_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
@@ -484,16 +546,32 @@ int DVB_SI_present_short_event_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLEleme
 
 		if (pshort_event_descriptor->event_name_length > 0)
 		{
-			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "event_name_char[ ]", (uint8_t*)pshort_event_descriptor->event_name_char, pshort_event_descriptor->event_name_length,
-				pshort_event_descriptor->trimmed_event_name_char);
+			//pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "event_name_char[ ]", (uint8_t*)pshort_event_descriptor->event_name_char, pshort_event_descriptor->event_name_length,
+			//	pshort_event_descriptor->trimmed_event_name_char);
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "event_name_char[ ]", pshort_event_descriptor->event_name_char, pshort_event_descriptor->event_name_length, pszEventName);
+		}
+
+		if (pszEventName != NULL)
+		{
+			free(pszEventName);
 		}
 
 		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "text_length", pshort_event_descriptor->text_length, 8, "uimsbf", NULL);
 
 		if (pshort_event_descriptor->text_length > 0)
 		{
-			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "text_char[ ]", (uint8_t*)pshort_event_descriptor->text_char, pshort_event_descriptor->text_length,
-				pshort_event_descriptor->trimmed_text_char);
+			pszEventText = (char*)malloc(pshort_event_descriptor->trimmed_text_length + 1);
+			memcpy(pszEventText, pshort_event_descriptor->trimmed_text_char, pshort_event_descriptor->trimmed_text_length);
+			pszEventText[pshort_event_descriptor->trimmed_text_length] = '\0';
+
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "text_char[ ]", pshort_event_descriptor->text_char, 
+				pshort_event_descriptor->text_length,
+				pszEventText);
+
+			if (pszEventText != NULL)
+			{
+				free(pszEventText);
+			}
 		}
 	}
 	else
@@ -1080,9 +1158,23 @@ int DVB_SI_present_multilingual_network_name_descriptor_to_xml(HALForXMLDoc* pxm
 		{
 			for (int lang_index = 0; lang_index < pmultilingual_network_name_descriptor->N; lang_index++)
 			{
+				char*  pszNetworkName = NULL;
+
+				int trimmed_network_name_length = pmultilingual_network_name_descriptor->st[lang_index].trimmed_network_name_length;
+				if (trimmed_network_name_length > 0)
+				{
+					pszNetworkName = (char*)malloc(trimmed_network_name_length + 1);
+					memcpy(pszNetworkName, pmultilingual_network_name_descriptor->st[lang_index].trimmed_network_name_char, trimmed_network_name_length);
+					pszNetworkName[trimmed_network_name_length] = '\0';
+				}
+
 				sprintf_s(pszField, sizeof(pszField), "language[%d]", lang_index);
-				sprintf_s(pszComment, sizeof(pszComment), "%s - %s", pmultilingual_network_name_descriptor->st[lang_index].ISO_639_language_code_char, pmultilingual_network_name_descriptor->st[lang_index].trimmed_network_name_char);
-				XMLElement* pxmlLangNode = pxmlDoc->NewBranchElement(pxmlDescriptorNode, pszField, pszComment, 3 + 1 + pmultilingual_network_name_descriptor->st[lang_index].network_name_length);
+
+				sprintf_s(pszComment, sizeof(pszComment), "%s - %s", pmultilingual_network_name_descriptor->st[lang_index].ISO_639_language_code_char, 
+					pszNetworkName);
+
+				XMLElement* pxmlLangNode = pxmlDoc->NewBranchElement(pxmlDescriptorNode, pszField, pszComment, 
+					3 + 1 + pmultilingual_network_name_descriptor->st[lang_index].network_name_length);
 
 				pxmlDoc->NewElementForByteBuf(pxmlLangNode, "ISO_639_language_code[ ]", (uint8_t*)pmultilingual_network_name_descriptor->st[lang_index].ISO_639_language_code_char,
 					3, pmultilingual_network_name_descriptor->st[lang_index].ISO_639_language_code_char);
@@ -1092,7 +1184,12 @@ int DVB_SI_present_multilingual_network_name_descriptor_to_xml(HALForXMLDoc* pxm
 				if (pmultilingual_network_name_descriptor->st[lang_index].network_name_length > 0)
 				{
 					pxmlDoc->NewElementForByteBuf(pxmlLangNode, "network_name[ ]", (uint8_t*)pmultilingual_network_name_descriptor->st[lang_index].network_name_char,
-						pmultilingual_network_name_descriptor->st[lang_index].network_name_length, pmultilingual_network_name_descriptor->st[lang_index].trimmed_network_name_char);
+						pmultilingual_network_name_descriptor->st[lang_index].network_name_length, pszNetworkName);
+				}
+
+				if (pszNetworkName != NULL)
+				{
+					free(pszNetworkName);
 				}
 			}
 		}
@@ -1136,6 +1233,7 @@ int DVB_SI_present_multilingual_bouquet_name_descriptor_to_xml(HALForXMLDoc* pxm
 {
 	int rtcode = SECTION_PARSE_NO_ERROR;
 	char   pszField[64];
+	//char   pszBouquetName[64];
 	char   pszComment[128];
 
 	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pmultilingual_bouquet_name_descriptor != NULL))
@@ -1152,8 +1250,18 @@ int DVB_SI_present_multilingual_bouquet_name_descriptor_to_xml(HALForXMLDoc* pxm
 		{
 			for (int lang_index = 0; lang_index < pmultilingual_bouquet_name_descriptor->N; lang_index ++)
 			{
+				char* pszBouquetName = NULL;
+
+				int trimmed_bouquet_name_length = pmultilingual_bouquet_name_descriptor->st[lang_index].trimmed_bouquet_name_length;
+				if (trimmed_bouquet_name_length > 0)
+				{
+					pszBouquetName = (char*)malloc(trimmed_bouquet_name_length + 1);
+
+					memcpy(pszBouquetName, pmultilingual_bouquet_name_descriptor->st[lang_index].trimmed_bouquet_name_char, trimmed_bouquet_name_length);
+					pszBouquetName[trimmed_bouquet_name_length] = '\0';
+				}
 				sprintf_s(pszField, sizeof(pszField), "language[%d]", lang_index);
-				sprintf_s(pszComment, sizeof(pszComment), "%s - %s", pmultilingual_bouquet_name_descriptor->st[lang_index].ISO_639_language_code_char, pmultilingual_bouquet_name_descriptor->st[lang_index].trimmed_bouquet_name_char);
+				sprintf_s(pszComment, sizeof(pszComment), "%s - %s", pmultilingual_bouquet_name_descriptor->st[lang_index].ISO_639_language_code_char, pszBouquetName);
 				XMLElement* pxmlLangNode = pxmlDoc->NewBranchElement(pxmlDescriptorNode, pszField, pszComment, 3 + 1 + pmultilingual_bouquet_name_descriptor->st[lang_index].bouquet_name_length);
 
 				pxmlDoc->NewElementForByteBuf(pxmlLangNode, "ISO_639_language_code[ ]", (uint8_t*)pmultilingual_bouquet_name_descriptor->st[lang_index].ISO_639_language_code_char,
@@ -1163,8 +1271,13 @@ int DVB_SI_present_multilingual_bouquet_name_descriptor_to_xml(HALForXMLDoc* pxm
 
 				if (pmultilingual_bouquet_name_descriptor->st[lang_index].bouquet_name_length > 0)
 				{
-					pxmlDoc->NewElementForByteBuf(pxmlLangNode, "bouquet_name[ ]", (uint8_t*)pmultilingual_bouquet_name_descriptor->st[lang_index].bouquet_name_char,
-						pmultilingual_bouquet_name_descriptor->st[lang_index].bouquet_name_length, pmultilingual_bouquet_name_descriptor->st[lang_index].trimmed_bouquet_name_char);
+					pxmlDoc->NewElementForByteBuf(pxmlLangNode, "bouquet_name[ ]", pmultilingual_bouquet_name_descriptor->st[lang_index].bouquet_name_char,
+						pmultilingual_bouquet_name_descriptor->st[lang_index].bouquet_name_length, pszBouquetName);
+				}
+
+				if (pszBouquetName != NULL)
+				{
+					free(pszBouquetName);
 				}
 			}
 		}
@@ -1224,10 +1337,32 @@ int DVB_SI_present_multilingual_service_name_descriptor_to_xml(HALForXMLDoc* pxm
 		{
 			for (int lang_index = 0; lang_index < pmultilingual_service_name_descriptor->N; lang_index ++)
 			{
-				sprintf_s(pszField, sizeof(pszField), "language[%d]", lang_index);
-				sprintf_s(pszComment, sizeof(pszComment), "%s - Name:%s, Provider:%s", pmultilingual_service_name_descriptor->st[lang_index].ISO_639_language_code_char, 
-					pmultilingual_service_name_descriptor->st[lang_index].trimmed_service_name_char,
-					pmultilingual_service_name_descriptor->st[lang_index].trimmed_service_provider_name_char);
+				sprintf_s(pszField, sizeof(pszField), "language[%d]()", lang_index);
+
+				char* pszServiceName = NULL;
+
+				int trimmed_service_name_length = pmultilingual_service_name_descriptor->st[lang_index].trimmed_service_name_length;
+				if (trimmed_service_name_length > 0)
+				{
+					pszServiceName = (char*)malloc(trimmed_service_name_length + 1);
+					memcpy(pszServiceName, pmultilingual_service_name_descriptor->st[lang_index].trimmed_service_name_char, trimmed_service_name_length);
+					pszServiceName[trimmed_service_name_length] = '\0';
+				}
+
+				char* pszServiceProvider = NULL;
+
+				int trimmed_service_provider_name_length = pmultilingual_service_name_descriptor->st[lang_index].trimmed_service_provider_name_length;
+				if (trimmed_service_provider_name_length > 0)
+				{
+					pszServiceProvider = (char*)malloc(trimmed_service_provider_name_length + 1);
+					memcpy(pszServiceProvider, pmultilingual_service_name_descriptor->st[lang_index].trimmed_service_provider_name_char, trimmed_service_provider_name_length);
+					pszServiceProvider[trimmed_service_provider_name_length] = '\0';
+				}
+
+				sprintf_s(pszComment, sizeof(pszComment), "%s - Name:%s, Provider:%s", 
+					pmultilingual_service_name_descriptor->st[lang_index].ISO_639_language_code_char, 
+					pszServiceName,
+					pszServiceProvider);
 
 				XMLElement* pxmlLangNode = pxmlDoc->NewBranchElement(pxmlDescriptorNode, pszField, pszComment, 
 					3 + 1 + pmultilingual_service_name_descriptor->st[lang_index].service_provider_name_length + 1 + pmultilingual_service_name_descriptor->st[lang_index].service_name_length);
@@ -1239,17 +1374,24 @@ int DVB_SI_present_multilingual_service_name_descriptor_to_xml(HALForXMLDoc* pxm
 
 				if (pmultilingual_service_name_descriptor->st[lang_index].service_provider_name_length > 0)
 				{
-					pxmlDoc->NewElementForByteBuf(pxmlLangNode, "service_provider_name[ ]", (uint8_t*)pmultilingual_service_name_descriptor->st[lang_index].service_provider_name_char,
-						pmultilingual_service_name_descriptor->st[lang_index].service_provider_name_length, pmultilingual_service_name_descriptor->st[lang_index].trimmed_service_provider_name_char);
+					pxmlDoc->NewElementForByteBuf(pxmlLangNode, "service_provider_name[ ]", 
+						pmultilingual_service_name_descriptor->st[lang_index].service_provider_name_char,
+						pmultilingual_service_name_descriptor->st[lang_index].service_provider_name_length, 
+						pszServiceProvider);
 				}
 
 				pxmlDoc->NewElementForBits(pxmlLangNode, "service_name_length", pmultilingual_service_name_descriptor->st[lang_index].service_name_length, 8, "uimsbf", NULL);
 
 				if (pmultilingual_service_name_descriptor->st[lang_index].service_name_length > 0)
 				{
-					pxmlDoc->NewElementForByteBuf(pxmlLangNode, "service_name[ ]", (uint8_t*)pmultilingual_service_name_descriptor->st[lang_index].service_name_char,
-						pmultilingual_service_name_descriptor->st[lang_index].service_name_length, pmultilingual_service_name_descriptor->st[lang_index].trimmed_service_name_char);
+					pxmlDoc->NewElementForByteBuf(pxmlLangNode, "service_name[ ]", 
+						pmultilingual_service_name_descriptor->st[lang_index].service_name_char,
+						pmultilingual_service_name_descriptor->st[lang_index].service_name_length, 
+						pszServiceName);
 				}
+
+				if (pszServiceName != NULL) free(pszServiceName);
+				if (pszServiceProvider != NULL) free(pszServiceProvider);
 			}
 		}
 	}
@@ -1604,109 +1746,97 @@ int DVB_SI_decode_transport_stream_descriptor_to_xml(uint8_t* buf, int length, H
 int DVB_SI_decode_data_broadcast_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, data_broadcast_descriptor_t* pDataBroadcastDescriptor)
 {
 	int rtcode = SECTION_PARSE_NO_ERROR;
-	//int	copy_length;
-	//char pszTemp[64];
-	//char pszCarouselType[64];
-	//BITS_t bs;
 
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL))
-	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "data_broadcast_descriptor()");
-	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 10))
+	{
+		data_broadcast_descriptor_t* pdata_broadcast_descriptor = (pDataBroadcastDescriptor == NULL) ? new data_broadcast_descriptor_t : pDataBroadcastDescriptor;
+		
+		rtcode = DVB_SI_decode_data_broadcast_descriptor(buf, length, pdata_broadcast_descriptor);
+		DVB_SI_present_data_broadcast_descriptor_to_xml(pxmlDoc, pxmlParentNode, pdata_broadcast_descriptor);
 
-	//	if ((buf != NULL) && (length >= 10))
-	//	{
-	//		data_broadcast_descriptor_t* pdata_broadcast_descriptor = (pDataBroadcastDescriptor == NULL) ? new data_broadcast_descriptor_t : pDataBroadcastDescriptor;
-	//		memset(pdata_broadcast_descriptor, 0x00, sizeof(data_broadcast_descriptor_t));
+		if (pDataBroadcastDescriptor == NULL)
+		{
+			delete pdata_broadcast_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
-	//		BITS_map(&bs, buf, length);
+	return rtcode;
+}
 
-	//		pdata_broadcast_descriptor->descriptor_tag = BITS_get(&bs, 8);
-	//		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pdata_broadcast_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
+int DVB_SI_present_data_broadcast_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, data_broadcast_descriptor_t* pdata_broadcast_descriptor)
+{
+	int rtcode = SECTION_PARSE_NO_ERROR;
+	char pszField[48];
+	char pszDataCastType[64];
 
-	//		pdata_broadcast_descriptor->descriptor_length = BITS_get(&bs, 8);
-	//		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pdata_broadcast_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pdata_broadcast_descriptor != NULL))
+	{
+		DVB_SI_NumericCoding2Text_DataBroadcastID(pdata_broadcast_descriptor->data_broadcast_id, pszDataCastType, sizeof(pszDataCastType));
+		sprintf_s(pszField, sizeof(pszField), "data_broadcast_descriptor(tag: 0x%02X)", pdata_broadcast_descriptor->descriptor_tag);
 
-	//		pdata_broadcast_descriptor->data_broadcast_id = BITS_get(&bs, 16);
-	//		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "data_broadcast_id", pdata_broadcast_descriptor->data_broadcast_id, 16, "uimsbf", NULL, &bs);
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, pszDataCastType, pdata_broadcast_descriptor->descriptor_length + 2);
 
-	//		pdata_broadcast_descriptor->component_tag = BITS_get(&bs, 8);
-	//		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "component_tag", pdata_broadcast_descriptor->component_tag, 8, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pdata_broadcast_descriptor->descriptor_tag, 8, "uimsbf", NULL);
 
-	//		pdata_broadcast_descriptor->selector_length = BITS_get(&bs, 8);
-	//		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "selector_length", pdata_broadcast_descriptor->selector_length, 8, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pdata_broadcast_descriptor->descriptor_length, 8, "uimsbf", NULL);
 
-	//		if (pdata_broadcast_descriptor->selector_length > 0)
-	//		{
-	//			uint8_t* old_ptr = bs.p_cur;
-	//			tinyxml2::XMLElement* pxmlSelectorNode = pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "selector_byte()");
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "data_broadcast_id", pdata_broadcast_descriptor->data_broadcast_id, 16, "uimsbf", pszDataCastType);
 
-	//			if (pdata_broadcast_descriptor->data_broadcast_id == 0x0005)
-	//			{
-	//				pxmlSelectorNode->SetAttribute("comment", "multiprotocol_encapsulation_info");
-	//				DVB_Databroadcast_decode_multiprotocol_encapsulation_info(bs.p_cur, pdata_broadcast_descriptor->selector_length, &(pdata_broadcast_descriptor->selector_byte.multiprotocol_encapsulation_info));
-	//			}
-	//			else if (pdata_broadcast_descriptor->data_broadcast_id == 0x0006)
-	//			{
-	//				pxmlSelectorNode->SetAttribute("comment", "data_carousel_info");
-	//				DVB_Databroadcast_decode_data_carousel_info_to_xml(bs.p_cur, pdata_broadcast_descriptor->selector_length, pxmlDoc, pxmlSelectorNode, &(pdata_broadcast_descriptor->selector_byte.data_carousel_info));
-	//			}
-	//			else if (pdata_broadcast_descriptor->data_broadcast_id == 0x0007)
-	//			{
-	//				pxmlSelectorNode->SetAttribute("comment", "object_carousel_info");
-	//				DVB_Databroadcast_decode_object_carousel_info_to_xml(bs.p_cur, pdata_broadcast_descriptor->selector_length, pxmlDoc, pxmlSelectorNode, &(pdata_broadcast_descriptor->selector_byte.object_carousel_info));
-	//			}
-	//			else if (pdata_broadcast_descriptor->data_broadcast_id == 0x000B)
-	//			{
-	//				pxmlSelectorNode->SetAttribute("comment", "IP/MAC_notification_info");
-	//				INT_decode_IP_MAC_notification_info(bs.p_cur, pdata_broadcast_descriptor->selector_length, &(pdata_broadcast_descriptor->selector_byte.IP_MAC_notification_info));
-	//			}
-	//			else
-	//			{
-	//				copy_length = (pdata_broadcast_descriptor->selector_length < MAX_DATABROADCAST_SELECT_LENGTH) ?
-	//					pdata_broadcast_descriptor->selector_length : MAX_DATABROADCAST_SELECT_LENGTH;
-	//				memcpy(pdata_broadcast_descriptor->selector_byte.buf, bs.p_cur, copy_length);
-	//			}
-	//			BITS_byteSkip(&bs, pdata_broadcast_descriptor->selector_length);
-	//			pxmlDoc->UpdateBufMark(pxmlSelectorNode, old_ptr, bs.p_cur);
-	//		}
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "component_tag", pdata_broadcast_descriptor->component_tag, 8, "uimsbf", NULL);
 
-	//		memcpy(pdata_broadcast_descriptor->ISO_639_language_code_char, bs.p_cur, 3);
-	//		pdata_broadcast_descriptor->ISO_639_language_code_char[3] = '\0';
-	//		pdata_broadcast_descriptor->ISO_639_language_code = BITS_get(&bs, 24);
-	//		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "ISO_639_language_code", pdata_broadcast_descriptor->ISO_639_language_code, 24, "uimsbf", pdata_broadcast_descriptor->ISO_639_language_code_char, &bs);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "selector_length", pdata_broadcast_descriptor->selector_length, 8, "uimsbf", NULL);
 
-	//		pdata_broadcast_descriptor->text_length = BITS_get(&bs, 8);
-	//		pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "text_length", pdata_broadcast_descriptor->text_length, 8, "uimsbf", NULL, &bs);
+		if (pdata_broadcast_descriptor->selector_length > 0)
+		{
+			XMLElement* pxmlSelectorNode = pxmlDoc->NewBranchElement(pxmlDescriptorNode, "selector_byte()", NULL, pdata_broadcast_descriptor->selector_length);
 
-	//		if (pdata_broadcast_descriptor->text_length > 0)
-	//		{
-	//			copy_length = (pdata_broadcast_descriptor->text_length < MAX_DATABROADCAST_TEXT_LENGTH) ? pdata_broadcast_descriptor->text_length : MAX_DATABROADCAST_TEXT_LENGTH;
-	//			memcpy(pdata_broadcast_descriptor->text_char, bs.p_cur, copy_length);
-	//			pdata_broadcast_descriptor->text_char[copy_length] = '\0';
+			if (pdata_broadcast_descriptor->data_broadcast_id == 0x0005)
+			{
+				pxmlSelectorNode->SetAttribute("comment", "multiprotocol_encapsulation_info");
+				DVB_Databroadcast_present_multiprotocol_encapsulation_info_to_xml(pxmlDoc, pxmlSelectorNode,
+					&(pdata_broadcast_descriptor->u.multiprotocol_encapsulation_info));
+			}
+			else if (pdata_broadcast_descriptor->data_broadcast_id == 0x0006)
+			{
+				pxmlSelectorNode->SetAttribute("comment", "data_carousel_info");
+				DVB_Databroadcast_present_data_carousel_info_to_xml(pxmlDoc, pxmlSelectorNode, 
+					&(pdata_broadcast_descriptor->u.data_carousel_info));
+			}
+			else if (pdata_broadcast_descriptor->data_broadcast_id == 0x0007)
+			{
+				pxmlSelectorNode->SetAttribute("comment", "object_carousel_info");
+				DVB_Databroadcast_present_object_carousel_info_to_xml(pxmlDoc, pxmlSelectorNode, 
+					&(pdata_broadcast_descriptor->u.object_carousel_info));
+			}
+			else if (pdata_broadcast_descriptor->data_broadcast_id == 0x000B)
+			{
+				pxmlSelectorNode->SetAttribute("comment", "IP/MAC_notification_info");
+				DVB_Databroadcast_present_IP_MAC_notification_info_to_xml(pxmlDoc, pxmlSelectorNode, 
+					&(pdata_broadcast_descriptor->u.IP_MAC_notification_info));
+			}
+			else
+			{
+				pxmlDoc->NewElementForByteBuf(pxmlSelectorNode, "selector_byte[ ]", pdata_broadcast_descriptor->selector_byte, pdata_broadcast_descriptor->selector_length);
+			}
+		}
 
-	//			BITS_byteSkip(&bs, pdata_broadcast_descriptor->text_length);
-	//		}
+		pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "ISO_639_language_code", (uint8_t*)pdata_broadcast_descriptor->ISO_639_language_code_char, 3, pdata_broadcast_descriptor->ISO_639_language_code_char);
 
-	//		DVB_SI_NumericCoding2Text_DataBroadcastID(pdata_broadcast_descriptor->data_broadcast_id, pszCarouselType, sizeof(pszCarouselType));
-	//		sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节, %s", pdata_broadcast_descriptor->descriptor_tag, length, pszCarouselType);
-	//		pxmlDescriptorNode->SetAttribute("comment", pszTemp);
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "text_length", pdata_broadcast_descriptor->text_length, 8, "uimsbf", NULL);
 
-	//		if (pDataBroadcastDescriptor == NULL)
-	//		{
-	//			delete pdata_broadcast_descriptor;
-	//		}
-	//	}
-	//	else
-	//	{
-	//		pxmlDescriptorNode->SetAttribute("error", "Parameter Error!");
-	//		rtcode = SECTION_PARSE_PARAMETER_ERROR;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	//}
+		if (pdata_broadcast_descriptor->text_length > 0)
+		{
+			pxmlDoc->NewElementForByteBuf(pxmlDescriptorNode, "text_char", (uint8_t*)pdata_broadcast_descriptor->text_char, pdata_broadcast_descriptor->text_length);
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
 	return rtcode;
 }
@@ -1718,88 +1848,90 @@ int DVB_SI_decode_data_broadcast_descriptor_to_xml(uint8_t* buf, int length, HAL
 //功能：解数据广播标识描述子				0x66
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-int DVB_SI_decode_data_broadcast_id_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, data_broadcast_id_descriptor_t* pDataBroadcastIDDescriptor)
+int DVB_SI_decode_data_broadcast_id_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, data_broadcast_id_descriptor_t* pDataBroadcastIDDescriptor)
 {
 	int rtcode = SECTION_PARSE_NO_ERROR;
-	//int	copy_length;
-	//char pszTemp[64];
-	//char pszCarouselType[32];
-	//BITS_t bs;
 
-	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
-	//{
-	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "data_broadcast_id_descriptor()");
-	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 4))
+	{
+		data_broadcast_id_descriptor_t* pdata_broadcast_id_descriptor = (pDataBroadcastIDDescriptor == NULL) ? new data_broadcast_id_descriptor_t : pDataBroadcastIDDescriptor;
+		rtcode = DVB_SI_decode_data_broadcast_id_descriptor(buf, length, pdata_broadcast_id_descriptor);
+		DVB_SI_present_data_broadcast_id_descriptor_to_xml(pxmlDoc, pxmlParentNode, pdata_broadcast_id_descriptor);
 
-	//	data_broadcast_id_descriptor_t* pdata_broadcast_id_descriptor = (pDataBroadcastIDDescriptor == NULL) ? new data_broadcast_id_descriptor_t : pDataBroadcastIDDescriptor;
-	//	memset(pdata_broadcast_id_descriptor, 0x00, sizeof(data_broadcast_id_descriptor_t));
-
-	//	BITS_map(&bs, buf, length);
-
-	//	pdata_broadcast_id_descriptor->descriptor_tag = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pdata_broadcast_id_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
-
-	//	pdata_broadcast_id_descriptor->descriptor_length = BITS_get(&bs, 8);
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pdata_broadcast_id_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
-
-	//	pdata_broadcast_id_descriptor->data_broadcast_id = BITS_get(&bs, 16);
-	//	DVB_SI_NumericCoding2Text_DataBroadcastID(pdata_broadcast_id_descriptor->data_broadcast_id, pszCarouselType, sizeof(pszCarouselType));
-	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "data_broadcast_id", pdata_broadcast_id_descriptor->data_broadcast_id, 16, "uimsbf", pszCarouselType, &bs);
-
-	//	copy_length = pdata_broadcast_id_descriptor->descriptor_length - 2;
-
-	//	pdata_broadcast_id_descriptor->id_selector_length = copy_length;
-
-	//	if (copy_length > 0)
-	//	{
-	//		uint8_t* old_ptr = bs.p_cur;
-	//		tinyxml2::XMLElement* pxmlSelectorNode = pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "id_selector_byte()");
-	//		pxmlSelectorNode->SetAttribute("comment", pszCarouselType);
-
-	//		if (pdata_broadcast_id_descriptor->data_broadcast_id == 0x0005)
-	//		{
-	//			DVB_Databroadcast_decode_multiprotocol_encapsulation_info(bs.p_cur, copy_length, &(pdata_broadcast_id_descriptor->id_selector_byte.multiprotocol_encapsulation_info));
-	//		}
-	//		else if (pdata_broadcast_id_descriptor->data_broadcast_id == 0x0006)
-	//		{
-	//			DVB_Databroadcast_decode_data_carousel_info_to_xml(bs.p_cur, copy_length, pxmlDoc, pxmlSelectorNode, &(pdata_broadcast_id_descriptor->id_selector_byte.data_carousel_info));
-	//		}
-	//		else if (pdata_broadcast_id_descriptor->data_broadcast_id == 0x0007)
-	//		{
-	//			DVB_Databroadcast_decode_object_carousel_info_to_xml(bs.p_cur, copy_length, pxmlDoc, pxmlSelectorNode, &(pdata_broadcast_id_descriptor->id_selector_byte.object_carousel_info));
-	//		}
-	//		else if (pdata_broadcast_id_descriptor->data_broadcast_id == 0x000B)
-	//		{
-	//			INT_decode_IP_MAC_notification_info(bs.p_cur, copy_length, &(pdata_broadcast_id_descriptor->id_selector_byte.IP_MAC_notification_info));
-	//		}
-	//		else
-	//		{
-	//			copy_length = (copy_length < MAX_DATABROADCAST_SELECT_LENGTH) ? copy_length : MAX_DATABROADCAST_SELECT_LENGTH;
-	//			memcpy(pdata_broadcast_id_descriptor->id_selector_byte.buf, bs.p_cur, copy_length);
-	//			pdata_broadcast_id_descriptor->id_selector_length = copy_length;
-	//		}
-
-	//		BITS_byteSkip(&bs, copy_length);
-	//		pxmlDoc->UpdateBufMark(pxmlSelectorNode, old_ptr, bs.p_cur);
-	//	}
-
-	//	DVB_SI_NumericCoding2Text_DataBroadcastID(pdata_broadcast_id_descriptor->data_broadcast_id, pszCarouselType, sizeof(pszCarouselType));
-	//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节, %s", pdata_broadcast_id_descriptor->descriptor_tag, length, pszCarouselType);
-	//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
-
-	//	if (pDataBroadcastIDDescriptor == NULL)
-	//	{
-	//		delete pdata_broadcast_id_descriptor;
-	//	}
-	//}
-	//else
-	//{
-	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	//}
+		if (pDataBroadcastIDDescriptor == NULL)
+		{
+			delete pdata_broadcast_id_descriptor;
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
 
 	return rtcode;
 }
 
+int DVB_SI_present_data_broadcast_id_descriptor_to_xml(HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, data_broadcast_id_descriptor_t* pdata_broadcast_id_descriptor)
+{
+	int rtcode = SECTION_PARSE_NO_ERROR;
+	char pszFiled[48];
+	char pszDataCastType[32];
+
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pdata_broadcast_id_descriptor != NULL))
+	{
+		DVB_SI_NumericCoding2Text_DataBroadcastID(pdata_broadcast_id_descriptor->data_broadcast_id, pszDataCastType, sizeof(pszDataCastType));
+		sprintf_s(pszFiled, sizeof(pszFiled), "data_broadcast_id_descriptor(tag: 0x%02X)", pdata_broadcast_id_descriptor->descriptor_tag);
+
+		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszFiled, pszDataCastType, pdata_broadcast_id_descriptor->descriptor_length + 2);
+
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pdata_broadcast_id_descriptor->descriptor_tag, 8, "uimsbf", NULL);
+
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pdata_broadcast_id_descriptor->descriptor_length, 8, "uimsbf", NULL);
+
+		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "data_broadcast_id", pdata_broadcast_id_descriptor->data_broadcast_id, 16, "uimsbf", pszDataCastType);
+
+		if (pdata_broadcast_id_descriptor->id_selector_length > 0)
+		{
+			XMLElement* pxmlSelectorNode = pxmlDoc->NewBranchElement(pxmlDescriptorNode, "id_selector_byte()", NULL, pdata_broadcast_id_descriptor->id_selector_length);
+
+			if (pdata_broadcast_id_descriptor->data_broadcast_id == 0x0005)
+			{
+				pxmlSelectorNode->SetAttribute("comment", "multiprotocol_encapsulation_info");
+				DVB_Databroadcast_present_multiprotocol_encapsulation_info_to_xml(pxmlDoc, pxmlSelectorNode,
+					&(pdata_broadcast_id_descriptor->u.multiprotocol_encapsulation_info));
+			}
+			else if (pdata_broadcast_id_descriptor->data_broadcast_id == 0x0006)
+			{
+				pxmlSelectorNode->SetAttribute("comment", "data_carousel_info");
+				DVB_Databroadcast_present_data_carousel_info_to_xml(pxmlDoc, pxmlSelectorNode, 
+					&(pdata_broadcast_id_descriptor->u.data_carousel_info));
+			}
+			else if (pdata_broadcast_id_descriptor->data_broadcast_id == 0x0007)
+			{
+				pxmlSelectorNode->SetAttribute("comment", "object_carousel_info");
+				DVB_Databroadcast_present_object_carousel_info_to_xml(pxmlDoc, pxmlSelectorNode, 
+					&(pdata_broadcast_id_descriptor->u.object_carousel_info));
+			}
+			else if (pdata_broadcast_id_descriptor->data_broadcast_id == 0x000B)
+			{
+				pxmlSelectorNode->SetAttribute("comment", "IP/MAC_notification_info");
+				DVB_Databroadcast_present_IP_MAC_notification_info_to_xml(pxmlDoc, pxmlSelectorNode,
+					&(pdata_broadcast_id_descriptor->u.IP_MAC_notification_info));
+			}
+			else
+			{
+				pxmlDoc->NewElementForByteBuf(pxmlSelectorNode, "id_selector_byte[ ]",
+					pdata_broadcast_id_descriptor->id_selector_byte, pdata_broadcast_id_descriptor->id_selector_length);
+			}
+		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	}
+
+	return rtcode;
+}
 
 //功能：解传送流描述符					0x67
 //输入：buffer, 起始位置nIndex

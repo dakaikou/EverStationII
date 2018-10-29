@@ -203,7 +203,8 @@ typedef struct _CA_descriptor_s
 	uint16_t	CA_PID;										//13
 
 	int		private_data_length;
-	uint8_t	private_data_byte[MAX_PRIVATE_DATA_LENGTH];
+	//uint8_t	private_data_byte[MAX_PRIVATE_DATA_LENGTH];
+	uint8_t* private_data_byte;					//volatilable pointer, only valid when the corresponding descriptor's buf is exists.
 
 } CA_descriptor_t, *pCA_descriptor_t;
 

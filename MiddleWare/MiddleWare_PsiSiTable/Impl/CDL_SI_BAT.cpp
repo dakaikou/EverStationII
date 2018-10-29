@@ -27,13 +27,20 @@ void CBAT::Init(void)
 	m_astStreamInfo = NULL;
 	m_aucSectionFlag = NULL;
 
+	m_pszBouquetName = NULL;
+
 	Reset();
 }
 
 void CBAT::Reset(void)
 {
 	m_usBouquetID = 0xFFFF;
-	memset(m_pszBouquetName, 0x00, sizeof(m_pszBouquetName));
+	//memset(m_pszBouquetName, 0x00, sizeof(m_pszBouquetName));
+	if (m_pszBouquetName != NULL)
+	{
+		free(m_pszBouquetName);
+		m_pszBouquetName = NULL;
+	}
 
 	if (m_astStreamInfo != NULL)
 	{
@@ -55,13 +62,10 @@ int CBAT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 
 	S32			 nStreamCount;
 
-	bouquet_name_descriptor_t				bouquet_name_descriptor;
-	multilingual_bouquet_name_descriptor_t	multilingual_bouquet_name_descriptor;
-	service_list_descriptor_t				service_list_descriptor;
 	bouquet_association_section_t			bat_section;
+
 	STREAM_INFO_t*							pStreamInfo;
 	STREAM_DESCRIPTION_t*					pStreamDescription;
-
 
 	rtcode = CPVT::AddSection(usPID, pprivate_section);
 
@@ -79,18 +83,34 @@ int CBAT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 
 				if (bat_section.bouquet_descriptors[descriptor_index].descriptor_tag == DVB_SI_BOUQUET_NAME_DESCRIPTOR)
 				{
-					DVB_SI_decode_bouquet_name_descriptor(descriptor_buf, descriptor_size, &bouquet_name_descriptor);
-					strcpy_s(m_pszBouquetName, sizeof(m_pszBouquetName), bouquet_name_descriptor.trimmed_bouquet_name);
+					if (m_pszBouquetName == NULL)
+					{
+						bouquet_name_descriptor_t				bouquet_name_descriptor;
+						DVB_SI_decode_bouquet_name_descriptor(descriptor_buf, descriptor_size, &bouquet_name_descriptor);
+						//strcpy_s(m_pszBouquetName, sizeof(m_pszBouquetName), bouquet_name_descriptor.trimmed_bouquet_name);
+						//memcpy_s(m_pszBouquetName, sizeof(m_pszBouquetName), bouquet_name_descriptor.trimmed_bouquet_name, bouquet_name_descriptor.trimmed_bouquet_name_length);
+						//m_pszBouquetName[bouquet_name_descriptor.trimmed_bouquet_name_length] = '\0';
 
-					break;
+						m_pszBouquetName = (char*)malloc(bouquet_name_descriptor.trimmed_bouquet_name_length + 1);
+						memcpy(m_pszBouquetName, bouquet_name_descriptor.trimmed_bouquet_name, bouquet_name_descriptor.trimmed_bouquet_name_length);
+						m_pszBouquetName[bouquet_name_descriptor.trimmed_bouquet_name_length] = '\0';
+
+						break;
+					}
 				}
 				else if (bat_section.bouquet_descriptors[descriptor_index].descriptor_tag == DVB_SI_MULTILINGUAL_BOUQUET_NAME_DESCRIPTOR)
 				{
-					if (strlen(m_pszBouquetName) == 0)
+					if (m_pszBouquetName == NULL)
 					{
+						multilingual_bouquet_name_descriptor_t	multilingual_bouquet_name_descriptor;
 						DVB_SI_decode_multilingual_bouquet_name_descriptor(descriptor_buf, descriptor_size, &multilingual_bouquet_name_descriptor);
 //						strcpy_s(m_pszBouquetName, sizeof(m_pszBouquetName), multilingual_bouquet_name_descriptor.bouquet_name_char[0]);
-						memcpy_s(m_pszBouquetName, sizeof(m_pszBouquetName), multilingual_bouquet_name_descriptor.st[0].trimmed_bouquet_name_char, sizeof(multilingual_bouquet_name_descriptor.st[0].trimmed_bouquet_name_char));
+						//memcpy_s(m_pszBouquetName, sizeof(m_pszBouquetName), multilingual_bouquet_name_descriptor.st[0].trimmed_bouquet_name_char, multilingual_bouquet_name_descriptor.st[0].trimmed_bouquet_name_length);
+						//m_pszBouquetName[multilingual_bouquet_name_descriptor.st[0].trimmed_bouquet_name_length] = '\0';
+
+						m_pszBouquetName = (char*)malloc(multilingual_bouquet_name_descriptor.st[0].trimmed_bouquet_name_length + 1);
+						memcpy(m_pszBouquetName, multilingual_bouquet_name_descriptor.st[0].trimmed_bouquet_name_char, multilingual_bouquet_name_descriptor.st[0].trimmed_bouquet_name_length);
+						m_pszBouquetName[multilingual_bouquet_name_descriptor.st[0].trimmed_bouquet_name_length] = '\0';
 
 						break;
 					}
@@ -111,12 +131,13 @@ int CBAT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 					pStreamInfo->original_network_id = pStreamDescription->original_network_id;
 					pStreamInfo->transport_stream_id = pStreamDescription->transport_stream_id;
 
-					memset(&(pStreamInfo->service_list_descriptor), 0x00, sizeof(service_list_descriptor));
+					memset(&(pStreamInfo->service_list_descriptor), 0x00, sizeof(service_list_descriptor_t));
 
 					for (descriptor_index = 0; descriptor_index < pStreamDescription->transport_descriptor_count; descriptor_index ++)
 					{
 						if (pStreamDescription->transport_descriptors[descriptor_index].descriptor_tag == DVB_SI_SERVICE_LIST_DESCRIPTOR)
 						{
+							service_list_descriptor_t				service_list_descriptor;
 							DVB_SI_decode_service_list_descriptor(pStreamDescription->transport_descriptors[descriptor_index].descriptor_buf,
 																pStreamDescription->transport_descriptors[descriptor_index].descriptor_size,
 																&service_list_descriptor);
@@ -147,10 +168,10 @@ uint16_t CBAT::GetBouquetID(void)
 int	CBAT::GetBouquetName(char* pszName, int size)
 {
 	int rtcode = MIDDLEWARE_PSISI_NO_ERROR;
-	if (pszName != NULL)
+	if ((pszName != NULL) && (m_pszBouquetName != NULL))
 	{
-//		strcpy_s(pszName, size, m_pszBouquetName);
-		memcpy_s(pszName, size, m_pszBouquetName, sizeof(m_pszBouquetName));
+		strcpy_s(pszName, size, m_pszBouquetName);
+		//memcpy_s(pszName, size, m_pszBouquetName, sizeof(m_pszBouquetName));
 	}
 	else
 	{

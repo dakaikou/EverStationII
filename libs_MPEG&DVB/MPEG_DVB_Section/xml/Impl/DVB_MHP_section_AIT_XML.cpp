@@ -84,9 +84,9 @@ int DVB_MHP_AIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, application_informa
 
 					switch (descriptor_tag)
 					{
-					//case DVB_MHP_TRANSPORT_PROTOCOL_DESCRIPTOR:
-					//	DVB_MHP_decode_transport_protocol_descriptor_to_xml(pl1temp, move_length, pxmlDoc, pxmlDescriptorsNode);
-					//	break;
+					case DVB_MHP_TRANSPORT_PROTOCOL_DESCRIPTOR:
+						DVB_MHP_decode_transport_protocol_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlDescriptorsNode);
+						break;
 					default:
 						MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlDescriptorsNode, pait_section->common_descriptors + descriptor_index);
 
@@ -136,15 +136,15 @@ int DVB_MHP_AIT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, application_informa
 							//case DVB_MHP_APPLICATION_DESCRIPTOR:
 							//	DVB_MHP_decode_application_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
 							//	break;
-							//case DVB_MHP_APPLICATION_NAME_DESCRIPTOR:
-							//	DVB_MHP_decode_application_name_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-							//	break;
-							//case DVB_MHP_TRANSPORT_PROTOCOL_DESCRIPTOR:
-							//	DVB_MHP_decode_transport_protocol_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-							//	break;
-							//case DVB_MHP_DVB_J_APPLICATION_LOCATION_DESCRIPTOR:
-							//	DVB_MHP_decode_dvb_j_application_location_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlDescriptorLoopNode);
-							//	break;
+							case DVB_MHP_APPLICATION_NAME_DESCRIPTOR:
+								DVB_MHP_decode_application_name_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlDescriptorsLoopNode);
+								break;
+							case DVB_MHP_TRANSPORT_PROTOCOL_DESCRIPTOR:
+								DVB_MHP_decode_transport_protocol_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlDescriptorsLoopNode);
+								break;
+							case DVB_MHP_DVB_J_APPLICATION_LOCATION_DESCRIPTOR:
+								DVB_MHP_decode_dvb_j_application_location_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlDescriptorsLoopNode);
+								break;
 							default:
 								MPEG_DVB_present_reserved_descriptor_to_xml(pxmlDoc, pxmlDescriptorsLoopNode, papplication->descriptors + descriptor_index);
 

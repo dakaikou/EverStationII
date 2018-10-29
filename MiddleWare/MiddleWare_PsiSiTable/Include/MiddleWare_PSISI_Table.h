@@ -8,6 +8,7 @@
 #include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/DVB_SI_Section.h"
 
 #include "MiddleWare_PSISI_Common.h"
+#include "MiddleWare_PSISI_SysCapability.h"
 
 /*------------------------------------------------------------
 		PAT definition 
@@ -144,9 +145,13 @@ typedef struct _STREAM_INFO_s
 	uint16_t									original_network_id;
 
 	service_list_descriptor_t					service_list_descriptor;
-	satellite_delivery_system_descriptor_t		satellite_delivery_system_descriptor;
-	cable_delivery_system_descriptor_t			cable_delivery_system_descriptor;
-	terrestrial_delivery_system_descriptor_t	terrestrial_delivery_system_descriptor;
+	
+	union
+	{
+		satellite_delivery_system_descriptor_t		satellite_delivery_system_descriptor;
+		cable_delivery_system_descriptor_t			cable_delivery_system_descriptor;
+		terrestrial_delivery_system_descriptor_t	terrestrial_delivery_system_descriptor;
+	} uDelivery;
 
 } STREAM_INFO_t;
 
@@ -159,7 +164,8 @@ public:
 protected:
 /*------------------semantic part---------------------------*/
 	uint16_t					m_usNetworkID;
-	char						m_pszNetworkName[MAX_NETWORK_NAME_LENGTH + 1];
+	//char						m_pszNetworkName[MAX_NETWORK_NAME_LENGTH + 1];
+	char*						m_pszNetworkName;
 
 /*------------------syntax part---------------------------*/
 	int						m_nStreamCount;
@@ -192,7 +198,8 @@ protected:
 
 /*------------------semantic part---------------------------*/
 	uint16_t				m_usBouquetID;
-	char					m_pszBouquetName[MAX_BOUQUET_NAME_LENGTH + 1];
+	//char					m_pszBouquetName[MAX_BOUQUET_NAME_LENGTH + 1];
+	char*					m_pszBouquetName;
 	
 /*------------------syntax part---------------------------*/
 	int						m_nStreamCount;

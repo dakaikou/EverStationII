@@ -18,13 +18,14 @@
 //返回：LPVOID指针
 int DVB_SI_decode_network_name_descriptor(uint8_t* buf, int length, network_name_descriptor_t* pnetwork_name_descriptor)
 {
-	S32		rtcode = SECTION_PARSE_NO_ERROR;
-	S32		copy_length = 0;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
 
 	if ((buf != NULL) &&
 		(length >= 2) &&
 		(pnetwork_name_descriptor != NULL))
 	{
+		memset(pnetwork_name_descriptor, 0x00, sizeof(network_name_descriptor_t));
+
 		pnetwork_name_descriptor->descriptor_tag = *buf++;
 		pnetwork_name_descriptor->descriptor_length = *buf++;
 
@@ -32,12 +33,13 @@ int DVB_SI_decode_network_name_descriptor(uint8_t* buf, int length, network_name
 		{
 			if (pnetwork_name_descriptor->descriptor_length > 0)
 			{
-				copy_length = min(pnetwork_name_descriptor->descriptor_length, MAX_NETWORK_NAME_LENGTH);
-
-				memcpy(pnetwork_name_descriptor->network_name, buf, copy_length);
-				pnetwork_name_descriptor->network_name[copy_length] = '\0';
+				pnetwork_name_descriptor->network_name_length = pnetwork_name_descriptor->descriptor_length;
+				pnetwork_name_descriptor->network_name = buf;
+				buf += pnetwork_name_descriptor->network_name_length;
 
 				pnetwork_name_descriptor->trimmed_network_name = DVB_SI_StringPrefixTrim(pnetwork_name_descriptor->network_name);
+				pnetwork_name_descriptor->trimmed_network_name_length = pnetwork_name_descriptor->network_name_length -
+					(int)(pnetwork_name_descriptor->trimmed_network_name - pnetwork_name_descriptor->network_name);
 			}
 		}
 	}
@@ -93,9 +95,9 @@ int DVB_SI_decode_service_list_descriptor(uint8_t* buf, int length, service_list
 //功能：解填充描述子					0x42
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-S32 DVB_SI_decode_stuffing_descriptor(U8* buf, S32 length, pstuffing_descriptor_t pstuffing_descriptor)
+int DVB_SI_decode_stuffing_descriptor(uint8_t* buf, int length, stuffing_descriptor_t* pstuffing_descriptor)
 {
-	S32		copy_length;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
 
 	if ((buf != NULL) &&
 		(length >= 2) &&
@@ -104,13 +106,20 @@ S32 DVB_SI_decode_stuffing_descriptor(U8* buf, S32 length, pstuffing_descriptor_
 		pstuffing_descriptor->descriptor_tag = *buf++;
 		pstuffing_descriptor->descriptor_length = *buf++;
 
-		copy_length = (pstuffing_descriptor->descriptor_length < MAX_STUFFING_LENGTH) ? 
-									pstuffing_descriptor->descriptor_length : MAX_STUFFING_LENGTH;
-		memcpy(pstuffing_descriptor->stuffing_byte, buf, copy_length);
-		pstuffing_descriptor->stuffing_byte[copy_length] = '\0';
+		pstuffing_descriptor->stuffing_length = pstuffing_descriptor->descriptor_length;
+		pstuffing_descriptor->stuffing_byte = buf;
+		buf += pstuffing_descriptor->stuffing_length;
+		//copy_length = (pstuffing_descriptor->descriptor_length < MAX_STUFFING_LENGTH) ? 
+		//							pstuffing_descriptor->descriptor_length : MAX_STUFFING_LENGTH;
+		//memcpy(pstuffing_descriptor->stuffing_byte, buf, copy_length);
+		//pstuffing_descriptor->stuffing_byte[copy_length] = '\0';
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
 	}
 
-	return 0;
+	return rtcode;
 }
 
 //功能：解卫星传送系统描述子				0x43
@@ -223,34 +232,49 @@ S32	DVB_SI_decode_VBI_data_descriptor(U8* buf, S32 length, pVBI_data_descriptor_
 //功能：解业务群名称描述子				0x47
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
-S32 DVB_SI_decode_bouquet_name_descriptor(U8* buf, S32 length, pbouquet_name_descriptor_t pbouquet_name_descriptor)
+int DVB_SI_decode_bouquet_name_descriptor(uint8_t* buf, int length, bouquet_name_descriptor_t* pbouquet_name_descriptor)
 {
-	S32		copy_length;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
+	//S32		copy_length;
 
 	if ((buf != NULL) &&
 		(length >= 2) &&
 		(pbouquet_name_descriptor != NULL))
 	{
+		memset(pbouquet_name_descriptor, 0x00, sizeof(bouquet_name_descriptor_t));
+
 		pbouquet_name_descriptor->descriptor_tag = *buf++;
 		pbouquet_name_descriptor->descriptor_length = *buf++;
 
-		copy_length = (pbouquet_name_descriptor->descriptor_length < MAX_BOUQUET_NAME_LENGTH) ? 
-												pbouquet_name_descriptor->descriptor_length : MAX_BOUQUET_NAME_LENGTH;
+		//copy_length = (pbouquet_name_descriptor->descriptor_length < MAX_BOUQUET_NAME_LENGTH) ? 
+		//										pbouquet_name_descriptor->descriptor_length : MAX_BOUQUET_NAME_LENGTH;
 
-		if (copy_length > 0)
-		{
-			memcpy(pbouquet_name_descriptor->bouquet_name, buf, copy_length);
-			pbouquet_name_descriptor->bouquet_name[copy_length] = '\0';
+		//if (copy_length > 0)
+		//{
+		//	memcpy(pbouquet_name_descriptor->bouquet_name, buf, copy_length);
+		//	pbouquet_name_descriptor->bouquet_name[copy_length] = '\0';
 
-			pbouquet_name_descriptor->trimmed_bouquet_name = DVB_SI_StringPrefixTrim(pbouquet_name_descriptor->bouquet_name);
-		}
-		else
-		{
-			memset(pbouquet_name_descriptor->bouquet_name, 0x00, sizeof(pbouquet_name_descriptor->bouquet_name));
-		}
+		//	pbouquet_name_descriptor->trimmed_bouquet_name = DVB_SI_StringPrefixTrim(pbouquet_name_descriptor->bouquet_name);
+		//}
+		//else
+		//{
+		//	memset(pbouquet_name_descriptor->bouquet_name, 0x00, sizeof(pbouquet_name_descriptor->bouquet_name));
+		//}
+
+		pbouquet_name_descriptor->bouquet_name_length = pbouquet_name_descriptor->descriptor_length;
+		pbouquet_name_descriptor->bouquet_name = buf;
+		buf += pbouquet_name_descriptor->bouquet_name_length;
+
+		pbouquet_name_descriptor->trimmed_bouquet_name = DVB_SI_StringPrefixTrim(pbouquet_name_descriptor->bouquet_name);
+		pbouquet_name_descriptor->trimmed_bouquet_name_length = pbouquet_name_descriptor->bouquet_name_length -
+			(int)(pbouquet_name_descriptor->trimmed_bouquet_name - pbouquet_name_descriptor->bouquet_name);
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
 	}
 
-	return 0;
+	return rtcode;
 }
 
 //功能：解业务描述子				0x48
@@ -264,46 +288,53 @@ int DVB_SI_decode_service_descriptor(uint8_t* buf, int length, service_descripto
 		(length >= 2) &&
 		(pservice_descriptor != NULL))
 	{
+		memset(pservice_descriptor, 0x00, sizeof(service_descriptor_t));
+
 		pservice_descriptor->descriptor_tag = *buf++;
 		pservice_descriptor->descriptor_length = *buf++;
 		pservice_descriptor->service_type = *buf++;
 
 		pservice_descriptor->service_provider_name_length = *buf++;
 
-		int copy_length = (pservice_descriptor->service_provider_name_length < MAX_SERVICE_PROVIDER_NAME_LENGTH) ?
-			pservice_descriptor->service_provider_name_length : MAX_SERVICE_PROVIDER_NAME_LENGTH;
+		//int copy_length = (pservice_descriptor->service_provider_name_length < MAX_SERVICE_PROVIDER_NAME_LENGTH) ?
+		//	pservice_descriptor->service_provider_name_length : MAX_SERVICE_PROVIDER_NAME_LENGTH;
 
-		if (copy_length > 0)
+		if (pservice_descriptor->service_provider_name_length > 0)
 		{
-			memcpy(pservice_descriptor->service_provider_name, buf, copy_length);
-			pservice_descriptor->service_provider_name[copy_length] = '\0';
+			//memcpy(pservice_descriptor->service_provider_name, buf, copy_length);
+			//pservice_descriptor->service_provider_name[copy_length] = '\0';
+			pservice_descriptor->service_provider_name = buf;
+			buf += pservice_descriptor->service_provider_name_length;
 
 			pservice_descriptor->trimmed_service_provider_name = DVB_SI_StringPrefixTrim(pservice_descriptor->service_provider_name);
+			pservice_descriptor->trimmed_service_provider_name_length = pservice_descriptor->service_provider_name_length -
+				(int)(pservice_descriptor->trimmed_service_provider_name - pservice_descriptor->service_provider_name);
 		}
-		else
-		{
-			memset(pservice_descriptor->service_provider_name, 0x00, sizeof(pservice_descriptor->service_provider_name));
-		}
-		buf += pservice_descriptor->service_provider_name_length;
+		//else
+		//{
+		//	memset(pservice_descriptor->service_provider_name, 0x00, sizeof(pservice_descriptor->service_provider_name));
+		//}
 
 		pservice_descriptor->service_name_length = *buf++;
 		
-		copy_length = (pservice_descriptor->service_name_length < MAX_SERVICE_NAME_LENGTH) ? 
-			pservice_descriptor->service_name_length : MAX_SERVICE_NAME_LENGTH;
+		//copy_length = (pservice_descriptor->service_name_length < MAX_SERVICE_NAME_LENGTH) ? 
+		//	pservice_descriptor->service_name_length : MAX_SERVICE_NAME_LENGTH;
 
-		if (copy_length > 0)
+		if (pservice_descriptor->service_name_length > 0)
 		{
-			memcpy(pservice_descriptor->service_name, buf, copy_length);
-			pservice_descriptor->service_name[copy_length] = '\0';
+			//memcpy(pservice_descriptor->service_name, buf, copy_length);
+			//pservice_descriptor->service_name[copy_length] = '\0';
+			pservice_descriptor->service_name = buf;
+			buf += pservice_descriptor->service_name_length;
 
 			pservice_descriptor->trimmed_service_name = DVB_SI_StringPrefixTrim(pservice_descriptor->service_name);
+			pservice_descriptor->trimmed_service_name_length = pservice_descriptor->service_name_length -
+				(int)(pservice_descriptor->trimmed_service_name - pservice_descriptor->service_name);
 		}
-		else
-		{
-			memset(pservice_descriptor->service_name, 0x00, sizeof(pservice_descriptor->service_name));
-		}
-
-		buf += pservice_descriptor->service_name_length;
+		//else
+		//{
+		//	memset(pservice_descriptor->service_name, 0x00, sizeof(pservice_descriptor->service_name));
+		//}
 	}
 	else
 	{
@@ -539,12 +570,14 @@ S32 DVB_SI_decode_time_shifted_service_descriptor(U8* buf, S32 length, ptime_shi
 int DVB_SI_decode_short_event_descriptor(uint8_t* buf, int length, short_event_descriptor_t* pshort_event_descriptor)
 {
 	int		rtcode = SECTION_PARSE_UNKNOWN_ERROR;
-	int		copy_length;
+	//int		copy_length;
 
 	if ((buf != NULL) &&
 		(length >= 6) &&
 		(pshort_event_descriptor != NULL))
 	{
+		memset(pshort_event_descriptor, 0x00, sizeof(short_event_descriptor_t));
+
 		pshort_event_descriptor->descriptor_tag = *buf++; 
 		pshort_event_descriptor->descriptor_length = *buf++;
 
@@ -561,36 +594,41 @@ int DVB_SI_decode_short_event_descriptor(uint8_t* buf, int length, short_event_d
 		pshort_event_descriptor->event_name_length = *buf++;
 		if (pshort_event_descriptor->event_name_length > 0)
 		{
-			copy_length = min(pshort_event_descriptor->event_name_length, MAX_EVENT_NAME_LENGTH);
+			//copy_length = min(pshort_event_descriptor->event_name_length, MAX_EVENT_NAME_LENGTH);
+			//memcpy(pshort_event_descriptor->event_name_char, buf, copy_length);
+			//pshort_event_descriptor->event_name_char[copy_length] = '\0';
 
-			memcpy(pshort_event_descriptor->event_name_char, buf, copy_length);
-			pshort_event_descriptor->event_name_char[copy_length] = '\0';
-			pshort_event_descriptor->trimmed_event_name_char = DVB_SI_StringPrefixTrim(pshort_event_descriptor->event_name_char);
-
+			pshort_event_descriptor->event_name_char = buf;
 			buf += pshort_event_descriptor->event_name_length;
+
+			pshort_event_descriptor->trimmed_event_name_char = DVB_SI_StringPrefixTrim(pshort_event_descriptor->event_name_char);
+			pshort_event_descriptor->trimmed_event_name_length = pshort_event_descriptor->event_name_length - (int)(pshort_event_descriptor->trimmed_event_name_char - pshort_event_descriptor->event_name_char);
 		}
-		else
-		{
-			memset(pshort_event_descriptor->event_name_char, 0x00, sizeof(pshort_event_descriptor->event_name_char));
-			pshort_event_descriptor->trimmed_event_name_char = pshort_event_descriptor->event_name_char;
-		}
+		//else
+		//{
+		//	memset(pshort_event_descriptor->event_name_char, 0x00, sizeof(pshort_event_descriptor->event_name_char));
+		//	pshort_event_descriptor->trimmed_event_name_char = pshort_event_descriptor->event_name_char;
+		//}
 
 		pshort_event_descriptor->text_length = *buf++;
 		if (pshort_event_descriptor->text_length > 0)
 		{
-			copy_length = min(pshort_event_descriptor->text_length, MAX_EVENT_TEXT_LENGTH);
+			//copy_length = min(pshort_event_descriptor->text_length, MAX_EVENT_TEXT_LENGTH);
 
-			memcpy(pshort_event_descriptor->text_char, buf, copy_length);
-			pshort_event_descriptor->text_char[copy_length] = '\0';
-			pshort_event_descriptor->trimmed_text_char = DVB_SI_StringPrefixTrim(pshort_event_descriptor->text_char);
-
+			//memcpy(pshort_event_descriptor->text_char, buf, copy_length);
+			//pshort_event_descriptor->text_char[copy_length] = '\0';
+			
+			pshort_event_descriptor->text_char = buf;
 			buf += pshort_event_descriptor->text_length;
+
+			pshort_event_descriptor->trimmed_text_char = DVB_SI_StringPrefixTrim(pshort_event_descriptor->text_char);
+			pshort_event_descriptor->trimmed_text_length = pshort_event_descriptor->text_length - (int)(pshort_event_descriptor->trimmed_text_char - pshort_event_descriptor->text_char);
 		}
-		else
-		{
-			memset(pshort_event_descriptor->text_char, 0x00, sizeof(pshort_event_descriptor->text_char));
-			pshort_event_descriptor->trimmed_text_char = pshort_event_descriptor->text_char;
-		}
+		//else
+		//{
+		//	memset(pshort_event_descriptor->text_char, 0x00, sizeof(pshort_event_descriptor->text_char));
+		//	pshort_event_descriptor->trimmed_text_char = pshort_event_descriptor->text_char;
+		//}
 
 		rtcode = SECTION_PARSE_NO_ERROR;
 	}
@@ -607,9 +645,10 @@ int DVB_SI_decode_short_event_descriptor(uint8_t* buf, int length, short_event_d
 //返回：解析状态码
 int DVB_SI_decode_extended_event_descriptor(uint8_t* buf, int length, extended_event_descriptor_t* pextended_event_descriptor)
 {
-	S32	copy_length;
-	S32 N = 0;
-	S32 loop_length;
+	int rtcode = SECTION_PARSE_NO_ERROR;
+	//int	copy_length;
+	int N = 0;
+	int loop_length;
 
 	if ((buf != NULL) &&
 		(length >= 2) &&
@@ -664,12 +703,22 @@ int DVB_SI_decode_extended_event_descriptor(uint8_t* buf, int length, extended_e
 		pextended_event_descriptor->N = N;
 
 		pextended_event_descriptor->text_length = *buf++;
-		copy_length = (pextended_event_descriptor->text_length < MAX_EVENT_TEXT_LENGTH) ? pextended_event_descriptor->text_length : MAX_EVENT_TEXT_LENGTH;
-		memcpy(pextended_event_descriptor->text_char, buf, copy_length);
-		pextended_event_descriptor->text_char[copy_length] = '\0';
+		//copy_length = (pextended_event_descriptor->text_length < MAX_EVENT_TEXT_LENGTH) ? pextended_event_descriptor->text_length : MAX_EVENT_TEXT_LENGTH;
+		//memcpy(pextended_event_descriptor->text_char, buf, copy_length);
+		//pextended_event_descriptor->text_char[copy_length] = '\0';
+
+		pextended_event_descriptor->text_char = buf;
+		buf += pextended_event_descriptor->text_length;
+
+		pextended_event_descriptor->trimmed_text_char = DVB_SI_StringPrefixTrim(pextended_event_descriptor->text_char);
+		pextended_event_descriptor->trimmed_text_length = pextended_event_descriptor->text_length - (int)(pextended_event_descriptor->trimmed_text_char - pextended_event_descriptor->text_char);
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
 	}
 
-	return 0;
+	return rtcode;
 }
 
 //功能：解时间偏移节目段描述子				0x4F
@@ -1295,7 +1344,7 @@ int DVB_SI_decode_multilingual_network_name_descriptor(uint8_t* buf, int length,
 	int rtcode = SECTION_PARSE_UNKNOWN_ERROR;
 	int N = 0;
 	int loop_length;
-	int copy_length;
+	//int copy_length;
 
 	if ((buf != NULL) &&
 		(length >= 2) &&
@@ -1321,14 +1370,18 @@ int DVB_SI_decode_multilingual_network_name_descriptor(uint8_t* buf, int length,
 
 			pmultilingual_network_name_descriptor->st[N].network_name_length = *buf++;
 
-			copy_length = min(pmultilingual_network_name_descriptor->st[N].network_name_length, MAX_NETWORK_NAME_LENGTH);
+			//copy_length = min(pmultilingual_network_name_descriptor->st[N].network_name_length, MAX_NETWORK_NAME_LENGTH);
 
-			memcpy(pmultilingual_network_name_descriptor->st[N].network_name_char, buf, copy_length);
-			pmultilingual_network_name_descriptor->st[N].network_name_char[copy_length] = '\0';
+			//memcpy(pmultilingual_network_name_descriptor->st[N].network_name_char, buf, copy_length);
+			//pmultilingual_network_name_descriptor->st[N].network_name_char[copy_length] = '\0';
+
+			pmultilingual_network_name_descriptor->st[N].network_name_char = buf;
+			buf += pmultilingual_network_name_descriptor->st[N].network_name_length;
 
 			pmultilingual_network_name_descriptor->st[N].trimmed_network_name_char = DVB_SI_StringPrefixTrim(pmultilingual_network_name_descriptor->st[N].network_name_char);
 
-			buf += pmultilingual_network_name_descriptor->st[N].network_name_length;
+			pmultilingual_network_name_descriptor->st[N].trimmed_network_name_length = pmultilingual_network_name_descriptor->st[N].network_name_length -
+				(int)(pmultilingual_network_name_descriptor->st[N].trimmed_network_name_char - pmultilingual_network_name_descriptor->st[N].network_name_char);
 
 			loop_length -= (4 + pmultilingual_network_name_descriptor->st[N].network_name_length);
 			N ++;
@@ -1350,7 +1403,7 @@ int DVB_SI_decode_multilingual_bouquet_name_descriptor(uint8_t* buf, int length,
 	int rtcode = SECTION_PARSE_NO_ERROR;
 	int N = 0;
 	int loop_length;
-	int copy_length;
+	//int copy_length;
 
 	if ((buf != NULL) &&
 		(length >= 2) &&
@@ -1375,14 +1428,16 @@ int DVB_SI_decode_multilingual_bouquet_name_descriptor(uint8_t* buf, int length,
 			buf += 3;
 
 			pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_length = *buf++;
-			copy_length = min(pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_length, MAX_BOUQUET_NAME_LENGTH);
+			//copy_length = min(pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_length, MAX_BOUQUET_NAME_LENGTH);
 
-			memcpy(pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_char, buf, copy_length);
-			pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_char[copy_length] = '\0';
+			//memcpy(pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_char, buf, copy_length);
+			//pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_char[copy_length] = '\0';
+			pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_char = buf;
+			buf += pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_length;
 
 			pmultilingual_bouquet_name_descriptor->st[N].trimmed_bouquet_name_char = DVB_SI_StringPrefixTrim(pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_char);
-
-			buf += pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_length;
+			pmultilingual_bouquet_name_descriptor->st[N].trimmed_bouquet_name_length = pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_length -
+				(int)(pmultilingual_bouquet_name_descriptor->st[N].trimmed_bouquet_name_char - pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_char);
 
 			loop_length -= (4 + pmultilingual_bouquet_name_descriptor->st[N].bouquet_name_length);
 			N++;
@@ -1406,7 +1461,7 @@ int DVB_SI_decode_multilingual_service_name_descriptor(uint8_t* buf, int length,
 	int rtcode = SECTION_PARSE_NO_ERROR;
 	int N = 0;
 	int loop_length;
-	int	copy_length;
+	//int	copy_length;
 
 	if ((buf != NULL) &&
 		(length >= 2) &&
@@ -1431,20 +1486,28 @@ int DVB_SI_decode_multilingual_service_name_descriptor(uint8_t* buf, int length,
 			buf += 3;
 
 			pmultilingual_service_name_descriptor->st[N].service_provider_name_length = *buf++;
-			copy_length = min(pmultilingual_service_name_descriptor->st[N].service_provider_name_length, MAX_SERVICE_PROVIDER_NAME_LENGTH);
+			//copy_length = min(pmultilingual_service_name_descriptor->st[N].service_provider_name_length, MAX_SERVICE_PROVIDER_NAME_LENGTH);
 
-			memcpy(pmultilingual_service_name_descriptor->st[N].service_provider_name_char, buf, copy_length);
-			pmultilingual_service_name_descriptor->st[N].service_provider_name_char[copy_length] = '\0';
-			pmultilingual_service_name_descriptor->st[N].trimmed_service_provider_name_char = DVB_SI_StringPrefixTrim(pmultilingual_service_name_descriptor->st[N].service_provider_name_char);
+			//memcpy(pmultilingual_service_name_descriptor->st[N].service_provider_name_char, buf, copy_length);
+			//pmultilingual_service_name_descriptor->st[N].service_provider_name_char[copy_length] = '\0';
+			pmultilingual_service_name_descriptor->st[N].service_provider_name_char = buf;
 			buf += pmultilingual_service_name_descriptor->st[N].service_provider_name_length;
 
-			pmultilingual_service_name_descriptor->st[N].service_name_length = *buf++;
-			copy_length = min(pmultilingual_service_name_descriptor->st[N].service_name_length, MAX_SERVICE_NAME_LENGTH);
+			pmultilingual_service_name_descriptor->st[N].trimmed_service_provider_name_char = DVB_SI_StringPrefixTrim(pmultilingual_service_name_descriptor->st[N].service_provider_name_char);
+			pmultilingual_service_name_descriptor->st[N].trimmed_service_provider_name_length = pmultilingual_service_name_descriptor->st[N].service_provider_name_length -
+				(int)(pmultilingual_service_name_descriptor->st[N].trimmed_service_provider_name_char - pmultilingual_service_name_descriptor->st[N].service_provider_name_char);
 
-			memcpy(pmultilingual_service_name_descriptor->st[N].service_name_char, buf, copy_length);
-			pmultilingual_service_name_descriptor->st[N].service_name_char[copy_length] = '\0';
-			pmultilingual_service_name_descriptor->st[N].trimmed_service_name_char = DVB_SI_StringPrefixTrim(pmultilingual_service_name_descriptor->st[N].service_name_char);
+			pmultilingual_service_name_descriptor->st[N].service_name_length = *buf++;
+			//copy_length = min(pmultilingual_service_name_descriptor->st[N].service_name_length, MAX_SERVICE_NAME_LENGTH);
+
+			//memcpy(pmultilingual_service_name_descriptor->st[N].service_name_char, buf, copy_length);
+			//pmultilingual_service_name_descriptor->st[N].service_name_char[copy_length] = '\0';
+			pmultilingual_service_name_descriptor->st[N].service_name_char = buf;
 			buf += pmultilingual_service_name_descriptor->st[N].service_name_length;
+
+			pmultilingual_service_name_descriptor->st[N].trimmed_service_name_char = DVB_SI_StringPrefixTrim(pmultilingual_service_name_descriptor->st[N].service_name_char);
+			pmultilingual_service_name_descriptor->st[N].trimmed_service_name_length = pmultilingual_service_name_descriptor->st[N].service_name_length -
+				(int)(pmultilingual_service_name_descriptor->st[N].trimmed_service_name_char - pmultilingual_service_name_descriptor->st[N].service_name_char);
 
 			loop_length -= (5 + pmultilingual_service_name_descriptor->st[N].service_name_length + pmultilingual_service_name_descriptor->st[N].service_provider_name_length);
 			N ++;
@@ -1659,7 +1722,7 @@ S32 DVB_SI_decode_partial_transport_stream_descriptor(U8* buf, S32 length, ppart
 int DVB_SI_decode_data_broadcast_descriptor(uint8_t* buf, int length, data_broadcast_descriptor_t* pdata_broadcast_descriptor)
 {
 	int rtcode = SECTION_PARSE_NO_ERROR;
-	int	copy_length;
+	//int	copy_length;
 	
 	if ((buf != NULL) && (length >= 10) && (pdata_broadcast_descriptor != NULL))
 	{
@@ -1674,46 +1737,57 @@ int DVB_SI_decode_data_broadcast_descriptor(uint8_t* buf, int length, data_broad
 		pdata_broadcast_descriptor->component_tag = *buf++;
 		pdata_broadcast_descriptor->selector_length = *buf++;
 
-		if (pdata_broadcast_descriptor->data_broadcast_id == 0x0005)
+		if (pdata_broadcast_descriptor->selector_length > 0)
 		{
-			DVB_Databroadcast_decode_multiprotocol_encapsulation_info(buf, pdata_broadcast_descriptor->selector_length, &(pdata_broadcast_descriptor->selector_byte.multiprotocol_encapsulation_info));
-		}
-		else if (pdata_broadcast_descriptor->data_broadcast_id == 0x0006)
-		{
-			DVB_Databroadcast_decode_data_carousel_info(buf, pdata_broadcast_descriptor->selector_length, &(pdata_broadcast_descriptor->selector_byte.data_carousel_info));
-		}
-		else if (pdata_broadcast_descriptor->data_broadcast_id == 0x0007)
-		{
-			DVB_Databroadcast_decode_object_carousel_info(buf, pdata_broadcast_descriptor->selector_length, &(pdata_broadcast_descriptor->selector_byte.object_carousel_info));
-		}
-		else if (pdata_broadcast_descriptor->data_broadcast_id == 0x000B)
-		{
-			INT_decode_IP_MAC_notification_info(buf, pdata_broadcast_descriptor->selector_length, &(pdata_broadcast_descriptor->selector_byte.IP_MAC_notification_info));
-		}
-		else
-		{
-			copy_length = (pdata_broadcast_descriptor->selector_length < MAX_DATABROADCAST_SELECT_LENGTH) ? 
-										pdata_broadcast_descriptor->selector_length : MAX_DATABROADCAST_SELECT_LENGTH;
-			memcpy(pdata_broadcast_descriptor->selector_byte.buf, buf, copy_length);
+			pdata_broadcast_descriptor->selector_byte = buf;
+			buf += pdata_broadcast_descriptor->selector_length;
+
+			if (pdata_broadcast_descriptor->data_broadcast_id == 0x0005)
+			{
+				DVB_Databroadcast_decode_multiprotocol_encapsulation_info(pdata_broadcast_descriptor->selector_byte, 
+					pdata_broadcast_descriptor->selector_length, 
+					&(pdata_broadcast_descriptor->u.multiprotocol_encapsulation_info));
+			}
+			else if (pdata_broadcast_descriptor->data_broadcast_id == 0x0006)
+			{
+				DVB_Databroadcast_decode_data_carousel_info(pdata_broadcast_descriptor->selector_byte, 
+					pdata_broadcast_descriptor->selector_length, 
+					&(pdata_broadcast_descriptor->u.data_carousel_info));
+			}
+			else if (pdata_broadcast_descriptor->data_broadcast_id == 0x0007)
+			{
+				DVB_Databroadcast_decode_object_carousel_info(pdata_broadcast_descriptor->selector_byte, 
+					pdata_broadcast_descriptor->selector_length, 
+					&(pdata_broadcast_descriptor->u.object_carousel_info));
+			}
+			else if (pdata_broadcast_descriptor->data_broadcast_id == 0x000B)
+			{
+				INT_decode_IP_MAC_notification_info(pdata_broadcast_descriptor->selector_byte, 
+					pdata_broadcast_descriptor->selector_length, 
+					&(pdata_broadcast_descriptor->u.IP_MAC_notification_info));
+			}
 		}
 
-		buf += pdata_broadcast_descriptor->selector_length;
-
-		pdata_broadcast_descriptor->ISO_639_language_code = buf[0];
-		pdata_broadcast_descriptor->ISO_639_language_code <<= 8;
-		pdata_broadcast_descriptor->ISO_639_language_code |= buf[1];
-		pdata_broadcast_descriptor->ISO_639_language_code <<= 8;
-		pdata_broadcast_descriptor->ISO_639_language_code |= buf[2];
+		//pdata_broadcast_descriptor->ISO_639_language_code = buf[0];
+		//pdata_broadcast_descriptor->ISO_639_language_code <<= 8;
+		//pdata_broadcast_descriptor->ISO_639_language_code |= buf[1];
+		//pdata_broadcast_descriptor->ISO_639_language_code <<= 8;
+		//pdata_broadcast_descriptor->ISO_639_language_code |= buf[2];
 
 		memcpy(pdata_broadcast_descriptor->ISO_639_language_code_char, buf, 3);
 		pdata_broadcast_descriptor->ISO_639_language_code_char[3] = '\0';
 		buf += 3;
 
 		pdata_broadcast_descriptor->text_length = *buf++;
-		copy_length = (pdata_broadcast_descriptor->text_length < MAX_DATABROADCAST_TEXT_LENGTH) ? pdata_broadcast_descriptor->text_length : MAX_DATABROADCAST_TEXT_LENGTH;
-		memcpy(pdata_broadcast_descriptor->text_char, buf, copy_length);
-		pdata_broadcast_descriptor->text_char[copy_length] = '\0';
+		if (pdata_broadcast_descriptor->text_length > 0)
+		{
+			pdata_broadcast_descriptor->text_char = (char*)buf;
+			buf += pdata_broadcast_descriptor->text_length;
+		}
 
+		//copy_length = (pdata_broadcast_descriptor->text_length < MAX_DATABROADCAST_TEXT_LENGTH) ? pdata_broadcast_descriptor->text_length : MAX_DATABROADCAST_TEXT_LENGTH;
+		//memcpy(pdata_broadcast_descriptor->text_char, buf, copy_length);
+		//pdata_broadcast_descriptor->text_char[copy_length] = '\0';
 	}
 	else
 	{
@@ -1752,10 +1826,12 @@ S32 DVB_SI_decode_scrambling_descriptor(U8* buf, S32 length, pscrambling_descrip
 //返回：LPVOID指针
 int DVB_SI_decode_data_broadcast_id_descriptor(uint8_t* buf, int length, data_broadcast_id_descriptor_t* pdata_broadcast_id_descriptor)
 {
-	S32		copy_length;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
 
-	if ((buf != NULL) && (length >= 2) && (pdata_broadcast_id_descriptor != NULL))
+	if ((buf != NULL) && (length >= 4) && (pdata_broadcast_id_descriptor != NULL))
 	{
+		memset(pdata_broadcast_id_descriptor, 0x00, sizeof(data_broadcast_id_descriptor_t));
+
 		pdata_broadcast_id_descriptor->descriptor_tag = *buf++;
 		pdata_broadcast_id_descriptor->descriptor_length = *buf++;
 
@@ -1763,38 +1839,42 @@ int DVB_SI_decode_data_broadcast_id_descriptor(uint8_t* buf, int length, data_br
 		pdata_broadcast_id_descriptor->data_broadcast_id <<= 8;
 		pdata_broadcast_id_descriptor->data_broadcast_id |= *buf++;
 
-		copy_length = pdata_broadcast_id_descriptor->descriptor_length - 2;
+		pdata_broadcast_id_descriptor->id_selector_length = pdata_broadcast_id_descriptor->descriptor_length - 2;
 
-		pdata_broadcast_id_descriptor->id_selector_length = copy_length;
-
-		if (copy_length > 0)
+		if (pdata_broadcast_id_descriptor->id_selector_length > 0)
 		{
+			pdata_broadcast_id_descriptor->id_selector_byte = buf;
+			buf += pdata_broadcast_id_descriptor->id_selector_length;
+
+			//sematic parser
 			if (pdata_broadcast_id_descriptor->data_broadcast_id == 0x0005)
 			{
-				DVB_Databroadcast_decode_multiprotocol_encapsulation_info(buf, copy_length, &(pdata_broadcast_id_descriptor->id_selector_byte.multiprotocol_encapsulation_info));
+				DVB_Databroadcast_decode_multiprotocol_encapsulation_info(pdata_broadcast_id_descriptor->id_selector_byte, 
+					pdata_broadcast_id_descriptor->id_selector_length, &(pdata_broadcast_id_descriptor->u.multiprotocol_encapsulation_info));
 			}
 			else if (pdata_broadcast_id_descriptor->data_broadcast_id == 0x0006)
 			{
-				DVB_Databroadcast_decode_data_carousel_info(buf, copy_length, &(pdata_broadcast_id_descriptor->id_selector_byte.data_carousel_info));
+				DVB_Databroadcast_decode_data_carousel_info(pdata_broadcast_id_descriptor->id_selector_byte, 
+					pdata_broadcast_id_descriptor->id_selector_length, &(pdata_broadcast_id_descriptor->u.data_carousel_info));
 			}
 			else if (pdata_broadcast_id_descriptor->data_broadcast_id == 0x0007)
 			{
-				DVB_Databroadcast_decode_object_carousel_info(buf, copy_length, &(pdata_broadcast_id_descriptor->id_selector_byte.object_carousel_info));
+				DVB_Databroadcast_decode_object_carousel_info(pdata_broadcast_id_descriptor->id_selector_byte, 
+					pdata_broadcast_id_descriptor->id_selector_length, &(pdata_broadcast_id_descriptor->u.object_carousel_info));
 			}
 			else if (pdata_broadcast_id_descriptor->data_broadcast_id == 0x000B)
 			{
-				INT_decode_IP_MAC_notification_info(buf, copy_length, &(pdata_broadcast_id_descriptor->id_selector_byte.IP_MAC_notification_info));
-			}
-			else
-			{
-				copy_length = (copy_length < MAX_DATABROADCAST_SELECT_LENGTH) ? copy_length : MAX_DATABROADCAST_SELECT_LENGTH;
-				memcpy(pdata_broadcast_id_descriptor->id_selector_byte.buf, buf, copy_length);
-				pdata_broadcast_id_descriptor->id_selector_length = copy_length;
+				INT_decode_IP_MAC_notification_info(pdata_broadcast_id_descriptor->id_selector_byte, 
+					pdata_broadcast_id_descriptor->id_selector_length, &(pdata_broadcast_id_descriptor->u.IP_MAC_notification_info));
 			}
 		}
 	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
+	}
 
-	return 0;
+	return rtcode;
 }
 
 //功能：解传送流描述符					0x67

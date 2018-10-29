@@ -11,6 +11,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+#include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
 
 #include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
@@ -167,131 +168,134 @@ void CNaviTree_Services::UpdateNIT(CNIT* pNIT)
 	{
 		uint16_t usNetworkID = pNIT->GetNetworkID();
 
-		pNIT->GetNetworkName(pszNetworkName, sizeof(pszNetworkName));
-		if (pNIT->GetTableID() == TABLE_ID_NIT_ACTUAL)
+		int rtcode = pNIT->GetNetworkName(pszNetworkName, sizeof(pszNetworkName));
+		if (rtcode == MIDDLEWARE_PSISI_NO_ERROR)
 		{
-			sprintf_s(pszText, sizeof(pszText), "当前网络: %s [network_id=0x%04X(%d)]", pszNetworkName, usNetworkID, usNetworkID);
-		}
-		else
-		{
-			sprintf_s(pszText, sizeof(pszText), "其他网络: %s [network_id=0x%04X(%d)]", pszNetworkName, usNetworkID, usNetworkID);
-		}
-
-		find_network_item = 0;
-		if (treeCtrl.ItemHasChildren(m_hRootItem))
-		{
-			hNetworkItem = treeCtrl.GetChildItem(m_hRootItem);
-			while (hNetworkItem != NULL)
-			{
-				//通过network_id查找
-				item_code = (DWORD)treeCtrl.GetItemData(hNetworkItem);
-
-				item_style = (item_code & 0xf0000000) >> 28;
-				assert(item_style == TREEITEM_STYLE_NETWORK);
-
-				item_param_id = (item_code & 0x0000ffff);
-
-				if (item_param_id == usNetworkID)
-				{
-					find_network_item = 1;
-
-					//更新network序号和名称
-					//item_code &= 0xf000ffff;
-					//item_code |= (network_index & 0x0fff) << 16;
-
-					//treeCtrl.SetItemData(hNetworkItem, item_code);
-					treeCtrl.SetItemText(hNetworkItem, pszText);
-					treeCtrl.SetItemState(hNetworkItem, TVIS_BOLD, TVIS_BOLD);
-
-					break;
-				}
-				else
-				{
-					hNetworkItem = treeCtrl.GetNextItem(hNetworkItem, TVGN_NEXT);
-				}
-			}
-		}
-
-		if (find_network_item == 0)
-		{
-			TreeCtrlItem.hParent = m_hRootItem;
-
-			hNetworkItem = treeCtrl.InsertItem(&TreeCtrlItem);
-
-			item_code = (TREEITEM_STYLE_NETWORK << 28);
-			item_code |= 0x0fff0000;
-			item_code |= usNetworkID;
-
-			treeCtrl.SetItemData(hNetworkItem, item_code);
-			treeCtrl.SetItemText(hNetworkItem, pszText);
-			treeCtrl.SetItemImage(hNetworkItem, 0, 0);
-
 			if (pNIT->GetTableID() == TABLE_ID_NIT_ACTUAL)
 			{
-				treeCtrl.SetItemState(hNetworkItem, TVIS_BOLD, TVIS_BOLD);
+				sprintf_s(pszText, sizeof(pszText), "当前网络: %s [network_id=0x%04X(%d)]", pszNetworkName, usNetworkID, usNetworkID);
 			}
-		}
-
-		if (hNetworkItem != NULL)
-		{
-			for (int i = 0; i < pNIT->GetStreamCount(); i++)
+			else
 			{
-				pNIT->GetStreamByIndex(i, &stStreamInfo);
+				sprintf_s(pszText, sizeof(pszText), "其他网络: %s [network_id=0x%04X(%d)]", pszNetworkName, usNetworkID, usNetworkID);
+			}
 
-				find_stream_item = 0;
-				if (treeCtrl.ItemHasChildren(hNetworkItem))
+			find_network_item = 0;
+			if (treeCtrl.ItemHasChildren(m_hRootItem))
+			{
+				hNetworkItem = treeCtrl.GetChildItem(m_hRootItem);
+				while (hNetworkItem != NULL)
 				{
-					hStreamItem = treeCtrl.GetChildItem(hNetworkItem);
-					//按stream_id查找
-					while (hStreamItem != NULL)
+					//通过network_id查找
+					item_code = (DWORD)treeCtrl.GetItemData(hNetworkItem);
+
+					item_style = (item_code & 0xf0000000) >> 28;
+					assert(item_style == TREEITEM_STYLE_NETWORK);
+
+					item_param_id = (item_code & 0x0000ffff);
+
+					if (item_param_id == usNetworkID)
 					{
-						item_code = (DWORD)treeCtrl.GetItemData(hStreamItem);
-						item_style = (item_code & 0xf0000000) >> 28;
-						//item_param_index = (item_code & 0x0fff0000) >> 16;
-						item_param_id = (item_code & 0x0000ffff);
+						find_network_item = 1;
 
-						assert(item_style == TREEITEM_STYLE_STREAM);
+						//更新network序号和名称
+						//item_code &= 0xf000ffff;
+						//item_code |= (network_index & 0x0fff) << 16;
 
-						if (item_param_id == stStreamInfo.transport_stream_id)
+						//treeCtrl.SetItemData(hNetworkItem, item_code);
+						treeCtrl.SetItemText(hNetworkItem, pszText);
+						treeCtrl.SetItemState(hNetworkItem, TVIS_BOLD, TVIS_BOLD);
+
+						break;
+					}
+					else
+					{
+						hNetworkItem = treeCtrl.GetNextItem(hNetworkItem, TVGN_NEXT);
+					}
+				}
+			}
+
+			if (find_network_item == 0)
+			{
+				TreeCtrlItem.hParent = m_hRootItem;
+
+				hNetworkItem = treeCtrl.InsertItem(&TreeCtrlItem);
+
+				item_code = (TREEITEM_STYLE_NETWORK << 28);
+				item_code |= 0x0fff0000;
+				item_code |= usNetworkID;
+
+				treeCtrl.SetItemData(hNetworkItem, item_code);
+				treeCtrl.SetItemText(hNetworkItem, pszText);
+				treeCtrl.SetItemImage(hNetworkItem, 0, 0);
+
+				if (pNIT->GetTableID() == TABLE_ID_NIT_ACTUAL)
+				{
+					treeCtrl.SetItemState(hNetworkItem, TVIS_BOLD, TVIS_BOLD);
+				}
+			}
+
+			if (hNetworkItem != NULL)
+			{
+				for (int i = 0; i < pNIT->GetStreamCount(); i++)
+				{
+					pNIT->GetStreamByIndex(i, &stStreamInfo);
+
+					find_stream_item = 0;
+					if (treeCtrl.ItemHasChildren(hNetworkItem))
+					{
+						hStreamItem = treeCtrl.GetChildItem(hNetworkItem);
+						//按stream_id查找
+						while (hStreamItem != NULL)
 						{
-							sprintf_s(pszText, sizeof(pszText), "传送流[ONetID=0x%04x(%d)-TSID=0x%04X(%d)]", stStreamInfo.original_network_id, stStreamInfo.original_network_id, stStreamInfo.transport_stream_id, stStreamInfo.transport_stream_id);
-							treeCtrl.SetItemText(hStreamItem, pszText);
+							item_code = (DWORD)treeCtrl.GetItemData(hStreamItem);
+							item_style = (item_code & 0xf0000000) >> 28;
+							//item_param_index = (item_code & 0x0fff0000) >> 16;
+							item_param_id = (item_code & 0x0000ffff);
 
-							find_stream_item = 1;
-							break;
+							assert(item_style == TREEITEM_STYLE_STREAM);
+
+							if (item_param_id == stStreamInfo.transport_stream_id)
+							{
+								sprintf_s(pszText, sizeof(pszText), "传送流[ONetID=0x%04x(%d)-TSID=0x%04X(%d)]", stStreamInfo.original_network_id, stStreamInfo.original_network_id, stStreamInfo.transport_stream_id, stStreamInfo.transport_stream_id);
+								treeCtrl.SetItemText(hStreamItem, pszText);
+
+								find_stream_item = 1;
+								break;
+							}
+							else
+							{
+								hStreamItem = treeCtrl.GetNextItem(hStreamItem, TVGN_NEXT);
+							}
 						}
-						else
-						{
-							hStreamItem = treeCtrl.GetNextItem(hStreamItem, TVGN_NEXT);
-						}
+					}
+
+					if (find_stream_item == 0)
+					{
+						sprintf_s(pszText, sizeof(pszText), "传送流[ONetID=0x%04x(%d)-TSID=0x%04X(%d)] <only refered in NIT>", stStreamInfo.original_network_id, stStreamInfo.original_network_id, stStreamInfo.transport_stream_id, stStreamInfo.transport_stream_id);
+
+						TreeCtrlItem.hParent = hNetworkItem;
+						hStreamItem = treeCtrl.InsertItem(&TreeCtrlItem);
+
+						item_code = (TREEITEM_STYLE_STREAM << 28);
+						item_code |= stStreamInfo.transport_stream_id;
+
+						treeCtrl.SetItemData(hStreamItem, item_code);
+						treeCtrl.SetItemImage(hStreamItem, 0, 0);
 					}
 				}
 
-				if (find_stream_item == 0)
-				{
-					sprintf_s(pszText, sizeof(pszText), "传送流[ONetID=0x%04x(%d)-TSID=0x%04X(%d)] <only refered in NIT>", stStreamInfo.original_network_id, stStreamInfo.original_network_id, stStreamInfo.transport_stream_id, stStreamInfo.transport_stream_id);
+				treeCtrl.SortChildren(m_hRootItem);
+				treeCtrl.Expand(m_hRootItem, TVE_EXPAND);
 
-					TreeCtrlItem.hParent = hNetworkItem;
-					hStreamItem = treeCtrl.InsertItem(&TreeCtrlItem);
+				treeCtrl.SortChildren(hNetworkItem);
+				treeCtrl.Expand(hNetworkItem, TVE_EXPAND);
 
-					item_code = (TREEITEM_STYLE_STREAM << 28);
-					item_code |= stStreamInfo.transport_stream_id;
-
-					treeCtrl.SetItemData(hStreamItem, item_code);
-					treeCtrl.SetItemImage(hStreamItem, 0, 0);
-				}
+				//if (pNIT->m_ucTableID == TABLE_ID_NIT_ACTUAL)
+				//{
+				//	treeCtrl.Expand(hNetworkItem, TVE_EXPAND);
+				//}
 			}
-
-			treeCtrl.SortChildren(m_hRootItem);
-			treeCtrl.Expand(m_hRootItem, TVE_EXPAND);
-
-			treeCtrl.SortChildren(hNetworkItem);
-			treeCtrl.Expand(hNetworkItem, TVE_EXPAND);
-
-			//if (pNIT->m_ucTableID == TABLE_ID_NIT_ACTUAL)
-			//{
-			//	treeCtrl.Expand(hNetworkItem, TVE_EXPAND);
-			//}
 		}
 	}
 }

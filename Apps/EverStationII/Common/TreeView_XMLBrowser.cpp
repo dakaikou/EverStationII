@@ -155,10 +155,11 @@ void CTreeView_PacketSyntax::ShowXMLDoc(tinyxml2::XMLDocument* pxmlDoc)
 	treeCtrl.Expand(m_hRootItem, TVE_EXPAND);
 }
 
+//this function is need to optimize
 HTREEITEM CTreeView_PacketSyntax::DisplaySingleNode(HTREEITEM hParent, tinyxml2::XMLElement* pxmlNode)
 {
 	CTreeCtrl&		treeCtrl = GetTreeCtrl();
-	char			pszText[256];
+	char			pszText[512];				//why is 512 bytes?  chendelin 2018.10.18
 	char			pszElement[256];
 	TV_INSERTSTRUCT TreeCtrlItem;
 	DWORD			dwParam;

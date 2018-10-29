@@ -6,6 +6,6 @@
 //defined in EN 300 468
 
 //非DLL导出函数，仅限模块内部使用   chendelin 2018.8.26
-char* DVB_SI_StringPrefixTrim(char* pstr_src);
+uint8_t* DVB_SI_StringPrefixTrim(uint8_t* pstr_src);
 
 #endif

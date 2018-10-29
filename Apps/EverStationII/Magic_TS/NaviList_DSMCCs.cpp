@@ -323,7 +323,7 @@ void CNaviList_DSMCCs::UpdateSDT(CSDT* pSDT)
 										{
 										case 0x0006:
 
-											pdata_carousel_info = &(pdata_broadcast_descriptor->selector_byte.data_carousel_info);
+											pdata_carousel_info = &(pdata_broadcast_descriptor->u.data_carousel_info);
 
 											DVB_SI_NumericCoding2Text_CarouselTypeID(pdata_carousel_info->carousel_type_id, pszTemp, sizeof(pszTemp));
 											listCtrl.SetItemText(nItem, LISTITEM_COL_INDEX_CAROUSEL_TYPE_ID, pszTemp);
@@ -339,7 +339,7 @@ void CNaviList_DSMCCs::UpdateSDT(CSDT* pSDT)
 
 										case 0x0007:
 
-											pobject_carousel_info = &(pdata_broadcast_descriptor->selector_byte.object_carousel_info);
+											pobject_carousel_info = &(pdata_broadcast_descriptor->u.object_carousel_info);
 
 											DVB_SI_NumericCoding2Text_CarouselTypeID(pobject_carousel_info->carousel_type_id, pszTemp, sizeof(pszTemp));
 											listCtrl.SetItemText(nItem, LISTITEM_COL_INDEX_CAROUSEL_TYPE_ID, pszTemp);

@@ -1,4 +1,4 @@
-#ifndef __DVB_SI_DESCRIPTOR_H__
+ï»¿#ifndef __DVB_SI_DESCRIPTOR_H__
 #define __DVB_SI_DESCRIPTOR_H__
 
 #include "../compile.h"
@@ -90,10 +90,14 @@ typedef struct _network_name_descriptor_s
 	uint16_t		descriptor_tag;						//8
 	uint8_t			descriptor_length;					//8
 
-	char			network_name[MAX_NETWORK_NAME_LENGTH + 1];						//max support for 8 Chinese charactors or 16 English charactors
-	char*			trimmed_network_name;
+	int				network_name_length;
+	uint8_t*		network_name;						//volatilable pointer, only valid when the corresponding descriptor's buf is exists.
+	
+	int				trimmed_network_name_length;
+	uint8_t*		trimmed_network_name;
 
 } network_name_descriptor_t, *pnetwork_name_descriptor_t;
+
 
 _CDL_EXPORT int DVB_SI_decode_network_name_descriptor(uint8_t* buf, int length, network_name_descriptor_t* pnetwork_name_descriptor);
 
@@ -115,15 +119,16 @@ _CDL_EXPORT int DVB_SI_decode_service_list_descriptor(uint8_t* buf, int length, 
 /*TAG = DVB_SI_STUFFING_DESCRIPTOR								0x42	*/
 typedef struct _stuffing_descriptor_s
 {
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t	descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
-
-	S8  stuffing_byte[MAX_STUFFING_LENGTH + 1];
+	//char  stuffing_byte[MAX_STUFFING_LENGTH + 1];
+	int		  stuffing_length;
+	uint8_t*  stuffing_byte;		//volatilable pointer, only valid when the corresponding descriptor's buf is exists.
 
 } stuffing_descriptor_t, *pstuffing_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_stuffing_descriptor(U8* buf, S32 length, pstuffing_descriptor_t pstuffing_descriptor);
+_CDL_EXPORT int DVB_SI_decode_stuffing_descriptor(uint8_t* buf, int length, stuffing_descriptor_t* pstuffing_descriptor);
 
 /*TAG = DVB_SI_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR			0x43	*/
 typedef struct _satellite_delivery_system_descriptor_s
@@ -193,8 +198,12 @@ typedef struct _bouquet_name_descriptor_s
 	uint16_t	descriptor_tag;						//8
 	uint8_t		descriptor_length;					//8
 
-	char		bouquet_name[MAX_BOUQUET_NAME_LENGTH + 1];
-	char*		trimmed_bouquet_name;
+	//char		bouquet_name[MAX_BOUQUET_NAME_LENGTH + 1];
+	int			bouquet_name_length;
+	uint8_t*	bouquet_name;			////volatilable pointer, only valid when the corresponding descriptor's buf is exists.
+	
+	int			trimmed_bouquet_name_length;
+	uint8_t*	trimmed_bouquet_name;
 
 } bouquet_name_descriptor_t, *pbouquet_name_descriptor_t;
 
@@ -206,14 +215,19 @@ typedef struct _service_descriptor_s
 	uint16_t	descriptor_tag;						//8
 	uint8_t		descriptor_length;					//8
 
-	uint8_t service_type;							//8
-	uint8_t service_provider_name_length;			//8
-	char	service_provider_name[MAX_SERVICE_PROVIDER_NAME_LENGTH + 1];
-	char*	trimmed_service_provider_name;
+	uint8_t		service_type;							//8
 
-	uint8_t service_name_length;					//8
-	char	service_name[MAX_SERVICE_NAME_LENGTH + 1];
-	char*	trimmed_service_name;
+	uint8_t		service_provider_name_length;			//8
+	uint8_t*	service_provider_name;					//volatilable pointer, only valid when the corresponding descriptor's buf is exists.
+	
+	int			trimmed_service_provider_name_length;
+	uint8_t*	trimmed_service_provider_name;
+
+	uint8_t		service_name_length;					//8
+	uint8_t*	service_name;							//volatilable pointer, only valid when the corresponding descriptor's buf is exists.
+
+	int			trimmed_service_name_length;
+	uint8_t*	trimmed_service_name;
 
 } service_descriptor_t, *pservice_descriptor_t;
 
@@ -305,16 +319,21 @@ typedef struct _short_event_descriptor_s
 	uint16_t	descriptor_tag;						//8
 	uint8_t		descriptor_length;					//8
 
-	//uint32_t	ISO_639_language_code;
 	char		ISO_639_language_code_char[4];				//24
 
 	uint8_t		event_name_length;							//8
-	char		event_name_char[MAX_EVENT_NAME_LENGTH + 1];
-	char*		trimmed_event_name_char;
+	//char		event_name_char[MAX_EVENT_NAME_LENGTH + 1];
+	uint8_t*	event_name_char;							//volatilable pointer, only valid when the corresponding descriptor's buf is exists.
+
+	int			trimmed_event_name_length;
+	uint8_t*	trimmed_event_name_char;
 	
-	uint8_t		text_length;									//8
-	char		text_char[MAX_EVENT_TEXT_LENGTH + 1];
-	char*		trimmed_text_char;
+	uint8_t		text_length;								//8
+	//char		text_char[MAX_EVENT_TEXT_LENGTH + 1];
+	uint8_t*	text_char;									//volatilable pointer, only valid when the corresponding descriptor's buf is exists.
+
+	int			trimmed_text_length;
+	uint8_t*	trimmed_text_char;
 
 } short_event_descriptor_t, *pshort_event_descriptor_t;
 
@@ -340,12 +359,15 @@ typedef struct _extended_event_descriptor_s
 	U8  item_length[MAX_EXTENDED_EVENTS];					//8
 	S8  item_char[MAX_EXTENDED_EVENTS][64];
 
-	U8  text_length;						//8
-	S8	text_char[MAX_EVENT_TEXT_LENGTH + 1];
+	uint8_t		 text_length;						//8
+	uint8_t*	 text_char;
+
+	int			 trimmed_text_length;
+	uint8_t*	 trimmed_text_char;
 
 } extended_event_descriptor_t, *pextended_event_descriptor_t;
 
-_CDL_EXPORT S32 DVB_SI_decode_extended_event_descriptor(U8* buf, S32 length, pextended_event_descriptor_t pextended_event_descriptor);
+_CDL_EXPORT int DVB_SI_decode_extended_event_descriptor(uint8_t* buf, int length, extended_event_descriptor_t* pextended_event_descriptor);
 
 /*TAG = TIME_SHIFTED_EVENT_DESCRIPTOR			0x4F	*/
 typedef struct _time_shifted_event_descriptor_s
@@ -366,7 +388,7 @@ typedef struct _component_descriptor_s
 	//U8*			descriptor_buf;						//8
 	//U8			descriptor_size;					//8
 
-	U16			descriptor_tag;						//8
+	uint16_t		descriptor_tag;						//8
 	U8			descriptor_length;					//8
 
 	U8	reserved_future_use;					//4
@@ -389,7 +411,7 @@ typedef struct _mosaic_descriptor_s
 	//U8*			descriptor_buf;						//8
 	//U8			descriptor_size;					//8
 
-	U16			descriptor_tag;						//8
+	uint16_t		descriptor_tag;						//8
 	U8			descriptor_length;					//8
 
 
@@ -624,9 +646,11 @@ typedef struct _multilingual_network_name_descriptor
 		//uint32_t ISO_639_language_code;
 		char	 ISO_639_language_code_char[4];				//24
 		
-		uint8_t	 network_name_length;							//8
-		char	 network_name_char[MAX_NETWORK_NAME_LENGTH + 1];
-		char*	trimmed_network_name_char;
+		uint8_t		 network_name_length;					//8
+		uint8_t*	 network_name_char;						//volatilable pointer, only valid when the corresponding descriptor's buf is exists.
+
+		int			 trimmed_network_name_length;
+		uint8_t*	 trimmed_network_name_char;
 
 	} st[MAX_LANGUAGES];
 
@@ -647,8 +671,11 @@ typedef struct _multilingual_bouquet_name_descriptor
 		char	 ISO_639_language_code_char[4];				//24
 
 		uint8_t	 bouquet_name_length;							//8
-		char	 bouquet_name_char[MAX_BOUQUET_NAME_LENGTH + 1];
-		char*	 trimmed_bouquet_name_char;
+		//char	 bouquet_name_char[MAX_BOUQUET_NAME_LENGTH + 1];
+		uint8_t*	 bouquet_name_char;							//volatilable pointer, only valid when the corresponding descriptor's buf is exists.
+
+		int			 trimmed_bouquet_name_length;
+		uint8_t*	 trimmed_bouquet_name_char;
 	} st[MAX_LANGUAGES];
 
 } multilingual_bouquet_name_descriptor_t, *pmultilingual_bouquet_name_descriptor_t;
@@ -667,13 +694,18 @@ typedef struct _multilingual_service_name_descriptor_s
 		//uint32_t ISO_639_language_code;
 		char	 ISO_639_language_code_char[4];				//8
 
-		uint8_t	 service_provider_name_length;				//8
-		char	 service_provider_name_char[MAX_SERVICE_PROVIDER_NAME_LENGTH + 1];
-		char*	 trimmed_service_provider_name_char;
+		uint8_t		 service_provider_name_length;				//8
+		uint8_t*	 service_provider_name_char;				//volatilable pointer, only valid when the corresponding descriptor's buf is exists.
 
-		uint8_t	 service_name_length;						//8
-		char	 service_name_char[MAX_SERVICE_NAME_LENGTH + 1];
-		char*	 trimmed_service_name_char;
+		int			 trimmed_service_provider_name_length;
+		uint8_t*	 trimmed_service_provider_name_char;
+
+		uint8_t		 service_name_length;						//8
+		uint8_t*	 service_name_char;							//volatilable pointer, only valid when the corresponding descriptor's buf is exists.
+
+		int			 trimmed_service_name_length;
+		uint8_t*	 trimmed_service_name_char;
+
 	} st[MAX_LANGUAGES];
 
 } multilingual_service_name_descriptor_t, *pmultilingual_service_name_descriptor_t;
@@ -790,27 +822,28 @@ typedef struct _data_broadcast_descriptor_s
 	//U8*			descriptor_buf;						//8
 	//U8			descriptor_size;					//8
 
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t	descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
-	U16 data_broadcast_id;					//16	
-	U8  component_tag;						//8
-	U8  selector_length;					//8
+	uint16_t data_broadcast_id;					//16	
+	uint8_t  component_tag;						//8
+	uint8_t  selector_length;					//8
+	uint8_t* selector_byte;
 
+	//sematic part
 	union
 	{
-		U8										buf[MAX_DATABROADCAST_SELECT_LENGTH];
 		multiprotocol_encapsulation_info_t		multiprotocol_encapsulation_info;
 		data_carousel_info_t					data_carousel_info;
 		object_carousel_info_t					object_carousel_info;
 		IP_MAC_notification_info_t				IP_MAC_notification_info;
+	} u;
 
-	} selector_byte;
+	//U32 ISO_639_language_code;				
+	char	ISO_639_language_code_char[4];			//24
 
-	U32 ISO_639_language_code;				
-	S8 ISO_639_language_code_char[4];		//24
-	U8 text_length;							//8
-	S8 text_char[MAX_DATABROADCAST_TEXT_LENGTH + 1];
+	uint8_t text_length;							//8
+	char*	text_char;
 
 } data_broadcast_descriptor_t, *pdata_broadcast_descriptor_t;
 
@@ -834,32 +867,34 @@ typedef struct _scrambling_descriptor_s
 //_CDL_EXPORT S32 SI_decode_CA_system_descriptor(U8* buf, S32 length, pCA_system_descriptor_t pCA_system_descriptor);
 _CDL_EXPORT int DVB_SI_decode_scrambling_descriptor(U8* buf, S32 length, pscrambling_descriptor_t pscrambling_descriptor);
 
-/*TAG = SI_DATA_BROADCAST_ID_DESCRIPTOR		0x66*/
+/*TAG = DVB_SI_DATA_BROADCAST_ID_DESCRIPTOR		0x66*/
 typedef struct _data_broadcast_id_descriptor_s
 {
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t	descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
-	U16 data_broadcast_id;					//16
+	uint16_t	data_broadcast_id;					//16
 
-	S8 id_selector_length;
-//	U8 id_selector_byte[MAX_DATABROADCAST_SELECT_LENGTH];
+	int			id_selector_length;
+	uint8_t*	id_selector_byte;					//volatilable, just valid if descriptor's buf is exist
+
+	//	U8 id_selector_byte[MAX_DATABROADCAST_SELECT_LENGTH];
+
+	//sematic part
 	union
 	{
-		U8										buf[MAX_DATABROADCAST_SELECT_LENGTH];
 		multiprotocol_encapsulation_info_t		multiprotocol_encapsulation_info;
 		data_carousel_info_t					data_carousel_info;
 		object_carousel_info_t					object_carousel_info;
 		IP_MAC_notification_info_t				IP_MAC_notification_info;
-
-	} id_selector_byte;
+	} u;
 
 } data_broadcast_id_descriptor_t, *pdata_broadcast_id_descriptor_t;
 
 _CDL_EXPORT int DVB_SI_decode_data_broadcast_id_descriptor(uint8_t* buf, int length, data_broadcast_id_descriptor_t* pdata_broadcast_id_descriptor);
 
 
-/*TAG = SI_TRANSPORT_STREAM_DESCRIPTOR		0x67*/
+/*TAG = DVB_SI_TRANSPORT_STREAM_DESCRIPTOR		0x67*/
 typedef struct _transport_stream_descriptor_s
 {
 	uint16_t	descriptor_tag;						//8
@@ -877,7 +912,7 @@ _CDL_EXPORT int DVB_SI_decode_transport_stream_descriptor(uint8_t* buf, int leng
 
 
 /*TAG = SI_AC3_DESCRIPTOR			0x6A*/
-//ÔÚTS 102 366ÖÐ¶¨Òå
+//åœ¨TS 102 366ä¸­å®šä¹‰
 typedef struct _ac3_descriptor_s
 {
 	//U8*			descriptor_buf;						//8
@@ -1025,7 +1060,7 @@ _CDL_EXPORT S32 DVB_SI_decode_extension_descriptor(U8* buf, S32 length, pextensi
 
 
 /*TAG = AC3_AUDIO_STREAM_DESCRIPTOR  0x81*/
-//ATSC A52±ê×¼¶¨Òå
+//ATSC A52æ ‡å‡†å®šä¹‰
 typedef struct _AC3_audio_stream_descriptor_s
 {
 	U16			descriptor_tag;						//8

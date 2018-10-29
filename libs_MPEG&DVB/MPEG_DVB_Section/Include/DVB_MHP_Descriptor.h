@@ -61,15 +61,22 @@ typedef struct _application_name_descriptor_s
 	//U8*			descriptor_buf;						//8
 	//U8			descriptor_size;					//8
 
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t	descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
 
-	U8		N;
-	U32		ISO_639_language_code[MAX_LANGUAGES];
-	S8		ISO_639_language_char[MAX_LANGUAGES][4];			//24
-	U8		application_name_length[MAX_LANGUAGES];				//8
-	S8		application_name_char[MAX_LANGUAGES][64];
+	int			N;
+	struct
+	{
+		//U32		ISO_639_language_code;
+		char		ISO_639_language_char[4];			//24
+		uint8_t		application_name_length;			//8
+		uint8_t*	application_name_char;
+
+		int			trimmed_application_name_length;
+		uint8_t*	trimmed_application_name_char;
+
+	}st[MAX_LANGUAGES];
 
 } application_name_descriptor_t, *papplication_name_descriptor_t;
 
@@ -78,14 +85,14 @@ _CDL_EXPORT int DVB_MHP_decode_application_name_descriptor(uint8_t* buf, int len
 /* MHP_TRANSPORT_PROTOCOL_DESCRIPTOR							0x02				*/
 typedef struct _transport_protocol_descriptor_s
 {
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t	descriptor_tag;						//8
+	uint8_t		descriptor_length;					//8
 
 
-	U16		protocol_id;							//16
-	U8		transport_protocol_label;				//8
-	U8		N;
-	U8		selector_byte[64];						//8 x N
+	uint16_t	protocol_id;							//16
+	uint8_t		transport_protocol_label;				//8
+	int			selector_length;
+	uint8_t*	selector_byte;							//8 x N
 
 } transport_protocol_descriptor_t, *ptransport_protocol_descriptor_t;
 
@@ -116,18 +123,17 @@ typedef struct _dvb_j_application_location_descriptor_s
 	//U8*			descriptor_buf;						//8
 	//U8			descriptor_size;					//8
 
-	U16			descriptor_tag;						//8
-	U8			descriptor_length;					//8
+	uint16_t		descriptor_tag;						//8
+	uint8_t			descriptor_length;					//8
 
+	uint8_t			base_directory_length;					//8
+	uint8_t*		base_directory_byte;				//8 x N1
 
-	U8		base_directory_length;					//8
-	S8		base_directory_byte[128];				//8 x N1
+	uint8_t			classpath_extension_length;
+	uint8_t*		classpath_extension_byte;			//8 x N2
 
-	U8		classpath_extension_length;
-	S8		classpath_extension_byte[128];			//8 x N2
-
-	U8		N;											
-	S8		initial_class_byte[128];				//8 x N3
+	int				initial_class_char_length;
+	uint8_t*		initial_class_byte;					//8 x N3
 
 } dvb_j_application_location_descriptor_t;
 

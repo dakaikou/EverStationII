@@ -343,20 +343,31 @@ void CDlg_TSAnalyzer_Overview::UpdateNIT(CNIT* pNIT)
 			int rtcode = pNIT->GetStreamByID(m_usActualTSID, &stStreamInfo);
 			if (rtcode == MIDDLEWARE_PSISI_NO_ERROR)
 			{
-				if (stStreamInfo.cable_delivery_system_descriptor.descriptor_tag == DVB_SI_CABLE_DELIVERY_SYSTEM_DESCRIPTOR)
+				if (stStreamInfo.uDelivery.cable_delivery_system_descriptor.descriptor_tag == DVB_SI_CABLE_DELIVERY_SYSTEM_DESCRIPTOR)
 				{
-					sprintf_s(pszFrequency, sizeof(pszFrequency), "%x.%04xMHz", (stStreamInfo.cable_delivery_system_descriptor.frequency & 0xFFFF0000) >> 16, stStreamInfo.cable_delivery_system_descriptor.frequency & 0x0000FFFF);
-					sprintf_s(pszSymbolRate, sizeof(pszSymbolRate), "%x.%04xMsps", (stStreamInfo.cable_delivery_system_descriptor.symbol_rate & 0xFFFF0000) >> 16, stStreamInfo.cable_delivery_system_descriptor.symbol_rate & 0x0000FFFF);
-					DVB_SI_NumericCoding2Text_CableModulation(stStreamInfo.cable_delivery_system_descriptor.modulation, pszModulation, sizeof(pszModulation));
+					cable_delivery_system_descriptor_t* pcable_delivery_system_descriptor = &(stStreamInfo.uDelivery.cable_delivery_system_descriptor);
+					sprintf_s(pszFrequency, sizeof(pszFrequency), "%x.%04xMHz", 
+						(pcable_delivery_system_descriptor->frequency & 0xFFFF0000) >> 16, 
+						pcable_delivery_system_descriptor->frequency & 0x0000FFFF);
+					sprintf_s(pszSymbolRate, sizeof(pszSymbolRate), "%x.%04xMsps", 
+						(pcable_delivery_system_descriptor->symbol_rate & 0xFFFF0000) >> 16, 
+						pcable_delivery_system_descriptor->symbol_rate & 0x0000FFFF);
+
+					DVB_SI_NumericCoding2Text_CableModulation(pcable_delivery_system_descriptor->modulation, pszModulation, sizeof(pszModulation));
 					sprintf_s(pszModulationParam, sizeof(pszModulationParam), "%s,%s,%s", pszFrequency, pszSymbolRate, pszModulation);
 				}
-				else if (stStreamInfo.satellite_delivery_system_descriptor.descriptor_tag == DVB_SI_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR)
+				else if (stStreamInfo.uDelivery.satellite_delivery_system_descriptor.descriptor_tag == DVB_SI_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR)
 				{
-					sprintf_s(pszFrequency, sizeof(pszFrequency), "%X.%05XGHz", (stStreamInfo.satellite_delivery_system_descriptor.frequency & 0xFFF00000) >> 20, stStreamInfo.satellite_delivery_system_descriptor.frequency & 0x000FFFFF);
-					sprintf_s(pszSymbolRate, sizeof(pszSymbolRate), "%X.%04XMsps", (stStreamInfo.satellite_delivery_system_descriptor.symbol_rate & 0xFFFF0000) >> 16, stStreamInfo.satellite_delivery_system_descriptor.symbol_rate & 0x0000FFFF);
+					satellite_delivery_system_descriptor_t* psatellite_delivery_system_descriptor = &(stStreamInfo.uDelivery.satellite_delivery_system_descriptor);
+					sprintf_s(pszFrequency, sizeof(pszFrequency), "%X.%05XGHz", 
+						(psatellite_delivery_system_descriptor->frequency & 0xFFF00000) >> 20, 
+						psatellite_delivery_system_descriptor->frequency & 0x000FFFFF);
+					sprintf_s(pszSymbolRate, sizeof(pszSymbolRate), "%X.%04XMsps", 
+						(psatellite_delivery_system_descriptor->symbol_rate & 0xFFFF0000) >> 16, 
+						psatellite_delivery_system_descriptor->symbol_rate & 0x0000FFFF);
 
-					DVB_SI_NumericCoding2Text_SatelliteModulationType(stStreamInfo.satellite_delivery_system_descriptor.modulation_type, pszModulation, sizeof(pszModulation));
-					DVB_SI_NumericCoding2Text_SatellitePolarization(stStreamInfo.satellite_delivery_system_descriptor.polarization, pszPolarization, sizeof(pszPolarization));
+					DVB_SI_NumericCoding2Text_SatelliteModulationType(psatellite_delivery_system_descriptor->modulation_type, pszModulation, sizeof(pszModulation));
+					DVB_SI_NumericCoding2Text_SatellitePolarization(psatellite_delivery_system_descriptor->polarization, pszPolarization, sizeof(pszPolarization));
 					sprintf_s(pszModulationParam, sizeof(pszModulationParam), "%s,%s,%s,%s", pszFrequency, pszSymbolRate, pszModulation, pszPolarization);
 				}
 				strNewModulation = pszModulationParam;

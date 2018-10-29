@@ -7,49 +7,37 @@
 #include "../../Include/DVB_SI_Descriptor.h"
 #include "../../Include/MPEG_DVB_ErrorCode.h"
 
-#include "HAL\HAL_XML\Include\HALForTinyXML2.h"
+#include "../Include/DVB_Databroadcast_XML.h"
+
+int DVB_Databroadcast_present_multiprotocol_encapsulation_info_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multiprotocol_encapsulation_info_t* pmultiprotocol_encapsulation_info)
+{
+	int rtcode = SECTION_PARSE_NO_ERROR;
+
+	return rtcode;
+}
 
 //
-int DVB_Databroadcast_decode_data_carousel_info_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, data_carousel_info_t* pDataCarouselInfo = NULL)
+int DVB_Databroadcast_present_data_carousel_info_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, data_carousel_info_t* pdata_carousel_info)
 {
 	int rtcode = SECTION_PARSE_NO_ERROR;
-	char pszTemp[64];
+	char pszComment[64];
 
-	if ((pxmlDoc != NULL) && (buf != NULL) && (length >= 16))
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pdata_carousel_info != NULL))
 	{
-		//data_carousel_info_t* pdata_carousel_info = (pDataCarouselInfo == NULL) ? new data_carousel_info_t : pDataCarouselInfo;
-		//memset(pdata_carousel_info, 0x00, sizeof(data_carousel_info_t));
+		DVB_SI_NumericCoding2Text_CarouselTypeID(pdata_carousel_info->carousel_type_id, pszComment, sizeof(pszComment));
+		pxmlDoc->NewElementForBits(pxmlParentNode, "carousel_type_id", pdata_carousel_info->carousel_type_id, 2, "bslbf", pszComment);
 
-		//BITS_map(&bs, buf, length);
+		pxmlDoc->NewElementForBits(pxmlParentNode, "reserved", pdata_carousel_info->reserved0, 6, "bslbf", NULL);
 
-		//pdata_carousel_info->carousel_type_id = BITS_get(&bs, 2);
-		//pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "carousel_type_id", pdata_carousel_info->carousel_type_id, 2, "bslbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlParentNode, "transaction_id", pdata_carousel_info->transaction_id, 32, "uimsbf", NULL);
 
-		//pdata_carousel_info->reserved0 = BITS_get(&bs, 6);
-		//pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "reserved", pdata_carousel_info->reserved0, 6, "bslbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlParentNode, "time_out_value_DSI", pdata_carousel_info->time_out_value_DSI, 32, "uimsbf", NULL);
 
-		//pdata_carousel_info->transaction_id = BITS_get(&bs, 32);
-		//pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "transaction_id", pdata_carousel_info->transaction_id, 32, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlParentNode, "time_out_value_DII", pdata_carousel_info->time_out_value_DII, 32, "uimsbf", NULL);
 
-		//pdata_carousel_info->time_out_value_DSI = BITS_get(&bs, 32);
-		//pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "time_out_value_DSI", pdata_carousel_info->time_out_value_DSI, 32, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlParentNode, "reserved", pdata_carousel_info->reserved1, 2, "bslbf", NULL);
 
-		//pdata_carousel_info->time_out_value_DII = BITS_get(&bs, 32);
-		//pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "time_out_value_DII", pdata_carousel_info->time_out_value_DII, 32, "uimsbf", NULL, &bs);
-
-		//pdata_carousel_info->reserved1 = BITS_get(&bs, 2);
-		//pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "reserved", pdata_carousel_info->reserved1, 2, "bslbf", NULL, &bs);
-
-		//pdata_carousel_info->leak_rate = BITS_get(&bs, 22);
-		//pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "leak_rate", pdata_carousel_info->leak_rate, 22, "uimsbf", NULL, &bs);
-
-		//sprintf_s(pszTemp, sizeof(pszTemp), "%d×Ö½Ú", length);
-		//pxmlParentNode->SetAttribute("comment", pszTemp);
-
-		//if (pDataCarouselInfo == NULL)
-		//{
-		//	delete pdata_carousel_info;
-		//}
+		pxmlDoc->NewElementForBits(pxmlParentNode, "leak_rate", pdata_carousel_info->leak_rate, 22, "uimsbf", NULL);
 	}
 	else
 	{
@@ -59,92 +47,59 @@ int DVB_Databroadcast_decode_data_carousel_info_to_xml(uint8_t* buf, int length,
 	return rtcode;
 }
 
-int DVB_Databroadcast_decode_object_carousel_info_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, object_carousel_info_t* pObjectCarouselInfo)
+int DVB_Databroadcast_present_object_carousel_info_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, object_carousel_info_t* pobject_carousel_info)
 {
 	int rtcode = SECTION_PARSE_NO_ERROR;
-	int	N;
-	int	copy_length;
-	char pszTemp[64];
+	char pszField[48];
+	char pszComment[64];
 
-
-	if ((pxmlDoc != NULL) && (buf != NULL) && (length >= 16))
+	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pobject_carousel_info != NULL))
 	{
-		//object_carousel_info_t* pobject_carousel_info = (pObjectCarouselInfo == NULL) ? new object_carousel_info_t : pObjectCarouselInfo;
-		//memset(pobject_carousel_info, 0x00, sizeof(object_carousel_info_t));
+		DVB_SI_NumericCoding2Text_CarouselTypeID(pobject_carousel_info->carousel_type_id, pszComment, sizeof(pszComment));
+		pxmlDoc->NewElementForBits(pxmlParentNode, "carousel_type_id", pobject_carousel_info->carousel_type_id, 2, "bslbf", pszComment);
 
-		//BITS_map(&bs, buf, length);
+		pxmlDoc->NewElementForBits(pxmlParentNode, "reserved", pobject_carousel_info->reserved0, 6, "bslbf", NULL);
 
-		//pobject_carousel_info->carousel_type_id = BITS_get(&bs, 2);
-		//DVB_SI_NumericCoding2Text_CarouselTypeID(pobject_carousel_info->carousel_type_id, pszTemp, sizeof(pszTemp));
-		//pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "carousel_type_id", pobject_carousel_info->carousel_type_id, 2, "bslbf", pszTemp, &bs);
+		pxmlDoc->NewElementForBits(pxmlParentNode, "transaction_id", pobject_carousel_info->transaction_id, 32, "uimsbf", NULL);
 
-		//pobject_carousel_info->reserved0 = BITS_get(&bs, 6);
-		//pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "reserved", pobject_carousel_info->reserved0, 6, "bslbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlParentNode, "time_out_value_DSI", pobject_carousel_info->time_out_value_DSI, 32, "uimsbf", NULL);
 
-		//pobject_carousel_info->transaction_id = BITS_get(&bs, 32);
-		//pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "transaction_id", pobject_carousel_info->transaction_id, 32, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlParentNode, "time_out_value_DII", pobject_carousel_info->time_out_value_DII, 32, "uimsbf", NULL);
 
-		//pobject_carousel_info->time_out_value_DSI = BITS_get(&bs, 32);
-		//pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "time_out_value_DSI", pobject_carousel_info->time_out_value_DSI, 32, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlParentNode, "reserved", pobject_carousel_info->reserved1, 2, "bslbf", NULL);
 
-		//pobject_carousel_info->time_out_value_DII = BITS_get(&bs, 32);
-		//pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "time_out_value_DII", pobject_carousel_info->time_out_value_DII, 32, "uimsbf", NULL, &bs);
+		pxmlDoc->NewElementForBits(pxmlParentNode, "leak_rate", pobject_carousel_info->leak_rate, 22, "uimsbf", NULL);
 
-		//pobject_carousel_info->reserved1 = BITS_get(&bs, 2);
-		//pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "reserved", pobject_carousel_info->reserved1, 2, "bslbf", NULL, &bs);
+		for (int obj_index = 0; obj_index < pobject_carousel_info->N; obj_index ++)
+		{
+			char* pszObjName = NULL;
 
-		//pobject_carousel_info->leak_rate = BITS_get(&bs, 22);
-		//pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "leak_rate", pobject_carousel_info->leak_rate, 22, "uimsbf", NULL, &bs);
+			if (pobject_carousel_info->st[obj_index].trimmed_object_name_length > 0)
+			{
+				pszObjName = (char*)malloc(pobject_carousel_info->st[obj_index].trimmed_object_name_length + 1);
+				memcpy(pszObjName, pobject_carousel_info->st[obj_index].trimmed_object_name_char, pobject_carousel_info->st[obj_index].trimmed_object_name_length);
+				pszObjName[pobject_carousel_info->st[obj_index].trimmed_object_name_length] = '\0';
+			}
 
-		//N = 0;
-		//int object_name_loop_length = (int)(bs.p_end - bs.p_cur);
-		//if (object_name_loop_length > 0)
-		//{
-		//	uint8_t* pl1temp = bs.p_cur;
-		//	BITS_byteSkip(&bs, object_name_loop_length);
-		//	tinyxml2::XMLElement* pxmlServiceLoopNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "object_name Ñ­»·()", -1, -1, NULL, NULL, &bs);
+			sprintf_s(pszField, sizeof(pszField), "object[%d]()", obj_index);
+			XMLElement* pxmlObjectNameNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, pszObjName, 3 + pobject_carousel_info->st[obj_index].object_name_length);
 
-		//	BITS_t object_name_loop_bs;
-		//	BITS_map(&object_name_loop_bs, pl1temp, object_name_loop_length);
-		//	while ((object_name_loop_length >= 4) && (N < 16))
-		//	{
-		//		uint8_t* old_ptr = object_name_loop_bs.p_cur;
+			pxmlDoc->NewElementForByteBuf(pxmlObjectNameNode, "ISO_639_language_code[]", 
+				(uint8_t*)pobject_carousel_info->st[obj_index].ISO_639_language_code_char,
+				3, pobject_carousel_info->st[obj_index].ISO_639_language_code_char);
 
-		//		sprintf_s(pszTemp, sizeof(pszTemp), "object_name [%d]", N);
-		//		tinyxml2::XMLElement* pxmlObjectNameNode = pxmlDoc->NewKeyValuePairElement(pxmlServiceLoopNode, pszTemp);
+			pxmlDoc->NewElementForBits(pxmlObjectNameNode, "object_name_length", pobject_carousel_info->st[obj_index].object_name_length, 8, "uimsbf", NULL);
 
-		//		memcpy(pobject_carousel_info->ISO_639_language_code_char[N], object_name_loop_bs.p_cur, 3);
-		//		pobject_carousel_info->ISO_639_language_code_char[N][3] = '\0';
-		//		pobject_carousel_info->ISO_639_language_code[N] = BITS_get(&object_name_loop_bs, 24);
-		//		pxmlDoc->NewKeyValuePairElement(pxmlObjectNameNode, "ISO_639_language_code", pobject_carousel_info->ISO_639_language_code[N],
-		//			24, "bslbf", pobject_carousel_info->ISO_639_language_code_char[N], &object_name_loop_bs);
+			if (pobject_carousel_info->st[obj_index].object_name_length > 0)
+			{
+				pxmlDoc->NewElementForByteBuf(pxmlObjectNameNode, "object_name_char[ ]", 
+					pobject_carousel_info->st[obj_index].object_name_char, 
+					pobject_carousel_info->st[obj_index].object_name_length,
+					pszObjName);
+			}
 
-		//		pobject_carousel_info->object_name_length[N] = BITS_get(&object_name_loop_bs, 8);
-		//		pxmlDoc->NewKeyValuePairElement(pxmlObjectNameNode, "object_name_length", pobject_carousel_info->object_name_length[N], 8, "uimsbf", NULL, &object_name_loop_bs);
-
-		//		if (pobject_carousel_info->object_name_length[N] > 0)
-		//		{
-		//			copy_length = min(pobject_carousel_info->object_name_length[N], 31);
-		//			memcpy(pobject_carousel_info->object_name_char[N], object_name_loop_bs.p_cur, copy_length);
-		//			pobject_carousel_info->object_name_char[N][copy_length] = '\0';
-		//			BITS_byteSkip(&object_name_loop_bs, pobject_carousel_info->object_name_length[N]);
-		//			pxmlDoc->NewKeyValuePairElement(pxmlObjectNameNode, "object_name_char[ ]", (uint8_t*)pobject_carousel_info->object_name_char[N], copy_length, pobject_carousel_info->object_name_char[N], &object_name_loop_bs);
-		//		}
-		//		pxmlDoc->UpdateBufMark(pxmlObjectNameNode, old_ptr, object_name_loop_bs.p_cur);
-		//		object_name_loop_length -= (int)(object_name_loop_bs.p_cur - old_ptr);
-
-		//		N++;
-		//	}
-		//}
-		//pobject_carousel_info->N = N;
-
-		//sprintf_s(pszTemp, sizeof(pszTemp), "%d×Ö½Ú", length);
-		//pxmlParentNode->SetAttribute("comment", pszTemp);
-
-		//if (pObjectCarouselInfo == NULL)
-		//{
-		//	delete pobject_carousel_info;
-		//}
+			if (pszObjName != NULL) free(pszObjName);
+		}
 	}
 	else
 	{
@@ -154,3 +109,9 @@ int DVB_Databroadcast_decode_object_carousel_info_to_xml(uint8_t* buf, int lengt
 	return rtcode;
 }
 
+int DVB_Databroadcast_present_IP_MAC_notification_info_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, IP_MAC_notification_info_t* pIP_MAC_notification_info)
+{
+	int rtcode = SECTION_PARSE_NO_ERROR;
+
+	return rtcode;
+}

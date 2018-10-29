@@ -34,10 +34,18 @@ typedef struct _object_carousel_info_s
 
 	int			N;
 
-	uint32_t	ISO_639_language_code[16];
-	char		ISO_639_language_code_char[16][4];
-	int			object_name_length[16];
-	char		object_name_char[16][32];
+	struct
+	{
+		//uint32_t	ISO_639_language_code[MAX_OBJECTS_PER_SERVICE];
+		char		ISO_639_language_code_char[4];
+
+		int			object_name_length;
+		uint8_t*	object_name_char;
+
+		int			trimmed_object_name_length;
+		uint8_t*	trimmed_object_name_char;
+
+	} st[MAX_OBJECTS_PER_SERVICE];
 
 } object_carousel_info_t, *pobject_carousel_info_t;
 

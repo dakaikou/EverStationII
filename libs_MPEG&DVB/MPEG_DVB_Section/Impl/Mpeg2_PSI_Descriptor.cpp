@@ -248,12 +248,14 @@ S32 MPEG2_PSI_decode_video_window_descriptor(U8* buf, S32 length, pvideo_window_
 //返回：LPVOID指针
 int MPEG2_PSI_decode_CA_descriptor(uint8_t* buf, int length, CA_descriptor_t* pCA_descriptor)
 {
-	int copy_length;
+	int rtcode = SECTION_PARSE_NO_ERROR;
 
 	if ((buf != NULL) &&
-		(length >= 2) &&
+		(length >= 6) &&
 		(pCA_descriptor != NULL))
 	{
+		memset(pCA_descriptor, 0x00, sizeof(CA_descriptor_t));
+
 		pCA_descriptor->descriptor_tag = *buf++;
 		pCA_descriptor->descriptor_length = *buf++;
 		
@@ -268,21 +270,25 @@ int MPEG2_PSI_decode_CA_descriptor(uint8_t* buf, int length, CA_descriptor_t* pC
 		pCA_descriptor->CA_PID |= *buf++;
 		
 		pCA_descriptor->private_data_length = pCA_descriptor->descriptor_length - 4;
-		copy_length = (pCA_descriptor->private_data_length < MAX_PRIVATE_DATA_LENGTH) ? pCA_descriptor->private_data_length : MAX_PRIVATE_DATA_LENGTH;
+		//copy_length = (pCA_descriptor->private_data_length < MAX_PRIVATE_DATA_LENGTH) ? pCA_descriptor->private_data_length : MAX_PRIVATE_DATA_LENGTH;
 
-		if (copy_length > 0)
-		{
-			memcpy(pCA_descriptor->private_data_byte, buf, copy_length);
-		}
-		else
-		{
-			memset(pCA_descriptor->private_data_byte, 0x00, sizeof(pCA_descriptor->private_data_byte));
-		}
-
+		//if (copy_length > 0)
+		//{
+		//	memcpy(pCA_descriptor->private_data_byte, buf, copy_length);
+		//}
+		//else
+		//{
+		//	memset(pCA_descriptor->private_data_byte, 0x00, sizeof(pCA_descriptor->private_data_byte));
+		//}
+		pCA_descriptor->private_data_byte = buf;
 		buf += pCA_descriptor->private_data_length;
 	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
+	}
 
-	return 0;
+	return rtcode;
 }
 
 //功能：解ISO639语言描述子

@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <assert.h>
 
 #include "../Include/HALForTinyXML2.h"
+
 
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
@@ -42,61 +44,61 @@ void HALForXMLDoc::SetSyncOffset(int offset)
 //}
 
 //if we don't know the field length, then we can use SetAnchor() and ClearAncher() paire to trake it 
-void HALForXMLDoc::SetAnchor(XMLElement* pxmlBranchNode)
-{
-	if (pxmlBranchNode != NULL)
-	{
-		//m_lastBranchNode = pxmlBranchNode;
+//void HALForXMLDoc::SetAnchor(XMLElement* pxmlBranchNode)
+//{
+//	if (pxmlBranchNode != NULL)
+//	{
+//		//m_lastBranchNode = pxmlBranchNode;
+//
+//		m_nTreeLevel++;
+//		assert(m_nTreeLevel <= MAX_TREE_LEVEL);
+//
+//		m_stBranchStack[m_nTreeLevel-1].pxmlBranchNode = pxmlBranchNode;
+//
+//		//if (offset >= 0)
+//		//{
+//		//	SetSyncOffset(offset);
+//		//}
+//
+//		//pxmlBranchNode->SetAttribute("offset", m_bs_tracer.offset);
+//		//m_stBranchStack[m_nTreeLevel-1].nOffset = m_bs_tracer.offset;
+//	}
+//}
 
-		m_nTreeLevel++;
-		assert(m_nTreeLevel <= MAX_TREE_LEVEL);
+//void HALForXMLDoc::ClearAnchor(XMLElement* pxmlBranchNode)
+//{
+//	if (pxmlBranchNode != NULL)
+//	{
+//		//assert(pxmlBranchNode == m_lastBranchNode);
+//		assert(pxmlBranchNode == m_stBranchStack[m_nTreeLevel - 1].pxmlBranchNode);
+//
+//		int offset = pxmlBranchNode->IntAttribute("offset", -1);
+//		int field_length = m_bs_tracer.offset - offset;
+//		pxmlBranchNode->SetAttribute("length", field_length);
+//		pxmlBranchNode->SetAttribute("field_length", field_length);
+//
+//		m_stBranchStack[m_nTreeLevel - 1].pxmlBranchNode = NULL;
+//		m_nTreeLevel--;
+//
+//		//if (m_nTreeLevel > 0)
+//		//{
+//		//	m_lastBranchNode = m_stBranchStack[m_nTreeLevel - 1].pxmlBranchNode;
+//		//}
+//		//else
+//		//{
+//		//	m_lastBranchNode = NULL;
+//		//}
+//	}
+//}
 
-		m_stBranchStack[m_nTreeLevel-1].pxmlBranchNode = pxmlBranchNode;
-
-		//if (offset >= 0)
-		//{
-		//	SetSyncOffset(offset);
-		//}
-
-		//pxmlBranchNode->SetAttribute("offset", m_bs_tracer.offset);
-		//m_stBranchStack[m_nTreeLevel-1].nOffset = m_bs_tracer.offset;
-	}
-}
-
-void HALForXMLDoc::ClearAnchor(XMLElement* pxmlBranchNode)
-{
-	if (pxmlBranchNode != NULL)
-	{
-		//assert(pxmlBranchNode == m_lastBranchNode);
-		assert(pxmlBranchNode == m_stBranchStack[m_nTreeLevel - 1].pxmlBranchNode);
-
-		int offset = pxmlBranchNode->IntAttribute("offset", -1);
-		int field_length = m_bs_tracer.offset - offset;
-		pxmlBranchNode->SetAttribute("length", field_length);
-		pxmlBranchNode->SetAttribute("field_length", field_length);
-
-		m_stBranchStack[m_nTreeLevel - 1].pxmlBranchNode = NULL;
-		m_nTreeLevel--;
-
-		//if (m_nTreeLevel > 0)
-		//{
-		//	m_lastBranchNode = m_stBranchStack[m_nTreeLevel - 1].pxmlBranchNode;
-		//}
-		//else
-		//{
-		//	m_lastBranchNode = NULL;
-		//}
-	}
-}
-
-void HALForXMLDoc::Align(void)
-{
-	if (m_bs_tracer.i_left < 8)		// 1~7
-	{
-		m_bs_tracer.i_left = 8;
-		m_bs_tracer.offset++;
-	}
-}
+//void HALForXMLDoc::Align(void)
+//{
+//	if (m_bs_tracer.i_left < 8)		// 1~7
+//	{
+//		m_bs_tracer.i_left = 8;
+//		m_bs_tracer.offset++;
+//	}
+//}
 
 XMLElement* HALForXMLDoc::NewRootElement(const char* key_name, const char* pszComment, int field_length)
 {
@@ -305,6 +307,63 @@ XMLElement * HALForXMLDoc::NewElementForByteBuf(XMLElement* pxmlParent, const ch
 
 	return pxmlNewElement;
 }
+
+//XMLElement * HALForXMLDoc::NewElementForCharBuf(XMLElement* pxmlParent, const char* key_name, const uint8_t* char_buf, int char_length, const uint8_t* trimmed_char)
+//{
+//	char* pszComment;
+//	char pszTemp[48];
+//	int	 i;
+//	XMLElement* pxmlNewElement = XMLDocument::NewElement(key_name);
+//
+//	if (char_buf != NULL)
+//	{
+//		memset(pszTemp, 0x00, sizeof(pszTemp));
+//
+//		for (i = 0; i < min(8, char_length); i++)
+//		{
+//			sprintf_s(pszTemp + i * 3, 4, "%02X ", char_buf[i]);
+//		}
+//		if (i < char_length)
+//		{
+//			sprintf_s(pszTemp + i * 3, 4, "...");
+//		}
+//		else
+//		{
+//			pszTemp[i * 3] = '\0';
+//		}
+//
+//		pxmlNewElement->SetAttribute("value", pszTemp);
+//	}
+//
+//	//assert(m_bs_tracer.i_left == 8);
+//
+//	int next_offset = m_bs_tracer.offset + char_length;
+//	int length = char_length;
+//	if (m_bs_tracer.i_left != 8) length += 1;
+//
+//	pxmlNewElement->SetAttribute("offset", m_bs_tracer.offset);
+//	pxmlNewElement->SetAttribute("length", length);
+//	pxmlNewElement->SetAttribute("field_length", char_length);
+//
+//	m_bs_tracer.offset = next_offset;
+//
+//	if (trimmed_char != NULL)
+//	{
+//		int trimmed_char_length = char_length - (int)(trimmed_char - char_buf);
+//		pszComment = (char*)malloc(trimmed_char_length + 1);
+//		memcpy(pszComment, trimmed_char, trimmed_char_length);
+//		pszComment[trimmed_char_length] = '\0';
+//		pxmlNewElement->SetAttribute("comment", pszComment);
+//		free(pszComment);
+//	}
+//
+//	if (pxmlParent != NULL)
+//	{
+//		pxmlParent->InsertEndChild(pxmlNewElement);
+//	}
+//
+//	return pxmlNewElement;
+//}
 
 
 XMLElement * HALForXMLDoc::NewElementForX64Bits(XMLElement* pxmlParent, const char* key_name, const uint64_t key_value, int bits, const char* mnemonic, const char* pszComment)

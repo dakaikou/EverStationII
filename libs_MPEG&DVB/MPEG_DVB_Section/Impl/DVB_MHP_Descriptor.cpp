@@ -5,7 +5,8 @@
 #include "../../Include/DVB_MHP_Descriptor.h"
 #include "../../Include/MPEG_DVB_ErrorCode.h"
 
-using namespace std;
+#include "DVB_SI_Utilities_Inner.h"
+
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
 #endif
@@ -73,7 +74,7 @@ int DVB_MHP_decode_application_descriptor(uint8_t* buf, int length, application_
 //±¸×¢£º2018.7 chendelin
 int DVB_MHP_decode_application_name_descriptor(uint8_t* buf, int length, application_name_descriptor_t* papplication_name_descriptor)
 {
-	S32		rtcode = 0;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
 	U8		N;
 	U8*		ptemp;
 	U8*		pend;
@@ -81,44 +82,47 @@ int DVB_MHP_decode_application_name_descriptor(uint8_t* buf, int length, applica
 
 	if ((buf != NULL) && (length >= 2) && (papplication_name_descriptor != NULL))
 	{
+		memset(papplication_name_descriptor, 0x00, sizeof(application_name_descriptor_t));
+
 		papplication_name_descriptor->descriptor_tag = *buf++;
 		papplication_name_descriptor->descriptor_length = *buf++;
 
 		ptemp = buf;
 		pend = ptemp + papplication_name_descriptor->descriptor_length;
-		buf = ptemp;
 
 		N = 0;
-		while (ptemp < pend)
+		while ((ptemp < pend) && (N < MAX_LANGUAGES))
 		{
-			if (N < MAX_LANGUAGES)
+			//papplication_name_descriptor->ISO_639_language_code[N] = ptemp[0];
+			//papplication_name_descriptor->ISO_639_language_code[N] <<= 8;
+			//papplication_name_descriptor->ISO_639_language_code[N] |= ptemp[1];
+			//papplication_name_descriptor->ISO_639_language_code[N] <<= 8;
+			//papplication_name_descriptor->ISO_639_language_code[N] |= ptemp[2];
+
+			memcpy(papplication_name_descriptor->st[N].ISO_639_language_char, ptemp, 3);
+			papplication_name_descriptor->st[N].ISO_639_language_char[3] = '\0';
+			ptemp += 3;
+
+			papplication_name_descriptor->st[N].application_name_length = *ptemp++;
+
+			if (papplication_name_descriptor->st[N].application_name_length > 0)
 			{
-				papplication_name_descriptor->ISO_639_language_code[N] = ptemp[0];
-				papplication_name_descriptor->ISO_639_language_code[N] <<= 8;
-				papplication_name_descriptor->ISO_639_language_code[N] |= ptemp[1];
-				papplication_name_descriptor->ISO_639_language_code[N] <<= 8;
-				papplication_name_descriptor->ISO_639_language_code[N] |= ptemp[2];
+				papplication_name_descriptor->st[N].application_name_char = ptemp;
+				ptemp += papplication_name_descriptor->st[N].application_name_length;
 
-				memcpy(papplication_name_descriptor->ISO_639_language_char[N], ptemp, 3);
-				papplication_name_descriptor->ISO_639_language_char[N][3] = '\0';
-				ptemp += 3;
-
-				papplication_name_descriptor->application_name_length[N] = *ptemp++;
-				copy_length = papplication_name_descriptor->application_name_length[N];
-
-				if (copy_length > 63)
-				{
-					copy_length = 63;
-				}
-				memcpy(papplication_name_descriptor->application_name_char[N], ptemp, copy_length);
-				papplication_name_descriptor->application_name_char[N][copy_length] = '\0';
-				ptemp += papplication_name_descriptor->application_name_length[N];
-
-				N++;
+				papplication_name_descriptor->st[N].trimmed_application_name_char = DVB_SI_StringPrefixTrim(papplication_name_descriptor->st[N].application_name_char);
+				papplication_name_descriptor->st[N].trimmed_application_name_length = papplication_name_descriptor->st[N].application_name_length -
+					(int)(papplication_name_descriptor->st[N].trimmed_application_name_char - papplication_name_descriptor->st[N].application_name_char);
 			}
+
+			N++;
 		}
 
 		papplication_name_descriptor->N = N;
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
 	}
 
 	return rtcode;
@@ -131,10 +135,11 @@ int DVB_MHP_decode_transport_protocol_descriptor(uint8_t* buf, int length, trans
 {
 	int			rtcode = SECTION_PARSE_NO_ERROR;
 	uint8_t*	pstart;
-	int			copy_length;
 
-	if ((buf != NULL) && (length >= 2) && (ptransport_protocol_descriptor != NULL))
+	if ((buf != NULL) && (length >= 5) && (ptransport_protocol_descriptor != NULL))
 	{
+		memset(ptransport_protocol_descriptor, 0x00, sizeof(transport_protocol_descriptor_t));
+
 		pstart = buf;
 
 		ptransport_protocol_descriptor->descriptor_tag = *buf++;
@@ -146,18 +151,17 @@ int DVB_MHP_decode_transport_protocol_descriptor(uint8_t* buf, int length, trans
 
 		ptransport_protocol_descriptor->transport_protocol_label = *buf++;
 
-		copy_length = length - (int)(buf - pstart);
+		ptransport_protocol_descriptor->selector_length = length - (int)(buf - pstart);
 
-		if (copy_length > 64)
+		if (ptransport_protocol_descriptor->selector_length > 0)
 		{
-			copy_length = 64;
+			ptransport_protocol_descriptor->selector_byte = buf;
+			buf += ptransport_protocol_descriptor->selector_length;
 		}
-		ptransport_protocol_descriptor->N = copy_length;
-
-		if (copy_length > 0)
-		{
-			memcpy(ptransport_protocol_descriptor->selector_byte, buf, copy_length);
-		}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
 	}
 
 	return rtcode;
@@ -169,56 +173,62 @@ int DVB_MHP_decode_transport_protocol_descriptor(uint8_t* buf, int length, trans
 //±¸×¢£º2018.7 chendelin
 int DVB_MHP_decode_dvb_j_application_location_descriptor(uint8_t* buf, int length, dvb_j_application_location_descriptor_t* pdvb_j_application_location_descriptor)
 {
-	S32		rtcode = SECTION_PARSE_NO_ERROR;
-	U16		copy_length;
-	U8		N;
+	int		rtcode = SECTION_PARSE_NO_ERROR;
 
 	if ((buf != NULL) && (length >= 2) && (pdvb_j_application_location_descriptor != NULL))
 	{
+		memset(pdvb_j_application_location_descriptor, 0x00, sizeof(dvb_j_application_location_descriptor_t));
+
 		pdvb_j_application_location_descriptor->descriptor_tag = *buf++;
 		pdvb_j_application_location_descriptor->descriptor_length = *buf++;
 
 		pdvb_j_application_location_descriptor->base_directory_length = *buf++;
-
-		copy_length = min(127, pdvb_j_application_location_descriptor->base_directory_length);
-		if (copy_length > 0)
+		if (pdvb_j_application_location_descriptor->base_directory_length > 0)
 		{
-			memcpy(pdvb_j_application_location_descriptor->base_directory_byte, buf, copy_length);
-			pdvb_j_application_location_descriptor->base_directory_byte[copy_length] = '\0';
+			//memcpy(pdvb_j_application_location_descriptor->base_directory_byte, buf, copy_length);
+			//pdvb_j_application_location_descriptor->base_directory_byte[copy_length] = '\0';
+			pdvb_j_application_location_descriptor->base_directory_byte = buf;
 			buf += pdvb_j_application_location_descriptor->base_directory_length;
 		}
-		else
-		{
-			memset(pdvb_j_application_location_descriptor->base_directory_byte, 0x00, sizeof(pdvb_j_application_location_descriptor->base_directory_byte));
-		}
+		//else
+		//{
+		//	memset(pdvb_j_application_location_descriptor->base_directory_byte, 0x00, sizeof(pdvb_j_application_location_descriptor->base_directory_byte));
+		//}
 
 		pdvb_j_application_location_descriptor->classpath_extension_length = *buf++;
-
-		copy_length = min(127, pdvb_j_application_location_descriptor->classpath_extension_length);
-		if (copy_length > 0)
+		//copy_length = min(127, pdvb_j_application_location_descriptor->classpath_extension_length);
+		if (pdvb_j_application_location_descriptor->classpath_extension_length > 0)
 		{
-			memcpy(pdvb_j_application_location_descriptor->classpath_extension_byte, buf, copy_length);
-			pdvb_j_application_location_descriptor->classpath_extension_byte[copy_length] = '\0';
+			//memcpy(pdvb_j_application_location_descriptor->classpath_extension_byte, buf, copy_length);
+			//pdvb_j_application_location_descriptor->classpath_extension_byte[copy_length] = '\0';
+			pdvb_j_application_location_descriptor->classpath_extension_byte = buf;
 			buf += pdvb_j_application_location_descriptor->classpath_extension_length;
 		}
-		else
-		{
-			memset(pdvb_j_application_location_descriptor->classpath_extension_byte, 0x00, sizeof(pdvb_j_application_location_descriptor->classpath_extension_byte));
-		}
+		//else
+		//{
+		//	memset(pdvb_j_application_location_descriptor->classpath_extension_byte, 0x00, sizeof(pdvb_j_application_location_descriptor->classpath_extension_byte));
+		//}
 
-		N = pdvb_j_application_location_descriptor->descriptor_length - pdvb_j_application_location_descriptor->base_directory_length - pdvb_j_application_location_descriptor->classpath_extension_length - 2;
-		pdvb_j_application_location_descriptor->N = N;
+		pdvb_j_application_location_descriptor->initial_class_char_length = pdvb_j_application_location_descriptor->descriptor_length -
+			pdvb_j_application_location_descriptor->base_directory_length - pdvb_j_application_location_descriptor->classpath_extension_length - 2;
 
-		copy_length = min(127, N);
-		if (copy_length > 0)
+		//copy_length = min(127, N);
+		if (pdvb_j_application_location_descriptor->initial_class_char_length > 0)
 		{
-			memcpy(pdvb_j_application_location_descriptor->initial_class_byte, buf, copy_length);
-			pdvb_j_application_location_descriptor->initial_class_byte[copy_length] = '\0';
+			//memcpy(pdvb_j_application_location_descriptor->initial_class_byte, buf, copy_length);
+			//pdvb_j_application_location_descriptor->initial_class_byte[copy_length] = '\0';
+
+			pdvb_j_application_location_descriptor->initial_class_byte = buf;
+			buf += pdvb_j_application_location_descriptor->initial_class_char_length;
 		}
-		else
-		{
-			memset(pdvb_j_application_location_descriptor->initial_class_byte, 0x00, sizeof(pdvb_j_application_location_descriptor->initial_class_byte));
-		}
+		//else
+		//{
+		//	memset(pdvb_j_application_location_descriptor->initial_class_byte, 0x00, sizeof(pdvb_j_application_location_descriptor->initial_class_byte));
+		//}
+	}
+	else
+	{
+		rtcode = SECTION_PARSE_PARAMETER_ERROR;
 	}
 
 	return rtcode;

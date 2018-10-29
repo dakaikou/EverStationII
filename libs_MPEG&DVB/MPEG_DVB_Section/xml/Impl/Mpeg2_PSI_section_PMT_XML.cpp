@@ -168,9 +168,9 @@ int MPEG2_PSI_PMT_PresentSection_to_XML(HALForXMLDoc* pxmlDoc, TS_program_map_se
 							//case DVB_SI_SUBTITLING_DESCRIPTOR:
 							//	DVB_SI_decode_subtitling_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
 							//	break;
-							//case DVB_SI_DATA_BROADCAST_ID_DESCRIPTOR:
-							//	DVB_SI_decode_data_broadcast_id_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
-							//	break;
+						case DVB_SI_DATA_BROADCAST_ID_DESCRIPTOR:
+							DVB_SI_decode_data_broadcast_id_descriptor_to_xml(descriptor_buf, descriptor_size, pxmlDoc, pxmlESInfoNode);
+							break;
 							//case DVB_SI_AC3_DESCRIPTOR:
 							//	DVB_SI_decode_ac3_descriptor_to_xml(pl2temp, move_length, pxmlDoc, pxmlESInfoNode);
 							//	break;

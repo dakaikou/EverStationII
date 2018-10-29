@@ -840,10 +840,10 @@ int DVB_SI_NumericCoding2Text_TeletextType(uint8_t teletext_type, char* pszText,
 	return rtcode;
 }
 
-char*	DVB_SI_StringPrefixTrim(char* pstr_src)
+uint8_t* DVB_SI_StringPrefixTrim(uint8_t* pstr_src)
 {
-	char*		pstr_dst = pstr_src;
-	unsigned char flag_char;
+	uint8_t*	pstr_dst = pstr_src;
+	uint8_t		flag_char;
 
 	if (pstr_src != NULL)
 	{

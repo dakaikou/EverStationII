@@ -174,26 +174,37 @@ void CListView_ServiceInfo::Update(uint16_t network_id, uint16_t transport_strea
 				sprintf_s(pszStreamID, sizeof(pszStreamID), "0x%04x(%d)", stStreamInfo.transport_stream_id, stStreamInfo.transport_stream_id);
 
 				memset(pszTSInfo, 0x00, sizeof(pszTSInfo));
-				if (stStreamInfo.cable_delivery_system_descriptor.descriptor_tag == DVB_SI_CABLE_DELIVERY_SYSTEM_DESCRIPTOR)
+				if (stStreamInfo.uDelivery.cable_delivery_system_descriptor.descriptor_tag == DVB_SI_CABLE_DELIVERY_SYSTEM_DESCRIPTOR)
 				{
+					cable_delivery_system_descriptor_t* pcable_delivery_system_descriptor = &(stStreamInfo.uDelivery.cable_delivery_system_descriptor);
+
 					listCtrl.InsertItem(nItem, "");
 					listCtrl.SetItemText(nItem, 1, "TS流信息");
-					sprintf_s(pszFrequency, sizeof(pszFrequency), "%x.%04xMHz", (stStreamInfo.cable_delivery_system_descriptor.frequency & 0xFFFF0000) >> 16, stStreamInfo.cable_delivery_system_descriptor.frequency & 0x0000FFFF);
-					sprintf_s(pszSymbolRate, sizeof(pszSymbolRate), "%x.%04xMsps", (stStreamInfo.cable_delivery_system_descriptor.symbol_rate & 0xFFFF0000) >> 16, stStreamInfo.cable_delivery_system_descriptor.symbol_rate & 0x0000FFFF);
-					DVB_SI_NumericCoding2Text_CableModulation(stStreamInfo.cable_delivery_system_descriptor.modulation, pszModulation, sizeof(pszModulation));
+					sprintf_s(pszFrequency, sizeof(pszFrequency), "%x.%04xMHz", 
+						(pcable_delivery_system_descriptor->frequency & 0xFFFF0000) >> 16, 
+						pcable_delivery_system_descriptor->frequency & 0x0000FFFF);
+					sprintf_s(pszSymbolRate, sizeof(pszSymbolRate), "%x.%04xMsps", 
+						(pcable_delivery_system_descriptor->symbol_rate & 0xFFFF0000) >> 16, 
+						pcable_delivery_system_descriptor->symbol_rate & 0x0000FFFF);
+					DVB_SI_NumericCoding2Text_CableModulation(pcable_delivery_system_descriptor->modulation, pszModulation, sizeof(pszModulation));
 					sprintf_s(pszTSInfo, sizeof(pszTSInfo), "ID:%s, 频率:%s, 符号率:%s, 调制:%s", pszStreamID, pszFrequency, pszSymbolRate, pszModulation);
 
 					listCtrl.SetItemText(nItem, 2, pszTSInfo);
 					nItem++;
 				}
-				else if (stStreamInfo.satellite_delivery_system_descriptor.descriptor_tag == DVB_SI_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR)
+				else if (stStreamInfo.uDelivery.satellite_delivery_system_descriptor.descriptor_tag == DVB_SI_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR)
 				{
+					satellite_delivery_system_descriptor_t* psatellite_delivery_system_descriptor = &(stStreamInfo.uDelivery.satellite_delivery_system_descriptor);
 					listCtrl.InsertItem(nItem, "");
 					listCtrl.SetItemText(nItem, 1, "TS流信息");
-					sprintf_s(pszFrequency, sizeof(pszFrequency), "%X.%05XGHz", (stStreamInfo.satellite_delivery_system_descriptor.frequency & 0xFFF00000) >> 20, stStreamInfo.satellite_delivery_system_descriptor.frequency & 0x000FFFFF);
-					sprintf_s(pszSymbolRate, sizeof(pszSymbolRate), "%X.%04XMsps", (stStreamInfo.satellite_delivery_system_descriptor.symbol_rate & 0xFFFF0000) >> 16, stStreamInfo.satellite_delivery_system_descriptor.symbol_rate & 0x0000FFFF);
-					DVB_SI_NumericCoding2Text_SatelliteModulationType(stStreamInfo.satellite_delivery_system_descriptor.modulation_type, pszModulation, sizeof(pszModulation));
-					DVB_SI_NumericCoding2Text_SatellitePolarization(stStreamInfo.satellite_delivery_system_descriptor.polarization, pszPolarization, sizeof(pszPolarization));
+					sprintf_s(pszFrequency, sizeof(pszFrequency), "%X.%05XGHz", 
+						(psatellite_delivery_system_descriptor->frequency & 0xFFF00000) >> 20, 
+						psatellite_delivery_system_descriptor->frequency & 0x000FFFFF);
+					sprintf_s(pszSymbolRate, sizeof(pszSymbolRate), "%X.%04XMsps", 
+						(psatellite_delivery_system_descriptor->symbol_rate & 0xFFFF0000) >> 16, 
+						psatellite_delivery_system_descriptor->symbol_rate & 0x0000FFFF);
+					DVB_SI_NumericCoding2Text_SatelliteModulationType(psatellite_delivery_system_descriptor->modulation_type, pszModulation, sizeof(pszModulation));
+					DVB_SI_NumericCoding2Text_SatellitePolarization(psatellite_delivery_system_descriptor->polarization, pszPolarization, sizeof(pszPolarization));
 					sprintf_s(pszTSInfo, sizeof(pszTSInfo), "ID:%s, 频率:%s, 符号率:%s, 调制:%s, 极化方式:%s", pszStreamID, pszFrequency, pszSymbolRate, pszModulation, pszPolarization);
 
 					listCtrl.SetItemText(nItem, 2, pszTSInfo);
@@ -264,7 +275,7 @@ void CListView_ServiceInfo::Update(uint16_t network_id, uint16_t transport_strea
 								{
 									if (pdata_broadcast_descriptor->data_broadcast_id == 0x0006)			//数据轮播
 									{
-										pdata_carousel_info = &(pdata_broadcast_descriptor->selector_byte.data_carousel_info);
+										pdata_carousel_info = &(pdata_broadcast_descriptor->u.data_carousel_info);
 
 										listCtrl.InsertItem(nItem, "");
 										listCtrl.SetItemText(nItem, 1, "carousel_type_id");
@@ -299,7 +310,7 @@ void CListView_ServiceInfo::Update(uint16_t network_id, uint16_t transport_strea
 									}
 									else if (pdata_broadcast_descriptor->data_broadcast_id == 0x0007)			//对象轮播
 									{
-										pobject_carousel_info = &(pdata_broadcast_descriptor->selector_byte.object_carousel_info);
+										pobject_carousel_info = &(pdata_broadcast_descriptor->u.object_carousel_info);
 
 										listCtrl.InsertItem(nItem, "");
 										listCtrl.SetItemText(nItem, 1, "Carousel_type_id");

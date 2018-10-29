@@ -8,6 +8,10 @@
 #include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
 #include "libs_MPEG&DVB/MPEG_DVB_Section\Include\MPEG_DVB_ErrorCode.h"
 
+#ifndef min
+#define min(a,b)  (((a)<(b))?(a):(b))
+#endif
+
 /////////////////////////////////////////////
 CEIT::CEIT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension) : CPVT(Key, PID, table_id, table_id_extension)
 {
@@ -116,8 +120,17 @@ int CEIT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 							rtcode = DVB_SI_decode_short_event_descriptor(descriptor_buf, descriptor_size, &short_event_descriptor);
 							if (rtcode == SECTION_PARSE_NO_ERROR)
 							{
-								strcpy_s(m_astEvent[m_nEventCount].pszEventName, sizeof(m_astEvent[m_nEventCount].pszEventName), short_event_descriptor.trimmed_event_name_char);
-								strcpy_s(m_astEvent[m_nEventCount].pszEventText, sizeof(m_astEvent[m_nEventCount].pszEventText), short_event_descriptor.trimmed_text_char);
+								//strcpy_s(m_astEvent[m_nEventCount].pszEventName, sizeof(m_astEvent[m_nEventCount].pszEventName), short_event_descriptor.trimmed_event_name_char);
+
+								int copy_length = min(MAX_EVENT_NAME_LENGTH, short_event_descriptor.trimmed_event_name_length);
+								memcpy_s(m_astEvent[m_nEventCount].pszEventName, sizeof(m_astEvent[m_nEventCount].pszEventName), short_event_descriptor.trimmed_event_name_char, copy_length);
+								m_astEvent[m_nEventCount].pszEventName[copy_length] = '\0';
+
+								//strcpy_s(m_astEvent[m_nEventCount].pszEventText, sizeof(m_astEvent[m_nEventCount].pszEventText), short_event_descriptor.trimmed_text_char);
+
+								copy_length = min(MAX_EVENT_TEXT_LENGTH, short_event_descriptor.trimmed_text_length);
+								memcpy_s(m_astEvent[m_nEventCount].pszEventText, sizeof(m_astEvent[m_nEventCount].pszEventText), short_event_descriptor.trimmed_text_char, copy_length);
+								m_astEvent[m_nEventCount].pszEventText[copy_length] = '\0';
 							}
 							else
 							{

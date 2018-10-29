@@ -21,11 +21,11 @@
 ****************************************************************************************/
 _CDL_EXPORT int FILE_GetStreamType(char* pszFileName)
 {
-	S32		stream_type = STREAM_UNKNOWN;
+	int		stream_type = STREAM_UNKNOWN;
 	U8		data_buf[131072];
 	U8*		rd_ptr;
 	U8*		end_ptr;
-	S32		rdcount;
+	int		rdcount;
 	U16		sync_word;
 	U16		read_word;
 	U32		sync_dword;
@@ -305,12 +305,12 @@ _CDL_EXPORT int FILE_GetStreamType(char* pszFileName)
 ****************************************************************************************/
 _CDL_EXPORT int FILE_CheckStreamType(int stream_type, char* pszFileName)
 {
-	S32		rtcode = FALSE;
+	int		rtcode = FALSE;
 	U8		data_buf[131072];
 	U8*		rd_ptr;
 	U8*		end_ptr;
 	U8*		next_ptr;
-	S32		rdcount;
+	int		rdcount;
 	U16		sync_word;
 	U16		read_word;
 	U32		sync_dword;

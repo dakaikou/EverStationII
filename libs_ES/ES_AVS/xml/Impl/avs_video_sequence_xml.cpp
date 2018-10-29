@@ -172,7 +172,6 @@ int	avs_decode_pb_picture_header_to_xml(uint8_t* nal_buf, int nal_length, AVS_gl
 int avs_decode_slice_to_xml(uint8_t* nal_buf, int nal_length, AVS_global_param_t* pparam, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, AVS_slice_t* pSliceParam)
 {
 	int		rtcode = AVS_UNKNOWN_ERROR;
-	BITS_t	 bs;
 	char  pszVerPos[32];
 	char  pszTemp[64];
 

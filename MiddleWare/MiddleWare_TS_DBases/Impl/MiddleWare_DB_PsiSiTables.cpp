@@ -1023,29 +1023,42 @@ int CDB_PsiSiTables::BuildBouquetTree(uint32_t uiCode, HALForXMLDoc* pxmlDoc)
 
 					CNIT* pNIT = (CNIT*)QueryNITByID(original_network_id);
 
-					pNIT->GetStreamByID(transport_stream_id, &stStreamInfoInNIT);
-
-					sprintf_s(pszStreamID, sizeof(pszStreamID), "ONetID:0x%04X, TsID:0x%04x", stStreamInfoInNIT.original_network_id, stStreamInfoInNIT.transport_stream_id);
-
 					memset(pszTSInfo, 0x00, sizeof(pszTSInfo));
-					if (stStreamInfoInNIT.cable_delivery_system_descriptor.descriptor_tag == DVB_SI_CABLE_DELIVERY_SYSTEM_DESCRIPTOR)
+					if (pNIT != NULL)
 					{
-						sprintf_s(pszFrequency, sizeof(pszFrequency), "%x.%04xMHz", (stStreamInfoInNIT.cable_delivery_system_descriptor.frequency & 0xFFFF0000) >> 16, stStreamInfoInNIT.cable_delivery_system_descriptor.frequency & 0x0000FFFF);
-						sprintf_s(pszSymbolRate, sizeof(pszSymbolRate), "%x.%04xMsps", (stStreamInfoInNIT.cable_delivery_system_descriptor.symbol_rate & 0xFFFF0000) >> 16, stStreamInfoInNIT.cable_delivery_system_descriptor.symbol_rate & 0x0000FFFF);
-						DVB_SI_NumericCoding2Text_CableModulation(stStreamInfoInNIT.cable_delivery_system_descriptor.modulation, pszModulation, sizeof(pszModulation));
-						sprintf_s(pszTSInfo, sizeof(pszTSInfo), "%s, 频率:%s, 符号率:%s, 调制:%s", pszStreamID, pszFrequency, pszSymbolRate, pszModulation);
-					}
-					else if (stStreamInfoInNIT.satellite_delivery_system_descriptor.descriptor_tag == DVB_SI_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR)
-					{
-						sprintf_s(pszFrequency, sizeof(pszFrequency), "%X.%05XGHz", (stStreamInfoInNIT.satellite_delivery_system_descriptor.frequency & 0xFFF00000) >> 20, stStreamInfoInNIT.satellite_delivery_system_descriptor.frequency & 0x000FFFFF);
-						sprintf_s(pszSymbolRate, sizeof(pszSymbolRate), "%X.%04XMsps", (stStreamInfoInNIT.satellite_delivery_system_descriptor.symbol_rate & 0xFFFF0000) >> 16, stStreamInfoInNIT.satellite_delivery_system_descriptor.symbol_rate & 0x0000FFFF);
-						DVB_SI_NumericCoding2Text_SatelliteModulationType(stStreamInfoInNIT.satellite_delivery_system_descriptor.modulation_type, pszModulation, sizeof(pszModulation));
-						DVB_SI_NumericCoding2Text_SatellitePolarization(stStreamInfoInNIT.satellite_delivery_system_descriptor.polarization, pszPolarization, sizeof(pszPolarization));
-						sprintf_s(pszTSInfo, sizeof(pszTSInfo), "%s, 频率:%s, 符号率:%s, 调制:%s, 极化方式:%s", pszStreamID, pszFrequency, pszSymbolRate, pszModulation, pszPolarization);
-					}
-					else
-					{
-						sprintf_s(pszTSInfo, sizeof(pszTSInfo), "%s", pszStreamID);
+						pNIT->GetStreamByID(transport_stream_id, &stStreamInfoInNIT);
+
+						sprintf_s(pszStreamID, sizeof(pszStreamID), "ONetID:0x%04X, TsID:0x%04x", stStreamInfoInNIT.original_network_id, stStreamInfoInNIT.transport_stream_id);
+
+						if (stStreamInfoInNIT.uDelivery.cable_delivery_system_descriptor.descriptor_tag == DVB_SI_CABLE_DELIVERY_SYSTEM_DESCRIPTOR)
+						{
+							cable_delivery_system_descriptor_t* pcable_delivery_system_descriptor = &(stStreamInfoInNIT.uDelivery.cable_delivery_system_descriptor);
+							sprintf_s(pszFrequency, sizeof(pszFrequency), "%x.%04xMHz", 
+								(pcable_delivery_system_descriptor->frequency & 0xFFFF0000) >> 16, 
+								pcable_delivery_system_descriptor->frequency & 0x0000FFFF);
+							sprintf_s(pszSymbolRate, sizeof(pszSymbolRate), "%x.%04xMsps", 
+								(pcable_delivery_system_descriptor->symbol_rate & 0xFFFF0000) >> 16, 
+								pcable_delivery_system_descriptor->symbol_rate & 0x0000FFFF);
+							DVB_SI_NumericCoding2Text_CableModulation(pcable_delivery_system_descriptor->modulation, pszModulation, sizeof(pszModulation));
+							sprintf_s(pszTSInfo, sizeof(pszTSInfo), "%s, 频率:%s, 符号率:%s, 调制:%s", pszStreamID, pszFrequency, pszSymbolRate, pszModulation);
+						}
+						else if (stStreamInfoInNIT.uDelivery.satellite_delivery_system_descriptor.descriptor_tag == DVB_SI_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR)
+						{
+							satellite_delivery_system_descriptor_t* psatellite_delivery_system_descriptor = &(stStreamInfoInNIT.uDelivery.satellite_delivery_system_descriptor);
+							sprintf_s(pszFrequency, sizeof(pszFrequency), "%X.%05XGHz", 
+								(psatellite_delivery_system_descriptor->frequency & 0xFFF00000) >> 20, 
+								psatellite_delivery_system_descriptor->frequency & 0x000FFFFF);
+							sprintf_s(pszSymbolRate, sizeof(pszSymbolRate), "%X.%04XMsps", 
+								(psatellite_delivery_system_descriptor->symbol_rate & 0xFFFF0000) >> 16, 
+								psatellite_delivery_system_descriptor->symbol_rate & 0x0000FFFF);
+							DVB_SI_NumericCoding2Text_SatelliteModulationType(psatellite_delivery_system_descriptor->modulation_type, pszModulation, sizeof(pszModulation));
+							DVB_SI_NumericCoding2Text_SatellitePolarization(psatellite_delivery_system_descriptor->polarization, pszPolarization, sizeof(pszPolarization));
+							sprintf_s(pszTSInfo, sizeof(pszTSInfo), "%s, 频率:%s, 符号率:%s, 调制:%s, 极化方式:%s", pszStreamID, pszFrequency, pszSymbolRate, pszModulation, pszPolarization);
+						}
+						else
+						{
+							sprintf_s(pszTSInfo, sizeof(pszTSInfo), "%s", pszStreamID);
+						}
 					}
 
 					//sprintf_s(pszText, sizeof(pszText), "传送流 [ONetID=0x%04X(%d) - TsID=0x%04X(%d)]", original_network_id, original_network_id, transport_stream_id, transport_stream_id);
@@ -1080,8 +1093,16 @@ int CDB_PsiSiTables::BuildBouquetTree(uint32_t uiCode, HALForXMLDoc* pxmlDoc)
 
 								//DVB_SI_NumericCoding2Text_ServiceType(service_type, pszTemp, sizeof(pszTemp));
 
-								sprintf_s(pszText, sizeof(pszText), "%s  [service_id = 0x%04X(%d),  %s]",
-									stServiceInfo.pszServiceName, service_id, service_id, pszTSInfo);
+								if (strlen(pszTSInfo) > 0)
+								{
+									sprintf_s(pszText, sizeof(pszText), "%s  [service_id = 0x%04X(%d),  %s]",
+										stServiceInfo.pszServiceName, service_id, service_id, pszTSInfo);
+								}
+								else
+								{
+									sprintf_s(pszText, sizeof(pszText), "%s  [service_id = 0x%04X(%d)]",
+										stServiceInfo.pszServiceName, service_id, service_id);
+								}
 
 								//XMLElement* pxmlServiceNode = XMLDOC_NewElementForString(pxmlDoc, pxmlRootNode, pszText, NULL);
 								pxmlDoc->NewElementForString(pxmlRootNode, pszText, NULL);

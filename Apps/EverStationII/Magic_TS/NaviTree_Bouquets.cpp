@@ -11,6 +11,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+#include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
 
 #include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_SI_Utilities.h"
@@ -24,8 +25,6 @@ static char THIS_FILE[] = __FILE__;
 // CPane_BouquetInfoTreeView
 
 IMPLEMENT_DYNCREATE(CNaviTree_Bouquets, CTreeView)
-
-//extern PSISI_REPORT_t			PSISI_REPORT;
 
 CNaviTree_Bouquets::CNaviTree_Bouquets()
 {
@@ -135,60 +134,63 @@ void CNaviTree_Bouquets::UpdateBAT(CBAT* pBAT)
 	{
 		bouquet_id = pBAT->GetBouquetID();
 
-		pBAT->GetBouquetName(pszTemp, sizeof(pszTemp));
+		int rtcode = pBAT->GetBouquetName(pszTemp, sizeof(pszTemp));
 
+		if (rtcode == MIDDLEWARE_PSISI_NO_ERROR)
+		{
 #if CHINESE_VERSION
-		sprintf_s(pszText, sizeof(pszText), "业务群 0x%04X(%d) [%s]", bouquet_id, bouquet_id, pszTemp);
+			sprintf_s(pszText, sizeof(pszText), "业务群 0x%04X(%d) [%s]", bouquet_id, bouquet_id, pszTemp);
 #else
-		sprintf_s(pszText, sizeof(pszText), "BOUQUET 0x%04X(%d) [%s]", bouquet_id, bouquet_id, pszTemp);
+			sprintf_s(pszText, sizeof(pszText), "BOUQUET 0x%04X(%d) [%s]", bouquet_id, bouquet_id, pszTemp);
 #endif
 
-		item_data = pBAT->GetKey();
-		item_data <<= 16;
-		item_data |= bouquet_id;
+			item_data = pBAT->GetKey();
+			item_data <<= 16;
+			item_data |= bouquet_id;
 
-		TreeCtrlItem.item.pszText = pszText;
-		TreeCtrlItem.item.mask = TVIF_TEXT | TVIF_PARAM;
+			TreeCtrlItem.item.pszText = pszText;
+			TreeCtrlItem.item.mask = TVIF_TEXT | TVIF_PARAM;
 
-		find_bouquet_item = 0;
-		if (treeCtrl.ItemHasChildren(m_hRootItem))
-		{
-			hBouquetItem = treeCtrl.GetChildItem(m_hRootItem);
-			while (hBouquetItem != NULL)
+			find_bouquet_item = 0;
+			if (treeCtrl.ItemHasChildren(m_hRootItem))
 			{
-				uint32_t temp = (uint32_t)treeCtrl.GetItemData(hBouquetItem);
-				if (item_data == temp)
+				hBouquetItem = treeCtrl.GetChildItem(m_hRootItem);
+				while (hBouquetItem != NULL)
 				{
-					find_bouquet_item = 1;
-					break;
-				}
-				else
-				{
-					hNextItem = treeCtrl.GetNextItem(hBouquetItem, TVGN_NEXT);
-					hBouquetItem = hNextItem;
+					uint32_t temp = (uint32_t)treeCtrl.GetItemData(hBouquetItem);
+					if (item_data == temp)
+					{
+						find_bouquet_item = 1;
+						break;
+					}
+					else
+					{
+						hNextItem = treeCtrl.GetNextItem(hBouquetItem, TVGN_NEXT);
+						hBouquetItem = hNextItem;
+					}
 				}
 			}
-		}
 
-		if (find_bouquet_item == 0)
-		{
-			TreeCtrlItem.hParent = m_hRootItem;
+			if (find_bouquet_item == 0)
+			{
+				TreeCtrlItem.hParent = m_hRootItem;
 
-			hChildItem = treeCtrl.InsertItem(&TreeCtrlItem);
-			treeCtrl.SetItemData(hChildItem, item_data);
-			treeCtrl.SetItemImage(hChildItem, 1, 1);
+				hChildItem = treeCtrl.InsertItem(&TreeCtrlItem);
+				treeCtrl.SetItemData(hChildItem, item_data);
+				treeCtrl.SetItemImage(hChildItem, 1, 1);
 
-			treeCtrl.SortChildren(m_hRootItem);
+				treeCtrl.SortChildren(m_hRootItem);
 
-			treeCtrl.Expand(m_hRootItem, TVE_EXPAND);
-		}
-		else
-		{
-			//xiaowangtest.ts，section_number=1的section先传，section_number=0的section后传，将导致bouquet_name在界面上不显示
-			//为修订此BUG，在此强行再设置一下bouquet名称。
-			//这么做不是最好的方法，容待以后再优化
-			//chendelin  2018.8.25
-			treeCtrl.SetItemText(hBouquetItem, pszText);
+				treeCtrl.Expand(m_hRootItem, TVE_EXPAND);
+			}
+			else
+			{
+				//xiaowangtest.ts，section_number=1的section先传，section_number=0的section后传，将导致bouquet_name在界面上不显示
+				//为修订此BUG，在此强行再设置一下bouquet名称。
+				//这么做不是最好的方法，容待以后再优化
+				//chendelin  2018.8.25
+				treeCtrl.SetItemText(hBouquetItem, pszText);
+			}
 		}
 	}
 }

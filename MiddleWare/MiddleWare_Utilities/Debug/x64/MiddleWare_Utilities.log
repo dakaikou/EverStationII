@@ -1,4 +1,4 @@
 ﻿  MiddleWare_Utilities.cpp
-e:\projects-mpeg2码流分析仪\软件工程\everstationii\middleware\middleware_utilities\impl\middleware_utilities.cpp(41): warning C4267: “=”: 从“size_t”转换到“S32”，可能丢失数据
-e:\projects-mpeg2码流分析仪\软件工程\everstationii\middleware\middleware_utilities\impl\middleware_utilities.cpp(325): warning C4267: “=”: 从“size_t”转换到“S32”，可能丢失数据
+e:\projects-mpeg2码流分析仪\软件工程\everstationii\middleware\middleware_utilities\impl\middleware_utilities.cpp(41): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
+e:\projects-mpeg2码流分析仪\软件工程\everstationii\middleware\middleware_utilities\impl\middleware_utilities.cpp(325): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
   MiddleWare_Utilities.vcxproj -> E:\Projects-Mpeg2码流分析仪\软件工程\EverStationII\Debug\x64\MiddleWare_UtilitiesD(x64).dll

@@ -27,13 +27,21 @@ void CNIT::Init(void)
 	m_astStreamInfo = NULL;
 	m_aucSectionFlag = NULL;
 
+	m_pszNetworkName = NULL;
+
 	Reset();
 }
 
 void CNIT::Reset(void)
 {
 	m_usNetworkID = 0xFFFF;
-	memset(m_pszNetworkName, 0x00, sizeof(m_pszNetworkName));
+	//memset(m_pszNetworkName, 0x00, sizeof(m_pszNetworkName));
+
+	if (m_pszNetworkName != NULL)
+	{
+		free(m_pszNetworkName);
+		m_pszNetworkName = NULL;
+	}
 
 	if (m_astStreamInfo != NULL)
 	{
@@ -55,14 +63,6 @@ int CNIT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 
 	int			 nStreamCount;
 
-	network_name_descriptor_t					network_name_descriptor;
-	multilingual_network_name_descriptor_t		multilingual_network_name_descriptor;
-	service_list_descriptor_t					service_list_descriptor;
-	satellite_delivery_system_descriptor_t		satellite_delivery_system_descriptor;
-	cable_delivery_system_descriptor_t			cable_delivery_system_descriptor;
-	terrestrial_delivery_system_descriptor_t	terrestrial_delivery_system_descriptor;
-
-
 	network_information_section_t				nit_section;
 	STREAM_INFO_t*								pStreamInfo;
 	STREAM_DESCRIPTION_t*						pStreamDescription;
@@ -83,17 +83,30 @@ int CNIT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 
 				if (nit_section.network_descriptors[descriptor_index].descriptor_tag == DVB_SI_NETWORK_NAME_DESCRIPTOR)
 				{
-					DVB_SI_decode_network_name_descriptor(descriptor_buf, descriptor_size, &network_name_descriptor);
-					strcpy_s(m_pszNetworkName, sizeof(m_pszNetworkName), network_name_descriptor.trimmed_network_name);
+					if (m_pszNetworkName == NULL)
+					{
+						network_name_descriptor_t					network_name_descriptor;
+						DVB_SI_decode_network_name_descriptor(descriptor_buf, descriptor_size, &network_name_descriptor);
+						//memcpy_s(m_pszNetworkName, sizeof(m_pszNetworkName), network_name_descriptor.trimmed_network_name, network_name_descriptor.trimmed_network_name_length);
+						//m_pszNetworkName[network_name_descriptor.trimmed_network_name_length] = '\0';
 
-					break;
+						m_pszNetworkName = (char*)malloc(network_name_descriptor.trimmed_network_name_length + 1);
+						memcpy(m_pszNetworkName, network_name_descriptor.trimmed_network_name, network_name_descriptor.trimmed_network_name_length);
+						m_pszNetworkName[network_name_descriptor.trimmed_network_name_length] = '\0';
+						break;
+					}
 				}
 				else if (nit_section.network_descriptors[descriptor_index].descriptor_tag == DVB_SI_MULTILINGUAL_NETWORK_NAME_DESCRIPTOR)
 				{
-					if (strlen(m_pszNetworkName) == 0)
+					if (m_pszNetworkName == NULL)
 					{
+						multilingual_network_name_descriptor_t		multilingual_network_name_descriptor;
 						DVB_SI_decode_multilingual_network_name_descriptor(descriptor_buf, descriptor_size, &multilingual_network_name_descriptor);
-						memcpy_s(m_pszNetworkName, sizeof(m_pszNetworkName), multilingual_network_name_descriptor.st[0].trimmed_network_name_char, sizeof(multilingual_network_name_descriptor.st[0].trimmed_network_name_char));
+						//memcpy_s(m_pszNetworkName, sizeof(m_pszNetworkName), multilingual_network_name_descriptor.st[0].trimmed_network_name_char, sizeof(multilingual_network_name_descriptor.st[0].trimmed_network_name_length));
+
+						m_pszNetworkName = (char*)malloc(multilingual_network_name_descriptor.st[0].trimmed_network_name_length + 1);
+						memcpy(m_pszNetworkName, multilingual_network_name_descriptor.st[0].trimmed_network_name_char, multilingual_network_name_descriptor.st[0].trimmed_network_name_length);
+						m_pszNetworkName[multilingual_network_name_descriptor.st[0].trimmed_network_name_length] = '\0';
 
 						break;
 					}
@@ -114,15 +127,17 @@ int CNIT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 					pStreamInfo->original_network_id = pStreamDescription->original_network_id;
 					pStreamInfo->transport_stream_id = pStreamDescription->transport_stream_id;
 
-					memset(&(pStreamInfo->service_list_descriptor), 0x00, sizeof(service_list_descriptor));
-					memset(&(pStreamInfo->satellite_delivery_system_descriptor), 0x00, sizeof(satellite_delivery_system_descriptor_t));
-					memset(&(pStreamInfo->cable_delivery_system_descriptor), 0x00, sizeof(cable_delivery_system_descriptor_t));
-					memset(&(pStreamInfo->terrestrial_delivery_system_descriptor), 0x00, sizeof(terrestrial_delivery_system_descriptor_t));
+					memset(&(pStreamInfo->service_list_descriptor), 0x00, sizeof(service_list_descriptor_t));
+					memset(&(pStreamInfo->uDelivery.satellite_delivery_system_descriptor), 0x00, sizeof(satellite_delivery_system_descriptor_t));
+					memset(&(pStreamInfo->uDelivery.cable_delivery_system_descriptor), 0x00, sizeof(cable_delivery_system_descriptor_t));
+					memset(&(pStreamInfo->uDelivery.terrestrial_delivery_system_descriptor), 0x00, sizeof(terrestrial_delivery_system_descriptor_t));
 
 					for (descriptor_index = 0; descriptor_index < pStreamDescription->transport_descriptor_count; descriptor_index++)
 					{
 						if (pStreamDescription->transport_descriptors[descriptor_index].descriptor_tag == DVB_SI_SERVICE_LIST_DESCRIPTOR)
 						{
+							service_list_descriptor_t					service_list_descriptor;
+
 							DVB_SI_decode_service_list_descriptor(pStreamDescription->transport_descriptors[descriptor_index].descriptor_buf,
 								pStreamDescription->transport_descriptors[descriptor_index].descriptor_size,
 								&service_list_descriptor);
@@ -130,24 +145,30 @@ int CNIT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 						}
 						else if (pStreamDescription->transport_descriptors[descriptor_index].descriptor_tag == DVB_SI_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR)
 						{
+							satellite_delivery_system_descriptor_t		satellite_delivery_system_descriptor;
+
 							DVB_SI_decode_satellite_delivery_system_descriptor(pStreamDescription->transport_descriptors[descriptor_index].descriptor_buf,
 								pStreamDescription->transport_descriptors[descriptor_index].descriptor_size,
 								&satellite_delivery_system_descriptor);
-							memcpy(&(pStreamInfo->satellite_delivery_system_descriptor), &satellite_delivery_system_descriptor, sizeof(satellite_delivery_system_descriptor));
+							memcpy(&(pStreamInfo->uDelivery.satellite_delivery_system_descriptor), &satellite_delivery_system_descriptor, sizeof(satellite_delivery_system_descriptor));
 						}
 						else if (pStreamDescription->transport_descriptors[descriptor_index].descriptor_tag == DVB_SI_CABLE_DELIVERY_SYSTEM_DESCRIPTOR)
 						{
+							cable_delivery_system_descriptor_t			cable_delivery_system_descriptor;
+
 							DVB_SI_decode_cable_delivery_system_descriptor(pStreamDescription->transport_descriptors[descriptor_index].descriptor_buf,
 								pStreamDescription->transport_descriptors[descriptor_index].descriptor_size,
 								&cable_delivery_system_descriptor);
-							memcpy(&(pStreamInfo->cable_delivery_system_descriptor), &cable_delivery_system_descriptor, sizeof(cable_delivery_system_descriptor));
+							memcpy(&(pStreamInfo->uDelivery.cable_delivery_system_descriptor), &cable_delivery_system_descriptor, sizeof(cable_delivery_system_descriptor));
 						}
 						else if (pStreamDescription->transport_descriptors[descriptor_index].descriptor_tag == DVB_SI_TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR)
 						{
+							terrestrial_delivery_system_descriptor_t	terrestrial_delivery_system_descriptor;
+
 							DVB_SI_decode_terrestrial_delivery_system_descriptor(pStreamDescription->transport_descriptors[descriptor_index].descriptor_buf,
 								pStreamDescription->transport_descriptors[descriptor_index].descriptor_size,
 								&terrestrial_delivery_system_descriptor);
-							memcpy(&(pStreamInfo->terrestrial_delivery_system_descriptor), &terrestrial_delivery_system_descriptor, sizeof(terrestrial_delivery_system_descriptor));
+							memcpy(&(pStreamInfo->uDelivery.terrestrial_delivery_system_descriptor), &terrestrial_delivery_system_descriptor, sizeof(terrestrial_delivery_system_descriptor));
 						}
 					}
 
@@ -173,7 +194,7 @@ uint16_t CNIT::GetNetworkID(void)
 int	CNIT::GetNetworkName(char* pszName, int size)
 {
 	int rtcode = MIDDLEWARE_PSISI_NO_ERROR;
-	if (pszName != NULL)
+	if ((pszName != NULL) && (m_pszNetworkName != NULL))
 	{
 		strcpy_s(pszName, size, m_pszNetworkName);
 		//memcpy_s(pszName, size, m_pszNetworkName, sizeof(m_pszNetworkName));

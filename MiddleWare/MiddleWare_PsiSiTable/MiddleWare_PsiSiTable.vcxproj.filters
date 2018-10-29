@@ -39,6 +39,9 @@
     <ClInclude Include="Include\MiddleWare_PSISI_Common.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\MiddleWare_PSISI_SysCapability.h">
+      <Filter>头文件\Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
