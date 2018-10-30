@@ -17,7 +17,7 @@
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TransportStream.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_TSPackets.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_Pcrs.h"
-#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
+#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_OCDCs.h"
 
 #include "TSMagic_GuiApi.h"
@@ -191,7 +191,7 @@ public:
 
 	CDB_TSPackets* GetTSPacketsDBase(void);
 	CDB_Pcrs* GetPcrsDBase(void);
-	CDB_PsiSiTables* GetPsiSiTablesDBase(void);
+	CDB_PsiSiObjs* GetPsiSiObjsDBase(void);
 	CDB_OCDCs* GetOCDCsDBase(void);
 
 	CTransportStream* GetTStream(void);
@@ -227,7 +227,7 @@ protected:
 
 	CDB_TSPackets		m_DB_TSPackets;
 	CDB_Pcrs			m_DB_Pcrs;
-	CDB_PsiSiTables		m_DB_PsiSiTables;
+	CDB_PsiSiObjs		m_DB_PsiSiObjs;
 	CDB_OCDCs			m_DB_OCDCs;
 
 	CTrigger_PsiSiSection	m_Trigger_Section;

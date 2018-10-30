@@ -113,9 +113,9 @@ void CListView_EpgSchedule::Update(uint16_t original_network_id, uint16_t transp
 {
 	CEIT* pEIT = NULL;
 	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
+	CDB_PsiSiObjs* pDB_PsiSiObjs = pTSMagicView->GetPsiSiObjsDBase();
 
-	pEIT = pDB_PsiSiTables->QueryEITSchBy3ID(original_network_id, transport_stream_id, service_id);
+	pEIT = pDB_PsiSiObjs->QueryEITSchBy3ID(original_network_id, transport_stream_id, service_id);
 	if (pEIT != NULL)
 	{
 		int				i, j;

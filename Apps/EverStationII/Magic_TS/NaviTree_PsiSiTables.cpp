@@ -1706,11 +1706,11 @@ void CNaviTree_PsiSiTables::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 				else
 				{
 					CTrigger_PsiSiSection* pSectionTrigger = pTSMagicView->GetSectionTrigger();
-					CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
+					CDB_PsiSiObjs* pDB_PsiSiObjs = pTSMagicView->GetPsiSiObjsDBase();
 					CPVT*			 pPVT = NULL;
 
 					usKeyID = (dwSelectItemData & 0xffff0000) >> 16;
-					pPVT = pDB_PsiSiTables->QueryByKey(usKeyID);
+					pPVT = pDB_PsiSiObjs->QueryByKey(usKeyID);
 					if (pPVT != NULL)
 					{
 						if (pPVT->IsNormalSectionSyntax() == 1)

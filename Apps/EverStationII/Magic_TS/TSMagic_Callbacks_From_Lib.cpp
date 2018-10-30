@@ -18,13 +18,13 @@
 
 #include "MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_Pcrs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_TSPackets.h"
-#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
+#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_ErrorCode.h"
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare/MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 
-int REPORT_PSISI_section(CDB_PsiSiTables* pDB_PsiSiTables, HWND hWnd, uint16_t PID, uint8_t* buf, int length)
+int REPORT_PSISI_section(CDB_PsiSiObjs* pDB_PsiSiObjs, HWND hWnd, uint16_t PID, uint8_t* buf, int length)
 {
 	int			rtcode = TSMAGIC_UNKNOWN_ERROR;
 	CPVT*		pPVT = NULL;
@@ -32,16 +32,16 @@ int REPORT_PSISI_section(CDB_PsiSiTables* pDB_PsiSiTables, HWND hWnd, uint16_t P
 	char		pszText[MAX_TXT_CHARS];
 	char		pszTemp[MAX_TXT_CHARS];
 
-	if ((pDB_PsiSiTables != NULL) && (buf != NULL) && (length >= 3))
+	if ((pDB_PsiSiObjs != NULL) && (buf != NULL) && (length >= 3))
 	{
 		private_section_t private_section; 
 		rtcode = MPEG_DVB_PVT_DecodeSection(buf, length, &private_section);
 		if (rtcode == SECTION_PARSE_NO_ERROR)
 		{
-			pPVT = pDB_PsiSiTables->QueryBy3ID(PID, private_section.table_id, private_section.table_id_extension);
+			pPVT = pDB_PsiSiObjs->QueryBy3ID(PID, private_section.table_id, private_section.table_id_extension);
 			if (pPVT == NULL)
 			{
-				pPVT = pDB_PsiSiTables->AppendRecord(PID, private_section.table_id, private_section.table_id_extension);
+				pPVT = pDB_PsiSiObjs->Append(PID, private_section.table_id, private_section.table_id_extension);
 			}
 
 			if (pPVT != NULL)

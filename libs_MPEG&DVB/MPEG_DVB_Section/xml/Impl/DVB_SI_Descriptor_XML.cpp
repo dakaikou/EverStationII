@@ -602,49 +602,43 @@ int DVB_SI_present_short_event_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLEleme
 //输入：buffer, 起始位置nIndex
 //返回：LPVOID指针
 //备注：2000.11 chendelin；
-int DVB_SI_decode_stream_identifier_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, stream_identifier_descriptor_t* pStreamIdentifierDescriptor)
+int DVB_SI_decode_stream_identifier_descriptor_to_xml(uint8_t* buf, int length, HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode, stream_identifier_descriptor_t* pStreamIdentifierDescriptor)
 {
 	int		rtcode = SECTION_PARSE_NO_ERROR;
+	//char   pszTemp[64];
+	//BITS_t bs;
 
-	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
-	{
-		stream_identifier_descriptor_t* pstream_identifier_descriptor = (pStreamIdentifierDescriptor == NULL) ? new stream_identifier_descriptor_t : pStreamIdentifierDescriptor;
-		rtcode = DVB_SI_decode_stream_identifier_descriptor(buf, length, pstream_identifier_descriptor);
-		DVB_SI_present_stream_identifier_descriptor_to_xml(pxmlDoc, pxmlParentNode, pstream_identifier_descriptor);
+	//if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (buf != NULL) && (length >= 2))
+	//{
+	//	tinyxml2::XMLElement* pxmlDescriptorNode = pxmlDoc->NewKeyValuePairElement(pxmlParentNode, "stream_identifier_descriptor()");
+	//	pxmlDoc->UpdateBufMark(pxmlDescriptorNode, buf, buf + length);
 
-		if (pStreamIdentifierDescriptor == NULL)
-		{
-			delete pstream_identifier_descriptor;
-		}
-	}
-	else
-	{
-		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	}
+	//	stream_identifier_descriptor_t* pstream_identifier_descriptor = (pStreamIdentifierDescriptor == NULL) ? new stream_identifier_descriptor_t : pStreamIdentifierDescriptor;
+	//	memset(pstream_identifier_descriptor, 0x00, sizeof(stream_identifier_descriptor_t));
 
-	return rtcode;
-}
+	//	BITS_map(&bs, buf, length);
 
-int DVB_SI_present_stream_identifier_descriptor_to_xml(HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, stream_identifier_descriptor_t* pstream_identifier_descriptor)
-{
-	int		rtcode = SECTION_PARSE_NO_ERROR;
-	char   pszField[64];
+	//	pstream_identifier_descriptor->descriptor_tag = BITS_get(&bs, 8);
+	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_tag", pstream_identifier_descriptor->descriptor_tag, 8, "uimsbf", NULL, &bs);
 
-	if ((pxmlDoc != NULL) && (pxmlParentNode != NULL) && (pstream_identifier_descriptor != NULL))
-	{
-		sprintf_s(pszField, sizeof(pszField), "stream_identifier_descriptor(tag: 0x%02X)", pstream_identifier_descriptor->descriptor_tag);
-		XMLElement* pxmlDescriptorNode = pxmlDoc->NewBranchElement(pxmlParentNode, pszField, NULL, pstream_identifier_descriptor->descriptor_length + 2);
+	//	pstream_identifier_descriptor->descriptor_length = BITS_get(&bs, 8);
+	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "descriptor_length", pstream_identifier_descriptor->descriptor_length, 8, "uimsbf", NULL, &bs);
 
-		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_tag", pstream_identifier_descriptor->descriptor_tag, 8, "uimsbf", NULL);
+	//	pstream_identifier_descriptor->component_tag = BITS_get(&bs, 8);
+	//	pxmlDoc->NewKeyValuePairElement(pxmlDescriptorNode, "component_tag", pstream_identifier_descriptor->component_tag, 8, "uimsbf", NULL, &bs);
 
-		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "descriptor_length", pstream_identifier_descriptor->descriptor_length, 8, "uimsbf", NULL);
+	//	sprintf_s(pszTemp, sizeof(pszTemp), "tag: 0x%02X, %d字节", pstream_identifier_descriptor->descriptor_tag, length);
+	//	pxmlDescriptorNode->SetAttribute("comment", pszTemp);
 
-		pxmlDoc->NewElementForBits(pxmlDescriptorNode, "component_tag", pstream_identifier_descriptor->component_tag, 8, "uimsbf", NULL);
-	}
-	else
-	{
-		rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
-	}
+	//	if (pStreamIdentifierDescriptor == NULL)
+	//	{
+	//		delete pstream_identifier_descriptor;
+	//	}
+	//}
+	//else
+	//{
+	//	rtcode = SECTION_PARSE_PARAMETER_ERROR;					//输入参数错误
+	//}
 
 	return rtcode;
 }

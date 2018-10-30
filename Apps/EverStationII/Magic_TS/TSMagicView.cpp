@@ -49,7 +49,7 @@ CTSMagicView::CTSMagicView()
 
 	m_DB_TSPackets.Reset();
 	m_DB_Pcrs.Reset();
-	m_DB_PsiSiTables.Reset();
+	m_DB_PsiSiObjs.Reset();
 	m_DB_OCDCs.Reset();
 
 	m_Trigger_Section.Reset();
@@ -655,7 +655,7 @@ void CTSMagicView::OnBtnOpen()
 
 					m_kThreadParams.pDB_Pcrs = &m_DB_Pcrs;
 					m_kThreadParams.pDB_TSPackets = &m_DB_TSPackets;
-					m_kThreadParams.pDB_PsiSiTables = &m_DB_PsiSiTables;
+					m_kThreadParams.pDB_PsiSiObjs = &m_DB_PsiSiObjs;
 					m_kThreadParams.pDB_OCDCs = &m_DB_OCDCs;
 					m_kThreadParams.pTStream = &m_transport_stream;
 					m_kThreadParams.pTrigger_Section = &m_Trigger_Section;
@@ -779,7 +779,7 @@ void CTSMagicView::OnBtnStream()
 
 			m_kThreadParams.pDB_Pcrs = &m_DB_Pcrs;
 			m_kThreadParams.pDB_TSPackets = &m_DB_TSPackets;
-			m_kThreadParams.pDB_PsiSiTables = &m_DB_PsiSiTables;
+			m_kThreadParams.pDB_PsiSiObjs = &m_DB_PsiSiObjs;
 			m_kThreadParams.pDB_OCDCs = &m_DB_OCDCs;
 			m_kThreadParams.pTStream = &m_transport_stream;
 			m_kThreadParams.pTrigger_Section = &m_Trigger_Section;
@@ -947,7 +947,7 @@ void CTSMagicView::GUIReset(void)
 	m_dlgSectionTriggerWaiting.ShowWindow(SW_HIDE);
 	m_dlgDsmccDownloadWaiting.ShowWindow(SW_HIDE);
 
-	m_DB_PsiSiTables.Reset();
+	m_DB_PsiSiObjs.Reset();
 	m_DB_OCDCs.Reset();
 	m_DB_TSPackets.Reset();
 	m_DB_Pcrs.Reset();
@@ -1610,9 +1610,9 @@ CDB_Pcrs* CTSMagicView::GetPcrsDBase(void)
 	return &m_DB_Pcrs;
 }
 
-CDB_PsiSiTables* CTSMagicView::GetPsiSiTablesDBase(void)
+CDB_PsiSiObjs* CTSMagicView::GetPsiSiObjsDBase(void)
 {
-	return &m_DB_PsiSiTables;
+	return &m_DB_PsiSiObjs;
 }
 
 CDB_OCDCs* CTSMagicView::GetOCDCsDBase(void)

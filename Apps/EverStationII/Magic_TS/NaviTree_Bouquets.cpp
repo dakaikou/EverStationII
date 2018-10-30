@@ -12,7 +12,7 @@ static char THIS_FILE[] = __FILE__;
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
-#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
+#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 
 #include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_SI_Utilities.h"
 #include "libs_Utilities\Include\XStream_Utilities.h"
@@ -211,10 +211,10 @@ void CNaviTree_Bouquets::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 		//uint16_t usKey = (code & 0xffff0000) >> 16;
 
 		CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-		CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
+		CDB_PsiSiObjs* pDB_PsiSiOjbs = pTSMagicView->GetPsiSiObjsDBase();
 
 		HALForXMLDoc xmlDoc;
-		pDB_PsiSiTables->BuildBouquetTree(code, &xmlDoc);
+		pDB_PsiSiOjbs->BuildBouquetTree(code, &xmlDoc);
 		m_pInfoTree->ShowXMLDoc(&xmlDoc);
 
 #ifdef _DEBUG

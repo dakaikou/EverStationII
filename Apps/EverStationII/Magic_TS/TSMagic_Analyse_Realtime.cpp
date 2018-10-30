@@ -15,7 +15,7 @@
 
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_TSPackets.h"
 #include "MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_Pcrs.h"
-#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
+#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_SectionSplicer.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_PESSplicer.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/MiddleWare_SectionSplicer_ErrorCode.h"
@@ -73,7 +73,7 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 	RECORD_TSPacket_t		TSPacketInfo;
 	CDB_TSPackets*			pDB_TSPackets = NULL;
 	CDB_Pcrs*				pDB_Pcrs = NULL;
-	CDB_PsiSiTables*		pDB_PsiSiTables = NULL;
+	CDB_PsiSiObjs*			pDB_PsiSiObjs = NULL;
 
 	CTrigger_PsiSiSection* pSectionTrigger = NULL;
 	CTrigger_TSPacket*		pTSPacketTrigger = NULL;
@@ -115,8 +115,8 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 		pDB_Pcrs = pThreadParams->pDB_Pcrs;
 		pDB_Pcrs->Reset();
 
-		pDB_PsiSiTables = pThreadParams->pDB_PsiSiTables;
-		pDB_PsiSiTables->Reset();
+		pDB_PsiSiObjs = pThreadParams->pDB_PsiSiObjs;
+		pDB_PsiSiObjs->Reset();
 
 		ptransport_stream->StartGetData();			//启动接收线程
 
@@ -301,7 +301,7 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 										section_buf = pSectionSplicer->m_pucSectionBuf;
 										section_length = pSectionSplicer->m_nSectionLength;
 
-										rtcode = REPORT_PSISI_section(pDB_PsiSiTables, pThreadParams->hMainWnd, pSectionSplicer->m_usPID, section_buf, section_length);
+										rtcode = REPORT_PSISI_section(pDB_PsiSiObjs, pThreadParams->hMainWnd, pSectionSplicer->m_usPID, section_buf, section_length);
 										if (rtcode != TSMAGIC_NO_ERROR)
 										{
 											if (rtcode == TSMAGIC_NOT_SUPPORTED_TABLE)

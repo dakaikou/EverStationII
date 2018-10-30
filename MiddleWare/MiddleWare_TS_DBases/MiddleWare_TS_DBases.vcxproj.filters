@@ -36,10 +36,10 @@
     <ClInclude Include="Include\MiddleWare_DB_Pcrs.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_DB_PsiSiTables.h">
+    <ClInclude Include="Include\MiddleWare_DB_OCDCs.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_DB_OCDCs.h">
+    <ClInclude Include="Include\MiddleWare_DB_PsiSiObjs.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -56,10 +56,10 @@
     <ClCompile Include="Impl\MiddleWare_DB_Pcrs.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\MiddleWare_DB_PsiSiTables.cpp">
+    <ClCompile Include="Impl\MiddleWare_DB_OCDCs.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\MiddleWare_DB_OCDCs.cpp">
+    <ClCompile Include="Impl\MiddleWare_DB_PsiSiObjs.cpp">
       <Filter>源文件\Impl</Filter>
     </ClCompile>
   </ItemGroup>

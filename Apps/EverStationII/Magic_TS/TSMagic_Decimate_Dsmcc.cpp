@@ -4,7 +4,7 @@
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_SectionSplicer.h"
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_TSPackets.h"
-#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
+#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_OCDCs.h"
 
 #include "libs_MPEG&DVB/MPEG_TSPacket/Include/Mpeg2_TS_ErrorCode.h"
@@ -40,7 +40,7 @@ void ts_dsmcc_download_loop(pthread_params_t pThreadParams)
 	char  pszDebug[MAX_TXT_CHARS];
 	S32	  old_ratio = 0;
 
-	CDB_PsiSiTables*			pDB_PsiSiTables = NULL;
+	CDB_PsiSiObjs*				pDB_PsiSiObjs = NULL;
 	CDB_OCDCs*					pDB_OCDCs = NULL;
 
 	DOWNLOAD_INFO_t				stDownloadInfo;
@@ -65,7 +65,7 @@ void ts_dsmcc_download_loop(pthread_params_t pThreadParams)
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_OPEN);
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_DOWNLOAD_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_OPEN);
 
-		pDB_PsiSiTables = pThreadParams->pDB_PsiSiTables;
+		pDB_PsiSiObjs = pThreadParams->pDB_PsiSiObjs;
 		pDB_OCDCs = pThreadParams->pDB_OCDCs;
 
 		//计算下载总的数据量
@@ -107,7 +107,7 @@ void ts_dsmcc_download_loop(pthread_params_t pThreadParams)
 			::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
 			::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_DOWNLOAD_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
 
-			pDB_PsiSiTables->DownloadDsmccTree(stDownloadInfo.usCandidatePID, pszDownloadRootPath);
+			pDB_PsiSiObjs->DownloadDsmccTree(stDownloadInfo.usCandidatePID, pszDownloadRootPath);
 
 			//判断应用程序是否中断了下载
 			if (pThreadParams->dsmcc_download_thread_running == 0)

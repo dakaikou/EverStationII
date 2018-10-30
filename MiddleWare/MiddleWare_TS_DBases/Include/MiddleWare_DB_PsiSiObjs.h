@@ -1,5 +1,5 @@
-#ifndef _TSMAGIC_DBASE_PSISITABLES_H_
-#define _TSMAGIC_DBASE_PSISITABLES_H_
+#ifndef _TSMAGIC_DBASE_PSISI_OBJS_H_
+#define _TSMAGIC_DBASE_PSISI_OBJS_H_
 
 #include <stdint.h>
 
@@ -27,11 +27,11 @@
 #define DEBUG_ECM			1
 #define DEBUG_EMM			1
 
-class _CDL_EXPORT CDB_PsiSiTables
+class _CDL_EXPORT CDB_PsiSiObjs
 {
 public:
-	CDB_PsiSiTables(void);
-	~CDB_PsiSiTables(void);
+	CDB_PsiSiObjs(void);
+	~CDB_PsiSiObjs(void);
 
 protected:
 
@@ -40,9 +40,9 @@ protected:
 	/*--------------------------------------------------
 			MPEG2 DVB syntax part
 	---------------------------------------------------*/
-	int			m_pvt_count;
-	CPVT**		m_apPVTs;									//由PID、table_id、table_id_extension共同确定一个表
-	int			m_memory_for_pvts;
+	int			m_obj_count;
+	CPVT**		m_apPsiSiObjs;									//由PID、table_id、table_id_extension共同确定一个表
+	int			m_memory_used_for_objs;
 
 protected:
 	void Init(void);
@@ -61,7 +61,7 @@ public:
 
 	void Reset(void);
 
-	CPVT* AppendRecord(uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
+	CPVT* Append(uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
 
 	CPVT* QueryByKey(uint32_t Key);
 	CPVT* QueryBy2ID(uint16_t PID, uint8_t table_id);

@@ -4,7 +4,7 @@
 #include "MiddleWare/MiddleWare_TransportStream\Include\MiddleWare_TransportStream.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_TSPackets.h"
 #include "MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_Pcrs.h"
-#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
+#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 
 void CALLBACK_REPORT_PCR_Record(RECORD_PCR_t* pPcrRecord);
 void CALLBACK_REPORT_PCR_Attribute(int ID, int curInterval, int curJitter, PCR_INTERVAL_ATTRIBUTE_t* pIntervalAttr=NULL, PCR_JITTER_ATTRIBUTE_t* pJitterAttr=NULL);

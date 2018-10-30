@@ -76,6 +76,7 @@ int CSDT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 			m_usOriginalNetworkID = sdt_section.original_network_id;
 			m_usTransportStreamID = sdt_section.transport_stream_id;
 
+			//每个流对应的SDT可能会有多个section，每个section会传一部分service信息，因此此处单独保存每个section携带的业务数据
 			nServiceCount = m_nServiceCount + sdt_section.service_count;
 			m_astServiceInfo = (SERVICE_INFO_t*)realloc(m_astServiceInfo, nServiceCount * sizeof(SERVICE_INFO_t));
 			if (m_astServiceInfo != NULL)
@@ -117,7 +118,7 @@ int CSDT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 								memcpy_s(m_astServiceInfo[m_nServiceCount].pszServiceName, sizeof(m_astServiceInfo[m_nServiceCount].pszServiceName),
 									service_descriptor.trimmed_service_name, copy_length);
 
-								m_astServiceInfo[m_nSectionCount].pszServiceName[copy_length] = '\0';
+								m_astServiceInfo[m_nServiceCount].pszServiceName[copy_length] = '\0';
 							}
 
 							if (service_descriptor.trimmed_service_provider_name_length > 0)
@@ -128,7 +129,7 @@ int CSDT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 								memcpy_s(m_astServiceInfo[m_nServiceCount].pszServiceProviderName, sizeof(m_astServiceInfo[m_nServiceCount].pszServiceProviderName),
 									service_descriptor.trimmed_service_provider_name, copy_length);
 
-								m_astServiceInfo[m_nSectionCount].pszServiceProviderName[copy_length] = '\0';
+								m_astServiceInfo[m_nServiceCount].pszServiceProviderName[copy_length] = '\0';
 							}
 						}
 						else if (preserved_descriptor->descriptor_tag == DVB_SI_MULTILINGUAL_SERVICE_NAME_DESCRIPTOR)
@@ -151,7 +152,7 @@ int CSDT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 										multilingual_service_name_descriptor.st[0].trimmed_service_name_char,
 										copy_length);
 
-									m_astServiceInfo[m_nSectionCount].pszServiceName[copy_length] = '\0';
+									m_astServiceInfo[m_nServiceCount].pszServiceName[copy_length] = '\0';
 								}
 
 								if (multilingual_service_name_descriptor.st[0].service_provider_name_length > 0)
@@ -167,7 +168,7 @@ int CSDT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 										multilingual_service_name_descriptor.st[0].trimmed_service_provider_name_char,
 										copy_length);
 
-									m_astServiceInfo[m_nSectionCount].pszServiceProviderName[copy_length] = '\0';
+									m_astServiceInfo[m_nServiceCount].pszServiceProviderName[copy_length] = '\0';
 								}
 							}
 

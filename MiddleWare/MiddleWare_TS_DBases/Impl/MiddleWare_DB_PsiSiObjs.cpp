@@ -4,7 +4,7 @@
 #include <time.h>
 #include <Shlwapi.h>
 
-#include "../Include/MiddleWare_DB_PsiSiTables.h"
+#include "../Include/MiddleWare_DB_PsiSiObjs.h"
 #include "../Include/MiddleWare_DB_ErrorCode.h"
 
 #include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_table_id.h"
@@ -21,21 +21,21 @@
 #define min(a,b)  (((a)<(b))?(a):(b))
 #endif
 
-CDB_PsiSiTables::CDB_PsiSiTables()
+CDB_PsiSiObjs::CDB_PsiSiObjs()
 {
 	Init();
 }
 
-CDB_PsiSiTables::~CDB_PsiSiTables()
+CDB_PsiSiObjs::~CDB_PsiSiObjs()
 {
 	Reset();
 }
 
-void CDB_PsiSiTables::Init(void)
+void CDB_PsiSiObjs::Init(void)
 {
 	m_memory_used = 0;
 
-	m_apPVTs = NULL;
+	m_apPsiSiObjs = NULL;
 
 	ResetRecords();
 
@@ -54,7 +54,7 @@ void CDB_PsiSiTables::Init(void)
 }
 
 
-void CDB_PsiSiTables::Reset(void)
+void CDB_PsiSiObjs::Reset(void)
 {
 	ResetRecords();
 
@@ -65,41 +65,41 @@ void CDB_PsiSiTables::Reset(void)
 	m_memory_used = 0;
 }
 
-void CDB_PsiSiTables::ResetRecords(void)
+void CDB_PsiSiObjs::ResetRecords(void)
 {
 	int			index;
 	CPVT*		pPVT;
 
-	if (m_apPVTs != NULL)
+	if (m_apPsiSiObjs != NULL)
 	{
-		for (index = 0; index < m_pvt_count; index++)
+		for (index = 0; index < m_obj_count; index++)
 		{
-			pPVT = m_apPVTs[index];
+			pPVT = m_apPsiSiObjs[index];
 
 			if (pPVT != NULL)
 			{
 				pPVT->Reset();					//无法复位派生类
 				delete pPVT;
 
-				m_apPVTs[index] = NULL;
+				m_apPsiSiObjs[index] = NULL;
 			}
 		}
 
-		free(m_apPVTs);
+		free(m_apPsiSiObjs);
 	}
 
-	m_apPVTs = NULL;
-	m_pvt_count = 0;
-	m_memory_for_pvts = 0;
+	m_apPsiSiObjs = NULL;
+	m_obj_count = 0;
+	m_memory_used_for_objs = 0;
 }
 
-CPVT* CDB_PsiSiTables::QueryByKey(uint32_t Key)
+CPVT* CDB_PsiSiObjs::QueryByKey(uint32_t Key)
 {
 	CPVT* pPVT = NULL;
 
-	for (int pvt_index = 0; pvt_index < m_pvt_count; pvt_index++)
+	for (int pvt_index = 0; pvt_index < m_obj_count; pvt_index++)
 	{
-		CPVT* pTemp = m_apPVTs[pvt_index];
+		CPVT* pTemp = m_apPsiSiObjs[pvt_index];
 		if (pTemp != NULL)
 		{
 			if (Key == pTemp->GetKey()) {
@@ -112,13 +112,13 @@ CPVT* CDB_PsiSiTables::QueryByKey(uint32_t Key)
 	return pPVT;
 }
 
-CPVT* CDB_PsiSiTables::QueryBy3ID(uint16_t PID, uint8_t table_id, uint16_t table_id_extension)
+CPVT* CDB_PsiSiObjs::QueryBy3ID(uint16_t PID, uint8_t table_id, uint16_t table_id_extension)
 {
 	CPVT* pPVT = NULL;
 
-	for (int pvt_index = 0; pvt_index < m_pvt_count; pvt_index++)
+	for (int pvt_index = 0; pvt_index < m_obj_count; pvt_index++)
 	{
-		CPVT* pTemp = m_apPVTs[pvt_index];
+		CPVT* pTemp = m_apPsiSiObjs[pvt_index];
 		if (pTemp != NULL)
 		{
 			if ((PID == pTemp->GetPID()) &&
@@ -134,13 +134,13 @@ CPVT* CDB_PsiSiTables::QueryBy3ID(uint16_t PID, uint8_t table_id, uint16_t table
 	return pPVT;
 }
 
-CPVT* CDB_PsiSiTables::QueryBy2ID(uint16_t PID, uint8_t table_id)
+CPVT* CDB_PsiSiObjs::QueryBy2ID(uint16_t PID, uint8_t table_id)
 {
 	CPVT* pPVT = NULL;
 
-	for (int pvt_index = 0; pvt_index < m_pvt_count; pvt_index++)
+	for (int pvt_index = 0; pvt_index < m_obj_count; pvt_index++)
 	{
-		CPVT* pTemp = m_apPVTs[pvt_index];
+		CPVT* pTemp = m_apPsiSiObjs[pvt_index];
 		if (pTemp != NULL)
 		{
 			if ((PID == pTemp->GetPID()) &&
@@ -155,7 +155,7 @@ CPVT* CDB_PsiSiTables::QueryBy2ID(uint16_t PID, uint8_t table_id)
 	return pPVT;
 }
 
-CPVT* CDB_PsiSiTables::AppendRecord(uint16_t PID, uint8_t table_id, uint16_t table_id_extension)
+CPVT* CDB_PsiSiObjs::Append(uint16_t PID, uint8_t table_id, uint16_t table_id_extension)
 {
 	CPVT* pPVT = NULL;
 
@@ -295,26 +295,26 @@ CPVT* CDB_PsiSiTables::AppendRecord(uint16_t PID, uint8_t table_id, uint16_t tab
 
 	if (pPVT != NULL)
 	{
-		m_pvt_count++;
+		m_obj_count++;
 
-		m_apPVTs = (CPVT**)realloc(m_apPVTs, m_pvt_count * sizeof(CPVT*));
-		if (m_apPVTs != NULL)
+		m_apPsiSiObjs = (CPVT**)realloc(m_apPsiSiObjs, m_obj_count * sizeof(CPVT*));
+		if (m_apPsiSiObjs != NULL)
 		{
-			m_apPVTs[m_pvt_count - 1] = pPVT;
-			m_memory_for_pvts = m_pvt_count * sizeof(CPVT*);
+			m_apPsiSiObjs[m_obj_count - 1] = pPVT;
+			m_memory_used_for_objs = m_obj_count * sizeof(CPVT*);
 		}
 	}
 
 	return pPVT;
 }
 
-CEIT* CDB_PsiSiTables::QueryEITSchBy3ID(uint16_t usOriginalNetworkID, uint16_t usTransportStreamID, uint16_t usServiceID)
+CEIT* CDB_PsiSiObjs::QueryEITSchBy3ID(uint16_t usOriginalNetworkID, uint16_t usTransportStreamID, uint16_t usServiceID)
 {
 	CEIT* pEIT = NULL;
 
-	for (int i = 0; i < m_pvt_count; i++)
+	for (int i = 0; i < m_obj_count; i++)
 	{
-		CPVT* pPVT = m_apPVTs[i];
+		CPVT* pPVT = m_apPsiSiObjs[i];
 		uint8_t ucTableID = pPVT->GetTableID();
 		if ((ucTableID >= TABLE_ID_EIT_SCH_ACTUAL_0) && (ucTableID <= TABLE_ID_EIT_SCH_OTHER_F))
 		{
@@ -333,13 +333,13 @@ CEIT* CDB_PsiSiTables::QueryEITSchBy3ID(uint16_t usOriginalNetworkID, uint16_t u
 	return pEIT;
 }
 
-CSDT* CDB_PsiSiTables::QuerySDTBy2ID(uint16_t usOriginalNetworkID, uint16_t usTransportStreamID)
+CSDT* CDB_PsiSiObjs::QuerySDTBy2ID(uint16_t usOriginalNetworkID, uint16_t usTransportStreamID)
 {
 	CSDT* pSDT = NULL;
 
-	for (int i = 0; i < m_pvt_count; i++)
+	for (int i = 0; i < m_obj_count; i++)
 	{
-		CPVT* pPVT = m_apPVTs[i];
+		CPVT* pPVT = m_apPsiSiObjs[i];
 		uint8_t ucTableID = pPVT->GetTableID();
 		if ((ucTableID == TABLE_ID_SDT_ACTUAL) || (ucTableID == TABLE_ID_SDT_OTHER))
 		{
@@ -357,13 +357,13 @@ CSDT* CDB_PsiSiTables::QuerySDTBy2ID(uint16_t usOriginalNetworkID, uint16_t usTr
 	return pSDT;
 }
 
-CSDT* CDB_PsiSiTables::QuerySDTByTSID(uint16_t usTransportStreamID)
+CSDT* CDB_PsiSiObjs::QuerySDTByTSID(uint16_t usTransportStreamID)
 {
 	CSDT* pSDT = NULL;
 
-	for (int i = 0; i < m_pvt_count; i++)
+	for (int i = 0; i < m_obj_count; i++)
 	{
-		CPVT* pPVT = m_apPVTs[i];
+		CPVT* pPVT = m_apPsiSiObjs[i];
 		uint8_t ucTableID = pPVT->GetTableID();
 		if ((ucTableID == TABLE_ID_SDT_ACTUAL) || (ucTableID == TABLE_ID_SDT_OTHER))
 		{
@@ -380,13 +380,13 @@ CSDT* CDB_PsiSiTables::QuerySDTByTSID(uint16_t usTransportStreamID)
 	return pSDT;
 }
 
-CNIT* CDB_PsiSiTables::QueryNITByID(uint16_t usNetworkID)
+CNIT* CDB_PsiSiObjs::QueryNITByID(uint16_t usNetworkID)
 {
 	CNIT* pNIT = NULL;
 
-	for (int i = 0; i < m_pvt_count; i++)
+	for (int i = 0; i < m_obj_count; i++)
 	{
-		CPVT* pPVT = m_apPVTs[i];
+		CPVT* pPVT = m_apPsiSiObjs[i];
 		uint8_t ucTableID = pPVT->GetTableID();
 		if ((ucTableID == TABLE_ID_NIT_ACTUAL) || (ucTableID == TABLE_ID_NIT_OTHER))
 		{
@@ -403,27 +403,16 @@ CNIT* CDB_PsiSiTables::QueryNITByID(uint16_t usNetworkID)
 	return pNIT;
 }
 
-CPAT* CDB_PsiSiTables::QueryPAT(void)
+CPAT* CDB_PsiSiObjs::QueryPAT(void)
 {
 	CPAT* pPAT = NULL;
 
 	pPAT = (CPAT*)QueryBy2ID(0x0000, TABLE_ID_PAT);
 
-	//for (int i = 0; i < m_pvt_count; i++)
-	//{
-	//	CPVT* pPVT = m_apPVTs[i];
-	//	uint8_t ucTableID = pPVT->GetTableID();
-	//	if (ucTableID == TABLE_ID_PAT)
-	//	{
-	//		CPAT* pTemp = (CPAT*)pPVT;
-	//		break;
-	//	}
-	//}
-
 	return pPAT;
 }
 
-CSDT* CDB_PsiSiTables::QueryActualSDT(void)
+CSDT* CDB_PsiSiObjs::QueryActualSDT(void)
 {
 	CSDT* pSDT = NULL;
 
@@ -432,13 +421,13 @@ CSDT* CDB_PsiSiTables::QueryActualSDT(void)
 	return pSDT;
 }
 
-CDSMCC_UNM* CDB_PsiSiTables::QueryDsmccUNM_DSI(uint16_t PID)
+CDSMCC_UNM* CDB_PsiSiObjs::QueryDsmccUNM_DSI(uint16_t PID)
 {
 	CDSMCC_UNM* pDSMCC = NULL;
 
-	for (int i = 0; i < m_pvt_count; i++)
+	for (int i = 0; i < m_obj_count; i++)
 	{
-		CPVT* pPVT = m_apPVTs[i];
+		CPVT* pPVT = m_apPsiSiObjs[i];
 		if ((pPVT->GetPID() == PID) && (pPVT->GetTableID() == TABLE_ID_DSMCC_UNM))
 		{
 			CDSMCC_UNM* pTempTable = (CDSMCC_UNM*)pPVT;
@@ -453,7 +442,7 @@ CDSMCC_UNM* CDB_PsiSiTables::QueryDsmccUNM_DSI(uint16_t PID)
 	return pDSMCC;
 }
 
-int CDB_PsiSiTables::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
+int CDB_PsiSiObjs::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 
@@ -580,7 +569,7 @@ int CDB_PsiSiTables::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, HALForXM
 }
 
 //递归函数，如果当前路径是个子目录，则递归调用本函数
-int CDB_PsiSiTables::OC_DownloadDirectoryAndFiles(uint16_t PID, uint16_t moduleId_for_srg, uint32_t objectKey_data, char* pszRootPath)
+int CDB_PsiSiObjs::OC_DownloadDirectoryAndFiles(uint16_t PID, uint16_t moduleId_for_srg, uint32_t objectKey_data, char* pszRootPath)
 {
 	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 
@@ -670,7 +659,7 @@ int CDB_PsiSiTables::OC_DownloadDirectoryAndFiles(uint16_t PID, uint16_t moduleI
 }
 
 //递归函数，如果当前路径是个子目录，则递归调用本函数
-int CDB_PsiSiTables::OC_BuildDirectory(uint16_t PID, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, uint16_t moduleId_for_srg, uint32_t objectKey_data)
+int CDB_PsiSiObjs::OC_BuildDirectory(uint16_t PID, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, uint16_t moduleId_for_srg, uint32_t objectKey_data)
 {
 	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 
@@ -727,7 +716,7 @@ int CDB_PsiSiTables::OC_BuildDirectory(uint16_t PID, HALForXMLDoc* pxmlDoc, XMLE
 	return rtcode;
 }
 
-int CDB_PsiSiTables::DSMCC_BuildDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t carousel_type_id, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
+int CDB_PsiSiObjs::DSMCC_BuildDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t carousel_type_id, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 
@@ -824,7 +813,7 @@ int CDB_PsiSiTables::DSMCC_BuildDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t 
 	return rtcode;
 }
 
-int CDB_PsiSiTables::DSMCC_DownloadDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t carousel_type_id, char* pszRootPath)
+int CDB_PsiSiObjs::DSMCC_DownloadDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t carousel_type_id, char* pszRootPath)
 {
 	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 
@@ -877,7 +866,7 @@ int CDB_PsiSiTables::DSMCC_DownloadDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8
 //usPID  -- input, DSMCC 的PID；
 //pxmlDoc -- output，所生成的DSMCC树通过此参数反馈给调用者
 //返回值，程序处理状态码。
-int CDB_PsiSiTables::BuildDsmccTree(uint16_t usPID, HALForXMLDoc* pxmlDoc)
+int CDB_PsiSiObjs::BuildDsmccTree(uint16_t usPID, HALForXMLDoc* pxmlDoc)
 {
 	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 
@@ -932,7 +921,7 @@ int CDB_PsiSiTables::BuildDsmccTree(uint16_t usPID, HALForXMLDoc* pxmlDoc)
 	return rtcode;
 }
 
-int CDB_PsiSiTables::DownloadDsmccTree(uint16_t usPID, char* pszRootPath)
+int CDB_PsiSiObjs::DownloadDsmccTree(uint16_t usPID, char* pszRootPath)
 {
 	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 
@@ -973,7 +962,7 @@ int CDB_PsiSiTables::DownloadDsmccTree(uint16_t usPID, char* pszRootPath)
 //uiCode  -- input, 高16位表示BAT在数据库中的唯一Key，低16位表示bouquet_id；
 //pxmlDoc -- output，所生成的bouquet树通过此参数反馈给调用者
 //返回值，程序处理状态码。
-int CDB_PsiSiTables::BuildBouquetTree(uint32_t uiCode, HALForXMLDoc* pxmlDoc)
+int CDB_PsiSiObjs::BuildBouquetTree(uint32_t uiCode, HALForXMLDoc* pxmlDoc)
 {
 	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 	STREAM_INFO_t stStreamInfoInBAT;

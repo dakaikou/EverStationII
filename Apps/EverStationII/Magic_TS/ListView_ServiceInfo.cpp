@@ -20,7 +20,7 @@ static char THIS_FILE[] = __FILE__;
 
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
-#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
+#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 
 #include "..\Common\define.h"
 
@@ -151,11 +151,11 @@ void CListView_ServiceInfo::Update(uint16_t network_id, uint16_t transport_strea
 	//char*					pstr_service_provider;
 
 	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
+	CDB_PsiSiObjs* pDB_PsiSiObjs = pTSMagicView->GetPsiSiObjsDBase();
 
 	if (network_id != 0xFFFF)
 	{
-		pNIT = pDB_PsiSiTables->QueryNITByID(network_id);
+		pNIT = pDB_PsiSiObjs->QueryNITByID(network_id);
 
 		if (pNIT != NULL)
 		{
@@ -220,7 +220,7 @@ void CListView_ServiceInfo::Update(uint16_t network_id, uint16_t transport_strea
 					nItem++;
 				}
 
-				pSDT = pDB_PsiSiTables->QuerySDTBy2ID(network_id, transport_stream_id);
+				pSDT = pDB_PsiSiObjs->QuerySDTBy2ID(network_id, transport_stream_id);
 
 				if (pSDT != NULL)
 				{
@@ -231,8 +231,6 @@ void CListView_ServiceInfo::Update(uint16_t network_id, uint16_t transport_strea
 						listCtrl.SetItemText(nItem, 1, "业务信息");
 						sprintf_s(pszServiceID, sizeof(pszServiceID), "0x%04X (%d)", stServiceInfo.service_id, stServiceInfo.service_id);
 						DVB_SI_NumericCoding2Text_ServiceType(stServiceInfo.service_type, pszServiceType, sizeof(pszServiceType));
-						//pstr_service_name = DVB_SI_StringPrefixTrim(stServiceInfo.service_name);
-						//pstr_service_provider = DVB_SI_StringPrefixTrim(stServiceInfo.service_provider_name);
 						sprintf_s(pszServiceInfo, sizeof(pszServiceInfo), "ID:%s, 业务类型:%s, free_CA_mode:%d, 名称:%s, 提供者:%s", 
 							pszServiceID, pszServiceType, stServiceInfo.free_CA_mode, stServiceInfo.pszServiceName, stServiceInfo.pszServiceProviderName);
 						listCtrl.SetItemText(nItem, 2, pszServiceInfo);

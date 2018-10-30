@@ -21,7 +21,7 @@ static char THIS_FILE[] = __FILE__;
 #include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_DSMCC_Table.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_TSPackets.h"
 #include "MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_Pcrs.h"
-#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
+#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 
 #include "libs_Utilities\Include\XStream_Utilities.h"
 
@@ -665,7 +665,7 @@ void CDlg_TSAnalyzer_Overview::UpdatePacketInfo(void)
 
 	//RECORD_TSPacket_t	TSPacketRecord;
 	CDB_TSPackets*	pDB_TSPackets = pTSMagicView->GetTSPacketsDBase();
-	CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
+	CDB_PsiSiObjs* pDB_PsiSiObjs = pTSMagicView->GetPsiSiObjsDBase();
 
 	if (m_nRunning == 1)
 	{

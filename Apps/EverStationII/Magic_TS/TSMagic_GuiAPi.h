@@ -8,7 +8,7 @@
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TransportStream.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_TSPackets.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_Pcrs.h"
-#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
+#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_OCDCs.h"
 
 #include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/Mpeg2_TS_packet.h"
@@ -107,7 +107,7 @@ typedef struct thread_params_s
 
 	CDB_TSPackets*		   pDB_TSPackets;
 	CDB_Pcrs*			   pDB_Pcrs;
-	CDB_PsiSiTables*	   pDB_PsiSiTables;
+	CDB_PsiSiObjs*		   pDB_PsiSiObjs;
 	CDB_OCDCs*			   pDB_OCDCs;
 
 	CTrigger_PsiSiSection*  pTrigger_Section;

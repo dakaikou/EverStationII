@@ -21,7 +21,7 @@ static char THIS_FILE[] = __FILE__;
 #include "libs_Utilities\Include\XStream_Utilities.h"
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
-#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
+#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 
 #include "TSMagic_Decimate_Dsmcc.h"
@@ -250,10 +250,10 @@ void CNaviList_DSMCCs::UpdatePMT(CPMT* pPMT)
 					}
 
 					CTSMagicView* pView = CTSMagicView::GetView();
-					CDB_PsiSiTables* pDB_PsiSiTables = pView->GetPsiSiTablesDBase();
+					CDB_PsiSiObjs* pDB_PsiSiObjs = pView->GetPsiSiObjsDBase();
 
 					//从SDT表中倒查业务名称
-					CSDT* pSDT = pDB_PsiSiTables->QueryActualSDT();		
+					CSDT* pSDT = pDB_PsiSiObjs->QueryActualSDT();
 					if (pSDT != NULL)
 					{
 						rtcode = pSDT->GetServiceInfoByID(usProgramNumber, &stServiceInfo);
@@ -264,7 +264,7 @@ void CNaviList_DSMCCs::UpdatePMT(CPMT* pPMT)
 					}
 
 					//在已有库中查询一下DSMCC表的状态，必须要查到DSMCC_UNM DSI的存在
-					CPVT* pPVT = pDB_PsiSiTables->QueryDsmccUNM_DSI(stEsInfo.elementary_PID);	//直接查DSI
+					CPVT* pPVT = pDB_PsiSiObjs->QueryDsmccUNM_DSI(stEsInfo.elementary_PID);	//直接查DSI
 					if (pPVT != NULL)
 					{
 						listCtrl.SetItemText(insert_index, LISTITEM_COL_INDEX_MARK, "+");
@@ -463,10 +463,10 @@ void CNaviList_DSMCCs::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 		usPID = (uint16_t)listCtrl.GetItemData(nSel);
 
 		CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-		CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
+		CDB_PsiSiObjs* pDB_PsiSiObjs = pTSMagicView->GetPsiSiObjsDBase();
 
 		HALForXMLDoc xmlDoc;
-		pDB_PsiSiTables->BuildDsmccTree(usPID, &xmlDoc);
+		pDB_PsiSiObjs->BuildDsmccTree(usPID, &xmlDoc);
 		m_pInfoTree->ShowXMLDoc(&xmlDoc);
 
 #ifdef _DEBUG

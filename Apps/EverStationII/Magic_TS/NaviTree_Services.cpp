@@ -12,7 +12,7 @@ static char THIS_FILE[] = __FILE__;
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
-#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiTables.h"
+#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 
 #include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
 #include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
@@ -157,7 +157,7 @@ void CNaviTree_Services::UpdateNIT(CNIT* pNIT)
 	int				item_param_id;
 
 	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
+	CDB_PsiSiObjs* pDB_PsiSiObjs = pTSMagicView->GetPsiSiObjsDBase();
 
 	TreeCtrlItem.item.pszText = pszText;
 	TreeCtrlItem.item.mask = TVIF_TEXT | TVIF_PARAM;
