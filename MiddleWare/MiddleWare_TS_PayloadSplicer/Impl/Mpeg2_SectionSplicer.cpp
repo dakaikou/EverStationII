@@ -6,7 +6,7 @@
 
 #include "../Include/MiddleWare_SectionSplicer_ErrorCode.h"
 #include "../Include/Mpeg2_SectionSplicer.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
 
 CSectionSplicer::CSectionSplicer(void)
 {
@@ -39,23 +39,23 @@ void CSectionSplicer::Reset(void)
 	m_nWriteSize = 0;
 }
 
-S32 CSectionSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
+int CSectionSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 {
-	S32		rtcode = SECTION_SPLICE_UNKNOWN_ERROR;
+	int		rtcode = SECTION_SPLICE_UNKNOWN_ERROR;
 
 	//section syntax
-	U8*		section_buf;
-	S32		section_length;
-	S32		pointer_field;
+	uint8_t*		section_buf;
+	int		section_length;
+	int		pointer_field;
 
-	U8*		payload_buf;
-	S32		payload_length;
+	uint8_t*		payload_buf;
+	int		payload_length;
 
 	//control part
-	S32		bAligned = 0;
-	S32		copy_length;
+	int		bAligned = 0;
+	int		copy_length;
 
-//	U8		ucOldTableID = 0xFF;
+//	uint8_t		ucOldTableID = 0xFF;
 
 	if (ptransport_packet != NULL)
 	{
@@ -110,7 +110,7 @@ S32 CSectionSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 					{
 						if (payload_length >= 3)
 						{
-							S32 maybe_padding = 1;
+							int maybe_padding = 1;
 
 							//Ìî³ä×Ö½Ú¼ì²é
 							for (int i = 0; i < payload_length; i++)
@@ -138,7 +138,7 @@ S32 CSectionSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 
 									m_nWriteSize = 0;
 									assert(m_pucSectionBuf == NULL);
-									m_pucSectionBuf = (U8*)malloc(m_nSectionLength);
+									m_pucSectionBuf = (uint8_t*)malloc(m_nSectionLength);
 									if (m_pucSectionBuf != NULL)
 									{
 										copy_length = (payload_length > m_nSectionLength) ? m_nSectionLength : payload_length;

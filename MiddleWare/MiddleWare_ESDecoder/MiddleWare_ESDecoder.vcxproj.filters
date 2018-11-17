@@ -13,41 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="头文件\Include">
-      <UniqueIdentifier>{4eaebb4f-c5dc-4922-9556-ebc1de3bb47c}</UniqueIdentifier>
+    <Filter Include="头文件\common">
+      <UniqueIdentifier>{b9b8e15a-78d5-4f51-aed8-0cab1869afca}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\Include\common">
-      <UniqueIdentifier>{449bde97-ebe5-4cb9-bbcd-df0f40b0b881}</UniqueIdentifier>
+    <Filter Include="源文件\common">
+      <UniqueIdentifier>{510fbc6b-80e7-4eb8-9dd4-8e426dc5bbda}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Impl">
-      <UniqueIdentifier>{f223df5f-6c14-49a2-be99-3de1c7c345e8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Impl\common">
-      <UniqueIdentifier>{713fe72d-b843-4c47-87c4-8c8f6d94b59d}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Include\common\audio_common.h">
-      <Filter>头文件\Include\common</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\common\file_common.h">
-      <Filter>头文件\Include\common</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\common\video_common.h">
-      <Filter>头文件\Include\common</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\ESDecoder.h">
-      <Filter>头文件\Include</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\ESDecoder_segment_tools.h">
-      <Filter>头文件\Include</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\common\video_width_height_api.h">
-      <Filter>头文件\Include\common</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\ESDecoder_ErrorCode.h">
-      <Filter>头文件\Include</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -57,22 +28,42 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Impl\ESDecoder.cpp">
-      <Filter>源文件\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\VESDecoder.cpp">
-      <Filter>源文件\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\VideoDecoder_YUV.cpp">
-      <Filter>源文件\Impl</Filter>
+      <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Impl\ESDecoder_segment_tools.cpp">
-      <Filter>源文件\Impl</Filter>
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\common\video_width_height_api.cpp">
-      <Filter>源文件\Impl\common</Filter>
+    <ClCompile Include="Impl\VESDecoder.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\VideoDecoder_YUV.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\ESDecoder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ESDecoder_ErrorCode.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ESDecoder_segment_tools.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\common\audio_common.h">
+      <Filter>头文件\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\common\file_common.h">
+      <Filter>头文件\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\common\video_common.h">
+      <Filter>头文件\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\videodecoder_yuv.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

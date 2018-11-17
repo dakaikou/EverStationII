@@ -13,12 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="头文件\Include">
-      <UniqueIdentifier>{738e55ef-ed32-42d7-810e-9d56e3743679}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Impl">
-      <UniqueIdentifier>{734c4d7a-e209-47a4-83cf-586e065a2f74}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -27,11 +21,11 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Compile.h">
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_Utilities\Include\MiddleWare_Utilities_MediaFile.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_Utilities.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_Utilities\Include\MiddleWare_Utilities_Video.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -41,8 +35,11 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\MiddleWare_Utilities.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_Utilities\Impl\MiddleWare_Utilities_MediaFile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_Utilities\Impl\MiddleWare_Utilities_Video.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

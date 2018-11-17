@@ -6,8 +6,10 @@
 #include <fcntl.h>
 #include <assert.h>
 
+#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
+#include "thirdparty_AL\TALForDirectX\Include\TALForDirectDraw.h"
+
 #include "../Include/common/video_common.h"
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "../Include/VESDecoder.h"
 
 CVESDecoder::CVESDecoder(void)
@@ -35,7 +37,7 @@ void CVESDecoder::Reset(void)
 	CESDecoder::Reset();
 }
 
-S32 CVESDecoder::OpenVideo(HWND hWnd)
+int CVESDecoder::OpenVideo(HWND hWnd)
 {
 	HRESULT ddRval;
 
@@ -43,14 +45,14 @@ S32 CVESDecoder::OpenVideo(HWND hWnd)
 	m_nDebugFrameCount = 0;
 	m_dwTimeCount = 0x00000000;
 
-	m_pDirectDraw = new CHALForDirectDraw;
+	m_pDirectDraw = new CTALForDirectDraw;
 
 	ddRval = m_pDirectDraw->OpenVideo(hWnd, m_VidDecodeInfo.luma_width, m_VidDecodeInfo.luma_height, m_VidDecodeInfo.pszFourCC);
 
 	return ddRval;
 }
 
-S32 CVESDecoder::CloseVideo(void)
+int CVESDecoder::CloseVideo(void)
 {
 	m_hVidWnd = NULL;
 
@@ -61,7 +63,7 @@ S32 CVESDecoder::CloseVideo(void)
 	return ddRval;
 }
 
-S32 CVESDecoder::DirectDraw_Render_yuv(void)
+int CVESDecoder::DirectDraw_Render_yuv(void)
 {
 	assert(m_pDirectDraw != NULL);
 
@@ -81,7 +83,7 @@ S32 CVESDecoder::DirectDraw_Render_yuv(void)
 
 		if (dwTickDiff >= 2000)
 		{
-			U32 fps = (m_nDebugFrameCount - 1) * 2000000 / dwTickDiff;
+			uint32_t fps = (m_nDebugFrameCount - 1) * 2000000 / dwTickDiff;
 
 			//::SendMessage(m_hVidWnd, WM_REPORT_VIDEO_DECODE_FPS, (WPARAM)fps, NULL);		chendelin
 

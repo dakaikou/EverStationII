@@ -4,8 +4,6 @@
 #include <windows.h>
 #include <mmsystem.h>
 
-#include "../Compile.h"
-#include "XStream_Include/INTTYPES.H"
 #include "./common/audio_common.h"
 #include "ESDecoder.h"
 #include "thirdparty_libs/directx/include/dsound.h"

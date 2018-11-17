@@ -1,7 +1,24 @@
 #ifndef _TSSB_DRVAPI_H_
 #define _TSSB_DRVAPI_H_
 
+#if defined(_WIN32) || defined(_WIN64)
+#   ifdef _SMART_TS_EXPORT
+#       define SMART_TS_LIB __declspec(dllexport)
+#   elif defined(_SMART_TS_IMPORT)
+#       define SMART_TS_LIB __declspec(dllimport)
+#   else
+#       define SMART_TS_LIB
+#   endif
+#elif __GNUC__ >= 4
+#   define SMART_TS_LIB __attribute__((visibility("default")))
+#else
+#   define SMART_TS_LIB
+#endif
+
+#include <stdint.h>
+
 #include <windows.h>
+#include <windef.h>
 
 #define SMARTTS_NULL			0x43444c00
 #define SMARTTS_ASI_IN			0x43444c01
@@ -46,79 +63,79 @@ typedef enum
 #define TIME_RESOLUTION				50						//ms
 #define CALCU_TIMESLICE_COUNT		(1000 / TIME_RESOLUTION / 2)
 
-_CDL_EXPORT ULONG smartts_init(void);
+SMART_TS_LIB ULONG smartts_init(void);
 
-_CDL_EXPORT ULONG smartts_start_transmit(int ext_sync_clk, int bitrate);
-_CDL_EXPORT ULONG smartts_transmit( PUCHAR buffer, ULONG count );
-_CDL_EXPORT ULONG smartts_stop_transmit( void );
+SMART_TS_LIB ULONG smartts_start_transmit(int ext_sync_clk, int bitrate);
+SMART_TS_LIB ULONG smartts_transmit( PUCHAR buffer, ULONG count );
+SMART_TS_LIB ULONG smartts_stop_transmit( void );
 
-_CDL_EXPORT ULONG smartts_checklocked(void);
+SMART_TS_LIB ULONG smartts_checklocked(void);
 
-_CDL_EXPORT ULONG smartts_start_receive(int loopout = 0);
-_CDL_EXPORT ULONG smartts_receive( PUCHAR buffer, ULONG count );
-_CDL_EXPORT ULONG smartts_stop_receive( void );
+SMART_TS_LIB ULONG smartts_start_receive(int loopout = 0);
+SMART_TS_LIB ULONG smartts_receive( PUCHAR buffer, ULONG count );
+SMART_TS_LIB ULONG smartts_stop_receive( void );
 
-_CDL_EXPORT ULONG smartts_pause( void );
-_CDL_EXPORT ULONG smartts_resume( UCHAR );
+SMART_TS_LIB ULONG smartts_pause( void );
+SMART_TS_LIB ULONG smartts_resume( UCHAR );
 
-_CDL_EXPORT ULONG smartts_fini(void);
+SMART_TS_LIB ULONG smartts_fini(void);
 
-_CDL_EXPORT ULONG smartts_lreset( void );
+SMART_TS_LIB ULONG smartts_lreset( void );
 
-_CDL_EXPORT ULONG smartts_get_asiin_status(void);
+SMART_TS_LIB ULONG smartts_get_asiin_status(void);
 
-_CDL_EXPORT ULONG smartts_get_asiin_bitrate_map(ULONG pbitrate_map[], int count);
-_CDL_EXPORT ULONG smartts_get_asiin_bitrate(void);
+SMART_TS_LIB ULONG smartts_get_asiin_bitrate_map(ULONG pbitrate_map[], int count);
+SMART_TS_LIB ULONG smartts_get_asiin_bitrate(void);
 
-_CDL_EXPORT ULONG smartts_set_timeslice_count(int timeslice_count);
-_CDL_EXPORT ULONG smartts_get_timeslice_count(void);
+SMART_TS_LIB ULONG smartts_set_timeslice_count(int timeslice_count);
+SMART_TS_LIB ULONG smartts_get_timeslice_count(void);
 
-_CDL_EXPORT void smartts_config_timer(void);
-_CDL_EXPORT void smartts_start_timer(void);
-_CDL_EXPORT void smartts_stop_timer(void);
+SMART_TS_LIB void smartts_config_timer(void);
+SMART_TS_LIB void smartts_start_timer(void);
+SMART_TS_LIB void smartts_stop_timer(void);
 
-_CDL_EXPORT ULONG smartts_enable_timer(int index);
-_CDL_EXPORT ULONG smartts_disable_timer(int index);
+SMART_TS_LIB ULONG smartts_enable_timer(int index);
+SMART_TS_LIB ULONG smartts_disable_timer(int index);
 
-_CDL_EXPORT double smartts_set_timer(int index, double frequency);
-_CDL_EXPORT double smartts_get_timer(int index);
+SMART_TS_LIB double smartts_set_timer(int index, double frequency);
+SMART_TS_LIB double smartts_get_timer(int index);
 
-_CDL_EXPORT ULONG smartts_enable_int(int index);
-_CDL_EXPORT ULONG smartts_disable_int(int index);
-_CDL_EXPORT ULONG smartts_clear_int(int index);
-_CDL_EXPORT BOOL  smartts_check_int(int index);
+SMART_TS_LIB ULONG smartts_enable_int(int index);
+SMART_TS_LIB ULONG smartts_disable_int(int index);
+SMART_TS_LIB ULONG smartts_clear_int(int index);
+SMART_TS_LIB BOOL  smartts_check_int(int index);
 
-_CDL_EXPORT ULONG smartts_select_1Hz_clk(int bExternal);
-_CDL_EXPORT ULONG smartts_select_ref_clk(int bExternal);
+SMART_TS_LIB ULONG smartts_select_1Hz_clk(int bExternal);
+SMART_TS_LIB ULONG smartts_select_ref_clk(int bExternal);
 
 //__declspec(dllexport) ULONG smartts_enable_reframe(void);
 //__declspec(dllexport) ULONG smartts_disable_reframe(void);
 
-_CDL_EXPORT ULONG smartts_enable_asiin(void);
-_CDL_EXPORT ULONG smartts_disable_asiin(void);
+SMART_TS_LIB ULONG smartts_enable_asiin(void);
+SMART_TS_LIB ULONG smartts_disable_asiin(void);
 
 //__declspec(dllexport) ULONG smartts_enable_asiout(void);
 //__declspec(dllexport) ULONG smartts_disable_asiout(void);
 
-_CDL_EXPORT ULONG smartts_set_iomode(ULONG mode);
-_CDL_EXPORT ULONG smartts_get_iomode(void);
+SMART_TS_LIB ULONG smartts_set_iomode(ULONG mode);
+SMART_TS_LIB ULONG smartts_get_iomode(void);
 
-_CDL_EXPORT ULONG smartts_bist_set_params(int ext_sync_clk, int bitrate, ULONG mode = BIST_MODE_188_0);
-_CDL_EXPORT ULONG smartts_bist_get_mode(void);
+SMART_TS_LIB ULONG smartts_bist_set_params(int ext_sync_clk, int bitrate, ULONG mode = BIST_MODE_188_0);
+SMART_TS_LIB ULONG smartts_bist_get_mode(void);
 
-_CDL_EXPORT ULONG smartts_get_sendfifo_error_count(void);
-_CDL_EXPORT ULONG smartts_get_recvfifo_error_count(void);
+SMART_TS_LIB ULONG smartts_get_sendfifo_error_count(void);
+SMART_TS_LIB ULONG smartts_get_recvfifo_error_count(void);
 
-_CDL_EXPORT ULONG ReadFpgaInnerReg32(ULONG offset, PULONG buffer);
-_CDL_EXPORT ULONG ReadFpgaInnerReg16(ULONG offset, PUSHORT buffer);
-_CDL_EXPORT ULONG ReadFpgaInnerReg8(ULONG offset, PUCHAR buffer);
+SMART_TS_LIB ULONG ReadFpgaInnerReg32(ULONG offset, PULONG buffer);
+SMART_TS_LIB ULONG ReadFpgaInnerReg16(ULONG offset, PUSHORT buffer);
+SMART_TS_LIB ULONG ReadFpgaInnerReg8(ULONG offset, PUCHAR buffer);
 
-_CDL_EXPORT ULONG ReadLocalConfigReg32(ULONG offset, PULONG buffer);
-_CDL_EXPORT ULONG ReadLocalConfigReg16(ULONG offset, PUSHORT buffer);
-_CDL_EXPORT ULONG ReadLocalConfigReg8(ULONG offset, PUCHAR buffer);
+SMART_TS_LIB ULONG ReadLocalConfigReg32(ULONG offset, PULONG buffer);
+SMART_TS_LIB ULONG ReadLocalConfigReg16(ULONG offset, PUSHORT buffer);
+SMART_TS_LIB ULONG ReadLocalConfigReg8(ULONG offset, PUCHAR buffer);
 
-_CDL_EXPORT ULONG ReadPciConfigReg32(ULONG offset, PULONG buffer);
-_CDL_EXPORT ULONG ReadPciConfigReg16(ULONG offset, PUSHORT buffer);
-_CDL_EXPORT ULONG ReadPciConfigReg8(ULONG offset, PUCHAR buffer);
+SMART_TS_LIB ULONG ReadPciConfigReg32(ULONG offset, PULONG buffer);
+SMART_TS_LIB ULONG ReadPciConfigReg16(ULONG offset, PUSHORT buffer);
+SMART_TS_LIB ULONG ReadPciConfigReg8(ULONG offset, PUCHAR buffer);
 
 #endif

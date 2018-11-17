@@ -1,19 +1,31 @@
 #ifndef __API_ES_DECODER_H__
 #define __API_ES_DECODER_H__
 
+#if defined(_WIN32) || defined(_WIN64)
+#   ifdef _MW_ES_EXPORT
+#       define MW_ES_LIB __declspec(dllexport)
+#   elif defined(_MW_ES_IMPORT)
+#       define MW_ES_LIB __declspec(dllimport)
+#   else
+#       define MW_ES_LIB
+#   endif
+#elif __GNUC__ >= 4
+#   define MW_ES_LIB __attribute__((visibility("default")))
+#else
+#   define MW_ES_LIB
+#endif
+
+#include <stdint.h>
+
 #include <windows.h>
 #include <mmsystem.h>
 
-#include "../Compile.h"
-#include "HAL/HAL_Sys/Include/INTTYPES.H"
-
-#include "libs_Mpeg&DVB/Mpeg_PESPacket/Include/MPEG_PES_packet.h"
-#include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/Mpeg2_TS_packet.h"
+#include "translate_layer/Mpeg_PESPacket/Include/MPEG_PES_packet.h"
+#include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
 
 #include "./common/audio_common.h"
 #include "./common/file_common.h"
 
-#include "HAL\HAL_BitStream\Include\HALForBitStream.h"
 #include "thirdparty_libs/directx/include/dsound.h"
 
 #define DS_NOTIFY_COUNT			2
@@ -27,15 +39,15 @@ typedef enum
 
 typedef struct
 {
-	U32		syncword;
-	S32		start_code;
+	uint32_t		syncword;
+	uint32_t		start_code;
 
-	U8*		rbsp_byte;
-	S32		NumBytesInRBSP;
+	uint8_t*		rbsp_byte;
+	int		NumBytesInRBSP;
 
 } AV_nal_unit_t, *pAV_nal_unit_t;
 
-class _CDL_EXPORT CESDecoder
+class MW_ES_LIB CESDecoder
 {
 public:
 	CESDecoder(void);
@@ -45,32 +57,32 @@ public:
 
 protected:
 
-	S64			m_nPrePcrPos;
-	S64			m_nPrePtsPos;
-	S64			m_nPreDtsPos;
+	int64_t			m_nPrePcrPos;
+	int64_t			m_nPrePtsPos;
+	int64_t			m_nPreDtsPos;
 
-	U16			m_usES_PID;
-	U16			m_usPCR_PID;
+	uint16_t			m_usES_PID;
+	uint16_t			m_usPCR_PID;
 
-	U8			m_nStreamType;
+	uint8_t			m_nStreamType;
 
-	S32			(*av_es_parse)(PVOID* pvoid);
+	int			(*av_es_parse)(PVOID* pvoid);
 
 	//pull mode functions
-	S8			m_pszFileName[256];
+	char			m_pszFileName[256];
 
-	S32			m_hFile;
-	S32			m_nFileTotalSize;
-	S32			m_nFileStartPos;
+	int			m_hFile;
+	int			m_nFileTotalSize;
+	int			m_nFileStartPos;
 
-	//S32			m_nWriteCount;
+	//int			m_nWriteCount;
 
 public:
 
 	HWND		m_hMsgWnd;
 
-	S32			m_nTriggerType;
-	S32			m_bTriggering;
+	int			m_nTriggerType;
+	int			m_bTriggering;
 
 public:
 
@@ -78,25 +90,25 @@ public:
 
 public:
 
-	virtual	S32	 Open(HWND hMsgWnd, S32 nStreamType, S8* pszFileName);
-	virtual S32  Close(void);
+	virtual	int	 Open(HWND hMsgWnd, int nStreamType, char* pszFileName);
+	virtual int  Close(void);
 	
-	S32			WriteTSPacket(transport_packet_t* pts_packet, S64 pos);
-//	S32			WriteTSPacket(U8* buf, S32 length, S64 pos);
-	S32			WriteESData(U8* buf, S32 length);
-	S32			FillData(void);
-	S32			IsOpened(void);
-	S32			SetParams(U16 ES_PID, U16  PCR_PID); 
+	int			WriteTSPacket(transport_packet_t* pts_packet, int64_t pos);
+//	int			WriteTSPacket(U8* buf, int length, int64_t pos);
+	int			WriteESData(uint8_t* buf, int length);
+	int			FillData(void);
+	int			IsOpened(void);
+	int			SetParams(uint16_t ES_PID, uint16_t  PCR_PID);
 
-	S32	Preview_EOF(void);
-	S32	Preview_GetFilePos(void);
+	int	Preview_EOF(void);
+	int	Preview_GetFilePos(void);
 
-	S32	Preview_SetFileRatio(int nPercent);
-	S32 Preview_GetFileRatio(void);
+	int	Preview_SetFileRatio(int nPercent);
+	int Preview_GetFileRatio(void);
 
 public:
 	void		Reset(void);
-	S32			SetTrigger(S32 nTriggerType);
+	int			SetTrigger(int nTriggerType);
 
 public:
 	~CESDecoder();

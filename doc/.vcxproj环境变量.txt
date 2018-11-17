@@ -1,0 +1,79 @@
+下面的表格给出了常用的环境变量的含义：
+
+
+
+
+  环境变量名
+  含义
+
+
+
+  
+
+$(SolutionDir)
+  解决方案目录：即.sln文件所在路径
+
+
+  
+$(SolutionName)
+  解决方案名称
+
+
+  
+
+$(ProjectDir)
+  项目根目录:, 即.vcxproj文件所在路径
+
+
+  
+$(ProjectName)
+  当前项目名称
+
+
+  
+$(ProjectExt)
+  工程文件后缀名，如.vcxproj
+
+$(OutDir)
+  项目输出文件目录
+
+
+  
+
+$(TargetDir)
+  项目输出文件目录
+
+
+  
+$(TargetName)
+  项目生成目标文件, 通常和$(ProjectName)同名, 如Game
+
+
+  
+$(TargetExt)
+  项目生成文件后缀名，如.exe, .lib具体取决于工程设置
+
+
+  
+$(TargetFileName)
+  项目输出文件名字。比如Game.exe, 等于 (TargetName)+(TargetName)+(TargetExt)
+
+
+  
+
+$(Configuration)
+  当前的编译配置名称，比如Debug，或Release
+
+
+  
+$(Platform)
+  Win32，或x64
+
+
+  
+
+--------------------- 
+作者：elloop 
+来源：CSDN 
+原文：https://blog.csdn.net/elloop/article/details/51010151 
+版权声明：本文为博主原创文章，转载请附上博文链接！

@@ -24,9 +24,9 @@ static char THIS_FILE[] = __FILE__;
 #include "Dlg_TSAnalyzer_TSPacket.h"
 
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TransportStream.h"
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+//#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 
-#include "libs_MPEG&DVB\MPEG_TSPacket\Include\Mpeg2_TS_Utilities.h"
+#include "translate_layer\MPEG2_TSPacket\Include\Mpeg2_TS_Utilities.h"
 
 CDlg_TSAnalyzer_Packets::CDlg_TSAnalyzer_Packets(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlg_TSAnalyzer_Packets::IDD, pParent)
@@ -292,10 +292,10 @@ void CDlg_TSAnalyzer_Packets::UpdatePIDList(void)
 
 	int						nTotalPkCount = pDBTSPackets->m_total_packet_count;
 	RECORD_TSPacket_t		TSPacketInfo;
-	S32						dTotalDataRate;
+	int						dTotalDataRate;
 	char pszTemp[256];
-	U32  pid_style_code;
-	S32	 rtcode;
+	uint32_t  pid_style_code;
+	int	 rtcode;
 
 	if (nTotalPkCount > 0)
 	{
@@ -717,7 +717,7 @@ void CDlg_TSAnalyzer_Packets::OnBtnDecimateTS2TS()
 	CDB_TSPackets*		pDB_TSPackets = pWindow->GetTSPacketsDBase();
 	//RECORD_TSPacket_t	TSPacketInfo;
 	CWnd*				pWnd = NULL;
-	S32					rtcode;
+	int					rtcode;
 
 	UpdateData(TRUE);
 
@@ -874,7 +874,7 @@ void CDlg_TSAnalyzer_Packets::OnBtnDecimateTS2ES()
 	thread_params_t*	pthread_params = &(pWindow->m_kThreadParams);
 	CDB_TSPackets*		pDB_TSPackets = pWindow->GetTSPacketsDBase();
 	//RECORD_TSPacket_t	TSPacketInfo;
-	S32					rtcode;
+	int					rtcode;
 
 	UpdateData(TRUE);	
 
@@ -973,7 +973,7 @@ void CDlg_TSAnalyzer_Packets::OnBnClickedBtnDecimateStop()
 	CDB_TSPackets*		pDB_TSPackets = pWindow->GetTSPacketsDBase();
 	//RECORD_TSPacket_t*	pPacketInfo;
 	CWnd*				pWnd = NULL;
-	S32					rtcode;
+	int					rtcode;
 
 	UpdateData(TRUE);
 

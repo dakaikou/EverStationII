@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <assert.h>
 
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 #include "../Include/ESDecoder.h"
 
 CESDecoder::CESDecoder(void)
@@ -34,7 +34,7 @@ CESDecoder::~CESDecoder()
 	Reset();
 }
 
-S32 CESDecoder::Open(HWND hMsgWnd, S32 nStreamType, S8* pszFileName)
+int CESDecoder::Open(HWND hMsgWnd, int nStreamType, char* pszFileName)
 {
 	//m_fifo.rdptr = m_fifo.wrptr = m_fifo.buf;
 	//m_fifo.endptr = m_fifo.buf + FIFO_BUF_SIZE;
@@ -70,12 +70,12 @@ S32 CESDecoder::Open(HWND hMsgWnd, S32 nStreamType, S8* pszFileName)
 	return 0;
 }
 
-S32 CESDecoder::IsOpened(void)
+int CESDecoder::IsOpened(void)
 {
 	return (m_hMsgWnd != NULL);
 }
 
-S32 CESDecoder::Close()
+int CESDecoder::Close()
 {
 	//m_fifo.rdptr = m_fifo.wrptr = m_fifo.buf;
 	//m_fifo.endptr = m_fifo.buf + FIFO_BUF_SIZE;
@@ -102,12 +102,12 @@ S32 CESDecoder::Close()
 }
 
 // pos -- first ts packet byte position
-//S32 CESDecoder::WriteTSPacket(U8* buf, S32 length, S64 pos)
+//int CESDecoder::WriteTSPacket(U8* buf, int length, S64 pos)
 //{
-//	S32		rtcode = NO_ERROR;
+//	int		rtcode = NO_ERROR;
 //	U8*		packet_buf = buf;
 //	U8*		payload_buf;
-//	S32		payload_length;
+//	int		payload_length;
 //	S8		transport_error_indicator;
 //	S8		transport_scrambling_control;
 //	S8		payload_unit_start_indicator;
@@ -185,12 +185,12 @@ S32 CESDecoder::Close()
 //	return rtcode;
 //}
 
-S32 CESDecoder::WriteTSPacket(transport_packet_t* pts_packet, S64 pos)
+int CESDecoder::WriteTSPacket(transport_packet_t* pts_packet, int64_t pos)
 {
-	S32		rtcode = NO_ERROR;
-	U8*		payload_buf;
-	S32		payload_length;
-	U8		pes_header_length;
+	int				rtcode = NO_ERROR;
+	uint8_t*		payload_buf;
+	int			payload_length;
+	uint8_t		pes_header_length;
 
 	//	m_nPos = pos;
 
@@ -237,11 +237,11 @@ S32 CESDecoder::WriteTSPacket(transport_packet_t* pts_packet, S64 pos)
 	return rtcode;
 }
 
-S32 CESDecoder::WriteESData(U8* buf, S32 length)
+int CESDecoder::WriteESData(uint8_t* buf, int length)
 {
-	S32		rtcode = 0;
-	//S32		move_length;
-	//S32		copy_length;
+	int		rtcode = 0;
+	//int		move_length;
+	//int		copy_length;
 
 	//if ((m_fifo.wrptr + length) > m_fifo.endptr)
 	//{
@@ -278,7 +278,7 @@ S32 CESDecoder::WriteESData(U8* buf, S32 length)
 	return rtcode;
 }
 
-S32 CESDecoder::SetParams(U16 ES_PID, U16 PCR_PID)
+int CESDecoder::SetParams(uint16_t ES_PID, uint16_t PCR_PID)
 {
 //	usNewPID = ((packet_buf[1] & 0x1f) << 8) | packet_buf[2];
 //	if (usNewPID != m_usPID)
@@ -296,12 +296,12 @@ S32 CESDecoder::SetParams(U16 ES_PID, U16 PCR_PID)
 	return 0;
 }
 
-S32 CESDecoder::FillData(void)
+int CESDecoder::FillData(void)
 {
-	S32		rtcode = -1;
-	//S32		move_length;
-	//S32		copy_length;
-	//S32		read_length;
+	int		rtcode = -1;
+	//int		move_length;
+	//int		copy_length;
+	//int		read_length;
 
 	//if (m_fifo.hFile != -1)
 	//{
@@ -352,9 +352,9 @@ void CESDecoder::Reset(void)
 }
 
 //返回旧的触发类型
-S32 CESDecoder::SetTrigger(S32 nTriggerType)
+int CESDecoder::SetTrigger(int nTriggerType)
 {
-	S32 rtcode = 0;
+	int rtcode = 0;
 	
 	//rtcode = m_nTriggerType;
 
@@ -363,12 +363,12 @@ S32 CESDecoder::SetTrigger(S32 nTriggerType)
 	return rtcode;
 }
 
-S32	CESDecoder::Preview_SetFileRatio(int nPercent)
+int	CESDecoder::Preview_SetFileRatio(int nPercent)
 {
-	S32	   offset;
+	int	   offset;
 	float  dRatio = nPercent / 100.0f;
 
-	offset = m_nFileStartPos + (S32)((m_nFileTotalSize - m_nFileStartPos) * dRatio);
+	offset = m_nFileStartPos + (int)((m_nFileTotalSize - m_nFileStartPos) * dRatio);
 
 	//if (m_hFile != -1)
 	//{
@@ -383,18 +383,18 @@ S32	CESDecoder::Preview_SetFileRatio(int nPercent)
 	return 0;
 }
 
-S32	CESDecoder::Preview_EOF(void)
+int	CESDecoder::Preview_EOF(void)
 {
-	S32 bEOF = 0;
+	int bEOF = 0;
 
 	bEOF = (Preview_GetFilePos() >= m_nFileTotalSize) ? 1 : 0;
 
 	return bEOF;
 }
 
-S32	CESDecoder::Preview_GetFilePos(void)
+int	CESDecoder::Preview_GetFilePos(void)
 {
-	S32 filepos = 0;
+	int filepos = 0;
 	
 	//if (m_hFile != -1)
 	//{
@@ -404,16 +404,16 @@ S32	CESDecoder::Preview_GetFilePos(void)
 	return filepos;
 }
 
-S32 CESDecoder::Preview_GetFileRatio(void)
+int CESDecoder::Preview_GetFileRatio(void)
 {
-	S64 filepos = 0;
-	S32 percent = 0;
+	int64_t filepos = 0;
+	int percent = 0;
 
 	//filepos = Preview_GetFilePos() - (m_fifo.endptr - m_fifo.rdptr);
 
 	//if (m_nFileTotalSize > 0)
 	//{
-	//	percent = (S32)((filepos - m_nFileStartPos) * 100.0f / (m_nFileTotalSize - m_nFileStartPos));
+	//	percent = (int)((filepos - m_nFileStartPos) * 100.0f / (m_nFileTotalSize - m_nFileStartPos));
 	//}
 
 	return percent;

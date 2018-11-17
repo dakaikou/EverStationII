@@ -1,23 +1,36 @@
 #ifndef __API_VES_DECODER_H__
 #define __API_VES_DECODER_H__
 
+#if defined(_WIN32) || defined(_WIN64)
+#   ifdef _MW_ES_EXPORT
+#       define MW_ES_LIB __declspec(dllexport)
+#   elif defined(_MW_ES_IMPORT)
+#       define MW_ES_LIB __declspec(dllimport)
+#   else
+#       define MW_ES_LIB
+#   endif
+#elif __GNUC__ >= 4
+#   define MW_ES_LIB __attribute__((visibility("default")))
+#else
+#   define MW_ES_LIB
+#endif
+
 #include <windows.h>
 #include <mmsystem.h>
 
-#include "../Compile.h"
+#include "thirdparty_AL\TALForDirectX\Include\TALForDirectDraw.h"
+
 #include "./common/video_common.h"
 
 #include "ESDecoder.h"
-#include "HAL/HAL_Sys/Include/INTTYPES.H"
-#include "HAL/HAL_DirectX/Include/HALForDirectDraw.h"
 
-class _CDL_EXPORT CVESDecoder : public CESDecoder
+class MW_ES_LIB CVESDecoder : public CESDecoder
 {
 public:
 	CVESDecoder(void);
 
-	S32		OpenVideo(HWND hWnd);
-	S32		CloseVideo(void);
+	int		OpenVideo(HWND hWnd);
+	int		CloseVideo(void);
 	void		Reset(void);
 
 protected:
@@ -28,17 +41,17 @@ protected:
 private:		//direct audio output
 
 	//direct draw variables
-	CHALForDirectDraw*		m_pDirectDraw;
+	CTALForDirectDraw*		m_pDirectDraw;
 
-	S32						m_nDebugFrameCount;
-	U32						m_dwTimeCount;
+	int						m_nDebugFrameCount;
+	uint32_t				m_dwTimeCount;
 
 
 protected:
 public:
 	
-	S32 DirectDraw_Render_yuv(void);
-	S32 DirectDraw_Paint(void);
+	int DirectDraw_Render_yuv(void);
+	int DirectDraw_Paint(void);
 
 public:
 	~CVESDecoder();

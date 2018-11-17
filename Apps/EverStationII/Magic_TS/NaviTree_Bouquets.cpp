@@ -10,12 +10,12 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+//#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_SI_Utilities.h"
-#include "libs_Utilities\Include\XStream_Utilities.h"
+#include "translate_layer\MPEG2_DVB_Section\Include\DVB_SI_Utilities.h"
+#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
 
 #include "..\Common\define.h"
 
@@ -123,7 +123,7 @@ void CNaviTree_Bouquets::UpdateBAT(CBAT* pBAT)
 	DWORD			item_data;
 
 	HTREEITEM				hChildItem;
-	HTREEITEM				hBouquetItem;
+	HTREEITEM				hBouquetItem = NULL;
 	HTREEITEM				hNextItem;
 
 	uint16_t bouquet_id;
@@ -213,7 +213,7 @@ void CNaviTree_Bouquets::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 		CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 		CDB_PsiSiObjs* pDB_PsiSiOjbs = pTSMagicView->GetPsiSiObjsDBase();
 
-		HALForXMLDoc xmlDoc;
+		TALForXMLDoc xmlDoc;
 		pDB_PsiSiOjbs->BuildBouquetTree(code, &xmlDoc);
 		m_pInfoTree->ShowXMLDoc(&xmlDoc);
 
@@ -228,7 +228,7 @@ void CNaviTree_Bouquets::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 		exeDrive[2] = '\0';
 
 		sprintf_s(pszXmlDir, sizeof(pszXmlDir), "%s\\~EverStationII\\xml", exeDrive);
-		BuildDirectory(pszXmlDir);
+		DIR_BuildDirectory(pszXmlDir);
 
 		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\BOUQUET_sematics_0x%04X.xml", pszXmlDir, code & 0xffff);
 		xmlDoc.SaveFile(pszFilePath);

@@ -17,7 +17,7 @@ static char THIS_FILE[] = __FILE__;
 #include "ESMagicFrm.h"
 #include "../Magic_TS/TSMagic_GuiApi_MSG.h"
 
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 
 //#include "..\Common\GuiCommon_TreeFunction.h"
 //#include "..\Common\GuiCommon_AVSVideoSyntax.h"

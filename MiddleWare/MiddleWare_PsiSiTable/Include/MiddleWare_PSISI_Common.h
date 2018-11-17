@@ -1,15 +1,28 @@
 #ifndef _MIDDLEWARE_PSISI_TABLE_COMMON_H_
 #define _MIDDLEWARE_PSISI_TABLE_COMMON_H_
 
-#include "../compile.h"
+#if defined(_WIN32) || defined(_WIN64)
+#   ifdef _MW_PSISI_EXPORT
+#       define MW_PSISI_LIB __declspec(dllexport)
+#   elif defined(_MW_PSISI_IMPORT)
+#       define MW_PSISI_LIB __declspec(dllimport)
+#   else
+#       define MW_PSISI_LIB
+#   endif
+#elif __GNUC__ >= 4
+#   define MW_PSISI_LIB __attribute__((visibility("default")))
+#else
+#   define MW_PSISI_LIB
+#endif
+
 #include <stdint.h>
 
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\MPEG_DVB_Common.h"
+#include "translate_layer\MPEG2_DVB_Section\Include\MPEG2_DVB_Common.h"
 
 /*------------------------------------------------------------
 		PSISI Table Base definition 
 -------------------------------------------------------------*/
-class _CDL_EXPORT CPVT
+class MW_PSISI_LIB CPVT
 {
 public:
 	CPVT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);

@@ -5,8 +5,8 @@
 
 #include "../Include/MiddleWare_PSISI_Table.h"
 #include "../Include/MiddleWare_PSISI_ErrorCode.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section\Include\MPEG_DVB_ErrorCode.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section\Include\MPEG2_DVB_ErrorCode.h"
 
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
@@ -37,7 +37,7 @@ void CEIT::Init(void)
 
 void CEIT::Reset(void)
 {
-	//S32				i;
+	//int				i;
 	//eit_segment_t*	psegment;
 
 	m_usServiceID = 0xffff;

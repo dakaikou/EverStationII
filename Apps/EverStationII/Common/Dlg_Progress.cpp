@@ -14,7 +14,6 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_Progress dialog
-#include "HAL/HAL_Sys/Include/INTTYPES.H"
 
 CDlg_Progress::CDlg_Progress(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlg_Progress::IDD, pParent)

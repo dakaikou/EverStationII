@@ -8,10 +8,10 @@
 #include "TSMagic_Trigger_Section.h"
 #include "TSMagic_Callbacks_To_Gui.h"
 
-#include "libs_MPEG&DVB/MPEG_TSPacket/Include/Mpeg2_TS_ErrorCode.h"
-#include "libs_MPEG&DVB/MPEG_PESPacket/Include/MPEG_stream_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
+#include "translate_layer/MPEG2_TSPacket/Include/Mpeg2_TS_ErrorCode.h"
+#include "translate_layer/MPEG_PESPacket/Include/MPEG_stream_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_SectionSplicer.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer\Include\MiddleWare_SectionSplicer_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TransportStream.h"
@@ -42,19 +42,19 @@ void CTrigger_PsiSiSection::Reset(void)
 	CTrigger::Reset();
 }
 
-U16 CTrigger_PsiSiSection::GetPID(void)
+uint16_t CTrigger_PsiSiSection::GetPID(void)
 {
 	return m_usPID;
 }
 
-S32 CTrigger_PsiSiSection::IsMatched(U8* buf, S32 length)
+int CTrigger_PsiSiSection::IsMatched(uint8_t* buf, int length)
 {
-	S32		 equal = -1;
-	S32		 i;
-	U8		 mask;
-	U8		 data;
-	U8		 src;
-	U8		 dst;
+	int		 equal = -1;
+	int		 i;
+	uint8_t		 mask;
+	uint8_t		 data;
+	uint8_t		 src;
+	uint8_t		 dst;
 
 	if (buf != NULL)
 	{
@@ -91,10 +91,10 @@ S32 CTrigger_PsiSiSection::IsMatched(U8* buf, S32 length)
 	return equal;
 }
 
-//void CTrigger_PsiSiSection::SetMatchParamsForEIT(U16 PID, U16 original_network_id, U16 transport_stream_id, U16 service_id, U8 table_id, U8 section_number)
+//void CTrigger_PsiSiSection::SetMatchParamsForEIT(uint16_t PID, uint16_t original_network_id, uint16_t transport_stream_id, uint16_t service_id, uint8_t table_id, uint8_t section_number)
 //{
-//	U8		ucReqMask[16];
-//	U8		ucReqData[16];
+//	uint8_t		ucReqMask[16];
+//	uint8_t		ucReqData[16];
 //
 //	memset(ucReqMask, 0x00, sizeof(ucReqMask));
 //	memset(ucReqData, 0x00, sizeof(ucReqData));
@@ -130,10 +130,10 @@ S32 CTrigger_PsiSiSection::IsMatched(U8* buf, S32 length)
 //}
 
 
-//void CTrigger_PsiSiSection::SetMatchParamsForINT(U16 PID, U32 platform_id, U8 section_number)
+//void CTrigger_PsiSiSection::SetMatchParamsForINT(uint16_t PID, uint32_t platform_id, uint8_t section_number)
 //{
-//	U8		ucReqMask[16];
-//	U8		ucReqData[16];
+//	uint8_t		ucReqMask[16];
+//	uint8_t		ucReqData[16];
 //
 //	memset(ucReqMask, 0x00, sizeof(ucReqMask));
 //	memset(ucReqData, 0x00, sizeof(ucReqData));
@@ -157,10 +157,10 @@ S32 CTrigger_PsiSiSection::IsMatched(U8* buf, S32 length)
 //	SetMatchParams(ucReqMask, ucReqData, sizeof(ucReqMask), 1);
 //}
 
-//void CTrigger_PsiSiSection::SetMatchParamsForAIT(U16 PID, U16 application_type, U8 section_number)
+//void CTrigger_PsiSiSection::SetMatchParamsForAIT(uint16_t PID, uint16_t application_type, uint8_t section_number)
 //{
-//	U8		ucReqMask[16];
-//	U8		ucReqData[16];
+//	uint8_t		ucReqMask[16];
+//	uint8_t		ucReqData[16];
 //
 //	memset(ucReqMask, 0x00, sizeof(ucReqMask));
 //	memset(ucReqData, 0x00, sizeof(ucReqData));
@@ -235,10 +235,10 @@ void CTrigger_PsiSiSection::SetMatchParamsForOtherSection(uint16_t PID, uint8_t 
 	SetMatchParams(ucReqMask, ucReqData, sizeof(ucReqMask), 1);
 }
 
-//void CTrigger_PsiSiSection::SetMatchParamsForDSMCC(U16 PID, U8 table_id, U16 table_id_extension, U8 section_number)
+//void CTrigger_PsiSiSection::SetMatchParamsForDSMCC(uint16_t PID, uint8_t table_id, uint16_t table_id_extension, uint8_t section_number)
 //{
-//	U8		ucReqMask[16];
-//	U8		ucReqData[16];
+//	uint8_t		ucReqMask[16];
+//	uint8_t		ucReqData[16];
 //
 //	memset(ucReqMask, 0x00, sizeof(ucReqMask));
 //	memset(ucReqData, 0x00, sizeof(ucReqData));
@@ -262,13 +262,13 @@ void CTrigger_PsiSiSection::SetMatchParamsForOtherSection(uint16_t PID, uint8_t 
 //}
 
 /*
-void SECTION_TRIGGER_DSMCC_SD_Set(U16 PID, U16 table_id_extension, U8 section_number)
+void SECTION_TRIGGER_DSMCC_SD_Set(uint16_t PID, uint16_t table_id_extension, uint8_t section_number)
 {
 #if GUI_TS_ANALYZER_PSISI
-S8		pszText[MAX_TXT_CHARS];
-U8		ucReqMask[16];
-U8		ucReqData[16];
-S32		i;
+char		pszText[MAX_TXT_CHARS];
+uint8_t		ucReqMask[16];
+uint8_t		ucReqData[16];
+int		i;
 CWnd*	pWnd;
 
 CTSMagicView* pWindow = CTSMagicView::GetView();
@@ -319,13 +319,13 @@ pWnd->SetWindowText(pszText);
 #endif
 }
 
-void SECTION_TRIGGER_DSMCC_DDM_Set(U16 PID, U16 table_id_extension, U8 section_number)
+void SECTION_TRIGGER_DSMCC_DDM_Set(uint16_t PID, uint16_t table_id_extension, uint8_t section_number)
 {
 #if GUI_TS_ANALYZER_PSISI
-S8		pszText[MAX_TXT_CHARS];
-U8		ucReqMask[16];
-U8		ucReqData[16];
-S32		i;
+char		pszText[MAX_TXT_CHARS];
+uint8_t		ucReqMask[16];
+uint8_t		ucReqData[16];
+int		i;
 CWnd*	pWnd;
 
 CTSMagicView* pWindow = CTSMagicView::GetView();
@@ -376,13 +376,13 @@ pWnd->SetWindowText(pszText);
 #endif
 }
 
-void SECTION_TRIGGER_DSMCC_UNM_Set(U16 PID, U16 table_id_extension, U8 section_number)
+void SECTION_TRIGGER_DSMCC_UNM_Set(uint16_t PID, uint16_t table_id_extension, uint8_t section_number)
 {
 #if GUI_TS_ANALYZER_PSISI
-S8		pszText[MAX_TXT_CHARS];
-U8		ucReqMask[16];
-U8		ucReqData[16];
-S32		i;
+char		pszText[MAX_TXT_CHARS];
+uint8_t		ucReqMask[16];
+uint8_t		ucReqData[16];
+int		i;
 CWnd*	pWnd;
 
 CTSMagicView* pWindow = CTSMagicView::GetView();
@@ -434,10 +434,10 @@ pWnd->SetWindowText(pszText);
 }
 */
 
-//void CTrigger_PsiSiSection::SetMatchParamsForMPE(U16 PID, U16 usRsv, U8 section_number)
+//void CTrigger_PsiSiSection::SetMatchParamsForMPE(uint16_t PID, uint16_t usRsv, uint8_t section_number)
 //{
-//	U8		ucReqMask[16];
-//	U8		ucReqData[16];
+//	uint8_t		ucReqMask[16];
+//	uint8_t		ucReqData[16];
 //
 //	memset(ucReqMask, 0x00, sizeof(ucReqMask));
 //	memset(ucReqData, 0x00, sizeof(ucReqData));
@@ -454,10 +454,10 @@ pWnd->SetWindowText(pszText);
 //	SetMatchParams(ucReqMask, ucReqData, sizeof(ucReqMask), 1);
 //}
 
-//void CTrigger_PsiSiSection::SetMatchParamsForPAT(U16 PID, U16 transport_stream_id, U8 section_number)
+//void CTrigger_PsiSiSection::SetMatchParamsForPAT(uint16_t PID, uint16_t transport_stream_id, uint8_t section_number)
 //{
-//	U8		ucReqMask[16];
-//	U8		ucReqData[16];
+//	uint8_t		ucReqMask[16];
+//	uint8_t		ucReqData[16];
 //
 //	memset(ucReqMask, 0x00, sizeof(ucReqMask));
 //	memset(ucReqData, 0x00, sizeof(ucReqData));
@@ -481,10 +481,10 @@ pWnd->SetWindowText(pszText);
 
 
 
-//void CTrigger_PsiSiSection::SetMatchParamsForPMT(U16 PID, U16 program_number, U8 section_number)
+//void CTrigger_PsiSiSection::SetMatchParamsForPMT(uint16_t PID, uint16_t program_number, uint8_t section_number)
 //{
-//	U8		ucReqMask[16];
-//	U8		ucReqData[16];
+//	uint8_t		ucReqMask[16];
+//	uint8_t		ucReqData[16];
 //
 //	memset(ucReqMask, 0x00, sizeof(ucReqMask));
 //	memset(ucReqData, 0x00, sizeof(ucReqData));
@@ -507,10 +507,10 @@ pWnd->SetWindowText(pszText);
 //	SetMatchParams(ucReqMask, ucReqData, sizeof(ucReqMask), 1);
 //}
 
-//void CTrigger_PsiSiSection::SetMatchParamsForTSDT(U16 PID, U8 section_number)
+//void CTrigger_PsiSiSection::SetMatchParamsForTSDT(uint16_t PID, uint8_t section_number)
 //{
-//	U8		ucReqMask[16];
-//	U8		ucReqData[16];
+//	uint8_t		ucReqMask[16];
+//	uint8_t		ucReqData[16];
 //
 //	memset(ucReqMask, 0x00, sizeof(ucReqMask));
 //	memset(ucReqData, 0x00, sizeof(ucReqData));
@@ -527,10 +527,10 @@ pWnd->SetWindowText(pszText);
 //	SetMatchParams(ucReqMask, ucReqData, sizeof(ucReqMask), 1);
 //}
 
-//void CTrigger_PsiSiSection::SetMatchParamsForCAT(U16 PID, U8 section_number)
+//void CTrigger_PsiSiSection::SetMatchParamsForCAT(uint16_t PID, uint8_t section_number)
 //{
-//	U8		ucReqMask[16];
-//	U8		ucReqData[16];
+//	uint8_t		ucReqMask[16];
+//	uint8_t		ucReqData[16];
 //
 //	memset(ucReqMask, 0x00, sizeof(ucReqMask));
 //	memset(ucReqData, 0x00, sizeof(ucReqData));
@@ -547,10 +547,10 @@ pWnd->SetWindowText(pszText);
 //	SetMatchParams(ucReqMask, ucReqData, sizeof(ucReqMask), 1);
 //}
 
-//void CTrigger_PsiSiSection::SetMatchParamsForNIT(U16 PID, U8 table_id, U16 network_id, U8 section_number)
+//void CTrigger_PsiSiSection::SetMatchParamsForNIT(uint16_t PID, uint8_t table_id, uint16_t network_id, uint8_t section_number)
 //{
-//	U8		ucReqMask[16];
-//	U8		ucReqData[16];
+//	uint8_t		ucReqMask[16];
+//	uint8_t		ucReqData[16];
 //
 //	memset(ucReqMask, 0x00, sizeof(ucReqMask));
 //	memset(ucReqData, 0x00, sizeof(ucReqData));
@@ -572,10 +572,10 @@ pWnd->SetWindowText(pszText);
 //	SetMatchParams(ucReqMask, ucReqData, sizeof(ucReqMask), 1);
 //}
 
-//void CTrigger_PsiSiSection::SetMatchParamsForSDT(U16 PID, U16 original_network_id, U16 transport_stream_id, U8 table_id, U8 section_number)
+//void CTrigger_PsiSiSection::SetMatchParamsForSDT(uint16_t PID, uint16_t original_network_id, uint16_t transport_stream_id, uint8_t table_id, uint8_t section_number)
 //{
-//	U8		ucReqMask[16];
-//	U8		ucReqData[16];
+//	uint8_t		ucReqMask[16];
+//	uint8_t		ucReqData[16];
 //
 //	memset(ucReqMask, 0x00, sizeof(ucReqMask));
 //	memset(ucReqData, 0x00, sizeof(ucReqData));
@@ -602,10 +602,10 @@ pWnd->SetWindowText(pszText);
 //	SetMatchParams(ucReqMask, ucReqData, sizeof(ucReqMask), 1);
 //}
 
-//void CTrigger_PsiSiSection::SetMatchParamsForBAT(U16 PID, U16 bouquet_id, U8 table_id, U8 section_number)
+//void CTrigger_PsiSiSection::SetMatchParamsForBAT(uint16_t PID, uint16_t bouquet_id, uint8_t table_id, uint8_t section_number)
 //{
-//	U8		ucReqMask[16];
-//	U8		ucReqData[16];
+//	uint8_t		ucReqMask[16];
+//	uint8_t		ucReqData[16];
 //
 //	memset(ucReqMask, 0x00, sizeof(ucReqMask));
 //	memset(ucReqData, 0x00, sizeof(ucReqData));
@@ -627,10 +627,10 @@ pWnd->SetWindowText(pszText);
 //	SetMatchParams(ucReqMask, ucReqData, sizeof(ucReqMask), 1);
 //}
 
-//void CTrigger_PsiSiSection::SetMatchParamsForTDT(U16 PID)
+//void CTrigger_PsiSiSection::SetMatchParamsForTDT(uint16_t PID)
 //{
-//	U8		ucReqMask[16];
-//	U8		ucReqData[16];
+//	uint8_t		ucReqMask[16];
+//	uint8_t		ucReqData[16];
 //
 //	memset(ucReqMask, 0x00, sizeof(ucReqMask));
 //	memset(ucReqData, 0x00, sizeof(ucReqData));
@@ -643,10 +643,10 @@ pWnd->SetWindowText(pszText);
 //	SetMatchParams(ucReqMask, ucReqData, sizeof(ucReqMask), 1);
 //}
 
-//void CTrigger_PsiSiSection::SetMatchParamsForTOT(U16 PID)
+//void CTrigger_PsiSiSection::SetMatchParamsForTOT(uint16_t PID)
 //{
-//	U8		ucReqMask[16];
-//	U8		ucReqData[16];
+//	uint8_t		ucReqMask[16];
+//	uint8_t		ucReqData[16];
 //
 //	memset(ucReqMask, 0x00, sizeof(ucReqMask));
 //	memset(ucReqData, 0x00, sizeof(ucReqData));
@@ -661,10 +661,10 @@ pWnd->SetWindowText(pszText);
 //	SetMatchParams(ucReqMask, ucReqData, sizeof(ucReqMask), 1);
 //}
 
-//void CTrigger_PsiSiSection::SetMatchParamsForRST(U16 PID)
+//void CTrigger_PsiSiSection::SetMatchParamsForRST(uint16_t PID)
 //{
-//	U8		ucReqMask[16];
-//	U8		ucReqData[16];
+//	uint8_t		ucReqMask[16];
+//	uint8_t		ucReqData[16];
 //
 //	memset(ucReqMask, 0x00, sizeof(ucReqMask));
 //	memset(ucReqData, 0x00, sizeof(ucReqData));
@@ -682,12 +682,12 @@ pWnd->SetWindowText(pszText);
 void ts_section_trigger_loop(pthread_params_t pThreadParams)
 {
 #if OPEN_SECTION_TRIGGER
-	U8	  packet_buf[204];
-	S32	  packet_length;
+	uint8_t	  packet_buf[204];
+	int	  packet_length;
 
-	S8	  pszDebug[256];
+	char	  pszDebug[256];
 
-	S32	  rtcode;
+	int	  rtcode;
 
 	CSectionSplicer				SectionSplicer;
 
@@ -729,7 +729,7 @@ void ts_section_trigger_loop(pthread_params_t pThreadParams)
 								{
 									if (pSectionTrigger->IsMatched(SectionSplicer.m_pucSectionBuf, SectionSplicer.m_nSectionLength))
 									{
-										S32 nOldCatchedCount = pSectionTrigger->GetCatchedCount();
+										int nOldCatchedCount = pSectionTrigger->GetCatchedCount();
 										pSectionTrigger->SaveTheWholePacket(SectionSplicer.m_pucSectionBuf, SectionSplicer.m_nSectionLength);
 
 										if (nOldCatchedCount == 0)		//捕捉到第一个匹配section时报告状态

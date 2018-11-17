@@ -1,7 +1,6 @@
 #ifndef _FILE_COMMON_H_
 #define _FILE_COMMON_H_
 
-#include "HAL/HAL_Sys/Include/INTTYPES.H"
 #include "audio_common.h"
 /*
 typedef struct 
@@ -41,19 +40,19 @@ typedef struct
 
 typedef struct
 {
-	S8		ID[4];
-	S32		file_size;
-	S8		type[4];
-	S8		format[4];
+	char		ID[4];
+	int		file_size;
+	char		type[4];
+	char		format[4];
 	
-	S32		length;
+	int		length;
 	union
 	{
 		formatchunk_t	waveFormat;
 	} u;
 	
-	S8		dataseg[4];
-	S32		datasize;
+	char		dataseg[4];
+	int		datasize;
 					
 } RIFF_t;
 

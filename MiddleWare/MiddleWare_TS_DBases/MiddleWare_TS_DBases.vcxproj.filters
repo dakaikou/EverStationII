@@ -13,12 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="源文件\Impl">
-      <UniqueIdentifier>{cba57863-e7ad-46e0-a64f-1fde529afe1a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\Include">
-      <UniqueIdentifier>{65ca2414-f974-46e0-a845-856f1de81a69}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -27,20 +21,20 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_DB_TSPackets.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_ErrorCode.h">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_DB_ErrorCode.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_OCDCs.h">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_DB_Pcrs.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_Pcrs.h">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_DB_OCDCs.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_PsiSiObjs.h">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_DB_PsiSiObjs.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_TSPackets.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -50,17 +44,17 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\MiddleWare_DB_TSPackets.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_TS_DBases\Impl\MiddleWare_DB_OCDCs.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\MiddleWare_DB_Pcrs.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_TS_DBases\Impl\MiddleWare_DB_Pcrs.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\MiddleWare_DB_OCDCs.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_TS_DBases\Impl\MiddleWare_DB_PsiSiObjs.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\MiddleWare_DB_PsiSiObjs.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_TS_DBases\Impl\MiddleWare_DB_TSPackets.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -2,15 +2,15 @@
 
 #include "..\Common\define.h"
 
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 
 #include "TSMagic_GuiApi.h"
 #include "TSMagic_GuiApi_MSG.h"
 #include "TSMagic_ErrorCode.h"
 #include "TSMagic_Trigger_PESES.h"
 
-#include "libs_Mpeg&DVB/Mpeg_PESPacket/Include/MPEG_stream_id.h"
-#include "libs_Mpeg&DVB/Mpeg_TSPacket\Include\Mpeg2_TS_ErrorCode.h"
+#include "translate_layer/Mpeg_PESPacket/Include/MPEG_stream_id.h"
+#include "translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_PESSplicer.h"
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TransportStream.h"
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TS_ErrorCode.h"
@@ -39,7 +39,7 @@ CTrigger_PESPacket::~CTrigger_PESPacket(void)
 {
 }
 
-void CTrigger_PESPacket::SetMatchParams(S32 filter_id, U16 PID, U32 style, S32 demand_count)
+void CTrigger_PESPacket::SetMatchParams(int filter_id, uint16_t PID, uint32_t style, int demand_count)
 {
 	m_usPID = PID;
 	m_dwStyle = style;
@@ -54,24 +54,24 @@ void CTrigger_PESPacket::Reset(void)
 	CTrigger::Reset();
 }
 
-U16 CTrigger_PESPacket::GetPID(void)
+uint16_t CTrigger_PESPacket::GetPID(void)
 {
 	return m_usPID;
 }
 
-U32 CTrigger_PESPacket::GetStyle(void)
+uint32_t CTrigger_PESPacket::GetStyle(void)
 {
 	return m_dwStyle;
 }
 
-//S32 CTrigger_PESPacket::IsMatched(U8* buf, S32 length)
+//int CTrigger_PESPacket::IsMatched(uint8_t* buf, int length)
 //{
-//	S32		 equal = -1;
-//	S32		 i;
-//	U8		 mask;
-//	U8		 data;
-//	U8		 src;
-//	U8		 dst;
+//	int		 equal = -1;
+//	int		 i;
+//	uint8_t		 mask;
+//	uint8_t		 data;
+//	uint8_t		 src;
+//	uint8_t		 dst;
 //
 //	if (buf != NULL)
 //	{
@@ -110,17 +110,17 @@ U32 CTrigger_PESPacket::GetStyle(void)
 
 //void ts_es_trigger_loop(pthread_params_t pThreadParams)
 //{
-//	U8	  packet_buf[204];
-//	S32	  packet_length;
+//	uint8_t	  packet_buf[204];
+//	int	  packet_length;
 //
 //	S8	  pszDebug[256];
 //
-//	S64	  read_byte_pos = 0;			//只能读小于2G的文件
+//	int64_t	  read_byte_pos = 0;			//只能读小于2G的文件
 //
-//	S32	  old_ratio = 0;
-//	S32	  analyse_ratio = 0;
-//	S32	  rtcode;
-//	//	S32	  getdata_rtcode;
+//	int	  old_ratio = 0;
+//	int	  analyse_ratio = 0;
+//	int	  rtcode;
+//	//	int	  getdata_rtcode;
 //
 //	CTransportStream*	 ptransport_stream = NULL;
 //	transport_packet_t			transport_packet;
@@ -208,7 +208,7 @@ U32 CTrigger_PESPacket::GetStyle(void)
 //	}
 //}
 //
-//U32 TSMagic_es_trigger_thread(LPVOID lpParam)
+//uint32_t TSMagic_es_trigger_thread(LPVOID lpParam)
 //{
 //	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
 //
@@ -219,17 +219,17 @@ U32 CTrigger_PESPacket::GetStyle(void)
 
 void ts_pes_trigger_loop(pthread_params_t pThreadParams)
 {
-	U8	TS_packet_buf[204];
-	S32	TS_packet_length;
+	uint8_t	TS_packet_buf[204];
+	int	TS_packet_length;
 
-	S8	  pszDebug[256];
+	char	  pszDebug[256];
 
-	S64	  read_byte_pos = 0;			//只能读小于2G的文件
+	int64_t	  read_byte_pos = 0;			//只能读小于2G的文件
 
-	//S32	  old_ratio = 0;
-	//S32	  analyse_ratio = 0;
-	S32	  rtcode;
-	//S32	  pes_payload_unit_started = 0;
+	//int	  old_ratio = 0;
+	//int	  analyse_ratio = 0;
+	int	  rtcode;
+	//int	  pes_payload_unit_started = 0;
 
 	CTransportStream*			ptransport_stream = NULL;
 	transport_packet_t			transport_packet;
@@ -237,7 +237,7 @@ void ts_pes_trigger_loop(pthread_params_t pThreadParams)
 	//CESDecoder*					pAVDecoder = NULL;
 	CPESSplicer					PESSplicer;
 
-	S32	hLastRecordHandler = -1;
+	int	hLastRecordHandler = -1;
 
 	if (pThreadParams != NULL)
 	{
@@ -276,8 +276,8 @@ void ts_pes_trigger_loop(pthread_params_t pThreadParams)
 							rtcode = PESSplicer.WriteTSPacket(&transport_packet);
 							if (rtcode == NO_ERROR)
 							{
-								S32 pes_length;
-								U8* pes_buf = PESSplicer.GetPESPacket(&pes_length);
+								int pes_length;
+								uint8_t* pes_buf = PESSplicer.GetPESPacket(&pes_length);
 								pPESPacketTrigger->SaveTheWholePacket(pes_buf, pes_length);			//内存块的搬移，数据量还是比较大的，待优化
 								::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_PES_TRIGGER_STATE, 2, 0);
 
@@ -332,7 +332,7 @@ void ts_pes_trigger_loop(pthread_params_t pThreadParams)
 	//}
 }
 
-U32 TSMagic_pes_trigger_thread(LPVOID lpParam)
+uint32_t TSMagic_pes_trigger_thread(LPVOID lpParam)
 {
 	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
 	ts_pes_trigger_loop(pThreadParams);

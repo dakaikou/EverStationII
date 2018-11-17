@@ -3,10 +3,10 @@
 #include <string.h>
 #include <assert.h>
 
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_IPDC_section.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include\MPEG_DVB_ErrorCode.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_IPDC_section.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include\MPEG2_DVB_ErrorCode.h"
 #include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_PSISI_ErrorCode.h"
 
 #include "../Include/MiddleWare_DSMCC_Table.h"
@@ -40,8 +40,8 @@ int CMPE::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 {
 	int	rtcode = MIDDLEWARE_PSISI_UNKNOWN_ERROR;
 
-	//S32 i;
-	//S32	collect_over;
+	//int i;
+	//int	collect_over;
 	//datagram_section_t		datagram_section;
 	
 	rtcode = CPVT::AddSection(usPID, pprivate_section);

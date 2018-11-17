@@ -4,8 +4,8 @@
 
 #include "../Include/MiddleWare_PSISI_Table.h"
 #include "../Include/MiddleWare_PSISI_ErrorCode.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section\Include\MPEG_DVB_ErrorCode.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section\Include\MPEG2_DVB_ErrorCode.h"
 
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
@@ -52,12 +52,12 @@ void CSDT::Reset(void)
 int CSDT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t* pprivate_section)
 {
 	int			 rtcode = MIDDLEWARE_PSISI_UNKNOWN_ERROR;
-	//U16 		 original_network_id;
+	//uint16_t 		 original_network_id;
 
-	S32			 nServiceCount;
-	S32			 service_index;
-	S32			 descriptor_index;
-	S32			 data_broadcast_count;
+	int			 nServiceCount;
+	int			 service_index;
+	int			 descriptor_index;
+	int			 data_broadcast_count;
 
 	service_description_section_t			sdt_section;
 	SERVICE_DESCRIPTION_t*					pServiceDescription;

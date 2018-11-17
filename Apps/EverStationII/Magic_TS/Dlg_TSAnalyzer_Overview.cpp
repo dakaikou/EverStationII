@@ -13,8 +13,8 @@ static char THIS_FILE[] = __FILE__;
 
 #include <math.h>
 
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_SI_Utilities.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Utilities.h"
 
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_PSISI_Table.h"
@@ -23,15 +23,12 @@ static char THIS_FILE[] = __FILE__;
 #include "MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_Pcrs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 
-#include "libs_Utilities\Include\XStream_Utilities.h"
+//#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
 
 
 #include "..\resource.h"
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_Overview dialog
-
-//extern PSISI_REPORT_t			PSISI_REPORT;
-
 
 CDlg_TSAnalyzer_Overview::CDlg_TSAnalyzer_Overview(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlg_TSAnalyzer_Overview::IDD, pParent)
@@ -657,7 +654,7 @@ void CDlg_TSAnalyzer_Overview::UpdatePacketInfo(void)
 	int				nTotalPkCount;
 	//int				nServicePkCount;
 	//float			fratio;
-	S32				nTotalDataRate;
+	int				nTotalDataRate;
 	//float			fServiceDataRate;
 	//char			pszText[MAX_TXT_CHARS];
 

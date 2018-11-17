@@ -18,13 +18,13 @@
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_SectionSplicer.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_PESSplicer.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/MiddleWare_SectionSplicer_ErrorCode.h"
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+//#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TS_ErrorCode.h"
 #include "MiddleWare/MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_ESDecoder/Include/ESDecoder.h"
 
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/MPEG_DVB_ErrorCode.h"
-#include "libs_MPEG&DVB/MPEG_TSPacket\Include\Mpeg2_TS_Utilities.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "translate_layer/MPEG2_TSPacket\Include\Mpeg2_TS_Utilities.h"
 
 //#include "MiddleWare_ESDecoder/Include/VideoDecoder_Mpeg2.h"
 //#include "MiddleWare_ESDecoder/Include/VideoDecoder_H264.h"
@@ -45,35 +45,35 @@
 
 void offline_ts_loop(pthread_params_t pThreadParams)
 {
-	U8*	  section_buf;
-	S32	  section_length;
+	uint8_t*	  section_buf;
+	int	  section_length;
 	
-	U8	  packet_buf[204];
-	S32	  packet_length;
+	uint8_t	  packet_buf[204];
+	int	  packet_length;
 
-//	S32	  old_pklength = -1;
-	S8	  pszDebug[MAX_TXT_CHARS];
-	S8	  pszTemp[128];
+//	int	  old_pklength = -1;
+	char	  pszDebug[MAX_TXT_CHARS];
+	char	  pszTemp[128];
 	//char  pszCheckFile[128];
 	FILE* fpCheckFile = NULL;
 
 	double file_size_div_100;
-	S64	  read_byte_pos = 0;			//只能读小于2G的文件
-	S64	  old_read_byte_pos = 0;
+	int64_t	  read_byte_pos = 0;			//只能读小于2G的文件
+	int64_t	  old_read_byte_pos = 0;
 
-	S32	  old_ratio = 0;
-	S32	  analyse_ratio = 0;
-	U32	  old_tickcount;
-	U32	  new_tickcount;
-	S32	  diff_tickcount;
+	int	  old_ratio = 0;
+	int	  analyse_ratio = 0;
+	uint32_t	  old_tickcount;
+	uint32_t	  new_tickcount;
+	int	  diff_tickcount;
 
-	S32	  stream_synced = 0;
-//	S32	  do_next_splice;
+	int	  stream_synced = 0;
+//	int	  do_next_splice;
 
-	S32					rtcode;
-//	S32					getdata_rtcode;
-//	S32					nErrCode = FILE_ERROR_NO_ERROR;
-	S32					filter_index;
+	int					rtcode;
+//	int					getdata_rtcode;
+//	int					nErrCode = FILE_ERROR_NO_ERROR;
+	int					filter_index;
 	CSectionSplicer		SectionSplicer[MAX_SECTION_FILTERS];
 	CSectionSplicer*	pSectionSplicer;
 	CPESSplicer			PESSplicer;
@@ -91,7 +91,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 	CTrigger_PESPacket*	   pPESPacketTrigger = NULL;
 
 
-	S32	hLastRecordHandler = -1;
+	int	hLastRecordHandler = -1;
 
 	if (pThreadParams != NULL)
 	{
@@ -151,7 +151,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 				//向界面汇报文件分析进度
 				if (ptransport_stream->m_llTotalFileLength > 0)
 				{
-					analyse_ratio = (U32)(read_byte_pos / file_size_div_100);
+					analyse_ratio = (uint32_t)(read_byte_pos / file_size_div_100);
 					if (analyse_ratio > old_ratio)
 					{
 						old_ratio = analyse_ratio;
@@ -195,7 +195,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 					{
 						if (pTSPacketTrigger->IsMatched(packet_buf, packet_length))
 						{
-//							S32 nOldCatchedCount = pTSPacketTrigger->GetCatchedCount();
+//							int nOldCatchedCount = pTSPacketTrigger->GetCatchedCount();
 							pTSPacketTrigger->SaveTheWholePacket(packet_buf, packet_length);
 //							if (nOldCatchedCount == 0)		//捕捉到第一个匹配TS包时报告状态
 							{
@@ -215,8 +215,8 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 							rtcode = PESSplicer.WriteTSPacket(&transport_packet);
 							if (rtcode == NO_ERROR)
 							{
-								S32 pes_length;
-								U8* pes_buf = PESSplicer.GetPESPacket(&pes_length);
+								int pes_length;
+								uint8_t* pes_buf = PESSplicer.GetPESPacket(&pes_length);
 								pPESPacketTrigger->SaveTheWholePacket(pes_buf, pes_length);
 								::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_PES_TRIGGER_STATE, 2, 0);
 								::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_PES_TRIGGER_STATE, 0, 0);
@@ -332,7 +332,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 										{
 											if (pSectionTrigger->IsMatched(section_buf, section_length))
 											{
-												S32 nOldCatchedCount = pSectionTrigger->GetCatchedCount();
+												int nOldCatchedCount = pSectionTrigger->GetCatchedCount();
 												pSectionTrigger->SaveTheWholePacket(section_buf, section_length);
 
 												if (nOldCatchedCount == 0)		//捕捉到第一个匹配section时报告状态
@@ -421,7 +421,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 
 							//这里仅是一种码流速率的估算方法,实际上是不可以自己证明自己的，应该通过其他方式计算码率
 							{
-								S64 sum = 0;
+								int64_t sum = 0;
 								int count = 0;
 								int pcr_count = pDB_Pcrs->GetTotalRecordCount();
 
@@ -438,7 +438,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 								}
 								if (count > 0)
 								{
-									int bitrate_cur = (S32)(sum / count);
+									int bitrate_cur = (int)(sum / count);
 
 									ptransport_stream->AddBitrateSample(bitrate_cur);
 
@@ -507,8 +507,8 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 		}
 
 #if OPEN_PACKET_STATISTIC
-		S32		error_count = 0;
-		S32		i;
+		int		error_count = 0;
+		int		i;
 		//RECORD_TSPacket_t* pRecord;
 
 		for (i = 0; i < MAX_PID_COUNT; i++)
@@ -566,7 +566,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 	}
 }
 
-U32 TSMagic_offline_thread(LPVOID lpParam)
+uint32_t TSMagic_offline_thread(LPVOID lpParam)
 {
 	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
 

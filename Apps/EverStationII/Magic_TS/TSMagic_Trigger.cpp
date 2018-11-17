@@ -11,7 +11,7 @@
 
 CTrigger::CTrigger(void)
 {
-	S32	i;
+	int	i;
 
 	m_bOpened = 0;
 	m_bFull = 0;
@@ -38,7 +38,7 @@ CTrigger::~CTrigger(void)
 
 void CTrigger::Reset(void)
 {
-	S32		i;
+	int		i;
 
 	for (i = 0; i < m_nGotCount; i++)
 	{
@@ -64,29 +64,29 @@ void CTrigger::Reset(void)
 	memset(m_ucMatchDatas, 0x00, sizeof(m_ucMatchDatas));
 }
 
-S32 CTrigger::IsOpened(void)
+int CTrigger::IsOpened(void)
 {
 	return m_bOpened;
 }
 
-S32 CTrigger::IsFull(void)
+int CTrigger::IsFull(void)
 {
 	return m_bFull;
 }
 
-//S32 CTrigger::GetFilterID(void)
+//int CTrigger::GetFilterID(void)
 //{
 //	return m_nFilterID;
 //}
 //
-S32 CTrigger::GetCatchedCount(void)
+int CTrigger::GetCatchedCount(void)
 {
 	return m_nGotCount;
 }
 
-U8*	CTrigger::GetCatchedDatas(S32 nIndex, S32* plength)
+uint8_t*	CTrigger::GetCatchedDatas(int nIndex, int* plength)
 {
-	U8* buf = NULL;
+	uint8_t* buf = NULL;
 	if ((nIndex >= 0) && (nIndex < m_nGotCount))
 	{
 		*plength = m_nDataLength[nIndex];
@@ -96,25 +96,25 @@ U8*	CTrigger::GetCatchedDatas(S32 nIndex, S32* plength)
 	return buf;
 }
 
-U8*	CTrigger::GetMatchMasks(S32* plength)
+uint8_t*	CTrigger::GetMatchMasks(int* plength)
 {
-	U8* buf = m_ucMatchMasks;;
+	uint8_t* buf = m_ucMatchMasks;;
 	*plength = m_nMatchLength;
 
 	return buf;
 }
 
-U8*	CTrigger::GetMatchDatas(S32* plength)
+uint8_t*	CTrigger::GetMatchDatas(int* plength)
 {
-	U8* buf = m_ucMatchDatas;;
+	uint8_t* buf = m_ucMatchDatas;;
 	*plength = m_nMatchLength;
 
 	return buf;
 }
 
-S32 CTrigger::SaveTheWholePacket(U8* buf, S32 length)
+int CTrigger::SaveTheWholePacket(uint8_t* buf, int length)
 {
-	S32				rtcode = TSMAGIC_PARAMETER_ERROR;
+	int				rtcode = TSMAGIC_PARAMETER_ERROR;
 
 	if ((buf != NULL) && (length > 0))
 	{
@@ -122,7 +122,7 @@ S32 CTrigger::SaveTheWholePacket(U8* buf, S32 length)
 		{
 			assert(m_ucDataBuf[m_nGotCount] == NULL);
 
-			m_ucDataBuf[m_nGotCount] = (U8*)malloc(length);
+			m_ucDataBuf[m_nGotCount] = (uint8_t*)malloc(length);
 			m_nDataLength[m_nGotCount] = length;
 
 			if (m_ucDataBuf[m_nGotCount] != NULL)
@@ -143,9 +143,9 @@ S32 CTrigger::SaveTheWholePacket(U8* buf, S32 length)
 	return rtcode;
 }
 
-S32 CTrigger::SaveAsNewStart(U8* buf, S32 length)
+int CTrigger::SaveAsNewStart(uint8_t* buf, int length)
 {
-	S32				handle = -1;
+	int				handle = -1;
 
 	if ((buf != NULL) && (length > 0))
 	{
@@ -154,7 +154,7 @@ S32 CTrigger::SaveAsNewStart(U8* buf, S32 length)
 			handle = m_nGotCount;
 
 			assert(m_ucDataBuf[m_nGotCount] == NULL);
-			m_ucDataBuf[m_nGotCount] = (U8*)malloc(length);
+			m_ucDataBuf[m_nGotCount] = (uint8_t*)malloc(length);
 
 			m_nDataLength[m_nGotCount] = length;
 
@@ -168,23 +168,23 @@ S32 CTrigger::SaveAsNewStart(U8* buf, S32 length)
 	return handle;
 }
 
-S32 CTrigger::AppendToLast(S32 handle, U8* buf, S32 length)
+int CTrigger::AppendToLast(int handle, uint8_t* buf, int length)
 {
-	S32				rtcode = TSMAGIC_PARAMETER_ERROR;
+	int				rtcode = TSMAGIC_PARAMETER_ERROR;
 
 	assert(handle == m_nGotCount);
 
-	U8* new_buf;
-	S32	new_size = 0;
-	U8*	last_buf = m_ucDataBuf[handle];
-	S32	last_length = m_nDataLength[handle];
+	uint8_t* new_buf;
+	int	new_size = 0;
+	uint8_t*	last_buf = m_ucDataBuf[handle];
+	int	last_length = m_nDataLength[handle];
 
 	if ((buf != NULL) && (length > 0))
 	{
 		assert(last_buf != NULL);
 
 		new_size = last_length + length;
-		new_buf = (U8*)realloc(last_buf, new_size);
+		new_buf = (uint8_t*)realloc(last_buf, new_size);
 		if (new_buf != NULL)
 		{
 			memcpy(new_buf + last_length, buf, length);
@@ -198,21 +198,21 @@ S32 CTrigger::AppendToLast(S32 handle, U8* buf, S32 length)
 	return rtcode;
 }
 
-S32 CTrigger::SaveAndClose(S32 handle, U8* buf, S32 length)
+int CTrigger::SaveAndClose(int handle, uint8_t* buf, int length)
 {
 	assert(handle == m_nGotCount);
 
-	U8* new_buf;
-	S32	new_size = 0;
-	U8*	last_buf = m_ucDataBuf[handle];
-	S32	last_length = m_nDataLength[handle];
+	uint8_t* new_buf;
+	int	new_size = 0;
+	uint8_t*	last_buf = m_ucDataBuf[handle];
+	int	last_length = m_nDataLength[handle];
 
 	if ((buf != NULL) && (length > 0))
 	{
 		assert(last_buf != NULL);
 
 		new_size = last_length + length;
-		new_buf = (U8*)realloc(last_buf, new_size);
+		new_buf = (uint8_t*)realloc(last_buf, new_size);
 		if (new_buf != NULL)
 		{
 			memcpy(new_buf + last_length, buf, length);
@@ -230,10 +230,10 @@ S32 CTrigger::SaveAndClose(S32 handle, U8* buf, S32 length)
 	return 0;
 }
 
-void CTrigger::SetMatchParams(U8* match_mask, U8* match_data, S32 match_len, S32 demand_count)
+void CTrigger::SetMatchParams(uint8_t* match_mask, uint8_t* match_data, int match_len, int demand_count)
 {
-	S32 match_length;
-	//	S32 i;
+	int match_length;
+	//	int i;
 
 	Reset();
 
@@ -255,14 +255,14 @@ void CTrigger::SetMatchParams(U8* match_mask, U8* match_data, S32 match_len, S32
 	//	m_bFull = 0;
 }
 
-S32 CTrigger::IsMatched(U8* buf, S32 length)
+int CTrigger::IsMatched(uint8_t* buf, int length)
 {
-	S32		 i;
-	S32		 equal = -1;
-	U8		 mask;
-	U8		 data;
-	U8		 src;
-	U8		 dst;
+	int		 i;
+	int		 equal = -1;
+	uint8_t		 mask;
+	uint8_t		 data;
+	uint8_t		 src;
+	uint8_t		 dst;
 
 	if ((buf != NULL) && (length >= m_nMatchLength))
 	{

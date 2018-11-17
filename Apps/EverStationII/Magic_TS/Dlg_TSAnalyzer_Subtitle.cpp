@@ -17,7 +17,7 @@ static char THIS_FILE[] = __FILE__;
 
 #include "TSMagicView.h"
 #include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_DSMCC_Table.h"
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+//#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_Subtitle dialog
 
@@ -203,9 +203,9 @@ void CDlg_TSAnalyzer_Subtitle::SetPIDInfo(CPMT* pPMT)
 /*
 	char			pszText[MAX_TXT_CHARS];
 	int				j;
-	U32				usPCR_PID;
+	uint32_t				usPCR_PID;
 	int				nItem;
-	U32				code;
+	uint32_t				code;
 
 	CTSMagicView* pView = CTSMagicView::GetView();
 
@@ -283,7 +283,7 @@ LRESULT CDlg_TSAnalyzer_Subtitle::OnUpdatePMT(WPARAM wParam, LPARAM lParam)
 
 	CTSMagicView* pWindow = CTSMagicView::GetView();
 
-//	U8	ucSubType = 0x00;
+//	uint8_t	ucSubType = 0x00;
 
 	if (pPMT != NULL)
 	{

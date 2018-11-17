@@ -19,11 +19,11 @@ static char THIS_FILE[] = __FILE__;
 #include "TSMagic_GuiApi.h"
 #include "TSMagic_GuiApi_MSG.h"
 
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
-#include "libs_Mpeg&DVB/Mpeg_TSPacket/xml/Include/Mpeg2_TS_packet_xml.h"
-#include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/Mpeg2_TS_PID.h"
-#include "libs_Utilities\Include\XStream_Utilities.h"
-#include "HAL\HAL_XML\Include\HALForTinyXML2.h"
+#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
+#include "syntax_express_xml/XML_MPEG2_TSPacket/Include/Mpeg2_TS_packet_xml.h"
+#include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_PID.h"
+#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
+#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
 
 //using namespace std;
 //using namespace tinyxml2;
@@ -488,8 +488,8 @@ void CDlg_TSAnalyzer_PacketTrigger::OnBtnNext()
 	{
 		pSlider->SetPos(nPos);
 
-		U8* packet_buf;
-		S32 packet_length;
+		uint8_t* packet_buf;
+		int packet_length;
 
 		packet_buf = pTSPacketTrigger->GetCatchedDatas(nPos, &packet_length);
 
@@ -501,7 +501,7 @@ void CDlg_TSAnalyzer_PacketTrigger::OnBtnNext()
 
 		if (m_pTree != NULL)
 		{
-			HALForXMLDoc xmlDoc;
+			TALForXMLDoc xmlDoc;
 			int rtcode = MPEG_decode_TS_packet_to_XML(packet_buf, packet_length, &xmlDoc);
 
 			m_pTree->Reset();
@@ -524,8 +524,8 @@ void CDlg_TSAnalyzer_PacketTrigger::OnBtnPre()
 	{
 		pSlider->SetPos(nPos);
 
-		U8* packet_buf;
-		S32 packet_length;
+		uint8_t* packet_buf;
+		int packet_length;
 		packet_buf = pTSPacketTrigger->GetCatchedDatas(nPos, &packet_length);
 
 		if (m_pList != NULL)
@@ -535,8 +535,8 @@ void CDlg_TSAnalyzer_PacketTrigger::OnBtnPre()
 		}
 		if (m_pTree != NULL)
 		{
-			HALForXMLDoc xmlDoc;
-			S32 rtcode = MPEG_decode_TS_packet_to_XML(packet_buf, packet_length, &xmlDoc);
+			TALForXMLDoc xmlDoc;
+			int rtcode = MPEG_decode_TS_packet_to_XML(packet_buf, packet_length, &xmlDoc);
 
 			m_pTree->Reset();
 			m_pTree->ShowXMLDoc(&xmlDoc);
@@ -554,8 +554,8 @@ void CDlg_TSAnalyzer_PacketTrigger::OnHScroll(UINT nSBCode, UINT nPos, CScrollBa
 	if (pScrollBar == (CScrollBar*)pSlider)
 	{
 		int nPos = pSlider->GetPos();
-		U8* packet_buf;
-		S32 packet_length;
+		uint8_t* packet_buf;
+		int packet_length;
 
 		packet_buf = pTSPacketTrigger->GetCatchedDatas(nPos, &packet_length);
 
@@ -566,8 +566,8 @@ void CDlg_TSAnalyzer_PacketTrigger::OnHScroll(UINT nSBCode, UINT nPos, CScrollBa
 		}
 		if (m_pTree != NULL)
 		{
-			HALForXMLDoc xmlDoc;
-			S32 rtcode = MPEG_decode_TS_packet_to_XML(packet_buf, packet_length, &xmlDoc);
+			TALForXMLDoc xmlDoc;
+			int rtcode = MPEG_decode_TS_packet_to_XML(packet_buf, packet_length, &xmlDoc);
 
 			m_pTree->Reset();
 			m_pTree->ShowXMLDoc(&xmlDoc);
@@ -604,8 +604,8 @@ void CDlg_TSAnalyzer_PacketTrigger::UpdateCatchResult(void)
 
 			pSlider->SetPos(0);
 
-			U8* packet_buf;
-			S32 packet_length;
+			uint8_t* packet_buf;
+			int packet_length;
 			packet_buf = pTSPacketTrigger->GetCatchedDatas(0, &packet_length);
 
 			if (m_pList != NULL)
@@ -615,7 +615,7 @@ void CDlg_TSAnalyzer_PacketTrigger::UpdateCatchResult(void)
 			}
 			if (m_pTree != NULL)
 			{
-				HALForXMLDoc xmlDoc;
+				TALForXMLDoc xmlDoc;
 				transport_packet_t ts_packet;
 
 				int rtcode = MPEG_decode_TS_packet_to_XML(packet_buf, packet_length, &xmlDoc, &ts_packet);
@@ -631,7 +631,7 @@ void CDlg_TSAnalyzer_PacketTrigger::UpdateCatchResult(void)
 				exeDrive[2] = '\0';
 
 				sprintf_s(pszXmlDir, sizeof(pszXmlDir), "%s\\~EverStationII\\xml", exeDrive);
-				BuildDirectory(pszXmlDir);
+				DIR_BuildDirectory(pszXmlDir);
 
 				sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\TS_packet_0x%04X.xml", pszXmlDir, ts_packet.PID);
 				xmlDoc.SaveFile(pszFilePath);
@@ -670,7 +670,7 @@ void CDlg_TSAnalyzer_PacketTrigger::UpdatePIDList(void)
 	int					item_count;
 	int					pid;
 	RECORD_TSPacket_t	TSPacketInfo;
-	S32					rtcode;
+	int					rtcode;
 	CSliderCtrl*		pSlider;
 	CWnd*				pBtn;
 	CWnd*				pWnd;
@@ -912,9 +912,9 @@ void CDlg_TSAnalyzer_PacketTrigger::OnSelchangeCmbAdaptationFieldExtensionFlag()
 }
 */
 
-S32 CDlg_TSAnalyzer_PacketTrigger::GetTriggerParams(U8* pucMask, U8* pucData, S32 length)
+int CDlg_TSAnalyzer_PacketTrigger::GetTriggerParams(uint8_t* pucMask, uint8_t* pucData, int length)
 {
-	S32 rtcode = -1;
+	int rtcode = -1;
 
 	if ((pucMask != NULL) && (pucData != NULL))
 	{

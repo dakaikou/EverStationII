@@ -1,6 +1,1 @@
-﻿  stdafx.cpp
-  dllmain.cpp
-  tinyxml2.cpp
-  正在生成代码...
-    正在创建库 .\lib\thirdparty_tinyxml2D(x64).lib 和对象 .\lib\thirdparty_tinyxml2D(x64).exp
-  thirdparty_tinyxml2.vcxproj -> E:\Projects-Mpeg2码流分析仪\软件工程\EverStationII\Debug\x64\thirdparty_tinyxml2D(x64).dll
+﻿

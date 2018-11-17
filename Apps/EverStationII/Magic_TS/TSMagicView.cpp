@@ -30,8 +30,8 @@ static char THIS_FILE[] = __FILE__;
 #include "..\resource.h"
 #include ".\tsmagicview.h"
 
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
-#include "libs_Utilities\Include\XStream_Utilities.h"
+#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
+#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
 
 IMPLEMENT_DYNCREATE(CTSMagicView, CFormView)
 
@@ -257,7 +257,7 @@ void CTSMagicView::loadCfg()
 	char	url[MAX_PATH];
 
 	GetModuleFileNameA(NULL, pszExeFile, MAX_PATH); 
-	len = GetModulePathLength(pszExeFile);
+	len = DIR_GetModulePathLength(pszExeFile);
 	assert(len > 0);
 
 	memcpy(pszIniFile, pszExeFile, len);
@@ -297,7 +297,7 @@ void CTSMagicView::loadCfg()
 	}
 }
 
-//int BuildDirectory(CString  strPath);
+//int DIR_BuildDirectory(CString  strPath);
 
 void CTSMagicView::OnInitialUpdate() 
 {
@@ -358,7 +358,7 @@ void CTSMagicView::OnInitialUpdate()
 	exeDrive[2] = '\0';
 
 	sprintf_s(pszDownloadRootPath, sizeof(pszDownloadRootPath), "%s\\~EverStationII\\download_TS", exeDrive);
-	BuildDirectory(pszDownloadRootPath);
+	DIR_BuildDirectory(pszDownloadRootPath);
 
 	strcpy_s(m_kThreadParams.pszDecimatePath, sizeof(m_kThreadParams.pszDecimatePath), pszDownloadRootPath);
 
@@ -591,7 +591,7 @@ void CTSMagicView::OnSize(UINT nType, int cx, int cy)
 void CTSMagicView::OnBtnOpen() 
 {
 	// TODO: Add your command handler code here
-	S32		rtcode = 0;
+	int		rtcode = 0;
 	CWnd*	pWnd = NULL;
 
 	if (m_kThreadParams.main_thread_running == 0)
@@ -733,7 +733,7 @@ void CTSMagicView::OnBtnOpen()
 
 void CTSMagicView::OnBtnStream() 
 {
-	S32		rtcode = 0;
+	int		rtcode = 0;
 	CWnd*	pWnd = NULL;
 	//CString	strURL;
 
@@ -1296,7 +1296,7 @@ LRESULT CTSMagicView::OnTSRecordLog(WPARAM wParam, LPARAM lParam)
 
 LRESULT CTSMagicView::OnTSReportFileSize(WPARAM wParam, LPARAM lParam)
 {
-	S64		total_file_size = *(S64*)wParam;
+	int64_t		total_file_size = *(int64_t*)wParam;
 
 #if GUI_TS_ANALYZER_PACKETS
 	m_dlgTSAnalyzerPackets.ReportFileSize(total_file_size);
@@ -1352,7 +1352,7 @@ LRESULT CTSMagicView::OnTSRecordRatio(WPARAM wParam, LPARAM lParam)
 LRESULT CTSMagicView::OnTSReportBitrateMap(WPARAM wParam, LPARAM lParam)
 {
 #if GUI_TS_ANALYZER_OVERVIEW
-	m_dlgTSAnalyzerOverview.UpdateBitrateMap((ULONG*)wParam, (S32)lParam);
+	m_dlgTSAnalyzerOverview.UpdateBitrateMap((ULONG*)wParam, (int)lParam);
 #endif
 
 	return NULL;
@@ -1399,10 +1399,10 @@ LRESULT CTSMagicView::OnReportTSTriggerStatus(WPARAM wParam, LPARAM lParam)
 {
 	CWnd* pWnd = NULL;
 	char pszText[MAX_TXT_CHARS];
-	S32 i;
-	U8* ucReqMask;
-	U8* ucReqData;
-	S32 length;
+	int i;
+	uint8_t* ucReqMask;
+	uint8_t* ucReqData;
+	int length;
 
 	if (wParam == 1)
 	{
@@ -1476,9 +1476,9 @@ LRESULT CTSMagicView::OnReportPESTriggerStatus(WPARAM wParam, LPARAM lParam)
 	else if (wParam == 2)
 	{
 #if GUI_TS_ANALYZER_PESES
-		S32 pes_length = 0;
-		U8* pes_buf = m_Trigger_PESPacket.GetCatchedDatas(0, &pes_length);
-		U32 uiPESStyle = m_Trigger_PESPacket.GetStyle();
+		int pes_length = 0;
+		uint8_t* pes_buf = m_Trigger_PESPacket.GetCatchedDatas(0, &pes_length);
+		uint32_t uiPESStyle = m_Trigger_PESPacket.GetStyle();
 		m_dlgTSAnalyzerPesEs.DisplayPESPacket(uiPESStyle, pes_buf, pes_length);
 #endif
 	}
@@ -1530,11 +1530,11 @@ LRESULT CTSMagicView::OnReportSectionTriggerStatus(WPARAM wParam, LPARAM lParam)
 {
 	CWnd* pWnd = NULL;
 	char pszText[MAX_TXT_CHARS];
-	S32 i;
-	U8* ucReqMask;
-	U8* ucReqData;
-	U8* section_buf;
-	S32 length;
+	int i;
+	uint8_t* ucReqMask;
+	uint8_t* ucReqData;
+	uint8_t* section_buf;
+	int length;
 
 	if (wParam == 1)
 	{

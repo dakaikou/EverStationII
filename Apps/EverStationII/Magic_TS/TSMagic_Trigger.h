@@ -1,8 +1,6 @@
 #ifndef _TSMAGIC_TRIGGER_BASE_H_
 #define _TSMAGIC_TRIGGER_BASE_H_
 
-#include "HAL/HAL_Sys/Include/INTTYPES.H"
-
 #define MAX_TRIGGER_COUNT			100
 
 class CTrigger
@@ -11,43 +9,43 @@ public:
 	CTrigger(void);
 	~CTrigger(void);
 protected:
-	S32		m_bOpened;
-	S32		m_bFull;;
+	int		m_bOpened;
+	int		m_bFull;;
 
-//	S32		m_nBrowseIndex;
-	S32		m_nGotCount;
-	S32		m_nDemandCount;
+//	int		m_nBrowseIndex;
+	int		m_nGotCount;
+	int		m_nDemandCount;
 
-	U8		m_ucMatchMasks[204];
-	U8		m_ucMatchDatas[204];
-	S32		m_nMatchLength;
+	uint8_t		m_ucMatchMasks[204];
+	uint8_t		m_ucMatchDatas[204];
+	int		m_nMatchLength;
 
-	U8*		m_ucDataBuf[MAX_TRIGGER_COUNT];
-	S32		m_nDataLength[MAX_TRIGGER_COUNT];
+	uint8_t*		m_ucDataBuf[MAX_TRIGGER_COUNT];
+	int		m_nDataLength[MAX_TRIGGER_COUNT];
 protected:
 	//	void Clearparams(void);
 public:
 
-	U8*	GetMatchMasks(S32* plength);
-	U8*	GetMatchDatas(S32* plength);
-	U8*	GetCatchedDatas(S32 nIndex, S32* plength);
+	uint8_t*	GetMatchMasks(int* plength);
+	uint8_t*	GetMatchDatas(int* plength);
+	uint8_t*	GetCatchedDatas(int nIndex, int* plength);
 
-	S32  SaveTheWholePacket(U8* buf, S32 length);
+	int  SaveTheWholePacket(uint8_t* buf, int length);
 
 	//以下三个函数为一组，必须成组使用
-	S32  SaveAsNewStart(U8* buf, S32 length);		//返回记录的句柄
-	S32  AppendToLast(S32 record_handle, U8* buf, S32 length);
-	S32  SaveAndClose(S32 record_handle, U8* buf, S32 length);
+	int  SaveAsNewStart(uint8_t* buf, int length);		//返回记录的句柄
+	int  AppendToLast(int record_handle, uint8_t* buf, int length);
+	int  SaveAndClose(int record_handle, uint8_t* buf, int length);
 	
-	S32	 GetCatchedCount(void);
+	int	 GetCatchedCount(void);
 
-	S32 IsOpened(void);
-	S32 IsFull(void);
+	int IsOpened(void);
+	int IsFull(void);
 	void Reset(void);
 
-	void SetMatchParams(U8* match_mask, U8* match_data, S32 match_len, S32 demand_count);
+	void SetMatchParams(uint8_t* match_mask, uint8_t* match_data, int match_len, int demand_count);
 
-	S32  IsMatched(U8* buf, S32 length);
+	int  IsMatched(uint8_t* buf, int length);
 };
 
 

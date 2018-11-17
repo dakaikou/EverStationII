@@ -20,27 +20,28 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_PesEs dialog
 
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 #include "MiddleWare/MiddleWare_ESDecoder/Include\ESDecoder_segment_tools.h"
 
-#include "libs_Mpeg&DVB/MPEG_DVB_Section\Include\Mpeg2_StreamType.h"
-#include "libs_Mpeg&DVB/Mpeg_TSPacket\Include\Mpeg2_TS_Utilities.h"
-#include "libs_Mpeg&DVB/Mpeg_PESPacket/xml/Include/MPEG_PES_Packet_xml.h"
+#include "translate_layer/MPEG2_DVB_Section\Include\Mpeg2_StreamType.h"
+#include "translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_Utilities.h"
+#include "syntax_express_xml/XML_MPEG_PESPacket/Include/MPEG_PES_Packet_xml.h"
 
 //#include "libs_ES\ES_MPV\Include\mpeg_video_sequence.h"
-#include "libs_ES\ES_MPA\Include\mpeg_audio_errorcode.h"
-#include "libs_ES\ES_MPV\xml\Include\mpeg_video_sequence_xml.h"
+#include "translate_layer\ES_MPA\Include\mpeg_audio_errorcode.h"
+
+#include "syntax_express_xml\XML_ES_MPV\Include\mpeg_video_sequence_xml.h"
 
 //#include "libs_ES\ES_AVS\Include\avs_video_sequence.h"
-#include "libs_ES\ES_AVS\xml\Include\avs_video_sequence_xml.h"
+#include "syntax_express_xml\XML_ES_AVS\Include\avs_video_sequence_xml.h"
 
-#include "libs_ES\ES_H264\xml\Include\h264_video_sequence_xml.h"
-#include "libs_ES\ES_MPA\xml\Include\mpeg_audio_sequence_xml.h"
-#include "libs_ES\ES_AC3\xml\Include\ac3_audio_sequence_xml.h"
-#include "libs_ES\ES_AAC\xml\Include\aac_audio_sequence_xml.h"
-#include "libs_ES\ES_DRA\xml\Include\dra_audio_sequence_xml.h"
+#include "syntax_express_xml\XML_ES_H264\Include\h264_video_sequence_xml.h"
+#include "syntax_express_xml\XML_ES_MPA\Include\mpeg_audio_sequence_xml.h"
+#include "syntax_express_xml\XML_ES_AC3\Include\ac3_audio_sequence_xml.h"
+#include "syntax_express_xml\XML_ES_AAC\Include\aac_audio_sequence_xml.h"
+#include "syntax_express_xml\XML_ES_DRA\Include\dra_audio_sequence_xml.h"
 
-#include "libs_Utilities\Include\XStream_Utilities.h"
+#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
 
 CDlg_TSAnalyzer_PesEs::CDlg_TSAnalyzer_PesEs(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlg_TSAnalyzer_PesEs::IDD, pParent)
@@ -293,7 +294,7 @@ void CDlg_TSAnalyzer_PesEs::Reset(void)
 //	}
 //}
 
-void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(uint32_t uiPESStyle, uint8_t* pes_buf, int pes_size, HALForXMLDoc* pxmlFatherDoc)
+void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(uint32_t uiPESStyle, uint8_t* pes_buf, int pes_size, TALForXMLDoc* pxmlFatherDoc)
 {
 	uint8_t sub_type = (uiPESStyle & 0x000000ff);
 	uint8_t stream_type = (uiPESStyle & 0x0000ff00) >> 8;
@@ -302,7 +303,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(uint32_t uiPESStyle, uint8_t* pes_b
 
 	if ((m_pList != NULL) && (m_pTree != NULL))
 	{
-		HALForXMLDoc xml2Doc;
+		TALForXMLDoc xml2Doc;
 
 		PES_packet_t PES_packet;
 		MPEG_decode_PES_packet_to_xml(pes_buf, pes_size, &xml2Doc, &PES_packet);
@@ -406,7 +407,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(uint32_t uiPESStyle, uint8_t* pes_b
 		exeDrive[2] = '\0';
 
 		sprintf_s(pszXmlDir, sizeof(pszXmlDir), "%s\\~EverStationII\\xml", exeDrive);
-		BuildDirectory(pszXmlDir);
+		DIR_BuildDirectory(pszXmlDir);
 
 		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\PES_packet_0x%04X.xml", pszXmlDir, PID);
 		xml2Doc.SaveFile(pszFilePath);
@@ -417,18 +418,18 @@ void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(uint32_t uiPESStyle, uint8_t* pes_b
 	}
 }
 
-void CDlg_TSAnalyzer_PesEs::DisplayMPVPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
+void CDlg_TSAnalyzer_PesEs::DisplayMPVPacket(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
-	S32			 align_offset = -1;
+	int			 align_offset = -1;
 	ES_segment_t segment;
-	U8			 start_code;
-	U8			 slices_start_code = 0x01;
-	S32			 slices_length = 0;
+	uint8_t			 start_code;
+	uint8_t			 slices_start_code = 0x01;
+	int			 slices_length = 0;
 	uint8_t*     slices_start_ptr = NULL;
-	U8			 extension_start_code_identifier;
+	uint8_t			 extension_start_code_identifier;
 
-	U8*			rd_ptr;
-	S32			remain_length;
+	uint8_t*			rd_ptr;
+	int			remain_length;
 
 	char	pszComment[32];
 	char	pszField[32];
@@ -604,13 +605,13 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPVPacket(uint8_t* es_buf, int es_size, HALFo
 	}
 }
 
-void CDlg_TSAnalyzer_PesEs::DisplayAVSPacket(U8* es_buf, S32 es_size, HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
+void CDlg_TSAnalyzer_PesEs::DisplayAVSPacket(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
 {
-	S32			 align_offset;
+	int			 align_offset;
 	ES_segment_t segment;
-	U8			 start_code;
-	U8			 slices_start_code = 0x00;
-	S32			 slices_length = 0;
+	uint8_t			 start_code;
+	uint8_t			 slices_start_code = 0x00;
+	int			 slices_length = 0;
 	uint8_t*     slices_start_ptr = NULL;
 
 	uint8_t     *rd_ptr;
@@ -708,14 +709,14 @@ void CDlg_TSAnalyzer_PesEs::DisplayAVSPacket(U8* es_buf, S32 es_size, HALForXMLD
 	}
 }
 
-void CDlg_TSAnalyzer_PesEs::DisplayH264Packet(U8* es_buf, S32 es_size, HALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
+void CDlg_TSAnalyzer_PesEs::DisplayH264Packet(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)
 {
-	S32			 align_offset;
+	int			 align_offset;
 	ES_segment_t segment;
-	U8			 start_code;
+	uint8_t			 start_code;
 
-	U8*			rd_ptr;
-	S32			left_length;
+	uint8_t*			rd_ptr;
+	int			left_length;
 
 	char	pszComment[32];
 	char	pszField[32];
@@ -816,7 +817,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayH264Packet(U8* es_buf, S32 es_size, HALForXML
 	}
 }
 
-void CDlg_TSAnalyzer_PesEs::DisplayMPAPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, REF_SYNC_t* pref_sync)
+void CDlg_TSAnalyzer_PesEs::DisplayMPAPacket(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, REF_SYNC_t* pref_sync)
 {
 	int			 align_offset;
 	ES_segment_t segment;
@@ -948,7 +949,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayMPAPacket(uint8_t* es_buf, int es_size, HALFo
 	}
 }
 
-void CDlg_TSAnalyzer_PesEs::DisplayAACPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
+void CDlg_TSAnalyzer_PesEs::DisplayAACPacket(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	int			 align_offset;
 	ES_segment_t segment;
@@ -1015,13 +1016,13 @@ void CDlg_TSAnalyzer_PesEs::DisplayAACPacket(uint8_t* es_buf, int es_size, HALFo
 	}
 }
 
-void CDlg_TSAnalyzer_PesEs::DisplayAC3Packet(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
+void CDlg_TSAnalyzer_PesEs::DisplayAC3Packet(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	int			 align_offset;
 	ES_segment_t segment;
 
-	U8*			rd_ptr;
-	S32			left_length;
+	uint8_t*			rd_ptr;
+	int			left_length;
 
 	char	pszComment[32];
 	char	pszField[32];
@@ -1083,7 +1084,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayAC3Packet(uint8_t* es_buf, int es_size, HALFo
 	}
 }
 
-void CDlg_TSAnalyzer_PesEs::DisplayDRAPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
+void CDlg_TSAnalyzer_PesEs::DisplayDRAPacket(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	int			 align_offset;
 	ES_segment_t segment;
@@ -1149,7 +1150,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayDRAPacket(uint8_t* es_buf, int es_size, HALFo
 	}
 }
 
-void CDlg_TSAnalyzer_PesEs::DisplayUnknownESPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
+void CDlg_TSAnalyzer_PesEs::DisplayUnknownESPacket(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	if ((es_buf != NULL) && (es_size > 0) && (pxmlDoc != NULL))
 	{

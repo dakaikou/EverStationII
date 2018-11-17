@@ -10,7 +10,7 @@
 
 #include "..\Magic_TS\TSMagicView.h"
 
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+//#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_TSPackets.h"
@@ -18,10 +18,10 @@
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 #include "MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_ErrorCode.h"
 
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
-#include "libs_MPEG&DVB/Mpeg_TSPacket\Include\Mpeg2_TS_Utilities.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
+#include "translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_Utilities.h"
 
 void REPORT_TS_packet_statistic(WPARAM wParam, LPARAM lParam)
 {

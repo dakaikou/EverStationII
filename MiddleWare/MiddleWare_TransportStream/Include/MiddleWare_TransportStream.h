@@ -1,12 +1,24 @@
 #ifndef __MIDDLEWARE_TRANSPORT_STREAM_H__
 #define __MIDDLEWARE_TRANSPORT_STREAM_H__
-#include <Windows.h>
 
-#include "../compile.h"
+#if defined(_WIN32) || defined(_WIN64)
+#   ifdef _MW_TS_EXPORT
+#       define MW_TS_LIB __declspec(dllexport)
+#   elif defined(_MW_TS_IMPORT)
+#       define MW_TS_LIB __declspec(dllimport)
+#   else
+#       define MW_TS_LIB
+#   endif
+#elif __GNUC__ >= 4
+#   define MW_TS_LIB __attribute__((visibility("default")))
+#else
+#   define MW_TS_LIB
+#endif
 
-#include "HAL/HAL_Sys/Include/INTTYPES.H"
-#include "HAL/HAL_Sys/Include/Template/FIFO.h"
-#include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/Mpeg2_TS_packet.h"
+#include <stdint.h>
+
+#include "../Template/FIFO.h"
+#include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
 
 /*-------------------------------------------------------
 	CTransportStream Class definition
@@ -24,62 +36,62 @@
 
 typedef struct
 {
-	S32	mean;
-	S32	rms;			//均方根值
-	S32	min;
-	S32	max;
+	int	mean;
+	int	rms;			//均方根值
+	int	min;
+	int	max;
 
 } BITRATE_ATTRIBUTE_t;
 
-class _CDL_EXPORT CTransportStream
+class MW_TS_LIB CTransportStream
 {
 public:
 	CTransportStream(void);
 
 public:
-	S32			m_bEnableTSRateDebug;
+	int			m_bEnableTSRateDebug;
 
-	S32			m_nPacketLength;
-	S32			m_bSynced;
-	S32			m_TsError;
+	int			m_nPacketLength;
+	int			m_bSynced;
+	int			m_TsError;
 
-	S32			m_hFile;
+	int			m_hFile;
 
-	S32			m_nRunning;				//主动设置的状态
-	S32			m_nStopRunning;			//线程反馈回来的状态
+	int			m_nRunning;				//主动设置的状态
+	int			m_nStopRunning;			//线程反馈回来的状态
 
-	S32			m_nReceiving;			//主动设置的状态
-	S32			m_nStopReceiving;		//线程反馈的状态
+	int			m_nReceiving;			//主动设置的状态
+	int			m_nStopReceiving;		//线程反馈的状态
 
-	S32			m_nMode;				//用以识别TS流的打开方式，0 - 表示离线分析， 1 - 表示实时分析
+	int			m_nMode;				//用以识别TS流的打开方式，0 - 表示离线分析， 1 - 表示实时分析
 
-	S32			m_nEOF;
+	int			m_nEOF;
 
-	S8			m_pszProtocolHead[16];
-	S8			m_pszProtocolExt[MAX_PATH];
+	char			m_pszProtocolHead[16];
+	char			m_pszProtocolExt[256];
 
 	double		mf_actual_1spulse_frequency;
 	double		mf_actual_scan_frequency;
-	S32			mn_actual_timeslice;
+	int			mn_actual_timeslice;
 
-//	S64			m_llCurFilePos;						//support file size: >= 4G
-	S64			m_llCurReadPos;
-	S64			m_llTotalFileLength;
+//	int64_t			m_llCurFilePos;						//support file size: >= 4G
+	int64_t			m_llCurReadPos;
+	int64_t			m_llTotalFileLength;
 
 
-	CFIFO<U8, TSCHUNK_MAX_SIZE>   m_ts_fifo;
+	CFIFO<uint8_t, TSCHUNK_MAX_SIZE>   m_ts_fifo;
 
 protected:
-	S32				m_bitrate_available;
-	S32				m_bitrate_sample_index;
-	S32				m_bitrate_sample_count;
-	S32				m_bitrate_sample_array[TS_BITRATE_FIFO_LENGTH];
+	int				m_bitrate_available;
+	int				m_bitrate_sample_index;
+	int				m_bitrate_sample_count;
+	int				m_bitrate_sample_array[TS_BITRATE_FIFO_LENGTH];
 
-	S32				m_bitrate_cur_value;
-	S32				m_bitrate_min_value;
-	S32				m_bitrate_max_value;
-	S32				m_bitrate_mean_value;
-	S32				m_bitrate_rms_value;
+	int				m_bitrate_cur_value;
+	int				m_bitrate_min_value;
+	int				m_bitrate_max_value;
+	int				m_bitrate_mean_value;
+	int				m_bitrate_rms_value;
 
 	//数据库指针，暂时采用写文件的方式，将来（只要我还活着）可以改成数据库
 	FILE*		fp_dbase;
@@ -87,31 +99,35 @@ protected:
 public:
 	~CTransportStream();
 
-	S32 GetMeasuredBitrateAttribute(BITRATE_ATTRIBUTE_t* pattr);
-	S32 AddBitrateSample(int bitrate);
+	int GetMeasuredBitrateAttribute(BITRATE_ATTRIBUTE_t* pattr);
+	int AddBitrateSample(int bitrate);
 
-	S32 Open(char* tsin_option, char* tsin_description, int mode);
-	S32 Close(void);
-	S32 Reset(void);
+	int Open(char* tsin_option, char* tsin_description, int mode);
+	int Close(void);
+	int Reset(void);
 
-	S32 StartGetData(void);
-	S32 StopGetData(void);
+	int StartGetData(void);
+	int StopGetData(void);
 
-	S32	StartGetBitrate(void);
-	S32	GetBitrateMap(ULONG pbitrate_map[], S32 count);
-	S32 GetBitrate(void);
-	S32	StopGetBitrate(void);
+	int	StartGetBitrate(void);
+	int	GetBitrateMap(int pbitrate_map[], int count);
+	int GetBitrate(void);
+	int	StopGetBitrate(void);
 
 	void SeekToBegin(void);
 
-	S32  PrefetchOnePacket(U8* buf, S32* plength);
-	S32  SkipOnePacket(void);
+	int  PrefetchOnePacket(uint8_t* buf, int* plength);
+	int  SkipOnePacket(void);
 
-//	S32  GetOnePacket(U8* buf, S32* plength);
-	S32	 GetLastError(void);
-	S64 Tell(void);
+//	int  GetOnePacket(uint8_t* buf, int* plength);
+	int	 GetLastError(void);
+	int64_t Tell(void);
 
 protected:
 };
+
+
+#define UNCREDITABLE_MAX_VALUE				-123456789
+#define UNCREDITABLE_MIN_VALUE				123456789
 
 #endif

@@ -2,8 +2,8 @@
 
 #include "../Include/MiddleWare_PSISI_Table.h"
 #include "../Include/MiddleWare_PSISI_ErrorCode.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/MPEG_DVB_ErrorCode.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
 
 /////////////////////////////////////////////
 CTOT::CTOT(uint16_t Key, uint16_t PID, uint8_t table_id) : CPVT(Key, PID, table_id, 0xffff)

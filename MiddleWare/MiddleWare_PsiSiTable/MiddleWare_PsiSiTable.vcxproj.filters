@@ -13,12 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="源文件\Impl">
-      <UniqueIdentifier>{844cc649-f2b4-4daa-a63f-974835c6fa56}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\Include">
-      <UniqueIdentifier>{46311306-f3ed-44ee-bffa-036d4f1dbfc5}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -27,20 +21,20 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_PSISI_ErrorCode.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_DSMCC_Table.h">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_DSMCC_Table.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_Common.h">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_PSISI_Table.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_PSISI_Common.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_SysCapability.h">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_PSISI_SysCapability.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_Table.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -50,59 +44,59 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_IPDC_MPE.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_DSMCC_DDM.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_MHP_AIT.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_DSMCC_UNM.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_PSI_PAT.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_IPDC_MPE.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_PSI_PMT.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_MHP_AIT.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_SI_BAT.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_PSI_CAT.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_SI_CMT.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_PSI_PAT.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_SI_EIT.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_PSI_PMT.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_SI_INT.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_PSI_TSDT.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_SI_NIT.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_PSISI_Common.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_SI_RST.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_SI_BAT.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_SI_SDT.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_SI_CMT.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_SI_TDT.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_SI_EIT.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_SI_TOT.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_SI_INT.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_DSMCC_DDM.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_SI_NIT.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_DSMCC_UNM.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_SI_RST.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_PSISI_Common.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_SI_SDT.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_PSI_CAT.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_SI_TDT.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\CDL_PSI_TSDT.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_PsiSiTable\Impl\CDL_SI_TOT.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

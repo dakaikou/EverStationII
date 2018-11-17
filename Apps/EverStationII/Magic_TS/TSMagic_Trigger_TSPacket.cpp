@@ -13,7 +13,7 @@
 
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TransportStream.h"
 #include "MiddleWare/MiddleWare_TransportStream\Include\MiddleWare_TS_ErrorCode.h"
-#include "libs_Mpeg&DVB/Mpeg_TSPacket\Include\Mpeg2_TS_ErrorCode.h"
+#include "translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_ErrorCode.h"
 
 CTrigger_TSPacket::CTrigger_TSPacket(void)
 {
@@ -25,13 +25,13 @@ CTrigger_TSPacket::~CTrigger_TSPacket(void)
 
 void ts_packet_trigger_loop(pthread_params_t pThreadParams)
 {
-	U8	  packet_buf[204];
-	S32	  packet_length;
-	S8	  pszDebug[256];
+	uint8_t	  packet_buf[204];
+	int	  packet_length;
+	char	  pszDebug[256];
 
-//	S64	  read_byte_pos = 0;
-	S32	  rtcode;
-//	S32	  getdata_rtcode;
+//	int64_t	  read_byte_pos = 0;
+	int	  rtcode;
+//	int	  getdata_rtcode;
 
 	CTransportStream* ptransport_stream = NULL;
 	transport_packet_t			transport_packet;
@@ -70,7 +70,7 @@ void ts_packet_trigger_loop(pthread_params_t pThreadParams)
 					{
 						if (pTSPacketTrigger->IsMatched(packet_buf, packet_length))
 						{
-//							S32 nOldCatchedCount = pTSPacketTrigger->GetCatchedCount();
+//							int nOldCatchedCount = pTSPacketTrigger->GetCatchedCount();
 							pTSPacketTrigger->SaveTheWholePacket(packet_buf, packet_length);
 //							if (nOldCatchedCount == 0)		//捕捉到第一个匹配section时报告状态
 							{
@@ -118,7 +118,7 @@ void ts_packet_trigger_loop(pthread_params_t pThreadParams)
 	//}
 }
 
-U32 TSMagic_packet_trigger_thread(LPVOID lpParam)
+uint32_t TSMagic_packet_trigger_thread(LPVOID lpParam)
 {
 	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
 	ts_packet_trigger_loop(pThreadParams);

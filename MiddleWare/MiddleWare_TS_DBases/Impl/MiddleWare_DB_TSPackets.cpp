@@ -5,19 +5,19 @@
 
 #include "MiddleWare/MiddleWare_TransportStream\Include\MiddleWare_TS_ErrorCode.h"
 #include "MiddleWare/MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 
-#include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/Mpeg2_TS_packet.h"
-#include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/Mpeg2_TS_Utilities.h"
-#include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/Mpeg2_TS_PID.h"
-#include "libs_Mpeg&DVB/Mpeg_PESPacket/Include/MPEG_stream_id.h"
-#include "libs_Mpeg&DVB/Mpeg_PESPacket/Include/MPEG_PES_Utilities.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_StreamType.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/MPEG_DVB_Common.h"
+#include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
+#include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_Utilities.h"
+#include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_PID.h"
+#include "translate_layer/Mpeg_PESPacket/Include/MPEG_stream_id.h"
+#include "translate_layer/Mpeg_PESPacket/Include/MPEG_PES_Utilities.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_StreamType.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_Common.h"
 
-#include "libs_Utilities\Include\XStream_Utilities.h"
+#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
 
 #include "../Include/MiddleWare_DB_TSPackets.h"
 #include "../Include/MiddleWare_DB_ErrorCode.h"
@@ -55,7 +55,7 @@ int sqlite3_test()
 	exeDrive[2] = '\0';
 
 	sprintf_s(pszDbaseDir, sizeof(pszDbaseDir), "%s\\~EverStationII\\dbase", exeDrive);
-	BuildDirectory(pszDbaseDir);
+	DIR_BuildDirectory(pszDbaseDir);
 
 	sprintf_s(pszDbFile, sizeof(pszDbFile), "%s\\EverStationII.db", pszDbaseDir);
 
@@ -197,7 +197,7 @@ int CDB_TSPackets::AddDummyRecord(uint16_t usPID, uint8_t payload_class, uint8_t
 			}
 			else
 			{
-				pInfo->ucClass = GetTSPayloadClassByStreamType(stream_type, stream_subtype);
+				pInfo->ucClass = MPEG2_TS_GetPayloadClassByStreamType(stream_type, stream_subtype);
 			}
 			pInfo->ucMainType = 0x00;
 			pInfo->ucStreamType = stream_type;
@@ -422,7 +422,7 @@ int CDB_TSPackets::AddPacket(transport_packet_t* pTS_packet)
 						{
 							stream_id = payload_buf[3];
 
-							class_type = GetTSPayloadClassByStreamID(stream_id);
+							class_type = MPEG2_TS_GetPayloadClassByStreamID(stream_id);
 							main_type = stream_id;		//stream_id
 						}
 						else

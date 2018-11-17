@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#include "HAL\HAL_XML\Include\HALForTinyXML2.h"
+#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_PesEs dialog
 #include "..\Magic_TS\TSMagic_GuiApi.h"
@@ -62,15 +62,15 @@ public:
 	void Reset(void);
 	void UpdatePAT(CPAT* pPAT);
 	void UpdatePMT(CPMT* pPMT);
-	void DisplayPESPacket(uint32_t uiPESStyle, uint8_t* PES_buf, int PES_length, HALForXMLDoc* pxmlDoc = NULL);
-	void DisplayMPVPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
-	void DisplayAVSPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
-	void DisplayH264Packet(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
-	void DisplayMPAPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL, REF_SYNC_t* pref_sync = NULL);
-	void DisplayAACPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
-	void DisplayAC3Packet(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
-	void DisplayDRAPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
-	void DisplayUnknownESPacket(uint8_t* es_buf, int es_size, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
+	void DisplayPESPacket(uint32_t uiPESStyle, uint8_t* PES_buf, int PES_length, TALForXMLDoc* pxmlDoc = NULL);
+	void DisplayMPVPacket(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
+	void DisplayAVSPacket(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
+	void DisplayH264Packet(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
+	void DisplayMPAPacket(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL, REF_SYNC_t* pref_sync = NULL);
+	void DisplayAACPacket(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
+	void DisplayAC3Packet(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
+	void DisplayDRAPacket(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
+	void DisplayUnknownESPacket(uint8_t* es_buf, int es_size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode = NULL);
 
 protected:
 

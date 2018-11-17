@@ -19,9 +19,9 @@
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_SectionSplicer.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_PESSplicer.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/MiddleWare_SectionSplicer_ErrorCode.h"
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TS_ErrorCode.h"
-#include "libs_Mpeg&DVB/Mpeg_TSPacket\Include\Mpeg2_TS_Utilities.h"
+#include "translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_Utilities.h"
 
 
 #include <stdio.h>
@@ -36,33 +36,33 @@
 
 void realtime_ts_analyzer(pthread_params_t pThreadParams)
 {
-	S32	  rtcode;
+	int	  rtcode;
 
-	U8	  record_buf[188 * 204];
-	S32   write_size;
+	uint8_t	  record_buf[188 * 204];
+	int   write_size;
 
-	U8*	  section_buf;
-	S32	  section_length;
-	U8	  packet_buf[204];
-	S32	  packet_length;
+	uint8_t*	  section_buf;
+	int	  section_length;
+	uint8_t	  packet_buf[204];
+	int	  packet_length;
 
-	S8	  pszDebug[MAX_TXT_CHARS];
-	S8	  pszTsFile[MAX_PATH];
-	S8	  pszTemp[128];
-	S64	  read_byte_pos = 0;
+	char	  pszDebug[MAX_TXT_CHARS];
+	char	  pszTsFile[MAX_PATH];
+	char	  pszTemp[128];
+	int64_t	  read_byte_pos = 0;
 
 	int   recording_state = 0;
 	int	  recording_size = 0;
 	COleDateTime	timeCurrent;
 	CString			strTime;
 
-	U32	  old_tickcount;
-	U32	  new_tickcount;
-	S32	  diff_tickcount;
+	uint32_t	  old_tickcount;
+	uint32_t	  new_tickcount;
+	int	  diff_tickcount;
 
-	S32	  stream_synced = 0;
+	int	  stream_synced = 0;
 
-	S32					filter_index;
+	int					filter_index;
 	CSectionSplicer		SectionSplicer[MAX_SECTION_FILTERS];
 	CSectionSplicer*	pSectionSplicer;
 	CPESSplicer			PESSplicer;
@@ -78,7 +78,7 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 	CTrigger_PsiSiSection* pSectionTrigger = NULL;
 	CTrigger_TSPacket*		pTSPacketTrigger = NULL;
 	CTrigger_PESPacket*		pPESPacketTrigger = NULL;
-	S32					pes_payload_unit_start_indicator = 0;
+	int					pes_payload_unit_start_indicator = 0;
 
 	FILE*	fp_record = NULL;
 
@@ -159,7 +159,7 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 					{
 						if (pTSPacketTrigger->IsMatched(packet_buf, packet_length))
 						{
-//							S32 nOldCatchedCount = pTSPacketTrigger->GetCatchedCount();
+//							int nOldCatchedCount = pTSPacketTrigger->GetCatchedCount();
 							pTSPacketTrigger->SaveTheWholePacket(packet_buf, packet_length);
 //							if (nOldCatchedCount == 0)		//捕捉到第一个匹配TS包时报告状态
 							{
@@ -179,8 +179,8 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 							rtcode = PESSplicer.WriteTSPacket(&transport_packet);
 							if (rtcode == NO_ERROR)
 							{
-								S32 pes_length;
-								U8* pes_buf = PESSplicer.GetPESPacket(&pes_length);
+								int pes_length;
+								uint8_t* pes_buf = PESSplicer.GetPESPacket(&pes_length);
 								pPESPacketTrigger->SaveTheWholePacket(pes_buf, pes_length);
 								::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_PES_TRIGGER_STATE, 2, 0);
 								::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_PES_TRIGGER_STATE, 0, 0);
@@ -322,7 +322,7 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 										{
 											if (pSectionTrigger->IsMatched(section_buf, section_length))
 											{
-												S32 nOldCatchedCount = pSectionTrigger->GetCatchedCount();
+												int nOldCatchedCount = pSectionTrigger->GetCatchedCount();
 												pSectionTrigger->SaveTheWholePacket(section_buf, section_length);
 												if (nOldCatchedCount == 0)		//捕捉到第一个匹配section时报告状态
 												{
@@ -376,7 +376,7 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 					//实时分析情况下的PCR检测，根据码流的PCR计算码率
 					if (transport_packet.adaptation_field.PCR_flag)
 					{
-						//S32		pcr_index;
+						//int		pcr_index;
 
 						PCR_code_t pcr_code;
 						pcr_code.base_32_30 = transport_packet.adaptation_field.program_clock_reference_base_32_30;
@@ -410,7 +410,7 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 
 							//这里仅是一种码流速率的估算方法,实际上是不可以自己证明自己的，应该通过其他方式计算码率
 							{
-								S64 sum = 0;
+								int64_t sum = 0;
 								int count = 0;
 								int pcr_count = pDB_Pcrs->GetTotalRecordCount();
 
@@ -427,7 +427,7 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 								}
 								if (count > 0)
 								{
-									int bitrate_cur = (S32)(sum / count);
+									int bitrate_cur = (int)(sum / count);
 
 									ptransport_stream->AddBitrateSample(bitrate_cur);
 
@@ -560,7 +560,7 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 //	assert(pThreadParams->packet_decimate_thread_stopped == 1);
 }
 
-U32 TSMagic_realtime_analyzer(LPVOID lpParam)
+uint32_t TSMagic_realtime_analyzer(LPVOID lpParam)
 {
 	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
 
@@ -571,10 +571,10 @@ U32 TSMagic_realtime_analyzer(LPVOID lpParam)
 
 void realtime_ts_monitor(pthread_params_t pThreadParams)
 {
-	S8					pszDebug[MAX_TXT_CHARS];
-	S32					bitrate;
-	S32					get_count = 0;
-	S32					find_signal = 0;
+	char				pszDebug[MAX_TXT_CHARS];
+	int					bitrate;
+	int					get_count = 0;
+	int					find_signal = 0;
 
 	CTransportStream* ptransport_stream = NULL;
 	CDB_TSPackets* pDB_TSPackets = NULL;
@@ -605,7 +605,7 @@ void realtime_ts_monitor(pthread_params_t pThreadParams)
 
 		while (pThreadParams->monitor_thread_running == 1)
 		{
-			bitrate = (S32)ptransport_stream->GetBitrate();
+			bitrate = (int)ptransport_stream->GetBitrate();
 
 			if (bitrate > 0)
 			{
@@ -670,7 +670,7 @@ void realtime_ts_monitor(pthread_params_t pThreadParams)
 	//}
 }
 
-U32 TSMagic_realtime_monitor(LPVOID lpParam)
+uint32_t TSMagic_realtime_monitor(LPVOID lpParam)
 {
 	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
 	realtime_ts_monitor(pThreadParams);

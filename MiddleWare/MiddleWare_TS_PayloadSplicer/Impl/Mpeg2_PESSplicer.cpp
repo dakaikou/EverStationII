@@ -42,22 +42,22 @@ void CPESSplicer::Reset(void)
 	m_pes_payload_unit_started = 0;
 }
 
-S32 CPESSplicer::SetPID(U16 usPID)
+int CPESSplicer::SetPID(uint16_t usPID)
 {
 	m_usPID = usPID;
 
 	return 0;
 }
 
-S32 CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
+int CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 {
-	S32		rtcode = PESES_SPLICE_UNKNOWN_ERROR;
+	int		rtcode = PESES_SPLICE_UNKNOWN_ERROR;
 
-	U8*		payload_buf;
-	S32		payload_length;
+	uint8_t*		payload_buf;
+	int		payload_length;
 
 	//control part
-	S32		bAligned = 0;
+	int		bAligned = 0;
 
 	if (ptransport_packet != NULL)
 	{
@@ -94,7 +94,7 @@ S32 CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 							//m_nPESLength = 0;
 
 							m_nBufSize = 0x10000;
-							m_pucPESBuf = (U8*)malloc(m_nBufSize);
+							m_pucPESBuf = (uint8_t*)malloc(m_nBufSize);
 							memcpy(m_pucPESBuf, payload_buf, payload_length);
 							m_nPESLength = payload_length;
 							//hLastRecordHandler = pPESPacketTrigger->SaveAsNewStart(transport_packet.payload_buf, transport_packet.payload_length);
@@ -159,7 +159,7 @@ S32 CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 					}
 					else if (m_pes_payload_unit_started == 1)
 					{
-						S32 bAligned = 1;
+						int bAligned = 1;
 						//检查包序号
 						//if (ptransport_packet->continuity_counter == 0)
 						//{
@@ -181,7 +181,7 @@ S32 CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 								//	pAVDecoder->m_bTriggering = 0;
 								//}
 
-								//S32 nOldCatchedCount = pPESPacketTrigger->GetCatchedCount();
+								//int nOldCatchedCount = pPESPacketTrigger->GetCatchedCount();
 
 								//pPESPacketTrigger->SaveAndClose(hLastRecordHandler, NULL, 0);
 
@@ -203,11 +203,11 @@ S32 CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 								//拼接过程中
 
 								//直接缓存数据
-								S32 new_size = m_nPESLength + payload_length;
+								int new_size = m_nPESLength + payload_length;
 								if (new_size > m_nBufSize)
 								{
 									m_nBufSize += 0x8000;
-									U8* new_buf = (U8*)realloc(m_pucPESBuf, m_nBufSize);
+									uint8_t* new_buf = (uint8_t*)realloc(m_pucPESBuf, m_nBufSize);
 									m_pucPESBuf = new_buf;
 								}
 
@@ -260,7 +260,7 @@ S32 CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 	return rtcode;
 }
 
-U8* CPESSplicer::GetPESPacket(S32* plength)
+uint8_t* CPESSplicer::GetPESPacket(int* plength)
 {
 	if (plength != NULL)
 	{
@@ -270,9 +270,9 @@ U8* CPESSplicer::GetPESPacket(S32* plength)
 	return m_pucPESBuf;
 }
 /*
-S32	CSectionSplicer::ReadSection(U8* buf, S32* plength)
+int	CSectionSplicer::ReadSection(uint8_t* buf, int* plength)
 {
-	S32		rtcode = NO_ERROR;
+	int		rtcode = NO_ERROR;
 
 	if ((buf != NULL) && (plength != NULL))
 	{

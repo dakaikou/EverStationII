@@ -1,7 +1,6 @@
 #ifndef _TSMAGIC_TRIGGER_SECTION_H_
 #define _TSMAGIC_TRIGGER_SECTION_H_
 
-#include "HAL/HAL_Sys/Include/INTTYPES.H"
 #include "TSMagic_Trigger.h"
 
 uint32_t TSMagic_section_trigger_thread(LPVOID lpParam);
@@ -22,7 +21,7 @@ public:
 
 	void Reset(void);
 	uint16_t GetPID(void);
-	int	  IsMatched(U8* buf, S32 length);
+	int	  IsMatched(uint8_t* buf, int length);
 };
 
 #endif		//_TSMAGIC_TRIGGER_SECTION_H_

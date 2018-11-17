@@ -3,12 +3,15 @@
 #include <Windows.h>
 #include <assert.h>
 
+
 #include "../Include/MiddleWare_DB_Pcrs.h"
 #include "../Include/MiddleWare_DB_ErrorCode.h"
 
-#include "HAL/HAL_Sys/Include/INTTYPES.H"
 //#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
-#include "libs_Utilities\Include\XStream_Utilities.h"
+#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
+
+#define UNCREDITABLE_MAX_VALUE				-123456789
+#define UNCREDITABLE_MIN_VALUE				123456789
 
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
@@ -16,7 +19,7 @@
 
 CDB_Pcrs::CDB_Pcrs()
 {
-	S32	i;
+	int	i;
 
 	for (i = 0; i < MAX_SUPPORTED_PCR_PIDS; i++)
 	{
@@ -44,7 +47,7 @@ CDB_Pcrs::~CDB_Pcrs()
 
 void CDB_Pcrs::Reset(void)
 {
-	S32	i;
+	int	i;
 
 	m_jitter_mean_value = UNCREDITABLE_MAX_VALUE;
 	m_jitter_rms_value = UNCREDITABLE_MAX_VALUE;
@@ -80,7 +83,7 @@ void CDB_Pcrs::Reset(void)
 	int		len;
 
 	GetModuleFileNameA(NULL, pszExeFile, sizeof(pszExeFile));
-	len = GetModulePathLength(pszExeFile);
+	len = DIR_GetModulePathLength(pszExeFile);
 	assert(len > 0);
 
 	memcpy(pszIniFile, pszExeFile, len);
@@ -90,11 +93,11 @@ void CDB_Pcrs::Reset(void)
 	m_bEnablePcrDebug = GetPrivateProfileIntA("编程者诊断", "PCR", 0, pszIniFile);
 }
 
-S32 CDB_Pcrs::VlookupPCRRecord(U16 usPCRPID)
+int CDB_Pcrs::VlookupPCRRecord(uint16_t usPCRPID)
 {
-	S32 rtcode;
-	S32	pcr_index;
-	S32 found_pcr = 0;
+	int rtcode;
+	int	pcr_index;
+	int found_pcr = 0;
 
 	for (pcr_index = 0; pcr_index < m_pcr_pid_count; pcr_index++)
 	{
@@ -125,15 +128,15 @@ S32 CDB_Pcrs::VlookupPCRRecord(U16 usPCRPID)
 
 }
 
-S32 CDB_Pcrs::GetTotalRecordCount(void)
+int CDB_Pcrs::GetTotalRecordCount(void)
 {
 	return m_pcr_pid_count;
 }
 
 //采用副本拷贝的方式，以保护原始数据不被破坏
-S32 CDB_Pcrs::GetRecordByIndex(int index, RECORD_PCR_t* pPcrInfo)
+int CDB_Pcrs::GetRecordByIndex(int index, RECORD_PCR_t* pPcrInfo)
 {
-	S32	rtcode = MIDDLEWARE_DB_UNKNOWN_ERROR;
+	int	rtcode = MIDDLEWARE_DB_UNKNOWN_ERROR;
 
 	if ((index >= 0) && (index < m_pcr_pid_count))
 	{
@@ -149,9 +152,9 @@ S32 CDB_Pcrs::GetRecordByIndex(int index, RECORD_PCR_t* pPcrInfo)
 }
 
 //采用副本拷贝的方式，以保护原始数据不被破坏
-S32 CDB_Pcrs::GetRecordByPID(U16 usPCRPID, RECORD_PCR_t* pPcrInfo)
+int CDB_Pcrs::GetRecordByPID(uint16_t usPCRPID, RECORD_PCR_t* pPcrInfo)
 {
-	S32	pcr_index;
+	int	pcr_index;
 	
 	pcr_index = VlookupPCRRecord(usPCRPID);
 	if (pcr_index >= 0)
@@ -166,30 +169,30 @@ S32 CDB_Pcrs::GetRecordByPID(U16 usPCRPID, RECORD_PCR_t* pPcrInfo)
 }
 
 // pos	--	ts packet start byte offset
-S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_reference_bitrate, S32 ref_bitrate_var)
+int CDB_Pcrs::AddPCRSample(uint16_t usPcrPID, int64_t pos, PCR_code_t* pPCRCode, int ext_reference_bitrate, int ref_bitrate_var)
 {
-	S32			rtcode = MIDDLEWARE_DB_UNKNOWN_ERROR;
+	int			rtcode = MIDDLEWARE_DB_UNKNOWN_ERROR;
 
 	PCR_code_t  old_PCR_code;
 
-	S64			old_pcr_pos;
-	S32			pcr_code_diff;
-	S32			pos_diff;
+	int64_t			old_pcr_pos;
+	int			pcr_code_diff;
+	int			pos_diff;
 
-	S64			code_time_diff_value;
-	S64			ts_time_diff_value;
+	int64_t			code_time_diff_value;
+	int64_t			ts_time_diff_value;
 
-	S32			data_rate_new;
-	S64			data_rate_sum;
-	S32			jitter_cur_value;
-	S32			interval_cur_value;
-	S32			sample_index;
-	S64			pcr_pos = pos + 12;				//必须要确保pcr_pos 要大于pos。程序需要考虑计数溢出的问题
-	U32			old_tickcount;
+	int			data_rate_new;
+	int64_t			data_rate_sum;
+	int			jitter_cur_value;
+	int			interval_cur_value;
+	int			sample_index;
+	int64_t			pcr_pos = pos + 12;				//必须要确保pcr_pos 要大于pos。程序需要考虑计数溢出的问题
+	uint32_t			old_tickcount;
 
-	S64 sum = 0;
-	S32	pcr_index;
-	S32	count = 0;
+	int64_t sum = 0;
+	int	pcr_index;
+	int	count = 0;
 
 	RECORD_PCR_t*	pInfo;
 
@@ -252,7 +255,7 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 			exeDrive[2] = '\0';
 			sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
 			sprintf_s(pszPcrPath, sizeof(pszPcrPath), "%s\\pcr", pszAppTempPath);
-			BuildDirectory(pszPcrPath);
+			DIR_BuildDirectory(pszPcrPath);
 
 			char file_name[128];
 			sprintf_s(file_name, sizeof(file_name), "%s\\tick_%08x_pcr_debug_0x%04X.txt", pszPcrPath, old_tickcount, pInfo->PCR_PID);
@@ -297,7 +300,7 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 					pInfo->PCR_code.extension);
 			}
 
-			pos_diff = (S32)(pInfo->PCR_pos - old_pcr_pos);
+			pos_diff = (int)(pInfo->PCR_pos - old_pcr_pos);
 			if (pos_diff > 0)
 			{
 				if (pInfo->fp_dbase != NULL)
@@ -317,10 +320,10 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 						fprintf(pInfo->fp_dbase, ", %d", ext_reference_bitrate);
 					}
 
-					code_time_diff_value = (S64)(pcr_code_diff * 37.037);					//ns，会溢出
+					code_time_diff_value = (int64_t)(pcr_code_diff * 37.037);					//ns，会溢出
 
 					////计算新码率
-					data_rate_new = (S32)(pos_diff * 8000000000.0 / code_time_diff_value);
+					data_rate_new = (int)(pos_diff * 8000000000.0 / code_time_diff_value);
 
 					int stable_stream = 1;
 					if (ext_reference_bitrate > 0)
@@ -331,7 +334,7 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 							stable_stream = 0;
 						}
 					}
-					S32 is_valid_sample = IsValidBitrate(data_rate_new, pInfo->encoder_bitrate_mean_value, pInfo->encoder_bitrate_rms_value, pInfo->encoder_bitrate_sample_count);
+					int is_valid_sample = IsValidBitrate(data_rate_new, pInfo->encoder_bitrate_mean_value, pInfo->encoder_bitrate_rms_value, pInfo->encoder_bitrate_sample_count);
 
 					pInfo->encoder_bitrate_cur_value = data_rate_new;
 					if (stable_stream && is_valid_sample)
@@ -357,7 +360,7 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 							{
 								data_rate_sum += pInfo->encoder_bitrate_sample_array[sample_index];
 							}
-							pInfo->encoder_bitrate_mean_value = (S32)(data_rate_sum / pInfo->encoder_bitrate_sample_count);
+							pInfo->encoder_bitrate_mean_value = (int)(data_rate_sum / pInfo->encoder_bitrate_sample_count);
 
 							if (pInfo->fp_dbase != NULL)
 							{
@@ -369,10 +372,10 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 							data_rate_sum = 0;
 							for (sample_index = 0; sample_index < pInfo->encoder_bitrate_sample_count; sample_index++)
 							{
-								data_rate_sum += (S64)pow(pInfo->encoder_bitrate_sample_array[sample_index] - pInfo->encoder_bitrate_mean_value, 2);
+								data_rate_sum += (int64_t)pow(pInfo->encoder_bitrate_sample_array[sample_index] - pInfo->encoder_bitrate_mean_value, 2);
 							}
 							data_rate_sum /= pInfo->encoder_bitrate_sample_count;
-							pInfo->encoder_bitrate_rms_value = (S32)sqrt((double)data_rate_sum);
+							pInfo->encoder_bitrate_rms_value = (int)sqrt((double)data_rate_sum);
 
 							if (pInfo->fp_dbase != NULL)
 							{
@@ -398,8 +401,8 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 					if ((pInfo->encoder_bitrate_sample_count >= 2) && (ext_reference_bitrate > 0))
 					{
 						//PCR间隔以实际检测到的字节接收时间间隔为准
-						ts_time_diff_value = (S64)((8000000000.0 / ext_reference_bitrate) * pos_diff);			//ns
-						interval_cur_value = (S32)(ts_time_diff_value / 1000000);			//ms
+						ts_time_diff_value = (int64_t)((8000000000.0 / ext_reference_bitrate) * pos_diff);			//ns
+						interval_cur_value = (int)(ts_time_diff_value / 1000000);			//ms
 
 						pInfo->interval_cur_value = interval_cur_value;
 						if (interval_cur_value > pInfo->interval_max_value)
@@ -451,7 +454,7 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 								{
 									interval_sum += pInfo->interval_sample_array[sample_index];
 								}
-								pInfo->interval_mean_value = (S32)(interval_sum / pInfo->interval_sample_count);
+								pInfo->interval_mean_value = (int)(interval_sum / pInfo->interval_sample_count);
 
 								//均值滤波，可以改成alfa-bete滤波，或者其他算法
 								sum = 0;
@@ -467,7 +470,7 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 
 								if (count > 0)
 								{
-									m_interval_mean_value = (S32)(sum / count);
+									m_interval_mean_value = (int)(sum / count);
 								}
 
 								interval_sum = 0;
@@ -476,7 +479,7 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 									interval_sum += pow(pInfo->interval_sample_array[sample_index] - pInfo->interval_mean_value, 2);
 								}
 								interval_sum /= pInfo->interval_sample_count;
-								pInfo->interval_rms_value = (S32)sqrt(interval_sum);
+								pInfo->interval_rms_value = (int)sqrt(interval_sum);
 
 								//if (pInfo->interval_rms_value > m_interval_rms_value)
 								//{
@@ -511,7 +514,7 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 						}
 
 						//计算PCR_AC，等效于在复用器输出端测量
-						jitter_cur_value = (S32)(code_time_diff_value - ts_time_diff_value);		//参考TR101 290计算定义
+						jitter_cur_value = (int)(code_time_diff_value - ts_time_diff_value);		//参考TR101 290计算定义
 
 						if (jitter_cur_value > 500)		//500ns
 						{
@@ -567,7 +570,7 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 								{
 									jitter_sum += pInfo->jitter_sample_array[sample_index];
 								}
-								pInfo->jitter_mean_value = (S32)(jitter_sum / pInfo->jitter_sample_count);
+								pInfo->jitter_mean_value = (int)(jitter_sum / pInfo->jitter_sample_count);
 								if (pInfo->fp_dbase != NULL)
 								{
 									fprintf(pInfo->fp_dbase, ", %d", pInfo->jitter_mean_value);
@@ -587,7 +590,7 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 								}
 								if (count > 0)
 								{
-									m_jitter_mean_value = (S32)(sum / count);
+									m_jitter_mean_value = (int)(sum / count);
 								}
 
 								jitter_sum = 0.0;
@@ -596,7 +599,7 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 									jitter_sum += pow(pInfo->jitter_sample_array[sample_index] - pInfo->jitter_mean_value, 2);
 								}
 								jitter_sum /= pInfo->jitter_sample_count;
-								int jitter_rms_value = (S32)sqrt(jitter_sum);
+								int jitter_rms_value = (int)sqrt(jitter_sum);
 								if (jitter_rms_value > pInfo->jitter_rms_value)
 								{
 									pInfo->jitter_rms_value = jitter_rms_value;
@@ -612,7 +615,7 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 									jitter_sum += pow(pInfo->jitter_sample_array[sample_index] - m_jitter_mean_value, 2);
 								}
 								jitter_sum /= pInfo->jitter_sample_count;
-								jitter_rms_value = (S32)sqrt(jitter_sum);
+								jitter_rms_value = (int)sqrt(jitter_sum);
 								if (jitter_rms_value > m_jitter_rms_value)
 								{
 									m_jitter_rms_value = jitter_rms_value;
@@ -673,9 +676,9 @@ S32 CDB_Pcrs::AddPCRSample(U16 usPcrPID, S64 pos, PCR_code_t* pPCRCode, S32 ext_
 	return rtcode;
 }
 
-S32 CDB_Pcrs::IsValidBitrate(S32 newValue, S32 refValue, S32 var, S32 timeLine)
+int CDB_Pcrs::IsValidBitrate(int newValue, int refValue, int var, int timeLine)
 {
-	S32 valid_sample = 0;
+	int valid_sample = 0;
 
 	if (timeLine < 16)		////为什么是16个样本？
 	{
@@ -736,9 +739,9 @@ S32 CDB_Pcrs::IsValidBitrate(S32 newValue, S32 refValue, S32 var, S32 timeLine)
 }
 
 
-S32 CDB_Pcrs::GetMeasuredJitterAttribute(PCR_JITTER_ATTRIBUTE_t* pattr)
+int CDB_Pcrs::GetMeasuredJitterAttribute(PCR_JITTER_ATTRIBUTE_t* pattr)
 {
-	S32 rtcode = MIDDLEWARE_DB_NO_ERROR;
+	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 	if (pattr != NULL)
 	{
 		pattr->min = m_jitter_min_value;
@@ -754,9 +757,9 @@ S32 CDB_Pcrs::GetMeasuredJitterAttribute(PCR_JITTER_ATTRIBUTE_t* pattr)
 	return rtcode;
 }
 
-S32 CDB_Pcrs::GetMeasuredIntervalAttribute(PCR_INTERVAL_ATTRIBUTE_t* pattr)
+int CDB_Pcrs::GetMeasuredIntervalAttribute(PCR_INTERVAL_ATTRIBUTE_t* pattr)
 {
-	S32 rtcode = MIDDLEWARE_DB_NO_ERROR;
+	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 	if (pattr != NULL)
 	{
 		pattr->min = m_interval_min_value;

@@ -11,8 +11,6 @@
 #include <assert.h>
 #include "InstrumentPanel_Base.h"
 
-#include "HAL/HAL_Sys/Include/INTTYPES.H"
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -46,6 +44,9 @@ static char THIS_FILE[] = __FILE__;
 //#define NOTSHOW_MIN_VALUE  123456789
 //#define NOTSHOW_MAX_VALUE  -123456789
 //#define NOTSHOW_VAR_VALUE  -100000000
+
+#define UNCREDITABLE_MAX_VALUE				-123456789
+#define UNCREDITABLE_MIN_VALUE				123456789
 
 CInstrumentPanel_Base::CInstrumentPanel_Base()
 {

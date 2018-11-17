@@ -1,8 +1,6 @@
 #ifndef _VIDEO_YUV2RGB_H_
 #define _VIDEO_YUV2RGB_H_
 
-#include "HAL/HAL_Sys/Include/INTTYPES.H"
-
 #define	VID_YUV2RGB_FastAlgorithm			1
 
 typedef enum
@@ -22,42 +20,42 @@ typedef enum
 
 typedef struct
 {
-	S32		size;				//the byte counts for this structure
-	S32		getparams;			//determine whether these parameters are usable
+	int		size;				//the byte counts for this structure
+	int		getparams;			//determine whether these parameters are usable
 
-	S32		graph_with_grid;
+	int		graph_with_grid;
 
-	S32		chroma_format;
-	S8		pszFourCC[5];
+	int		chroma_format;
+	char		pszFourCC[5];
 
-	S32		luma_width;
-	S32		luma_height;
-	S32		luma_buf_size;
-	S32		luma_pix_count;
-	U8*		pucY;
+	int		luma_width;
+	int		luma_height;
+	int		luma_buf_size;
+	int		luma_pix_count;
+	uint8_t*		pucY;
 
-	S32		chroma_width;
-	S32		chroma_height;
-	S32		chroma_buf_size;
-	S32		chroma_pix_count;
-	U8*		pucU;
-	U8*		pucV;
+	int		chroma_width;
+	int		chroma_height;
+	int		chroma_buf_size;
+	int		chroma_pix_count;
+	uint8_t*		pucU;
+	uint8_t*		pucV;
 
-	S32		frame_buf_size;
+	int		frame_buf_size;
 
-	S32	    display_width;
-	S32		display_height;
+	int	    display_width;
+	int		display_height;
 
-	S32		mb_width;								//mpeg_sequence_header & mpeg_sequence_extension	
-	S32		mb_height_frame;						//mpeg_sequence_header & mpeg_sequence_extension	
-	S32		mb_height_field;						//mpeg_sequence_header & mpeg_sequence_extension	
-	S32		mb_count;
-	S32		luma_mbw;
-	S32		luma_mbh;
-	S32		chroma_mbw;
-	S32		chroma_mbh;
+	int		mb_width;								//mpeg_sequence_header & mpeg_sequence_extension	
+	int		mb_height_frame;						//mpeg_sequence_header & mpeg_sequence_extension	
+	int		mb_height_field;						//mpeg_sequence_header & mpeg_sequence_extension	
+	int		mb_count;
+	int		luma_mbw;
+	int		luma_mbh;
+	int		chroma_mbw;
+	int		chroma_mbh;
 
-	S32		blockcount;
+	int		blockcount;
 
 } Video_decode_info_t, *pVideo_decode_info_t;
 

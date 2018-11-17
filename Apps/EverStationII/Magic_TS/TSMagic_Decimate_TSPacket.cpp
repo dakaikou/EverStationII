@@ -11,24 +11,24 @@
 #include "TSMagic_ErrorCode.h"
 #include "TSMagic_Decimate_TSPacket.h"
 
-#include "libs_Mpeg&DVB/Mpeg_PESPacket/Include/MPEG_stream_id.h"
-#include "libs_Mpeg&DVB/Mpeg_TSPacket\Include\Mpeg2_TS_ErrorCode.h"
+#include "translate_layer/Mpeg_PESPacket/Include/MPEG_stream_id.h"
+#include "translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TransportStream\Include\MiddleWare_TS_ErrorCode.h"
 
 void ts2es_decimate_loop(pthread_params_t pThreadParams)
 {
-	U8	  ts_packet_buf[204];
-	S32	  ts_packet_length;
-	S8	  pszDebug[MAX_TXT_CHARS];
-	S8	  pszEsFile[MAX_PATH];
+	uint8_t	  ts_packet_buf[204];
+	int	  ts_packet_length;
+	char	  pszDebug[MAX_TXT_CHARS];
+	char	  pszEsFile[MAX_PATH];
 
 	float file_size_div_100;
-	S64	  read_byte_pos = 0;
-	S32	  decimate_size = 0;
+	int64_t	  read_byte_pos = 0;
+	int	  decimate_size = 0;
 
-	S32	  old_ratio = 0;
-	S32	  analyse_ratio = 0;
-	S32	  rtcode;
+	int	  old_ratio = 0;
+	int	  analyse_ratio = 0;
+	int	  rtcode;
 	COleDateTime	timeCurrent;
 	CString			strTime;
 
@@ -38,19 +38,19 @@ void ts2es_decimate_loop(pthread_params_t pThreadParams)
 	CDB_TSPackets* pDB_TSPackets = NULL;
 	RECORD_TSPacket_t			TSPacketInfo;
 
-	U16							usPID;
+	uint16_t							usPID;
 	FILE*						fp = NULL;
 
-	U8		adaptation_field_length;
-	U8		payload_length;
-	U8*		ts_payload_buf;
-	U8*		pes_buf = NULL;
-	U8		pes_header_length;
-	U8*		es_buf = NULL;
+	uint8_t		adaptation_field_length;
+	uint8_t		payload_length;
+	uint8_t*		ts_payload_buf;
+	uint8_t*		pes_buf = NULL;
+	uint8_t		pes_header_length;
+	uint8_t*		es_buf = NULL;
 	bool	es_payload_start = 0;
 
-	U32		start_code;
-	U8		stream_id;
+	uint32_t		start_code;
+	uint8_t		stream_id;
 
 	if (pThreadParams != NULL)
 	{
@@ -87,7 +87,7 @@ void ts2es_decimate_loop(pthread_params_t pThreadParams)
 				if (rtcode == MIDDLEWARE_TS_NO_ERROR)
 				{
 					read_byte_pos = ptransport_stream->Tell();
-					analyse_ratio = (U32)(read_byte_pos / file_size_div_100);
+					analyse_ratio = (uint32_t)(read_byte_pos / file_size_div_100);
 					if (analyse_ratio > old_ratio)
 					{
 						old_ratio = analyse_ratio;
@@ -149,12 +149,12 @@ void ts2es_decimate_loop(pthread_params_t pThreadParams)
 													//识别为PES流
 													pes_buf = ts_payload_buf;
 
-													U8 mark_bits = (pes_buf[6] & 0xc0) >> 6;
-													U8 PES_scrambling_control = (pes_buf[6] & 0x30) >> 4;
-													U8 PES_priority = (pes_buf[6] & 0x08) >> 3;
-													U8 data_alignment_indicator = (pes_buf[6] & 0x04) >> 2;
-													U8 copyright = (pes_buf[6] & 0x02) >> 1;
-													U8 original_or_copy = (pes_buf[6] & 0x01) >> 0;
+													uint8_t mark_bits = (pes_buf[6] & 0xc0) >> 6;
+													uint8_t PES_scrambling_control = (pes_buf[6] & 0x30) >> 4;
+													uint8_t PES_priority = (pes_buf[6] & 0x08) >> 3;
+													uint8_t data_alignment_indicator = (pes_buf[6] & 0x04) >> 2;
+													uint8_t copyright = (pes_buf[6] & 0x02) >> 1;
+													uint8_t original_or_copy = (pes_buf[6] & 0x01) >> 0;
 
 													if ((mark_bits == 0x02) && (PES_scrambling_control == 0x00))
 													{
@@ -176,7 +176,7 @@ void ts2es_decimate_loop(pthread_params_t pThreadParams)
 															{
 																if (data_alignment_indicator == 1)
 																{
-																	U16 audio_sync_word = (es_buf[0] << 8) | es_buf[1];			//获取音频同步字
+																	uint16_t audio_sync_word = (es_buf[0] << 8) | es_buf[1];			//获取音频同步字
 
 																	if ((audio_sync_word & 0xFFF0) == 0xFFF0)
 																	{
@@ -190,8 +190,8 @@ void ts2es_decimate_loop(pthread_params_t pThreadParams)
 															}
 															else if ((stream_id >= VIDEO_STREAM_MIN) && (stream_id <= VIDEO_STREAM_MAX))		//0xE0~EF
 															{
-//																U32 es_start_code = (es_buf[0] << 24) | (es_buf[1] << 16) | (es_buf[2] << 8) | es_buf[3];
-																U32 es_start_code = es_buf[0];
+//																uint32_t es_start_code = (es_buf[0] << 24) | (es_buf[1] << 16) | (es_buf[2] << 8) | es_buf[3];
+																uint32_t es_start_code = es_buf[0];
 																es_start_code <<= 8;
 																es_start_code |= es_buf[1];
 																es_start_code <<= 8;
@@ -211,7 +211,7 @@ void ts2es_decimate_loop(pthread_params_t pThreadParams)
 															}
 															else if (stream_id == PRIVATE_STREAM_1)
 															{
-																U16 es_start_code = (es_buf[0] << 8) | es_buf[1];
+																uint16_t es_start_code = (es_buf[0] << 8) | es_buf[1];
 
 																if (es_start_code == 0x0B77)			//AC-3 stream
 																{
@@ -330,7 +330,7 @@ void ts2es_decimate_loop(pthread_params_t pThreadParams)
 	//}
 }
 
-U32 TSMagic_ts2es_decimate_thread(LPVOID lpParam)
+uint32_t TSMagic_ts2es_decimate_thread(LPVOID lpParam)
 {
 	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
 	ts2es_decimate_loop(pThreadParams);
@@ -341,19 +341,19 @@ U32 TSMagic_ts2es_decimate_thread(LPVOID lpParam)
 //仅用于离线分析时的TS->TS抽选
 void ts2ts_decimate_loop(pthread_params_t pThreadParams)
 {
-	U8	  packet_buf[204];
-	S32	  packet_length;
-	S8	  pszDebug[MAX_TXT_CHARS];
-	S8	  pszTsFile[MAX_PATH];
+	uint8_t	  packet_buf[204];
+	int	  packet_length;
+	char	  pszDebug[MAX_TXT_CHARS];
+	char	  pszTsFile[MAX_PATH];
 
 	float file_size_div_100;
-	S64	  read_byte_pos = 0;
-	S32	  decimate_size = 0;
+	int64_t	  read_byte_pos = 0;
+	int	  decimate_size = 0;
 
-	S32	  old_ratio = 0;
-	S32	  analyse_ratio = 0;
-	S32	  rtcode;
-//	S32   getdata_rtcode;
+	int	  old_ratio = 0;
+	int	  analyse_ratio = 0;
+	int	  rtcode;
+//	int   getdata_rtcode;
 	COleDateTime	timeCurrent;
 	CString			strTime;
 
@@ -363,7 +363,7 @@ void ts2ts_decimate_loop(pthread_params_t pThreadParams)
 	CDB_TSPackets* pDB_TSPackets = NULL;
 	RECORD_TSPacket_t			TSPacketInfo;
 
-	U16							usPID;
+	uint16_t							usPID;
 	FILE*						fp = NULL;
 
 	if (pThreadParams != NULL)
@@ -399,7 +399,7 @@ void ts2ts_decimate_loop(pthread_params_t pThreadParams)
 				if (rtcode == NO_ERROR)
 				{
 					read_byte_pos = ptransport_stream->Tell();
-					analyse_ratio = (U32)(read_byte_pos / file_size_div_100);
+					analyse_ratio = (uint32_t)(read_byte_pos / file_size_div_100);
 					if (analyse_ratio > old_ratio)
 					{
 						old_ratio = analyse_ratio;
@@ -477,7 +477,7 @@ void ts2ts_decimate_loop(pthread_params_t pThreadParams)
 	//}
 }
 
-U32 TSMagic_ts2ts_decimate_thread(LPVOID lpParam)
+uint32_t TSMagic_ts2ts_decimate_thread(LPVOID lpParam)
 {
 	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
 	ts2ts_decimate_loop(pThreadParams);

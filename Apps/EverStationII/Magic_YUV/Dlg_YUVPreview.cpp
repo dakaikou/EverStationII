@@ -12,10 +12,9 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_YUVPreview dialog
-#include "MiddleWare/MiddleWare_ESDecoder/Include/common/video_width_height_api.h"
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
+#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_Video.h"
 
-//#include "..\DirectX\DirectDraw_Api.h"
 #include "..\Common\Dlg_ShowVideo.h"
 #include "..\Magic_YUV\GuiApi_YUV.h"
 
@@ -87,7 +86,7 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 	
 	for (i = 0; i < VIDEO_FORMAT_MAX; i++)
 	{
-		Get_Video_width_and_height_info(i, NULL, pszItem, sizeof(pszItem));
+		VIDEO_get_width_and_height_info(i, NULL, pszItem, sizeof(pszItem));
 		pCmbBox->AddString(pszItem);
 	}
 	pCmbBox->SetCurSel(VIDEO_CIF);
@@ -139,7 +138,7 @@ void CDlg_YUVPreview::OnBtnPreview()
 		nSel = pCmbBox->GetCurSel();
 		if (nSel != CB_ERR)
 		{
-			Get_Video_width_and_height_info(nSel, &wh, NULL, 0);
+			VIDEO_get_width_and_height_info(nSel, &wh, NULL, 0);
 		}
 		else
 		{
@@ -329,7 +328,7 @@ void CDlg_YUVPreview::OnBtnExchange()
 				{
 					pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_SRC_WH);
 					nSel = pCmbBox->GetCurSel();
-					Get_Video_width_and_height_info(nSel, &wh, NULL);
+					VIDEO_get_width_and_height_info(nSel, &wh, NULL);
 
 					pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_SRC_CHROMA);
 					nSrcChroma = pCmbBox->GetCurSel();

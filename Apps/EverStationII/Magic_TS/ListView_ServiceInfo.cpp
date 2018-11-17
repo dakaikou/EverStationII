@@ -12,14 +12,14 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_SI_Utilities.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Section.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Utilities.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Section.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
 
-#include "libs_Utilities\Include\XStream_Utilities.h"
+//#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
 
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+//#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 
 #include "..\Common\define.h"
@@ -91,13 +91,13 @@ void CListView_ServiceInfo::Reset(void)
 	listCtrl.DeleteAllItems();
 }
 /*
-	U16										service_id;
-	U8										EIT_schedule_flag;
-	U8										EIT_present_following_flag;
-	U8										running_status;
-	U8										free_CA_mode;
+	uint16_t										service_id;
+	uint8_t										EIT_schedule_flag;
+	uint8_t										EIT_present_following_flag;
+	uint8_t										running_status;
+	uint8_t										free_CA_mode;
 
-	U16										descriptors_loop_length;
+	uint16_t										descriptors_loop_length;
 
 	service_descriptor_t					service_descriptor;
 	bouquet_name_descriptor_t				bouquet_name_descriptor;

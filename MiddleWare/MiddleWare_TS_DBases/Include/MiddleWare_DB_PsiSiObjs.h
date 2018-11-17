@@ -1,12 +1,26 @@
 #ifndef _TSMAGIC_DBASE_PSISI_OBJS_H_
 #define _TSMAGIC_DBASE_PSISI_OBJS_H_
 
+#if defined(_WIN32) || defined(_WIN64)
+#   ifdef _MW_DB_EXPORT
+#       define MW_DB_LIB __declspec(dllexport)
+#   elif defined(_MW_DB_IMPORT)
+#       define MW_DB_LIB __declspec(dllimport)
+#   else
+#       define MW_DB_LIB
+#   endif
+#elif __GNUC__ >= 4
+#   define MW_DB_LIB __attribute__((visibility("default")))
+#else
+#   define MW_DB_LIB
+#endif
+
 #include <stdint.h>
 
 #include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_PSISI_Table.h"
 #include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_DSMCC_Table.h"
 
-#include "HAL\HAL_XML\Include\HALForTinyXML2.h"
+#include "thirdparty_AL\TALForXML\Include\TALForXML.h"
 
 #define DEBUG_PAT			1
 #define DEBUG_PMT			1
@@ -27,7 +41,7 @@
 #define DEBUG_ECM			1
 #define DEBUG_EMM			1
 
-class _CDL_EXPORT CDB_PsiSiObjs
+class MW_DB_LIB CDB_PsiSiObjs
 {
 public:
 	CDB_PsiSiObjs(void);
@@ -49,13 +63,13 @@ protected:
 
 	void ResetRecords(void);
 
-	int DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
+	int DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
 	int OC_DownloadDirectoryAndFiles(uint16_t PID, uint16_t moduleId_for_srg, uint32_t objectKey_data, char* pszRootPath);
 
-	int DSMCC_BuildDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t carousel_type_id, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
+	int DSMCC_BuildDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t carousel_type_id, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
 	int DSMCC_DownloadDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t carousel_type_id, char* pszRootPath);
 
-	int OC_BuildDirectory(uint16_t PID, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, uint16_t moduleId_for_srg, uint32_t objectKey_data);
+	int OC_BuildDirectory(uint16_t PID, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, uint16_t moduleId_for_srg, uint32_t objectKey_data);
 
 public:
 
@@ -78,10 +92,10 @@ public:
 	CSDT* QueryActualSDT(void);
 	CDSMCC_UNM* QueryDsmccUNM_DSI(uint16_t PID);
 
-	int BuildDsmccTree(uint16_t usPID, HALForXMLDoc* pxmlDoc);
+	int BuildDsmccTree(uint16_t usPID, TALForXMLDoc* pxmlDoc);
 	int DownloadDsmccTree(uint16_t usPID, char* pszRootPath);
 
-	int BuildBouquetTree(uint32_t uiCode, HALForXMLDoc* pxmlDoc);
+	int BuildBouquetTree(uint32_t uiCode, TALForXMLDoc* pxmlDoc);
 };
 
 #endif		//_TSMAGIC_DBASE_PSISITABLES_H_

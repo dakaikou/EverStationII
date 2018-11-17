@@ -1,11 +1,26 @@
 #ifndef _MPEG2_PSISI_TABLE_H_
 #define _MPEG2_PSISI_TABLE_H_
 
-#include "../compile.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/DVB_SI_Descriptor.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Section.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/DVB_SI_Section.h"
+#if defined(_WIN32) || defined(_WIN64)
+#   ifdef _MW_PSISI_EXPORT
+#       define MW_PSISI_LIB __declspec(dllexport)
+#   elif defined(_MW_PSISI_IMPORT)
+#       define MW_PSISI_LIB __declspec(dllimport)
+#   else
+#       define MW_PSISI_LIB
+#   endif
+#elif __GNUC__ >= 4
+#   define MW_PSISI_LIB __attribute__((visibility("default")))
+#else
+#   define MW_PSISI_LIB
+#endif
+
+#include <stdint.h>
+
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Section.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Descriptor.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Section.h"
 
 #include "MiddleWare_PSISI_Common.h"
 #include "MiddleWare_PSISI_SysCapability.h"
@@ -13,7 +28,7 @@
 /*------------------------------------------------------------
 		PAT definition 
 -------------------------------------------------------------*/
-class _CDL_EXPORT CPAT : public CPVT
+class MW_PSISI_LIB CPAT : public CPVT
 {
 public:
 	CPAT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
@@ -63,7 +78,7 @@ typedef struct _ES_INFO_s
 } ES_INFO_t;
 
 
-class _CDL_EXPORT CPMT : public CPVT
+class MW_PSISI_LIB CPMT : public CPVT
 {
 public:
 	CPMT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
@@ -99,7 +114,7 @@ typedef struct _CA_INFO_s
 
 } CA_SYSTEM_INFO_t;
 
-class _CDL_EXPORT CCAT : public CPVT
+class MW_PSISI_LIB CCAT : public CPVT
 {
 public:
 	CCAT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
@@ -122,7 +137,7 @@ public:
 /*------------------------------------------------------------
 	TSDT 
 -------------------------------------------------------------*/
-class _CDL_EXPORT CTSDT : public CPVT
+class MW_PSISI_LIB CTSDT : public CPVT
 {
 public:
 	CTSDT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
@@ -155,7 +170,7 @@ typedef struct _STREAM_INFO_s
 
 } STREAM_INFO_t;
 
-class _CDL_EXPORT CNIT : public CPVT
+class MW_PSISI_LIB CNIT : public CPVT
 {
 public:
 	CNIT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
@@ -188,7 +203,7 @@ public:
 /*------------------------------------------------------------
 		BAT definition 
 -------------------------------------------------------------*/
-class _CDL_EXPORT CBAT : public CPVT
+class MW_PSISI_LIB CBAT : public CPVT
 {
 public:
 	CBAT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
@@ -242,7 +257,7 @@ typedef struct _SERVICE_INFO_s
 
 } SERVICE_INFO_t;
 
-class _CDL_EXPORT CSDT : public CPVT
+class MW_PSISI_LIB CSDT : public CPVT
 {
 public:
 	CSDT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
@@ -286,7 +301,7 @@ typedef struct _EVENT_INFO_s
 
 } EVENT_INFO_t;
 
-class _CDL_EXPORT CEIT : public CPVT
+class MW_PSISI_LIB CEIT : public CPVT
 {
 public:
 	CEIT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
@@ -326,7 +341,7 @@ public:
 /*------------------------------------------------------------
 		RST definition 
 -------------------------------------------------------------*/
-class _CDL_EXPORT CRST : public CPVT
+class MW_PSISI_LIB CRST : public CPVT
 {
 public:
 	CRST(uint16_t Key, uint16_t PID, uint8_t table_id);
@@ -343,7 +358,7 @@ private:
 /*------------------------------------------------------------
 		TDT definition 
 -------------------------------------------------------------*/
-class _CDL_EXPORT CTDT : public CPVT
+class MW_PSISI_LIB CTDT : public CPVT
 {
 public:
 	CTDT(uint16_t Key, uint16_t PID, uint8_t table_id);
@@ -360,7 +375,7 @@ public:
 /*------------------------------------------------------------
 		TOT definition 
 -------------------------------------------------------------*/
-class _CDL_EXPORT CTOT : public CPVT
+class MW_PSISI_LIB CTOT : public CPVT
 {
 public:
 	CTOT(uint16_t Key, uint16_t PID, uint8_t table_id);
@@ -378,7 +393,7 @@ public:
 /*------------------------------------------------------------
 		CMT definition 
 -------------------------------------------------------------*/
-class _CDL_EXPORT CCMT : public CPVT
+class MW_PSISI_LIB CCMT : public CPVT
 {
 public:
 	CCMT(uint16_t Key, uint16_t PID, uint8_t table_id);
@@ -388,7 +403,7 @@ public:
 public:
 	void Init(void);
 	void Reset(void);
-	S32  AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t* pprivate_section);
+	int  AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t* pprivate_section);
 private:
 };
 

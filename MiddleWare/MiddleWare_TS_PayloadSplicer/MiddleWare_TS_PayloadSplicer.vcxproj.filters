@@ -13,12 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="头文件\Include">
-      <UniqueIdentifier>{5e54820b-0910-4076-b817-6e135fc77988}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Impl">
-      <UniqueIdentifier>{7d25ddcf-8f8b-4b3a-9749-d968262b0826}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -27,17 +21,17 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Mpeg2_PESSplicer.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_TS_PayloadSplicer\Include\MiddleWare_PesSplicer_ErrorCode.h">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Mpeg2_SectionSplicer.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_TS_PayloadSplicer\Include\MiddleWare_SectionSplicer_ErrorCode.h">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_PesSplicer_ErrorCode.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_TS_PayloadSplicer\Include\Mpeg2_PESSplicer.h">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_SectionSplicer_ErrorCode.h">
-      <Filter>头文件\Include</Filter>
+    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_TS_PayloadSplicer\Include\Mpeg2_SectionSplicer.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -47,11 +41,11 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\Mpeg2_PESSplicer.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_TS_PayloadSplicer\Impl\Mpeg2_PESSplicer.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\Mpeg2_SectionSplicer.cpp">
-      <Filter>源文件\Impl</Filter>
+    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_TS_PayloadSplicer\Impl\Mpeg2_SectionSplicer.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

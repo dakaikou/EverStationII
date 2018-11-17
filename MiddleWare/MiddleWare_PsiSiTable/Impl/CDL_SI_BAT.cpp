@@ -4,8 +4,8 @@
 
 #include "../Include/MiddleWare_PSISI_Table.h"
 #include "../Include/MiddleWare_PSISI_ErrorCode.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section\Include\MPEG_DVB_ErrorCode.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section\Include\MPEG2_DVB_ErrorCode.h"
 
 /////////////////////////////////////////////
 CBAT::CBAT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension) : CPVT(Key, PID, table_id, table_id_extension)
@@ -57,10 +57,10 @@ int CBAT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t
 {
 	int			 rtcode = MIDDLEWARE_PSISI_UNKNOWN_ERROR;					//0 -- fail
 
-	S32			 descriptor_index;
-	S32			 stream_index;
+	int			 descriptor_index;
+	int			 stream_index;
 
-	S32			 nStreamCount;
+	int			 nStreamCount;
 
 	bouquet_association_section_t			bat_section;
 

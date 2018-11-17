@@ -1,18 +1,18 @@
 #ifndef _AUDIO_COMMON_H_
 #define _AUDIO_COMMON_H_
 
-#include "HAL/HAL_Sys/Include/INTTYPES.H"
+#include <stdint.h>
 
 typedef struct
 {
-	S32		size;				//the byte counts for this structure
-	S32		getparams;			//determine whether these parameters are usable
+	int		size;				//the byte counts for this structure
+	int		getparams;			//determine whether these parameters are usable
 
-	S32		nch;				//channel counts
-	S32		sampling_rate;		//sampling rate
-	S32		bitspersample;		//bit counts for one sample
+	int		nch;				//channel counts
+	int		sampling_rate;		//sampling rate
+	int		bitspersample;		//bit counts for one sample
 
-	S32		frame_buf_size;		//frame buf length
+	int		frame_buf_size;		//frame buf length
 
 } Audio_decode_info_t, *pAudio_decode_info_t;
 

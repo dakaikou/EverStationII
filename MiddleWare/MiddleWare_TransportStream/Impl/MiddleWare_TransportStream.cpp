@@ -7,24 +7,24 @@
 #include <math.h>
 
 #include "../Include/MiddleWare_TransportStream.h"
-#include "libs_Mpeg&DVB/Mpeg_TSPacket\Include\Mpeg2_TS_ErrorCode.h"
 #include "../Include/MiddleWare_TS_ErrorCode.h"
 
-#include "HAL/HAL_TSInput/Include/Dektec_TransRecv.h"
-#include "HAL/HAL_TSInput/Include/UDP_TransRecv.h"
+#include "streamio_layer/SIOWithDektec/Include/SIOWithDektec.h"
+#include "streamio_layer/SIOWithUDP/Include/SIOWithUDP.h"
 #include "thirdparty_HW/SmartTS/smartts_drvapi.h"
 
-#include "libs_Utilities\Include\XStream_Utilities.h"
+#include "translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_ErrorCode.h"
+#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
 
 #define MAX_PCR_FIELD_TRIGGER_COUNT			100
 
-U32 receive_transport_stream(LPVOID lpParam)
+uint32_t receive_transport_stream(LPVOID lpParam)
 {
-	S32 rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
+	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
 
-	U8	buf[30 * 1024];
-//	U8	buf[6144];
-	S32 rdsize;
+	uint8_t	buf[30 * 1024];
+//	uint8_t	buf[6144];
+	int rdsize;
 
 	CTransportStream*	ptransport_stream = (CTransportStream*)lpParam;
 
@@ -50,7 +50,7 @@ U32 receive_transport_stream(LPVOID lpParam)
 									rtcode = ptransport_stream->m_ts_fifo.WriteData(buf, rdsize);
 								}
 
-								S64 llCurFilePos = _telli64(ptransport_stream->m_hFile);
+								int64_t llCurFilePos = _telli64(ptransport_stream->m_hFile);
 
 								if (llCurFilePos >= ptransport_stream->m_llTotalFileLength)
 								{
@@ -222,15 +222,15 @@ CTransportStream::~CTransportStream()
 	}
 }
 
-S32 CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
+int CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 {
-	S32	 rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;					//默认返回成功
+	int	 rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;					//默认返回成功
 //	S8*	 device_name;
-	S8*  pdest;
-	S8   idx;
-	S8   ip_addr[16];
-	S32  port;
-//	S32  netcard_index = 1;
+	char*  pdest;
+	int   idx;
+	char   ip_addr[16];
+	int  port;
+//	int  netcard_index = 1;
 
 	//初始状态设置
 	m_nMode = mode;
@@ -247,7 +247,7 @@ S32 CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 	int		len;
 
 	GetModuleFileNameA(NULL, pszExeFile, MAX_PATH);
-	len = GetModulePathLength(pszExeFile);
+	len = DIR_GetModulePathLength(pszExeFile);
 	assert(len > 0);
 
 	memcpy(pszIniFile, pszExeFile, len);
@@ -357,10 +357,10 @@ S32 CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 	exeDrive[2] = '\0';
 	sprintf_s(pszAppTempPath, sizeof(pszAppTempPath), "%s\\~EverStationII", exeDrive);
 	sprintf_s(pszPcrPath, sizeof(pszPcrPath), "%s\\pcr", pszAppTempPath);
-	BuildDirectory(pszPcrPath);
+	DIR_BuildDirectory(pszPcrPath);
 
 	char file_name[128];
-	U32 old_tickcount = ::GetTickCount();
+	uint32_t old_tickcount = ::GetTickCount();
 	sprintf_s(file_name, sizeof(file_name), "%s\\tick_%08x_ts_bitrate.txt", pszPcrPath, old_tickcount);
 
 	fp_dbase = NULL;
@@ -378,9 +378,9 @@ S32 CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 	return rtcode;
 }
 
-S32 CTransportStream::Close()
+int CTransportStream::Close()
 {
-	S32		rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
+	int		rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
 
 	m_nReceiving = 0;
 	m_nRunning = 0;
@@ -473,9 +473,9 @@ S32 CTransportStream::Close()
 	return rtcode;
 }
 
-S32 CTransportStream::StartGetData(void)
+int CTransportStream::StartGetData(void)
 {
-	S32 rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
+	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
 
 	if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
@@ -507,9 +507,9 @@ S32 CTransportStream::StartGetData(void)
 	return rtcode;
 }
 
-S32 CTransportStream::StopGetData(void)
+int CTransportStream::StopGetData(void)
 {
-	S32 rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
+	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
 
 	m_nReceiving = 0;
 
@@ -554,9 +554,9 @@ S32 CTransportStream::StopGetData(void)
 	return rtcode;
 }
 
-S32 CTransportStream::Reset()
+int CTransportStream::Reset()
 {
-	S32		rtcode = MIDDLEWARE_TS_NO_ERROR;
+	int		rtcode = MIDDLEWARE_TS_NO_ERROR;
 
 	m_bitrate_cur_value = UNCREDITABLE_MAX_VALUE;
 	m_bitrate_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
@@ -575,13 +575,13 @@ S32 CTransportStream::Reset()
 
 
 /*
-S32 CTransportStream::GetData(void)
+int CTransportStream::GetData(void)
 {
-	S32 rtcode = NO_ERROR;
+	int rtcode = NO_ERROR;
 
-	U8	buf[30 * 1024];
-//	U8	buf[6144];
-	S32 rdsize;
+	uint8_t	buf[30 * 1024];
+//	uint8_t	buf[6144];
+	int rdsize;
 	
 	if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
@@ -656,16 +656,16 @@ S32 CTransportStream::GetData(void)
 }
 */
 
-S32 CTransportStream::PrefetchOnePacket(U8* buf, S32* plength)
+int CTransportStream::PrefetchOnePacket(uint8_t* buf, int* plength)
 {
-	S32						rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
-	U32						wait_state = WAIT_FAILED;
-//	U8*						rdptr;
-//	U8*						old_rdptr;
-//	U8*						old_wrptr;
-//	S32						tail_length;
-//	S32						copy_length;
-	U8						temp_buffer[613];
+	int						rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
+	uint32_t						wait_state = WAIT_FAILED;
+//	uint8_t*						rdptr;
+//	uint8_t*						old_rdptr;
+//	uint8_t*						old_wrptr;
+//	int						tail_length;
+//	int						copy_length;
+	uint8_t						temp_buffer[613];
 
 	if ((buf != NULL) && (plength != NULL))
 	{
@@ -774,9 +774,9 @@ S32 CTransportStream::PrefetchOnePacket(U8* buf, S32* plength)
 	return rtcode;
 }
 
-S32 CTransportStream::SkipOnePacket(void)
+int CTransportStream::SkipOnePacket(void)
 {
-	S32	rtcode = NO_ERROR;
+	int	rtcode = NO_ERROR;
 
 	m_llCurReadPos += m_nPacketLength;
 	m_ts_fifo.SkipData(m_nPacketLength);
@@ -784,9 +784,9 @@ S32 CTransportStream::SkipOnePacket(void)
 	return rtcode;
 }
 
-S32 CTransportStream::StartGetBitrate(void)
+int CTransportStream::StartGetBitrate(void)
 {
-	S32 rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
+	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
 
 	if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
@@ -809,9 +809,9 @@ S32 CTransportStream::StartGetBitrate(void)
 	return rtcode;
 }
 
-S32 CTransportStream::StopGetBitrate(void)
+int CTransportStream::StopGetBitrate(void)
 {
-	S32 rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
+	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
 
 	if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
@@ -834,7 +834,7 @@ S32 CTransportStream::StopGetBitrate(void)
 	return rtcode;
 }
 
-int CTransportStream::GetBitrateMap(ULONG pbitrate_map[], int count)
+int CTransportStream::GetBitrateMap(int pbitrate_map[], int count)
 {
 	int		rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
 	int		readcount;
@@ -855,17 +855,17 @@ int CTransportStream::GetBitrateMap(ULONG pbitrate_map[], int count)
 
 #ifdef _WIN64
 #else
-		rtcode = smartts_get_asiin_bitrate_map(pbitrate_map, readcount);
+		//rtcode = smartts_get_asiin_bitrate_map(pbitrate_map, readcount);
 
-		if (rtcode > 0)
-		{
-			for (int i = 0; i < readcount; i++)
-			{
-				temp = pbitrate_map[i];
-				temp *= coeff;
-				pbitrate_map[i] = (ULONG)temp;
-			}
-		}
+		//if (rtcode > 0)
+		//{
+		//	for (int i = 0; i < readcount; i++)
+		//	{
+		//		double temp = pbitrate_map[i];
+		//		temp *= coeff;
+		//		pbitrate_map[i] = (ULONG)temp;
+		//	}
+		//}
 #endif
 
 	}
@@ -873,9 +873,9 @@ int CTransportStream::GetBitrateMap(ULONG pbitrate_map[], int count)
 	return rtcode;
 }
 
-S32 CTransportStream::GetBitrate(void)
+int CTransportStream::GetBitrate(void)
 {
-	S32  rtvalue = -1;
+	int  rtvalue = -1;
 
 	if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
@@ -888,10 +888,10 @@ S32 CTransportStream::GetBitrate(void)
 #else
 		if (strcmp(m_pszProtocolExt, "SMARTTS") == 0)
 		{
-			bitrate_value = smartts_get_asiin_bitrate();
+			ULONG bitrate_value = smartts_get_asiin_bitrate();
 			if (bitrate_value >= 0)
 			{
-				m_bitrate_mean_value = (S32)(bitrate_value * 8 * mf_actual_1spulse_frequency);
+				m_bitrate_mean_value = (int)(bitrate_value * 8 * mf_actual_1spulse_frequency);
 				rtvalue = m_bitrate_mean_value;
 			}
 		}
@@ -909,9 +909,9 @@ S32 CTransportStream::GetBitrate(void)
 	return rtvalue;
 }
 
-S32 CTransportStream::GetMeasuredBitrateAttribute(BITRATE_ATTRIBUTE_t* pattr)
+int CTransportStream::GetMeasuredBitrateAttribute(BITRATE_ATTRIBUTE_t* pattr)
 {
-	S32 rtcode = NO_ERROR;
+	int rtcode = NO_ERROR;
 	if (pattr != NULL)
 	{
 		pattr->min = m_bitrate_min_value;
@@ -927,7 +927,7 @@ S32 CTransportStream::GetMeasuredBitrateAttribute(BITRATE_ATTRIBUTE_t* pattr)
 	return rtcode;
 }
 
-S32 CTransportStream::AddBitrateSample(int bitrate)
+int CTransportStream::AddBitrateSample(int bitrate)
 {
 	m_bitrate_cur_value = bitrate;
 	if (fp_dbase != NULL)
@@ -955,22 +955,22 @@ S32 CTransportStream::AddBitrateSample(int bitrate)
 
 	if (m_bitrate_sample_count >= 2)
 	{
-		S64 data_rate_sum = 0;
+		int64_t data_rate_sum = 0;
 		for (int sample_index = 0; sample_index < m_bitrate_sample_count; sample_index++)
 		{
 			data_rate_sum += m_bitrate_sample_array[sample_index];
 		}
-		m_bitrate_mean_value = (S32)(data_rate_sum / m_bitrate_sample_count);
+		m_bitrate_mean_value = (int)(data_rate_sum / m_bitrate_sample_count);
 
 		m_bitrate_available = 1;
 
 		data_rate_sum = 0;
 		for (int sample_index = 0; sample_index < m_bitrate_sample_count; sample_index++)
 		{
-			data_rate_sum += (S64)pow(m_bitrate_sample_array[sample_index] - m_bitrate_mean_value, 2);
+			data_rate_sum += (int64_t)pow(m_bitrate_sample_array[sample_index] - m_bitrate_mean_value, 2);
 		}
 		data_rate_sum /= m_bitrate_sample_count;
-		m_bitrate_rms_value = (S32)sqrt((double)data_rate_sum);
+		m_bitrate_rms_value = (int)sqrt((double)data_rate_sum);
 
 		if (fp_dbase != NULL)
 		{
@@ -995,14 +995,14 @@ void CTransportStream::SeekToBegin(void)
 	}
 }
 /*
-void CTransportStream::Seek(S64 fileoffset)
+void CTransportStream::Seek(int64_t fileoffset)
 {
 	if (m_hFile != -1)
 	{
 //		m_llCurFilePos = fileoffset;
 		_lseeki64(m_hFile, fileoffset, SEEK_SET);
 
-		S64 llCurFilePos = _telli64(m_hFile);
+		int64_t llCurFilePos = _telli64(m_hFile);
 		if (llCurFilePos >= m_llTotalFileLength)
 		{
 			m_nEOF = 1;
@@ -1014,12 +1014,12 @@ void CTransportStream::Seek(S64 fileoffset)
 	}
 }
 */
-S64 CTransportStream::Tell(void)
+int64_t CTransportStream::Tell(void)
 {
 	return m_llCurReadPos;
 }
 
-S32 CTransportStream::GetLastError()
+int CTransportStream::GetLastError()
 {
 	return m_TsError;
 }

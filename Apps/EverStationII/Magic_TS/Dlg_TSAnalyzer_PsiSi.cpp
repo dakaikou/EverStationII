@@ -14,16 +14,16 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_PsiSi dialog
 
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\Mpeg2_table_id.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_table_id.h"
+#include "translate_layer\MPEG2_DVB_Section\Include\Mpeg2_table_id.h"
+#include "translate_layer\MPEG2_DVB_Section\Include\DVB_table_id.h"
 
-#include "libs_MPEG&DVB\MPEG_DVB_Section\xml\Include\Mpeg2_DSMCC_section_XML.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\xml\Include\Mpeg2_PSI_section_XML.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\xml\Include\DVB_SI_section_XML.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\xml\Include\DVB_IPDC_section_XML.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\xml\Include\DVB_MHP_section_XML.h"
+#include "syntax_express_xml\XML_MPEG2_DVB_Section\Include\Mpeg2_DSMCC_section_XML.h"
+#include "syntax_express_xml\XML_MPEG2_DVB_Section\Include\Mpeg2_PSI_section_XML.h"
+#include "syntax_express_xml\XML_MPEG2_DVB_Section\Include\DVB_SI_section_XML.h"
+#include "syntax_express_xml\XML_MPEG2_DVB_Section\Include\DVB_IPDC_section_XML.h"
+#include "syntax_express_xml\XML_MPEG2_DVB_Section\Include\DVB_MHP_section_XML.h"
 
-#include "libs_Utilities\Include\XStream_Utilities.h"
+#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
 
 
 CDlg_TSAnalyzer_PsiSi::CDlg_TSAnalyzer_PsiSi(CWnd* pParent /*=NULL*/)
@@ -154,12 +154,12 @@ void CDlg_TSAnalyzer_PsiSi::DisplaySection(uint8_t* section_buf, int section_len
 		exeDrive[2] = '\0';
 
 		sprintf_s(pszXmlDir, sizeof(pszXmlDir), "%s\\~EverStationII\\xml", exeDrive);
-		BuildDirectory(pszXmlDir);
+		DIR_BuildDirectory(pszXmlDir);
 #endif
 		uint8_t	table_id;
 		if ((section_buf != NULL) && (section_length >= 3))
 		{
-			HALForXMLDoc xml2Doc;
+			TALForXMLDoc xml2Doc;
 
 			table_id = section_buf[0];
 

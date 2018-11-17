@@ -11,8 +11,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
 
 #include "..\Common\define.h"
 #include "..\Magic_TS\TSMagic_GuiApi_MSG.h"
@@ -394,9 +394,9 @@ void CNaviTree_PsiSiTables::UpdateCMT(CCMT* pCMT)
 	TV_INSERTSTRUCT TreeCtrlItem;
 	char			pszText[MAX_TXT_CHARS];
 
-	HTREEITEM		hParentItem;
+	HTREEITEM		hParentItem = NULL;
 	HTREEITEM		hTableItem;
-	HTREEITEM		hPIDItem;
+	HTREEITEM		hPIDItem = NULL;
 	HTREEITEM		hNextItem = NULL;
 	CString			strTemp;
 
@@ -784,7 +784,7 @@ void CNaviTree_PsiSiTables::UpdateNIT(int section_number, CNIT* pNIT)
 	TV_INSERTSTRUCT TreeCtrlItem;
 	char			pszText[MAX_TXT_CHARS];
 	CString			strTemp;
-	S32				find_network_item;
+	int				find_network_item;
 
 	HTREEITEM	hSectionItem = NULL;
 	HTREEITEM	hNitNetworkItem = NULL;
@@ -1160,9 +1160,9 @@ void CNaviTree_PsiSiTables::UpdateEIT(int section_number, CEIT* pEIT)
 	HTREEITEM		hServiceItem = NULL;
 	HTREEITEM		hTableItem = NULL;
 	HTREEITEM		hNextItem = NULL;
-	S32				find_stream_item;
-	S32				find_service_item;
-	S32				find_table_item;
+	int				find_stream_item;
+	int				find_service_item;
+	int				find_table_item;
 
 	TreeCtrlItem.item.pszText = pszText;
 	TreeCtrlItem.item.mask = TVIF_TEXT | TVIF_PARAM;
@@ -1392,9 +1392,9 @@ void CNaviTree_PsiSiTables::UpdateDSMCC(int section_number, CPVT* pPVT)
 	HTREEITEM		hExtensionItem = NULL;
 	HTREEITEM		hNextItem = NULL;
 
-	S32				find_pid_item;
-	S32				find_table_item;
-	S32				find_extension_item;
+	int				find_pid_item;
+	int				find_table_item;
+	int				find_extension_item;
 
 	TreeCtrlItem.item.pszText = pszText;
 	TreeCtrlItem.item.mask = TVIF_TEXT | TVIF_PARAM;

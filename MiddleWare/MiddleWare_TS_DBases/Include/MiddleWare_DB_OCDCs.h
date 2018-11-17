@@ -1,10 +1,22 @@
 #ifndef _TSMAGIC_DBASE_OCDCS_H_
 #define _TSMAGIC_DBASE_OCDCS_H_
 
+#if defined(_WIN32) || defined(_WIN64)
+#   ifdef _MW_DB_EXPORT
+#       define MW_DB_LIB __declspec(dllexport)
+#   elif defined(_MW_DB_IMPORT)
+#       define MW_DB_LIB __declspec(dllimport)
+#   else
+#       define MW_DB_LIB
+#   endif
+#elif __GNUC__ >= 4
+#   define MW_DB_LIB __attribute__((visibility("default")))
+#else
+#   define MW_DB_LIB
+#endif
+
 #include <stdint.h>
 #include <stdio.h>
-
-#include "../compile.h"
 
 #define OPEN_DSMCC_DOWNLOAD			1
 
@@ -54,7 +66,7 @@ typedef struct _DOWNLOAD_INFO_s
 
 } DOWNLOAD_INFO_t;
 
-class _CDL_EXPORT CDB_OCDCs
+class MW_DB_LIB CDB_OCDCs
 {
 public:
 	CDB_OCDCs(void);

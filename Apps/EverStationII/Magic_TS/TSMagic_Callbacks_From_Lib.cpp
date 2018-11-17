@@ -9,19 +9,19 @@
 #include "TSMagic_Callbacks_From_Lib.h"
 #include "TSMagic_Callbacks_To_Gui.h"
 
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/MPEG_DVB_ErrorCode.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/MPEG_DVB_Common.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/DVB_IPDC_Section.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/DVB_MHP_Section.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_Common.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_IPDC_Section.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_MHP_Section.h"
 
 #include "MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_Pcrs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_TSPackets.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_ErrorCode.h"
 
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+//#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare/MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 
 int REPORT_PSISI_section(CDB_PsiSiObjs* pDB_PsiSiObjs, HWND hWnd, uint16_t PID, uint8_t* buf, int length)

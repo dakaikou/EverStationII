@@ -1,9 +1,21 @@
 #ifndef __API_ES_SEGMENT_TOOLS_H__
 #define __API_ES_SEGMENT_TOOLS_H__
 
-#include <stdint.h>
+#if defined(_WIN32) || defined(_WIN64)
+#   ifdef _MW_ES_EXPORT
+#       define MW_ES_LIB __declspec(dllexport)
+#   elif defined(_MW_ES_IMPORT)
+#       define MW_ES_LIB __declspec(dllimport)
+#   else
+#       define MW_ES_LIB
+#   endif
+#elif __GNUC__ >= 4
+#   define MW_ES_LIB __attribute__((visibility("default")))
+#else
+#   define MW_ES_LIB
+#endif
 
-#include "../Compile.h"
+#include <stdint.h>
 
 typedef struct
 {
@@ -23,7 +35,7 @@ typedef struct
 
 } ES_segment_t, *pES_segment_t;
 
-_CDL_EXPORT int	ES_get_next_segment(uint8_t* es_buf, int es_length, ES_segment_t* psegment);
+MW_ES_LIB int	ES_get_next_segment(uint8_t* es_buf, int es_length, ES_segment_t* psegment);
 
 
 #endif

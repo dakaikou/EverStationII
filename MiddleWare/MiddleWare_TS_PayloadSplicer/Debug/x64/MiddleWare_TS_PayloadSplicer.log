@@ -1,11 +1,1 @@
-﻿  stdafx.cpp
-  dllmain.cpp
-  Mpeg2_PESSplicer.cpp
-e:\projects-mpeg2码流分析仪\软件工程\everstationii\middleware\middleware_transportstream\include\middleware_transportstream.h(70): warning C4251: “CTransportStream::m_ts_fifo”: class“CFIFO<U8,775200>”需要有 dll 接口由 class“CTransportStream”的客户端使用
-  e:\projects-mpeg2码流分析仪\软件工程\everstationii\middleware\middleware_transportstream\include\middleware_transportstream.h(70): note: 参见“CFIFO<U8,775200>”的声明
-  Mpeg2_SectionSplicer.cpp
-e:\projects-mpeg2码流分析仪\软件工程\everstationii\middleware\middleware_transportstream\include\middleware_transportstream.h(70): warning C4251: “CTransportStream::m_ts_fifo”: class“CFIFO<U8,775200>”需要有 dll 接口由 class“CTransportStream”的客户端使用
-  e:\projects-mpeg2码流分析仪\软件工程\everstationii\middleware\middleware_transportstream\include\middleware_transportstream.h(70): note: 参见“CFIFO<U8,775200>”的声明
-  正在生成代码...
-    正在创建库 .\lib\MiddleWare_TS_PayloadSplicerD(x64).lib 和对象 .\lib\MiddleWare_TS_PayloadSplicerD(x64).exp
-  MiddleWare_TS_PayloadSplicer.vcxproj -> E:\Projects-Mpeg2码流分析仪\软件工程\EverStationII\Debug\x64\MiddleWare_TS_PayloadSplicerD(x64).dll
+﻿

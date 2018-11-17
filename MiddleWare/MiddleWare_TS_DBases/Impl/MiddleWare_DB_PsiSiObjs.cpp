@@ -7,15 +7,15 @@
 #include "../Include/MiddleWare_DB_PsiSiObjs.h"
 #include "../Include/MiddleWare_DB_ErrorCode.h"
 
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_table_id.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\Mpeg2_table_id.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_SI_Utilities.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\Mpeg2_DSMCC_Utilities.h"
+#include "translate_layer\MPEG2_DVB_Section\Include\DVB_table_id.h"
+#include "translate_layer\MPEG2_DVB_Section\Include\Mpeg2_table_id.h"
+#include "translate_layer\MPEG2_DVB_Section\Include\DVB_SI_Utilities.h"
+#include "translate_layer\MPEG2_DVB_Section\Include\Mpeg2_DSMCC_Utilities.h"
 
-#include "libs_MPEG&DVB\MPEG_DVB_Section\xml\Include\dsmcc\Mpeg2_DSMCC_DDM_XML.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\xml\Include\dsmcc\Mpeg2_DSMCC_BIOP_XML.h"
+#include "syntax_express_xml\XML_MPEG2_DVB_Section\Include\dsmcc\Mpeg2_DSMCC_DDM_XML.h"
+#include "syntax_express_xml\XML_MPEG2_DVB_Section\Include\dsmcc\Mpeg2_DSMCC_BIOP_XML.h"
 
-#include "libs_Utilities\Include\XStream_Utilities.h"
+#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
 
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
@@ -442,7 +442,7 @@ CDSMCC_UNM* CDB_PsiSiObjs::QueryDsmccUNM_DSI(uint16_t PID)
 	return pDSMCC;
 }
 
-int CDB_PsiSiObjs::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
+int CDB_PsiSiObjs::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 
@@ -457,32 +457,32 @@ int CDB_PsiSiObjs::DSMCC_BuildOCTree(uint16_t PID, DSMCC_DSI_t* pDSI, HALForXMLD
 			DSMCC_DII_t*				pDII;
 			BIOP::DirectoryMessage_t*			pDirectoryMessage;
 			BIOP::FileMessage_t*				pFileMessage;
-			BIOP::Binding_t*					pBindings;
-			BIOP::IOR_t*						pIOR;
-			BIOP::BIOPProfileBody_t*			pBIOPProfileBody;
+			//BIOP::Binding_t*					pBindings;
+			//BIOP::IOR_t*						pIOR;
+			//BIOP::BIOPProfileBody_t*			pBIOPProfileBody;
 			//LiteOptionsProfileBody_t*	pLiteOptionsProfileBody;
-			BIOP::ObjectLocation_t*		pObjectLocation;
-			BIOP::ConnBinder_t*			pConnBinder;
+			//BIOP::ObjectLocation_t*		pObjectLocation;
+			//BIOP::ConnBinder_t*			pConnBinder;
 
 			char			pszText[256];
-			char			pszTemp[64];
+			//char			pszTemp[64];
 			int				module_index;
-			int				binding_index;
+			//int				binding_index;
 			int				blockCount;
-			int				component_index;
-			int				profile_index;
+			//int				component_index;
+			//int				profile_index;
 			int				object_index;
 			//int				i;
 
 			XMLElement*	hSessionItem;
-			XMLElement*	hSrgItem;
+			//XMLElement*	hSrgItem;
 			XMLElement*	hDirItem;
 			XMLElement*	hChildItem;
 			XMLElement*	hModuleItem;
-			XMLElement*	hBindingItem;
-			XMLElement*	hNameComponentItem;
-			XMLElement*	hIORItem;
-			XMLElement*	hIOP_taggedProfileItem;
+			//XMLElement*	hBindingItem;
+			//XMLElement*	hNameComponentItem;
+			//XMLElement*	hIORItem;
+			//XMLElement*	hIOP_taggedProfileItem;
 
 			hSessionItem = pxmlDoc->NewBranchElement(pxmlParentNode, "下载会话（DSI/DII/DDB）", NULL);
 
@@ -604,7 +604,7 @@ int CDB_PsiSiObjs::OC_DownloadDirectoryAndFiles(uint16_t PID, uint16_t moduleId_
 
 						if (strcmp(pBindings->IOR.type_id_byte, "dir") == 0)	//如果是目录
 						{
-							BuildDirectory(pszPath);
+							DIR_BuildDirectory(pszPath);
 
 							BIOP::BIOPProfileBody_t* pBIOPProfileBody = &(pBindings->IOR.BIOPProfileBody);
 							pObjectLocation = &(pBIOPProfileBody->ObjectLocation);
@@ -659,7 +659,7 @@ int CDB_PsiSiObjs::OC_DownloadDirectoryAndFiles(uint16_t PID, uint16_t moduleId_
 }
 
 //递归函数，如果当前路径是个子目录，则递归调用本函数
-int CDB_PsiSiObjs::OC_BuildDirectory(uint16_t PID, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, uint16_t moduleId_for_srg, uint32_t objectKey_data)
+int CDB_PsiSiObjs::OC_BuildDirectory(uint16_t PID, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, uint16_t moduleId_for_srg, uint32_t objectKey_data)
 {
 	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 
@@ -669,7 +669,7 @@ int CDB_PsiSiObjs::OC_BuildDirectory(uint16_t PID, HALForXMLDoc* pxmlDoc, XMLEle
 	BIOP::Name_t*				pName;
 	BIOP::ObjectLocation_t*		pObjectLocation;
 
-	int							ddm_table_index;
+	//int							ddm_table_index;
 	int							binding_index;
 	int							object_index;
 	unsigned short				sub_moduleId;
@@ -716,7 +716,7 @@ int CDB_PsiSiObjs::OC_BuildDirectory(uint16_t PID, HALForXMLDoc* pxmlDoc, XMLEle
 	return rtcode;
 }
 
-int CDB_PsiSiObjs::DSMCC_BuildDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t carousel_type_id, HALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
+int CDB_PsiSiObjs::DSMCC_BuildDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t carousel_type_id, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
 {
 	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 
@@ -734,7 +734,7 @@ int CDB_PsiSiObjs::DSMCC_BuildDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t ca
 			int				blockCount;
 
 			XMLElement*	pxmlDsiItem;
-			XMLElement*	pxmlChildItem;
+			//XMLElement*	pxmlChildItem;
 			XMLElement*	pxmlGroupItem;
 			XMLElement*	pxmlModuleItem;
 
@@ -780,7 +780,7 @@ int CDB_PsiSiObjs::DSMCC_BuildDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t ca
 							pxmlDoc->NewElementForBits(pxmlModuleItem, "moduleVersion", pmoduleInfo->moduleVersion, 8, "uimsbf", NULL);
 
 							//计算参数
-							blockCount = (S32)(ceil((double)pmoduleInfo->moduleSize / pDII->blockSize));
+							blockCount = (int)(ceil((double)pmoduleInfo->moduleSize / pDII->blockSize));
 							pxmlDoc->NewElementForBits(pxmlModuleItem, "blockCount", blockCount, -1, "uimsbf", NULL);
 
 							if (strlen(pmoduleInfo->moduleName) > 0)
@@ -837,7 +837,7 @@ int CDB_PsiSiObjs::DSMCC_DownloadDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t
 			for (group_index = 0; group_index < pDSI->NumberOfGroups; group_index++)
 			{
 				sprintf_s(pszGroupDir, sizeof(pszGroupDir), "%s\\%s", pszRootPath, pDSI->astGroupInfo[group_index].name_descriptor.text_char);
-				BuildDirectory(pszGroupDir);
+				DIR_BuildDirectory(pszGroupDir);
 
 				pDSMCC_DII = (CDSMCC_UNM*)QueryBy3ID(PID, TABLE_ID_DSMCC_UNM, (pDSI->astGroupInfo[group_index].GroupId & 0x0000ffff));
 				if (pDSMCC_DII != NULL)
@@ -866,7 +866,7 @@ int CDB_PsiSiObjs::DSMCC_DownloadDCTree(uint16_t PID, DSMCC_DSI_t* pDSI, uint8_t
 //usPID  -- input, DSMCC 的PID；
 //pxmlDoc -- output，所生成的DSMCC树通过此参数反馈给调用者
 //返回值，程序处理状态码。
-int CDB_PsiSiObjs::BuildDsmccTree(uint16_t usPID, HALForXMLDoc* pxmlDoc)
+int CDB_PsiSiObjs::BuildDsmccTree(uint16_t usPID, TALForXMLDoc* pxmlDoc)
 {
 	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 
@@ -962,7 +962,7 @@ int CDB_PsiSiObjs::DownloadDsmccTree(uint16_t usPID, char* pszRootPath)
 //uiCode  -- input, 高16位表示BAT在数据库中的唯一Key，低16位表示bouquet_id；
 //pxmlDoc -- output，所生成的bouquet树通过此参数反馈给调用者
 //返回值，程序处理状态码。
-int CDB_PsiSiObjs::BuildBouquetTree(uint32_t uiCode, HALForXMLDoc* pxmlDoc)
+int CDB_PsiSiObjs::BuildBouquetTree(uint32_t uiCode, TALForXMLDoc* pxmlDoc)
 {
 	int rtcode = MIDDLEWARE_DB_NO_ERROR;
 	STREAM_INFO_t stStreamInfoInBAT;

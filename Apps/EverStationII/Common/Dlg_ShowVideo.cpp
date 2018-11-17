@@ -15,7 +15,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_ShowVideo dialog
 
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 //#include "MiddleWare_ESDecoder/Include/Decoder_MPEG2_PS.h"
 //#include "MiddleWare_ESDecoder/Include/AudioDecoder_MPEG2.h"
 //#include "MiddleWare_ESDecoder/Include/VideoDecoder_MPEG2.h"
@@ -1287,7 +1287,7 @@ void CDlg_ShowVideo::OnBtnPreFrame()
 	UpdateData(FALSE);
 }
 
-U32 VideoPlay_Thread(PVOID pVoid)
+uint32_t VideoPlay_Thread(PVOID pVoid)
 {
 	CDlg_ShowVideo* pdlg = (CDlg_ShowVideo*)pVoid;
 	int				nPos = 0;
@@ -1357,7 +1357,7 @@ U32 VideoPlay_Thread(PVOID pVoid)
 	return 0;
 }
 
-U32 AudioPlay_Thread(PVOID pVoid)
+uint32_t AudioPlay_Thread(PVOID pVoid)
 {
 	CDlg_ShowVideo* pdlg = (CDlg_ShowVideo*)pVoid;
 	int				nPos = 0;
@@ -1448,7 +1448,7 @@ void CDlg_ShowVideo::OnCheckCycle()
 
 LRESULT CDlg_ShowVideo::OnReportVideoDecodeFPS(WPARAM wParam, LPARAM lParam)
 {
-	U32	FPS = (U32)wParam;
+	uint32_t	FPS = (uint32_t)wParam;
 	float fps;
 	CString strFPS;
 

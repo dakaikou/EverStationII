@@ -10,13 +10,13 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+//#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\DVB_SI_Utilities.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
+#include "translate_layer\MPEG2_DVB_Section\Include\DVB_SI_Utilities.h"
 
 #include "TSMagicView.h"
 /////////////////////////////////////////////////////////////////////////////
@@ -145,7 +145,7 @@ void CNaviTree_Services::UpdateNIT(CNIT* pNIT)
 	TV_INSERTSTRUCT TreeCtrlItem;
 	char			pszNetworkName[64];
 	char			pszText[MAX_TXT_CHARS];
-	HTREEITEM		hNetworkItem;
+	HTREEITEM		hNetworkItem = NULL;
 	HTREEITEM		hStreamItem;
 	//char*			pstr_dst;
 	int				find_network_item;
@@ -310,9 +310,9 @@ void CNaviTree_Services::UpdateSDT(CSDT* pSDT)
 	int				find_network_item;
 	int				find_stream_item;
 	
-	HTREEITEM		hNetworkItem;
-	HTREEITEM		hStreamItem;
-	HTREEITEM		hServiceItem;
+	HTREEITEM		hNetworkItem = NULL;
+	HTREEITEM		hStreamItem = NULL;
+	HTREEITEM		hServiceItem = NULL;
 	CString			strTemp;
 
 	uint8_t			item_style;

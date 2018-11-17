@@ -1,14 +1,28 @@
 #ifndef _CDL_DSMCC_TABLE_H_
 #define _CDL_DSMCC_TABLE_H_
 
-#include "../compile.h"
-#include "HAL/HAL_Sys/Include/INTTYPES.H"
-#include "libs_MPEG&DVB\MPEG_DVB_Section\Include\MPEG_DVB_Common.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_DSMCC_Descriptor.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_DSMCC_Section.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_UNM_DII.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_UNM_DSI.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_DDM_DDB.h"
+#if defined(_WIN32) || defined(_WIN64)
+#   ifdef _MW_PSISI_EXPORT
+#       define MW_PSISI_LIB __declspec(dllexport)
+#   elif defined(_MW_PSISI_IMPORT)
+#       define MW_PSISI_LIB __declspec(dllimport)
+#   else
+#       define MW_PSISI_LIB
+#   endif
+#elif __GNUC__ >= 4
+#   define MW_PSISI_LIB __attribute__((visibility("default")))
+#else
+#   define MW_PSISI_LIB
+#endif
+
+#include <stdint.h>
+
+#include "translate_layer\MPEG2_DVB_Section\Include\MPEG2_DVB_Common.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Descriptor.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Section.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_UNM_DII.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_UNM_DSI.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_DDM_DDB.h"
 
 #include "MiddleWare_PSISI_Common.h"
 
@@ -16,7 +30,7 @@
 /*------------------------------------------------------------
 		AIT definition 
 -------------------------------------------------------------*/
-class _CDL_EXPORT CAIT : public CPVT
+class MW_PSISI_LIB CAIT : public CPVT
 {
 public:
 	CAIT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
@@ -24,7 +38,7 @@ public:
 public:
 
 	//------------------semantic part------------------------
-	U16						m_usApplicationType;
+	uint16_t						m_usApplicationType;
 
 	//------------------syntax part---------------------------
 public:
@@ -39,35 +53,35 @@ typedef struct DSMCC_DSI_s
 	int				data_broadcast_type;						//0x0006 -- DC, 0x0007 -- OC
 
 																//DC
-	S32				NumberOfGroups;
+	int				NumberOfGroups;
 	GroupInfo_t*	astGroupInfo;
 
 	//OC
 	//业务网关信息
-	U32				carouselId;
-	U16				moduleId_for_srg;
-	U32				objectKey_data_for_srg;
+	uint32_t				carouselId;
+	uint16_t				moduleId_for_srg;
+	uint32_t				objectKey_data_for_srg;
 
-	//	U16				moduleId_for_dii;
-	U16				table_id_extension_for_dii;
+	//	uint16_t				moduleId_for_dii;
+	uint16_t				table_id_extension_for_dii;
 
 } DSMCC_DSI_t;
 
 typedef struct DSMCC_DII_s
 {
-	U32			downloadId;								//32
-	U16			blockSize;								//16
-	U8			windowSize;								//8
-	U8			ackPeriod;								//8
-	U32			tCDownloadWindow;						//32
-	U32			tCDownloadScenario;						//32
+	uint32_t			downloadId;								//32
+	uint16_t			blockSize;								//16
+	uint8_t			windowSize;								//8
+	uint8_t			ackPeriod;								//8
+	uint32_t			tCDownloadWindow;						//32
+	uint32_t			tCDownloadScenario;						//32
 
-	U16				numberOfModules;					//16
+	uint16_t				numberOfModules;					//16
 	ModuleInfo_t*	astModuleInfo;
 
 } DSMCC_DII_t;
 
-class _CDL_EXPORT CDSMCC_UNM : public CPVT
+class MW_PSISI_LIB CDSMCC_UNM : public CPVT
 {
 public:
 	CDSMCC_UNM(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
@@ -94,7 +108,7 @@ public:
 	uint16_t GetMessageID(void);
 };
 
-class _CDL_EXPORT CDSMCC_DDM : public CPVT
+class MW_PSISI_LIB CDSMCC_DDM : public CPVT
 {
 public:
 	CDSMCC_DDM(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
@@ -132,7 +146,7 @@ public:
 };
 
 //MPE datagram
-class _CDL_EXPORT CMPE : public CPVT
+class MW_PSISI_LIB CMPE : public CPVT
 {
 public:
 	CMPE(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);
@@ -151,7 +165,7 @@ public:
 /*------------------------------------------------------------
 		INT definition 
 -------------------------------------------------------------*/
-class _CDL_EXPORT CINT : public CPVT
+class MW_PSISI_LIB CINT : public CPVT
 {
 public:
 	CINT(uint16_t Key, uint16_t PID, uint8_t table_id, uint16_t table_id_extension);

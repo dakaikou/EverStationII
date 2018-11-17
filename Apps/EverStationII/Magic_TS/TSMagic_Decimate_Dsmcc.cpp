@@ -2,18 +2,18 @@
 
 #include "MiddleWare/MiddleWare_TransportStream\Include\MiddleWare_TS_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_SectionSplicer.h"
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_TSPackets.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_OCDCs.h"
 
-#include "libs_MPEG&DVB/MPEG_TSPacket/Include/Mpeg2_TS_ErrorCode.h"
-#include "libs_MPEG&DVB/MPEG_TSPacket\Include\Mpeg2_TS_Utilities.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section\Include\MPEG_DVB_ErrorCode.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_DSMCC_Utilities.h"
+#include "translate_layer/MPEG2_TSPacket/Include/Mpeg2_TS_ErrorCode.h"
+#include "translate_layer/MPEG2_TSPacket\Include\Mpeg2_TS_Utilities.h"
+#include "translate_layer/MPEG2_DVB_Section\Include\MPEG2_DVB_ErrorCode.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Utilities.h"
 
-#include "libs_Utilities\Include\XStream_Utilities.h"
+#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
 
 #include "..\Common\define.h"
 
@@ -38,20 +38,20 @@ void ts_dsmcc_download_loop(pthread_params_t pThreadParams)
 #if OPEN_DSMCC_DOWNLOAD
 
 	char  pszDebug[MAX_TXT_CHARS];
-	S32	  old_ratio = 0;
+	int	  old_ratio = 0;
 
 	CDB_PsiSiObjs*				pDB_PsiSiObjs = NULL;
 	CDB_OCDCs*					pDB_OCDCs = NULL;
 
 	DOWNLOAD_INFO_t				stDownloadInfo;
-	S32							download_index;
-	S64							total_file_size;							//所有需要下载文件的大小，K字节
-	S64							download_file_size;
-	S32							download_ratio;
+	int							download_index;
+	int64_t							total_file_size;							//所有需要下载文件的大小，K字节
+	int64_t							download_file_size;
+	//int							download_ratio;
 
-	U32							old_tickcount;
-	U32							new_tickcount;
-	S32							diff_tickcount;
+	uint32_t							old_tickcount;
+	uint32_t							new_tickcount;
+	int							diff_tickcount;
 
 	if (pThreadParams != NULL)
 	{
@@ -96,7 +96,7 @@ void ts_dsmcc_download_loop(pthread_params_t pThreadParams)
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_DOWNLOAD_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
 
-		BuildDirectory(pszDownloadRootPath);
+		DIR_BuildDirectory(pszDownloadRootPath);
 
 		int download_count = pDB_OCDCs->GetDownloadCount();
 		for (download_index = 0; download_index < download_count; download_index++)

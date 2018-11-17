@@ -29,9 +29,9 @@ void CTDT::Reset(void)
 	CPVT::Reset();
 }
 
-S32 CTDT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t* pprivate_section)
+int CTDT::AddSection(uint16_t usPID, uint8_t* buf, int length, private_section_t* pprivate_section)
 {
-	S32						rtcode = MIDDLEWARE_PSISI_NO_ERROR;
+	int						rtcode = MIDDLEWARE_PSISI_NO_ERROR;
 	time_date_section_t		tdt_section;
 
 	rtcode = CPVT::AddSection(usPID, pprivate_section);

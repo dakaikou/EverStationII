@@ -1,11 +1,25 @@
 #ifndef _MIDDLEWARE_DBASE_TSPACKETS_H_
 #define _MIDDLEWARE_DBASE_TSPACKETS_H_
 
+#if defined(_WIN32) || defined(_WIN64)
+#   ifdef _MW_DB_EXPORT
+#       define MW_DB_LIB __declspec(dllexport)
+#   elif defined(_MW_DB_IMPORT)
+#       define MW_DB_LIB __declspec(dllimport)
+#   else
+#       define MW_DB_LIB
+#   endif
+#elif __GNUC__ >= 4
+#   define MW_DB_LIB __attribute__((visibility("default")))
+#else
+#   define MW_DB_LIB
+#endif
+
 #include <stdint.h>
+
 #include <Windows.h>
 
-#include "..\Compile.h"
-#include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/Mpeg2_TS_packet.h"
+#include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
 
 #define MAX_PID_COUNT						8192
 #define PID_STYLE_VERIFY_COUNTDOWNS			3
@@ -49,7 +63,7 @@ typedef struct _TS_packet_info_s
 
 } RECORD_TSPacket_t;
 
-class _CDL_EXPORT CDB_TSPackets
+class MW_DB_LIB CDB_TSPackets
 {
 public:
 	CDB_TSPackets(void);

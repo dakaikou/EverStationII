@@ -12,15 +12,14 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_SI_Utilities.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/DVB_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Section.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Utilities.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Section.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
 
-#include "libs_Utilities\Include\XStream_Utilities.h"
+#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
 
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 
@@ -465,7 +464,7 @@ void CNaviList_DSMCCs::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 		CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 		CDB_PsiSiObjs* pDB_PsiSiObjs = pTSMagicView->GetPsiSiObjsDBase();
 
-		HALForXMLDoc xmlDoc;
+		TALForXMLDoc xmlDoc;
 		pDB_PsiSiObjs->BuildDsmccTree(usPID, &xmlDoc);
 		m_pInfoTree->ShowXMLDoc(&xmlDoc);
 
@@ -480,7 +479,7 @@ void CNaviList_DSMCCs::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 		exeDrive[2] = '\0';
 
 		sprintf_s(pszXmlDir, sizeof(pszXmlDir), "%s\\~EverStationII\\xml", exeDrive);
-		BuildDirectory(pszXmlDir);
+		DIR_BuildDirectory(pszXmlDir);
 
 		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\DSMCC_sematics_0x%04X.xml", pszXmlDir, usPID);
 		xmlDoc.SaveFile(pszFilePath);

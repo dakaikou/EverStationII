@@ -20,16 +20,16 @@ CYUV_VideoDecoder::~CYUV_VideoDecoder(void)
 	Reset();
 }
 
-S32 CYUV_VideoDecoder::Open(S32 nFileType, S8* pszFileName, Video_decode_info_t* pdecode_info)
+int CYUV_VideoDecoder::Open(int nFileType, char* pszFileName, Video_decode_info_t* pdecode_info)
 {
 	m_nFileType = nFileType;
 	strcpy_s(m_pszFileName, pszFileName);
 
 	memcpy(&m_VidDecodeInfo, pdecode_info, sizeof(Video_decode_info_t));
 
-	m_pucFrameBuf[CC_Y] = (U8*)malloc(m_VidDecodeInfo.luma_buf_size);
-	m_pucFrameBuf[CC_Cb] = (U8*)malloc(m_VidDecodeInfo.chroma_buf_size);
-	m_pucFrameBuf[CC_Cr] = (U8*)malloc(m_VidDecodeInfo.chroma_buf_size);
+	m_pucFrameBuf[CC_Y] = (uint8_t*)malloc(m_VidDecodeInfo.luma_buf_size);
+	m_pucFrameBuf[CC_Cb] = (uint8_t*)malloc(m_VidDecodeInfo.chroma_buf_size);
+	m_pucFrameBuf[CC_Cr] = (uint8_t*)malloc(m_VidDecodeInfo.chroma_buf_size);
 	memset(m_pucFrameBuf[CC_Y], 0x00, m_VidDecodeInfo.luma_buf_size);
 	memset(m_pucFrameBuf[CC_Cb], 0x80, m_VidDecodeInfo.chroma_buf_size);
 	memset(m_pucFrameBuf[CC_Cr], 0x80, m_VidDecodeInfo.chroma_buf_size);
@@ -53,7 +53,7 @@ S32 CYUV_VideoDecoder::Open(S32 nFileType, S8* pszFileName, Video_decode_info_t*
 	return 0;
 }
 
-S32 CYUV_VideoDecoder::Close(void)
+int CYUV_VideoDecoder::Close(void)
 {
 	Reset();
 
@@ -62,7 +62,7 @@ S32 CYUV_VideoDecoder::Close(void)
 
 void CYUV_VideoDecoder::Reset(void)
 {
-	S32		 i;
+	int		 i;
 
 	memset(&m_VidDecodeInfo, 0x00, sizeof(Video_decode_info_t));
 
@@ -82,7 +82,7 @@ void CYUV_VideoDecoder::Reset(void)
 	}
 }
 
-S32 CYUV_VideoDecoder::OpenVideo(HWND hWnd, S8* pszFourCC, S32 strSize)
+int CYUV_VideoDecoder::OpenVideo(HWND hWnd, char* pszFourCC, int strSize)
 {
 //	if (pwidth != NULL)
 //	{
@@ -100,16 +100,16 @@ S32 CYUV_VideoDecoder::OpenVideo(HWND hWnd, S8* pszFourCC, S32 strSize)
 	return CVESDecoder::OpenVideo(hWnd);
 }
 
-S32 CYUV_VideoDecoder::CloseVideo(void)
+int CYUV_VideoDecoder::CloseVideo(void)
 {
 	return CVESDecoder::CloseVideo();
 }
 
-S32 CYUV_VideoDecoder::Preview_NextPicture(void)
+int CYUV_VideoDecoder::Preview_NextPicture(void)
 {
-	S32		rdsize;
-	S32		end_of_file = 0;
-	S32		seek_count = 0;
+	int		rdsize;
+	int		end_of_file = 0;
+	int		seek_count = 0;
 
 	if (_tell(m_hFile) < m_nFileTotalSize)
 	{
@@ -179,24 +179,24 @@ S32 CYUV_VideoDecoder::Preview_NextPicture(void)
 //		::SendMessage(m_hVidWnd, WM_UPDATE_PICTURE, (WPARAM)&m_VidDecodeInfo, NULL);
 	}
 
-	S32 percent = 0;
+	int percent = 0;
 
 	if (m_nFileTotalSize > 0)
 	{
-		S32 filepos = _tell(m_hFile);
+		int filepos = _tell(m_hFile);
 		
-		percent = (S32)(filepos * 100 / m_nFileTotalSize);
+		percent = (int)(filepos * 100 / m_nFileTotalSize);
 	}
 
 	return percent;	
 }
 
-S32	CYUV_VideoDecoder::Preview_EOF(void)
+int	CYUV_VideoDecoder::Preview_EOF(void)
 {
-	S32	bEOF = FALSE;
+	int	bEOF = FALSE;
 
-	S32 filepos = _tell(m_hFile);
-	S32 endpos = m_nFileTotalSize - (m_nFileTotalSize % m_VidDecodeInfo.frame_buf_size);
+	int filepos = _tell(m_hFile);
+	int endpos = m_nFileTotalSize - (m_nFileTotalSize % m_VidDecodeInfo.frame_buf_size);
 
 	if (filepos >= endpos)
 	{
@@ -206,9 +206,9 @@ S32	CYUV_VideoDecoder::Preview_EOF(void)
 	return bEOF;
 }
 
-S32 CYUV_VideoDecoder::Preview_PrePicture(void)
+int CYUV_VideoDecoder::Preview_PrePicture(void)
 {
-	S64 filepos = _telli64(m_hFile);
+	int64_t filepos = _telli64(m_hFile);
 	
 	filepos -= (m_VidDecodeInfo.frame_buf_size << 1);
 	if (filepos < 0)
@@ -223,9 +223,9 @@ S32 CYUV_VideoDecoder::Preview_PrePicture(void)
 	return Preview_NextPicture();
 }
 
-S32 CYUV_VideoDecoder::Preview_ForwardPicture(void)
+int CYUV_VideoDecoder::Preview_ForwardPicture(void)
 {
-	S32 filepos = _tell(m_hFile);
+	int filepos = _tell(m_hFile);
 
 	filepos += m_VidDecodeInfo.frame_buf_size * 5;
 	if (filepos > (m_nFileTotalSize - m_VidDecodeInfo.frame_buf_size))
@@ -238,9 +238,9 @@ S32 CYUV_VideoDecoder::Preview_ForwardPicture(void)
 	return Preview_NextPicture();
 }
 
-S32 CYUV_VideoDecoder::Preview_BackwardPicture(void)
+int CYUV_VideoDecoder::Preview_BackwardPicture(void)
 {
-	S64 filepos = _telli64(m_hFile);
+	int64_t filepos = _telli64(m_hFile);
 
 	filepos -= m_VidDecodeInfo.frame_buf_size * 5;
 	if (filepos < 0)
@@ -252,9 +252,9 @@ S32 CYUV_VideoDecoder::Preview_BackwardPicture(void)
 	return Preview_NextPicture();
 }
 
-S32 CYUV_VideoDecoder::Preview_LastPicture(void)
+int CYUV_VideoDecoder::Preview_LastPicture(void)
 {
-	S32 filepos = m_nFileTotalSize - m_VidDecodeInfo.frame_buf_size;
+	int filepos = m_nFileTotalSize - m_VidDecodeInfo.frame_buf_size;
 	
 	filepos -= filepos % m_VidDecodeInfo.frame_buf_size;
 
@@ -263,16 +263,16 @@ S32 CYUV_VideoDecoder::Preview_LastPicture(void)
 	return Preview_NextPicture();
 }
 
-S32 CYUV_VideoDecoder::Preview_FirstPicture(void)
+int CYUV_VideoDecoder::Preview_FirstPicture(void)
 {
 	_lseek(m_hFile, 0, SEEK_SET);
 
 	return Preview_NextPicture();
 }
 
-S32 CYUV_VideoDecoder::Preview_AtPercent(S32 nPercent)
+int CYUV_VideoDecoder::Preview_AtPercent(int nPercent)
 {
-	S32		 offset;
+	int		 offset;
 
 	offset = m_nFileTotalSize * nPercent / 100;
 	offset -= offset % m_VidDecodeInfo.frame_buf_size;
@@ -305,9 +305,9 @@ void CYUV_VideoDecoder::SetGrid(void)
 */	
 }
 
-S32	CYUV_VideoDecoder::Get_decode_info(Video_decode_info_t* pdecode_info)
+int	CYUV_VideoDecoder::Get_decode_info(Video_decode_info_t* pdecode_info)
 {
-	S32	rtcode = 0;
+	int	rtcode = 0;
 
 	if (pdecode_info != NULL)
 	{
@@ -323,7 +323,7 @@ S32	CYUV_VideoDecoder::Get_decode_info(Video_decode_info_t* pdecode_info)
 	return rtcode;
 }
 
-void DecodeFourCC2Text(S8* pszFourCC, S8* pszText, S32 size)
+void DecodeFourCC2Text(char* pszFourCC, char* pszText, int size)
 {
 	if ((pszFourCC != NULL) && (pszText != NULL))
 	{

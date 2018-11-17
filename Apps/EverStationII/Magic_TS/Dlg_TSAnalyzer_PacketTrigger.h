@@ -9,7 +9,7 @@
 #include "..\resource.h"
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_PacketTrigger dialog
-#include "libs_Mpeg&DVB/Mpeg_TSPacket/Include/Mpeg2_TS_packet.h"
+#include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
 
 #include "TSMagic_Trigger_TSPacket.h"
 
@@ -63,14 +63,14 @@ public:
 	void UpdateCatchResult(void);
 	void UpdatePIDList(void);
 	//void DisplayTSPacket(transport_packet_t* ppacket);
-	//void DisplayTSPacket(U8* packet_buf, S32 packet_length);
+	//void DisplayTSPacket(uint8_t* packet_buf, int packet_length);
 	//void ClearPacketList( BOOL bFirstTime = FALSE );
 	//void ClearPacketTree( BOOL bFirstTime = FALSE );
 	void CancelTrigger(void);
 
 protected:
 	BOOL VerifySearchConditions( void );
-	S32 GetTriggerParams(U8* ucMask, U8* ucData, S32 length);
+	int GetTriggerParams(uint8_t* ucMask, uint8_t* ucData, int length);
 
 protected:
 

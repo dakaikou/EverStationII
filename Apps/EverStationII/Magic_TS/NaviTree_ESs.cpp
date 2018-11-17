@@ -4,7 +4,7 @@
 #include "stdafx.h"
 //#include "EverStation.h"
 #include "NaviTree_ESs.h"
-#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
+//#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 
 #ifdef _DEBUG
@@ -13,9 +13,9 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_MPEG&DVB/MPEG_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
-#include "libs_MPEG&DVB/Mpeg_TSPacket\Include\Mpeg2_TS_Utilities.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
+#include "translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_Utilities.h"
 
 #include "../resource.h"
 #include "..\Common\define.h"
@@ -177,7 +177,7 @@ void CNaviTree_ESs::UpdatePMT(CPMT* pPMT)
 	char			pszText[MAX_TXT_CHARS];
 	char			pszTemp[128];
 	int				program_number;
-	U8				class_type;
+	uint8_t				class_type;
 	HTREEITEM		hESItem;
 	HTREEITEM		hPmtItem = NULL;
 	DWORD			dwItemData;
@@ -254,7 +254,7 @@ void CNaviTree_ESs::UpdatePMT(CPMT* pPMT)
 						}
 
 						MPEG2_PSI_NumericCoding2Text_StreamType(es_info.stream_type, es_info.stream_subtype, pszTemp, sizeof(pszTemp));
-						class_type = GetTSPayloadClassByStreamType(es_info.stream_type, es_info.stream_subtype);
+						class_type = MPEG2_TS_GetPayloadClassByStreamType(es_info.stream_type, es_info.stream_subtype);
 						//pid_style = StreamTypeLookup(pPMT->m_astEsInfo[es_index].stream_type, pPMT->m_astEsInfo[es_index].stream_subtype, pszTemp, sizeof(pszTemp));
 						//class_type = (pid_style & 0x00070000) >> 16;
 						//main_type = (pid_style & 0x0000ff00) >> 8;

@@ -3,8 +3,8 @@
 #include <assert.h>
 #include <math.h>
 
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section\Include\MPEG_DVB_ErrorCode.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section\Include\MPEG2_DVB_ErrorCode.h"
 
 #include "../Include/MiddleWare_PSISI_ErrorCode.h"
 #include "../Include/MiddleWare_PSISI_Common.h"

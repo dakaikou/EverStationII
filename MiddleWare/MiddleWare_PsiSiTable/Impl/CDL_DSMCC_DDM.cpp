@@ -4,14 +4,14 @@
 #include <assert.h>
 #include <math.h>
 
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_DSMCC_section.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_DSMCC_Utilities.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/Mpeg2_table_id.h"
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/MPEG_DVB_ErrorCode.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_section.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Utilities.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
 
-#include "libs_Mpeg&DVB/MPEG_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_DDM.h"
+#include "translate_layer/MPEG2_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_DDM.h"
 
-#include "libs_Utilities\Include\XStream_Utilities.h"
+#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
 
 #include "../Include/MiddleWare_PSISI_ErrorCode.h"
 #include "../Include/MiddleWare_DSMCC_Table.h"
@@ -124,15 +124,15 @@ int CDSMCC_DDM::AddSection(uint16_t usPID, uint8_t* buf, int length, private_sec
 	
 	dsmcc_section_t				DSMCC_section;
 
-	U8*							message_buf;
-	S32							message_length;
+	uint8_t*							message_buf;
+	int							message_length;
 
-	//U8*							module_buf;
-	S32							module_length;
+	//uint8_t*							module_buf;
+	int							module_length;
 
-	S8							magic[5];
-	U8							objectKey_length;
-	S8							objectKind_data[4];
+	char							magic[5];
+	uint8_t							objectKey_length;
+	char							objectKind_data[4];
 
 	rtcode = CPVT::AddSection(usPID, pprivate_section);
 	if (rtcode == MIDDLEWARE_PSISI_NO_ERROR)
@@ -268,7 +268,7 @@ void CDSMCC_DDM::SaveModuleBufToDisk(char* pszFatherDirectory, char* pszModuleNa
 	{
 		sprintf_s(pszModuleFile, sizeof(pszModuleFile), "%s\\MODULE(ID_0x%04X)", pszFatherDirectory, m_usTableIDExtension);
 	}
-	BuildDirectory(pszModuleFile);
+	DIR_BuildDirectory(pszModuleFile);
 
 	FILE* fp = NULL;
 	fopen_s(&fp, pszModuleFile, "wb");
