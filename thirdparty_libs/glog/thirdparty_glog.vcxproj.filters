@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="源文件\base">
+      <UniqueIdentifier>{9c7bf307-6ef5-424c-bad7-458f28b99e1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\glob">
+      <UniqueIdentifier>{38a57034-2cce-43ee-912d-b1bd81c46d6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\windows">
+      <UniqueIdentifier>{8e8d84f7-546b-4b2c-9617-c2275bb5e03c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="glog\logging.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="glog\raw_logging.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="glog\stl_logging.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="glog\vlog_is_on.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\demangle.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\symbolize.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utilities.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\commandlineflags.h">
+      <Filter>源文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\googleinit.h">
+      <Filter>源文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\mutex.h">
+      <Filter>源文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\windows\port.h">
+      <Filter>源文件\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="src\glog\log_severity.h">
+      <Filter>源文件\glob</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\demangle.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\logging.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\raw_logging.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\signalhandler.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\symbolize.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utilities.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vlog_is_on.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows\port.cc">
+      <Filter>源文件\windows</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

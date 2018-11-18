@@ -33,6 +33,8 @@
 //#include "MiddleWare_ESDecoder/Include/AudioDecoder_AC3.h"
 //#include "MiddleWare_ESDecoder/Include/AudioDecoder_AAC.h"
 
+#include "thirdparty_libs\glog\glog\logging.h"
+
 #include <stdio.h>
 #include <windows.h>
 #include <time.h>
@@ -104,6 +106,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 
 		sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: 开始(文件名：%s)", pThreadParams->pszFileName);
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_OPEN);
+		LOG(INFO) << pszDebug;
 
 		ptransport_stream = pThreadParams->pTStream;
 		ptransport_stream->Reset();
@@ -173,6 +176,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 
 					sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: 找到同步（文件位置：0x%llx）\n", read_byte_pos);
 					::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
+					LOG(INFO) << pszDebug;
 				}
 
 				//汇报TS包长度
@@ -183,6 +187,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 
 					sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: TS包长 = %d\n", packet_length);
 					::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
+					LOG(INFO) << pszDebug;
 				}
 
 				//对该TS包进行语法分析
@@ -236,6 +241,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 						{
 							sprintf_s(pszDebug, sizeof(pszDebug), "离线分析:TS包统计——连续计数错误（文件位置：0x%llx, PID = 0x%04x）\n", read_byte_pos, transport_packet.PID);
 							::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
+							LOG(INFO) << pszDebug;
 						}
 						else
 						{
@@ -243,6 +249,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 							sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: TS包统计——%s（文件位置：0x%llx）\n", pszTemp, read_byte_pos);
 
 							::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
+							LOG(INFO) << pszDebug;
 						}
 					}
 #endif					
@@ -282,6 +289,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 								{
 									sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: section拼接——超出section_filter的最大数量!");
 									::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
+									LOG(INFO) << pszDebug;
 								}
 							}
 
@@ -305,12 +313,14 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 												sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: section报告——在TS_PID=0x%04X上发现未识别的PSI/SI表(table_id=0x%02x)（文件位置：0x%llx）\n", pSectionSplicer->m_usPID, pSectionSplicer->m_ucTableID, read_byte_pos);
 
 												::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_WARNING);
+												LOG(INFO) << pszDebug;
 											}
 											else if (rtcode == MIDDLEWARE_PSISI_VERSION_CHANGE)
 											{
 												sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: section报告——PSI/SI表(TS_PID=0x%04X, table_id=0x%02x)版本发生变更（文件位置：0x%llx）\n", pSectionSplicer->m_usPID, section_buf[0], read_byte_pos);
 
 												::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_WARNING);
+												LOG(INFO) << pszDebug;
 											}
 											else if (rtcode == MIDDLEWARE_PSISI_DUPLICATED_SECTION)
 											{
@@ -324,6 +334,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 												sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: section报告——PSI/SI表(TS_PID=0x%04X, table_id=0x%02X) %s（文件位置：0x%llx）\n",  pSectionSplicer->m_usPID, section_buf[0], pszTemp, read_byte_pos);
 
 												::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
+												LOG(INFO) << pszDebug;
 											}
 										}
 #if OPEN_SECTION_TRIGGER
@@ -361,17 +372,20 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 									{
 										sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: section拼接——TS包(TS_PID=0x%04X)包头指示传输错误（文件位置：0x%llx）\n", transport_packet.PID, read_byte_pos);
 										::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_WARNING);
+										LOG(INFO) << pszDebug;
 									}
 									else if (rtcode == SECTION_SPLICE_CONTINUITY_ERROR)
 									{
 										sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: section拼接——TS包(TS_PID=0x%04X)序号不连续（文件位置：0x%llx）\n", transport_packet.PID, read_byte_pos);
 										::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
+										LOG(INFO) << pszDebug;
 									}
 									else
 									{
 										TSMagic_ErrorCodeLookup(rtcode, pszTemp, sizeof(pszTemp));
 										sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: section拼接——%s（TS_PID=0x%04X, 文件位置：0x%llx）\n", pszTemp, transport_packet.PID, read_byte_pos);
 										::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
+										LOG(INFO) << pszDebug;
 									}
 
 								} while (rtcode == SECTION_SPLICE_ONE_MORE_SECTIONS);
@@ -459,6 +473,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 					sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: %s（文件位置：0x%llx）\n", pszTemp, read_byte_pos);
 
 					::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
+					LOG(INFO) << pszDebug;
 				}
 
 				ptransport_stream->SkipOnePacket();
@@ -470,6 +485,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 
 				sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: 丢失同步（文件位置：0x%llx）\n", read_byte_pos);
 				::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
+				LOG(INFO) << pszDebug;
 			}
 			else if (rtcode == MIDDLEWARE_TS_FILE_EOF_ERROR)
 			{
@@ -486,6 +502,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 				sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: %s（文件位置：0x%llx）\n", pszTemp, read_byte_pos);
 
 				::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
+				LOG(INFO) << pszDebug;
 			}
 		}
 
@@ -522,6 +539,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 					sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: 连续计数错误（PID = 0x%04x, error_count = %d）\n", i, error_count);
 					//::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
 					::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
+					LOG(INFO) << pszDebug;
 				}
 			}
 		}
@@ -556,6 +574,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 
 		sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: 结束! (耗时%d ms)", diff_tickcount);
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_CLOSE);
+		LOG(INFO) << pszDebug;
 
 		pThreadParams->main_thread_stopped = 1;			//通知应用程序，主线程顺利退出
 	}
@@ -563,6 +582,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 	{
 		sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: 输入参数错误！");
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
+		LOG(INFO) << pszDebug;
 	}
 }
 

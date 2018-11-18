@@ -15,12 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h">
+    <ClInclude Include="Include\TOOL_Directory.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\toolbox_libs\TOOL_Directory\Impl\TOOL_Directory.cpp">
+    <ClCompile Include="Impl\TOOL_Directory.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
