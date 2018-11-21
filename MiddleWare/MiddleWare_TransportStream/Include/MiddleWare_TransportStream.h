@@ -37,7 +37,7 @@
 typedef struct
 {
 	int	mean;
-	int	rms;			//¾ù·½¸ùÖµ
+	int	rms;			//å‡æ–¹æ ¹å€¼
 	int	min;
 	int	max;
 
@@ -55,15 +55,13 @@ public:
 	int			m_bSynced;
 	int			m_TsError;
 
-	int			m_hFile;
+	int			m_nRunning;				//ä¸»åŠ¨è®¾ç½®çš„çŠ¶æ€
+	int			m_nStopRunning;			//çº¿ç¨‹åé¦ˆå›æ¥çš„çŠ¶æ€
 
-	int			m_nRunning;				//Ö÷¶¯ÉèÖÃµÄ×´Ì¬
-	int			m_nStopRunning;			//Ïß³Ì·´À¡»ØÀ´µÄ×´Ì¬
+	int			m_nReceiving;			//ä¸»åŠ¨è®¾ç½®çš„çŠ¶æ€
+	int			m_nStopReceiving;		//çº¿ç¨‹åé¦ˆçš„çŠ¶æ€
 
-	int			m_nReceiving;			//Ö÷¶¯ÉèÖÃµÄ×´Ì¬
-	int			m_nStopReceiving;		//Ïß³Ì·´À¡µÄ×´Ì¬
-
-	int			m_nMode;				//ÓÃÒÔÊ¶±ğTSÁ÷µÄ´ò¿ª·½Ê½£¬0 - ±íÊ¾ÀëÏß·ÖÎö£¬ 1 - ±íÊ¾ÊµÊ±·ÖÎö
+	int			m_nMode;				//ç”¨ä»¥è¯†åˆ«TSæµçš„æ‰“å¼€æ–¹å¼ï¼Œ0 - è¡¨ç¤ºç¦»çº¿åˆ†æï¼Œ 1 - è¡¨ç¤ºå®æ—¶åˆ†æ
 
 	int			m_nEOF;
 
@@ -74,7 +72,6 @@ public:
 	double		mf_actual_scan_frequency;
 	int			mn_actual_timeslice;
 
-//	int64_t			m_llCurFilePos;						//support file size: >= 4G
 	int64_t			m_llCurReadPos;
 	int64_t			m_llTotalFileLength;
 
@@ -93,8 +90,8 @@ protected:
 	int				m_bitrate_mean_value;
 	int				m_bitrate_rms_value;
 
-	//Êı¾İ¿âÖ¸Õë£¬ÔİÊ±²ÉÓÃĞ´ÎÄ¼şµÄ·½Ê½£¬½«À´£¨Ö»ÒªÎÒ»¹»î×Å£©¿ÉÒÔ¸Ä³ÉÊı¾İ¿â
-	FILE*		fp_dbase;
+	//æ•°æ®åº“æŒ‡é’ˆï¼Œæš‚æ—¶é‡‡ç”¨å†™æ–‡ä»¶çš„æ–¹å¼ï¼Œå°†æ¥ï¼ˆåªè¦æˆ‘è¿˜æ´»ç€ï¼‰å¯ä»¥æ”¹æˆæ•°æ®åº“	chendelin  2018.11.19
+	FILE*		fp_tsrate_dbase;
 
 public:
 	~CTransportStream();
@@ -109,10 +106,10 @@ public:
 	int StartGetData(void);
 	int StopGetData(void);
 
-	int	StartGetBitrate(void);
-	int	GetBitrateMap(int pbitrate_map[], int count);
+	//int	StartGetBitrate(void);
+	//int	GetBitrateMap(int pbitrate_map[], int count);
 	int GetBitrate(void);
-	int	StopGetBitrate(void);
+	//int	StopGetBitrate(void);
 
 	void SeekToBegin(void);
 

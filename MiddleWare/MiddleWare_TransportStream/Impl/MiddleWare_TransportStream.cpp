@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <io.h>
-#include <fcntl.h>
 #include <assert.h>
 #include <math.h>
 
@@ -11,19 +10,16 @@
 
 #include "streamio_layer/SIOWithDektec/Include/SIOWithDektec.h"
 #include "streamio_layer/SIOWithUDP/Include/SIOWithUDP.h"
+#include "streamio_layer/SIOWithFile/Include/SIOWithFile.h"
 #include "thirdparty_HW/SmartTS/smartts_drvapi.h"
 
-#include "translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_ErrorCode.h"
 #include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
-
-#define MAX_PCR_FIELD_TRIGGER_COUNT			100
 
 uint32_t receive_transport_stream(LPVOID lpParam)
 {
 	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
 
 	uint8_t	buf[30 * 1024];
-//	uint8_t	buf[6144];
 	int rdsize;
 
 	CTransportStream*	ptransport_stream = (CTransportStream*)lpParam;
@@ -38,37 +34,24 @@ uint32_t receive_transport_stream(LPVOID lpParam)
 				{
 					if (strcmp(ptransport_stream->m_pszProtocolHead, "FILE") == 0)				//离线分析模式，读文件
 					{
-						assert(ptransport_stream->m_hFile >= 0);
-
 						if (ptransport_stream->m_nEOF == 0)
 						{
 							if (ptransport_stream->m_ts_fifo.GetAvailableSpace() >= sizeof(buf))
 							{
-								rdsize = _read(ptransport_stream->m_hFile, buf, sizeof(buf));
+								rdsize = file_receive(buf, sizeof(buf));
 								if (rdsize > 0)
 								{
 									rtcode = ptransport_stream->m_ts_fifo.WriteData(buf, rdsize);
 								}
-
-								int64_t llCurFilePos = _telli64(ptransport_stream->m_hFile);
-
-								if (llCurFilePos >= ptransport_stream->m_llTotalFileLength)
+								else if (rdsize == 0)
 								{
-									//到达文件尾，停止读文件
 									ptransport_stream->m_nEOF = 1;
-
-									//如果文件是以实时的方式打开，模拟实时分析环境
-									if (ptransport_stream->m_nMode == 1)
-									{
-										ptransport_stream->SeekToBegin();
-									}
+									rtcode = MIDDLEWARE_TS_FILE_EOF_ERROR;
 								}
-							}
-							else
-							{
-								rdsize = 0;
-								//FIFO空间不够，暂停写入。等待100ms
-//								Sleep(1);
+								else
+								{
+									rtcode = MIDDLEWARE_TS_STREAM_NODATA_ERROR;				//没有采集到实时流
+								}
 							}
 						}
 						else
@@ -97,10 +80,6 @@ uint32_t receive_transport_stream(LPVOID lpParam)
 									rtcode = MIDDLEWARE_TS_STREAM_NODATA_ERROR;				//没有采集到实时流
 								}
 							}
-							else
-							{
-//								Sleep(1);
-							}
 						}
 						else if (strcmp(ptransport_stream->m_pszProtocolExt, "DEKTEC") == 0)
 						{
@@ -123,10 +102,6 @@ uint32_t receive_transport_stream(LPVOID lpParam)
 								{
 									rtcode = MIDDLEWARE_TS_STREAM_NODATA_ERROR;				//没有采集到实时流
 								}
-							}
-							else
-							{
-//								Sleep(1);
 							}
 						}
 					}
@@ -179,7 +154,6 @@ CTransportStream::CTransportStream(void)
 	memset(m_pszProtocolHead, '\0', 16);
 	memset(m_pszProtocolExt, '\0', MAX_PATH);
 
-	m_hFile			 = -1;
 	m_nPacketLength	 = 0;
 
 	m_TsError	= MIDDLEWARE_TS_NO_ERROR;
@@ -213,19 +187,11 @@ CTransportStream::CTransportStream(void)
 
 CTransportStream::~CTransportStream()
 {
-	//delete mp_ts_fifo;
-
-	if (m_hFile != -1)
-	{
-		_close(m_hFile);
-		m_hFile = -1;
-	}
 }
 
 int CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 {
 	int	 rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;					//默认返回成功
-//	S8*	 device_name;
 	char*  pdest;
 	int   idx;
 	char   ip_addr[16];
@@ -321,25 +287,10 @@ int CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 	}
 	else if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
-		errno_t errcode = _sopen_s(&m_hFile, m_pszProtocolExt, _O_BINARY | _O_RDONLY, _SH_DENYWR, 0);
-
-		if (m_hFile != -1)
+		rtcode = file_receive_init(m_pszProtocolExt);
+		if (rtcode == TSFILE_NO_ERROR)
 		{
-			_lseeki64(m_hFile, 0, SEEK_END);
-			m_llTotalFileLength = _telli64(m_hFile);
-
-			_lseeki64(m_hFile, 0, SEEK_SET);
-
-//			m_llCurFilePos = 0;
-			m_llCurReadPos = 0;
-
-			m_nEOF = 0;
-
-			rtcode = MIDDLEWARE_TS_NO_ERROR;
-		}
-		else
-		{
-			rtcode = MIDDLEWARE_TS_STREAM_OPEN_ERROR;						//打不开文件
+			m_llTotalFileLength = file_attr_get_total_length();
 		}
 	}
 	else
@@ -363,14 +314,14 @@ int CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 	uint32_t old_tickcount = ::GetTickCount();
 	sprintf_s(file_name, sizeof(file_name), "%s\\tick_%08x_ts_bitrate.txt", pszPcrPath, old_tickcount);
 
-	fp_dbase = NULL;
+	fp_tsrate_dbase = NULL;
 	if (m_bEnableTSRateDebug)
 	{
-		fopen_s(&fp_dbase, file_name, "wt");
+		fopen_s(&fp_tsrate_dbase, file_name, "wt");
 	}
-	if (fp_dbase != NULL)
+	if (fp_tsrate_dbase != NULL)
 	{
-		fprintf(fp_dbase, "当前值, 均值, 标准差\n");
+		fprintf(fp_tsrate_dbase, "当前值, 均值, 标准差\n");
 	}
 
 	::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)receive_transport_stream, (LPVOID)this, 0, 0);
@@ -399,34 +350,14 @@ int CTransportStream::Close()
 
 	m_nPacketLength	 = 0;
 
-//	m_llCurFilePos						= 0;
 	m_llCurReadPos = 0;
 	m_llTotalFileLength					= 0;
 
-	//ByteFIFO_Term(&m_ts_fifo);
 	m_ts_fifo.Reset();
 
 	if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
-		if (m_hFile != -1)
-		{
-			if (_close(m_hFile) == 0)
-			{
-				m_hFile = -1;
-				m_TsError = MIDDLEWARE_TS_NO_ERROR;
-				rtcode = MIDDLEWARE_TS_NO_ERROR;
-			}
-			else
-			{
-				m_hFile = -1;
-				m_TsError = MIDDLEWARE_TS_FILE_CLOSE_ERROR;
-				rtcode = MIDDLEWARE_TS_FILE_CLOSE_ERROR;								//无法关闭文件
-			}
-		}
-
-		m_nEOF = 0;
-
-		memset(m_pszProtocolExt, '\0', MAX_PATH);
+		rtcode = file_receive_fini();
 	}
 	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
 	{
@@ -464,10 +395,10 @@ int CTransportStream::Close()
 
 	m_bitrate_available = 0;
 
-	if (fp_dbase != NULL)
+	if (fp_tsrate_dbase != NULL)
 	{
-		fclose(fp_dbase);
-		fp_dbase = NULL;
+		fclose(fp_tsrate_dbase);
+		fp_tsrate_dbase = NULL;
 	}
 
 	return rtcode;
@@ -479,7 +410,7 @@ int CTransportStream::StartGetData(void)
 
 	if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
-		rtcode = MIDDLEWARE_TS_NO_ERROR;
+		rtcode = file_start_receive();				//read from the beginning of the file
 	}
 	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
 	{
@@ -511,19 +442,9 @@ int CTransportStream::StopGetData(void)
 {
 	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
 
-	m_nReceiving = 0;
-
-	//等待线程退出
-	while (m_nStopReceiving == 0)
-	{
-		Sleep(100);
-	}
-
-	m_bSynced = 0;
-
 	if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
-//		SeekToBegin();			//是否定位到文件头，由应用自行决定
+		file_stop_receive();
 	}
 	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
 	{
@@ -544,10 +465,15 @@ int CTransportStream::StopGetData(void)
 		rtcode = udp_stop_receive();
 	}
 
-	//m_bitrate_mean_value = 0;									//平滑后的比特率
-	//m_bitrate_rms_value = 0;									//比特率抖动方差
-	//m_bitrate_min_value = 123456789;									//平滑后的最小比特率
-	//m_bitrate_max_value = -123456789;									//平滑后的最大比特率
+	m_nReceiving = 0;
+
+	//等待线程退出
+	while (m_nStopReceiving == 0)
+	{
+		Sleep(100);
+	}
+
+	m_bSynced = 0;
 
 	m_ts_fifo.Reset();
 
@@ -573,99 +499,11 @@ int CTransportStream::Reset()
 	return rtcode;
 }
 
-
-/*
-int CTransportStream::GetData(void)
-{
-	int rtcode = NO_ERROR;
-
-	uint8_t	buf[30 * 1024];
-//	uint8_t	buf[6144];
-	int rdsize;
-	
-	if (strcmp(m_pszProtocolHead, "FILE") == 0)
-	{
-		if (m_hFile != -1)
-		{
-			rdsize = _read(m_hFile, buf, sizeof(buf));
-			if (rdsize > 0)
-			{
-				ByteFIFO_WriteRawData(&m_ts_fifo, buf, rdsize);
-			}
-
-#if LOW_LEVEL_IO
-			m_dwCurFilePos = _telli64(m_hFile);
-#else
-			m_dwCurFilePos = _tell(m_hFile);
-#endif
-			//reach the end of the file
-			if (rdsize < sizeof(buf))
-			{
-	//			SeekToBegin();
-				rtcode = FILE_EOF_ERROR;				//到达文件尾
-			}
-		}
-	}
-	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
-	{
-		if (strcmp(m_pszProtocolExt, "SMARTTS") == 0)
-		{
-			rdsize = smartts_receive(buf, 4096);
-
-			if (rdsize > 0)
-			{
-				rtcode = ByteFIFO_WriteRawData(&m_ts_fifo, buf, rdsize);
-			}
-			else
-			{
-				rtcode = STREAM_NODATA_ERROR;				//没有采集到实时流
-			}
-		}
-		else if (strcmp(m_pszProtocolExt, "DEKTEC") == 0)
-		{
-			rdsize = dektec_receive(buf, sizeof(buf));
-
-			if (rdsize > 0)
-			{
-				rtcode = ByteFIFO_WriteRawData(&m_ts_fifo, buf, rdsize);
-			}
-			else
-			{
-				rtcode = STREAM_NODATA_ERROR;				//没有采集到实时流
-			}
-		}
-	}
-	else if (strcmp(m_pszProtocolHead, "UDP") == 0)
-	{
-		rdsize = udp_receive(buf, sizeof(buf));
-
-		if (rdsize >0)
-		{
-			rtcode = ByteFIFO_WriteRawData(&m_ts_fifo, buf, rdsize);
-		}
-		else
-		{
-			rtcode = STREAM_NODATA_ERROR;				//没有采集到实时流
-		}
-	}
-	else
-	{
-	}
-
-	return rtcode;
-}
-*/
-
 int CTransportStream::PrefetchOnePacket(uint8_t* buf, int* plength)
 {
 	int						rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
-	uint32_t						wait_state = WAIT_FAILED;
-//	uint8_t*						rdptr;
-//	uint8_t*						old_rdptr;
-//	uint8_t*						old_wrptr;
-//	int						tail_length;
-//	int						copy_length;
-	uint8_t						temp_buffer[613];
+	uint32_t				wait_state = WAIT_FAILED;
+	uint8_t					temp_buffer[613];
 
 	if ((buf != NULL) && (plength != NULL))
 	{
@@ -776,7 +614,7 @@ int CTransportStream::PrefetchOnePacket(uint8_t* buf, int* plength)
 
 int CTransportStream::SkipOnePacket(void)
 {
-	int	rtcode = NO_ERROR;
+	int	rtcode = MIDDLEWARE_TS_NO_ERROR;
 
 	m_llCurReadPos += m_nPacketLength;
 	m_ts_fifo.SkipData(m_nPacketLength);
@@ -784,94 +622,94 @@ int CTransportStream::SkipOnePacket(void)
 	return rtcode;
 }
 
-int CTransportStream::StartGetBitrate(void)
-{
-	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
+//int CTransportStream::StartGetBitrate(void)
+//{
+//	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
+//
+//	if (strcmp(m_pszProtocolHead, "FILE") == 0)
+//	{
+//	}
+//	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
+//	{
+//#ifdef _WIN64
+//#else
+//		if (strcmp(m_pszProtocolExt, "SMARTTS") == 0)
+//		{
+//			smartts_start_timer();
+//		}
+//		else if (strcmp(m_pszProtocolExt, "DEKTEC") == 0)
+//		{
+//	//		dektec_start_timer();
+//		}
+//#endif
+//	}
+//
+//	return rtcode;
+//}
 
-	if (strcmp(m_pszProtocolHead, "FILE") == 0)
-	{
-	}
-	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
-	{
-#ifdef _WIN64
-#else
-		if (strcmp(m_pszProtocolExt, "SMARTTS") == 0)
-		{
-			smartts_start_timer();
-		}
-		else if (strcmp(m_pszProtocolExt, "DEKTEC") == 0)
-		{
-	//		dektec_start_timer();
-		}
-#endif
-	}
+//int CTransportStream::StopGetBitrate(void)
+//{
+//	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
+//
+//	if (strcmp(m_pszProtocolHead, "FILE") == 0)
+//	{
+//	}
+//	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
+//	{
+//#ifdef _WIN64
+//#else
+//		if (strcmp(m_pszProtocolExt, "SMARTTS") == 0)
+//		{
+//			smartts_stop_timer();
+//		}
+//		else if (strcmp(m_pszProtocolExt, "DEKTEC") == 0)
+//		{
+//	//		dektec_stop_timer();
+//		}
+//#endif
+//	}
+//
+//	return rtcode;
+//}
 
-	return rtcode;
-}
-
-int CTransportStream::StopGetBitrate(void)
-{
-	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
-
-	if (strcmp(m_pszProtocolHead, "FILE") == 0)
-	{
-	}
-	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
-	{
-#ifdef _WIN64
-#else
-		if (strcmp(m_pszProtocolExt, "SMARTTS") == 0)
-		{
-			smartts_stop_timer();
-		}
-		else if (strcmp(m_pszProtocolExt, "DEKTEC") == 0)
-		{
-	//		dektec_stop_timer();
-		}
-#endif
-	}
-
-	return rtcode;
-}
-
-int CTransportStream::GetBitrateMap(int pbitrate_map[], int count)
-{
-	int		rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
-	int		readcount;
-	double	coeff = 8.0;
-	
-	if (m_hFile == -1)
-	{
-		coeff *= mf_actual_scan_frequency;
-
-		if (count >= mn_actual_timeslice)
-		{
-			readcount = mn_actual_timeslice;
-		}
-		else
-		{
-			readcount = count;
-		}
-
-#ifdef _WIN64
-#else
-		//rtcode = smartts_get_asiin_bitrate_map(pbitrate_map, readcount);
-
-		//if (rtcode > 0)
-		//{
-		//	for (int i = 0; i < readcount; i++)
-		//	{
-		//		double temp = pbitrate_map[i];
-		//		temp *= coeff;
-		//		pbitrate_map[i] = (ULONG)temp;
-		//	}
-		//}
-#endif
-
-	}
-
-	return rtcode;
-}
+//int CTransportStream::GetBitrateMap(int pbitrate_map[], int count)
+//{
+//	int		rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
+////	int		readcount;
+////	double	coeff = 8.0;
+////	
+////	if (m_hFile == -1)
+////	{
+////		coeff *= mf_actual_scan_frequency;
+////
+////		if (count >= mn_actual_timeslice)
+////		{
+////			readcount = mn_actual_timeslice;
+////		}
+////		else
+////		{
+////			readcount = count;
+////		}
+////
+////#ifdef _WIN64
+////#else
+////		//rtcode = smartts_get_asiin_bitrate_map(pbitrate_map, readcount);
+////
+////		//if (rtcode > 0)
+////		//{
+////		//	for (int i = 0; i < readcount; i++)
+////		//	{
+////		//		double temp = pbitrate_map[i];
+////		//		temp *= coeff;
+////		//		pbitrate_map[i] = (ULONG)temp;
+////		//	}
+////		//}
+////#endif
+////
+////	}
+//
+//	return rtcode;
+//}
 
 int CTransportStream::GetBitrate(void)
 {
@@ -879,7 +717,6 @@ int CTransportStream::GetBitrate(void)
 
 	if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
-		//为了调试程序，暂时假定流的速率为1000Mbps，以后更正     chendelin 2012.01.02
 		rtvalue = m_bitrate_mean_value;
 	}
 	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
@@ -930,9 +767,9 @@ int CTransportStream::GetMeasuredBitrateAttribute(BITRATE_ATTRIBUTE_t* pattr)
 int CTransportStream::AddBitrateSample(int bitrate)
 {
 	m_bitrate_cur_value = bitrate;
-	if (fp_dbase != NULL)
+	if (fp_tsrate_dbase != NULL)
 	{
-		fprintf(fp_dbase, "%d", m_bitrate_cur_value);
+		fprintf(fp_tsrate_dbase, "%d", m_bitrate_cur_value);
 	}
 
 	if (bitrate > m_bitrate_max_value)
@@ -972,25 +809,24 @@ int CTransportStream::AddBitrateSample(int bitrate)
 		data_rate_sum /= m_bitrate_sample_count;
 		m_bitrate_rms_value = (int)sqrt((double)data_rate_sum);
 
-		if (fp_dbase != NULL)
+		if (fp_tsrate_dbase != NULL)
 		{
-			fprintf(fp_dbase, ", %d, %d", m_bitrate_mean_value, m_bitrate_rms_value);
+			fprintf(fp_tsrate_dbase, ", %d, %d", m_bitrate_mean_value, m_bitrate_rms_value);
 		}
 	}
-	if (fp_dbase != NULL)
+	if (fp_tsrate_dbase != NULL)
 	{
-		fprintf(fp_dbase, "\n");
+		fprintf(fp_tsrate_dbase, "\n");
 	}
 
 	return NO_ERROR;
 }
 
-
 void CTransportStream::SeekToBegin(void)
 {
-	if (m_hFile != -1)
+	if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
-		_lseeki64(m_hFile, 0, SEEK_SET);
+		file_seek(0);
 		m_nEOF = 0;
 	}
 }

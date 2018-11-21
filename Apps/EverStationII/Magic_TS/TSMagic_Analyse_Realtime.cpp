@@ -599,7 +599,7 @@ void realtime_ts_monitor(pthread_params_t pThreadParams)
 		pDB_Pcrs->Reset();
 
 		ptransport_stream = pThreadParams->pTStream;
-		ptransport_stream->StartGetBitrate();
+		//ptransport_stream->StartGetBitrate();
 
 		pThreadParams->monitor_thread_running = 1;
 
@@ -656,7 +656,7 @@ void realtime_ts_monitor(pthread_params_t pThreadParams)
 			}
 		}
 
-		ptransport_stream->StopGetBitrate();
+		//ptransport_stream->StopGetBitrate();
 
 		pThreadParams->monitor_thread_stopped = 1;
 

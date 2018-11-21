@@ -18,7 +18,6 @@
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_SectionSplicer.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_PESSplicer.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/MiddleWare_SectionSplicer_ErrorCode.h"
-//#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TS_ErrorCode.h"
 #include "MiddleWare/MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_ESDecoder/Include/ESDecoder.h"
@@ -56,12 +55,15 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 //	int	  old_pklength = -1;
 	char	  pszDebug[MAX_TXT_CHARS];
 	char	  pszTemp[128];
-	//char  pszCheckFile[128];
+
+#if TS_FILE_READ_INTEGRITY_DIAGNOSIS
+	char  pszCheckFile[128];
 	FILE* fpCheckFile = NULL;
+#endif
 
 	double file_size_div_100;
 	int64_t	  read_byte_pos = 0;			//只能读小于2G的文件
-	int64_t	  old_read_byte_pos = 0;
+	//int64_t	  old_read_byte_pos = 0;
 
 	int	  old_ratio = 0;
 	int	  analyse_ratio = 0;
@@ -111,7 +113,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 		ptransport_stream = pThreadParams->pTStream;
 		ptransport_stream->Reset();
 
-		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_REPORT_FILESIZE, (WPARAM)(&(ptransport_stream->m_llTotalFileLength)), (LPARAM)((char*)pThreadParams->pszFileName));
+		//::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_REPORT_FILESIZE, (WPARAM)(&(ptransport_stream->m_llTotalFileLength)), (LPARAM)((char*)pThreadParams->pszFileName));
 		pTSPacketTrigger = pThreadParams->pTrigger_TSPacket;
 		pTSPacketTrigger->Reset();
 
@@ -123,34 +125,38 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 
 		pDB_TSPackets = pThreadParams->pDB_TSPackets;
 		pDB_TSPackets->Reset();
+
 		pDB_Pcrs = pThreadParams->pDB_Pcrs;
 		pDB_Pcrs->Reset();
 
 		pDB_PsiSiObjs = pThreadParams->pDB_PsiSiObjs;
 		pDB_PsiSiObjs->Reset();
 
-		ptransport_stream->SeekToBegin();
+		//ptransport_stream->SeekToBegin();
 		ptransport_stream->StartGetData();			//启动接收任务
 
 
 		file_size_div_100 = ptransport_stream->m_llTotalFileLength / 100.0;
 
-//		sprintf_s(pszCheckFile, sizeof(pszCheckFile), "e:\\temp\\check.ts");
-//		fpCheckFile = fopen(pszCheckFile, "wb");
-
+#if TS_FILE_READ_INTEGRITY_DIAGNOSIS
+		sprintf_s(pszCheckFile, sizeof(pszCheckFile), "e:\\temp\\check.ts");
+		fpCheckFile = fopen(pszCheckFile, "wb");
+#endif
 		while (pThreadParams->main_thread_running == 1)
 		{
 			packet_length = sizeof(packet_buf);
 			rtcode = ptransport_stream->PrefetchOnePacket(packet_buf, &packet_length);
 			if (rtcode == MIDDLEWARE_TS_NO_ERROR)
 			{
-//				if (fpCheckFile != NULL)
-//				{
-//					fwrite(packet_buf, sizeof(char), packet_length, fpCheckFile);
-//				}
-//				old_read_byte_pos = read_byte_pos;
+#if TS_FILE_READ_INTEGRITY_DIAGNOSIS
+				if (fpCheckFile != NULL)
+				{
+					fwrite(packet_buf, sizeof(char), packet_length, fpCheckFile);
+				}
+#endif
 				read_byte_pos = ptransport_stream->Tell();			//因为是预读一个包，实际FIFO读指针并未发生移动
 
+#if REPORT_FILE_ANALYSE_RATIO
 				//向界面汇报文件分析进度
 				if (ptransport_stream->m_llTotalFileLength > 0)
 				{
@@ -160,14 +166,14 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 						old_ratio = analyse_ratio;
 						::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_REPORT_RATIO, (WPARAM)NULL, (LPARAM)analyse_ratio);
 
-#if OPEN_PACKET_STATISTIC
+						//每隔1%进度汇报一次比特率
 						if (pDB_TSPackets->callback_gui_update != NULL)
 						{
 							pDB_TSPackets->callback_gui_update((int)ptransport_stream->GetBitrate(), NULL);
 						}
-#endif
 					}
 				}
+#endif
 
 				//汇报同步状态
 				if (stream_synced == 0)
@@ -190,6 +196,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 					LOG(INFO) << pszDebug;
 				}
 
+#if OPEN_TS_PACKET_ANALYZER
 				//对该TS包进行语法分析
 				rtcode = MPEG_decode_TS_packet(packet_buf, packet_length, &transport_packet);
 				if (rtcode == NO_ERROR)
@@ -241,7 +248,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 						{
 							sprintf_s(pszDebug, sizeof(pszDebug), "离线分析:TS包统计——连续计数错误（文件位置：0x%llx, PID = 0x%04x）\n", read_byte_pos, transport_packet.PID);
 							::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
-							LOG(INFO) << pszDebug;
+							LOG(ERROR) << pszDebug;
 						}
 						else
 						{
@@ -289,7 +296,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 								{
 									sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: section拼接——超出section_filter的最大数量!");
 									::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
-									LOG(INFO) << pszDebug;
+									LOG(ERROR) << pszDebug;
 								}
 							}
 
@@ -313,7 +320,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 												sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: section报告——在TS_PID=0x%04X上发现未识别的PSI/SI表(table_id=0x%02x)（文件位置：0x%llx）\n", pSectionSplicer->m_usPID, pSectionSplicer->m_ucTableID, read_byte_pos);
 
 												::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_WARNING);
-												LOG(INFO) << pszDebug;
+												LOG(ERROR) << pszDebug;
 											}
 											else if (rtcode == MIDDLEWARE_PSISI_VERSION_CHANGE)
 											{
@@ -395,10 +402,13 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 
 					}
 
+#if TS_FILE_READ_INTEGRITY_DIAGNOSIS
 					if (fpCheckFile != NULL)
 					{
 						fwrite(packet_buf, sizeof(char), packet_length, fpCheckFile);
 					}
+#endif
+
 #if OPEN_PCR_ANALYZER
 					//离线分析情况下的PCR检测
 					if (transport_packet.adaptation_field.PCR_flag)
@@ -475,7 +485,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 					::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
 					LOG(INFO) << pszDebug;
 				}
-
+#endif
 				ptransport_stream->SkipOnePacket();
 			}
 			else if (rtcode == ETR290_TS_SYNC_LOSS)
@@ -493,7 +503,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 			}
 			else if (rtcode == MIDDLEWARE_TS_FIFO_EMPTY_ERROR)
 			{
-				Sleep(1);
+				//Sleep(1);
 			}
 			else
 			{
@@ -508,12 +518,13 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 
 		ptransport_stream->StopGetData();			//停止接收任务
 
+#if TS_FILE_READ_INTEGRITY_DIAGNOSIS
 		if (fpCheckFile != NULL)
 		{
 			fclose(fpCheckFile);
 			fpCheckFile = NULL;
 		}
-
+#endif
 		//检查内存占用情况
 		//RSISI_REPORT_check_memory(pThreadParams->hMainWnd);
 
@@ -539,7 +550,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 					sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: 连续计数错误（PID = 0x%04x, error_count = %d）\n", i, error_count);
 					//::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
 					::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
-					LOG(INFO) << pszDebug;
+					LOG(ERROR) << pszDebug;
 				}
 			}
 		}

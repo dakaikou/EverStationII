@@ -5,6 +5,7 @@ VisualStudioVersion = 15.0.27428.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MiddleWare_TransportStream", "MiddleWare\MiddleWare_TransportStream\MiddleWare_TransportStream.vcxproj", "{D6EC1FC5-FAC3-425E-8F58-0C631476AB63}"
 	ProjectSection(ProjectDependencies) = postProject
+		{E12B9848-62FF-4FE2-B4DA-163D4B83BDFA} = {E12B9848-62FF-4FE2-B4DA-163D4B83BDFA}
 		{2C802655-2FC3-4C41-A41D-B0A5C5E9CC37} = {2C802655-2FC3-4C41-A41D-B0A5C5E9CC37}
 		{B65CA65C-CF4C-44F3-B9B7-0047CA0257FE} = {B65CA65C-CF4C-44F3-B9B7-0047CA0257FE}
 		{63E6DBDB-2FC6-4AAE-9D10-DC6E60A859C2} = {63E6DBDB-2FC6-4AAE-9D10-DC6E60A859C2}
@@ -190,6 +191,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TRANSLATE_ES_MPV", "translate_layer\ES_MPV\TRANSLATE_ES_MPV.vcxproj", "{47472C6A-8E5C-4693-814D-433A7490A879}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "thirdparty_glog", "thirdparty_libs\glog\thirdparty_glog.vcxproj", "{1F4FC492-B501-4352-91B2-2632887C161B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SIOWithFile", "streamio_layer\SIOWithFile\SIOWithFile.vcxproj", "{E12B9848-62FF-4FE2-B4DA-163D4B83BDFA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -495,6 +498,14 @@ Global
 		{1F4FC492-B501-4352-91B2-2632887C161B}.Release|Win32.Build.0 = Release|Win32
 		{1F4FC492-B501-4352-91B2-2632887C161B}.Release|x64.ActiveCfg = Release|x64
 		{1F4FC492-B501-4352-91B2-2632887C161B}.Release|x64.Build.0 = Release|x64
+		{E12B9848-62FF-4FE2-B4DA-163D4B83BDFA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E12B9848-62FF-4FE2-B4DA-163D4B83BDFA}.Debug|Win32.Build.0 = Debug|Win32
+		{E12B9848-62FF-4FE2-B4DA-163D4B83BDFA}.Debug|x64.ActiveCfg = Debug|x64
+		{E12B9848-62FF-4FE2-B4DA-163D4B83BDFA}.Debug|x64.Build.0 = Debug|x64
+		{E12B9848-62FF-4FE2-B4DA-163D4B83BDFA}.Release|Win32.ActiveCfg = Release|Win32
+		{E12B9848-62FF-4FE2-B4DA-163D4B83BDFA}.Release|Win32.Build.0 = Release|Win32
+		{E12B9848-62FF-4FE2-B4DA-163D4B83BDFA}.Release|x64.ActiveCfg = Release|x64
+		{E12B9848-62FF-4FE2-B4DA-163D4B83BDFA}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
