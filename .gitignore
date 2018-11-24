@@ -1,0 +1,16 @@
+/.vs/*
+/Debug/*
+/Release/*
+*.obj
+*.log
+*.tlog
+*.pdb
+*.idb
+*.pch
+*.lib
+*.dll
+*.exp
+/Apps/EverStationII/Debug/
+/Apps/EverStationII/Release/
+
+

@@ -34,6 +34,8 @@
 
 #define TS_BITRATE_FIFO_LENGTH		128
 
+#define USE_FIFO_ACCESS_MUTEX		1	
+
 typedef struct
 {
 	int	mean;
@@ -78,6 +80,10 @@ public:
 
 	CFIFO<uint8_t, TSCHUNK_MAX_SIZE>   m_ts_fifo;
 
+#if USE_FIFO_ACCESS_MUTEX
+	HANDLE			m_hFifoAccess;
+#endif
+
 protected:
 	int				m_bitrate_available;
 	int				m_bitrate_sample_index;
@@ -103,7 +109,7 @@ public:
 	int Close(void);
 	int Reset(void);
 
-	int StartGetData(void);
+	int StartGetData(int64_t offset = -1);
 	int StopGetData(void);
 
 	//int	StartGetBitrate(void);
@@ -113,8 +119,12 @@ public:
 
 	void SeekToBegin(void);
 
-	int  PrefetchOnePacket(uint8_t* buf, int* plength);
-	int  SkipOnePacket(void);
+	int  Synchronize(int* plength);
+
+	int  SyncReadOnePacket(uint8_t* buf, int* plength);
+
+	//int  PrefetchOnePacket(uint8_t* buf, int* plength);
+	//int  SkipOnePacket(void);
 
 //	int  GetOnePacket(uint8_t* buf, int* plength);
 	int	 GetLastError(void);

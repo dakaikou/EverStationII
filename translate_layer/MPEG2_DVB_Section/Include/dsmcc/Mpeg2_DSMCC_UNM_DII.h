@@ -34,7 +34,7 @@ typedef struct ModuleInfo_s
 																				//0x0007		-- OC - ServiceGatewayInfo
 
 	//below members only valid when it is a DC module
-	char		moduleName[128];
+	char		moduleName[256];
 
 } ModuleInfo_t;
 

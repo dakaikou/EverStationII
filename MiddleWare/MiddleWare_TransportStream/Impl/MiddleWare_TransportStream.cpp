@@ -15,7 +15,8 @@
 
 #include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
 
-uint32_t receive_transport_stream(LPVOID lpParam)
+
+uint32_t thread_receive_transport_stream(LPVOID lpParam)
 {
 	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
 
@@ -41,7 +42,16 @@ uint32_t receive_transport_stream(LPVOID lpParam)
 								rdsize = file_receive(buf, sizeof(buf));
 								if (rdsize > 0)
 								{
-									rtcode = ptransport_stream->m_ts_fifo.WriteData(buf, rdsize);
+#if USE_FIFO_ACCESS_MUTEX
+									uint32_t wait_state = ::WaitForSingleObject(ptransport_stream->m_hFifoAccess, INFINITE);
+									if (wait_state == WAIT_OBJECT_0)
+									{
+#endif
+										rtcode = ptransport_stream->m_ts_fifo.WriteData(buf, rdsize);
+#if USE_FIFO_ACCESS_MUTEX
+										::ReleaseMutex(ptransport_stream->m_hFifoAccess);
+									}
+#endif
 								}
 								else if (rdsize == 0)
 								{
@@ -50,6 +60,7 @@ uint32_t receive_transport_stream(LPVOID lpParam)
 								}
 								else
 								{
+									assert(0);
 									rtcode = MIDDLEWARE_TS_STREAM_NODATA_ERROR;				//没有采集到实时流
 								}
 							}
@@ -73,13 +84,23 @@ uint32_t receive_transport_stream(LPVOID lpParam)
 #endif
 								if (rdsize > 0)
 								{
-									rtcode = ptransport_stream->m_ts_fifo.WriteData(buf, rdsize);
+#if USE_FIFO_ACCESS_MUTEX
+									uint32_t wait_state = ::WaitForSingleObject(ptransport_stream->m_hFifoAccess, INFINITE);
+									if (wait_state == WAIT_OBJECT_0)
+									{
+#endif
+										rtcode = ptransport_stream->m_ts_fifo.WriteData(buf, rdsize);
+#if USE_FIFO_ACCESS_MUTEX
+										::ReleaseMutex(ptransport_stream->m_hFifoAccess);
+									}
+#endif
 								}
 								else
 								{
 									rtcode = MIDDLEWARE_TS_STREAM_NODATA_ERROR;				//没有采集到实时流
 								}
 							}
+
 						}
 						else if (strcmp(ptransport_stream->m_pszProtocolExt, "DEKTEC") == 0)
 						{
@@ -92,11 +113,20 @@ uint32_t receive_transport_stream(LPVOID lpParam)
 #endif
 								if (rdsize > 0)
 								{
-									rtcode = ptransport_stream->m_ts_fifo.WriteData(buf, rdsize);
-									if (rtcode != NO_ERROR)
+#if USE_FIFO_ACCESS_MUTEX
+									uint32_t wait_state = ::WaitForSingleObject(ptransport_stream->m_hFifoAccess, INFINITE);
+									if (wait_state == WAIT_OBJECT_0)
 									{
-										assert(0);
+#endif
+										rtcode = ptransport_stream->m_ts_fifo.WriteData(buf, rdsize);
+										if (rtcode != NO_ERROR)
+										{
+											assert(0);
+										}
+#if USE_FIFO_ACCESS_MUTEX
+										::ReleaseMutex(ptransport_stream->m_hFifoAccess);
 									}
+#endif
 								}
 								else
 								{
@@ -113,8 +143,17 @@ uint32_t receive_transport_stream(LPVOID lpParam)
 
 							if (rdsize > 0)
 							{
-								rtcode = ptransport_stream->m_ts_fifo.WriteData(buf, rdsize);
-								assert(rtcode == NO_ERROR);
+#if USE_FIFO_ACCESS_MUTEX
+								uint32_t wait_state = ::WaitForSingleObject(ptransport_stream->m_hFifoAccess, INFINITE);
+								if (wait_state == WAIT_OBJECT_0)
+								{
+#endif
+									rtcode = ptransport_stream->m_ts_fifo.WriteData(buf, rdsize);
+									assert(rtcode == NO_ERROR);
+#if USE_FIFO_ACCESS_MUTEX
+									::ReleaseMutex(ptransport_stream->m_hFifoAccess);
+								}
+#endif
 							}
 							else
 							{
@@ -180,8 +219,11 @@ CTransportStream::CTransportStream(void)
 	m_nStopRunning = 1;
 
 	m_nEOF = 0;
-
 	m_bSynced = 0;
+
+#if USE_FIFO_ACCESS_MUTEX
+	m_hFifoAccess = NULL;
+#endif
 }
 
 
@@ -324,7 +366,10 @@ int CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 		fprintf(fp_tsrate_dbase, "当前值, 均值, 标准差\n");
 	}
 
-	::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)receive_transport_stream, (LPVOID)this, 0, 0);
+#if USE_FIFO_ACCESS_MUTEX
+	m_hFifoAccess = ::CreateMutex(NULL, FALSE, NULL);
+#endif
+	::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)thread_receive_transport_stream, (LPVOID)this, 0, 0);
 
 	return rtcode;
 }
@@ -353,7 +398,18 @@ int CTransportStream::Close()
 	m_llCurReadPos = 0;
 	m_llTotalFileLength					= 0;
 
-	m_ts_fifo.Reset();
+#if USE_FIFO_ACCESS_MUTEX
+	uint32_t wait_state = ::WaitForSingleObject(m_hFifoAccess, INFINITE);
+	if (wait_state == WAIT_OBJECT_0)
+	{
+#endif
+		m_ts_fifo.Reset();
+		
+#if USE_FIFO_ACCESS_MUTEX
+		::CloseHandle(m_hFifoAccess);
+		m_hFifoAccess = NULL;
+	}
+#endif
 
 	if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
@@ -404,13 +460,21 @@ int CTransportStream::Close()
 	return rtcode;
 }
 
-int CTransportStream::StartGetData(void)
+int CTransportStream::StartGetData(int64_t offset)
 {
 	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
 
 	if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
-		rtcode = file_start_receive();				//read from the beginning of the file
+		if (offset >= 0)
+		{
+			m_llCurReadPos = offset;
+			if (offset < m_llTotalFileLength)
+			{
+				m_nEOF = 0;
+			}
+		}
+		rtcode = file_start_receive(offset);				//read from the beginning of the file
 	}
 	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
 	{
@@ -475,7 +539,17 @@ int CTransportStream::StopGetData(void)
 
 	m_bSynced = 0;
 
-	m_ts_fifo.Reset();
+#if USE_FIFO_ACCESS_MUTEX
+	uint32_t wait_state = ::WaitForSingleObject(m_hFifoAccess, INFINITE);
+	if (wait_state == WAIT_OBJECT_0)
+	{
+#endif
+		m_ts_fifo.Reset();
+
+#if USE_FIFO_ACCESS_MUTEX
+		::ReleaseMutex(m_hFifoAccess);
+	}
+#endif
 
 	return rtcode;
 }
@@ -499,100 +573,141 @@ int CTransportStream::Reset()
 	return rtcode;
 }
 
-int CTransportStream::PrefetchOnePacket(uint8_t* buf, int* plength)
+//找同步
+int CTransportStream::Synchronize(int* plength)
 {
 	int						rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
 	uint32_t				wait_state = WAIT_FAILED;
 	uint8_t					temp_buffer[613];
+	int						bExist = 0;
 
-	if ((buf != NULL) && (plength != NULL))
+	do
 	{
-		assert(*plength >= 188);
-		*plength = 0;
-
-		if (m_ts_fifo.GetAvailablePayload() > 0)
+		if (m_ts_fifo.GetAvailablePayload() >= 613)		//3 * 204 + 1
 		{
-			if (m_bSynced == 0)
+#if USE_FIFO_ACCESS_MUTEX
+			uint32_t wait_state = ::WaitForSingleObject(m_hFifoAccess, INFINITE);
+			if (wait_state == WAIT_OBJECT_0)
 			{
-				//找同步
-				while (m_ts_fifo.GetAvailablePayload() >= 613)		//3 * 204 + 1
+#endif
+				m_ts_fifo.PrefetchData(temp_buffer, sizeof(temp_buffer));
+
+				//if (((temp_buffer[0] == 0x47) || (temp_buffer[0] == 0xB8)) &&
+				//	((temp_buffer[188] == 0x47) || (temp_buffer[188] == 0xB8)) &&
+				//	((temp_buffer[376] == 0x47) || (temp_buffer[376] == 0xB8)) &&
+				//	((temp_buffer[564] == 0x47) || (temp_buffer[564] == 0xB8)))
+				if ((temp_buffer[0] == 0x47) &&
+					(temp_buffer[188] == 0x47) &&
+					(temp_buffer[376] == 0x47) &&
+					(temp_buffer[564] == 0x47))
 				{
-					m_ts_fifo.PrefetchData(temp_buffer, sizeof(temp_buffer));
+					//188 packet seems could not occurs syncword 0xB8
 
-					if ((temp_buffer[0] == 0x47) &&
-						(temp_buffer[188] == 0x47) &&
-						(temp_buffer[376] == 0x47) &&
-						(temp_buffer[564] == 0x47))
+					m_bSynced = 1;
+					m_nPacketLength = 188;
+
+					if (plength != NULL)
 					{
-						m_bSynced = 1;
-						m_nPacketLength = 188;
-
-						break;
-					}
-					else if ((temp_buffer[0] == 0x47) &&
-						(temp_buffer[204] == 0x47) &&
-						(temp_buffer[408] == 0x47) &&
-						(temp_buffer[612] == 0x47))
-					{
-						m_bSynced = 1;
-						m_nPacketLength = 204;
-
-						break;
-					}
-					else
-					{
-						m_ts_fifo.SkipData(1);
-						m_llCurReadPos++;
-					}
-				}
-			}
-
-			if (m_bSynced == 1)
-			{
-				if (m_ts_fifo.GetAvailablePayload() >= (m_nPacketLength + 1))
-				{
-					m_ts_fifo.PrefetchData(temp_buffer, (m_nPacketLength + 1));
-
-					if ((temp_buffer[0] == 0x47) && (temp_buffer[m_nPacketLength] == 0x47))
-					{
-						memcpy(buf, temp_buffer, m_nPacketLength);
 						*plength = m_nPacketLength;
-						
-						rtcode = MIDDLEWARE_TS_NO_ERROR;
 					}
-					else
-					{
-						m_bSynced = FALSE;
-						m_nPacketLength = 0;
 
-						rtcode = ETR290_TS_SYNC_LOSS;						//同步丢失
-					}
+					rtcode = MIDDLEWARE_TS_NO_ERROR;
+
+					bExist = 1;
 				}
-				else		//FIFO数据量不够
+				else if (((temp_buffer[0] == 0x47) || (temp_buffer[0] == 0xB8)) &&
+					((temp_buffer[204] == 0x47) || (temp_buffer[204] == 0xB8)) &&
+					((temp_buffer[408] == 0x47) || (temp_buffer[408] == 0xB8)) &&
+					((temp_buffer[612] == 0x47) || (temp_buffer[612] == 0xB8)))
 				{
-					if (m_nEOF == 1)
+					//zongyang-204 sync error.ts is as this case
+
+					m_bSynced = 1;
+					m_nPacketLength = 204;
+
+					if (plength != NULL)
 					{
-						rtcode = MIDDLEWARE_TS_FILE_EOF_ERROR;
+						*plength = m_nPacketLength;
 					}
-					else
-					{
-						rtcode = MIDDLEWARE_TS_FIFO_EMPTY_ERROR;				//FIFO空
-					}
-				}
-			}
-			else
-			{
-				if (m_nEOF == 1)
-				{
-					rtcode = MIDDLEWARE_TS_FILE_EOF_ERROR;
+
+					rtcode = MIDDLEWARE_TS_NO_ERROR;
+
+					bExist = 1;
 				}
 				else
 				{
-					rtcode = ETR290_TS_SYNC_LOSS;
+					m_ts_fifo.SkipData(1);
+					m_llCurReadPos++;
 				}
+#if USE_FIFO_ACCESS_MUTEX
+				::ReleaseMutex(m_hFifoAccess);
 			}
+#endif
 		}
 		else
+		{
+			//the avalilable payload is not enough
+			if (m_nEOF == 1)
+			{
+				rtcode = MIDDLEWARE_TS_FILE_EOF_ERROR;
+			}
+			else
+			{
+				rtcode = MIDDLEWARE_TS_FIFO_EMPTY_ERROR;				//FIFO空
+			}
+
+			bExist = 1;
+		}
+
+
+	} while (bExist == 0);
+
+	return rtcode;
+}
+
+int CTransportStream::SyncReadOnePacket(uint8_t* buf, int* plength)
+{
+	int						rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
+	uint32_t				wait_state = WAIT_FAILED;
+
+	if (buf != NULL)
+	{
+		assert(*plength >= m_nPacketLength);
+		assert(m_bSynced == 1);
+
+		//this case the stream is synced
+		if (m_ts_fifo.GetAvailablePayload() >= m_nPacketLength)
+		{
+#if USE_FIFO_ACCESS_MUTEX
+			uint32_t wait_state = ::WaitForSingleObject(m_hFifoAccess, INFINITE);
+			if (wait_state == WAIT_OBJECT_0)
+			{
+#endif
+				m_ts_fifo.PrefetchData(buf, m_nPacketLength);
+
+				if ((buf[0] == 0x47) || (buf[0] == 0xB8))
+				{
+					*plength = m_nPacketLength;
+
+					m_llCurReadPos += m_nPacketLength;
+					m_ts_fifo.SkipData(m_nPacketLength);
+
+					rtcode = MIDDLEWARE_TS_NO_ERROR;
+				}
+				else
+				{
+					m_bSynced = 0;
+					m_nPacketLength = 0;
+					*plength = 0;
+
+					rtcode = ETR290_TS_SYNC_LOSS;						//同步丢失
+				}
+#if USE_FIFO_ACCESS_MUTEX
+				::ReleaseMutex(m_hFifoAccess);
+			}
+#endif
+		}
+		else		//FIFO数据量不够
 		{
 			if (m_nEOF == 1)
 			{
@@ -600,7 +715,7 @@ int CTransportStream::PrefetchOnePacket(uint8_t* buf, int* plength)
 			}
 			else
 			{
-				rtcode = MIDDLEWARE_TS_FIFO_EMPTY_ERROR;						//FIFO空
+				rtcode = MIDDLEWARE_TS_FIFO_EMPTY_ERROR;				//FIFO空
 			}
 		}
 	}
@@ -612,15 +727,64 @@ int CTransportStream::PrefetchOnePacket(uint8_t* buf, int* plength)
 	return rtcode;
 }
 
-int CTransportStream::SkipOnePacket(void)
-{
-	int	rtcode = MIDDLEWARE_TS_NO_ERROR;
+//int CTransportStream::PrefetchOnePacket(uint8_t* buf, int* plength)
+//{
+//	int						rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
+//	uint32_t				wait_state = WAIT_FAILED;
+//
+//	if (buf != NULL)
+//	{
+//		assert(*plength >= m_nPacketLength);
+//		assert(m_bSynced == 1);
+//
+//		//this case the stream is synced
+//		if (m_ts_fifo.GetAvailablePayload() >= m_nPacketLength)
+//		{
+//			m_ts_fifo.PrefetchData(buf, m_nPacketLength);
+//
+//			if ((buf[0] == 0x47) || (buf[0] == 0xB8))
+//			{
+//				*plength = m_nPacketLength;
+//				rtcode = MIDDLEWARE_TS_NO_ERROR;
+//			}
+//			else
+//			{
+//				m_bSynced = 0;
+//				m_nPacketLength = 0;
+//				*plength = 0;
+//
+//				rtcode = ETR290_TS_SYNC_LOSS;						//同步丢失
+//			}
+//		}
+//		else		//FIFO数据量不够
+//		{
+//			if (m_nEOF == 1)
+//			{
+//				rtcode = MIDDLEWARE_TS_FILE_EOF_ERROR;
+//			}
+//			else
+//			{
+//				rtcode = MIDDLEWARE_TS_FIFO_EMPTY_ERROR;				//FIFO空
+//			}
+//		}
+//	}
+//	else
+//	{
+//		rtcode = MIDDLEWARE_TS_PARAMETER_ERROR;						//输入参数错误
+//	}
+//
+//	return rtcode;
+//}
 
-	m_llCurReadPos += m_nPacketLength;
-	m_ts_fifo.SkipData(m_nPacketLength);
-
-	return rtcode;
-}
+//int CTransportStream::SkipOnePacket(void)
+//{
+//	int	rtcode = MIDDLEWARE_TS_NO_ERROR;
+//
+//	m_llCurReadPos += m_nPacketLength;
+//	m_ts_fifo.SkipData(m_nPacketLength);
+//
+//	return rtcode;
+//}
 
 //int CTransportStream::StartGetBitrate(void)
 //{
@@ -824,6 +988,7 @@ int CTransportStream::AddBitrateSample(int bitrate)
 
 void CTransportStream::SeekToBegin(void)
 {
+	m_llCurReadPos = 0;
 	if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
 		file_seek(0);

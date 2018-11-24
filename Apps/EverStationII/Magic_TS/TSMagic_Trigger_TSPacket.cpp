@@ -51,59 +51,58 @@ void ts_packet_trigger_loop(pthread_params_t pThreadParams)
 		ptransport_stream = pThreadParams->pTStream;
 
 		//这里不一定需要重头开始搜
-//		ptransport_stream->SeekToBegin();
 		ptransport_stream->StartGetData();
 
-		while (pThreadParams->ts_trigger_thread_running == 1)
-		{
-			packet_length = sizeof(packet_buf);
-			rtcode = ptransport_stream->PrefetchOnePacket(packet_buf, &packet_length);
-			if (rtcode == MIDDLEWARE_TS_NO_ERROR)
-			{
-				//成功读出一个TS包
-//				read_byte_pos = ptransport_stream->Tell();
-
-				rtcode = MPEG_decode_TS_packet(packet_buf, packet_length, &transport_packet);
-				if (rtcode == TSPACKET_PARSE_NO_ERROR)
-				{
-					if (pTSPacketTrigger->IsOpened() && (!pTSPacketTrigger->IsFull()))
-					{
-						if (pTSPacketTrigger->IsMatched(packet_buf, packet_length))
-						{
-//							int nOldCatchedCount = pTSPacketTrigger->GetCatchedCount();
-							pTSPacketTrigger->SaveTheWholePacket(packet_buf, packet_length);
-//							if (nOldCatchedCount == 0)		//捕捉到第一个匹配section时报告状态
-							{
-								::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_TS_TRIGGER_STATE, 0, 0);
-							}
-
-							if (pTSPacketTrigger->IsFull())
-							{
-								break;
-							}
-						}
-					}
-				}
-				else
-				{
-					//解析TS包语法发现错误，为什么发生错误？？？？
-				}
-
-				ptransport_stream->SkipOnePacket();
-			}
-			else if (rtcode == MIDDLEWARE_TS_FILE_EOF_ERROR)
-			{
-				ptransport_stream->SeekToBegin();
-			}
-			else if (rtcode == MIDDLEWARE_TS_FIFO_EMPTY_ERROR)
-			{
-				Sleep(10);
-			}
-			else
-			{
-				break;
-			}
-		}
+//		while (pThreadParams->ts_trigger_thread_running == 1)
+//		{
+//			packet_length = sizeof(packet_buf);
+//			rtcode = ptransport_stream->PrefetchOnePacket(packet_buf, &packet_length);
+//			if (rtcode == MIDDLEWARE_TS_NO_ERROR)
+//			{
+//				//成功读出一个TS包
+////				read_byte_pos = ptransport_stream->Tell();
+//
+//				rtcode = MPEG_decode_TS_packet(packet_buf, packet_length, &transport_packet);
+//				if (rtcode == TSPACKET_PARSE_NO_ERROR)
+//				{
+//					if (pTSPacketTrigger->IsOpened() && (!pTSPacketTrigger->IsFull()))
+//					{
+//						if (pTSPacketTrigger->IsMatched(packet_buf, packet_length))
+//						{
+////							int nOldCatchedCount = pTSPacketTrigger->GetCatchedCount();
+//							pTSPacketTrigger->SaveTheWholePacket(packet_buf, packet_length);
+////							if (nOldCatchedCount == 0)		//捕捉到第一个匹配section时报告状态
+//							{
+//								::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_TS_TRIGGER_STATE, 0, 0);
+//							}
+//
+//							if (pTSPacketTrigger->IsFull())
+//							{
+//								break;
+//							}
+//						}
+//					}
+//				}
+//				else
+//				{
+//					//解析TS包语法发现错误，为什么发生错误？？？？
+//				}
+//
+//				ptransport_stream->SkipOnePacket();
+//			}
+//			else if (rtcode == MIDDLEWARE_TS_FILE_EOF_ERROR)
+//			{
+//				ptransport_stream->SeekToBegin();
+//			}
+//			else if (rtcode == MIDDLEWARE_TS_FIFO_EMPTY_ERROR)
+//			{
+//				Sleep(10);
+//			}
+//			else
+//			{
+//				break;
+//			}
+//		}
 
 		pThreadParams->ts_trigger_thread_running = 0;
 //		pThreadParams->ts_trigger_thread_stopped = 1;

@@ -6,6 +6,7 @@
 #include <Windows.h>
 
 #include "FIFO_ErrorCode.h"
+#define USE_FIFO_MUTEX			0
 
 template <class DType, int N> class CFIFO
 {
@@ -23,7 +24,9 @@ protected:
 	int		m_available_payload;		//可读的载荷数量
 	int		m_available_space;		//可写的空间容量
 
+#if USE_FIFO_MUTEX
 	HANDLE	m_hAccess;
+#endif
 
 public:
 	void Reset(void);
@@ -46,7 +49,10 @@ template <class DType, int N> CFIFO<DType, N>::CFIFO(void)
 	m_available_payload = 0;
 	m_available_space = 0;
 
+#if USE_FIFO_MUTEX
 	m_hAccess = ::CreateMutex(NULL, FALSE, NULL);
+#endif
+
 	m_startptr = new DType[N];
 	if (m_startptr != NULL)
 	{
@@ -65,65 +71,64 @@ template <class DType, int N> CFIFO<DType, N>::~CFIFO(void)
 {
 	uint32_t wait_state = WAIT_FAILED;
 
+#if USE_FIFO_MUTEX
 	wait_state = ::WaitForSingleObject(m_hAccess, INFINITE);
-
-	if (m_startptr != NULL)
+	if (wait_state = WAIT_OBJECT_0)
 	{
-		delete m_startptr;
+#endif
+		if (m_startptr != NULL)
+		{
+			delete m_startptr;
+		}
+
+		m_capacity = 0;
+		m_rdptr = m_wrptr = m_endptr = m_startptr = NULL;
+		m_available_payload = 0;
+		m_available_space = 0;
+
+#if USE_FIFO_MUTEX
+		::CloseHandle(m_hAccess);
+		m_hAccess = NULL;
 	}
-
-	m_capacity = 0;
-	m_rdptr = m_wrptr = m_endptr = m_startptr = NULL;
-	m_available_payload = 0;
-	m_available_space = 0;
-
-	::CloseHandle(m_hAccess);
-	m_hAccess = NULL;
+#endif
 }
 
 template <class DType, int N> void CFIFO<DType, N>::Reset(void)
 {
+#if USE_FIFO_MUTEX
 	uint32_t wait_state = WAIT_FAILED;
 
 	wait_state = ::WaitForSingleObject(m_hAccess, INFINITE);
 	if (wait_state == WAIT_OBJECT_0)
 	{
+#endif
 		m_rdptr = m_wrptr = m_startptr;
 		m_available_payload = 0;
 		m_available_space = m_capacity;
 
+#if USE_FIFO_MUTEX
 		::ReleaseMutex(m_hAccess);
 	}
-}
-
-template <class DType, int N> int CFIFO<DType, N>::GetAvailablePayload(void)
-{
-	int		 rtcode = FIFO_UNKNOWN_ERROR;
-	uint32_t wait_state = WAIT_FAILED;
-
-	wait_state = ::WaitForSingleObject(m_hAccess, INFINITE);
-	if (wait_state == WAIT_OBJECT_0)
-	{
-		rtcode = m_available_payload;
-
-		::ReleaseMutex(m_hAccess);
-	}
-
-	return rtcode;
+#endif
 }
 
 template <class DType, int N> int CFIFO<DType, N>::GetAvailableSpace(void)
 {
-	int		 rtcode = FIFO_UNKNOWN_ERROR;
+	int		 rtcode = -1;
+
+#if USE_FIFO_MUTEX
 	uint32_t wait_state = WAIT_FAILED;
 
 	wait_state = ::WaitForSingleObject(m_hAccess, INFINITE);
 	if (wait_state == WAIT_OBJECT_0)
 	{
+#endif
 		rtcode = m_available_space;
 
+#if USE_FIFO_MUTEX
 		::ReleaseMutex(m_hAccess);
 	}
+#endif
 
 	return rtcode;
 }
@@ -132,19 +137,43 @@ template <class DType, int N> int CFIFO<DType, N>::WriteData(DType* buf, int len
 {
 	int			rtcode = FIFO_UNKNOWN_ERROR;
 	uint32_t	wait_state = WAIT_FAILED;
-	int			left_length;
+	int			next_write_length;
 	int			tail_length;
 
 	if ((buf != NULL) && (length > 0))
 	{
+#if USE_FIFO_MUTEX
 		wait_state = ::WaitForSingleObject(m_hAccess, INFINITE);
 		if (wait_state == WAIT_OBJECT_0)
 		{
+#endif
 			if (m_available_space >= length)
 			{
 				tail_length = (int)(m_endptr - m_wrptr);
-				if (tail_length >= length)
+				if (tail_length < length)
 				{
+					//in this case, wrptr must great than rdptr 
+					// |----------------|XXXXXXXXXXXXXXXXXX|------|
+					//                  rdptr               wrptr  endptr
+					//尾部空间不够，分两次写入
+					memcpy(m_wrptr, buf, tail_length * sizeof(DType));
+					m_wrptr = m_startptr;
+					next_write_length = length - tail_length;
+
+					memcpy(m_wrptr, buf + tail_length, next_write_length * sizeof(DType));
+					m_wrptr += next_write_length;
+
+					assert(m_wrptr <= m_rdptr);
+				}
+				else
+				{
+					//int this case, wrptr may less than rdptr, or great than then rdptr
+					// |XXXXXXXXXX|------------------|XXXXXXXXXXXXXXXX|
+					//            wrptr            rdptr           endptr
+					// |----------|XXXXXXXXXXXXXXXXXX|----------------|
+					//            rdptr               wrptr  endptr
+					//
+
 					//尾部空间足够，直接写入
 					memcpy(m_wrptr, buf, length * sizeof(DType));
 					m_wrptr += length;
@@ -152,18 +181,6 @@ template <class DType, int N> int CFIFO<DType, N>::WriteData(DType* buf, int len
 					{
 						m_wrptr = m_startptr;
 					}
-				}
-				else
-				{
-					//尾部空间不够，分两次写入
-					memcpy(m_wrptr, buf, tail_length * sizeof(DType));
-					m_wrptr = m_startptr;
-					left_length = length - tail_length;
-
-					memcpy(m_wrptr, buf + tail_length, left_length * sizeof(DType));
-					m_wrptr += left_length;
-
-					assert(m_wrptr <= m_rdptr);
 				}
 
 				m_available_payload += length;
@@ -176,12 +193,14 @@ template <class DType, int N> int CFIFO<DType, N>::WriteData(DType* buf, int len
 				rtcode = FIFO_WRITE_OVERFLOW;
 			}
 
+#if USE_FIFO_MUTEX
 			::ReleaseMutex(m_hAccess);
 		}
 		else
 		{
 			rtcode = wait_state;
 		}
+#endif
 	}
 	else
 	{
@@ -191,38 +210,80 @@ template <class DType, int N> int CFIFO<DType, N>::WriteData(DType* buf, int len
 	return rtcode;
 }
 
+template <class DType, int N> int CFIFO<DType, N>::GetAvailablePayload(void)
+{
+	int		 rtcode = -1;
+
+#if USE_FIFO_MUTEX
+	uint32_t wait_state = WAIT_FAILED;
+
+	wait_state = ::WaitForSingleObject(m_hAccess, INFINITE);
+	if (wait_state == WAIT_OBJECT_0)
+	{
+#endif
+		rtcode = m_available_payload;
+
+#if USE_FIFO_MUTEX
+		::ReleaseMutex(m_hAccess);
+	}
+#endif
+
+	return rtcode;
+}
+
 template <class DType, int N> int CFIFO<DType, N>::PrefetchData(DType* buf, int length)
 {
 	int			rtcode = FIFO_UNKNOWN_ERROR;
 	int			tail_length;
-	int			left_length;
+	int			next_read_length;
 	uint32_t	wait_state = WAIT_FAILED;
 
 	if ((buf != NULL) && (length > 0))
 	{
+#if USE_FIFO_MUTEX
 		wait_state = ::WaitForSingleObject(m_hAccess, INFINITE);
 		if (wait_state == WAIT_OBJECT_0)
 		{
-			tail_length = (int)(m_endptr - m_rdptr);
-			if (tail_length >= length)
+#endif
+			if (m_available_payload >= length)
 			{
-				memcpy(buf, m_rdptr, length * sizeof(DType));
+				tail_length = (int)(m_endptr - m_rdptr);
+				if (tail_length < length)
+				{
+					//int this case, rdptr must great than wrptr, and the tail payload is not enough
+					// |XXXXXXXXXX|----------------|XXXXXXXXXX|CCCC
+					//            wrptr            rdptr      endptr
+
+					memcpy(buf, m_rdptr, tail_length * sizeof(DType));
+					next_read_length = length - tail_length;
+					memcpy(buf + tail_length, m_startptr, next_read_length * sizeof(DType));
+				}
+				else
+				{
+					//in this case, rdptr can great than wrptr, or less than wrptr 
+					// |XXXXXXXXXX|----------------|CCCCCCCCCCXXXX|
+					//            wrptr            rdptr           endptr
+					//
+					// |-------------|XXXXXXXXXXXXXXXXXX|----------------|
+					//               rdptr               wrptr           endptr
+					memcpy(buf, m_rdptr, length * sizeof(DType));
+				}
+
+				rtcode = FIFO_NO_ERROR;
 			}
 			else
 			{
-				memcpy(buf, m_rdptr, tail_length * sizeof(DType));
-				left_length = length - tail_length;
-				memcpy(buf + tail_length, m_startptr, left_length * sizeof(DType));
+				rtcode = FIFO_READ_UNDERFLOW;
 			}
 
+#if USE_FIFO_MUTEX
 			::ReleaseMutex(m_hAccess);
-
-			rtcode = FIFO_NO_ERROR;
 		}
 		else
 		{
 			rtcode = wait_state;
 		}
+#endif
 	}
 	else
 	{
@@ -235,28 +296,35 @@ template <class DType, int N> int CFIFO<DType, N>::PrefetchData(DType* buf, int 
 template <class DType, int N> int CFIFO<DType, N>::SkipData(int length)
 {
 	int			rtcode = FIFO_UNKNOWN_ERROR;
+
+#if USE_FIFO_MUTEX
 	uint32_t	wait_state = WAIT_FAILED;
 
 	wait_state = ::WaitForSingleObject(m_hAccess, INFINITE);
 	if (wait_state == WAIT_OBJECT_0)
 	{
-		m_rdptr += length;
+#endif
+		int skip_legth = min(m_available_payload, length);
+
+		m_rdptr += skip_legth;
 		if (m_rdptr >= m_endptr)
 		{
 			m_rdptr = m_startptr + (m_rdptr - m_endptr);
 		}
 
-		m_available_payload -= length;
-		m_available_space += length;
-
-		::ReleaseMutex(m_hAccess);
+		m_available_payload -= skip_legth;
+		m_available_space += skip_legth;
 
 		rtcode = FIFO_NO_ERROR;
+
+#if USE_FIFO_MUTEX
+		::ReleaseMutex(m_hAccess);
 	}
 	else
 	{
 		rtcode = wait_state;
 	}
+#endif
 
 	return rtcode;
 }

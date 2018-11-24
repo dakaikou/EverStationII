@@ -30,13 +30,16 @@ int file_receive_init(char* pszFile)
 	return rtcode;
 }
 
-int file_start_receive(void)
+int file_start_receive(int64_t offset)
 {
 	int rtcode = TSFILE_UNKNOWN_ERROR;
 
 	if (g_hFile != -1)
 	{
-		//_lseeki64(g_hFile, offset, SEEK_SET);
+		if (offset >= 0)
+		{
+			_lseeki64(g_hFile, offset, SEEK_SET);
+		}
 
 		rtcode = TSFILE_NO_ERROR;
 	}

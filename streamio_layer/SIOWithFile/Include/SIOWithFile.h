@@ -27,7 +27,7 @@
 #define TSFILE_UNKNOWN_ERROR		0xFFFFFFFF
 
 SIO_FILE_LIB	int file_receive_init(char* pszFile);
-SIO_FILE_LIB	int file_start_receive(void);
+SIO_FILE_LIB	int file_start_receive(int64_t offset = -1);
 SIO_FILE_LIB	int file_receive(unsigned char *buffer, int count);
 SIO_FILE_LIB	int file_stop_receive(void);
 SIO_FILE_LIB	int file_receive_fini(void);

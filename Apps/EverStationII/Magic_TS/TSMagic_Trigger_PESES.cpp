@@ -251,64 +251,63 @@ void ts_pes_trigger_loop(pthread_params_t pThreadParams)
 
 		ptransport_stream = pThreadParams->pTStream;
 		//这里不一定需要重头开始搜
-//		ptransport_stream->SeekToBegin();
 		ptransport_stream->StartGetData();
 
-		while (pThreadParams->pes_trigger_thread_running == 1)
-		{
-			TS_packet_length = sizeof(TS_packet_buf);
-			rtcode = ptransport_stream->PrefetchOnePacket(TS_packet_buf, &TS_packet_length);
-			if (rtcode == MIDDLEWARE_TS_NO_ERROR)
-			{
-				//成功读出一个TS包
-				read_byte_pos = ptransport_stream->Tell();			//在这种捕捉场景下，读出来的文件位置其实没啥用
-
-				rtcode = MPEG_decode_TS_packet(TS_packet_buf, TS_packet_length, &transport_packet);
-				if (rtcode == TSPACKET_PARSE_NO_ERROR)
-				{
-					//该包无语法错误，有效
-					//PES packet trigger
-					if (pPESPacketTrigger->IsOpened() && (!pPESPacketTrigger->IsFull()))
-					{
-						if (transport_packet.PID == pPESPacketTrigger->GetPID())
-						{
-							//TS_PID与待捕捉的PES包一致
-							rtcode = PESSplicer.WriteTSPacket(&transport_packet);
-							if (rtcode == NO_ERROR)
-							{
-								int pes_length;
-								uint8_t* pes_buf = PESSplicer.GetPESPacket(&pes_length);
-								pPESPacketTrigger->SaveTheWholePacket(pes_buf, pes_length);			//内存块的搬移，数据量还是比较大的，待优化
-								::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_PES_TRIGGER_STATE, 2, 0);
-
-								PESSplicer.Reset();
-
-								break;
-							}
-						}
-					}
-				}
-				else
-				{
-					//解析TS包语法发现错误，为什么发生错误？？？？
-				}
-
-				ptransport_stream->SkipOnePacket();
-			}
-			else if (rtcode == MIDDLEWARE_TS_FILE_EOF_ERROR)
-			{
-				ptransport_stream->SeekToBegin();
-			}
-			else if (rtcode == MIDDLEWARE_TS_FIFO_EMPTY_ERROR)
-			{
-				Sleep(1);
-			}
-			else
-			{
-//				assert(0);			//示例码流：tcl_short.ts  henan.ts
-//				break;
-			}
-		}
+//		while (pThreadParams->pes_trigger_thread_running == 1)
+//		{
+//			TS_packet_length = sizeof(TS_packet_buf);
+//			rtcode = ptransport_stream->PrefetchOnePacket(TS_packet_buf, &TS_packet_length);
+//			if (rtcode == MIDDLEWARE_TS_NO_ERROR)
+//			{
+//				//成功读出一个TS包
+//				read_byte_pos = ptransport_stream->Tell();			//在这种捕捉场景下，读出来的文件位置其实没啥用
+//
+//				rtcode = MPEG_decode_TS_packet(TS_packet_buf, TS_packet_length, &transport_packet);
+//				if (rtcode == TSPACKET_PARSE_NO_ERROR)
+//				{
+//					//该包无语法错误，有效
+//					//PES packet trigger
+//					if (pPESPacketTrigger->IsOpened() && (!pPESPacketTrigger->IsFull()))
+//					{
+//						if (transport_packet.PID == pPESPacketTrigger->GetPID())
+//						{
+//							//TS_PID与待捕捉的PES包一致
+//							rtcode = PESSplicer.WriteTSPacket(&transport_packet);
+//							if (rtcode == NO_ERROR)
+//							{
+//								int pes_length;
+//								uint8_t* pes_buf = PESSplicer.GetPESPacket(&pes_length);
+//								pPESPacketTrigger->SaveTheWholePacket(pes_buf, pes_length);			//内存块的搬移，数据量还是比较大的，待优化
+//								::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_PES_TRIGGER_STATE, 2, 0);
+//
+//								PESSplicer.Reset();
+//
+//								break;
+//							}
+//						}
+//					}
+//				}
+//				else
+//				{
+//					//解析TS包语法发现错误，为什么发生错误？？？？
+//				}
+//
+//				ptransport_stream->SkipOnePacket();
+//			}
+//			else if (rtcode == MIDDLEWARE_TS_FILE_EOF_ERROR)
+//			{
+//				ptransport_stream->SeekToBegin();
+//			}
+//			else if (rtcode == MIDDLEWARE_TS_FIFO_EMPTY_ERROR)
+//			{
+//				Sleep(1);
+//			}
+//			else
+//			{
+////				assert(0);			//示例码流：tcl_short.ts  henan.ts
+////				break;
+//			}
+//		}
 
 		ptransport_stream->StopGetData();
 		//if (pAVDecoder != NULL)

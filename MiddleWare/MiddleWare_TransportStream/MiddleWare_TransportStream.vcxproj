@@ -175,6 +175,8 @@
     <ClInclude Include="Include\MiddleWare_TS_ErrorCode.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Template\FIFO.h" />
+    <ClInclude Include="Template\FIFO_ErrorCode.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Impl\MiddleWare_TransportStream.cpp" />
