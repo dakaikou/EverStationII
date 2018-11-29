@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <windows.h>
+//#include <windows.h>
 #include <assert.h>
 
 #include "../Include/MiddleWare_SectionSplicer_ErrorCode.h"
@@ -44,18 +44,16 @@ int CSectionSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 	int		rtcode = SECTION_SPLICE_UNKNOWN_ERROR;
 
 	//section syntax
-	uint8_t*		section_buf;
-	int		section_length;
-	int		pointer_field;
+	uint8_t*	section_buf;
+	int			section_length;
+	int			pointer_field;
 
-	uint8_t*		payload_buf;
-	int		payload_length;
+	uint8_t*	payload_buf;
+	int			payload_length;
 
 	//control part
 	int		bAligned = 0;
 	int		copy_length;
-
-//	uint8_t		ucOldTableID = 0xFF;
 
 	if (ptransport_packet != NULL)
 	{
@@ -91,22 +89,23 @@ int CSectionSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 
 						if (m_nWriteSize >= m_nSectionLength)
 						{
-							rtcode = SECTION_SPLICE_ONE_MORE_SECTIONS;
+							//rtcode = SECTION_SPLICE_ONE_MORE_SECTIONS;
+							rtcode = SECTION_SPLICE_LAST_PACKET_WITH_ANOTHER_START;
 						}
 						else
 						{
 							//上次不完整，需要丢弃
 							Reset();
 
-							rtcode = NO_ERROR;
+							rtcode = SECTION_SPLICE_NO_ERROR;
 						}
 					}
 					else
 					{
-						rtcode = NO_ERROR;
+						rtcode = SECTION_SPLICE_NO_ERROR;
 					}
 
-					if (rtcode == NO_ERROR)
+					if (rtcode == SECTION_SPLICE_NO_ERROR)
 					{
 						if (payload_length >= 3)
 						{
@@ -151,11 +150,11 @@ int CSectionSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 
 										if (m_nWriteSize >= m_nSectionLength)
 										{
-											rtcode = NO_ERROR;
+											rtcode = SECTION_SPLICE_LAST_PACKET;
 										}
 										else
 										{
-											rtcode = SECTION_SPLICE_NOT_COMPLETE;
+											rtcode = SECTION_SPLICE_FIRST_PACKET;
 										}
 									}
 									else
@@ -215,14 +214,14 @@ int CSectionSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 				
 								if (m_nWriteSize >= m_nSectionLength)
 								{
-									rtcode = NO_ERROR;
+									rtcode = SECTION_SPLICE_LAST_PACKET;
 								}
 								else
 								{
 									//继续等下一个TS包
 									m_nPkIndex = ptransport_packet->continuity_counter;
 
-									rtcode = SECTION_SPLICE_NOT_COMPLETE;
+									rtcode = SECTION_SPLICE_FOLLOW_PACKET;
 								}
 							}
 							else
@@ -242,7 +241,7 @@ int CSectionSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 					else
 					{
 						//不处理，丢掉TS包
-						rtcode = SECTION_SPLICE_NOT_SYNC;
+						rtcode = SECTION_SPLICE_DO_NOT_SYNC;
 					}
 				}
 			}

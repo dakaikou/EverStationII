@@ -1,11 +1,17 @@
 #include <string.h>
-#include <stdio.h>
-#include <assert.h>
-
-#include "../../Stream_AL/BitStream.h"
 
 #include "../Include/Mpeg2_TS_ErrorCode.h"
 #include "../Include/Mpeg2_TS_packet.h"
+
+#define USE_BIT_STREAM_INLINE_PARSER			0
+
+#if USE_BIT_STREAM_INLINE_PARSER
+
+#include "../../Stream_AL/BitStream.h"
+
+//
+//  notes: use BITS_t inline function to parse syntax is much slower than native method.   chendelin 2018.11.25
+//
 
 int MPEG_decode_TS_adaptation_field(uint8_t *buf, int length, adaptation_field_t* padaptation_field)
 {
@@ -103,6 +109,12 @@ int MPEG_decode_TS_adaptation_field(uint8_t *buf, int length, adaptation_field_t
 	return rtcode;
 }
 
+
+//
+//  notes: use BITS_t inline function to parse syntax is much slower than native method.   chendelin 2018.11.25
+//
+
+
 int MPEG_decode_TS_packet(uint8_t *buf, int length, transport_packet_t* ptransport_packet)
 {
 	int	 rtcode = TSPACKET_PARSE_NO_ERROR;
@@ -168,6 +180,189 @@ int MPEG_decode_TS_packet(uint8_t *buf, int length, transport_packet_t* ptranspo
 
 	return rtcode;
 }
+
+#else 
+
+int MPEG_decode_TS_adaptation_field(uint8_t *buf, int length, adaptation_field_t* padaptation_field)
+{
+	int		rtcode = TSPACKET_PARSE_NO_ERROR;
+
+	if ((buf != NULL) && (length <= 204) && (padaptation_field != NULL))
+	{
+		padaptation_field->adaptation_field_length = *buf++;
+
+		if ((padaptation_field->adaptation_field_length >= 0) && (padaptation_field->adaptation_field_length <= 183))
+		{
+			if (padaptation_field->adaptation_field_length > 0)
+			{
+				padaptation_field->discontinuity_indicator = (*buf & 0x80) >> 7;
+				padaptation_field->random_access_indicator = (*buf & 0x40) >> 6;
+				padaptation_field->elementary_stream_priority_indicator = (*buf & 0x20) >> 5;
+				padaptation_field->PCR_flag = (*buf & 0x10) >> 4;
+				padaptation_field->OPCR_flag = (*buf & 0x08) >> 3;
+				padaptation_field->splicing_point_flag = (*buf & 0x04) >> 2;
+				padaptation_field->transport_private_data_flag = (*buf & 0x02) >> 1;
+				padaptation_field->adaptation_field_extension_flag = *buf++ & 0x01;
+
+				if (padaptation_field->PCR_flag)
+				{
+					padaptation_field->program_clock_reference_base_32_30 = (*buf & 0xe0) >> 5;
+					padaptation_field->program_clock_reference_base_29_15 = (*buf++ & 0x1f);
+					padaptation_field->program_clock_reference_base_29_15 <<= 8;
+					padaptation_field->program_clock_reference_base_29_15 |= *buf++;
+					padaptation_field->program_clock_reference_base_29_15 <<= 2;
+					padaptation_field->program_clock_reference_base_29_15 |= (*buf & 0xc0) >> 6;
+					padaptation_field->program_clock_reference_base_14_0 = (*buf++ & 0x3f);
+					padaptation_field->program_clock_reference_base_14_0 <<= 8;
+					padaptation_field->program_clock_reference_base_14_0 |= *buf++;
+					padaptation_field->program_clock_reference_base_14_0 <<= 1;
+					padaptation_field->program_clock_reference_base_14_0 |= (*buf & 0x80) >> 7;
+
+					padaptation_field->program_clock_reference_extension = (*buf++ & 0x01) << 8;
+					padaptation_field->program_clock_reference_extension |= *buf++;
+				}
+				/*
+				if( padaptation_field->OPCR_flag ){
+
+				padaptation_field->original_program_clock_reference_base  = *buf++;
+				padaptation_field->original_program_clock_reference_base <<= 25;
+				padaptation_field->original_program_clock_reference_base |= *buf++ << 17;
+				padaptation_field->original_program_clock_reference_base |= *buf++ << 9;
+				padaptation_field->original_program_clock_reference_base |= *buf++ << 1;
+				padaptation_field->original_program_clock_reference_base |= ( *buf & 0x80 ) >> 7;
+
+				padaptation_field->original_program_clock_reference_extension  = ( *buf++ & 0x01 ) << 8;
+				padaptation_field->original_program_clock_reference_extension |=  *buf++;
+				}
+
+				if( padaptation_field->splicing_point_flag ){
+				padaptation_field->splice_countdown = *buf++;
+
+				}
+
+				if( padaptation_field->transport_private_data_flag ){
+				padaptation_field->transport_private_data_length = *buf++;
+				padaptation_field->pprivate_data_byte = buf;
+
+				buf += padaptation_field->transport_private_data_length;
+				}
+
+				if( padaptation_field->adaptation_field_extension_flag ){
+				padaptation_field->adaptation_field_extension_length = *buf++;
+
+				padaptation_field->ltw_flag = ( *buf & 0x80 ) >> 7;
+				padaptation_field->piecewise_rate_flag = ( *buf & 0x40 ) >> 6;
+				padaptation_field->seamless_splice_flag = ( *buf++ & 0x20 ) >> 5;
+
+				if( padaptation_field->ltw_flag ){
+				padaptation_field->ltw_valid_flag = ( *buf & 0x80 ) >> 7;
+				padaptation_field->ltw_offset = ( ( *buf++ & 0x7F ) << 8 ) + *buf++;
+				}
+
+				if( padaptation_field->piecewise_rate_flag ){
+				padaptation_field->piecewise_rate = ( ( *buf++ & 0x3F ) << 16 ) + ( *buf++ << 8 ) + *buf++;
+				}
+
+				if( padaptation_field->seamless_splice_flag ){
+				padaptation_field->splice_type = (*buf & 0xF0 ) >> 4;
+				padaptation_field->DTS_next_AU = ( ( *buf++ & 0x0E ) << 30 ) + ( *buf++ << 22 ) + ( ( *buf++ & 0xFE ) << 15 ) + ( *buf++ << 7 ) + ( (*buf++ & 0xFE ) >> 1 );
+				}
+				}
+				*/
+			}
+		}
+		else
+		{
+			rtcode = TSPACKET_PARSE_SYNTAX_ERROR;
+		}
+	}
+	else
+	{
+		rtcode = TSPACKET_PARSE_PARAMETER_ERROR;
+	}
+
+	return rtcode;
+}
+
+int MPEG_decode_TS_packet(uint8_t *buf, int length, transport_packet_t* ptransport_packet)
+{
+	int	 rtcode = TSPACKET_PARSE_NO_ERROR;
+
+	uint8_t*  porigin = buf;
+	int		  offset = 0;
+
+	if ((buf != NULL) &&
+		((length == 188) || (length == 204)) &&
+		(ptransport_packet != NULL))
+	{
+		memset(ptransport_packet, 0x00, sizeof(transport_packet_t));
+
+		if ((buf[0] == 0x47) || (buf[0] == 0xB8))
+		{
+			ptransport_packet->sync_byte = *buf++;
+
+			ptransport_packet->transport_error_indicator = (*buf & 0x80) >> 7;
+			ptransport_packet->payload_unit_start_indicator = (*buf & 0x40) >> 6;
+			ptransport_packet->transport_priority = (*buf & 0x20) >> 5;
+
+			ptransport_packet->PID = (*buf++ & 0x1F);
+			ptransport_packet->PID <<= 8;
+			ptransport_packet->PID |= *buf++;
+
+			ptransport_packet->transport_scrambling_control = (*buf & 0xC0) >> 6;
+			ptransport_packet->adaptation_field_control = (*buf & 0x30) >> 4;
+			ptransport_packet->continuity_counter = (*buf++) & 0x0F;
+
+			if ((ptransport_packet->adaptation_field_control & 0b10) == 0b10)
+			{
+				rtcode = MPEG_decode_TS_adaptation_field(buf, length - 4, &(ptransport_packet->adaptation_field));
+
+				if (rtcode == TSPACKET_PARSE_NO_ERROR)
+				{
+					buf += (ptransport_packet->adaptation_field.adaptation_field_length + 1);
+				}
+			}
+
+			if (rtcode == TSPACKET_PARSE_NO_ERROR)
+			{
+				offset = (int)(buf - porigin);
+				if (offset > 188)			//failure
+				{
+					rtcode = TSPACKET_PARSE_SYNTAX_ERROR;
+				}
+				else								//success
+				{
+					if ((ptransport_packet->adaptation_field_control & 0b01) == 0b01)
+					{
+						ptransport_packet->payload_length = (uint8_t)(188 - offset);
+						if (ptransport_packet->payload_length > 0)
+						{
+							ptransport_packet->payload_buf = buf;
+							buf += ptransport_packet->payload_length;
+							//memcpy(ptransport_packet->payload_buf, buf, ptransport_packet->payload_length);
+						}
+					}
+					else
+					{
+						ptransport_packet->payload_length = 0;
+					}
+				}
+			}
+		}
+		else
+		{
+			rtcode = TSPACKET_PARSE_SYNC_ERROR;
+		}
+	}
+	else
+	{
+		rtcode = TSPACKET_PARSE_PARAMETER_ERROR;
+	}
+
+	return rtcode;
+}
+
+#endif
 
 int MPEG_encode_TS_packet(uint8_t *buf, int length, transport_packet_t* pTS_packet)
 {

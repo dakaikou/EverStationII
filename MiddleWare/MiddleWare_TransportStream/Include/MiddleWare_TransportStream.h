@@ -39,7 +39,7 @@
 typedef struct
 {
 	int	mean;
-	int	rms;			//均方根值
+	int	rms;
 	int	min;
 	int	max;
 
@@ -57,14 +57,13 @@ public:
 	int			m_bSynced;
 	int			m_TsError;
 
-	int			m_nRunning;				//主动设置的状态
-	int			m_nStopRunning;			//线程反馈回来的状态
+	int			m_nRunning;
+	int			m_nStopRunning;
 
-	int			m_nReceiving;			//主动设置的状态
-	int			m_nStopReceiving;		//线程反馈的状态
+	int			m_nReceiving;
+	int			m_nStopReceiving;
 
-	int			m_nMode;				//用以识别TS流的打开方式，0 - 表示离线分析， 1 - 表示实时分析
-
+	int			m_nMode;				//0-offline, 1-realtime
 	int			m_nEOF;
 
 	char			m_pszProtocolHead[16];
@@ -96,7 +95,6 @@ protected:
 	int				m_bitrate_mean_value;
 	int				m_bitrate_rms_value;
 
-	//数据库指针，暂时采用写文件的方式，将来（只要我还活着）可以改成数据库	chendelin  2018.11.19
 	FILE*		fp_tsrate_dbase;
 
 public:
@@ -112,12 +110,14 @@ public:
 	int StartGetData(int64_t offset = -1);
 	int StopGetData(void);
 
-	//int	StartGetBitrate(void);
+	int	StartGetBitrate(void);
 	//int	GetBitrateMap(int pbitrate_map[], int count);
 	int GetBitrate(void);
-	//int	StopGetBitrate(void);
+	int	StopGetBitrate(void);
 
 	void SeekToBegin(void);
+	void Seek(int64_t offset);
+	int64_t Tell(void);
 
 	int  Synchronize(int* plength);
 
@@ -128,7 +128,6 @@ public:
 
 //	int  GetOnePacket(uint8_t* buf, int* plength);
 	int	 GetLastError(void);
-	int64_t Tell(void);
 
 protected:
 };

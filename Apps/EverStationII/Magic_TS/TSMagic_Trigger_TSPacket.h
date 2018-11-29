@@ -8,7 +8,7 @@
 class CTrigger_TSPacket : public CTrigger
 {
 protected:
-	uint16_t			m_usPID;
+	uint16_t	m_usPID;
 	int			m_nFilterID;
 
 public:

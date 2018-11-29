@@ -54,7 +54,7 @@ int CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 	int		rtcode = PESES_SPLICE_UNKNOWN_ERROR;
 
 	uint8_t*		payload_buf;
-	int		payload_length;
+	int				payload_length;
 
 	//control part
 	int		bAligned = 0;
@@ -97,7 +97,6 @@ int CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 							m_pucPESBuf = (uint8_t*)malloc(m_nBufSize);
 							memcpy(m_pucPESBuf, payload_buf, payload_length);
 							m_nPESLength = payload_length;
-							//hLastRecordHandler = pPESPacketTrigger->SaveAsNewStart(transport_packet.payload_buf, transport_packet.payload_length);
 
 							//if (main_type == PID_MAINTYPE_VIDEO)
 							//{
@@ -150,11 +149,13 @@ int CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 
 							//	pAVDecoder->WriteTSPacket(&transport_packet, read_byte_pos);
 							//}
+
+							rtcode = PESES_SPLICE_FIRST_PACKET;
 						}
 						else
 						{
 							//还没有找到PES头，忽略当前TS包
-							rtcode = PESES_SPLICE_NOT_SYNC;
+							rtcode = PESES_SPLICE_DO_NOT_SYNC;
 						}
 					}
 					else if (m_pes_payload_unit_started == 1)
@@ -196,7 +197,7 @@ int CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 
 								m_pes_payload_unit_started = 0;
 
-								rtcode = PESES_SPLICE_NO_ERROR;
+								rtcode = PESES_SPLICE_LAST_PACKET;
 							}
 							else
 							{
@@ -222,7 +223,7 @@ int CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 								//	pAVDecoder->WriteTSPacket(&transport_packet, read_byte_pos);
 								//}
 
-								rtcode = PESES_SPLICE_NOT_COMPLETE;
+								rtcode = PESES_SPLICE_FOLLOW_PACKET;
 							}
 						}
 						else

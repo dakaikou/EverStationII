@@ -72,11 +72,8 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 	int	  diff_tickcount;
 
 	int	  stream_synced = 0;
-//	int	  do_next_splice;
 
 	int					rtcode;
-//	int					getdata_rtcode;
-//	int					nErrCode = FILE_ERROR_NO_ERROR;
 	int					filter_index;
 	CSectionSplicer		SectionSplicer[MAX_SECTION_FILTERS];
 	CSectionSplicer*	pSectionSplicer;
@@ -307,31 +304,45 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 									do
 									{
 										rtcode = pSectionSplicer->WriteTSPacket(&transport_packet);
-										if ((rtcode == NO_ERROR) || (rtcode == SECTION_SPLICE_ONE_MORE_SECTIONS))
+										
+										if (rtcode == SECTION_SPLICE_FIRST_PACKET)
 										{
+											//正常现象，不需要报错
+										}
+										else if (rtcode == SECTION_SPLICE_FOLLOW_PACKET)
+										{
+											//正常现象，不需要报错
+										}
+										else if ((rtcode == SECTION_SPLICE_LAST_PACKET) || (rtcode == SECTION_SPLICE_LAST_PACKET_WITH_ANOTHER_START))
+										{
+											//if (rtcode == SECTION_SPLICE_LAST_PACKET_WITH_ANOTHER_START)
+											//{
+											//	rtcode = SECTION_SPLICE_LAST_PACKET_WITH_ANOTHER_START;
+											//}
+
 											//如果SECTION拼接成功，则进行section分析
 
 											section_buf = pSectionSplicer->m_pucSectionBuf;
 											section_length = pSectionSplicer->m_nSectionLength;
 
-											rtcode = REPORT_PSISI_section(pDB_PsiSiObjs, pThreadParams->hMainWnd, pSectionSplicer->m_usPID, section_buf, section_length);
-											if (rtcode != TSMAGIC_NO_ERROR)
+											int report_rtcode = REPORT_PSISI_section(pDB_PsiSiObjs, pThreadParams->hMainWnd, pSectionSplicer->m_usPID, section_buf, section_length);
+											if (report_rtcode != TSMAGIC_NO_ERROR)
 											{
-												if (rtcode == TSMAGIC_NOT_SUPPORTED_TABLE)
+												if (report_rtcode == TSMAGIC_NOT_SUPPORTED_TABLE)
 												{
 													sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: section报告——在TS_PID=0x%04X上发现未识别的PSI/SI表(table_id=0x%02x)（文件位置：0x%llx）\n", pSectionSplicer->m_usPID, pSectionSplicer->m_ucTableID, read_byte_pos);
 
 													::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_WARNING);
 													LOG(ERROR) << pszDebug;
 												}
-												else if (rtcode == MIDDLEWARE_PSISI_VERSION_CHANGE)
+												else if (report_rtcode == MIDDLEWARE_PSISI_VERSION_CHANGE)
 												{
 													sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: section报告——PSI/SI表(TS_PID=0x%04X, table_id=0x%02x)版本发生变更（文件位置：0x%llx）\n", pSectionSplicer->m_usPID, section_buf[0], read_byte_pos);
 
 													::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_WARNING);
 													LOG(INFO) << pszDebug;
 												}
-												else if (rtcode == MIDDLEWARE_PSISI_DUPLICATED_SECTION)
+												else if (report_rtcode == MIDDLEWARE_PSISI_DUPLICATED_SECTION)
 												{
 													//											sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: section报告——PSI/SI表重复的段(TS_PID=0x%04X, table_id=0x%02X)版本发生变更（文件位置：0x%llx）\n", pSectionSplicer->m_usPID, section_buf[0], read_byte_pos);
 													//
@@ -339,7 +350,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 												}
 												else
 												{
-													TSMagic_ErrorCodeLookup(rtcode, pszTemp, sizeof(pszTemp));
+													TSMagic_ErrorCodeLookup(report_rtcode, pszTemp, sizeof(pszTemp));
 													sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: section报告——PSI/SI表(TS_PID=0x%04X, table_id=0x%02X) %s（文件位置：0x%llx）\n", pSectionSplicer->m_usPID, section_buf[0], pszTemp, read_byte_pos);
 
 													::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
@@ -365,11 +376,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 											//完成使命，释放当前section拼接器资源
 											pSectionSplicer->Reset();
 										}
-										else if (rtcode == SECTION_SPLICE_NOT_COMPLETE)
-										{
-											//正常现象，不需要报错
-										}
-										else if (rtcode == SECTION_SPLICE_NOT_SYNC)
+										else if (rtcode == SECTION_SPLICE_DO_NOT_SYNC)
 										{
 											//正常现象，不需要报错
 										}
@@ -397,7 +404,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 											LOG(INFO) << pszDebug;
 										}
 
-									} while (rtcode == SECTION_SPLICE_ONE_MORE_SECTIONS);
+									} while (rtcode == SECTION_SPLICE_LAST_PACKET_WITH_ANOTHER_START);
 								}
 							}
 						}
@@ -423,7 +430,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 							BITRATE_ATTRIBUTE_t bitrate_attr;
 							ptransport_stream->GetMeasuredBitrateAttribute(&bitrate_attr);
 
-							rtcode = pDB_Pcrs->AddPCRSample(transport_packet.PID, read_byte_pos, &pcr_code, bitrate_attr.mean, bitrate_attr.rms);
+							rtcode = pDB_Pcrs->AddPCRSample(transport_packet.PID, read_byte_pos - packet_length + 12, &pcr_code, bitrate_attr.mean, bitrate_attr.rms);
 							if (rtcode == NO_ERROR)
 							{
 								RECORD_PCR_t PCRRecord;
@@ -481,7 +488,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 					{
 						//解析TS包语法发现错误，为什么发生错误？？？？
 						TSMagic_ErrorCodeLookup(rtcode, pszTemp, sizeof(pszTemp));
-						sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: %s（文件位置：0x%llx）\n", pszTemp, read_byte_pos);
+						sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: [PID=0x%04X] %s（文件位置：开始于0x%llx - 结束于0x%llx）\n", transport_packet.PID, pszTemp, read_byte_pos - packet_length, read_byte_pos);
 
 						::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
 						LOG(INFO) << pszDebug;

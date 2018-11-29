@@ -135,9 +135,6 @@
     <ClInclude Include="Magic_TS\TSMagic_Callbacks_To_Gui.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
-    <ClInclude Include="Magic_TS\TSMagic_Decimate_Dsmcc.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
     <ClInclude Include="Magic_TS\TSMagic_Decimate_TSPacket.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
@@ -297,6 +294,9 @@
     <ClInclude Include="Common\TreeView_XMLBrowser.h">
       <Filter>头文件\Common</Filter>
     </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_Dsmcc_Download.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -339,9 +339,6 @@
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
     <ClCompile Include="Magic_TS\TSMagic_Callbacks_To_Gui.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\TSMagic_Decimate_Dsmcc.cpp">
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
     <ClCompile Include="Magic_TS\TSMagic_Decimate_TSPacket.cpp">
@@ -526,6 +523,9 @@
     </ClCompile>
     <ClCompile Include="Common\TreeView_XMLBrowser.cpp">
       <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_Dsmcc_Download.cpp">
+      <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -271,8 +271,8 @@
     <ClInclude Include="Magic_TS\TSMagicView.h" />
     <ClInclude Include="Magic_TS\TSMagic_Callbacks_From_Lib.h" />
     <ClInclude Include="Magic_TS\TSMagic_Callbacks_To_Gui.h" />
-    <ClInclude Include="Magic_TS\TSMagic_Decimate_Dsmcc.h" />
     <ClInclude Include="Magic_TS\TSMagic_Decimate_TSPacket.h" />
+    <ClInclude Include="Magic_TS\TSMagic_Dsmcc_Download.h" />
     <ClInclude Include="Magic_TS\TSMagic_ErrorCode.h" />
     <ClInclude Include="Magic_TS\TSMagic_GuiAPi.h" />
     <ClInclude Include="Magic_TS\TSMagic_GuiApi_MSG.h" />
@@ -354,8 +354,8 @@
     <ClCompile Include="Magic_TS\TSMagic_Analyse_Realtime.cpp" />
     <ClCompile Include="Magic_TS\TSMagic_Callbacks_From_Lib.cpp" />
     <ClCompile Include="Magic_TS\TSMagic_Callbacks_To_Gui.cpp" />
-    <ClCompile Include="Magic_TS\TSMagic_Decimate_Dsmcc.cpp" />
     <ClCompile Include="Magic_TS\TSMagic_Decimate_TSPacket.cpp" />
+    <ClCompile Include="Magic_TS\TSMagic_Dsmcc_Download.cpp" />
     <ClCompile Include="Magic_TS\TSMagic_ErrorCode_LUT.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>

@@ -24,9 +24,6 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_TransportStream.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Include\MiddleWare_TS_ErrorCode.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -35,6 +32,9 @@
     </ClInclude>
     <ClInclude Include="Template\FIFO_ErrorCode.h">
       <Filter>头文件\template</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\MiddleWare_TransportStream.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

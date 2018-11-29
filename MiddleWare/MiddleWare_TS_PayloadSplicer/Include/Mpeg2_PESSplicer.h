@@ -26,9 +26,9 @@ public:
 	CPESSplicer(void);
 
 private:
-	uint16_t			m_usPID;
+	uint16_t	m_usPID;
 
-	uint8_t*			m_pucPESBuf;
+	uint8_t*	m_pucPESBuf;
 	int			m_nBufSize;
 	int			m_nPESLength;
 
@@ -43,7 +43,7 @@ public:
 	int			WriteTSPacket(transport_packet_t* ptransport_packet);
 	void		Reset(void);
 	void		Init(void);
-	uint8_t*			GetPESPacket(int* plength);
+	uint8_t*	GetPESPacket(int* plength);
 
 public:
 	~CPESSplicer();

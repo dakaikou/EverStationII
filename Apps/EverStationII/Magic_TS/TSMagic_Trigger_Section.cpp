@@ -16,7 +16,7 @@
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer\Include\MiddleWare_SectionSplicer_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TransportStream.h"
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TS_ErrorCode.h"
-//#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
+#include "thirdparty_libs\glog\glog\logging.h"
 
 #include "TSMagicView.h"
 
@@ -24,8 +24,6 @@
 #include <windows.h>
 #include <time.h>
 #include <assert.h>
-
-//extern PSISI_REPORT_t			PSISI_REPORT;
 
 CTrigger_PsiSiSection::CTrigger_PsiSiSection(void)
 {
@@ -683,11 +681,15 @@ void ts_section_trigger_loop(pthread_params_t pThreadParams)
 {
 #if OPEN_SECTION_TRIGGER
 	uint8_t	  packet_buf[204];
-	int	  packet_length;
-
+	int		  packet_length;
+	int		  stream_synced = 0;
+	int		  catchedCount = 0;
 	char	  pszDebug[256];
 
-	int	  rtcode;
+	int64_t	  read_byte_pos = 0;
+	int64_t   section_start_pos = -1;
+	int64_t   section_end_pos = -1;
+	int		  rtcode;
 
 	CSectionSplicer				SectionSplicer;
 
@@ -698,84 +700,172 @@ void ts_section_trigger_loop(pthread_params_t pThreadParams)
 
 	if (pThreadParams != NULL)
 	{
+		uint32_t tickCount = ::GetTickCount();
+		srand(tickCount);
+		uint32_t randNum = rand();
+
 		pThreadParams->section_trigger_thread_running = 1;
 
-		sprintf_s(pszDebug, sizeof(pszDebug), "SECTION捕捉: 开始");
+		sprintf_s(pszDebug, sizeof(pszDebug), "SECTION捕捉<ID:0x%08X>: 开始", randNum);
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_OPEN);
+		LOG(INFO) << pszDebug;
 
 		ptransport_stream = pThreadParams->pTStream;
 		ptransport_stream->StartGetData();				//启动接收线程
 
 		pSectionTrigger = pThreadParams->pTrigger_Section;
 
-		//while (pThreadParams->section_trigger_thread_running == 1)
-		//{
-		//	packet_length = sizeof(packet_buf);
-		//	rtcode = ptransport_stream->PrefetchOnePacket(packet_buf, &packet_length);
-		//	if (rtcode == MIDDLEWARE_TS_NO_ERROR)
-		//	{
-		//		//成功读出一个TS包
-		//		rtcode = MPEG_decode_TS_packet(packet_buf, packet_length, &transport_packet);
-		//		if (rtcode == TSPACKET_PARSE_NO_ERROR)
-		//		{
-		//			//PSISI section trigger
-		//			if (transport_packet.PID == pSectionTrigger->GetPID())
-		//			{
-		//				if (pSectionTrigger->IsOpened() && (!pSectionTrigger->IsFull()))
-		//				{
-		//					do {
-		//						rtcode = SectionSplicer.WriteTSPacket(&transport_packet);
-		//						if ((rtcode == NO_ERROR) || (rtcode == SECTION_SPLICE_ONE_MORE_SECTIONS))
-		//						{
-		//							if (pSectionTrigger->IsMatched(SectionSplicer.m_pucSectionBuf, SectionSplicer.m_nSectionLength))
-		//							{
-		//								int nOldCatchedCount = pSectionTrigger->GetCatchedCount();
-		//								pSectionTrigger->SaveTheWholePacket(SectionSplicer.m_pucSectionBuf, SectionSplicer.m_nSectionLength);
+		while (pThreadParams->section_trigger_thread_running == 1)
+		{
+			if (stream_synced == 0)
+			{
+				do
+				{
+					rtcode = ptransport_stream->Synchronize(&packet_length);
+					if (rtcode == MIDDLEWARE_TS_NO_ERROR)
+					{
+						stream_synced = 1;
 
-		//								if (nOldCatchedCount == 0)		//捕捉到第一个匹配section时报告状态
-		//								{
-		//									::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_SECTION_TRIGGER_STATE, 0, 0);
-		//								}
+						read_byte_pos = ptransport_stream->Tell();			//因为是预读一个包，实际FIFO读指针并未发生移动
+						sprintf_s(pszDebug, sizeof(pszDebug), "SECTION捕捉<ID:0x%08X>: 找到同步, TS包长 %d字节（文件位置：0x%llx）\n", randNum, packet_length, read_byte_pos);
 
-		//								if (pSectionTrigger->IsFull())
-		//								{
-		//									break;
-		//								}
-		//							}
+						::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
+						LOG(INFO) << pszDebug;
+						break;
+					}
+					else if (rtcode == MIDDLEWARE_TS_FILE_EOF_ERROR)
+					{
+						ptransport_stream->SeekToBegin();
+					}
+				} while (pThreadParams->section_trigger_thread_running == 1);
+			}
+			else if (stream_synced == 1)
+			{
+				packet_length = sizeof(packet_buf);
+				rtcode = ptransport_stream->SyncReadOnePacket(packet_buf, &packet_length);
+				read_byte_pos = ptransport_stream->Tell();			//因为是预读一个包，实际FIFO读指针并未发生移动
+				if (rtcode == MIDDLEWARE_TS_NO_ERROR)
+				{
+					//成功读出一个TS包
+					rtcode = MPEG_decode_TS_packet(packet_buf, packet_length, &transport_packet);
+					if (rtcode == TSPACKET_PARSE_NO_ERROR)
+					{
+						//PSISI section trigger
+						if (transport_packet.PID == pSectionTrigger->GetPID())
+						{
+							if (pSectionTrigger->IsOpened() && (!pSectionTrigger->IsFull()))
+							{
+								do {
+									rtcode = SectionSplicer.WriteTSPacket(&transport_packet);
+									
+									if (rtcode == SECTION_SPLICE_FIRST_PACKET)
+									{
+										catchedCount = 1;
+										section_start_pos = read_byte_pos - packet_length;
+									}
+									else if (rtcode == SECTION_SPLICE_FOLLOW_PACKET)
+									{
+										catchedCount++;
+									}
+									else if ((rtcode == SECTION_SPLICE_LAST_PACKET) || (rtcode == SECTION_SPLICE_LAST_PACKET_WITH_ANOTHER_START))
+									{
+										catchedCount++;
 
-		//							SectionSplicer.Reset();
-		//						}
-		//					} while (rtcode == SECTION_SPLICE_ONE_MORE_SECTIONS);
+										if (rtcode == SECTION_SPLICE_LAST_PACKET_WITH_ANOTHER_START)
+										{
+											section_end_pos = read_byte_pos - packet_length + 4 + 1 + transport_packet.payload_buf[0];		//pointer_field
+										}
+										else
+										{
+											section_end_pos = read_byte_pos;
+										}
 
-		//					if (pSectionTrigger->IsFull())
-		//					{
-		//						break;
-		//					}
-		//				}
-		//			}
-		//		}
-		//		else
-		//		{
-		//			//解析TS包语法发现错误，为什么发生错误？？？？
-		//			assert(0);
-		//		}
+										if (pSectionTrigger->IsMatched(SectionSplicer.m_pucSectionBuf, SectionSplicer.m_nSectionLength))
+										{
+											int nOldCatchedCount = pSectionTrigger->GetCatchedCount();
+											pSectionTrigger->SaveTheWholePacket(SectionSplicer.m_pucSectionBuf, SectionSplicer.m_nSectionLength);
 
-		//		ptransport_stream->SkipOnePacket();
-		//	}
-		//	else if (rtcode == MIDDLEWARE_TS_FILE_EOF_ERROR)
-		//	{
-		//		ptransport_stream->SeekToBegin();
-		//	}
-		//	else if (rtcode == MIDDLEWARE_TS_FIFO_EMPTY_ERROR)
-		//	{
-		//		//				Sleep(10);
-		//	}
-		//	else
-		//	{
-		//		break;
-		//	}
+											if (nOldCatchedCount == 0)		//捕捉到第一个匹配section时报告状态
+											{
+												::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_SECTION_TRIGGER_STATE, 0, 0);
 
-		//}
+												if (section_start_pos == -1)
+												{
+													section_start_pos = read_byte_pos - packet_length;
+												}
+
+												sprintf_s(pszDebug, sizeof(pszDebug), "SECTION捕捉<ID:0x%08X>: 找到匹配Section（文件位置：开始于0x%llx - 结束于0x%llx）\n", randNum, section_start_pos, section_end_pos);
+												::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
+												LOG(INFO) << pszDebug;
+											}
+
+											if (pSectionTrigger->IsFull())
+											{
+												if (rtcode == SECTION_SPLICE_LAST_PACKET_WITH_ANOTHER_START)
+												{
+													ptransport_stream->Seek(read_byte_pos - packet_length);
+												}
+												else
+												{
+													ptransport_stream->Seek(read_byte_pos);
+												}
+
+												break;
+											}
+										}
+										else
+										{
+											if (rtcode == SECTION_SPLICE_LAST_PACKET_WITH_ANOTHER_START)
+											{
+												section_start_pos = read_byte_pos - packet_length;
+											}
+											else
+											{
+												section_start_pos = -1;
+											}
+											section_end_pos = -1;
+											catchedCount = 0;
+										}
+
+										SectionSplicer.Reset();
+									}
+								} while (rtcode == SECTION_SPLICE_LAST_PACKET_WITH_ANOTHER_START);
+
+								if (pSectionTrigger->IsFull())
+								{
+									break;
+								}
+							}
+						}
+					}
+					else
+					{
+						//解析TS包语法发现错误，为什么发生错误？？？？
+						assert(0);
+					}
+				}
+				else if (rtcode == ETR290_TS_SYNC_LOSS)
+				{
+					//读取TS包发生错误——同步丢失
+					stream_synced = 0;
+
+					sprintf_s(pszDebug, sizeof(pszDebug), "SECTION捕捉<ID:0x%08X>: 丢失同步（文件位置：0x%llx）\n", randNum, read_byte_pos);
+					::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
+					LOG(INFO) << pszDebug;
+				}
+				else if (rtcode == MIDDLEWARE_TS_FILE_EOF_ERROR)
+				{
+					ptransport_stream->SeekToBegin();
+				}
+				else if (rtcode == MIDDLEWARE_TS_FIFO_EMPTY_ERROR)
+				{
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
 
 		ptransport_stream->StopGetData();
 
@@ -785,8 +875,12 @@ void ts_section_trigger_loop(pthread_params_t pThreadParams)
 		pThreadParams->section_trigger_thread_running = 0;
 //		pThreadParams->section_trigger_thread_stopped = 1;
 
-		sprintf_s(pszDebug, sizeof(pszDebug), "SECTION捕捉: 结束");
+		uint32_t existTickCount = ::GetTickCount();
+		uint32_t diff_tickcount = existTickCount - tickCount;
+
+		sprintf_s(pszDebug, sizeof(pszDebug), "SECTION捕捉<ID:0x%08X>: 结束, 共抓%d个TS包，耗时%dms", randNum, catchedCount, diff_tickcount);
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_CLOSE);
+		LOG(INFO) << pszDebug;
 	}
 	//else
 	//{

@@ -1,4 +1,4 @@
-#include <string.h>
+ï»¿#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <io.h>
@@ -33,7 +33,7 @@ uint32_t thread_receive_transport_stream(LPVOID lpParam)
 			{
 				while (ptransport_stream->m_nReceiving)
 				{
-					if (strcmp(ptransport_stream->m_pszProtocolHead, "FILE") == 0)				//ÀëÏß·ÖÎöÄ£Ê½£¬¶ÁÎÄ¼þ
+					if (strcmp(ptransport_stream->m_pszProtocolHead, "FILE") == 0)				//ç¦»çº¿åˆ†æžæ¨¡å¼ï¼Œè¯»æ–‡ä»¶
 					{
 						if (ptransport_stream->m_nEOF == 0)
 						{
@@ -55,19 +55,26 @@ uint32_t thread_receive_transport_stream(LPVOID lpParam)
 								}
 								else if (rdsize == 0)
 								{
-									ptransport_stream->m_nEOF = 1;
-									rtcode = MIDDLEWARE_TS_FILE_EOF_ERROR;
+									if (ptransport_stream->m_nMode == 0)		//offline mode
+									{
+										ptransport_stream->m_nEOF = 1;
+										rtcode = MIDDLEWARE_TS_FILE_EOF_ERROR;
+									}
+									else     //realtime mode
+									{
+										file_seek(0);
+									}
 								}
 								else
 								{
 									assert(0);
-									rtcode = MIDDLEWARE_TS_STREAM_NODATA_ERROR;				//Ã»ÓÐ²É¼¯µ½ÊµÊ±Á÷
+									rtcode = MIDDLEWARE_TS_STREAM_NODATA_ERROR;				//æ²¡æœ‰é‡‡é›†åˆ°å®žæ—¶æµ
 								}
 							}
 						}
 						else
 						{
-							//ÕýÔÚÎÄ¼þÎ²£¬¿Õ×ª£¬µÈ´ýÓ¦ÓÃÖØÖÃÎÄ¼þÖ¸Õë
+							//æ­£åœ¨æ–‡ä»¶å°¾ï¼Œç©ºè½¬ï¼Œç­‰å¾…åº”ç”¨é‡ç½®æ–‡ä»¶æŒ‡é’ˆ
 							Sleep(100);
 						}
 					}
@@ -97,7 +104,7 @@ uint32_t thread_receive_transport_stream(LPVOID lpParam)
 								}
 								else
 								{
-									rtcode = MIDDLEWARE_TS_STREAM_NODATA_ERROR;				//Ã»ÓÐ²É¼¯µ½ÊµÊ±Á÷
+									rtcode = MIDDLEWARE_TS_STREAM_NODATA_ERROR;				//æ²¡æœ‰é‡‡é›†åˆ°å®žæ—¶æµ
 								}
 							}
 
@@ -130,7 +137,7 @@ uint32_t thread_receive_transport_stream(LPVOID lpParam)
 								}
 								else
 								{
-									rtcode = MIDDLEWARE_TS_STREAM_NODATA_ERROR;				//Ã»ÓÐ²É¼¯µ½ÊµÊ±Á÷
+									rtcode = MIDDLEWARE_TS_STREAM_NODATA_ERROR;				//æ²¡æœ‰é‡‡é›†åˆ°å®žæ—¶æµ
 								}
 							}
 						}
@@ -157,7 +164,7 @@ uint32_t thread_receive_transport_stream(LPVOID lpParam)
 							}
 							else
 							{
-								rtcode = MIDDLEWARE_TS_STREAM_NODATA_ERROR;				//Ã»ÓÐ²É¼¯µ½ÊµÊ±Á÷
+								rtcode = MIDDLEWARE_TS_STREAM_NODATA_ERROR;				//æ²¡æœ‰é‡‡é›†åˆ°å®žæ—¶æµ
 							}
 						}
 					}
@@ -171,7 +178,7 @@ uint32_t thread_receive_transport_stream(LPVOID lpParam)
 			}
 			else
 			{
-				Sleep(100);    //¿Õ×ª£¬µÈ´ýÏÂ´Î½ÓÊÕÖ¸Áî
+				Sleep(100);    //ç©ºè½¬ï¼Œç­‰å¾…ä¸‹æ¬¡æŽ¥æ”¶æŒ‡ä»¤
 			}
 		}
 
@@ -201,10 +208,10 @@ CTransportStream::CTransportStream(void)
 	m_llCurReadPos = 0;
 	m_llTotalFileLength					= 0;
 
-	m_bitrate_mean_value = UNCREDITABLE_MAX_VALUE;									//Æ½»¬ºóµÄ±ÈÌØÂÊ
-	m_bitrate_rms_value = UNCREDITABLE_MAX_VALUE;									//±ÈÌØÂÊ¶¶¶¯·½²î
-	m_bitrate_min_value = UNCREDITABLE_MIN_VALUE;									//Æ½»¬ºóµÄ×îÐ¡±ÈÌØÂÊ
-	m_bitrate_max_value = UNCREDITABLE_MAX_VALUE;									//Æ½»¬ºóµÄ×î´ó±ÈÌØÂÊ
+	m_bitrate_mean_value = UNCREDITABLE_MAX_VALUE;									//å¹³æ»‘åŽçš„æ¯”ç‰¹çŽ‡
+	m_bitrate_rms_value = UNCREDITABLE_MAX_VALUE;									//æ¯”ç‰¹çŽ‡æŠ–åŠ¨æ–¹å·®
+	m_bitrate_min_value = UNCREDITABLE_MIN_VALUE;									//å¹³æ»‘åŽçš„æœ€å°æ¯”ç‰¹çŽ‡
+	m_bitrate_max_value = UNCREDITABLE_MAX_VALUE;									//å¹³æ»‘åŽçš„æœ€å¤§æ¯”ç‰¹çŽ‡
 
 	m_bitrate_sample_index = 0;
 	m_bitrate_sample_count = 0;
@@ -233,14 +240,14 @@ CTransportStream::~CTransportStream()
 
 int CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 {
-	int	 rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;					//Ä¬ÈÏ·µ»Ø³É¹¦
+	int	 rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;					//é»˜è®¤è¿”å›žæˆåŠŸ
 	char*  pdest;
 	int   idx;
 	char   ip_addr[16];
 	int  port;
 //	int  netcard_index = 1;
 
-	//³õÊ¼×´Ì¬ÉèÖÃ
+	//åˆå§‹çŠ¶æ€è®¾ç½®
 	m_nMode = mode;
 
 	m_nRunning = 1;
@@ -262,9 +269,9 @@ int CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 	pszIniFile[len] = '\0';
 	sprintf_s(pszIniFile, sizeof(pszIniFile), "%s\\config.ini", pszIniFile);
 
-	m_bEnableTSRateDebug = GetPrivateProfileIntA("±à³ÌÕßÕï¶Ï", "TSÂëÂÊ", 0, pszIniFile);
+	m_bEnableTSRateDebug = GetPrivateProfileIntA("ç¼–ç¨‹è€…è¯Šæ–­", "TSç çŽ‡", 0, pszIniFile);
 
-	//URL½âÎö£¬´ÓURL»ñÈ¡ÊäÈë²ÎÊý
+	//URLè§£æžï¼Œä»ŽURLèŽ·å–è¾“å…¥å‚æ•°
 	//pdest = strstr(url_str, "://");
 	//if (pdest != NULL)
 	//{
@@ -337,7 +344,7 @@ int CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 	}
 	else
 	{
-		rtcode = MIDDLEWARE_TS_PARAMETER_ERROR;						//Ð­Òé´íÎó
+		rtcode = MIDDLEWARE_TS_PARAMETER_ERROR;						//åè®®é”™è¯¯
 	}
 
 	//char	pszExeFile[MAX_PATH];
@@ -363,7 +370,7 @@ int CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 	}
 	if (fp_tsrate_dbase != NULL)
 	{
-		fprintf(fp_tsrate_dbase, "µ±Ç°Öµ, ¾ùÖµ, ±ê×¼²î\n");
+		fprintf(fp_tsrate_dbase, "å½“å‰å€¼, å‡å€¼, æ ‡å‡†å·®\n");
 	}
 
 #if USE_FIFO_ACCESS_MUTEX
@@ -440,10 +447,10 @@ int CTransportStream::Close()
 	m_bSynced = 0;
 
 	m_bitrate_cur_value = UNCREDITABLE_MAX_VALUE;
-	m_bitrate_mean_value = UNCREDITABLE_MAX_VALUE;									//Æ½»¬ºóµÄ±ÈÌØÂÊ
-	m_bitrate_rms_value = UNCREDITABLE_MAX_VALUE;									//±ÈÌØÂÊ¶¶¶¯·½²î
-	m_bitrate_min_value = UNCREDITABLE_MIN_VALUE;									//Æ½»¬ºóµÄ×îÐ¡±ÈÌØÂÊ
-	m_bitrate_max_value = UNCREDITABLE_MAX_VALUE;									//Æ½»¬ºóµÄ×î´ó±ÈÌØÂÊ
+	m_bitrate_mean_value = UNCREDITABLE_MAX_VALUE;									//å¹³æ»‘åŽçš„æ¯”ç‰¹çŽ‡
+	m_bitrate_rms_value = UNCREDITABLE_MAX_VALUE;									//æ¯”ç‰¹çŽ‡æŠ–åŠ¨æ–¹å·®
+	m_bitrate_min_value = UNCREDITABLE_MIN_VALUE;									//å¹³æ»‘åŽçš„æœ€å°æ¯”ç‰¹çŽ‡
+	m_bitrate_max_value = UNCREDITABLE_MAX_VALUE;									//å¹³æ»‘åŽçš„æœ€å¤§æ¯”ç‰¹çŽ‡
 
 	m_bitrate_sample_index = 0;
 	m_bitrate_sample_count = 0;
@@ -531,7 +538,7 @@ int CTransportStream::StopGetData(void)
 
 	m_nReceiving = 0;
 
-	//µÈ´ýÏß³ÌÍË³ö
+	//ç­‰å¾…çº¿ç¨‹é€€å‡º
 	while (m_nStopReceiving == 0)
 	{
 		Sleep(100);
@@ -559,10 +566,10 @@ int CTransportStream::Reset()
 	int		rtcode = MIDDLEWARE_TS_NO_ERROR;
 
 	m_bitrate_cur_value = UNCREDITABLE_MAX_VALUE;
-	m_bitrate_mean_value = UNCREDITABLE_MAX_VALUE;									//Æ½»¬ºóµÄ±ÈÌØÂÊ
-	m_bitrate_rms_value = UNCREDITABLE_MAX_VALUE;									//±ÈÌØÂÊ¶¶¶¯·½²î
-	m_bitrate_min_value = UNCREDITABLE_MIN_VALUE;									//Æ½»¬ºóµÄ×îÐ¡±ÈÌØÂÊ
-	m_bitrate_max_value = UNCREDITABLE_MAX_VALUE;									//Æ½»¬ºóµÄ×î´ó±ÈÌØÂÊ
+	m_bitrate_mean_value = UNCREDITABLE_MAX_VALUE;									//å¹³æ»‘åŽçš„æ¯”ç‰¹çŽ‡
+	m_bitrate_rms_value = UNCREDITABLE_MAX_VALUE;									//æ¯”ç‰¹çŽ‡æŠ–åŠ¨æ–¹å·®
+	m_bitrate_min_value = UNCREDITABLE_MIN_VALUE;									//å¹³æ»‘åŽçš„æœ€å°æ¯”ç‰¹çŽ‡
+	m_bitrate_max_value = UNCREDITABLE_MAX_VALUE;									//å¹³æ»‘åŽçš„æœ€å¤§æ¯”ç‰¹çŽ‡
 
 	m_bitrate_sample_index = 0;
 	m_bitrate_sample_count = 0;
@@ -573,7 +580,7 @@ int CTransportStream::Reset()
 	return rtcode;
 }
 
-//ÕÒÍ¬²½
+//æ‰¾åŒæ­¥
 int CTransportStream::Synchronize(int* plength)
 {
 	int						rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
@@ -653,7 +660,7 @@ int CTransportStream::Synchronize(int* plength)
 			}
 			else
 			{
-				rtcode = MIDDLEWARE_TS_FIFO_EMPTY_ERROR;				//FIFO¿Õ
+				rtcode = MIDDLEWARE_TS_FIFO_EMPTY_ERROR;				//FIFOç©º
 			}
 
 			bExist = 1;
@@ -700,14 +707,14 @@ int CTransportStream::SyncReadOnePacket(uint8_t* buf, int* plength)
 					m_nPacketLength = 0;
 					*plength = 0;
 
-					rtcode = ETR290_TS_SYNC_LOSS;						//Í¬²½¶ªÊ§
+					rtcode = ETR290_TS_SYNC_LOSS;						//åŒæ­¥ä¸¢å¤±
 				}
 #if USE_FIFO_ACCESS_MUTEX
 				::ReleaseMutex(m_hFifoAccess);
 			}
 #endif
 		}
-		else		//FIFOÊý¾ÝÁ¿²»¹»
+		else		//FIFOæ•°æ®é‡ä¸å¤Ÿ
 		{
 			if (m_nEOF == 1)
 			{
@@ -715,13 +722,13 @@ int CTransportStream::SyncReadOnePacket(uint8_t* buf, int* plength)
 			}
 			else
 			{
-				rtcode = MIDDLEWARE_TS_FIFO_EMPTY_ERROR;				//FIFO¿Õ
+				rtcode = MIDDLEWARE_TS_FIFO_EMPTY_ERROR;				//FIFOç©º
 			}
 		}
 	}
 	else
 	{
-		rtcode = MIDDLEWARE_TS_PARAMETER_ERROR;						//ÊäÈë²ÎÊý´íÎó
+		rtcode = MIDDLEWARE_TS_PARAMETER_ERROR;						//è¾“å…¥å‚æ•°é”™è¯¯
 	}
 
 	return rtcode;
@@ -753,10 +760,10 @@ int CTransportStream::SyncReadOnePacket(uint8_t* buf, int* plength)
 //				m_nPacketLength = 0;
 //				*plength = 0;
 //
-//				rtcode = ETR290_TS_SYNC_LOSS;						//Í¬²½¶ªÊ§
+//				rtcode = ETR290_TS_SYNC_LOSS;						//åŒæ­¥ä¸¢å¤±
 //			}
 //		}
-//		else		//FIFOÊý¾ÝÁ¿²»¹»
+//		else		//FIFOæ•°æ®é‡ä¸å¤Ÿ
 //		{
 //			if (m_nEOF == 1)
 //			{
@@ -764,13 +771,13 @@ int CTransportStream::SyncReadOnePacket(uint8_t* buf, int* plength)
 //			}
 //			else
 //			{
-//				rtcode = MIDDLEWARE_TS_FIFO_EMPTY_ERROR;				//FIFO¿Õ
+//				rtcode = MIDDLEWARE_TS_FIFO_EMPTY_ERROR;				//FIFOç©º
 //			}
 //		}
 //	}
 //	else
 //	{
-//		rtcode = MIDDLEWARE_TS_PARAMETER_ERROR;						//ÊäÈë²ÎÊý´íÎó
+//		rtcode = MIDDLEWARE_TS_PARAMETER_ERROR;						//è¾“å…¥å‚æ•°é”™è¯¯
 //	}
 //
 //	return rtcode;
@@ -786,55 +793,55 @@ int CTransportStream::SyncReadOnePacket(uint8_t* buf, int* plength)
 //	return rtcode;
 //}
 
-//int CTransportStream::StartGetBitrate(void)
-//{
-//	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
-//
-//	if (strcmp(m_pszProtocolHead, "FILE") == 0)
-//	{
-//	}
-//	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
-//	{
-//#ifdef _WIN64
-//#else
-//		if (strcmp(m_pszProtocolExt, "SMARTTS") == 0)
-//		{
-//			smartts_start_timer();
-//		}
-//		else if (strcmp(m_pszProtocolExt, "DEKTEC") == 0)
-//		{
-//	//		dektec_start_timer();
-//		}
-//#endif
-//	}
-//
-//	return rtcode;
-//}
+int CTransportStream::StartGetBitrate(void)
+{
+	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
 
-//int CTransportStream::StopGetBitrate(void)
-//{
-//	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
-//
-//	if (strcmp(m_pszProtocolHead, "FILE") == 0)
-//	{
-//	}
-//	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
-//	{
-//#ifdef _WIN64
-//#else
-//		if (strcmp(m_pszProtocolExt, "SMARTTS") == 0)
-//		{
-//			smartts_stop_timer();
-//		}
-//		else if (strcmp(m_pszProtocolExt, "DEKTEC") == 0)
-//		{
-//	//		dektec_stop_timer();
-//		}
-//#endif
-//	}
-//
-//	return rtcode;
-//}
+	if (strcmp(m_pszProtocolHead, "FILE") == 0)
+	{
+	}
+	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
+	{
+#ifdef _WIN64
+#else
+		if (strcmp(m_pszProtocolExt, "SMARTTS") == 0)
+		{
+			smartts_start_timer();
+		}
+		else if (strcmp(m_pszProtocolExt, "DEKTEC") == 0)
+		{
+	//		dektec_start_timer();
+		}
+#endif
+	}
+
+	return rtcode;
+}
+
+int CTransportStream::StopGetBitrate(void)
+{
+	int rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
+
+	if (strcmp(m_pszProtocolHead, "FILE") == 0)
+	{
+	}
+	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
+	{
+#ifdef _WIN64
+#else
+		if (strcmp(m_pszProtocolExt, "SMARTTS") == 0)
+		{
+			smartts_stop_timer();
+		}
+		else if (strcmp(m_pszProtocolExt, "DEKTEC") == 0)
+		{
+	//		dektec_stop_timer();
+		}
+#endif
+	}
+
+	return rtcode;
+}
 
 //int CTransportStream::GetBitrateMap(int pbitrate_map[], int count)
 //{
@@ -995,26 +1002,25 @@ void CTransportStream::SeekToBegin(void)
 		m_nEOF = 0;
 	}
 }
-/*
-void CTransportStream::Seek(int64_t fileoffset)
-{
-	if (m_hFile != -1)
-	{
-//		m_llCurFilePos = fileoffset;
-		_lseeki64(m_hFile, fileoffset, SEEK_SET);
 
-		int64_t llCurFilePos = _telli64(m_hFile);
-		if (llCurFilePos >= m_llTotalFileLength)
-		{
-			m_nEOF = 1;
-		}
-		else
-		{
-			m_nEOF = 0;
-		}
+void CTransportStream::Seek(int64_t offset)
+{
+	m_llCurReadPos = offset;
+	if (offset < m_llTotalFileLength)
+	{
+		m_nEOF = 0;
+	}
+	else
+	{
+		m_nEOF = 1;
+	}
+
+	if (strcmp(m_pszProtocolHead, "FILE") == 0)
+	{
+		file_seek(offset);
 	}
 }
-*/
+
 int64_t CTransportStream::Tell(void)
 {
 	return m_llCurReadPos;

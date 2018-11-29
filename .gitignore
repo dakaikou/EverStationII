@@ -10,6 +10,9 @@
 *.lib
 *.dll
 *.exp
+*.db
+*.suo
+*.VC.db
 /Apps/EverStationII/Debug/
 /Apps/EverStationII/Release/
 

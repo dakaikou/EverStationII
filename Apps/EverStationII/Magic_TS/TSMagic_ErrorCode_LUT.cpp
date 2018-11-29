@@ -4,7 +4,6 @@
 
 #include "TSMagic_ErrorCode.h"
 
-//#include "MiddleWare\MiddleWare_Utilities\Include\MiddleWare_Utilities.h"
 #include "MiddleWare\MiddleWare_TS_PayloadSplicer\Include\MiddleWare_SectionSplicer_ErrorCode.h"
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "translate_layer\MPEG2_DVB_Section\Include\MPEG2_DVB_ErrorCode.h"
@@ -65,7 +64,7 @@ int	TSMagic_ErrorCodeLookup(uint32_t error_code, char* pszText, int size)
 		case SECTION_SPLICE_SCRAMBLED_PACKET:
 			sprintf_s(pszText, size, "section拼接TS包加扰(代码:0x%08X)", error_code);
 			break;
-		case SECTION_SPLICE_NOT_COMPLETE:
+		case SECTION_SPLICE_FOLLOW_PACKET:
 			sprintf_s(pszText, size, "section拼接未等到足够数据(代码:0x%08X)", error_code);
 			break;
 		case SECTION_SPLICE_INVALID_PACKET:
@@ -77,7 +76,7 @@ int	TSMagic_ErrorCodeLookup(uint32_t error_code, char* pszText, int size)
 		case SECTION_SPLICE_SYNTAX_ERROR:
 			sprintf_s(pszText, size, "section拼接语法错误(代码:0x%08X)", error_code);
 			break;
-		case SECTION_SPLICE_NOT_SYNC:
+		case SECTION_SPLICE_DO_NOT_SYNC:
 			sprintf_s(pszText, size, "section拼接TS包未同步(代码:0x%08X)", error_code);
 			break;
 			//TS_packet解析错误代码

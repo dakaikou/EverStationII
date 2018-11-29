@@ -659,7 +659,7 @@ int CDB_Pcrs::AddPCRSample(uint16_t usPcrPID, int64_t pos, PCR_code_t* pPCRCode,
 					fprintf(pInfo->fp_dbase, ", *%d",	pos_diff);
 				}
 				//位置计数器发生溢出
-				assert(0);
+				//assert(0);
 			}
 
 			if (pInfo->fp_dbase != NULL)

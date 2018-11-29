@@ -21,16 +21,16 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_TS_PayloadSplicer\Include\MiddleWare_PesSplicer_ErrorCode.h">
+    <ClInclude Include="Include\MiddleWare_PesSplicer_ErrorCode.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_TS_PayloadSplicer\Include\MiddleWare_SectionSplicer_ErrorCode.h">
+    <ClInclude Include="Include\MiddleWare_SectionSplicer_ErrorCode.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_TS_PayloadSplicer\Include\Mpeg2_PESSplicer.h">
+    <ClInclude Include="Include\Mpeg2_PESSplicer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\MiddleWare\MiddleWare_TS_PayloadSplicer\Include\Mpeg2_SectionSplicer.h">
+    <ClInclude Include="Include\Mpeg2_SectionSplicer.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -41,10 +41,10 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_TS_PayloadSplicer\Impl\Mpeg2_PESSplicer.cpp">
+    <ClCompile Include="Impl\Mpeg2_PESSplicer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\MiddleWare\MiddleWare_TS_PayloadSplicer\Impl\Mpeg2_SectionSplicer.cpp">
+    <ClCompile Include="Impl\Mpeg2_SectionSplicer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

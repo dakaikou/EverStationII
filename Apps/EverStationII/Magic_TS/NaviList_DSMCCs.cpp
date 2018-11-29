@@ -23,7 +23,7 @@ static char THIS_FILE[] = __FILE__;
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 
-#include "TSMagic_Decimate_Dsmcc.h"
+#include "TSMagic_Dsmcc_Download.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CListView_ServiceInfo
