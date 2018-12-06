@@ -41,10 +41,6 @@ static char THIS_FILE[] = __FILE__;
 #define SCREEN_MINLIMITCOLOR	RGB(120, 0, 0)
 #define SCREEN_PAINTCOLOR		RGB(220, 220, 0)
 
-//#define NOTSHOW_MIN_VALUE  123456789
-//#define NOTSHOW_MAX_VALUE  -123456789
-//#define NOTSHOW_VAR_VALUE  -100000000
-
 #define UNCREDITABLE_MAX_VALUE				-123456789
 #define UNCREDITABLE_MIN_VALUE				123456789
 
@@ -52,6 +48,7 @@ CInstrumentPanel_Base::CInstrumentPanel_Base()
 {
 	m_pMemDC = NULL;
 	m_pBkBrush = NULL;
+	m_pWaveformBrush = NULL;
 	m_pBkgroundBmp = NULL;
 	m_pWaveformBmp = NULL;
 	//m_pAlarmLineBmp = NULL;
@@ -93,6 +90,19 @@ CInstrumentPanel_Base::CInstrumentPanel_Base()
 
 	strcpy_s(m_pszXUnits, sizeof(m_pszXUnits), "ms");
 	strcpy_s(m_pszYUnits, sizeof(m_pszYUnits), "ms");
+
+	m_Palette[0] = SCREEN_WAVECOLOR0;
+	m_Palette[1] = SCREEN_WAVECOLOR1;
+	m_Palette[2] = SCREEN_WAVECOLOR2;
+	m_Palette[3] = SCREEN_WAVECOLOR3;
+	m_Palette[4] = SCREEN_WAVECOLOR4;
+	m_Palette[5] = SCREEN_WAVECOLOR5;
+	m_Palette[6] = SCREEN_WAVECOLOR6;
+	m_Palette[7] = SCREEN_WAVECOLOR7;
+	m_Palette[8] = SCREEN_WAVECOLOR8;
+	m_Palette[9] = SCREEN_WAVECOLOR9;
+	m_Palette[10] = SCREEN_WAVECOLOR10;
+	m_Palette[11] = SCREEN_WAVECOLOR11;
 }
 
 CInstrumentPanel_Base::~CInstrumentPanel_Base()
@@ -149,6 +159,12 @@ CInstrumentPanel_Base::~CInstrumentPanel_Base()
 	{
 		delete m_pBkBrush;
 		m_pBkBrush = NULL;
+	}
+
+	if (m_pWaveformBrush != NULL)
+	{
+		delete m_pWaveformBrush;
+		m_pWaveformBrush = NULL;
 	}
 
 	if (m_pAxisPen != NULL)
@@ -493,7 +509,34 @@ void CInstrumentPanel_Base::OnPaint()
 	CPaintDC dc(this); // device context for painting
 	
 	// TODO: Add your message handler code here
-	CombineDraw();
+	
+	if (m_bNeedUpdate == 1)
+	{
+		//CombineDraw();
+		BITMAP bm;
+
+		CDC* pDC = GetDC();
+
+		if (m_pBkgroundBmp != NULL)
+		{
+			m_pBkgroundBmp->GetBitmap(&bm);
+			m_pMemDC->SelectObject(m_pBkgroundBmp);
+			dc.StretchBlt(m_rectClient.left, m_rectClient.top, m_rectClient.Width(), m_rectClient.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+		}
+
+		if (m_pWaveformBmp != NULL)
+		{
+			if (m_pWaveformBmp->GetSafeHandle() != NULL)
+			{
+				m_pWaveformBmp->GetBitmap(&bm);
+				m_pMemDC->SelectObject(m_pWaveformBmp);
+				dc.StretchBlt(m_rectWaveform.left, m_rectWaveform.top, m_rectWaveform.Width(), m_rectWaveform.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCPAINT);
+			}
+		}
+
+		m_bNeedUpdate = 0;
+	}
+
 	// Do not call CStatic::OnPaint() for painting messages
 }
 
@@ -522,6 +565,12 @@ int CInstrumentPanel_Base::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	{
 		m_pBkBrush = new CBrush;
 		m_pBkBrush->CreateSolidBrush(SCREEN_BKCOLOR);
+	}
+
+	if (m_pWaveformBrush == NULL)
+	{
+		m_pWaveformBrush = new CBrush;
+		m_pWaveformBrush->CreateSolidBrush(RGB(0x00, 0x00, 0x00));
 	}
 
 	if (m_pAxisPen == NULL)
@@ -616,9 +665,14 @@ void CInstrumentPanel_Base::Reset(void)
 
 	for (int i = 0; i < m_nChannleCount; i++)
 	{
-		::SetEvent(m_pChannel[i]->hSampleAccess);
-		::CloseHandle(m_pChannel[i]->hSampleAccess);
-
+#if INSTRUMENT_PANEL_USE_MUTEX
+		if (m_pChannel[i]->hSampleAccess != NULL)
+		{
+			::SetEvent(m_pChannel[i]->hSampleAccess);
+			::CloseHandle(m_pChannel[i]->hSampleAccess);
+			m_pChannel[i]->hSampleAccess = NULL;
+		}
+#endif
 		if (m_pChannel[i]->pnXSampleArray != NULL)
 		{
 			delete m_pChannel[i]->pnXSampleArray;
@@ -652,8 +706,11 @@ void CInstrumentPanel_Base::Reset(void)
 	}
 
 	DisplayMeasuredValue(m_pMemDC, m_pBkgroundBmp, m_rectMeasuredValue);
-	DisplayMeasureGraph(m_pMemDC, m_pWaveformBmp);
 
+	ClearWaveform(m_pMemDC, m_pWaveformBmp);
+	//DisplayMeasureGraph(m_pMemDC, m_pWaveformBmp);
+
+	m_bNeedUpdate = 1;
 	Invalidate(FALSE);
 }
 
@@ -676,94 +733,63 @@ void CInstrumentPanel_Base::AppendXSample(int ID, int x)
 
 	if (pChannel == NULL)
 	{
-		pChannel = new SAMPLE_CHANNEL_t;
+		if (m_nChannleCount < MAX_CHANNEL_COUNT)
+		{
+			pChannel = new SAMPLE_CHANNEL_t;
 
-		pChannel->ID = ID;
-		pChannel->pnXSampleArray = new int[m_nChannleDepth];
-		memset(pChannel->pnXSampleArray, 0, sizeof(int) * m_nChannleDepth);
-		pChannel->pnYSampleArray = NULL;
-		pChannel->nSampleCount = 0;
-		pChannel->nSampleIndex = 0;
-		pChannel->hSampleAccess = ::CreateEvent(NULL, FALSE, TRUE, NULL);
+			pChannel->ID = ID;
+			pChannel->pnXSampleArray = new int[m_nChannleDepth];
+			memset(pChannel->pnXSampleArray, 0, sizeof(int) * m_nChannleDepth);
+			pChannel->pnYSampleArray = NULL;
+			pChannel->nSampleCount = 0;
+			pChannel->nSampleIndex = 0;
+			pChannel->bNeedRedrawing = 0;
 
-		if ((m_nChannleCount % 12) == 0)
-		{
-			pChannel->color = SCREEN_WAVECOLOR0;
-		}
-		else if ((m_nChannleCount % 12) == 1)
-		{
-			pChannel->color = SCREEN_WAVECOLOR1;
-		}
-		else if ((m_nChannleCount % 12) == 2)
-		{
-			pChannel->color = SCREEN_WAVECOLOR2;
-		}
-		else if ((m_nChannleCount % 12) == 3)
-		{
-			pChannel->color = SCREEN_WAVECOLOR3;
-		}
-		else if ((m_nChannleCount % 12) == 4)
-		{
-			pChannel->color = SCREEN_WAVECOLOR4;
-		}
-		else if ((m_nChannleCount % 12) == 5)
-		{
-			pChannel->color = SCREEN_WAVECOLOR5;
-		}
-		else if ((m_nChannleCount % 12) == 6)
-		{
-			pChannel->color = SCREEN_WAVECOLOR6;
-		}
-		else if ((m_nChannleCount % 12) == 7)
-		{
-			pChannel->color = SCREEN_WAVECOLOR7;
-		}
-		else if ((m_nChannleCount % 12) == 8)
-		{
-			pChannel->color = SCREEN_WAVECOLOR8;
-		}
-		else if ((m_nChannleCount % 12) == 9)
-		{
-			pChannel->color = SCREEN_WAVECOLOR9;
-		}
-		else if ((m_nChannleCount % 12) == 10)
-		{
-			pChannel->color = SCREEN_WAVECOLOR10;
-		}
-		else if ((m_nChannleCount % 12) == 11)
-		{
-			pChannel->color = SCREEN_WAVECOLOR11;
-		}
+#if INSTRUMENT_PANEL_USE_MUTEX
+			pChannel->hSampleAccess = ::CreateEvent(NULL, FALSE, TRUE, NULL);
+#endif
+			int color_index = m_nChannleCount % MAX_CHANNEL_COUNT;
+			pChannel->color = m_Palette[color_index];
 
-		m_pChannel[m_nChannleCount] = pChannel;
-		m_nChannleCount++;
+			m_pChannel[m_nChannleCount] = pChannel;
+			m_nChannleCount++;
+			assert(m_nChannleCount <= MAX_CHANNEL_COUNT);
+		}
 	}
 
-	if (pChannel->hSampleAccess != NULL)
+	if (pChannel != NULL)
 	{
-		::WaitForSingleObject(pChannel->hSampleAccess, INFINITE);
+#if INSTRUMENT_PANEL_USE_MUTEX
+		if (pChannel->hSampleAccess != NULL)
+		{
+			::WaitForSingleObject(pChannel->hSampleAccess, INFINITE);
+		}
+#endif
+
+		pChannel->pnXSampleArray[pChannel->nSampleIndex] = x;
+
+		pChannel->nSampleIndex++;
+		pChannel->nSampleIndex %= m_nChannleDepth;
+		if (pChannel->nSampleCount < m_nChannleDepth)
+		{
+			pChannel->nSampleCount++;
+		}
+
+		pChannel->bNeedRedrawing = 1;
+		m_bNeedUpdate = 1;
+
+#if INSTRUMENT_PANEL_USE_MUTEX
+		if (pChannel->hSampleAccess != NULL)
+		{
+			::SetEvent(pChannel->hSampleAccess);
+		}
+#endif
+
+		DisplayMeasuredValue(m_pMemDC, m_pBkgroundBmp, m_rectMeasuredValue);
+		DisplayMeasureGraph(m_pMemDC, m_pWaveformBmp);
+
+		Invalidate(FALSE);
 	}
-
-	pChannel->pnXSampleArray[pChannel->nSampleIndex] = x;
-	
-	pChannel->nSampleIndex++;
-	pChannel->nSampleIndex %= m_nChannleDepth;
-	if (pChannel->nSampleCount < m_nChannleDepth)
-	{
-		pChannel->nSampleCount++;
-	}
-
-	m_bNeedUpdate = 1;
-	
-	if (pChannel->hSampleAccess != NULL)
-	{
-		::SetEvent(pChannel->hSampleAccess);
-	}
-
-	DisplayMeasuredValue(m_pMemDC, m_pBkgroundBmp, m_rectMeasuredValue);
-	DisplayMeasureGraph(m_pMemDC, m_pWaveformBmp);
-
-	Invalidate(FALSE);
 }
 
 void CInstrumentPanel_Base::AppendYSample(int ID, int y)
@@ -783,95 +809,69 @@ void CInstrumentPanel_Base::AppendYSample(int ID, int y)
 
 	if (pChannel == NULL)
 	{
-		pChannel = new SAMPLE_CHANNEL_t;
+		if (m_nChannleCount < MAX_CHANNEL_COUNT)
+		{
+			pChannel = new SAMPLE_CHANNEL_t;
 
-		pChannel->ID = ID;
-		pChannel->pnXSampleArray = NULL;
-		pChannel->pnYSampleArray = new int[m_nChannleDepth];
-		memset(pChannel->pnYSampleArray, 0, sizeof(int) * m_nChannleDepth);
-		pChannel->nSampleCount = 0;
-		pChannel->nSampleIndex = 0;
-		pChannel->hSampleAccess = ::CreateEvent(NULL, FALSE, TRUE, NULL);
+			pChannel->ID = ID;
+			pChannel->pnXSampleArray = NULL;
+			pChannel->pnYSampleArray = new int[m_nChannleDepth];
+			memset(pChannel->pnYSampleArray, 0, sizeof(int) * m_nChannleDepth);
+			pChannel->nSampleCount = 0;
+			pChannel->nSampleIndex = 0;
+			pChannel->bNeedRedrawing = 0;
 
-		if ((m_nChannleCount % 12) == 0)
-		{
-			pChannel->color = SCREEN_WAVECOLOR0;
-		}
-		else if ((m_nChannleCount % 12) == 1)
-		{
-			pChannel->color = SCREEN_WAVECOLOR1;
-		}
-		else if ((m_nChannleCount % 12) == 2)
-		{
-			pChannel->color = SCREEN_WAVECOLOR2;
-		}
-		else if ((m_nChannleCount % 12) == 3)
-		{
-			pChannel->color = SCREEN_WAVECOLOR3;
-		}
-		else if ((m_nChannleCount % 12) == 4)
-		{
-			pChannel->color = SCREEN_WAVECOLOR4;
-		}
-		else if ((m_nChannleCount % 12) == 5)
-		{
-			pChannel->color = SCREEN_WAVECOLOR5;
-		}
-		else if ((m_nChannleCount % 12) == 6)
-		{
-			pChannel->color = SCREEN_WAVECOLOR6;
-		}
-		else if ((m_nChannleCount % 12) == 7)
-		{
-			pChannel->color = SCREEN_WAVECOLOR7;
-		}
-		else if ((m_nChannleCount % 12) == 8)
-		{
-			pChannel->color = SCREEN_WAVECOLOR8;
-		}
-		else if ((m_nChannleCount % 12) == 9)
-		{
-			pChannel->color = SCREEN_WAVECOLOR9;
-		}
-		else if ((m_nChannleCount % 12) == 10)
-		{
-			pChannel->color = SCREEN_WAVECOLOR10;
-		}
-		else if ((m_nChannleCount % 12) == 11)
-		{
-			pChannel->color = SCREEN_WAVECOLOR11;
-		}
+#if INSTRUMENT_PANEL_USE_MUTEX
+			pChannel->hSampleAccess = ::CreateEvent(NULL, FALSE, TRUE, NULL);
+#endif
 
-		m_pChannel[m_nChannleCount] = pChannel;
-		m_nChannleCount++;
+			int color_index = m_nChannleCount % MAX_CHANNEL_COUNT;
+			pChannel->color = m_Palette[color_index];
+
+			m_pChannel[m_nChannleCount] = pChannel;
+			m_nChannleCount++;
+			assert(m_nChannleCount <= MAX_CHANNEL_COUNT);
+		}
 	}
 
-	if (pChannel->hSampleAccess != NULL)
+	if (pChannel != NULL)
 	{
-		::WaitForSingleObject(pChannel->hSampleAccess, INFINITE);
+#if INSTRUMENT_PANEL_USE_MUTEX
+		if (pChannel->hSampleAccess != NULL)
+		{
+			::WaitForSingleObject(pChannel->hSampleAccess, INFINITE);
+		}
+#endif
+
+		pChannel->pnYSampleArray[pChannel->nSampleIndex] = y;
+
+		pChannel->nSampleIndex++;
+		pChannel->nSampleIndex %= m_nChannleDepth;
+		if (pChannel->nSampleCount < m_nChannleDepth)
+		{
+			pChannel->nSampleCount++;
+		}
+
+		pChannel->bNeedRedrawing = 1;
+		m_bNeedUpdate = 1;
+
+#if INSTRUMENT_PANEL_USE_MUTEX
+		if (pChannel->hSampleAccess != NULL)
+		{
+			::SetEvent(pChannel->hSampleAccess);
+		}
+#endif
+
+		DisplayMeasuredValue(m_pMemDC, m_pBkgroundBmp, m_rectMeasuredValue);
+		DisplayMeasureGraph(m_pMemDC, m_pWaveformBmp);
+
+		Invalidate(FALSE);
 	}
-
-	pChannel->pnYSampleArray[pChannel->nSampleIndex] = y;
-
-	pChannel->nSampleIndex++;
-	pChannel->nSampleIndex %= m_nChannleDepth;
-	if (pChannel->nSampleCount < m_nChannleDepth)
-	{
-		pChannel->nSampleCount++;
-	}
-
-	m_bNeedUpdate = 1;
-
-	::SetEvent(pChannel->hSampleAccess);
-
-	DisplayMeasuredValue(m_pMemDC, m_pBkgroundBmp, m_rectMeasuredValue);
-	DisplayMeasureGraph(m_pMemDC, m_pWaveformBmp);
-
-	Invalidate(FALSE);
 }
 
 void CInstrumentPanel_Base::AppendXYSample(int ID, int x, int y)
 {
+	//step1: look up the old record
 	SAMPLE_CHANNEL_t* pChannel = NULL;
 	for (int i = 0; i < m_nChannleCount; i++)
 	{
@@ -885,98 +885,72 @@ void CInstrumentPanel_Base::AppendXYSample(int ID, int x, int y)
 		}
 	}
 
+	//step 2: create a new record if not exist
 	if (pChannel == NULL)
 	{
-		pChannel = new SAMPLE_CHANNEL_t;
+		if (m_nChannleCount < MAX_CHANNEL_COUNT)
+		{
+			pChannel = new SAMPLE_CHANNEL_t;
 
-		pChannel->ID = ID;
+			pChannel->ID = ID;
 
-		pChannel->pnXSampleArray = new int[m_nChannleDepth];
-		memset(pChannel->pnXSampleArray, 0, sizeof(int) * m_nChannleDepth);
-		
-		pChannel->pnYSampleArray = new int[m_nChannleDepth];
-		memset(pChannel->pnYSampleArray, 0, sizeof(int) * m_nChannleDepth);
-		
-		pChannel->nSampleCount = 0;
-		pChannel->nSampleIndex = 0;
-		pChannel->hSampleAccess = ::CreateEvent(NULL, FALSE, TRUE, NULL);
+			pChannel->pnXSampleArray = new int[m_nChannleDepth];
+			memset(pChannel->pnXSampleArray, 0, sizeof(int) * m_nChannleDepth);
 
-		if ((m_nChannleCount % 12) == 0)
-		{
-			pChannel->color = SCREEN_WAVECOLOR0;
-		}
-		else if ((m_nChannleCount % 12) == 1)
-		{
-			pChannel->color = SCREEN_WAVECOLOR1;
-		}
-		else if ((m_nChannleCount % 12) == 2)
-		{
-			pChannel->color = SCREEN_WAVECOLOR2;
-		}
-		else if ((m_nChannleCount % 12) == 3)
-		{
-			pChannel->color = SCREEN_WAVECOLOR3;
-		}
-		else if ((m_nChannleCount % 12) == 4)
-		{
-			pChannel->color = SCREEN_WAVECOLOR4;
-		}
-		else if ((m_nChannleCount % 12) == 5)
-		{
-			pChannel->color = SCREEN_WAVECOLOR5;
-		}
-		else if ((m_nChannleCount % 12) == 6)
-		{
-			pChannel->color = SCREEN_WAVECOLOR6;
-		}
-		else if ((m_nChannleCount % 12) == 7)
-		{
-			pChannel->color = SCREEN_WAVECOLOR7;
-		}
-		else if ((m_nChannleCount % 12) == 8)
-		{
-			pChannel->color = SCREEN_WAVECOLOR8;
-		}
-		else if ((m_nChannleCount % 12) == 9)
-		{
-			pChannel->color = SCREEN_WAVECOLOR9;
-		}
-		else if ((m_nChannleCount % 12) == 10)
-		{
-			pChannel->color = SCREEN_WAVECOLOR10;
-		}
-		else if ((m_nChannleCount % 12) == 11)
-		{
-			pChannel->color = SCREEN_WAVECOLOR11;
-		}
+			pChannel->pnYSampleArray = new int[m_nChannleDepth];
+			memset(pChannel->pnYSampleArray, 0, sizeof(int) * m_nChannleDepth);
 
-		m_pChannel[m_nChannleCount] = pChannel;
-		m_nChannleCount++;
+			pChannel->nSampleCount = 0;
+			pChannel->nSampleIndex = 0;
+			pChannel->bNeedRedrawing = 0;
+
+#if INSTRUMENT_PANEL_USE_MUTEX
+			pChannel->hSampleAccess = ::CreateEvent(NULL, FALSE, TRUE, NULL);
+#endif
+
+			int color_index = m_nChannleCount % MAX_CHANNEL_COUNT;
+			pChannel->color = m_Palette[color_index];
+
+			m_pChannel[m_nChannleCount] = pChannel;
+			m_nChannleCount++;
+			assert(m_nChannleCount <= MAX_CHANNEL_COUNT);
+		}
 	}
 
-	if (pChannel->hSampleAccess != NULL)
+	if (pChannel != NULL)
 	{
-		::WaitForSingleObject(pChannel->hSampleAccess, INFINITE);
+#if INSTRUMENT_PANEL_USE_MUTEX
+		if (pChannel->hSampleAccess != NULL)
+		{
+			::WaitForSingleObject(pChannel->hSampleAccess, INFINITE);
+		}
+#endif
+
+		pChannel->pnXSampleArray[pChannel->nSampleIndex] = x;
+		pChannel->pnYSampleArray[pChannel->nSampleIndex] = y;
+
+		pChannel->nSampleIndex++;
+		pChannel->nSampleIndex %= m_nChannleDepth;
+		if (pChannel->nSampleCount < m_nChannleDepth)
+		{
+			pChannel->nSampleCount++;
+		}
+
+		pChannel->bNeedRedrawing = 1;
+		m_bNeedUpdate = 1;
+
+#if INSTRUMENT_PANEL_USE_MUTEX
+		if (pChannel->hSampleAccess != NULL)
+		{
+			::SetEvent(pChannel->hSampleAccess);
+		}
+#endif
+
+		DisplayMeasuredValue(m_pMemDC, m_pBkgroundBmp, m_rectMeasuredValue);
+		DisplayMeasureGraph(m_pMemDC, m_pWaveformBmp);
+
+		Invalidate(FALSE);
 	}
-
-	pChannel->pnXSampleArray[pChannel->nSampleIndex] = x;
-	pChannel->pnYSampleArray[pChannel->nSampleIndex] = y;
-
-	pChannel->nSampleIndex++;
-	pChannel->nSampleIndex %= m_nChannleDepth;
-	if (pChannel->nSampleCount < m_nChannleDepth)
-	{
-		pChannel->nSampleCount++;
-	}
-
-	m_bNeedUpdate = 1;
-
-	::SetEvent(pChannel->hSampleAccess);
-
-	DisplayMeasuredValue(m_pMemDC, m_pBkgroundBmp, m_rectMeasuredValue);
-	DisplayMeasureGraph(m_pMemDC, m_pWaveformBmp);
-
-	Invalidate(FALSE);
 }
 
 void CInstrumentPanel_Base::Init_X_Axis(int nXAxisStyle, int nXShownOption, int nXMinAlarm, int nXMaxAlarm, char* pszXUnits, int nXFloor, int nXCeil, int nXStep)
@@ -1009,64 +983,64 @@ void CInstrumentPanel_Base::Init_Y_Axis(int nYAxisStyle, int nYMarkShownOption, 
 	m_nYStep = nYStep;
 }
 
-void CInstrumentPanel_Base::CombineDraw(void)
-{
-	BITMAP bm;
-
-	CDC* pDC = GetDC();
-
-	if (m_pBkgroundBmp != NULL)
-	{
-		m_pBkgroundBmp->GetBitmap(&bm);
-		m_pMemDC->SelectObject(m_pBkgroundBmp);
-		pDC->StretchBlt(m_rectClient.left, m_rectClient.top, m_rectClient.Width(), m_rectClient.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
-	}
-
-	//if (m_pLeftMarkBmp != NULL)
-	//{
-	//	m_pLeftMarkBmp->GetBitmap(&bm);
-	//	m_pMemDC->SelectObject(m_pLeftMarkBmp);
-	//	pDC->StretchBlt(m_rectLeftMark.left, m_rectLeftMark.top, m_rectLeftMark.Width(), m_rectLeftMark.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCPAINT);
-	//}
-	//if (m_pMidMarkBmp != NULL)
-	//{
-	//	m_pMidMarkBmp->GetBitmap(&bm);
-	//	m_pMemDC->SelectObject(m_pMidMarkBmp);
-	//	pDC->StretchBlt(m_rectMidMark.left, m_rectMidMark.top, m_rectMidMark.Width(), m_rectMidMark.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCPAINT);
-	//}
-	//if (m_pRightMarkBmp != NULL)
-	//{
-	//	m_pRightMarkBmp->GetBitmap(&bm);
-	//	m_pMemDC->SelectObject(m_pRightMarkBmp);
-	//	pDC->StretchBlt(m_rectRightMark.left, m_rectRightMark.top, m_rectRightMark.Width(), m_rectRightMark.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCPAINT);
-	//}
-
-	//if (m_pAlarmLineBmp != NULL)
-	//{
-	//	m_pAlarmLineBmp->GetBitmap(&bm);
-	//	m_pMemDC->SelectObject(m_pAlarmLineBmp);
-	//	pDC->StretchBlt(m_rectWaveform.left, m_rectWaveform.top, m_rectWaveform.Width(), m_rectWaveform.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCPAINT);
-	//}
-
-	//if (m_pValueBmp != NULL)
-	//{
-	//	m_pValueBmp->GetBitmap(&bm);
-	//	m_pMemDC->SelectObject(m_pValueBmp);
-	//	pDC->StretchBlt(m_rectMeasureValue.left, m_rectMeasureValue.top, m_rectMeasureValue.Width(), m_rectMeasureValue.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCPAINT);
-	//}
-
-	if (m_pWaveformBmp != NULL)
-	{
-		if (m_pWaveformBmp->GetSafeHandle() != NULL)
-		{
-			m_pWaveformBmp->GetBitmap(&bm);
-			m_pMemDC->SelectObject(m_pWaveformBmp);
-			pDC->StretchBlt(m_rectWaveform.left, m_rectWaveform.top, m_rectWaveform.Width(), m_rectWaveform.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCPAINT);
-		}
-	}
-
-	ReleaseDC(pDC);
-}
+//void CInstrumentPanel_Base::CombineDraw(void)
+//{
+//	BITMAP bm;
+//
+//	CDC* pDC = GetDC();
+//
+//	if (m_pBkgroundBmp != NULL)
+//	{
+//		m_pBkgroundBmp->GetBitmap(&bm);
+//		m_pMemDC->SelectObject(m_pBkgroundBmp);
+//		pDC->StretchBlt(m_rectClient.left, m_rectClient.top, m_rectClient.Width(), m_rectClient.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+//	}
+//
+//	//if (m_pLeftMarkBmp != NULL)
+//	//{
+//	//	m_pLeftMarkBmp->GetBitmap(&bm);
+//	//	m_pMemDC->SelectObject(m_pLeftMarkBmp);
+//	//	pDC->StretchBlt(m_rectLeftMark.left, m_rectLeftMark.top, m_rectLeftMark.Width(), m_rectLeftMark.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCPAINT);
+//	//}
+//	//if (m_pMidMarkBmp != NULL)
+//	//{
+//	//	m_pMidMarkBmp->GetBitmap(&bm);
+//	//	m_pMemDC->SelectObject(m_pMidMarkBmp);
+//	//	pDC->StretchBlt(m_rectMidMark.left, m_rectMidMark.top, m_rectMidMark.Width(), m_rectMidMark.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCPAINT);
+//	//}
+//	//if (m_pRightMarkBmp != NULL)
+//	//{
+//	//	m_pRightMarkBmp->GetBitmap(&bm);
+//	//	m_pMemDC->SelectObject(m_pRightMarkBmp);
+//	//	pDC->StretchBlt(m_rectRightMark.left, m_rectRightMark.top, m_rectRightMark.Width(), m_rectRightMark.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCPAINT);
+//	//}
+//
+//	//if (m_pAlarmLineBmp != NULL)
+//	//{
+//	//	m_pAlarmLineBmp->GetBitmap(&bm);
+//	//	m_pMemDC->SelectObject(m_pAlarmLineBmp);
+//	//	pDC->StretchBlt(m_rectWaveform.left, m_rectWaveform.top, m_rectWaveform.Width(), m_rectWaveform.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCPAINT);
+//	//}
+//
+//	//if (m_pValueBmp != NULL)
+//	//{
+//	//	m_pValueBmp->GetBitmap(&bm);
+//	//	m_pMemDC->SelectObject(m_pValueBmp);
+//	//	pDC->StretchBlt(m_rectMeasureValue.left, m_rectMeasureValue.top, m_rectMeasureValue.Width(), m_rectMeasureValue.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCPAINT);
+//	//}
+//
+//	if (m_pWaveformBmp != NULL)
+//	{
+//		if (m_pWaveformBmp->GetSafeHandle() != NULL)
+//		{
+//			m_pWaveformBmp->GetBitmap(&bm);
+//			m_pMemDC->SelectObject(m_pWaveformBmp);
+//			pDC->StretchBlt(m_rectWaveform.left, m_rectWaveform.top, m_rectWaveform.Width(), m_rectWaveform.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCPAINT);
+//		}
+//	}
+//
+//	ReleaseDC(pDC);
+//}
 
 void CInstrumentPanel_Base::OnDestroy()
 {
@@ -1196,7 +1170,33 @@ void CInstrumentPanel_Base::OnSize(UINT nType, int cx, int cy)
 
 		DisplayMeasuredValue(m_pMemDC, m_pBkgroundBmp, m_rectMeasuredValue);
 
+		ClearWaveform(m_pMemDC, m_pWaveformBmp);
+		for (int i = 0; i < m_nChannleCount; i++)
+		{
+			m_pChannel[i]->bNeedRedrawing = 1;
+		}
 		DisplayMeasureGraph(m_pMemDC, m_pWaveformBmp);
+
+		m_bNeedUpdate = 1;
+	}
+}
+
+void CInstrumentPanel_Base::ClearWaveform(CDC* pMemDC, CBitmap* pWaveformBmp)
+{
+	if ((pMemDC != NULL) && (pWaveformBmp != NULL))
+	{
+		BITMAP bm;
+		CRect rectPicture;
+
+		pWaveformBmp->GetBitmap(&bm);
+
+		rectPicture.left = 0;
+		rectPicture.top = 0;
+		rectPicture.right = bm.bmWidth;
+		rectPicture.bottom = bm.bmHeight;
+
+		pMemDC->SelectObject(pWaveformBmp);
+		pMemDC->FillRect(&rectPicture, m_pWaveformBrush);
 	}
 }
 

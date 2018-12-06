@@ -41,7 +41,7 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 	int	  rtcode;
 
 	uint8_t	  record_buf[188 * 204];
-	int   write_size;
+	int		  write_size;
 
 	uint8_t*  section_buf;
 	int		  section_length;
@@ -55,8 +55,10 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 
 	int   recording_state = 0;
 	int	  recording_size = 0;
+
 	COleDateTime	timeCurrent;
 	CString			strTime;
+	time_t			syncread_start_time;
 
 	uint32_t	  thread_start_tickcount;
 	uint32_t	  thread_end_tickcount;
@@ -163,6 +165,7 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 						::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
 						LOG(INFO) << pszDebug;
 
+						syncread_start_time = time(NULL);
 						break;
 					}
 				} while (pThreadParams->main_thread_running == 1);
@@ -172,6 +175,15 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 				packet_length = sizeof(packet_buf);
 				rtcode = ptransport_stream->SyncReadOnePacket(packet_buf, &packet_length);
 				read_byte_pos = ptransport_stream->Tell();
+				uint32_t read_tickcount = ::GetTickCount();
+				time_t read_time = time(NULL);
+
+				int second_change = ((read_time - syncread_start_time) >= 2) ? 1 : 0;
+				if (second_change)
+				{
+					syncread_start_time = read_time;
+				}
+
 				if (rtcode == MIDDLEWARE_TS_NO_ERROR)
 				{
 					//汇报TS包长度
@@ -250,15 +262,18 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 #if OPEN_PACKET_STATISTIC
 						rtcode = pDB_TSPackets->AddPacket(&transport_packet);
 
-						if (pDB_TSPackets->callback_gui_update != NULL)
+						if (second_change)
 						{
-							if ((pDB_TSPackets->m_total_packet_count % 20000) == 0)
+							if (pDB_TSPackets->callback_gui_update != NULL)
 							{
-								pDB_TSPackets->callback_gui_update((int)ptransport_stream->GetBitrate(), NULL);
-							}
-							if ((pDB_TSPackets->m_total_packet_count % 20000000000) == 0)
-							{
-								pDB_TSPackets->PartialReset();
+								//if ((pDB_TSPackets->m_total_packet_count % 20000) == 0)
+								//{
+									pDB_TSPackets->callback_gui_update((int)ptransport_stream->GetBitrate(), NULL);
+								//}
+								//if ((pDB_TSPackets->m_total_packet_count % 20000000000) == 0)
+								//{
+									pDB_TSPackets->PartialReset();
+								//}
 							}
 						}
 #endif					
@@ -455,7 +470,7 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 								//采用获取副本的方式，防止子程序对原始数据进行修改
 								pDB_Pcrs->GetRecordByPID(transport_packet.PID, &PCRRecord);
 
-								CALLBACK_REPORT_PCR_Record(&PCRRecord);
+								CALLBACK_REPORT_PCR_Diagnosis(&PCRRecord);
 
 								int nID = PCRRecord.PCR_PID;
 
@@ -466,7 +481,7 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 									pDB_Pcrs->GetMeasuredIntervalAttribute(&interval_attr);
 									pDB_Pcrs->GetMeasuredJitterAttribute(&jitter_attr);
 
-									CALLBACK_REPORT_PCR_Attribute(nID, PCRRecord.interval_cur_value, PCRRecord.jitter_cur_value, &interval_attr, &jitter_attr);
+									CALLBACK_REPORT_PCR_Observation(nID, PCRRecord.interval_cur_value, PCRRecord.jitter_cur_value, &interval_attr, &jitter_attr);
 								}
 
 								//这里仅是一种码流速率的估算方法,实际上是不可以自己证明自己的，应该通过其他方式计算码率

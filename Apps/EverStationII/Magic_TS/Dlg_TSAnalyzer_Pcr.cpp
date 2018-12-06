@@ -299,9 +299,9 @@ void CDlg_TSAnalyzer_Pcr::OnSize(UINT nType, int cx, int cy)
 }
 
 
-void CDlg_TSAnalyzer_Pcr::UpdatePCRRecord(RECORD_PCR_t* pCurPcrInfo)
+void CDlg_TSAnalyzer_Pcr::UpdatePCRDiagnosis(RECORD_PCR_t* pCurPcrInfo)
 {
-	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+	//CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
 	char			pszText[MAX_TXT_CHARS];
 	int				nItemCount;
@@ -516,7 +516,7 @@ void CDlg_TSAnalyzer_Pcr::UpdatePCRRecord(RECORD_PCR_t* pCurPcrInfo)
 }
 
 
-void CDlg_TSAnalyzer_Pcr::UpdatePCR(int ID, int curInterval, int curJitter, PCR_INTERVAL_ATTRIBUTE_t* pIntervalAttr, PCR_JITTER_ATTRIBUTE_t* pJitterAttr)
+void CDlg_TSAnalyzer_Pcr::UpdatePCRObservation(int ID, int curInterval, int curJitter, PCR_INTERVAL_ATTRIBUTE_t* pIntervalAttr, PCR_JITTER_ATTRIBUTE_t* pJitterAttr)
 {
 	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 

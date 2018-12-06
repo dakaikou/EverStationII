@@ -39,20 +39,16 @@
 #include <time.h>
 #include <assert.h>
 
-#define AUDIO_ES_READ_SIZE				4096						//16 * 1024
-#define VIDEO_ES_READ_SIZE				4096						//32 * 1024
-
 #define MAX_SECTION_FILTERS				16
 
 void offline_ts_loop(pthread_params_t pThreadParams)
 {
-	uint8_t*	  section_buf;
-	int	  section_length;
+	uint8_t*  section_buf;
+	int		  section_length;
 	
 	uint8_t	  packet_buf[204];
-	int	  packet_length;
+	int		  packet_length;
 
-//	int	  old_pklength = -1;
 	char	  pszDebug[MAX_TXT_CHARS];
 	char	  pszTemp[128];
 
@@ -63,13 +59,13 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 
 	double file_size_div_100;
 	int64_t	  read_byte_pos = 0;			//只能读小于2G的文件
-	//int64_t	  old_read_byte_pos = 0;
 
-	int	  old_ratio = 0;
-	int	  analyse_ratio = 0;
-	uint32_t	  old_tickcount;
-	uint32_t	  new_tickcount;
-	int	  diff_tickcount;
+	int			  old_ratio = 0;
+	int			  analyse_ratio = 0;
+	uint32_t	  thread_start_tickcount;
+	uint32_t	  thread_finish_tickcount;
+	time_t		  syncread_start_time;
+	int			  diff_tickcount;
 
 	int	  stream_synced = 0;
 
@@ -91,15 +87,12 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 	CTrigger_TSPacket*	   pTSPacketTrigger = NULL;
 	CTrigger_PESPacket*	   pPESPacketTrigger = NULL;
 
-
-	int	hLastRecordHandler = -1;
-
 	if (pThreadParams != NULL)
 	{
 		assert(pThreadParams->main_thread_stopped == 0);
 		pThreadParams->main_thread_running = 1;
 
-		old_tickcount = ::GetTickCount();
+		thread_start_tickcount = ::GetTickCount();
 
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_OFFLINE_THREAD, 1, NULL);
 
@@ -154,6 +147,8 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 
 						::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
 						LOG(INFO) << pszDebug;
+
+						syncread_start_time = time(NULL);
 						break;
 					}
 					else if (rtcode == MIDDLEWARE_TS_FILE_EOF_ERROR)
@@ -167,6 +162,15 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 				packet_length = sizeof(packet_buf);
 				rtcode = ptransport_stream->SyncReadOnePacket(packet_buf, &packet_length);
 				read_byte_pos = ptransport_stream->Tell();			//因为是预读一个包，实际FIFO读指针并未发生移动
+				uint32_t read_tickcount = ::GetTickCount();
+				time_t read_time = time(NULL);
+
+				int second_change = ((read_time - syncread_start_time) >= 2) ? 1 : 0;
+				if (second_change)
+				{
+					syncread_start_time = read_time;
+				}
+
 				if (rtcode == MIDDLEWARE_TS_NO_ERROR)
 				{
 #if TS_FILE_READ_INTEGRITY_DIAGNOSIS
@@ -176,7 +180,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 					}
 #endif
 
-#if REPORT_FILE_ANALYSE_RATIO
+#if GUI_REPORT_FILE_ANALYSE_RATIO
 					//向界面汇报文件分析进度
 					if (ptransport_stream->m_llTotalFileLength > 0)
 					{
@@ -185,12 +189,6 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 						{
 							old_ratio = analyse_ratio;
 							::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_REPORT_RATIO, (WPARAM)NULL, (LPARAM)analyse_ratio);
-
-							//每隔1%进度汇报一次比特率
-							if (pDB_TSPackets->callback_gui_update != NULL)
-							{
-								pDB_TSPackets->callback_gui_update((int)ptransport_stream->GetBitrate(), NULL);
-							}
 						}
 					}
 #endif
@@ -238,6 +236,72 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 						}
 #endif
 
+#if OPEN_PCR_ANALYZER
+						//离线分析情况下的PCR检测
+						if (transport_packet.adaptation_field.PCR_flag)
+						{
+							PCR_code_t pcr_code;
+							pcr_code.base_32_30 = transport_packet.adaptation_field.program_clock_reference_base_32_30;
+							pcr_code.base_29_15 = transport_packet.adaptation_field.program_clock_reference_base_29_15;
+							pcr_code.base_14_0 = transport_packet.adaptation_field.program_clock_reference_base_14_0;
+							pcr_code.extension = transport_packet.adaptation_field.program_clock_reference_extension;
+
+							BITRATE_ATTRIBUTE_t bitrate_attr;
+							ptransport_stream->GetMeasuredBitrateAttribute(&bitrate_attr);
+
+							rtcode = pDB_Pcrs->AddPCRSample(transport_packet.PID, read_byte_pos - packet_length + 12, &pcr_code, bitrate_attr.mean, bitrate_attr.rms);
+							if (rtcode == NO_ERROR)
+							{
+								RECORD_PCR_t PCRRecord;
+								//采用获取副本的方式，防止子程序对原始数据进行修改
+								pDB_Pcrs->GetRecordByPID(transport_packet.PID, &PCRRecord);
+								CALLBACK_REPORT_PCR_Diagnosis(&PCRRecord);
+
+								int nID = PCRRecord.PCR_PID;
+
+								if (PCRRecord.interval_available && PCRRecord.jitter_available)
+								{
+									PCR_INTERVAL_ATTRIBUTE_t interval_attr;
+									PCR_JITTER_ATTRIBUTE_t jitter_attr;
+									pDB_Pcrs->GetMeasuredIntervalAttribute(&interval_attr);
+									pDB_Pcrs->GetMeasuredJitterAttribute(&jitter_attr);
+
+									CALLBACK_REPORT_PCR_Observation(nID, PCRRecord.interval_cur_value, PCRRecord.jitter_cur_value, &interval_attr, &jitter_attr);
+								}
+
+								//这里仅是一种码流速率的估算方法,实际上是不可以自己证明自己的，应该通过其他方式计算码率
+								{
+									int64_t sum = 0;
+									int count = 0;
+									int pcr_count = pDB_Pcrs->GetTotalRecordCount();
+
+									for (int i = 0; i < pcr_count; i++)
+									{
+										if (pDB_Pcrs->GetRecordByIndex(i, &PCRRecord) == NO_ERROR)
+										{
+											if (PCRRecord.encoder_bitrate_available)
+											{
+												sum += PCRRecord.encoder_bitrate_mean_value;
+												count++;
+											}
+										}
+									}
+									if (count > 0)
+									{
+										int bitrate_cur = (int)(sum / count);
+
+										ptransport_stream->AddBitrateSample(bitrate_cur);
+
+										ptransport_stream->GetMeasuredBitrateAttribute(&bitrate_attr);
+										CALLBACK_REPORT_bitrates(bitrate_cur, &bitrate_attr);
+
+										pDB_TSPackets->m_total_bitrate_from_software = bitrate_cur;
+									}
+								}
+							}
+						}
+#endif
+
 #if OPEN_PACKET_STATISTIC
 						rtcode = pDB_TSPackets->AddPacket(&transport_packet);
 						if (rtcode != NO_ERROR)
@@ -258,6 +322,18 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 								LOG(INFO) << pszDebug;
 							}
 						}
+
+#if GUI_REPORT_TS_STATISTIC
+						if (second_change)
+						{
+							//每隔1s汇报一次比特率
+							if (pDB_TSPackets->callback_gui_update != NULL)
+							{
+								pDB_TSPackets->callback_gui_update((int)ptransport_stream->GetBitrate(), NULL);
+							}
+						}
+#endif
+
 #endif					
 
 #if OPEN_SECTION_SPLICER
@@ -409,80 +485,6 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 							}
 						}
 #endif
-
-#if TS_FILE_READ_INTEGRITY_DIAGNOSIS
-						if (fpCheckFile != NULL)
-						{
-							fwrite(packet_buf, sizeof(char), packet_length, fpCheckFile);
-						}
-#endif
-
-#if OPEN_PCR_ANALYZER
-						//离线分析情况下的PCR检测
-						if (transport_packet.adaptation_field.PCR_flag)
-						{
-							PCR_code_t pcr_code;
-							pcr_code.base_32_30 = transport_packet.adaptation_field.program_clock_reference_base_32_30;
-							pcr_code.base_29_15 = transport_packet.adaptation_field.program_clock_reference_base_29_15;
-							pcr_code.base_14_0 = transport_packet.adaptation_field.program_clock_reference_base_14_0;
-							pcr_code.extension = transport_packet.adaptation_field.program_clock_reference_extension;
-
-							BITRATE_ATTRIBUTE_t bitrate_attr;
-							ptransport_stream->GetMeasuredBitrateAttribute(&bitrate_attr);
-
-							rtcode = pDB_Pcrs->AddPCRSample(transport_packet.PID, read_byte_pos - packet_length + 12, &pcr_code, bitrate_attr.mean, bitrate_attr.rms);
-							if (rtcode == NO_ERROR)
-							{
-								RECORD_PCR_t PCRRecord;
-								//采用获取副本的方式，防止子程序对原始数据进行修改
-								pDB_Pcrs->GetRecordByPID(transport_packet.PID, &PCRRecord);
-
-								CALLBACK_REPORT_PCR_Record(&PCRRecord);
-
-								int nID = PCRRecord.PCR_PID;
-
-								if (PCRRecord.interval_available && PCRRecord.jitter_available)
-								{
-									PCR_INTERVAL_ATTRIBUTE_t interval_attr;
-									PCR_JITTER_ATTRIBUTE_t jitter_attr;
-									pDB_Pcrs->GetMeasuredIntervalAttribute(&interval_attr);
-									pDB_Pcrs->GetMeasuredJitterAttribute(&jitter_attr);
-
-									CALLBACK_REPORT_PCR_Attribute(nID, PCRRecord.interval_cur_value, PCRRecord.jitter_cur_value, &interval_attr, &jitter_attr);
-								}
-
-								//这里仅是一种码流速率的估算方法,实际上是不可以自己证明自己的，应该通过其他方式计算码率
-								{
-									int64_t sum = 0;
-									int count = 0;
-									int pcr_count = pDB_Pcrs->GetTotalRecordCount();
-
-									for (int i = 0; i < pcr_count; i++)
-									{
-										if (pDB_Pcrs->GetRecordByIndex(i, &PCRRecord) == NO_ERROR)
-										{
-											if (PCRRecord.encoder_bitrate_available)
-											{
-												sum += PCRRecord.encoder_bitrate_mean_value;
-												count++;
-											}
-										}
-									}
-									if (count > 0)
-									{
-										int bitrate_cur = (int)(sum / count);
-
-										ptransport_stream->AddBitrateSample(bitrate_cur);
-
-										ptransport_stream->GetMeasuredBitrateAttribute(&bitrate_attr);
-										CALLBACK_REPORT_bitrates(bitrate_cur, &bitrate_attr);
-
-										pDB_TSPackets->m_total_bitrate_from_software = bitrate_cur;
-									}
-								}
-							}
-						}
-#endif
 					}
 					else
 					{
@@ -571,8 +573,6 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 		}
 #endif	
 
-		pDB_Pcrs->Reset();
-
 		//重新文件定位
 //		ptransport_stream->SeekToBegin();
 
@@ -587,8 +587,8 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 			::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_OFFLINE_THREAD, 2, NULL);			//离线分析结束
 		}
 
-		new_tickcount = ::GetTickCount();
-		diff_tickcount = new_tickcount - old_tickcount;
+		thread_finish_tickcount = ::GetTickCount();
+		diff_tickcount = thread_finish_tickcount - thread_start_tickcount;
 
 		analyse_ratio = 100;
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_REPORT_RATIO, (WPARAM)NULL, (LPARAM)analyse_ratio);

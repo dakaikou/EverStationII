@@ -221,6 +221,7 @@
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="Common\Define.h" />
     <ClInclude Include="Common\Dlg_Progress.h" />
+    <ClInclude Include="Common\Dlg_ShowVideo.h" />
     <ClInclude Include="Common\HexEditView_ByteBuffer.h" />
     <ClInclude Include="Common\InstrumentPanel_Base.h" />
     <ClInclude Include="Common\InstrumentPanel_Histogram.h" />

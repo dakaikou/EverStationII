@@ -23,7 +23,6 @@
 #include "DVB_SI_Descriptor.h"
 
 #define MIN(x, y)						(x < y? x : y)
-//#define min(x, y)						(x < y? x : y)
 /*------------------------------------------------------------
 Section size definition
 -------------------------------------------------------------*/

@@ -10,8 +10,6 @@
 
 #include "..\Magic_TS\TSMagicView.h"
 
-//#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
-
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_TSPackets.h"
 #include "MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_Pcrs.h"
@@ -25,6 +23,8 @@
 
 void REPORT_TS_packet_statistic(WPARAM wParam, LPARAM lParam)
 {
+#if GUI_REPORT_TS_STATISTIC
+
 	CTSMagicView* pWindow = CTSMagicView::GetView();
 
  	if (pWindow != NULL)
@@ -41,35 +41,47 @@ void REPORT_TS_packet_statistic(WPARAM wParam, LPARAM lParam)
 		pWindow->m_dlgTSAnalyzerOverview.UpdatePacketInfo();
 #endif
 	}
+
+#endif
 }
 
-void CALLBACK_REPORT_PCR_Record(RECORD_PCR_t* pPcrRecord)
+void CALLBACK_REPORT_PCR_Diagnosis(RECORD_PCR_t* pPcrRecord)
 {
+#if GUI_REPORT_PCR_DIAGNOSIS
+
 	CTSMagicView* pWindow = CTSMagicView::GetView();
 
 	if (pWindow != NULL)
 	{
 #if GUI_TS_ANALYZER_PCR
-		pWindow->m_dlgTSAnalyzerPcr.UpdatePCRRecord(pPcrRecord);
+		pWindow->m_dlgTSAnalyzerPcr.UpdatePCRDiagnosis(pPcrRecord);
 #endif
 	}
+
+#endif
 }
 
 
-void CALLBACK_REPORT_PCR_Attribute(int ID, int curInterval, int curJitter, PCR_INTERVAL_ATTRIBUTE_t* pIntervalAttr, PCR_JITTER_ATTRIBUTE_t* pJitterAttr)
+void CALLBACK_REPORT_PCR_Observation(int ID, int curInterval, int curJitter, PCR_INTERVAL_ATTRIBUTE_t* pIntervalAttr, PCR_JITTER_ATTRIBUTE_t* pJitterAttr)
 {
+#if GUI_REPORT_PCR_OBSERVATION
+
 	CTSMagicView* pWindow = CTSMagicView::GetView();
 
 	if (pWindow != NULL)
 	{
 #if GUI_TS_ANALYZER_PCR
-		pWindow->m_dlgTSAnalyzerPcr.UpdatePCR(ID, curInterval, curJitter, pIntervalAttr, pJitterAttr);
+		pWindow->m_dlgTSAnalyzerPcr.UpdatePCRObservation(ID, curInterval, curJitter, pIntervalAttr, pJitterAttr);
 #endif
 	}
+
+#endif
 }
 
 void CALLBACK_REPORT_bitrates(int cur, BITRATE_ATTRIBUTE_t* pattr)
 {
+#if GUI_REPORT_TS_BITRATE
+
 	CTSMagicView* pWindow = CTSMagicView::GetView();
 
 	if (pWindow != NULL)
@@ -78,6 +90,8 @@ void CALLBACK_REPORT_bitrates(int cur, BITRATE_ATTRIBUTE_t* pattr)
 		pWindow->m_dlgTSAnalyzerOverview.UpdateBitrateSample(cur, pattr);
 #endif
 	}
+
+#endif
 }
 
 void CALLBACK_REPORT_dsmcc(int section_number, CPVT* pPVT)

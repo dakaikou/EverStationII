@@ -6,8 +6,8 @@
 #include "MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_Pcrs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 
-void CALLBACK_REPORT_PCR_Record(RECORD_PCR_t* pPcrRecord);
-void CALLBACK_REPORT_PCR_Attribute(int ID, int curInterval, int curJitter, PCR_INTERVAL_ATTRIBUTE_t* pIntervalAttr=NULL, PCR_JITTER_ATTRIBUTE_t* pJitterAttr=NULL);
+void CALLBACK_REPORT_PCR_Diagnosis(RECORD_PCR_t* pPcrRecord);
+void CALLBACK_REPORT_PCR_Observation(int ID, int curInterval, int curJitter, PCR_INTERVAL_ATTRIBUTE_t* pIntervalAttr=NULL, PCR_JITTER_ATTRIBUTE_t* pJitterAttr=NULL);
 void CALLBACK_REPORT_bitrates(int cur, BITRATE_ATTRIBUTE_t* pattr=NULL);
 
 void CALLBACK_REPORT_pat(int section_number, CPAT* pPAT);

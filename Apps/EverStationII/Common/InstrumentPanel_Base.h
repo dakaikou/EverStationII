@@ -6,6 +6,7 @@
 #endif // _MSC_VER > 1000
 //
 
+#define INSTRUMENT_PANEL_USE_MUTEX		1
 #define INSTRUMENT_PANEL_USE_DIRECTX	0
 
 #define X_SEPARATOR						5
@@ -22,12 +23,8 @@
 #define FONT_MARK_HEIGHT				RECT_MARK_HEIGHT - 6
 #define FONT_MEASURE_HEIGHT				12
 
-
-
 #define GRID_DIVISION_VERTICAL			6
 #define GRID_DIVISION_HORIZONTAL		20
-
-//#include "XStream_FIFO\Include\FIFO.h"
 
 typedef struct
 {
@@ -43,7 +40,12 @@ typedef struct
 	int nSampleIndex;
 	int ID;
 	DWORD color;
+
+	int bNeedRedrawing;
+
+#if INSTRUMENT_PANEL_USE_MUTEX
 	HANDLE	hSampleAccess;
+#endif
 
 } SAMPLE_CHANNEL_t;
 
@@ -87,10 +89,10 @@ public:
 protected:
 
 	SAMPLE_CHANNEL_t* m_pChannel[MAX_CHANNEL_COUNT];
-	int				   m_nChannleCount;
-	int					m_nChannleDepth;
+	int				  m_nChannleCount;
+	int				  m_nChannleDepth;
 
-	int					m_bNeedUpdate;
+	int				  m_bNeedUpdate;
 
 	double	m_dGridDelty;
 	double	m_dGridDeltx;
@@ -154,6 +156,7 @@ protected:
 	CFont* m_pMarkFont;
 
 	CBrush* m_pBkBrush;
+	CBrush* m_pWaveformBrush;
 	
 	CBitmap* m_pBkgroundBmp;
 	CBitmap* m_pWaveformBmp;
@@ -162,8 +165,10 @@ protected:
 	//CBitmap* m_pLeftMarkBmp;
 	//CBitmap* m_pMidMarkBmp;
 	//CBitmap* m_pRightMarkBmp;
+
+	COLORREF  m_Palette[MAX_CHANNEL_COUNT];
 	
-	CDC* m_pMemDC;
+	CDC*	m_pMemDC;
 
 	CRect	m_rectClient;
 	CRect   m_rectTitle;
@@ -183,10 +188,11 @@ protected:
 	void DisplayXAlarmLine(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
 	void DisplayYAlarmLine(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
 	void DisplayBkGrid(CDC* pMemDC, CBitmap* pBkBmp, CRect rectWaveform);
+	void ClearWaveform(CDC* pMemDC, CBitmap* pBkBmp);
 
 	void AdjustLayout(CRect rectContainer);
 
-	void CombineDraw(void);
+	//void CombineDraw(void);
 public:
 	void AppendXSample(int ID, int x);
 	void AppendYSample(int ID, int y);

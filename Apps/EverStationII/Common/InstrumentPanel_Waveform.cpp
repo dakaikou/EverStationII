@@ -116,6 +116,12 @@ void CInstrumentPanel_Waveform::AppendSample(int ID, int sampleValue, SAMPLE_ATT
 
 			DisplayBkGrid(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
 			DisplayYAlarmLine(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
+
+			ClearWaveform(m_pMemDC, m_pWaveformBmp);
+			for (int i = 0; i < m_nChannleCount; i++)
+			{
+				m_pChannel[i]->bNeedRedrawing = 1;
+			}
 		}
 	}
 
@@ -151,7 +157,13 @@ void CInstrumentPanel_Waveform::DisplayMeasureGraph(CDC* pMemDC, CBitmap* pGraph
 				CPen* pWaveformPen = new CPen;
 				pWaveformPen->CreatePen(PS_SOLID, 1, pChannel->color);
 
-				::WaitForSingleObject(pChannel->hSampleAccess, INFINITE);
+#if INSTRUMENT_PANEL_USE_MUTEX
+				if (pChannel->hSampleAccess != NULL)
+				{
+					::WaitForSingleObject(pChannel->hSampleAccess, INFINITE);
+				}
+#endif
+
 				if (pChannel->nSampleCount > 0)
 				{
 					CPoint	point[WAVEFORM_SAMPLE_COUNT];
@@ -255,10 +267,14 @@ void CInstrumentPanel_Waveform::DisplayMeasureGraph(CDC* pMemDC, CBitmap* pGraph
 					pMemDC->Polyline(point, pChannel->nSampleCount);
 				}
 
-				m_bNeedUpdate = 0;
+				//m_bNeedUpdate = 0;
 
-				::SetEvent(pChannel->hSampleAccess);
-
+#if INSTRUMENT_PANEL_USE_MUTEX
+				if (pChannel->hSampleAccess != NULL)
+				{
+					::SetEvent(pChannel->hSampleAccess);
+				}
+#endif
 				delete pWaveformPen;
 			}
 		}

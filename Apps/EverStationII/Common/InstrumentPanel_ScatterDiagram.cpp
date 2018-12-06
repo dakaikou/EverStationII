@@ -1,12 +1,6 @@
 //
 
 #include "stdafx.h"
-#include <Winuser.h>
-#include <Windows.h>
-#include <math.h>
-#include <string.h>
-#include <memory.h>
-#include <wingdi.h>
 #include <afxwin.h>
 #include <assert.h>
 #include "InstrumentPanel_ScatterDiagram.h"
@@ -57,70 +51,85 @@ void CInstrumentPanel_ScatterDiagram::DisplayMeasureGraph(CDC* pMemDC, CBitmap* 
 			rectPicture.top = 0;
 			rectPicture.right = bm.bmWidth;
 			rectPicture.bottom = bm.bmHeight;
-			pMemDC->FillRect(&rectPicture, m_pBkBrush);
+			//pMemDC->FillRect(&rectPicture, m_pBkBrush);
 
 			CPoint	point;
 			double yoffset = rectPicture.bottom - (double)rectPicture.Height() / 2;
 			double diameter = rectPicture.Width() / (double)(m_nXPositiveMark - m_nXNegtiveMark);
-			int radis = (int)ceil(diameter / 2.0);
+			int radis = (int)ceil(diameter / 4.0);
 
 			for (int ch = 0; ch < m_nChannleCount; ch++)
 			{
 				SAMPLE_CHANNEL_t* pChannel = m_pChannel[ch];
 
-				CPen* pWaveformPen = new CPen;
-				pWaveformPen->CreatePen(PS_SOLID, 1, pChannel->color);
-				pMemDC->SelectObject(pWaveformPen);
+				if (pChannel->bNeedRedrawing)
+				{
+					CPen* pWaveformPen = new CPen;
+					pWaveformPen->CreatePen(PS_SOLID, 1, pChannel->color);
+					pMemDC->SelectObject(pWaveformPen);
 
-				CBrush* pPaintBrush = new CBrush;
-				pPaintBrush->CreateSolidBrush(pChannel->color);
-				CBrush* pOldBrush = pMemDC->SelectObject(pPaintBrush);
+					CBrush* pPaintBrush = new CBrush;
+					pPaintBrush->CreateSolidBrush(pChannel->color);
+					CBrush* pOldBrush = pMemDC->SelectObject(pPaintBrush);
 
-				::WaitForSingleObject(pChannel->hSampleAccess, INFINITE);
-				if (pChannel->nSampleCount > 0) {
-
-					for (i = 0; i < pChannel->nSampleCount; i++)
+#if INSTRUMENT_PANEL_USE_MUTEX
+					if (pChannel->hSampleAccess != NULL)
 					{
-						ratio = double(pChannel->pnXSampleArray[i] - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
-						point.x = (int)(rectPicture.left + ratio * rectPicture.Width());
-						if (point.x < rectPicture.left)
-						{
-							point.x = rectPicture.left;
-						}
-						else if (point.x > rectPicture.right)
-						{
-							point.x = rectPicture.right;
-						}
-
-						ratio = (double)pChannel->pnYSampleArray[i] / m_nYPositiveMark;
-						point.y = (int)(yoffset - ratio * rectPicture.Height() / 2);
-						if (point.y < rectPicture.top)
-						{
-							point.y = rectPicture.top;
-						}
-						else if (point.y > rectPicture.bottom)
-						{
-							point.y = rectPicture.bottom;
-						}
-
-						//pMemDC->TextOutA(point.x, point.y, "O");
-						//pMemDC->SetPixel(point, pChannel->color);
-						RECT rectPoint;
-						rectPoint.left = point.x - radis;
-						rectPoint.top = point.y - radis;
-						rectPoint.right = point.x + radis;
-						rectPoint.bottom = point.y + radis;
-						pMemDC->Ellipse(&rectPoint);
-						//pMemDC->FillRect(&rectPoint, pPaintBrush);
+						::WaitForSingleObject(pChannel->hSampleAccess, INFINITE);
 					}
+#endif
+					if (pChannel->nSampleCount > 0) {
+
+						for (i = 0; i < pChannel->nSampleCount; i++)
+						{
+							ratio = double(pChannel->pnXSampleArray[i] - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
+							point.x = (int)(rectPicture.left + ratio * rectPicture.Width());
+							if (point.x < rectPicture.left)
+							{
+								point.x = rectPicture.left;
+							}
+							else if (point.x > rectPicture.right)
+							{
+								point.x = rectPicture.right;
+							}
+
+							ratio = (double)pChannel->pnYSampleArray[i] / m_nYPositiveMark;
+							point.y = (int)(yoffset - ratio * rectPicture.Height() / 2);
+							if (point.y < rectPicture.top)
+							{
+								point.y = rectPicture.top;
+							}
+							else if (point.y > rectPicture.bottom)
+							{
+								point.y = rectPicture.bottom;
+							}
+
+							//pMemDC->TextOutA(point.x, point.y, "O");
+							//pMemDC->SetPixel(point, pChannel->color);
+							RECT rectPoint;
+							rectPoint.left = point.x - radis;
+							rectPoint.top = point.y - radis;
+							rectPoint.right = point.x + radis;
+							rectPoint.bottom = point.y + radis;
+							pMemDC->Ellipse(&rectPoint);
+							//pMemDC->FillRect(&rectPoint, pPaintBrush);
+						}
+					}
+
+					pChannel->bNeedRedrawing = 0;
+
+#if INSTRUMENT_PANEL_USE_MUTEX
+					if (pChannel->hSampleAccess != NULL)
+					{
+						::SetEvent(pChannel->hSampleAccess);
+					}
+#endif
+					delete pWaveformPen;
+					delete pPaintBrush;
 				}
 
-				m_bNeedUpdate = 0;
-				::SetEvent(pChannel->hSampleAccess);
-
-				delete pWaveformPen;
-				delete pPaintBrush;
 			}
+			//m_bNeedUpdate = 0;
 		}
 	}
 }
@@ -246,7 +255,15 @@ void CInstrumentPanel_ScatterDiagram::AppendSample(int ID, int xsampleValue, int
 		DisplayBkGrid(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
 		DisplayXAlarmLine(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
 		DisplayYAlarmLine(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
+
+		ClearWaveform(m_pMemDC, m_pWaveformBmp);
+		for (int i = 0; i < m_nChannleCount; i++)
+		{
+			m_pChannel[i]->bNeedRedrawing = 1;
+		}
+		DisplayMeasureGraph(m_pMemDC, m_pWaveformBmp);
 	}
 
 	CInstrumentPanel_Base::AppendXYSample(ID, xsampleValue, ysampleValue);
 }
+

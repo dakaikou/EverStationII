@@ -56,7 +56,7 @@ int	MPEG_decode_PES_packet(uint8_t *pes_buf, int pes_size, PES_packet_t* pPES_pa
 			if ((pPES_packet->PTS_DTS_flags & 0b10) == 0b10)			//have PTS
 			{
 				pPES_packet->PTS_marker = BITS_get(&bs, 4);
-				assert((pPES_packet->PTS_marker == 0b0010) || (pPES_packet->PTS_marker == 0b0011));
+				//assert((pPES_packet->PTS_marker == 0b0010) || (pPES_packet->PTS_marker == 0b0011));
 				pPES_packet->PTS_32_30 = BITS_get(&bs, 3);
 				pPES_packet->PTS_marker_bit1 = BITS_get(&bs, 1);
 

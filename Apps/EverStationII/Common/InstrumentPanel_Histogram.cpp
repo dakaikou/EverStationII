@@ -60,7 +60,7 @@ void CInstrumentPanel_Histogram::DisplayMeasureGraph(CDC* pMemDC, CBitmap* pGrap
 			rectPicture.top = 0;
 			rectPicture.right = bm.bmWidth;
 			rectPicture.bottom = bm.bmHeight;
-			pMemDC->FillRect(&rectPicture, m_pBkBrush);
+			pMemDC->FillRect(&rectPicture, m_pWaveformBrush);
 
 			double deltX = (double)rectPicture.Width() / HISTGRAM_HORZ_DIVISION;
 			for (int ch = 0; ch < m_nChannleCount; ch++)
@@ -71,7 +71,13 @@ void CInstrumentPanel_Histogram::DisplayMeasureGraph(CDC* pMemDC, CBitmap* pGrap
 				pPaintBrush->CreateSolidBrush(pChannel->color);
 				CBrush* pOldBrush = pMemDC->SelectObject(pPaintBrush);
 
-				::WaitForSingleObject(pChannel->hSampleAccess, INFINITE);
+#if INSTRUMENT_PANEL_USE_MUTEX
+				if (pChannel->hSampleAccess != NULL)
+				{
+					::WaitForSingleObject(pChannel->hSampleAccess, INFINITE);
+				}
+#endif
+
 				if (pChannel->nSampleCount > 0) {
 
 					if (fBiasLevel > 0)
@@ -131,9 +137,14 @@ void CInstrumentPanel_Histogram::DisplayMeasureGraph(CDC* pMemDC, CBitmap* pGrap
 					}
 				}
 
-				m_bNeedUpdate = 0;
-				::SetEvent(pChannel->hSampleAccess);
+				//m_bNeedUpdate = 0;
 
+#if INSTRUMENT_PANEL_USE_MUTEX
+				if (pChannel->hSampleAccess != NULL)
+				{
+					::SetEvent(pChannel->hSampleAccess);
+				}
+#endif
 				pMemDC->SelectObject(pOldBrush);
 				delete pPaintBrush;
 			}
@@ -222,6 +233,12 @@ void CInstrumentPanel_Histogram::AppendSample(int ID, int sampleValue, SAMPLE_AT
 
 			DisplayBkGrid(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
 			DisplayXAlarmLine(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
+
+			ClearWaveform(m_pMemDC, m_pWaveformBmp);
+			for (int i = 0; i < m_nChannleCount; i++)
+			{
+				m_pChannel[i]->bNeedRedrawing = 1;
+			}
 		}
 	}
 
