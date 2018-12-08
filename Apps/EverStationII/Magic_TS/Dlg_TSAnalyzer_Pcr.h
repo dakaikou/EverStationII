@@ -77,7 +77,6 @@ protected:
 	//{{AFX_MSG(CDlg_TSAnalyzer_Pcr)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-//	afx_msg void OnSelchangeCmbPcrpid();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:

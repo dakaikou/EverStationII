@@ -6,25 +6,9 @@
 #endif // _MSC_VER > 1000
 //
 
-#define INSTRUMENT_PANEL_USE_MUTEX		1
+#define ON_PAINTING_USE_MUTEX			1
+#define INSTRUMENT_PANEL_USE_MUTEX		0
 #define INSTRUMENT_PANEL_USE_DIRECTX	0
-
-#define X_SEPARATOR						5
-#define Y_SEPARATOR						10
-
-#define RECT_MEASURE_WIDTH				120
-
-#define RECT_MARK_HEIGHT				20
-#define RECT_MARK_WIDTH					60
-
-#define RECT_TITLE_HEIGHT				30
-
-#define FONT_TITLE_HEIGHT				RECT_TITLE_HEIGHT - 12
-#define FONT_MARK_HEIGHT				RECT_MARK_HEIGHT - 6
-#define FONT_MEASURE_HEIGHT				12
-
-#define GRID_DIVISION_VERTICAL			6
-#define GRID_DIVISION_HORIZONTAL		20
 
 typedef struct
 {
@@ -33,9 +17,17 @@ typedef struct
 
 typedef struct
 {
+	int x;
+	int y;
+	int bConsumed;
+} SAMPLE_VALUE_t;
+
+typedef struct
+{
 //	CFIFO<int, 1024> fifo;
-	int* pnXSampleArray;
-	int* pnYSampleArray;
+	//int* pnXSampleArray;
+	//int* pnYSampleArray;
+	SAMPLE_VALUE_t* pstSampleArray;
 	int nSampleCount;
 	int nSampleIndex;
 	int ID;
@@ -92,7 +84,9 @@ protected:
 	int				  m_nChannleCount;
 	int				  m_nChannleDepth;
 
-	int				  m_bNeedUpdate;
+	int				  m_bNeedRedrawAllBmp;
+	int				  m_bNeedRedrawWaveformBmp;
+	int				  m_bNeedRedrawMeasurePanelBmp;
 
 	double	m_dGridDelty;
 	double	m_dGridDeltx;
@@ -155,11 +149,13 @@ protected:
 	CFont* m_pTitleFont;
 	CFont* m_pMarkFont;
 
-	CBrush* m_pBkBrush;
+	CBrush* m_pBkgroundBrush;
 	CBrush* m_pWaveformBrush;
-	
+	CBrush* m_pMeasurePanelBrush;
+
 	CBitmap* m_pBkgroundBmp;
 	CBitmap* m_pWaveformBmp;
+	CBitmap* m_pMeasurePanelBmp;
 	//CBitmap* m_pAlarmLineBmp;
 	//CBitmap* m_pValueBmp;
 	//CBitmap* m_pLeftMarkBmp;
@@ -173,7 +169,7 @@ protected:
 	CRect	m_rectClient;
 	CRect   m_rectTitle;
 	CRect	m_rectWaveform;
-	CRect	m_rectMeasuredValue;
+	CRect	m_rectMeasurePanel;
 	CRect   m_rectXLeftMark;
 	CRect   m_rectXMidMark;
 	CRect   m_rectXRightMark;
@@ -181,14 +177,20 @@ protected:
 	CRect   m_rectYMidMark;
 	CRect   m_rectYBottomMark;
 
-	virtual void DisplayMeasureGraph(CDC* pMemDC, CBitmap* pGraphBmp);
+#if ON_PAINTING_USE_MUTEX
+	HANDLE	m_hPaintingAccess;
+#endif
 
-	void DisplayMeasuredValue(CDC* pMemDC, CBitmap* pBkBmp, CRect rectMeasure);
-	void DisplayMeasureScale(CDC* pMemDC, CBitmap* pBkBmp, CRect rectMark, int nMark);
-	void DisplayXAlarmLine(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
-	void DisplayYAlarmLine(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
-	void DisplayBkGrid(CDC* pMemDC, CBitmap* pBkBmp, CRect rectWaveform);
-	void ClearWaveform(CDC* pMemDC, CBitmap* pBkBmp);
+	virtual void DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp);
+	virtual void DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp);
+
+	void DisplayMeasureScaleInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectMark, int nMark);
+	void DisplayXAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
+	void DisplayYAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
+	void DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectWaveform);
+
+	void ClearWaveformInMemory(CDC* pMemDC, CBitmap* pBkBmp);
+	void DisplayMeasurePanelInMemory(CDC* pMemDC, CBitmap* pBkBmp);
 
 	void AdjustLayout(CRect rectContainer);
 
@@ -202,6 +204,7 @@ public:
 	void Init_Y_Axis(int nYAxisStyle, int nYShownOption, int nYMinAlarm, int nYMaxAlarm, char* pszYUnits, int nYFloor, int nYCeil, int nStep=100);
 
 	void Reset(void);
+	//void Activate(void);
 
 	//void AppendSampleForMeanSymmetryGraph(int ID, int curValue, int minValue, int meanValue, int maxValue, int rmsValue);
 	//void AppendSampleForMinMaxGraph(int ID, int curValue, int minValue, int meanValue, int maxValue, int rmsValue);
@@ -219,6 +222,7 @@ protected:
 public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 };
 
 /////////////////////////////////////////////////////////////////////////////

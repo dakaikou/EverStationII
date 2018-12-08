@@ -62,7 +62,6 @@ void CDlg_TSAnalyzer_Pcr::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_Pcr, CDialog)
 	//{{AFX_MSG_MAP(CDlg_TSAnalyzer_Pcr)
 	ON_WM_SIZE()
-//	ON_CBN_SELCHANGE(IDC_CMB_PCRPID, OnSelchangeCmbPcrpid)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 

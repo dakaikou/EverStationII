@@ -8,8 +8,8 @@
 
 #include "InstrumentPanel_Base.h"
 
-#define HISTGRAM_SAMPLE_DEPTH							1024 * 20
-#define HISTGRAM_HORZ_DIVISION							101								//根据被测对象的分辨率确定
+#define SCATTER_DIAGRAM_SAMPLE_DEPTH							1024 * 20
+//#define SCATTER_DIAGRAM_HORZ_DIVISION							101								//根据被测对象的分辨率确定
 
 /////////////////////////////////////////////////////////////////////////////
 // CGraph_Oscilloscope window
@@ -26,7 +26,8 @@ public:
 public:
 
 	void AppendSample(int ID, int xsampleValue, int ysampleValue, SAMPLE_ATTRIBUTE_t* xattr=NULL, SAMPLE_ATTRIBUTE_t* yattr=NULL);
-	void DisplayMeasureGraph(CDC* pDC, CBitmap* pGraphBmp);
+	void DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp);
+	void DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp);
 
 // Overrides
 	// ClassWizard generated virtual function overrides

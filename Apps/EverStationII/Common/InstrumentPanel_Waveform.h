@@ -24,7 +24,8 @@ public:
 // Operations
 public:
 	void AppendSample(int ID, int sampleValue, SAMPLE_ATTRIBUTE_t* attr = NULL);
-	void DisplayMeasureGraph(CDC* pDC, CBitmap* pGraphBmp);
+	void DisplayTheNewSamplesInMemory(CDC* pDC, CBitmap* pGraphBmp);
+	void DisplayTheWholeSamplesInMemory(CDC* pDC, CBitmap* pGraphBmp);
 
 // Overrides
 	// ClassWizard generated virtual function overrides

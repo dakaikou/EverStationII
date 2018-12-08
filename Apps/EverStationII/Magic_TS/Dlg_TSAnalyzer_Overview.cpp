@@ -23,9 +23,6 @@ static char THIS_FILE[] = __FILE__;
 #include "MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_Pcrs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 
-//#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
-
-
 #include "..\resource.h"
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_Overview dialog
@@ -776,14 +773,4 @@ void CDlg_TSAnalyzer_Overview::OnBnClickedRadioDektec()
 */
 
 
-BOOL CDlg_TSAnalyzer_Overview::PreTranslateMessage(MSG* pMsg)
-{
-	// TODO: 在此添加专用代码和/或调用基类
-	if (pMsg->message == WM_CREATE ||
-		pMsg->message == WM_SIZE)
-	{
-		//m_TsRateJitterGraphHistogram.SendMessage(pMsg->message, pMsg->wParam, pMsg->lParam);
-	}
 
-	return CDialog::PreTranslateMessage(pMsg);
-}

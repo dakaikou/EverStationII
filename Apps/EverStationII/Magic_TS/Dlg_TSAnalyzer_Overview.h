@@ -79,7 +79,6 @@ protected:
 public:
 	CListCtrl m_listBandwidth;
 	CListCtrl m_listTSOverview;
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };
 
 //{{AFX_INSERT_LOCATION}}

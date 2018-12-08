@@ -44,91 +44,85 @@ void CInstrumentPanel_Waveform::AppendSample(int ID, int sampleValue, SAMPLE_ATT
 {
 	int nNegtiveBias, nPositiveBias;
 
-	if (attr != NULL)
+#if ON_PAINTING_USE_MUTEX
+	DWORD wait_state = ::WaitForSingleObject(m_hPaintingAccess, INFINITE);
+	if (wait_state == WAIT_OBJECT_0)
 	{
-		m_nMeasuredYMeanValue = attr->mean;
-		m_nMeasuredYRmsValue = attr->rms;
+#endif
+		if (attr != NULL)
+		{
+			m_nMeasuredYMeanValue = attr->mean;
+			m_nMeasuredYRmsValue = attr->rms;
 
-		if (attr->min < m_nMeasuredYMinValue)
-		{
-			m_nMeasuredYMinValue = attr->min;
-		}
-		if (attr->max > m_nMeasuredYMaxValue)
-		{
-			m_nMeasuredYMaxValue = attr->max;
-		}
-
-		int bRedraw = 0;
-		if (m_nYAxisStyle == AXIS_STYLE_MEAN_SYMMETRY)
-		{
-			nNegtiveBias = m_nYNegtiveMark;
-			if (attr->min < m_nYNegtiveMark)
+			if (attr->min < m_nMeasuredYMinValue)
 			{
-				if (attr->min > m_nYFloor)
+				m_nMeasuredYMinValue = attr->min;
+			}
+			if (attr->max > m_nMeasuredYMaxValue)
+			{
+				m_nMeasuredYMaxValue = attr->max;
+			}
+
+			int bRedraw = 0;
+			if (m_nYAxisStyle == AXIS_STYLE_MEAN_SYMMETRY)
+			{
+				nNegtiveBias = m_nYNegtiveMark;
+				if (attr->min < m_nYNegtiveMark)
 				{
-					nNegtiveBias = (int)(floor(attr->min / (double)m_nYStep) * m_nYStep);
-					bRedraw = 1;
+					if (attr->min > m_nYFloor)
+					{
+						nNegtiveBias = (int)(floor(attr->min / (double)m_nYStep) * m_nYStep);
+						bRedraw = 1;
+					}
+				}
+
+				nPositiveBias = m_nYPositiveMark;
+				if (attr->max > m_nYPositiveMark)
+				{
+					if (attr->max < m_nYCeil)
+					{
+						nPositiveBias = (int)(ceil(attr->max / (double)m_nYStep) * m_nYStep);
+						bRedraw = 1;
+					}
+				}
+
+				if (bRedraw)
+				{
+					int bias = max(abs(nNegtiveBias), abs(nPositiveBias));
+					m_nYNegtiveMark = -bias;
+					m_nYPositiveMark = bias;
 				}
 			}
-
-			nPositiveBias = m_nYPositiveMark;
-			if (attr->max > m_nYPositiveMark)
+			else if (m_nYAxisStyle == AXIS_STYLE_FROM_MIN_TO_MAX)
 			{
-				if (attr->max < m_nYCeil)
+				if (attr->min < m_nYNegtiveMark)
 				{
-					nPositiveBias = (int)(ceil(attr->max / (double)m_nYStep) * m_nYStep);
-					bRedraw = 1;
+					if (attr->min > m_nYFloor)
+					{
+						m_nYNegtiveMark = (int)(floor(attr->min / (double)m_nYStep) * m_nYStep);
+						bRedraw = 1;
+					}
 				}
-			}
-
-			if (bRedraw)
-			{
-				int bias = max(abs(nNegtiveBias), abs(nPositiveBias));
-				m_nYNegtiveMark = -bias;
-				m_nYPositiveMark = bias;
-			}
-		}
-		else if (m_nYAxisStyle == AXIS_STYLE_FROM_MIN_TO_MAX)
-		{
-			if (attr->min < m_nYNegtiveMark)
-			{
-				if (attr->min > m_nYFloor)
+				if (attr->max > m_nYPositiveMark)
 				{
-					m_nYNegtiveMark = (int)(floor(attr->min / (double)m_nYStep) * m_nYStep);
-					bRedraw = 1;
-				}
-			}
-			if (attr->max > m_nYPositiveMark)
-			{
-				if (attr->max < m_nYCeil)
-				{
-					m_nYPositiveMark = (int)(ceil(attr->max / (double)m_nYStep) * m_nYStep);
-					bRedraw = 1;
+					if (attr->max < m_nYCeil)
+					{
+						m_nYPositiveMark = (int)(ceil(attr->max / (double)m_nYStep) * m_nYStep);
+						bRedraw = 1;
+					}
 				}
 			}
 		}
 
-		if (bRedraw)
-		{
-			DisplayMeasureScale(m_pMemDC, m_pBkgroundBmp, m_rectYBottomMark, m_nYNegtiveMark);
-			DisplayMeasureScale(m_pMemDC, m_pBkgroundBmp, m_rectYMidMark, (m_nYNegtiveMark + m_nYPositiveMark) / 2);
-			DisplayMeasureScale(m_pMemDC, m_pBkgroundBmp, m_rectYTopMark, m_nYPositiveMark);
+		CInstrumentPanel_Base::AppendYSample(ID, sampleValue);
 
-			DisplayBkGrid(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
-			DisplayYAlarmLine(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
-
-			ClearWaveform(m_pMemDC, m_pWaveformBmp);
-			for (int i = 0; i < m_nChannleCount; i++)
-			{
-				m_pChannel[i]->bNeedRedrawing = 1;
-			}
-		}
+#if ON_PAINTING_USE_MUTEX
+		::ReleaseMutex(m_hPaintingAccess);
 	}
-
-	CInstrumentPanel_Base::AppendYSample(ID, sampleValue);
+#endif
 }
 
-void CInstrumentPanel_Waveform::DisplayMeasureGraph(CDC* pMemDC, CBitmap* pGraphBmp)
+void CInstrumentPanel_Waveform::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp)
 {
 	int		i;
 	int		max_count = 0;
@@ -147,7 +141,7 @@ void CInstrumentPanel_Waveform::DisplayMeasureGraph(CDC* pMemDC, CBitmap* pGraph
 			rectPicture.top = 0;
 			rectPicture.right = bm.bmWidth;
 			rectPicture.bottom = bm.bmHeight;
-			pMemDC->FillRect(&rectPicture, m_pBkBrush);
+			pMemDC->FillRect(&rectPicture, m_pBkgroundBrush);
 
 			double  deltX = (double)rectPicture.Width() / WAVEFORM_SAMPLE_COUNT;
 			for (int ch = 0; ch < m_nChannleCount; ch++)
@@ -185,7 +179,7 @@ void CInstrumentPanel_Waveform::DisplayMeasureGraph(CDC* pMemDC, CBitmap* pGraph
 							{
 								point[i].x = (int)x;
 
-								ratio = (double)pChannel->pnYSampleArray[i] / m_nYPositiveMark;
+								ratio = (double)pChannel->pstSampleArray[i].y / m_nYPositiveMark;
 								point[i].y = (int)(yoffset - ratio * rectPicture.Height() / 2);
 								if (point[i].y < rectPicture.top)
 								{
@@ -205,7 +199,7 @@ void CInstrumentPanel_Waveform::DisplayMeasureGraph(CDC* pMemDC, CBitmap* pGraph
 							for (i = 0; i < WAVEFORM_SAMPLE_COUNT; i++)
 							{
 								point[i].x = (int)x;
-								ratio = (double)pChannel->pnYSampleArray[rdindex] / m_nYPositiveMark;
+								ratio = (double)pChannel->pstSampleArray[rdindex].y / m_nYPositiveMark;
 								point[i].y = (int)(yoffset - ratio * rectPicture.Height() / 2);
 								if (point[i].y < rectPicture.top)
 								{
@@ -233,7 +227,7 @@ void CInstrumentPanel_Waveform::DisplayMeasureGraph(CDC* pMemDC, CBitmap* pGraph
 							{
 								point[i].x = (int)x;
 
-								ratio = (double)(pChannel->pnYSampleArray[i] - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
+								ratio = (double)(pChannel->pstSampleArray[i].y - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
 								point[i].y = (int)(yoffset - ratio * rectPicture.Height());
 								if (point[i].y < rectPicture.top)
 								{
@@ -249,7 +243,7 @@ void CInstrumentPanel_Waveform::DisplayMeasureGraph(CDC* pMemDC, CBitmap* pGraph
 							for (i = 0; i < WAVEFORM_SAMPLE_COUNT; i++)
 							{
 								point[i].x = (int)x;
-								ratio = (double)(pChannel->pnYSampleArray[rdindex] - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
+								ratio = (double)(pChannel->pstSampleArray[rdindex].y - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
 								point[i].y = (int)(yoffset - ratio * rectPicture.Height());
 								if (point[i].y < rectPicture.top)
 								{
@@ -281,3 +275,155 @@ void CInstrumentPanel_Waveform::DisplayMeasureGraph(CDC* pMemDC, CBitmap* pGraph
 	}
 }
 
+void CInstrumentPanel_Waveform::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp)
+{
+	int		i;
+	int		max_count = 0;
+
+	BITMAP bm;
+	if ((pGraphBmp != NULL) && (pMemDC != NULL))
+	{
+		if (pGraphBmp->GetSafeHandle() != NULL)
+		{
+			pGraphBmp->GetBitmap(&bm);
+			pMemDC->SelectObject(pGraphBmp);
+
+			CRect rectPicture;
+
+			rectPicture.left = 0;
+			rectPicture.top = 0;
+			rectPicture.right = bm.bmWidth;
+			rectPicture.bottom = bm.bmHeight;
+			pMemDC->FillRect(&rectPicture, m_pBkgroundBrush);
+
+			double  deltX = (double)rectPicture.Width() / WAVEFORM_SAMPLE_COUNT;
+			for (int ch = 0; ch < m_nChannleCount; ch++)
+			{
+				SAMPLE_CHANNEL_t* pChannel = m_pChannel[ch];
+
+				CPen* pWaveformPen = new CPen;
+				pWaveformPen->CreatePen(PS_SOLID, 1, pChannel->color);
+
+#if INSTRUMENT_PANEL_USE_MUTEX
+				if (pChannel->hSampleAccess != NULL)
+				{
+					::WaitForSingleObject(pChannel->hSampleAccess, INFINITE);
+				}
+#endif
+
+				if (pChannel->nSampleCount > 0)
+				{
+					CPoint	point[WAVEFORM_SAMPLE_COUNT];
+					double	x;
+					double 	yoffset;
+					double  ratio;
+					int		rdindex;
+
+					yoffset = rectPicture.bottom - (double)rectPicture.Height() / 2;
+
+					CPen* pOldPen = pMemDC->SelectObject(pWaveformPen);
+					x = rectPicture.left;
+
+					if (m_nXAxisStyle == AXIS_STYLE_MEAN_SYMMETRY)
+					{
+						if (pChannel->nSampleCount < WAVEFORM_SAMPLE_COUNT)
+						{
+							for (i = 0; i < pChannel->nSampleCount; i++)
+							{
+								point[i].x = (int)x;
+
+								ratio = (double)pChannel->pstSampleArray[i].y / m_nYPositiveMark;
+								point[i].y = (int)(yoffset - ratio * rectPicture.Height() / 2);
+								if (point[i].y < rectPicture.top)
+								{
+									point[i].y = rectPicture.top;
+								}
+								else if (point[i].y > rectPicture.bottom)
+								{
+									point[i].y = rectPicture.bottom;
+								}
+
+								x += deltX;
+							}
+						}
+						else
+						{
+							rdindex = pChannel->nSampleIndex;
+							for (i = 0; i < WAVEFORM_SAMPLE_COUNT; i++)
+							{
+								point[i].x = (int)x;
+								ratio = (double)pChannel->pstSampleArray[rdindex].y / m_nYPositiveMark;
+								point[i].y = (int)(yoffset - ratio * rectPicture.Height() / 2);
+								if (point[i].y < rectPicture.top)
+								{
+									point[i].y = rectPicture.top;
+								}
+								else if (point[i].y > rectPicture.bottom)
+								{
+									point[i].y = rectPicture.bottom;
+								}
+
+								x += deltX;
+
+								rdindex++;
+								rdindex %= WAVEFORM_SAMPLE_COUNT;
+							}
+						}
+					}
+					else if (m_nXAxisStyle == AXIS_STYLE_FROM_MIN_TO_MAX)
+					{
+						yoffset = rectPicture.bottom;
+
+						if (pChannel->nSampleCount < WAVEFORM_SAMPLE_COUNT)
+						{
+							for (i = 0; i < pChannel->nSampleCount; i++)
+							{
+								point[i].x = (int)x;
+
+								ratio = (double)(pChannel->pstSampleArray[i].y - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
+								point[i].y = (int)(yoffset - ratio * rectPicture.Height());
+								if (point[i].y < rectPicture.top)
+								{
+									point[i].y = rectPicture.top;
+								}
+
+								x += deltX;
+							}
+						}
+						else
+						{
+							rdindex = pChannel->nSampleIndex;
+							for (i = 0; i < WAVEFORM_SAMPLE_COUNT; i++)
+							{
+								point[i].x = (int)x;
+								ratio = (double)(pChannel->pstSampleArray[rdindex].y - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
+								point[i].y = (int)(yoffset - ratio * rectPicture.Height());
+								if (point[i].y < rectPicture.top)
+								{
+									point[i].y = rectPicture.top;
+								}
+
+								x += deltX;
+
+								rdindex++;
+								rdindex %= WAVEFORM_SAMPLE_COUNT;
+							}
+						}
+					}
+
+					pMemDC->Polyline(point, pChannel->nSampleCount);
+				}
+
+				//m_bNeedUpdate = 0;
+
+#if INSTRUMENT_PANEL_USE_MUTEX
+				if (pChannel->hSampleAccess != NULL)
+				{
+					::SetEvent(pChannel->hSampleAccess);
+				}
+#endif
+				delete pWaveformPen;
+			}
+		}
+	}
+}
