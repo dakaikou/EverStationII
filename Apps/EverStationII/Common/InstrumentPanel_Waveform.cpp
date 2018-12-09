@@ -179,7 +179,8 @@ void CInstrumentPanel_Waveform::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBit
 							{
 								point[i].x = (int)x;
 
-								ratio = (double)pChannel->pstSampleArray[i].y / m_nYPositiveMark;
+								//ratio = (double)pChannel->pstSampleArray[i].y / m_nYPositiveMark;
+								ratio = (double)pChannel->pnYArray[i] / m_nYPositiveMark;
 								point[i].y = (int)(yoffset - ratio * rectPicture.Height() / 2);
 								if (point[i].y < rectPicture.top)
 								{
@@ -195,11 +196,12 @@ void CInstrumentPanel_Waveform::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBit
 						}
 						else
 						{
-							rdindex = pChannel->nSampleIndex;
+							rdindex = pChannel->nWrIndex;
 							for (i = 0; i < WAVEFORM_SAMPLE_COUNT; i++)
 							{
 								point[i].x = (int)x;
-								ratio = (double)pChannel->pstSampleArray[rdindex].y / m_nYPositiveMark;
+								//ratio = (double)pChannel->pstSampleArray[rdindex].y / m_nYPositiveMark;
+								ratio = (double)pChannel->pnYArray[rdindex] / m_nYPositiveMark;
 								point[i].y = (int)(yoffset - ratio * rectPicture.Height() / 2);
 								if (point[i].y < rectPicture.top)
 								{
@@ -227,7 +229,8 @@ void CInstrumentPanel_Waveform::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBit
 							{
 								point[i].x = (int)x;
 
-								ratio = (double)(pChannel->pstSampleArray[i].y - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
+								//ratio = (double)(pChannel->pstSampleArray[i].y - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
+								ratio = (double)(pChannel->pnYArray[i] - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
 								point[i].y = (int)(yoffset - ratio * rectPicture.Height());
 								if (point[i].y < rectPicture.top)
 								{
@@ -239,11 +242,12 @@ void CInstrumentPanel_Waveform::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBit
 						}
 						else
 						{
-							rdindex = pChannel->nSampleIndex;
+							rdindex = pChannel->nWrIndex;
 							for (i = 0; i < WAVEFORM_SAMPLE_COUNT; i++)
 							{
 								point[i].x = (int)x;
-								ratio = (double)(pChannel->pstSampleArray[rdindex].y - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
+								//ratio = (double)(pChannel->pstSampleArray[rdindex].y - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
+								ratio = (double)(pChannel->pnYArray[rdindex] - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
 								point[i].y = (int)(yoffset - ratio * rectPicture.Height());
 								if (point[i].y < rectPicture.top)
 								{
@@ -332,7 +336,8 @@ void CInstrumentPanel_Waveform::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitma
 							{
 								point[i].x = (int)x;
 
-								ratio = (double)pChannel->pstSampleArray[i].y / m_nYPositiveMark;
+								//ratio = (double)pChannel->pstSampleArray[i].y / m_nYPositiveMark;
+								ratio = (double)pChannel->pnYArray[i] / m_nYPositiveMark;
 								point[i].y = (int)(yoffset - ratio * rectPicture.Height() / 2);
 								if (point[i].y < rectPicture.top)
 								{
@@ -348,11 +353,12 @@ void CInstrumentPanel_Waveform::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitma
 						}
 						else
 						{
-							rdindex = pChannel->nSampleIndex;
+							rdindex = pChannel->nWrIndex;
 							for (i = 0; i < WAVEFORM_SAMPLE_COUNT; i++)
 							{
 								point[i].x = (int)x;
-								ratio = (double)pChannel->pstSampleArray[rdindex].y / m_nYPositiveMark;
+								//ratio = (double)pChannel->pstSampleArray[rdindex].y / m_nYPositiveMark;
+								ratio = (double)pChannel->pnYArray[rdindex] / m_nYPositiveMark;
 								point[i].y = (int)(yoffset - ratio * rectPicture.Height() / 2);
 								if (point[i].y < rectPicture.top)
 								{
@@ -380,7 +386,8 @@ void CInstrumentPanel_Waveform::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitma
 							{
 								point[i].x = (int)x;
 
-								ratio = (double)(pChannel->pstSampleArray[i].y - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
+								//ratio = (double)(pChannel->pstSampleArray[i].y - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
+								ratio = (double)(pChannel->pnYArray[i] - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
 								point[i].y = (int)(yoffset - ratio * rectPicture.Height());
 								if (point[i].y < rectPicture.top)
 								{
@@ -392,11 +399,12 @@ void CInstrumentPanel_Waveform::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitma
 						}
 						else
 						{
-							rdindex = pChannel->nSampleIndex;
+							rdindex = pChannel->nWrIndex;
 							for (i = 0; i < WAVEFORM_SAMPLE_COUNT; i++)
 							{
 								point[i].x = (int)x;
-								ratio = (double)(pChannel->pstSampleArray[rdindex].y - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
+								//ratio = (double)(pChannel->pstSampleArray[rdindex].y - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
+								ratio = (double)(pChannel->pnYArray[rdindex] - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
 								point[i].y = (int)(yoffset - ratio * rectPicture.Height());
 								if (point[i].y < rectPicture.top)
 								{

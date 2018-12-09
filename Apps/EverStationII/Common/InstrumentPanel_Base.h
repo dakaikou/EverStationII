@@ -10,30 +10,81 @@
 #define INSTRUMENT_PANEL_USE_MUTEX		0
 #define INSTRUMENT_PANEL_USE_DIRECTX	0
 
+#define SCREEN_BKGROUNDCOLOR			RGB(0, 0, 0)
+#define SCREEN_BKWAVEFORMCOLOR			RGB(0, 0, 0)
+#define SCREEN_BKMEASUREPANELCOLOR		RGB(0, 0, 0)
+
+#define SCREEN_TEXTCOLOR		RGB(0, 255, 0)
+#define SCREEN_TITLECOLOR		RGB(225, 255, 0)
+#define SCREEN_UNITCOLOR		RGB(100, 220, 128)
+#define SCREEN_GRIDCOLOR		RGB(128, 128, 128)
+#define SCREEN_AXISCOLOR		RGB(220, 220, 220)
+
+#define SCREEN_WAVECOLOR0		RGB(250, 250, 0)
+#define SCREEN_WAVECOLOR1		RGB(50, 250, 50)
+#define SCREEN_WAVECOLOR2		RGB(150, 250, 100)
+#define SCREEN_WAVECOLOR3		RGB(100, 250, 150)
+#define SCREEN_WAVECOLOR4		RGB(250, 200, 0)
+#define SCREEN_WAVECOLOR5		RGB(200, 200, 50)
+#define SCREEN_WAVECOLOR6		RGB(150, 200, 100)
+#define SCREEN_WAVECOLOR7		RGB(100, 200, 150)
+#define SCREEN_WAVECOLOR8		RGB(250, 150, 0)
+#define SCREEN_WAVECOLOR9		RGB(200, 150, 50)
+#define SCREEN_WAVECOLOR10		RGB(150, 150, 100)
+#define SCREEN_WAVECOLOR11		RGB(100, 150, 150)
+
+#define SCREEN_MAXLIMITCOLOR	RGB(160, 0, 0)
+#define SCREEN_MINLIMITCOLOR	RGB(120, 0, 0)
+
+//#define SCREEN_PAINTCOLOR		RGB(220, 220, 0)
+
+#define X_SEPARATOR						4
+#define Y_SEPARATOR						4
+
+#define RECT_MEASURE_WIDTH				160
+#define RECT_XMARK_HEIGHT				30
+#define RECT_XMARK_WIDTH				160
+#define RECT_YMARK_HEIGHT				30
+#define RECT_YMARK_WIDTH				20
+#define RECT_TITLE_HEIGHT				40
+
+#define FONT_TITLE_HEIGHT				20
+#define FONT_MARK_HEIGHT				16
+#define FONT_MEASURE_HEIGHT				16
+
+#define GRID_DIVISION_VERTICAL			6
+#define GRID_DIVISION_HORIZONTAL		20
+
+#define UNCREDITABLE_MAX_VALUE				-123456789
+#define UNCREDITABLE_MIN_VALUE				123456789
+
 typedef struct
 {
 	int min, mean, max, rms;
 } SAMPLE_ATTRIBUTE_t;
 
-typedef struct
-{
-	int x;
-	int y;
-	int bConsumed;
-} SAMPLE_VALUE_t;
+//typedef struct
+//{
+//	int x;
+//	int y;
+//	int bConsumed;
+//} SAMPLE_VALUE_t;
 
 typedef struct
 {
-//	CFIFO<int, 1024> fifo;
-	//int* pnXSampleArray;
-	//int* pnYSampleArray;
-	SAMPLE_VALUE_t* pstSampleArray;
+	int* pnXArray;
+	int* pnYArray;
+	//int* pbConsumed;
+	//SAMPLE_VALUE_t* pstSampleArray;
 	int nSampleCount;
-	int nSampleIndex;
+	int nWrIndex;
+	int nRdIndex;
+	int bFull;
+	int bEmpty;
 	int ID;
 	DWORD color;
 
-	int bNeedRedrawing;
+	//int bNeedRedrawing;
 
 #if INSTRUMENT_PANEL_USE_MUTEX
 	HANDLE	hSampleAccess;
@@ -189,12 +240,10 @@ protected:
 	void DisplayYAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
 	void DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectWaveform);
 
-	void ClearWaveformInMemory(CDC* pMemDC, CBitmap* pBkBmp);
 	void DisplayMeasurePanelInMemory(CDC* pMemDC, CBitmap* pBkBmp);
 
 	void AdjustLayout(CRect rectContainer);
 
-	//void CombineDraw(void);
 public:
 	void AppendXSample(int ID, int x);
 	void AppendYSample(int ID, int y);
@@ -204,11 +253,6 @@ public:
 	void Init_Y_Axis(int nYAxisStyle, int nYShownOption, int nYMinAlarm, int nYMaxAlarm, char* pszYUnits, int nYFloor, int nYCeil, int nStep=100);
 
 	void Reset(void);
-	//void Activate(void);
-
-	//void AppendSampleForMeanSymmetryGraph(int ID, int curValue, int minValue, int meanValue, int maxValue, int rmsValue);
-	//void AppendSampleForMinMaxGraph(int ID, int curValue, int minValue, int meanValue, int maxValue, int rmsValue);
-	//void AppendSampleForScatterDiagram(int ID, int curValue, int minValue, int meanValue, int maxValue, int rmsValue);
 
 	// Generated message map functions
 protected:

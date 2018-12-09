@@ -8,8 +8,8 @@
 
 #include "InstrumentPanel_Base.h"
 
-#define SCATTER_DIAGRAM_SAMPLE_DEPTH							1024 * 20
-//#define SCATTER_DIAGRAM_HORZ_DIVISION							101								//根据被测对象的分辨率确定
+#define SCATTER_DIAGRAM_SAMPLE_DEPTH							1024 * 16
+//#define SCATTER_DIAGRAM_SAMPLE_DEPTH							1024 * 20
 
 /////////////////////////////////////////////////////////////////////////////
 // CGraph_Oscilloscope window

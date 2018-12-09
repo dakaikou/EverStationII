@@ -86,7 +86,8 @@ void CInstrumentPanel_Histogram::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBi
 						{
 							for (i = 0; i < pChannel->nSampleCount; i++)
 							{
-								int distance = pChannel->pstSampleArray[i].x - m_nMeasuredXMeanValue;
+								int distance = pChannel->pnXArray[i] - m_nMeasuredXMeanValue;
+								//int distance = pChannel->pstSampleArray[i].x - m_nMeasuredXMeanValue;
 								if ((distance > m_nXNegtiveMark) && (distance < m_nXPositiveMark))
 								{
 									int index = (int)((distance - m_nXNegtiveMark) / fBiasLevel);
@@ -104,9 +105,11 @@ void CInstrumentPanel_Histogram::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBi
 						{
 							for (i = 0; i < pChannel->nSampleCount; i++)
 							{
-								if ((pChannel->pstSampleArray[i].x > m_nXNegtiveMark) && (pChannel->pstSampleArray[i].x < m_nXPositiveMark))
+								//if ((pChannel->pstSampleArray[i].x > m_nXNegtiveMark) && (pChannel->pstSampleArray[i].x < m_nXPositiveMark))
+								if ((pChannel->pnXArray[i] > m_nXNegtiveMark) && (pChannel->pnXArray[i] < m_nXPositiveMark))
 								{
-									int index = (int)((pChannel->pstSampleArray[i].x - m_nXNegtiveMark) / fBiasLevel);
+									//int index = (int)((pChannel->pstSampleArray[i].x - m_nXNegtiveMark) / fBiasLevel);
+									int index = (int)((pChannel->pnXArray[i] - m_nXNegtiveMark) / fBiasLevel);
 									assert((index >= 0) && (index < HISTGRAM_HORZ_DIVISION));
 									nHistGram[index] ++;
 
@@ -185,10 +188,6 @@ void CInstrumentPanel_Histogram::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitm
 			{
 				SAMPLE_CHANNEL_t* pChannel = m_pChannel[ch];
 
-				CBrush* pPaintBrush = new CBrush;
-				pPaintBrush->CreateSolidBrush(pChannel->color);
-				CBrush* pOldBrush = pMemDC->SelectObject(pPaintBrush);
-
 #if INSTRUMENT_PANEL_USE_MUTEX
 				if (pChannel->hSampleAccess != NULL)
 				{
@@ -196,7 +195,12 @@ void CInstrumentPanel_Histogram::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitm
 				}
 #endif
 
-				if (pChannel->nSampleCount > 0) {
+				if (pChannel->nSampleCount > 0) 
+				{
+
+					CBrush* pPaintBrush = new CBrush;
+					pPaintBrush->CreateSolidBrush(pChannel->color);
+					CBrush* pOldBrush = pMemDC->SelectObject(pPaintBrush);
 
 					if (fBiasLevel > 0)
 					{
@@ -204,7 +208,8 @@ void CInstrumentPanel_Histogram::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitm
 						{
 							for (i = 0; i < pChannel->nSampleCount; i++)
 							{
-								int distance = pChannel->pstSampleArray[i].x - m_nMeasuredXMeanValue;
+								//int distance = pChannel->pstSampleArray[i].x - m_nMeasuredXMeanValue;
+								int distance = pChannel->pnXArray[i] - m_nMeasuredXMeanValue;
 								if ((distance > m_nXNegtiveMark) && (distance < m_nXPositiveMark))
 								{
 									int index = (int)((distance - m_nXNegtiveMark) / fBiasLevel);
@@ -222,9 +227,11 @@ void CInstrumentPanel_Histogram::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitm
 						{
 							for (i = 0; i < pChannel->nSampleCount; i++)
 							{
-								if ((pChannel->pstSampleArray[i].x > m_nXNegtiveMark) && (pChannel->pstSampleArray[i].x < m_nXPositiveMark))
+								if ((pChannel->pnXArray[i] > m_nXNegtiveMark) && (pChannel->pnXArray[i] < m_nXPositiveMark))
+								//if ((pChannel->pstSampleArray[i].x > m_nXNegtiveMark) && (pChannel->pstSampleArray[i].x < m_nXPositiveMark))
 								{
-									int index = (int)((pChannel->pstSampleArray[i].x - m_nXNegtiveMark) / fBiasLevel);
+									//int index = (int)((pChannel->pstSampleArray[i].x - m_nXNegtiveMark) / fBiasLevel);
+									int index = (int)((pChannel->pnXArray[i] - m_nXNegtiveMark) / fBiasLevel);
 									assert((index >= 0) && (index < HISTGRAM_HORZ_DIVISION));
 									nHistGram[index] ++;
 
@@ -253,6 +260,9 @@ void CInstrumentPanel_Histogram::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitm
 							pMemDC->FillRect(&rectPaint, pPaintBrush);
 						}
 					}
+
+					pMemDC->SelectObject(pOldBrush);
+					delete pPaintBrush;
 				}
 
 				//m_bNeedUpdate = 0;
@@ -263,8 +273,6 @@ void CInstrumentPanel_Histogram::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitm
 					::SetEvent(pChannel->hSampleAccess);
 				}
 #endif
-				pMemDC->SelectObject(pOldBrush);
-				delete pPaintBrush;
 			}
 		}
 	}
@@ -347,24 +355,6 @@ void CInstrumentPanel_Histogram::AppendSample(int ID, int sampleValue, SAMPLE_AT
 					}
 				}
 			}
-
-			//if (bRedraw)
-			//{
-			//	DisplayMeasureScale(m_pMemDC, m_pBkgroundBmp, m_rectXLeftMark, m_nXNegtiveMark);
-			//	DisplayMeasureScale(m_pMemDC, m_pBkgroundBmp, m_rectXMidMark, (m_nXNegtiveMark + m_nXPositiveMark) / 2);
-			//	DisplayMeasureScale(m_pMemDC, m_pBkgroundBmp, m_rectXRightMark, m_nXPositiveMark);
-
-			//	DisplayBkGrid(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
-			//	DisplayXAlarmLine(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
-
-			//	ClearWaveform(m_pMemDC, m_pWaveformBmp);
-			//	for (int i = 0; i < m_nChannleCount; i++)
-			//	{
-			//		m_pChannel[i]->bNeedRedrawing = 1;
-			//	}
-
-			//	Invalidate(FALSE);
-			//}
 		}
 
 		CInstrumentPanel_Base::AppendXSample(ID, sampleValue);

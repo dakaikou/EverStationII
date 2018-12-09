@@ -30,8 +30,6 @@ END_MESSAGE_MAP()
 
 void CInstrumentPanel_ScatterDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp)
 {
-	int		i;
-	double  ratio;
 	CRect	rectPaint;
 
 	//assert(m_nXAxisStyle == AXIS_STYLE_FROM_MIN_TO_MAX);
@@ -44,6 +42,7 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC
 		{
 			pGraphBmp->GetBitmap(&bm);
 			pMemDC->SelectObject(pGraphBmp);
+			pMemDC->SetBkColor(SCREEN_BKWAVEFORMCOLOR);
 
 			CRect rectPicture;
 
@@ -51,7 +50,7 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC
 			rectPicture.top = 0;
 			rectPicture.right = bm.bmWidth;
 			rectPicture.bottom = bm.bmHeight;
-			//pMemDC->FillRect(&rectPicture, m_pBkBrush);
+			pMemDC->FillRect(&rectPicture, m_pWaveformBrush);
 
 			CPoint	point;
 			double yoffset = rectPicture.bottom - (double)rectPicture.Height() / 2;
@@ -62,27 +61,30 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC
 			{
 				SAMPLE_CHANNEL_t* pChannel = m_pChannel[ch];
 
-				//if (pChannel->bNeedRedrawing)
+				if (pChannel->nSampleCount > 0)
 				{
-					CPen* pWaveformPen = new CPen;
-					pWaveformPen->CreatePen(PS_SOLID, 1, pChannel->color);
-					pMemDC->SelectObject(pWaveformPen);
-
-					CBrush* pPaintBrush = new CBrush;
-					pPaintBrush->CreateSolidBrush(pChannel->color);
-					CBrush* pOldBrush = pMemDC->SelectObject(pPaintBrush);
-
 #if INSTRUMENT_PANEL_USE_MUTEX
 					if (pChannel->hSampleAccess != NULL)
 					{
 						::WaitForSingleObject(pChannel->hSampleAccess, INFINITE);
 					}
 #endif
-					if (pChannel->nSampleCount > 0) {
+					CPen* pWaveformPen = new CPen;
+					pWaveformPen->CreatePen(PS_SOLID, 3, pChannel->color);
+					pMemDC->SelectObject(pWaveformPen);
 
-						for (i = 0; i < pChannel->nSampleCount; i++)
+					CBrush* pPaintBrush = new CBrush;
+					pPaintBrush->CreateSolidBrush(pChannel->color);
+					CBrush* pOldBrush = pMemDC->SelectObject(pPaintBrush);
+
+					if (pChannel->nSampleCount < m_nChannleDepth)
+					{
+						assert(pChannel->nRdIndex <= pChannel->nWrIndex);
+
+						for (int rdIndex = 0; rdIndex < pChannel->nRdIndex; rdIndex++)
 						{
-							ratio = double(pChannel->pstSampleArray[i].x - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
+							//ratio = double(pChannel->pstSampleArray[i].x - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
+							double ratio = double(pChannel->pnXArray[rdIndex] - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
 							point.x = (int)(rectPicture.left + ratio * rectPicture.Width());
 							if (point.x < rectPicture.left)
 							{
@@ -93,7 +95,8 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC
 								point.x = rectPicture.right;
 							}
 
-							ratio = (double)pChannel->pstSampleArray[i].y / m_nYPositiveMark;
+							//ratio = (double)pChannel->pstSampleArray[i].y / m_nYPositiveMark;
+							ratio = (double)pChannel->pnYArray[rdIndex] / m_nYPositiveMark;
 							point.y = (int)(yoffset - ratio * rectPicture.Height() / 2);
 							if (point.y < rectPicture.top)
 							{
@@ -106,19 +109,112 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC
 
 							//pMemDC->TextOutA(point.x, point.y, "O");
 							//pMemDC->SetPixel(point, pChannel->color);
-							RECT rectPoint;
-							rectPoint.left = point.x - radis;
-							rectPoint.top = point.y - radis;
-							rectPoint.right = point.x + radis;
-							rectPoint.bottom = point.y + radis;
-							pMemDC->Ellipse(&rectPoint);
+							//pMemDC->SetPixel(point.x + 1, point.y - 1, pChannel->color);
+							//pMemDC->SetPixel(point.x - 1, point.y - 1, pChannel->color);
+							//pMemDC->SetPixel(point.x, point.y, pChannel->color);
+							//pMemDC->SetPixel(point.x - 1, point.y + 1, pChannel->color);
+							//pMemDC->SetPixel(point.x + 1, point.y + 1, pChannel->color);
+
+							//pMemDC->SetPixel(point.x - 2, point.y, pChannel->color);
+							//pMemDC->SetPixel(point.x - 1, point.y, pChannel->color);
+							//pMemDC->SetPixel(point.x + 1, point.y, pChannel->color);
+							//pMemDC->SetPixel(point.x + 2, point.y, pChannel->color);
+
+							//pMemDC->SetPixel(point.x, point.y - 2, pChannel->color);
+							//pMemDC->SetPixel(point.x, point.y - 1, pChannel->color);
+							//pMemDC->SetPixel(point.x, point.y + 1, pChannel->color);
+							//pMemDC->SetPixel(point.x, point.y + 2, pChannel->color);
+							pMemDC->MoveTo(point.x - 2, point.y);
+							pMemDC->LineTo(point.x + 2, point.y);
+							pMemDC->MoveTo(point.x, point.y - 2);
+							pMemDC->LineTo(point.x, point.y + 2);
+							//RECT rectPoint;
+							//rectPoint.left = point.x - radis;
+							//rectPoint.top = point.y - radis;
+							//rectPoint.right = point.x + radis;
+							//rectPoint.bottom = point.y + radis;
+							//pMemDC->Ellipse(&rectPoint);
 							//pMemDC->FillRect(&rectPoint, pPaintBrush);
 
-							pChannel->pstSampleArray[i].bConsumed = 1;
+							//pChannel->pstSampleArray[i].bConsumed = 1;
+							//pChannel->pbConsumed[i] = 1;
 						}
 					}
+					else
+					{
+						int rdIndex = pChannel->nWrIndex;
+						do
+						{
+							//ratio = double(pChannel->pstSampleArray[i].x - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
+							double ratio = double(pChannel->pnXArray[rdIndex] - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
+							point.x = (int)(rectPicture.left + ratio * rectPicture.Width());
+							if (point.x < rectPicture.left)
+							{
+								point.x = rectPicture.left;
+							}
+							else if (point.x > rectPicture.right)
+							{
+								point.x = rectPicture.right;
+							}
 
-					pChannel->bNeedRedrawing = 0;
+							//ratio = (double)pChannel->pstSampleArray[i].y / m_nYPositiveMark;
+							ratio = (double)pChannel->pnYArray[rdIndex] / m_nYPositiveMark;
+							point.y = (int)(yoffset - ratio * rectPicture.Height() / 2);
+							if (point.y < rectPicture.top)
+							{
+								point.y = rectPicture.top;
+							}
+							else if (point.y > rectPicture.bottom)
+							{
+								point.y = rectPicture.bottom;
+							}
+
+							//pMemDC->TextOutA(point.x, point.y, "O");
+							//pMemDC->SetPixel(point, pChannel->color);
+							//pMemDC->SetPixel(point.x + 1, point.y - 1, pChannel->color);
+							//pMemDC->SetPixel(point.x - 1, point.y - 1, pChannel->color);
+							//pMemDC->SetPixel(point.x, point.y, pChannel->color);
+							//pMemDC->SetPixel(point.x - 1, point.y + 1, pChannel->color);
+							//pMemDC->SetPixel(point.x + 1, point.y + 1, pChannel->color);
+
+							//pMemDC->SetPixel(point.x - 2, point.y, pChannel->color);
+							//pMemDC->SetPixel(point.x - 1, point.y, pChannel->color);
+							//pMemDC->SetPixel(point.x + 1, point.y, pChannel->color);
+							//pMemDC->SetPixel(point.x + 2, point.y, pChannel->color);
+
+							//pMemDC->SetPixel(point.x, point.y - 2, pChannel->color);
+							//pMemDC->SetPixel(point.x, point.y - 1, pChannel->color);
+							//pMemDC->SetPixel(point.x, point.y + 1, pChannel->color);
+							//pMemDC->SetPixel(point.x, point.y + 2, pChannel->color);
+							pMemDC->MoveTo(point.x - 2, point.y);
+							pMemDC->LineTo(point.x + 2, point.y);
+							pMemDC->MoveTo(point.x, point.y - 2);
+							pMemDC->LineTo(point.x, point.y + 2);
+							//RECT rectPoint;
+							//rectPoint.left = point.x - radis;
+							//rectPoint.top = point.y - radis;
+							//rectPoint.right = point.x + radis;
+							//rectPoint.bottom = point.y + radis;
+							//pMemDC->Ellipse(&rectPoint);
+							//pMemDC->FillRect(&rectPoint, pPaintBrush);
+
+							//pChannel->pstSampleArray[i].bConsumed = 1;
+							//pChannel->pbConsumed[rdIndex] = 1;
+
+							rdIndex++;
+							rdIndex %= m_nChannleDepth;
+							if (rdIndex == pChannel->nRdIndex)
+							{
+								break;
+							}
+
+						} while (1);
+					}
+
+					//pChannel->bNeedRedrawing = 0;
+
+					delete pWaveformPen;
+					delete pPaintBrush;
 
 #if INSTRUMENT_PANEL_USE_MUTEX
 					if (pChannel->hSampleAccess != NULL)
@@ -126,10 +222,7 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC
 						::SetEvent(pChannel->hSampleAccess);
 					}
 #endif
-					delete pWaveformPen;
-					delete pPaintBrush;
 				}
-
 			}
 		}
 	}
@@ -137,7 +230,7 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC
 
 void CInstrumentPanel_ScatterDiagram::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp)
 {
-	int		i;
+	//int		i;
 	double  ratio;
 	CRect	rectPaint;
 
@@ -162,36 +255,42 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheNewSamplesInMemory(CDC* pMemDC, 
 
 			CPoint	point;
 			double yoffset = rectPicture.bottom - (double)rectPicture.Height() / 2;
-			double diameter = rectPicture.Width() / (double)(m_nXPositiveMark - m_nXNegtiveMark);
-			int radis = (int)ceil(diameter / 4.0);
+			//double diameter = rectPicture.Width() / (double)(m_nXPositiveMark - m_nXNegtiveMark);
+			//int radis = (int)ceil(diameter / 4.0);
 
 			for (int ch = 0; ch < m_nChannleCount; ch++)
 			{
 				SAMPLE_CHANNEL_t* pChannel = m_pChannel[ch];
 
-				if (pChannel->bNeedRedrawing)
+				//if (pChannel->bNeedRedrawing)
+				if (pChannel->bEmpty == 0)
 				{
-					CPen* pWaveformPen = new CPen;
-					pWaveformPen->CreatePen(PS_SOLID, 1, pChannel->color);
-					pMemDC->SelectObject(pWaveformPen);
-
-					CBrush* pPaintBrush = new CBrush;
-					pPaintBrush->CreateSolidBrush(pChannel->color);
-					CBrush* pOldBrush = pMemDC->SelectObject(pPaintBrush);
-
 #if INSTRUMENT_PANEL_USE_MUTEX
 					if (pChannel->hSampleAccess != NULL)
 					{
 						::WaitForSingleObject(pChannel->hSampleAccess, INFINITE);
 					}
 #endif
-					if (pChannel->nSampleCount > 0) {
+					CPen* pWaveformPen = new CPen;
+					pWaveformPen->CreatePen(PS_SOLID, 3, pChannel->color);
+					pMemDC->SelectObject(pWaveformPen);
 
-						for (i = 0; i < pChannel->nSampleCount; i++)
+					//CBrush* pPaintBrush = new CBrush;
+					//pPaintBrush->CreateSolidBrush(pChannel->color);
+					//CBrush* pOldBrush = pMemDC->SelectObject(pPaintBrush);
+
+					//if (pChannel->nSampleCount > 0) 
+					{
+
+						//for (i = 0; i < pChannel->nSampleCount; i++)
+						do
 						{
-							if (pChannel->pstSampleArray[i].bConsumed == 0)
+							//if (pChannel->pstSampleArray[i].bConsumed == 0)
+							//if (pChannel->pbConsumed[i] == 0)
 							{
-								ratio = double(pChannel->pstSampleArray[i].x - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
+								int rdIndex = pChannel->nRdIndex;
+								//ratio = double(pChannel->pstSampleArray[i].x - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
+								ratio = double(pChannel->pnXArray[rdIndex] - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
 								point.x = (int)(rectPicture.left + ratio * rectPicture.Width());
 								if (point.x < rectPicture.left)
 								{
@@ -202,7 +301,8 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheNewSamplesInMemory(CDC* pMemDC, 
 									point.x = rectPicture.right;
 								}
 
-								ratio = (double)pChannel->pstSampleArray[i].y / m_nYPositiveMark;
+								//ratio = (double)pChannel->pstSampleArray[i].y / m_nYPositiveMark;
+								ratio = (double)pChannel->pnYArray[rdIndex] / m_nYPositiveMark;
 								point.y = (int)(yoffset - ratio * rectPicture.Height() / 2);
 								if (point.y < rectPicture.top)
 								{
@@ -215,18 +315,58 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheNewSamplesInMemory(CDC* pMemDC, 
 
 								//pMemDC->TextOutA(point.x, point.y, "O");
 								//pMemDC->SetPixel(point, pChannel->color);
-								RECT rectPoint;
-								rectPoint.left = point.x - radis;
-								rectPoint.top = point.y - radis;
-								rectPoint.right = point.x + radis;
-								rectPoint.bottom = point.y + radis;
-								pMemDC->Ellipse(&rectPoint);
+								//pMemDC->SetPixel(point.x + 1, point.y - 1, pChannel->color);
+								//pMemDC->SetPixel(point.x - 1, point.y - 1, pChannel->color);
+								//pMemDC->SetPixel(point.x, point.y, pChannel->color);
+								//pMemDC->SetPixel(point.x - 1, point.y + 1, pChannel->color);
+								//pMemDC->SetPixel(point.x + 1, point.y + 1, pChannel->color);
+
+								//pMemDC->SetPixel(point.x - 2, point.y, pChannel->color);
+								//pMemDC->SetPixel(point.x - 1, point.y, pChannel->color);
+								//pMemDC->SetPixel(point.x + 1, point.y, pChannel->color);
+								//pMemDC->SetPixel(point.x + 2, point.y, pChannel->color);
+
+								//pMemDC->SetPixel(point.x, point.y - 2, pChannel->color);
+								//pMemDC->SetPixel(point.x, point.y - 1, pChannel->color);
+								//pMemDC->SetPixel(point.x, point.y + 1, pChannel->color);
+								//pMemDC->SetPixel(point.x, point.y + 2, pChannel->color);
+
+								pMemDC->MoveTo(point.x - 2, point.y);
+								pMemDC->LineTo(point.x + 2, point.y);
+								pMemDC->MoveTo(point.x, point.y - 2);
+								pMemDC->LineTo(point.x, point.y + 2);
+
+								//RECT rectPoint;
+								//rectPoint.left = point.x - radis;
+								//rectPoint.top = point.y - radis;
+								//rectPoint.right = point.x + radis;
+								//rectPoint.bottom = point.y + radis;
+								//pMemDC->Ellipse(&rectPoint);
+
 								//pMemDC->FillRect(&rectPoint, pPaintBrush);
 
-								pChannel->pstSampleArray[i].bConsumed = 1;
+								//pChannel->pstSampleArray[i].bConsumed = 1;
+								//pChannel->pbConsumed[rdIndex] = 1;
+
+								if (pChannel->bFull == 1) pChannel->bFull = 0;
+
+								pChannel->nRdIndex++;
+								pChannel->nRdIndex %= m_nChannleDepth;
+
+								if (pChannel->nRdIndex == pChannel->nWrIndex)
+								{
+									pChannel->bEmpty = 1;
+									break;
+								}
 							}
-						}
+
+						} while (1);
 					}
+
+					delete pWaveformPen;
+					//delete pPaintBrush;
+
+					//pChannel->bNeedRedrawing = 0;
 
 #if INSTRUMENT_PANEL_USE_MUTEX
 					if (pChannel->hSampleAccess != NULL)
@@ -234,10 +374,6 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheNewSamplesInMemory(CDC* pMemDC, 
 						::SetEvent(pChannel->hSampleAccess);
 					}
 #endif
-					delete pWaveformPen;
-					delete pPaintBrush;
-
-					pChannel->bNeedRedrawing = 0;
 				}
 			}
 		}
