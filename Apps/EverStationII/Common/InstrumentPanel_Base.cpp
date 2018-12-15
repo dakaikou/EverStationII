@@ -36,17 +36,17 @@ CInstrumentPanel_Base::CInstrumentPanel_Base()
 	//m_pLeftMarkBmp = NULL;
 	//m_pMidMarkBmp = NULL;
 	//m_pRightMarkBmp = NULL;
-	m_pAxisPen = NULL;
-	m_pGridPen = NULL;
-	m_pDotPen = NULL;
-	m_pDashPen = NULL;
+	//m_pAxisPen = NULL;
+	//m_pGridPen = NULL;
+	//m_pDotPen = NULL;
+	//m_pDashPen = NULL;
 
-	m_pMeasureFont = NULL;
-	m_pMarkFont = NULL;
-	m_pTitleFont = NULL;
+	//m_pMeasureFont = NULL;
+	//m_pMarkFont = NULL;
+	//m_pTitleFont = NULL;
 
-	m_pMaxLimitPen = NULL;
-	m_pMinLimitPen = NULL;
+	//m_pMaxLimitPen = NULL;
+	//m_pMinLimitPen = NULL;
 
 	m_nXMarkShownOption = RANGE_MARK_HIDE;
 	m_nXAxisStyle = AXIS_STYLE_UNKNOWN;
@@ -54,8 +54,8 @@ CInstrumentPanel_Base::CInstrumentPanel_Base()
 	m_nYMarkShownOption = RANGE_MARK_HIDE;
 	m_nYAxisStyle = AXIS_STYLE_UNKNOWN;
 
-	m_dGridDeltx = 0;
-	m_dGridDelty = 0;
+	//m_dGridDeltx = 0;
+	//m_dGridDelty = 0;
 	m_dMeasureDeltX = 0;
 	m_dMeasureDeltY = 0;
 
@@ -166,56 +166,56 @@ CInstrumentPanel_Base::~CInstrumentPanel_Base()
 		m_pMeasurePanelBrush = NULL;
 	}
 
-	if (m_pAxisPen != NULL)
-	{
-		delete m_pAxisPen;
-		m_pAxisPen = NULL;
-	}
+	//if (m_pAxisPen != NULL)
+	//{
+	//	delete m_pAxisPen;
+	//	m_pAxisPen = NULL;
+	//}
 
-	if (m_pGridPen != NULL)
-	{
-		delete m_pGridPen;
-		m_pGridPen = NULL;
-	}
+	//if (m_pGridPen != NULL)
+	//{
+	//	delete m_pGridPen;
+	//	m_pGridPen = NULL;
+	//}
 
-	if (m_pDotPen != NULL)
-	{
-		delete m_pDotPen;
-		m_pDotPen = NULL;
-	}
+	//if (m_pDotPen != NULL)
+	//{
+	//	delete m_pDotPen;
+	//	m_pDotPen = NULL;
+	//}
 
-	if (m_pDashPen != NULL)
-	{
-		delete m_pDashPen;
-		m_pDashPen = NULL;
-	}
+	//if (m_pDashPen != NULL)
+	//{
+	//	delete m_pDashPen;
+	//	m_pDashPen = NULL;
+	//}
 
-	if( m_pMaxLimitPen != NULL )
-	{
-		delete m_pMaxLimitPen;
-		m_pMaxLimitPen = NULL;
-	}
-	if (m_pMinLimitPen != NULL)
-	{
-		delete m_pMinLimitPen;
-		m_pMinLimitPen = NULL;
-	}
+	//if( m_pMaxLimitPen != NULL )
+	//{
+	//	delete m_pMaxLimitPen;
+	//	m_pMaxLimitPen = NULL;
+	//}
+	//if (m_pMinLimitPen != NULL)
+	//{
+	//	delete m_pMinLimitPen;
+	//	m_pMinLimitPen = NULL;
+	//}
 
-	if (m_pTitleFont != NULL)
-	{
-		delete m_pTitleFont;
-		m_pTitleFont = NULL;
-	}
-	if (m_pMeasureFont != NULL)
-	{
-		delete m_pMeasureFont;
-		m_pMeasureFont = NULL;
-	}
-	if (m_pMarkFont != NULL)
-	{
-		delete m_pMarkFont;
-		m_pMarkFont = NULL;
-	}
+	//if (m_pTitleFont != NULL)
+	//{
+	//	delete m_pTitleFont;
+	//	m_pTitleFont = NULL;
+	//}
+	//if (m_pMeasureFont != NULL)
+	//{
+	//	delete m_pMeasureFont;
+	//	m_pMeasureFont = NULL;
+	//}
+	//if (m_pMarkFont != NULL)
+	//{
+	//	delete m_pMarkFont;
+	//	m_pMarkFont = NULL;
+	//}
 }
 
 
@@ -232,69 +232,420 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CInstrumentPanel_Base message handlers
-void CInstrumentPanel_Base::DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectPicture)
+void CInstrumentPanel_Base::DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectGridArea)
 {
-	int i;
-	int x, y;
+	//int i;
+	//int x, y;
+	CString strMark;
 
 	if ((pMemDC != NULL) && (pBkBmp != NULL))
 	{
+		BITMAP bm;
+		CRect rectBkGround;
+
+		pBkBmp->GetBitmap(&bm);
+		rectBkGround.left = 0;
+		rectBkGround.top = 0;
+		rectBkGround.right = bm.bmWidth;
+		rectBkGround.bottom = bm.bmHeight;
+
 		pMemDC->SelectObject(pBkBmp);
 		pMemDC->SelectObject(m_pBkgroundBrush);
-		pMemDC->FillRect(rectPicture, m_pBkgroundBrush);
+		pMemDC->FillRect(rectBkGround, m_pBkgroundBrush);
 		pMemDC->SetBkColor(SCREEN_BKGROUNDCOLOR);
 
-		CPen* pOldPen = pMemDC->SelectObject(m_pGridPen);
-		pMemDC->Rectangle(rectPicture);
+		double dGridDeltx = (double)rectGridArea.Width() / GRID_DIVISION_HORIZONTAL;
+		double dGridDelty = (double)rectGridArea.Height() / GRID_DIVISION_VERTICAL;
+		double dHalfHeight = rectGridArea.Height() / 2.0;
+		double dHalfWidth = rectGridArea.Width() / 2.0;
 
-		pMemDC->SelectObject(m_pDotPen);
-		for (i = 1; i < GRID_DIVISION_VERTICAL; i++)
-		{
-			y = (int)(rectPicture.top + i * m_dGridDelty);
+		CPen* pFramePen = new CPen;
+		pFramePen->CreatePen(PS_SOLID, 1, SCREEN_GRIDCOLOR);
 
-			pMemDC->MoveTo(rectPicture.left, y);
-			pMemDC->LineTo(rectPicture.right, y);
-		}
-		pMemDC->SelectObject(m_pAxisPen);
-		if (m_nYAxisStyle == AXIS_STYLE_FROM_MIN_TO_MAX)
-		{
-			y = rectPicture.bottom;
-		}
-		else
-		{
-			y = rectPicture.top + rectPicture.Height() / 2;
-		}
-		pMemDC->MoveTo(rectPicture.left, y);
-		pMemDC->LineTo(rectPicture.right, y);
+		CPen* pDotPen = new CPen;
+		pDotPen->CreatePen(PS_DOT, 1, SCREEN_GRIDCOLOR);
 
-		pMemDC->SelectObject(m_pDotPen);
-		for (i = 1; i < GRID_DIVISION_HORIZONTAL; i++)
+		CPen* pAxisPen = new CPen;
+		pAxisPen->CreatePen(PS_SOLID, 2, SCREEN_AXISCOLOR);
+
+		CPen* pOldPen = pMemDC->SelectObject(pFramePen);
+		pMemDC->Rectangle(rectGridArea);
+
+		CFont* pMarkFont = new CFont;
+		pMarkFont->CreateFont(FONT_MARK_HEIGHT, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, NULL);
+
+		CFont* pTitleFont = new CFont;
+		pTitleFont->CreateFont(FONT_TITLE_HEIGHT, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, NULL);
+
+		//pMemDC->SelectObject(pMarkFont);
+		//pMemDC->SetTextColor(SCREEN_TEXTCOLOR);
+
+		if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX)
 		{
-			x = (int)(rectPicture.left + i * m_dGridDeltx);
-			pMemDC->MoveTo(x, rectPicture.top);
-			pMemDC->LineTo(x, rectPicture.bottom);
+			CRect rectYMark;
+			rectYMark.left = 0;
+			rectYMark.right = rectGridArea.left - X_SEPARATOR;
+
+			int y0 = rectGridArea.bottom;
+			double deltYMark = (m_nYPositiveMark - m_nYNegtiveMark) / GRID_DIVISION_VERTICAL;
+
+			pMemDC->SelectObject(pMarkFont);
+			pMemDC->SetTextColor(SCREEN_TEXTCOLOR);
+			pMemDC->SelectObject(pAxisPen);
+			pMemDC->MoveTo(rectGridArea.left, y0);
+			pMemDC->LineTo(rectGridArea.right, y0);
+
+			if (m_nYMarkShownOption == RANGE_MARK_SHOWN)
+			{
+				strMark.Format("%d\n", m_nYNegtiveMark);
+
+				rectYMark.top = y0 - RECT_YMARK_HEIGHT / 2;
+				rectYMark.bottom = y0 + RECT_YMARK_HEIGHT / 2;
+
+				pMemDC->DrawText(strMark, strMark.GetLength(), &rectYMark, DT_RIGHT | DT_SINGLELINE | DT_VCENTER);
+			}
+
+			int y = y0;
+			for (int i = 1; i < GRID_DIVISION_VERTICAL; i++)
+			{
+				y = (int)(y0 - i * dGridDelty);
+
+				pMemDC->SelectObject(pDotPen);
+				pMemDC->MoveTo(rectGridArea.left, y);
+				pMemDC->LineTo(rectGridArea.right, y);
+
+				if (m_nYMarkShownOption == RANGE_MARK_SHOWN)
+				{
+					//rectYMark.left = 0;
+					//rectYMark.right = rectGridArea.left - X_SEPARATOR;
+					rectYMark.top = y - RECT_YMARK_HEIGHT / 2;
+					rectYMark.bottom = y + RECT_YMARK_HEIGHT / 2;
+
+					strMark.Format("%d\n", (int)(m_nYNegtiveMark + i * deltYMark));
+
+					pMemDC->DrawText(strMark, strMark.GetLength(), &rectYMark, DT_RIGHT | DT_SINGLELINE | DT_VCENTER);
+				}
+			}
+
+			if (m_nYMarkShownOption == RANGE_MARK_SHOWN)
+			{
+				strMark.Format("%d\n", m_nYPositiveMark);
+
+				//rectYMark.left = 0;
+				//rectYMark.right = rectGridArea.left - X_SEPARATOR;
+				rectYMark.top = rectGridArea.top - RECT_YMARK_HEIGHT / 2;
+				rectYMark.bottom = rectGridArea.top + RECT_YMARK_HEIGHT / 2;
+
+				pMemDC->DrawText(strMark, strMark.GetLength(), &rectYMark, DT_RIGHT | DT_SINGLELINE | DT_VCENTER);
+			}
+
+			pMemDC->SelectObject(pDotPen);
+		}
+		else if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)
+		{
+			int y0 = (int)(rectGridArea.top + dHalfHeight);
+
+			pMemDC->SelectObject(pAxisPen);
+			pMemDC->MoveTo(rectGridArea.left, y0);
+			pMemDC->LineTo(rectGridArea.right, y0);
+
+			pMemDC->SelectObject(pMarkFont);
+			pMemDC->SetTextColor(SCREEN_TEXTCOLOR);
+
+			int nMeanValueMark = (m_nYPositiveMark + m_nYNegtiveMark) / 2;
+			double deltYMark = (m_nYPositiveMark - m_nYNegtiveMark) / GRID_DIVISION_VERTICAL;
+
+			strMark.Format("%d\n", nMeanValueMark);
+
+			CRect rectYMark;
+			rectYMark.left = 0;
+			rectYMark.right = rectGridArea.left - X_SEPARATOR;
+			rectYMark.top = y0 - RECT_YMARK_HEIGHT / 2;
+			rectYMark.bottom = y0 + RECT_YMARK_HEIGHT / 2;
+
+			pMemDC->DrawText(strMark, strMark.GetLength(), &rectYMark, DT_RIGHT | DT_SINGLELINE | DT_VCENTER);
+
+			int y = y0;
+			for (int i = 1; i < GRID_DIVISION_VERTICAL / 2; i++)
+			{
+				y = (int)(y0 - i * dGridDelty);
+
+				pMemDC->SelectObject(pDotPen);
+				pMemDC->MoveTo(rectGridArea.left, y);
+				pMemDC->LineTo(rectGridArea.right, y);
+
+				//rectYMark.left = 0;
+				//rectYMark.right = rectGridArea.left - X_SEPARATOR;
+				rectYMark.top = y - RECT_YMARK_HEIGHT / 2;
+				rectYMark.bottom = y + RECT_YMARK_HEIGHT / 2;
+
+				strMark.Format("%d\n", (int)(nMeanValueMark + i * deltYMark));
+
+				pMemDC->DrawText(strMark, strMark.GetLength(), &rectYMark, DT_RIGHT | DT_SINGLELINE | DT_VCENTER);
+			}
+
+			strMark.Format("%d\n", m_nYPositiveMark);
+
+			//rectYMark.left = 0;
+			//rectYMark.right = rectGridArea.left - X_SEPARATOR;
+			rectYMark.top = rectGridArea.top - RECT_YMARK_HEIGHT / 2;
+			rectYMark.bottom = rectGridArea.top + RECT_YMARK_HEIGHT / 2;
+
+			pMemDC->DrawText(strMark, strMark.GetLength(), &rectYMark, DT_RIGHT | DT_SINGLELINE | DT_VCENTER);
+
+			y = y0;
+			for (int i = 1; i < GRID_DIVISION_VERTICAL / 2; i++)
+			{
+				y = (int)(y0 + i * dGridDelty);
+
+				pMemDC->SelectObject(pDotPen);
+				pMemDC->MoveTo(rectGridArea.left, y);
+				pMemDC->LineTo(rectGridArea.right, y);
+
+				//rectYMark.left = 0;
+				//rectYMark.right = rectGridArea.left - X_SEPARATOR;
+				rectYMark.top = y - RECT_YMARK_HEIGHT / 2;
+				rectYMark.bottom = y + RECT_YMARK_HEIGHT / 2;
+
+				strMark.Format("%d\n", (int)(nMeanValueMark - i * deltYMark));
+
+				pMemDC->DrawText(strMark, strMark.GetLength(), &rectYMark, DT_RIGHT | DT_SINGLELINE | DT_VCENTER);
+			}
+
+			strMark.Format("%d\n", m_nYNegtiveMark);
+
+			rectYMark.left = 0;
+			rectYMark.right = rectGridArea.left - X_SEPARATOR;
+			rectYMark.top = rectGridArea.bottom - RECT_YMARK_HEIGHT / 2;
+			rectYMark.bottom = rectGridArea.bottom + RECT_YMARK_HEIGHT / 2;
+
+			pMemDC->DrawText(strMark, strMark.GetLength(), &rectYMark, DT_RIGHT | DT_SINGLELINE | DT_VCENTER);
+
+			pMemDC->SelectObject(pDotPen);
+		}
+		else if (m_nYAxisStyle == AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY)
+		{
+			int y0 = (int)(rectGridArea.top + dHalfHeight);
+			double dLogArithmicCoeff = m_nYPositiveMark / pow(10, GRID_DIVISION_VERTICAL / 2);
+
+			pMemDC->SelectObject(pAxisPen);
+			pMemDC->MoveTo(rectGridArea.left, y0);
+			pMemDC->LineTo(rectGridArea.right, y0);
+
+			pMemDC->SelectObject(pMarkFont);
+			pMemDC->SetTextColor(SCREEN_TEXTCOLOR);
+
+			int nMeanValueMark = (m_nYPositiveMark + m_nYNegtiveMark) / 2;
+			double deltYMark = (m_nYPositiveMark - m_nYNegtiveMark) / GRID_DIVISION_VERTICAL;
+
+			strMark.Format("%d\n", nMeanValueMark);
+
+			CRect rectYMark;
+			rectYMark.left = 0;
+			rectYMark.right = rectGridArea.left - X_SEPARATOR;
+			rectYMark.top = y0 - RECT_YMARK_HEIGHT / 2;
+			rectYMark.bottom = y0 + RECT_YMARK_HEIGHT / 2;
+
+			pMemDC->DrawText(strMark, strMark.GetLength(), &rectYMark, DT_RIGHT | DT_SINGLELINE | DT_VCENTER);
+
+			int y = y0;
+			for (int i = 1; i < GRID_DIVISION_VERTICAL / 2; i++)
+			{
+				y = (int)(y0 - i * dGridDelty);
+
+				pMemDC->SelectObject(pDotPen);
+				pMemDC->MoveTo(rectGridArea.left, y);
+				pMemDC->LineTo(rectGridArea.right, y);
+
+				//rectYMark.left = 0;
+				//rectYMark.right = rectGridArea.left - X_SEPARATOR;
+				rectYMark.top = y - RECT_YMARK_HEIGHT / 2;
+				rectYMark.bottom = y + RECT_YMARK_HEIGHT / 2;
+
+				strMark.Format("%d\n", (int)(nMeanValueMark + dLogArithmicCoeff *pow(10, i)));
+
+				pMemDC->DrawText(strMark, strMark.GetLength(), &rectYMark, DT_RIGHT | DT_SINGLELINE | DT_VCENTER);
+			}
+
+			strMark.Format("%d\n", m_nYPositiveMark);
+
+			//rectYMark.left = 0;
+			//rectYMark.right = rectGridArea.left - X_SEPARATOR;
+			rectYMark.top = rectGridArea.top - RECT_YMARK_HEIGHT / 2;
+			rectYMark.bottom = rectGridArea.top + RECT_YMARK_HEIGHT / 2;
+
+			pMemDC->DrawText(strMark, strMark.GetLength(), &rectYMark, DT_RIGHT | DT_SINGLELINE | DT_VCENTER);
+
+			y = y0;
+			for (int i = 1; i < GRID_DIVISION_VERTICAL / 2; i++)
+			{
+				y = (int)(y0 + i * dGridDelty);
+
+				pMemDC->SelectObject(pDotPen);
+				pMemDC->MoveTo(rectGridArea.left, y);
+				pMemDC->LineTo(rectGridArea.right, y);
+
+				//rectYMark.left = 0;
+				//rectYMark.right = rectGridArea.left - X_SEPARATOR;
+				rectYMark.top = y - RECT_YMARK_HEIGHT / 2;
+				rectYMark.bottom = y + RECT_YMARK_HEIGHT / 2;
+
+				strMark.Format("%d\n", (int)(nMeanValueMark - dLogArithmicCoeff * pow(10, i)));
+
+				pMemDC->DrawText(strMark, strMark.GetLength(), &rectYMark, DT_RIGHT | DT_SINGLELINE | DT_VCENTER);
+			}
+
+			strMark.Format("%d\n", m_nYNegtiveMark);
+
+			rectYMark.left = 0;
+			rectYMark.right = rectGridArea.left - X_SEPARATOR;
+			rectYMark.top = rectGridArea.bottom - RECT_YMARK_HEIGHT / 2;
+			rectYMark.bottom = rectGridArea.bottom + RECT_YMARK_HEIGHT / 2;
+
+			pMemDC->DrawText(strMark, strMark.GetLength(), &rectYMark, DT_RIGHT | DT_SINGLELINE | DT_VCENTER);
+
+			pMemDC->SelectObject(pDotPen);
 		}
 
-		pMemDC->SelectObject(m_pAxisPen);
-		if (m_nXAxisStyle == AXIS_STYLE_FROM_MIN_TO_MAX)
+
+		if (m_nXAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX)
 		{
-			x = rectPicture.left;
+			int x0 = rectGridArea.left;
+			double deltXMark = (m_nXPositiveMark - m_nXNegtiveMark) / GRID_DIVISION_HORIZONTAL;
+
+			pMemDC->SelectObject(pAxisPen);
+			pMemDC->MoveTo(x0, rectGridArea.top);
+			pMemDC->LineTo(x0, rectGridArea.bottom);
+
+			CRect rectXMark;
+
+			if (m_nXMarkShownOption != RANGE_MARK_HIDE)
+			{
+				rectXMark.left = rectGridArea.left - RECT_XMARK_WIDTH / 2;
+				rectXMark.right = rectGridArea.left + RECT_XMARK_WIDTH / 2;
+				rectXMark.top = rectGridArea.bottom + RECT_YMARK_HEIGHT / 2 + Y_SEPARATOR;
+				rectXMark.bottom = bm.bmHeight - Y_SEPARATOR;
+
+				strMark.Format("%d\n", m_nXNegtiveMark);
+				pMemDC->DrawText(strMark, strMark.GetLength(), &rectXMark, DT_CENTER | DT_SINGLELINE | DT_TOP);
+			}
+
+			pMemDC->SelectObject(pDotPen);
+			for (int i = 1; i < GRID_DIVISION_HORIZONTAL; i++)
+			{
+				int x = (int)(rectGridArea.left + i * dGridDeltx);
+				pMemDC->MoveTo(x, rectGridArea.top);
+				pMemDC->LineTo(x, rectGridArea.bottom);
+
+				rectXMark.left = x - RECT_XMARK_WIDTH / 2;
+				rectXMark.right = x + RECT_XMARK_WIDTH / 2;
+
+				if (m_nXMarkShownOption == RANGE_MARK_SHOWN)
+				{
+					strMark.Format("%d\n", (int)(m_nXNegtiveMark + i * deltXMark));
+					pMemDC->DrawText(strMark, strMark.GetLength(), &rectXMark, DT_CENTER | DT_SINGLELINE | DT_TOP);
+				}
+			}
+
+			if (m_nXMarkShownOption != RANGE_MARK_HIDE)
+			{
+				rectXMark.left = rectGridArea.right - RECT_XMARK_WIDTH / 2;
+				rectXMark.right = rectGridArea.right + RECT_XMARK_WIDTH / 2;
+
+				strMark.Format("%d\n", m_nXPositiveMark);
+				pMemDC->DrawText(strMark, strMark.GetLength(), &rectXMark, DT_CENTER | DT_SINGLELINE | DT_TOP);
+			}
 		}
-		else
+		else if (m_nXAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)
 		{
-			x = rectPicture.left + rectPicture.Width() / 2;
+			int x0 = (int)(rectGridArea.left + dHalfWidth);
+
+			pMemDC->SelectObject(pAxisPen);
+			pMemDC->MoveTo(x0, rectGridArea.top);
+			pMemDC->LineTo(x0, rectGridArea.bottom);
+
+			int nMeanValueMark = (m_nXPositiveMark + m_nXNegtiveMark) / 2;
+			double deltXMark = (m_nXPositiveMark - m_nXNegtiveMark) / GRID_DIVISION_HORIZONTAL;
+
+			strMark.Format("%d\n", nMeanValueMark);
+
+			CRect rectXMark;
+			rectXMark.left = x0 - RECT_XMARK_WIDTH / 2;
+			rectXMark.right = x0 + RECT_XMARK_WIDTH / 2;
+			rectXMark.top = rectGridArea.bottom + RECT_YMARK_HEIGHT / 2 + Y_SEPARATOR;
+			rectXMark.bottom = bm.bmHeight - Y_SEPARATOR;
+
+			pMemDC->DrawText(strMark, strMark.GetLength(), &rectXMark, DT_CENTER | DT_SINGLELINE | DT_TOP);
+
+			strMark.Format("%d\n", m_nXNegtiveMark);
+
+			rectXMark.left = rectGridArea.left - RECT_XMARK_WIDTH / 2;
+			rectXMark.right = rectGridArea.left + RECT_XMARK_WIDTH / 2;
+			//rectXMark.top = rectGridArea.bottom + RECT_YMARK_HEIGHT / 2 + Y_SEPARATOR;
+			//rectXMark.bottom = bm.bmHeight - Y_SEPARATOR;
+
+			pMemDC->DrawText(strMark, strMark.GetLength(), &rectXMark, DT_CENTER | DT_SINGLELINE | DT_TOP);
+
+			strMark.Format("%d\n", m_nXPositiveMark);
+
+			rectXMark.left = rectGridArea.right - RECT_XMARK_WIDTH / 2;
+			rectXMark.right = rectGridArea.right + RECT_XMARK_WIDTH / 2;
+			//rectXMark.top = rectGridArea.bottom + RECT_YMARK_HEIGHT / 2 + Y_SEPARATOR;
+			//rectXMark.bottom = bm.bmHeight - Y_SEPARATOR;
+
+			pMemDC->DrawText(strMark, strMark.GetLength(), &rectXMark, DT_CENTER | DT_SINGLELINE | DT_TOP);
+
+			pMemDC->SelectObject(pDotPen);
+			for (int i = 1; i < GRID_DIVISION_HORIZONTAL / 2; i++)
+			{
+				int x = (int)(x0 + i * dGridDeltx);
+				pMemDC->MoveTo(x, rectGridArea.top);
+				pMemDC->LineTo(x, rectGridArea.bottom);
+
+				rectXMark.left = x - RECT_XMARK_WIDTH / 2;
+				rectXMark.right = x + RECT_XMARK_WIDTH / 2;
+
+				strMark.Format("%d\n", (int)(nMeanValueMark + i * deltXMark));
+
+				pMemDC->DrawText(strMark, strMark.GetLength(), &rectXMark, DT_CENTER | DT_SINGLELINE | DT_TOP);
+			}
+
+			for (int i = 1; i < GRID_DIVISION_HORIZONTAL / 2; i++)
+			{
+				int x = (int)(x0 - i * dGridDeltx);
+				pMemDC->MoveTo(x, rectGridArea.top);
+				pMemDC->LineTo(x, rectGridArea.bottom);
+
+				rectXMark.left = x - RECT_XMARK_WIDTH / 2;
+				rectXMark.right = x + RECT_XMARK_WIDTH / 2;
+
+				strMark.Format("%d\n", (int)(nMeanValueMark - i * deltXMark));
+
+				pMemDC->DrawText(strMark, strMark.GetLength(), &rectXMark, DT_CENTER | DT_SINGLELINE | DT_TOP);
+			}
 		}
-		pMemDC->MoveTo(x, rectPicture.top);
-		pMemDC->LineTo(x, rectPicture.bottom);
+
+		CRect rectTitle;
+		rectTitle.left = rectGridArea.left;
+		rectTitle.top = Y_SEPARATOR;
+		rectTitle.right = rectGridArea.right;
+		rectTitle.bottom = rectGridArea.top - Y_SEPARATOR;
 
 		//pMemDC->SelectObject(m_pBkBrush);
-		pMemDC->FillRect(m_rectTitle, m_pBkgroundBrush);
+		pMemDC->FillRect(rectTitle, m_pBkgroundBrush);
 
-		pMemDC->SelectObject(m_pTitleFont);
+		pMemDC->SelectObject(pTitleFont);
 		pMemDC->SetTextColor(SCREEN_TITLECOLOR);
-		pMemDC->DrawText(m_strTitle, m_strTitle.GetLength(), &m_rectTitle, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		pMemDC->DrawText(m_strTitle, m_strTitle.GetLength(), &rectTitle, DT_CENTER | DT_SINGLELINE | DT_TOP);
 
 		pMemDC->SelectObject(pOldPen);
+
+		delete pFramePen;
+		delete pDotPen;
+		delete pAxisPen;
+
+		delete pMarkFont;
+		delete pTitleFont;
 	}
 }
 
@@ -307,6 +658,9 @@ void CInstrumentPanel_Base::DisplayMeasurePanelInMemory(CDC* pMemDC, CBitmap* pM
 		BITMAP bm;
 		CRect rectPicture;
 
+		CFont* pMeasureFont = new CFont;
+		pMeasureFont->CreateFont(FONT_MEASURE_HEIGHT, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, NULL);
+
 		pMemBmp->GetBitmap(&bm);
 
 		rectPicture.left = 0;
@@ -314,7 +668,7 @@ void CInstrumentPanel_Base::DisplayMeasurePanelInMemory(CDC* pMemDC, CBitmap* pM
 		rectPicture.right = bm.bmWidth;
 		rectPicture.bottom = bm.bmHeight;
 
-		pMemDC->SelectObject(m_pMeasureFont);
+		pMemDC->SelectObject(pMeasureFont);
 		pMemDC->SelectObject(pMemBmp);
 		pMemDC->SelectObject(m_pMeasurePanelBrush);
 		pMemDC->FillRect(&rectPicture, m_pMeasurePanelBrush);
@@ -370,7 +724,7 @@ void CInstrumentPanel_Base::DisplayMeasurePanelInMemory(CDC* pMemDC, CBitmap* pM
 			nYOffset += (FONT_MEASURE_HEIGHT + 1);
 		}
 
-		if (m_nXMarkShownOption == RANGE_MARK_SHOWN)
+		if (m_nXMarkShownOption != RANGE_MARK_HIDE)
 		{
 			sprintf_s(pszText, sizeof(pszText), "XÖá£¨UNIT£º%s£©\0", m_pszXUnits);
 			pMemDC->SetTextColor(SCREEN_UNITCOLOR);
@@ -415,53 +769,82 @@ void CInstrumentPanel_Base::DisplayMeasurePanelInMemory(CDC* pMemDC, CBitmap* pM
 				nYOffset += (FONT_MEASURE_HEIGHT + 1);
 			}
 		}
+
+		delete pMeasureFont;
 	}
 }
 
-void CInstrumentPanel_Base::DisplayMeasureScaleInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectMark, int nMark)
-{
-	char	pszText[64];
-	if ((pMemDC != NULL) && (pBkBmp != NULL))
-	{
-		pMemDC->SelectObject(pBkBmp);
+//void CInstrumentPanel_Base::DisplayMeasureScaleInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectMark, int nMark)
+//{
+	//char	pszText[64];
+	//if ((pMemDC != NULL) && (pBkBmp != NULL))
+	//{
+	//	pMemDC->SelectObject(pBkBmp);
 
-		pMemDC->SelectObject(m_pBkgroundBrush);
-		pMemDC->FillRect(&rectMark, m_pBkgroundBrush);
+	//	pMemDC->SelectObject(m_pBkgroundBrush);
+	//	pMemDC->FillRect(&rectMark, m_pBkgroundBrush);
 
-		pMemDC->SetBkColor(SCREEN_BKGROUNDCOLOR);
-		pMemDC->SetTextColor(SCREEN_TEXTCOLOR);
+	//	pMemDC->SetBkColor(SCREEN_BKGROUNDCOLOR);
+	//	pMemDC->SetTextColor(SCREEN_TEXTCOLOR);
 
-		pMemDC->SelectObject(m_pMarkFont);
+	//	pMemDC->SelectObject(m_pMarkFont);
 
-		sprintf_s(pszText, sizeof(pszText), "%d\n", nMark);
-		CString strMark = pszText;
-		pMemDC->DrawText(strMark, strMark.GetLength(), &rectMark, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
-	}
-}
+	//	sprintf_s(pszText, sizeof(pszText), "%d\n", nMark);
+	//	CString strMark = pszText;
+	//	pMemDC->DrawText(strMark, strMark.GetLength(), &rectMark, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+	//}
+//}
 
 void CInstrumentPanel_Base::DisplayXAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine)
 {
 	if ((pMemDC != NULL) && (pBkBmp != NULL))
 	{
+		BITMAP bm;
+		pBkBmp->GetBitmap(&bm);
+
 		pMemDC->SelectObject(pBkBmp);
 
 		int x0, x1;
 		int y0, y1;
 		double ratio;
 
+		CRect rectMark;
+		CString strMark;
+
+		CPen* pMaxLimitPen = new CPen;
+		pMaxLimitPen->CreatePen(PS_SOLID, 2, SCREEN_MAXLIMITCOLOR);
+
+		CPen* pMinLimitPen = new CPen;
+		pMinLimitPen->CreatePen(PS_SOLID, 2, SCREEN_MINLIMITCOLOR);
+
+		CFont* pMarkFont = new CFont;
+		pMarkFont->CreateFont(FONT_MARK_HEIGHT, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, NULL);
+
 		y0 = rectAlarmLine.top;
 		y1 = rectAlarmLine.bottom;
 
 		double xoffset = rectAlarmLine.left;
+
+		pMemDC->SelectObject(pMarkFont);
 
 		if (m_nXNegtiveMark < m_nXAlarmMinLimit)
 		{
 			ratio = (double)(m_nXAlarmMinLimit - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
 			x0 = (int)(xoffset + ratio * rectAlarmLine.Width());
 
-			pMemDC->SelectObject(m_pMaxLimitPen);
+			pMemDC->SelectObject(pMaxLimitPen);
 			pMemDC->MoveTo(x0, y0);
 			pMemDC->LineTo(x0, y1);
+
+			rectMark.left = x0 - RECT_XMARK_WIDTH/2;
+			rectMark.right = x0 + RECT_XMARK_WIDTH / 2;
+			rectMark.top = bm.bmHeight - Y_SEPARATOR - RECT_YMARK_HEIGHT;
+			rectMark.bottom = bm.bmHeight - Y_SEPARATOR;
+
+			strMark.Format("%d\n", m_nXAlarmMinLimit);
+
+			pMemDC->SetTextColor(SCREEN_MAXLIMITCOLOR);
+			pMemDC->DrawText(strMark, strMark.GetLength(), &rectMark, DT_CENTER | DT_SINGLELINE | DT_BOTTOM);
 		}
 
 		if (m_nXPositiveMark > m_nXAlarmMaxLimit)
@@ -469,10 +852,25 @@ void CInstrumentPanel_Base::DisplayXAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkB
 			ratio = (double)(m_nXAlarmMaxLimit - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
 			x1 = (int)(xoffset + ratio * rectAlarmLine.Width());
 
-			pMemDC->SelectObject(m_pMaxLimitPen);
+			pMemDC->SelectObject(pMaxLimitPen);
 			pMemDC->MoveTo(x1, y0);
 			pMemDC->LineTo(x1, y1);
+
+			rectMark.left = x1 - RECT_XMARK_WIDTH / 2;
+			rectMark.right = x1 + RECT_XMARK_WIDTH / 2;
+			rectMark.top = bm.bmHeight - Y_SEPARATOR - RECT_YMARK_HEIGHT;
+			rectMark.bottom = bm.bmHeight - Y_SEPARATOR;
+
+			strMark.Format("%d\n", m_nXAlarmMaxLimit);
+
+			pMemDC->SetTextColor(SCREEN_MAXLIMITCOLOR);
+			pMemDC->DrawText(strMark, strMark.GetLength(), &rectMark, DT_CENTER | DT_SINGLELINE | DT_BOTTOM);
 		}
+
+		delete pMaxLimitPen;
+		delete pMinLimitPen;
+
+		delete pMarkFont;
 	}
 }
 
@@ -486,35 +884,128 @@ void CInstrumentPanel_Base::DisplayYAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkB
 		int y0, y1;
 		double ratio;
 
+		CRect rectMark;
+		CString strMark;
+
+		CPen* pMaxLimitPen = new CPen;
+		pMaxLimitPen->CreatePen(PS_SOLID, 2, SCREEN_MAXLIMITCOLOR);
+
+		CPen* pMinLimitPen = new CPen;
+		pMinLimitPen->CreatePen(PS_SOLID, 2, SCREEN_MINLIMITCOLOR);
+
+		CFont* pMarkFont = new CFont;
+		pMarkFont->CreateFont(FONT_MARK_HEIGHT, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, NULL);
+
+		pMemDC->SelectObject(pMarkFont);
+
 		x0 = rectAlarmLine.left;
 		x1 = rectAlarmLine.right;
 
-		double yoffset = rectAlarmLine.bottom;
+		if (m_nYAxisStyle == AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY)
+		{
+			double half_height = rectAlarmLine.Height()/2.0;
+			double dLogArithmicCoeff = m_nYPositiveMark / pow(10, GRID_DIVISION_VERTICAL / 2);
+			double yoffset = rectAlarmLine.top + half_height;
 
-		if (m_nYPositiveMark > m_nYAlarmMaxLimit)
-		{
-			ratio = (double)(m_nYAlarmMaxLimit - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
-			y0 = (int)(yoffset - ratio * rectAlarmLine.Height());
-			if (y0 < rectAlarmLine.top)
+			if (m_nYPositiveMark > m_nYAlarmMaxLimit)
 			{
-				y0 = rectAlarmLine.top;
+				ratio = log10(m_nYAlarmMaxLimit/ dLogArithmicCoeff) / log10(m_nYPositiveMark/ dLogArithmicCoeff);
+				y0 = (int)(yoffset - ratio * half_height);
+				if (y0 < rectAlarmLine.top)
+				{
+					y0 = rectAlarmLine.top;
+				}
+				pMemDC->SelectObject(pMaxLimitPen);
+				pMemDC->MoveTo(x0, y0);
+				pMemDC->LineTo(x1, y0);
+
+				rectMark.left = X_SEPARATOR;
+				rectMark.right = x0 - X_SEPARATOR;
+				rectMark.top = y0 - RECT_YMARK_HEIGHT / 2;
+				rectMark.bottom = y0 + RECT_YMARK_HEIGHT / 2;
+
+				strMark.Format("%d\n", m_nYAlarmMaxLimit);
+
+				pMemDC->SetTextColor(SCREEN_MAXLIMITCOLOR);
+				pMemDC->DrawText(strMark, strMark.GetLength(), &rectMark, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
 			}
-			pMemDC->SelectObject(m_pMaxLimitPen);
-			pMemDC->MoveTo(x0, y0);
-			pMemDC->LineTo(x1, y0);
-		}
-		if (m_nYNegtiveMark < m_nYAlarmMinLimit)
-		{
-			ratio = (double)(m_nYAlarmMinLimit - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
-			y1 = (int)(yoffset - ratio * rectAlarmLine.Height());
-			if (y1 > rectAlarmLine.bottom)
+			if (m_nYNegtiveMark < m_nYAlarmMinLimit)
 			{
-				y1 = rectAlarmLine.bottom;
+				ratio = log10(-m_nYAlarmMinLimit/ dLogArithmicCoeff) / log10(-m_nYNegtiveMark/ dLogArithmicCoeff);
+				y1 = (int)(yoffset + ratio * half_height);
+				if (y1 > rectAlarmLine.bottom)
+				{
+					y1 = rectAlarmLine.bottom;
+				}
+				pMemDC->SelectObject(pMinLimitPen);
+				pMemDC->MoveTo(x0, y1);
+				pMemDC->LineTo(x1, y1);
+
+				rectMark.left = X_SEPARATOR;
+				rectMark.right = x0 - X_SEPARATOR;
+				rectMark.top = y1 - RECT_YMARK_HEIGHT / 2;
+				rectMark.bottom = y1 + RECT_YMARK_HEIGHT / 2;
+
+				strMark.Format("%d\n", m_nYAlarmMinLimit);
+
+				pMemDC->SetTextColor(SCREEN_MAXLIMITCOLOR);
+				pMemDC->DrawText(strMark, strMark.GetLength(), &rectMark, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
 			}
-			pMemDC->SelectObject(m_pMinLimitPen);
-			pMemDC->MoveTo(x0, y1);
-			pMemDC->LineTo(x1, y1);
 		}
+		else
+		{
+			double yoffset = rectAlarmLine.bottom;
+
+			if (m_nYPositiveMark > m_nYAlarmMaxLimit)
+			{
+				ratio = (double)(m_nYAlarmMaxLimit - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
+				y0 = (int)(yoffset - ratio * rectAlarmLine.Height());
+				if (y0 < rectAlarmLine.top)
+				{
+					y0 = rectAlarmLine.top;
+				}
+				pMemDC->SelectObject(pMaxLimitPen);
+				pMemDC->MoveTo(x0, y0);
+				pMemDC->LineTo(x1, y0);
+
+				rectMark.left = X_SEPARATOR;
+				rectMark.right = x0 - X_SEPARATOR;
+				rectMark.top = y0 - RECT_YMARK_HEIGHT / 2;
+				rectMark.bottom = y0 + RECT_YMARK_HEIGHT / 2;
+
+				strMark.Format("%d\n", m_nYAlarmMaxLimit);
+
+				pMemDC->SetTextColor(SCREEN_MAXLIMITCOLOR);
+				pMemDC->DrawText(strMark, strMark.GetLength(), &rectMark, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
+			}
+			if (m_nYNegtiveMark < m_nYAlarmMinLimit)
+			{
+				ratio = (double)(m_nYAlarmMinLimit - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
+				y1 = (int)(yoffset - ratio * rectAlarmLine.Height());
+				if (y1 > rectAlarmLine.bottom)
+				{
+					y1 = rectAlarmLine.bottom;
+				}
+				pMemDC->SelectObject(pMinLimitPen);
+				pMemDC->MoveTo(x0, y1);
+				pMemDC->LineTo(x1, y1);
+
+				rectMark.left = X_SEPARATOR;
+				rectMark.right = x0 - X_SEPARATOR;
+				rectMark.top = y1 - RECT_YMARK_HEIGHT / 2;
+				rectMark.bottom = y1 + RECT_YMARK_HEIGHT / 2;
+
+				strMark.Format("%d\n", m_nYAlarmMinLimit);
+
+				pMemDC->SetTextColor(SCREEN_MAXLIMITCOLOR);
+				pMemDC->DrawText(strMark, strMark.GetLength(), &rectMark, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
+			}
+		}
+
+		delete pMaxLimitPen;
+		delete pMinLimitPen;
+
+		delete pMarkFont;
 	}
 }
 
@@ -537,19 +1028,19 @@ void CInstrumentPanel_Base::OnPaint()
 			DisplayXAlarmLineInMemory(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
 			DisplayYAlarmLineInMemory(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
 
-			if (m_nXMarkShownOption == RANGE_MARK_SHOWN)
-			{
-				DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectXLeftMark, m_nXNegtiveMark);
-				DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectXMidMark, (m_nXNegtiveMark + m_nXPositiveMark) / 2);
-				DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectXRightMark, m_nXPositiveMark);
-			}
+			//if (m_nXMarkShownOption == RANGE_MARK_SHOWN)
+			//{
+			//	DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectXLeftMark, m_nXNegtiveMark);
+			//	DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectXMidMark, (m_nXNegtiveMark + m_nXPositiveMark) / 2);
+			//	DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectXRightMark, m_nXPositiveMark);
+			//}
 
-			if (m_nYMarkShownOption == RANGE_MARK_SHOWN)
-			{
-				DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectYBottomMark, m_nYNegtiveMark);
-				DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectYMidMark, (m_nYNegtiveMark + m_nYPositiveMark) / 2);
-				DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectYTopMark, m_nYPositiveMark);
-			}
+			//if (m_nYMarkShownOption == RANGE_MARK_SHOWN)
+			//{
+			//	DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectYBottomMark, m_nYNegtiveMark);
+			//	DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectYMidMark, (m_nYNegtiveMark + m_nYPositiveMark) / 2);
+			//	DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectYTopMark, m_nYPositiveMark);
+			//}
 
 			//if (m_pBkgroundBmp != NULL)
 			//{
@@ -666,29 +1157,29 @@ int CInstrumentPanel_Base::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		m_pMeasurePanelBrush->CreateSolidBrush(SCREEN_BKMEASUREPANELCOLOR);
 	}
 
-	if (m_pAxisPen == NULL)
-	{
-		m_pAxisPen = new CPen;
-		m_pAxisPen->CreatePen(PS_SOLID, 2, SCREEN_AXISCOLOR);
-	}
+	//if (m_pAxisPen == NULL)
+	//{
+	//	m_pAxisPen = new CPen;
+	//	m_pAxisPen->CreatePen(PS_SOLID, 2, SCREEN_AXISCOLOR);
+	//}
 
-	if (m_pGridPen == NULL)
-	{
-		m_pGridPen = new CPen;
-		m_pGridPen->CreatePen(PS_SOLID, 1, SCREEN_GRIDCOLOR);
-	}
+	//if (m_pGridPen == NULL)
+	//{
+	//	m_pGridPen = new CPen;
+	//	m_pGridPen->CreatePen(PS_SOLID, 1, SCREEN_GRIDCOLOR);
+	//}
 
-	if (m_pDotPen == NULL)
-	{
-		m_pDotPen = new CPen;
-		m_pDotPen->CreatePen(PS_DOT, 1, SCREEN_GRIDCOLOR);
-	}
+	//if (m_pDotPen == NULL)
+	//{
+	//	m_pDotPen = new CPen;
+	//	m_pDotPen->CreatePen(PS_DOT, 1, SCREEN_GRIDCOLOR);
+	//}
 
-	if (m_pDashPen == NULL)
-	{
-		m_pDashPen = new CPen;
-		m_pDashPen->CreatePen(PS_DASH, 1, SCREEN_GRIDCOLOR);
-	}
+	//if (m_pDashPen == NULL)
+	//{
+	//	m_pDashPen = new CPen;
+	//	m_pDashPen->CreatePen(PS_DASH, 1, SCREEN_GRIDCOLOR);
+	//}
 
 	//if (m_pWavePen == NULL)
 	//{
@@ -696,33 +1187,33 @@ int CInstrumentPanel_Base::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	//	m_pWavePen->CreatePen(PS_SOLID, 1, SCREEN_WAVECOLOR);
 	//}
 
-	if (m_pMaxLimitPen == NULL)
-	{
-		m_pMaxLimitPen = new CPen;
-		m_pMaxLimitPen->CreatePen(PS_SOLID, 2, SCREEN_MAXLIMITCOLOR);
-	}
+	//if (m_pMaxLimitPen == NULL)
+	//{
+	//	m_pMaxLimitPen = new CPen;
+	//	m_pMaxLimitPen->CreatePen(PS_SOLID, 2, SCREEN_MAXLIMITCOLOR);
+	//}
 
-	if (m_pMinLimitPen == NULL)
-	{
-		m_pMinLimitPen = new CPen;
-		m_pMinLimitPen->CreatePen(PS_SOLID, 2, SCREEN_MINLIMITCOLOR);
-	}
+	//if (m_pMinLimitPen == NULL)
+	//{
+	//	m_pMinLimitPen = new CPen;
+	//	m_pMinLimitPen->CreatePen(PS_SOLID, 2, SCREEN_MINLIMITCOLOR);
+	//}
 
-	if (m_pTitleFont == NULL)
-	{
-		m_pTitleFont = new CFont;
-		m_pTitleFont->CreateFont(FONT_TITLE_HEIGHT, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, NULL);
-	}
-	if (m_pMeasureFont == NULL)
-	{
-		m_pMeasureFont = new CFont;
-		m_pMeasureFont->CreateFont(FONT_MEASURE_HEIGHT, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, NULL);
-	}
-	if (m_pMarkFont == NULL)
-	{
-		m_pMarkFont = new CFont;
-		m_pMarkFont->CreateFont(FONT_MARK_HEIGHT, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, NULL);
-	}
+	//if (m_pTitleFont == NULL)
+	//{
+	//	m_pTitleFont = new CFont;
+	//	m_pTitleFont->CreateFont(FONT_TITLE_HEIGHT, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, NULL);
+	//}
+	//if (m_pMeasureFont == NULL)
+	//{
+	//	m_pMeasureFont = new CFont;
+	//	m_pMeasureFont->CreateFont(FONT_MEASURE_HEIGHT, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, NULL);
+	//}
+	//if (m_pMarkFont == NULL)
+	//{
+	//	m_pMarkFont = new CFont;
+	//	m_pMarkFont->CreateFont(FONT_MARK_HEIGHT, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, NULL);
+	//}
 
 	ReleaseDC(pDC);
 
@@ -752,6 +1243,8 @@ void CInstrumentPanel_Base::Reset(void)
 
 		m_nYNegtiveMark = m_nYAlarmMinLimit;
 		m_nYPositiveMark = m_nYAlarmMaxLimit;
+		//m_nYNegtiveMark = m_nYFloor;
+		//m_nYPositiveMark = m_nYCeil;
 
 		m_nMeasuredXMeanValue = UNCREDITABLE_MAX_VALUE;
 		m_nMeasuredXRmsValue = UNCREDITABLE_MAX_VALUE;			//Ä¬ÈÏÕý¸º1bps
@@ -1134,6 +1627,11 @@ void CInstrumentPanel_Base::Init_Y_Axis(int nYAxisStyle, int nYMarkShownOption, 
 	m_nYFloor = nYFloor;
 	m_nYCeil = nYCeil;
 	m_nYStep = nYStep;
+
+	//if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)
+	//{
+	//	assert((m_nYFloor + m_nYCeil) == 0);
+	//}
 }
 
 void CInstrumentPanel_Base::OnDestroy()
@@ -1158,14 +1656,14 @@ void CInstrumentPanel_Base::OnDestroy()
 void CInstrumentPanel_Base::AdjustLayout(CRect rectContainer)
 {
 	int markWidth = max(RECT_YMARK_WIDTH, RECT_XMARK_WIDTH/2);
-	m_rectTitle.left = rectContainer.left + X_SEPARATOR + markWidth + X_SEPARATOR;
-	m_rectTitle.top = rectContainer.top + Y_SEPARATOR;
-	m_rectTitle.right = rectContainer.right - X_SEPARATOR - RECT_MEASURE_WIDTH - X_SEPARATOR - X_SEPARATOR;
-	m_rectTitle.bottom = rectContainer.top + Y_SEPARATOR + RECT_TITLE_HEIGHT;
+	//m_rectTitle.left = rectContainer.left + X_SEPARATOR + markWidth + X_SEPARATOR;
+	//m_rectTitle.top = rectContainer.top + Y_SEPARATOR;
+	//m_rectTitle.right = rectContainer.right - X_SEPARATOR - RECT_MEASURE_WIDTH - X_SEPARATOR - X_SEPARATOR;
+	//m_rectTitle.bottom = rectContainer.top + Y_SEPARATOR + RECT_TITLE_HEIGHT;
 
-	m_rectWaveform.left = m_rectTitle.left;
-	m_rectWaveform.right = m_rectTitle.right;
-	m_rectWaveform.top = m_rectTitle.bottom + Y_SEPARATOR;
+	m_rectWaveform.left = rectContainer.left + X_SEPARATOR + markWidth + X_SEPARATOR;
+	m_rectWaveform.right = rectContainer.right - X_SEPARATOR - RECT_MEASURE_WIDTH - X_SEPARATOR - X_SEPARATOR;
+	m_rectWaveform.top = rectContainer.top + Y_SEPARATOR + RECT_TITLE_HEIGHT + Y_SEPARATOR;
 	m_rectWaveform.bottom = rectContainer.bottom - Y_SEPARATOR - RECT_XMARK_HEIGHT - Y_SEPARATOR - RECT_YMARK_HEIGHT/2;
 
 	m_rectMeasurePanel.left = rectContainer.right - X_SEPARATOR - RECT_MEASURE_WIDTH;
@@ -1173,38 +1671,35 @@ void CInstrumentPanel_Base::AdjustLayout(CRect rectContainer)
 	m_rectMeasurePanel.top = m_rectWaveform.top;
 	m_rectMeasurePanel.bottom = m_rectWaveform.bottom;
 
-	m_rectXLeftMark.left = m_rectWaveform.left - RECT_XMARK_WIDTH / 2;
-	m_rectXLeftMark.right = m_rectWaveform.left + RECT_XMARK_WIDTH / 2;
-	m_rectXLeftMark.top = m_rectWaveform.bottom + Y_SEPARATOR + RECT_XMARK_HEIGHT / 2;
-	m_rectXLeftMark.bottom = rectContainer.bottom - Y_SEPARATOR;
+	//m_rectXLeftMark.left = m_rectWaveform.left - RECT_XMARK_WIDTH / 2;
+	//m_rectXLeftMark.right = m_rectWaveform.left + RECT_XMARK_WIDTH / 2;
+	//m_rectXLeftMark.top = m_rectWaveform.bottom + Y_SEPARATOR + RECT_XMARK_HEIGHT / 2;
+	//m_rectXLeftMark.bottom = rectContainer.bottom - Y_SEPARATOR;
 
-	m_rectXRightMark.left = m_rectWaveform.right - RECT_XMARK_WIDTH / 2;
-	m_rectXRightMark.right = m_rectWaveform.right + RECT_XMARK_WIDTH / 2;
-	m_rectXRightMark.top = m_rectWaveform.bottom + Y_SEPARATOR + RECT_XMARK_HEIGHT / 2;
-	m_rectXRightMark.bottom = rectContainer.bottom - Y_SEPARATOR;
+	//m_rectXRightMark.left = m_rectWaveform.right - RECT_XMARK_WIDTH / 2;
+	//m_rectXRightMark.right = m_rectWaveform.right + RECT_XMARK_WIDTH / 2;
+	//m_rectXRightMark.top = m_rectWaveform.bottom + Y_SEPARATOR + RECT_XMARK_HEIGHT / 2;
+	//m_rectXRightMark.bottom = rectContainer.bottom - Y_SEPARATOR;
 
-	m_rectXMidMark.left = m_rectWaveform.left + m_rectWaveform.Width() / 2 - RECT_XMARK_WIDTH / 2;
-	m_rectXMidMark.right = m_rectWaveform.left + m_rectWaveform.Width() / 2 + RECT_XMARK_WIDTH / 2;
-	m_rectXMidMark.top = m_rectWaveform.bottom + Y_SEPARATOR + RECT_YMARK_HEIGHT / 2;
-	m_rectXMidMark.bottom = rectContainer.bottom - Y_SEPARATOR;
+	//m_rectXMidMark.left = m_rectWaveform.left + m_rectWaveform.Width() / 2 - RECT_XMARK_WIDTH / 2;
+	//m_rectXMidMark.right = m_rectWaveform.left + m_rectWaveform.Width() / 2 + RECT_XMARK_WIDTH / 2;
+	//m_rectXMidMark.top = m_rectWaveform.bottom + Y_SEPARATOR + RECT_YMARK_HEIGHT / 2;
+	//m_rectXMidMark.bottom = rectContainer.bottom - Y_SEPARATOR;
 
-	m_rectYTopMark.left = rectContainer.left + X_SEPARATOR;
-	m_rectYTopMark.right = m_rectWaveform.left - X_SEPARATOR;
-	m_rectYTopMark.top = m_rectWaveform.top - RECT_YMARK_HEIGHT / 2;
-	m_rectYTopMark.bottom = m_rectWaveform.top + RECT_YMARK_HEIGHT / 2;
+	//m_rectYTopMark.left = rectContainer.left + X_SEPARATOR;
+	//m_rectYTopMark.right = m_rectWaveform.left - X_SEPARATOR;
+	//m_rectYTopMark.top = m_rectWaveform.top - RECT_YMARK_HEIGHT / 2;
+	//m_rectYTopMark.bottom = m_rectWaveform.top + RECT_YMARK_HEIGHT / 2;
 
-	m_rectYBottomMark.left = rectContainer.left + X_SEPARATOR;
-	m_rectYBottomMark.right = m_rectWaveform.left - X_SEPARATOR;
-	m_rectYBottomMark.top = m_rectWaveform.bottom - RECT_YMARK_HEIGHT / 2;
-	m_rectYBottomMark.bottom = m_rectWaveform.bottom + RECT_YMARK_HEIGHT / 2;
+	//m_rectYBottomMark.left = rectContainer.left + X_SEPARATOR;
+	//m_rectYBottomMark.right = m_rectWaveform.left - X_SEPARATOR;
+	//m_rectYBottomMark.top = m_rectWaveform.bottom - RECT_YMARK_HEIGHT / 2;
+	//m_rectYBottomMark.bottom = m_rectWaveform.bottom + RECT_YMARK_HEIGHT / 2;
 
-	m_rectYMidMark.left = rectContainer.left + X_SEPARATOR;
-	m_rectYMidMark.right = m_rectWaveform.left - X_SEPARATOR;
-	m_rectYMidMark.top = m_rectWaveform.top + m_rectWaveform.Height() / 2 - RECT_YMARK_HEIGHT / 2;
-	m_rectYMidMark.bottom = m_rectWaveform.top + m_rectWaveform.Height() / 2 + RECT_YMARK_HEIGHT / 2;
-
-	m_dGridDeltx = (double)m_rectWaveform.Width() / GRID_DIVISION_HORIZONTAL;
-	m_dGridDelty = (double)m_rectWaveform.Height() / GRID_DIVISION_VERTICAL;
+	//m_rectYMidMark.left = rectContainer.left + X_SEPARATOR;
+	//m_rectYMidMark.right = m_rectWaveform.left - X_SEPARATOR;
+	//m_rectYMidMark.top = m_rectWaveform.top + m_rectWaveform.Height() / 2 - RECT_YMARK_HEIGHT / 2;
+	//m_rectYMidMark.bottom = m_rectWaveform.top + m_rectWaveform.Height() / 2 + RECT_YMARK_HEIGHT / 2;
 }
 
 void CInstrumentPanel_Base::OnTimer(UINT_PTR nIDEvent)

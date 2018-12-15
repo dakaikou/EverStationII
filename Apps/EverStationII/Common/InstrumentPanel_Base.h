@@ -33,8 +33,8 @@
 #define SCREEN_WAVECOLOR10		RGB(150, 150, 100)
 #define SCREEN_WAVECOLOR11		RGB(100, 150, 150)
 
-#define SCREEN_MAXLIMITCOLOR	RGB(160, 0, 0)
-#define SCREEN_MINLIMITCOLOR	RGB(120, 0, 0)
+#define SCREEN_MAXLIMITCOLOR	RGB(200, 0, 0)
+#define SCREEN_MINLIMITCOLOR	RGB(160, 0, 0)
 
 //#define SCREEN_PAINTCOLOR		RGB(220, 220, 0)
 
@@ -42,10 +42,10 @@
 #define Y_SEPARATOR						4
 
 #define RECT_MEASURE_WIDTH				160
-#define RECT_XMARK_HEIGHT				30
-#define RECT_XMARK_WIDTH				160
+#define RECT_XMARK_HEIGHT				40
+#define RECT_XMARK_WIDTH				80
 #define RECT_YMARK_HEIGHT				30
-#define RECT_YMARK_WIDTH				20
+#define RECT_YMARK_WIDTH				80
 #define RECT_TITLE_HEIGHT				40
 
 #define FONT_TITLE_HEIGHT				20
@@ -95,12 +95,18 @@ typedef struct
 #define MAX_CHANNEL_COUNT		12
 #define DEFAULT_CHANNEL_DEPTH	256
 
-#define AXIS_STYLE_UNKNOWN				0
-#define AXIS_STYLE_MEAN_SYMMETRY		1
-#define AXIS_STYLE_FROM_MIN_TO_MAX		2
+#define AXIS_STYLE_UNKNOWN							0
+#define AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY			1
+#define AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX		2
+#define AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY		3
+#define AXIS_STYLE_LOGARITHMIC_FROM_MIN_TO_MAX		4
 
-#define RANGE_MARK_SHOWN	1
-#define RANGE_MARK_HIDE		0
+#define RANGE_MARK_SHOWN_MINMAX			2
+#define RANGE_MARK_SHOWN				1
+#define RANGE_MARK_HIDE					0
+
+#define MEASURE_VALUE_SHOWN				1
+#define MEASURE_VALUE_HIDE				0
 
 //#define SCAN_STYLE_FIXED_POS		1
 //#define SCAN_STYLE_IN_SEQUENCE		0
@@ -139,8 +145,8 @@ protected:
 	int				  m_bNeedRedrawWaveformBmp;
 	int				  m_bNeedRedrawMeasurePanelBmp;
 
-	double	m_dGridDelty;
-	double	m_dGridDeltx;
+	//double	m_dGridDelty;
+	//double	m_dGridDeltx;
 
 	double	m_dMeasureDeltX;
 	double	m_dMeasureDeltY;
@@ -189,16 +195,16 @@ protected:
 	UINT_PTR	m_uiTimerID;
 
 	//CPen* m_pWavePen;
-	CPen* m_pGridPen;
-	CPen* m_pDotPen;
-	CPen* m_pDashPen;
-	CPen* m_pAxisPen;
+	//CPen* m_pGridPen;
+	//CPen* m_pDotPen;
+	//CPen* m_pDashPen;
+	//CPen* m_pAxisPen;
 
-	CPen* m_pMaxLimitPen;
-	CPen* m_pMinLimitPen;
-	CFont* m_pMeasureFont;
-	CFont* m_pTitleFont;
-	CFont* m_pMarkFont;
+	//CPen* m_pMaxLimitPen;
+	//CPen* m_pMinLimitPen;
+	//CFont* m_pMeasureFont;
+	//CFont* m_pTitleFont;
+	//CFont* m_pMarkFont;
 
 	CBrush* m_pBkgroundBrush;
 	CBrush* m_pWaveformBrush;
@@ -218,15 +224,15 @@ protected:
 	CDC*	m_pMemDC;
 
 	CRect	m_rectClient;
-	CRect   m_rectTitle;
+	//CRect   m_rectTitle;
 	CRect	m_rectWaveform;
 	CRect	m_rectMeasurePanel;
-	CRect   m_rectXLeftMark;
-	CRect   m_rectXMidMark;
-	CRect   m_rectXRightMark;
-	CRect   m_rectYTopMark;
-	CRect   m_rectYMidMark;
-	CRect   m_rectYBottomMark;
+	//CRect   m_rectXLeftMark;
+	//CRect   m_rectXMidMark;
+	//CRect   m_rectXRightMark;
+	//CRect   m_rectYTopMark;
+	//CRect   m_rectYMidMark;
+	//CRect   m_rectYBottomMark;
 
 #if ON_PAINTING_USE_MUTEX
 	HANDLE	m_hPaintingAccess;
@@ -235,9 +241,9 @@ protected:
 	virtual void DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp);
 	virtual void DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp);
 
-	void DisplayMeasureScaleInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectMark, int nMark);
-	void DisplayXAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
-	void DisplayYAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
+	//virtual void DisplayMeasureScaleInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectMark, int nMark);
+	virtual void DisplayXAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
+	virtual void DisplayYAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
 	void DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectWaveform);
 
 	void DisplayMeasurePanelInMemory(CDC* pMemDC, CBitmap* pBkBmp);

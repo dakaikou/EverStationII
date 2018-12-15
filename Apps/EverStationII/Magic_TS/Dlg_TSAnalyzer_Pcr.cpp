@@ -153,8 +153,10 @@ BOOL CDlg_TSAnalyzer_Pcr::OnInitDialog()
 		TRACE0("未能创建TS流码率监控窗口\n");
 		return FALSE; // 未能创建
 	}
-	m_PcrScatterDiagramGraph.Init_X_Axis(AXIS_STYLE_FROM_MIN_TO_MAX, RANGE_MARK_SHOWN, 0, 40, "ms", 0, 150, 10);				//0点对称型
-	m_PcrScatterDiagramGraph.Init_Y_Axis(AXIS_STYLE_MEAN_SYMMETRY, RANGE_MARK_SHOWN, -500, 500, "ns", -10000, 10000);				//0点对称型
+	m_PcrScatterDiagramGraph.Init_X_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, RANGE_MARK_SHOWN, 0, 40000, "us", 0, 150000, 10000);				//单向从小到大型
+	m_PcrScatterDiagramGraph.Init_Y_Axis(AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY, RANGE_MARK_SHOWN, -500, 500, "ns", -100000, 100000, 1000);				//0点对称型
+	//m_PcrScatterDiagramGraph.Init_X_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, RANGE_MARK_SHOWN, 0, 40000, "us", 0, 150000, 10000);				//单向从小到大型
+	//m_PcrScatterDiagramGraph.Init_Y_Axis(AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY, RANGE_MARK_SHOWN, -500, 500, "ns", -100000, 100000, 100);				//0点对称型
 #endif
 
 #if SHOW_PCR_INTERVAL_HISTGRAM

@@ -408,7 +408,7 @@ void CInstrumentPanel_ScatterDiagram::AppendSample(int ID, int xsampleValue, int
 				m_nMeasuredXMaxValue = xattr->max;
 			}
 
-			assert(m_nXAxisStyle == AXIS_STYLE_FROM_MIN_TO_MAX);
+			assert(m_nXAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX);
 
 			if (xattr->min < m_nXNegtiveMark)
 			{
@@ -442,7 +442,7 @@ void CInstrumentPanel_ScatterDiagram::AppendSample(int ID, int xsampleValue, int
 				m_nMeasuredYMaxValue = yattr->max;
 			}
 
-			if (m_nYAxisStyle == AXIS_STYLE_MEAN_SYMMETRY)
+			if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)
 			{
 				nNegtiveBias = m_nYNegtiveMark;
 				if (yattr->min < m_nYNegtiveMark)
@@ -471,7 +471,36 @@ void CInstrumentPanel_ScatterDiagram::AppendSample(int ID, int xsampleValue, int
 					m_nYPositiveMark = bias;
 				}
 			}
-			else if (m_nYAxisStyle == AXIS_STYLE_FROM_MIN_TO_MAX)
+			else if (m_nYAxisStyle == AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY)
+			{
+				nNegtiveBias = m_nYNegtiveMark;
+				if (yattr->min < m_nYNegtiveMark)
+				{
+					if (yattr->min > m_nYFloor)
+					{
+						nNegtiveBias = (int)(floor(yattr->min / (double)m_nYStep) * m_nYStep);
+						m_bNeedRedrawAllBmp = 1;
+					}
+				}
+
+				nPositiveBias = m_nYPositiveMark;
+				if (yattr->max > m_nYPositiveMark)
+				{
+					if (yattr->max < m_nYCeil)
+					{
+						nPositiveBias = (int)(ceil(yattr->max / (double)m_nYStep) * m_nYStep);
+						m_bNeedRedrawAllBmp = 1;
+					}
+				}
+
+				if (m_bNeedRedrawAllBmp)
+				{
+					int bias = max(abs(nNegtiveBias), abs(nPositiveBias));
+					m_nYNegtiveMark = -bias;
+					m_nYPositiveMark = bias;
+				}
+			}
+			else if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX)
 			{
 				if (yattr->min < m_nYNegtiveMark)
 				{

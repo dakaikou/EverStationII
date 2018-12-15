@@ -402,7 +402,7 @@ int CDB_Pcrs::AddPCRSample(uint16_t usPcrPID, int64_t pos, PCR_code_t* pPCRCode,
 					{
 						//PCR间隔以实际检测到的字节接收时间间隔为准
 						ts_time_diff_value = (int64_t)((8000000000.0 / ext_reference_bitrate) * pos_diff);			//ns
-						interval_cur_value = (int)(ts_time_diff_value / 1000000);			//ms
+						interval_cur_value = (int)(ts_time_diff_value / 1000);			//us
 
 						pInfo->interval_cur_value = interval_cur_value;
 						if (interval_cur_value > pInfo->interval_max_value)
@@ -423,7 +423,7 @@ int CDB_Pcrs::AddPCRSample(uint16_t usPcrPID, int64_t pos, PCR_code_t* pPCRCode,
 							m_interval_min_value = pInfo->interval_min_value;
 						}
 
-						if (pInfo->interval_cur_value > 100)
+						if (pInfo->interval_cur_value > 100000)
 						{
 							pInfo->pcr_interval_error_count++;
 							if (pInfo->fp_dbase != NULL)

@@ -64,7 +64,7 @@ void CInstrumentPanel_Waveform::AppendSample(int ID, int sampleValue, SAMPLE_ATT
 			}
 
 			int bRedraw = 0;
-			if (m_nYAxisStyle == AXIS_STYLE_MEAN_SYMMETRY)
+			if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)
 			{
 				nNegtiveBias = m_nYNegtiveMark;
 				if (attr->min < m_nYNegtiveMark)
@@ -93,7 +93,7 @@ void CInstrumentPanel_Waveform::AppendSample(int ID, int sampleValue, SAMPLE_ATT
 					m_nYPositiveMark = bias;
 				}
 			}
-			else if (m_nYAxisStyle == AXIS_STYLE_FROM_MIN_TO_MAX)
+			else if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX)
 			{
 				if (attr->min < m_nYNegtiveMark)
 				{
@@ -171,7 +171,7 @@ void CInstrumentPanel_Waveform::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBit
 					CPen* pOldPen = pMemDC->SelectObject(pWaveformPen);
 					x = rectPicture.left;
 
-					if (m_nXAxisStyle == AXIS_STYLE_MEAN_SYMMETRY)
+					if (m_nXAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)
 					{
 						if (pChannel->nSampleCount < WAVEFORM_SAMPLE_COUNT)
 						{
@@ -219,7 +219,7 @@ void CInstrumentPanel_Waveform::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBit
 							}
 						}
 					}
-					else if (m_nXAxisStyle == AXIS_STYLE_FROM_MIN_TO_MAX)
+					else if (m_nXAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX)
 					{
 						yoffset = rectPicture.bottom;
 
@@ -328,7 +328,7 @@ void CInstrumentPanel_Waveform::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitma
 					CPen* pOldPen = pMemDC->SelectObject(pWaveformPen);
 					x = rectPicture.left;
 
-					if (m_nXAxisStyle == AXIS_STYLE_MEAN_SYMMETRY)
+					if (m_nXAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)
 					{
 						if (pChannel->nSampleCount < WAVEFORM_SAMPLE_COUNT)
 						{
@@ -376,7 +376,7 @@ void CInstrumentPanel_Waveform::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitma
 							}
 						}
 					}
-					else if (m_nXAxisStyle == AXIS_STYLE_FROM_MIN_TO_MAX)
+					else if (m_nXAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX)
 					{
 						yoffset = rectPicture.bottom;
 

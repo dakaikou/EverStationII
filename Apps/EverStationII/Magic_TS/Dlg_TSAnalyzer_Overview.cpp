@@ -96,8 +96,10 @@ BOOL CDlg_TSAnalyzer_Overview::OnInitDialog()
 		TRACE0("未能创建TS流码率监控窗口\n");
 		return FALSE; // 未能创建
 	}
-	m_TsRateJitterGraphHistogram.Init_X_Axis(AXIS_STYLE_MEAN_SYMMETRY, RANGE_MARK_SHOWN, -100, 100, "bps", -10000, 10000);	//X轴（-1000， 1000）bps，Y轴（0， 100%）比例			
-	m_TsRateJitterGraphHistogram.Init_Y_Axis(AXIS_STYLE_FROM_MIN_TO_MAX, RANGE_MARK_HIDE, 0, 100, "%", 0, 100);	//X轴（-1000， 1000）bps，Y轴（0， 100%）比例			
+	//m_TsRateJitterGraphHistogram.Init_X_Axis(AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY, RANGE_MARK_SHOWN, -100, 100, "bps", -10000, 10000);	//X轴（-1000， 1000）bps，Y轴（0， 100%）比例			
+	//m_TsRateJitterGraphHistogram.Init_Y_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, RANGE_MARK_HIDE, 0, 100, "%", 0, 100);	//X轴（-1000， 1000）bps，Y轴（0， 100%）比例			
+	m_TsRateJitterGraphHistogram.Init_X_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, RANGE_MARK_SHOWN_MINMAX, 100000000, 0, "bps", 0, 100000000, 1000);	//X轴（-1000， 1000）bps，Y轴（0， 100%）比例			
+	m_TsRateJitterGraphHistogram.Init_Y_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, RANGE_MARK_HIDE, 0, 100, "%", 0, 100);	//X轴（-1000， 1000）bps，Y轴（0， 100%）比例			
 
 	m_nEtr290Count = 0;
 
