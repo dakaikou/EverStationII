@@ -175,20 +175,20 @@ int CDB_Pcrs::AddPCRSample(uint16_t usPcrPID, int64_t pos, PCR_code_t* pPCRCode,
 
 	PCR_code_t  old_PCR_code;
 
-	int64_t			old_pcr_pos;
+	int64_t		old_pcr_pos;
 	int			pcr_code_diff;
 	int			pos_diff;
 
-	int64_t			code_time_diff_value;
-	int64_t			ts_time_diff_value;
+	int64_t		code_time_diff_value;
+	int64_t		ts_time_diff_value;
 
 	int			data_rate_new;
-	int64_t			data_rate_sum;
+	int64_t		data_rate_sum;
 	int			jitter_cur_value;
 	int			interval_cur_value;
 	int			sample_index;
-	int64_t			pcr_pos = pos + 12;				//必须要确保pcr_pos 要大于pos。程序需要考虑计数溢出的问题
-	uint32_t			old_tickcount;
+	int64_t		pcr_pos = pos + 12;				//必须要确保pcr_pos 要大于pos。程序需要考虑计数溢出的问题
+	uint32_t	old_tickcount;
 
 	int64_t sum = 0;
 	int	pcr_index;
@@ -267,7 +267,7 @@ int CDB_Pcrs::AddPCRSample(uint16_t usPcrPID, int64_t pos, PCR_code_t* pPCRCode,
 
 			if (pInfo->fp_dbase != NULL)
 			{
-				fprintf(pInfo->fp_dbase, "pos, bits:32-30, bits:29-15, bits:14-0, extension, pos_diff, pcr_code_diff, 参考比特率, 比特率, 比特率均值, 比特率rms, PCR间隔, 间隔均值, 间隔方差, PCR_AC, AC均值, AC rms\n");
+				fprintf(pInfo->fp_dbase, "pos, bits:32-30, bits:29-15, bits:14-0, extension, pos_diff, pcr_code_diff, deltT_PCR, 计算比特率, 外部码率, 计算比特率', 比特率均值, 比特率rms, deltT_TS, PCR_AC, deltT_TS', PCR间隔, 间隔均值, 间隔方差, PCR_AC', AC均值, AC rms\n");
 				fprintf(pInfo->fp_dbase, "%lld, %d, %d, %d, %d\n",
 					pInfo->PCR_pos, 
 					pInfo->PCR_code.base_32_30,
@@ -317,21 +317,49 @@ int CDB_Pcrs::AddPCRSample(uint16_t usPcrPID, int64_t pos, PCR_code_t* pPCRCode,
 					if (pInfo->fp_dbase != NULL)
 					{
 						fprintf(pInfo->fp_dbase, ", %d", pcr_code_diff);
-						fprintf(pInfo->fp_dbase, ", %d", ext_reference_bitrate);
 					}
 
 					code_time_diff_value = (int64_t)(pcr_code_diff * 37.037);					//ns，会溢出
+					if (pInfo->fp_dbase != NULL)
+					{
+						fprintf(pInfo->fp_dbase, ", %I64d", code_time_diff_value);
+					}
 
 					////计算新码率
-					data_rate_new = (int)(pos_diff * 8000000000.0 / code_time_diff_value);
+					data_rate_new = (int)(pos_diff * 8000.0 / code_time_diff_value * 1000000);
+					if (pInfo->fp_dbase != NULL)
+					{
+						fprintf(pInfo->fp_dbase, ", %d", data_rate_new);
+					}
+
+					if (pInfo->fp_dbase != NULL)
+					{
+						fprintf(pInfo->fp_dbase, ", %d", ext_reference_bitrate);
+					}
 
 					int stable_stream = 1;
 					if (ext_reference_bitrate > 0)
 					{
-						double bitrate_jitter_ratio = (double)data_rate_new / ext_reference_bitrate;
-						if ((bitrate_jitter_ratio > 5.0) || (bitrate_jitter_ratio < 0.2))
+						//double bitrate_jitter_ratio = (double)data_rate_new / ext_reference_bitrate;
+						//if ((bitrate_jitter_ratio > 5.0) || (bitrate_jitter_ratio < 0.2))
+						//{
+						//	stable_stream = 0;
+						//}
+						if (pInfo->encoder_bitrate_rms_value > 0)
 						{
-							stable_stream = 0;
+							double bitrate_jitter_ratio = fabs(data_rate_new - ext_reference_bitrate) / pInfo->encoder_bitrate_rms_value;
+							if (bitrate_jitter_ratio > 500)
+							{
+								stable_stream = 0;
+							}
+						}
+						else
+						{
+							double bitrate_jitter = fabs(data_rate_new - ext_reference_bitrate);
+							if (bitrate_jitter > 5000)			//5K bps
+							{
+								stable_stream = 0;
+							}
 						}
 					}
 					int is_valid_sample = IsValidBitrate(data_rate_new, pInfo->encoder_bitrate_mean_value, pInfo->encoder_bitrate_rms_value, pInfo->encoder_bitrate_sample_count);
@@ -402,7 +430,49 @@ int CDB_Pcrs::AddPCRSample(uint16_t usPcrPID, int64_t pos, PCR_code_t* pPCRCode,
 					{
 						//PCR间隔以实际检测到的字节接收时间间隔为准
 						ts_time_diff_value = (int64_t)((8000000000.0 / ext_reference_bitrate) * pos_diff);			//ns
+						if (pInfo->fp_dbase != NULL)
+						{
+							fprintf(pInfo->fp_dbase, ", %I64d", ts_time_diff_value);
+						}
+
+						//计算PCR_AC，等效于在复用器输出端测量
+						jitter_cur_value = (int)(code_time_diff_value - ts_time_diff_value);		//参考TR101 290计算定义
+						pInfo->jitter_cur_value = jitter_cur_value;
+
+						if (pInfo->fp_dbase != NULL)
+						{
+							fprintf(pInfo->fp_dbase, ", %d", pInfo->jitter_cur_value);
+						}
+
+						if (jitter_cur_value > 500)		//500ns
+						{
+							pInfo->pcr_ac_error_count++;
+						}
+						if (jitter_cur_value < -500)
+						{
+							pInfo->pcr_ac_error_count++;
+						}
+
+						if (jitter_cur_value > pInfo->jitter_max_value)
+						{
+							pInfo->jitter_max_value = jitter_cur_value;
+						}
+						if (jitter_cur_value < pInfo->jitter_min_value)
+						{
+							pInfo->jitter_min_value = jitter_cur_value;
+						}
+
+						if (pInfo->jitter_max_value > m_jitter_max_value)
+						{
+							m_jitter_max_value = pInfo->jitter_max_value;
+						}
+						if (pInfo->jitter_min_value < m_jitter_min_value)
+						{
+							m_jitter_min_value = pInfo->jitter_min_value;
+						}
+
 						interval_cur_value = (int)(ts_time_diff_value / 1000);			//us
+						//interval_cur_value = ts_time_diff_value;			//ns
 
 						pInfo->interval_cur_value = interval_cur_value;
 						if (interval_cur_value > pInfo->interval_max_value)
@@ -428,7 +498,9 @@ int CDB_Pcrs::AddPCRSample(uint16_t usPcrPID, int64_t pos, PCR_code_t* pPCRCode,
 							pInfo->pcr_interval_error_count++;
 							if (pInfo->fp_dbase != NULL)
 							{
-								fprintf(pInfo->fp_dbase, ", *%d, *%d, *%d", pInfo->interval_cur_value, pInfo->interval_mean_value, pInfo->interval_rms_value);
+								fprintf(pInfo->fp_dbase, " *%I64d, *%d, *%d, *%d", ts_time_diff_value, pInfo->interval_cur_value, pInfo->interval_mean_value, pInfo->interval_rms_value);
+								//fprintf(pInfo->fp_dbase, ", *%d, *%d, *%d", pInfo->interval_cur_value, pInfo->interval_mean_value, pInfo->interval_rms_value);
+								//fprintf(pInfo->fp_dbase, ", *%d, *%d, *%d", pInfo->interval_cur_value, pInfo->interval_mean_value, pInfo->interval_rms_value);
 							}
 						}
 						else
@@ -436,7 +508,7 @@ int CDB_Pcrs::AddPCRSample(uint16_t usPcrPID, int64_t pos, PCR_code_t* pPCRCode,
 							pInfo->interval_available = 1;
 							if (pInfo->fp_dbase != NULL)
 							{
-								fprintf(pInfo->fp_dbase, ", %d", pInfo->interval_cur_value);
+								fprintf(pInfo->fp_dbase, ", %I64d, %d", ts_time_diff_value, pInfo->interval_cur_value);
 							}
 							//PCR间隔太长的样本是否要保留，是否要参与均值和方差计算？
 							pInfo->interval_sample_array[pInfo->interval_sample_index] = pInfo->interval_cur_value;
@@ -513,37 +585,6 @@ int CDB_Pcrs::AddPCRSample(uint16_t usPcrPID, int64_t pos, PCR_code_t* pPCRCode,
 							}
 						}
 
-						//计算PCR_AC，等效于在复用器输出端测量
-						jitter_cur_value = (int)(code_time_diff_value - ts_time_diff_value);		//参考TR101 290计算定义
-
-						if (jitter_cur_value > 500)		//500ns
-						{
-							pInfo->pcr_ac_error_count++;
-						}
-						if (jitter_cur_value < -500)
-						{
-							pInfo->pcr_ac_error_count++;
-						}
-
-						pInfo->jitter_cur_value = jitter_cur_value;
-
-						if (jitter_cur_value > pInfo->jitter_max_value)
-						{
-							pInfo->jitter_max_value = jitter_cur_value;
-						}
-						if (jitter_cur_value < pInfo->jitter_min_value)
-						{
-							pInfo->jitter_min_value = jitter_cur_value;
-						}
-
-						if (pInfo->jitter_max_value > m_jitter_max_value)
-						{
-							m_jitter_max_value = pInfo->jitter_max_value;
-						}
-						if (pInfo->jitter_min_value < m_jitter_min_value)
-						{
-							m_jitter_min_value = pInfo->jitter_min_value;
-						}
 
 //						int jitter_filter_thread = max(50000, 5 * m_jitter_rms_value);
 						int jitter_filter_thread = 50000;
@@ -773,4 +814,33 @@ int CDB_Pcrs::GetMeasuredIntervalAttribute(PCR_INTERVAL_ATTRIBUTE_t* pattr)
 	}
 
 	return rtcode;
+}
+
+int MPEG_PCR_minus(PCR_code_t* pcr_code_minuend, PCR_code_t* pcr_code_substractor)
+{
+	int64_t pcr_value_minuend, pcr_value_substractor;
+	int pcr_diff = -1;
+
+	if ((pcr_code_minuend != NULL) && (pcr_code_substractor != NULL))
+	{
+		pcr_value_minuend = pcr_code_minuend->base_32_30;
+		pcr_value_minuend <<= 15;
+		pcr_value_minuend |= pcr_code_minuend->base_29_15;
+		pcr_value_minuend <<= 15;
+		pcr_value_minuend |= pcr_code_minuend->base_14_0;
+		pcr_value_minuend *= 300;
+		pcr_value_minuend += pcr_code_minuend->extension;
+
+		pcr_value_substractor = pcr_code_substractor->base_32_30;
+		pcr_value_substractor <<= 15;
+		pcr_value_substractor |= pcr_code_substractor->base_29_15;
+		pcr_value_substractor <<= 15;
+		pcr_value_substractor |= pcr_code_substractor->base_14_0;
+		pcr_value_substractor *= 300;
+		pcr_value_substractor += pcr_code_substractor->extension;
+
+		pcr_diff = (int)(pcr_value_minuend - pcr_value_substractor);
+	}
+
+	return pcr_diff;
 }

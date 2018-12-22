@@ -52,8 +52,14 @@
 #define FONT_MARK_HEIGHT				16
 #define FONT_MEASURE_HEIGHT				16
 
-#define GRID_DIVISION_VERTICAL			6
-#define GRID_DIVISION_HORIZONTAL		20
+#define VERTICAL_GRID_DIVISION				10
+#define HORIZONTAL_GRID_DIVISION			20
+//#define VERTICAL_GRID_DIVISION_ONEWAY		10
+//#define VERTICAL_GRID_DIVISION_SYMMETRY		10
+//#define HORIZONTAL_GRID_DIVISION_ONEWAY		20
+//#define HORIZONTAL_GRID_DIVISION_SYMMETRY	20
+
+#define LOGARITHMIC_RANK					(VERTICAL_GRID_DIVISION/2)
 
 #define UNCREDITABLE_MAX_VALUE				-123456789
 #define UNCREDITABLE_MIN_VALUE				123456789
@@ -101,12 +107,16 @@ typedef struct
 #define AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY		3
 #define AXIS_STYLE_LOGARITHMIC_FROM_MIN_TO_MAX		4
 
-#define RANGE_MARK_SHOWN_MINMAX			2
-#define RANGE_MARK_SHOWN				1
-#define RANGE_MARK_HIDE					0
+#define RANGE_MARK_SHOWN_KEYPOINT		0x00000004
+#define RANGE_MARK_SHOWN_PARTIAL		0x00000002
+#define RANGE_MARK_SHOWN_TOTAL			0x00000001
+#define RANGE_MARK_HIDE					0x00000000
 
-#define MEASURE_VALUE_SHOWN				1
-#define MEASURE_VALUE_HIDE				0
+#define MEASURE_PANEL_SHOWN				0x00010000
+#define MEASURE_PANEL_HIDE				0x00000000
+
+//#define MEASURE_VALUE_SHOWN				1
+//#define MEASURE_VALUE_HIDE				0
 
 //#define SCAN_STYLE_FIXED_POS		1
 //#define SCAN_STYLE_IN_SEQUENCE		0
@@ -145,18 +155,20 @@ protected:
 	int				  m_bNeedRedrawWaveformBmp;
 	int				  m_bNeedRedrawMeasurePanelBmp;
 
-	//double	m_dGridDelty;
-	//double	m_dGridDeltx;
+	//double	m_dMeasureDeltX;
+	//double	m_dMeasureDeltY;
 
-	double	m_dMeasureDeltX;
-	double	m_dMeasureDeltY;
+	double  m_dYLogArithmicCoeff;
+	double  m_dXLogArithmicCoeff;
 
 	char	m_pszXUnits[16];
 	char	m_pszYUnits[16];
 	
+	int		m_nXPanelShownOption;
 	int		m_nXMarkShownOption;
 	int		m_nXAxisStyle;
 
+	int		m_nYPanelShownOption;
 	int		m_nYMarkShownOption;
 	int		m_nYAxisStyle;
 
@@ -172,7 +184,8 @@ protected:
 	int		m_nMeasuredXMinValue;			
 	int		m_nMeasuredXMaxValue;			
 
-	int		m_nYNegtiveMark;			
+	int		m_nYNegtiveMark;
+	int		m_nYZeroMark;
 	int		m_nYPositiveMark;			
 	int		m_nYAlarmMinLimit;
 	int		m_nYAlarmMaxLimit;
@@ -181,6 +194,7 @@ protected:
 	int		m_nYStep;
 
 	int		m_nXNegtiveMark;
+	int		m_nXZeroMark;
 	int		m_nXPositiveMark;
 	int		m_nXAlarmMinLimit;
 	int		m_nXAlarmMaxLimit;
@@ -188,23 +202,7 @@ protected:
 	int		m_nXCeil;
 	int		m_nXStep;
 
-	//int		m_nObserveMinValue;
-	//int		m_nObserveMaxValue;
-
-
 	UINT_PTR	m_uiTimerID;
-
-	//CPen* m_pWavePen;
-	//CPen* m_pGridPen;
-	//CPen* m_pDotPen;
-	//CPen* m_pDashPen;
-	//CPen* m_pAxisPen;
-
-	//CPen* m_pMaxLimitPen;
-	//CPen* m_pMinLimitPen;
-	//CFont* m_pMeasureFont;
-	//CFont* m_pTitleFont;
-	//CFont* m_pMarkFont;
 
 	CBrush* m_pBkgroundBrush;
 	CBrush* m_pWaveformBrush;
@@ -213,26 +211,14 @@ protected:
 	CBitmap* m_pBkgroundBmp;
 	CBitmap* m_pWaveformBmp;
 	CBitmap* m_pMeasurePanelBmp;
-	//CBitmap* m_pAlarmLineBmp;
-	//CBitmap* m_pValueBmp;
-	//CBitmap* m_pLeftMarkBmp;
-	//CBitmap* m_pMidMarkBmp;
-	//CBitmap* m_pRightMarkBmp;
 
 	COLORREF  m_Palette[MAX_CHANNEL_COUNT];
 	
 	CDC*	m_pMemDC;
 
 	CRect	m_rectClient;
-	//CRect   m_rectTitle;
 	CRect	m_rectWaveform;
 	CRect	m_rectMeasurePanel;
-	//CRect   m_rectXLeftMark;
-	//CRect   m_rectXMidMark;
-	//CRect   m_rectXRightMark;
-	//CRect   m_rectYTopMark;
-	//CRect   m_rectYMidMark;
-	//CRect   m_rectYBottomMark;
 
 #if ON_PAINTING_USE_MUTEX
 	HANDLE	m_hPaintingAccess;
@@ -241,14 +227,16 @@ protected:
 	virtual void DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp);
 	virtual void DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp);
 
-	//virtual void DisplayMeasureScaleInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectMark, int nMark);
 	virtual void DisplayXAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
 	virtual void DisplayYAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
-	void DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectWaveform);
 
+	void DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectWaveform);
 	void DisplayMeasurePanelInMemory(CDC* pMemDC, CBitmap* pBkBmp);
 
 	void AdjustLayout(CRect rectContainer);
+
+	int XMAP_Value2Pos(int value, CRect rectPicture);
+	int YMAP_Value2Pos(int value, CRect rectPicture);
 
 public:
 	void AppendXSample(int ID, int x);

@@ -44,8 +44,6 @@ void CInstrumentPanel_Histogram::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBi
 	int		nHistGram[HISTGRAM_HORZ_DIVISION];
 	memset(nHistGram, 0x00, sizeof(nHistGram));
 
-	double fBiasLevel = (double)(m_nXPositiveMark - m_nXNegtiveMark) / HISTGRAM_HORZ_DIVISION;
-
 	BITMAP bm;
 	if ((pGraphBmp != NULL) && (pMemDC != NULL))
 	{
@@ -63,6 +61,7 @@ void CInstrumentPanel_Histogram::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBi
 			pMemDC->FillRect(&rectPicture, m_pWaveformBrush);
 
 			double deltX = (double)rectPicture.Width() / HISTGRAM_HORZ_DIVISION;
+
 			for (int ch = 0; ch < m_nChannleCount; ch++)
 			{
 				SAMPLE_CHANNEL_t* pChannel = m_pChannel[ch];
@@ -80,45 +79,19 @@ void CInstrumentPanel_Histogram::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBi
 
 				if (pChannel->nSampleCount > 0) {
 
-					if (fBiasLevel > 0)
+					for (i = 0; i < pChannel->nSampleCount; i++)
 					{
-						if (m_nXAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)		//对称型
+						int xPos = XMAP_Value2Pos(pChannel->pnXArray[i], rectPicture);
+						if (xPos >= 0)
 						{
-							for (i = 0; i < pChannel->nSampleCount; i++)
-							{
-								int distance = pChannel->pnXArray[i] - m_nMeasuredXMeanValue;
-								//int distance = pChannel->pstSampleArray[i].x - m_nMeasuredXMeanValue;
-								if ((distance > m_nXNegtiveMark) && (distance < m_nXPositiveMark))
-								{
-									int index = (int)((distance - m_nXNegtiveMark) / fBiasLevel);
-									assert((index >= 0) && (index < HISTGRAM_HORZ_DIVISION));
-									nHistGram[index] ++;
+							int index = (int)(xPos / deltX);
+							assert((index >= 0) && (index < HISTGRAM_HORZ_DIVISION));
+							nHistGram[index] ++;
 
-									if (nHistGram[index] > max_count)
-									{
-										max_count = nHistGram[index];
-									}
-								}
-							}
-						}
-						else if (m_nXAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX)  //非对称型
-						{
-							for (i = 0; i < pChannel->nSampleCount; i++)
+							if (nHistGram[index] > max_count)
 							{
-								//if ((pChannel->pstSampleArray[i].x > m_nXNegtiveMark) && (pChannel->pstSampleArray[i].x < m_nXPositiveMark))
-								if ((pChannel->pnXArray[i] > m_nXNegtiveMark) && (pChannel->pnXArray[i] < m_nXPositiveMark))
-								{
-									//int index = (int)((pChannel->pstSampleArray[i].x - m_nXNegtiveMark) / fBiasLevel);
-									int index = (int)((pChannel->pnXArray[i] - m_nXNegtiveMark) / fBiasLevel);
-									assert((index >= 0) && (index < HISTGRAM_HORZ_DIVISION));
-									nHistGram[index] ++;
-
-									if (nHistGram[index] > max_count)
-									{
-										max_count = nHistGram[index];
-										max_pos = index;
-									}
-								}
+								max_count = nHistGram[index];
+								max_pos = index;
 							}
 						}
 					}
@@ -139,32 +112,30 @@ void CInstrumentPanel_Histogram::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBi
 							pMemDC->FillRect(&rectPaint, pPaintBrush);
 						}
 
-						int mark_x = (int)(rectPicture.left + max_pos * deltX);
+						//int mark_x = (int)(rectPicture.left + max_pos * deltX);
 
-						CString strMark;
-						CRect rectXMark;
+						//CString strMark;
+						//CRect rectXMark;
 
-						strMark.Format("%d\n", (int)(m_nXNegtiveMark+ (max_pos+0.5) * fBiasLevel));
+						//strMark.Format("%d\n", (int)(m_nXNegtiveMark+ (max_pos+0.5) * deltX));
 
-						rectXMark.left = mark_x - RECT_XMARK_WIDTH / 2;
-						rectXMark.right = mark_x + RECT_XMARK_WIDTH / 2;
-						rectXMark.top = rectPicture.top + Y_SEPARATOR;
-						rectXMark.bottom = rectXMark.top + RECT_XMARK_HEIGHT;
+						//rectXMark.left = mark_x - RECT_XMARK_WIDTH / 2;
+						//rectXMark.right = mark_x + RECT_XMARK_WIDTH / 2;
+						//rectXMark.top = rectPicture.top + Y_SEPARATOR;
+						//rectXMark.bottom = rectXMark.top + RECT_XMARK_HEIGHT;
 
-						CFont* pMarkFont = new CFont;
-						pMarkFont->CreateFont(FONT_MARK_HEIGHT, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, NULL);
+						//CFont* pMarkFont = new CFont;
+						//pMarkFont->CreateFont(FONT_MARK_HEIGHT, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, NULL);
 
-						pMemDC->SelectObject(pMarkFont);
-						pMemDC->SetTextColor(SCREEN_MAXLIMITCOLOR);
-						pMemDC->DrawText(strMark, strMark.GetLength(), &rectXMark, DT_CENTER | DT_SINGLELINE | DT_TOP);
+						//pMemDC->SelectObject(pMarkFont);
+						//pMemDC->SetTextColor(SCREEN_MAXLIMITCOLOR);
+						//pMemDC->DrawText(strMark, strMark.GetLength(), &rectXMark, DT_CENTER | DT_SINGLELINE | DT_TOP);
 
-						strMark.Format("%d\n", m_nXNegtiveMark);
+						//strMark.Format("%d\n", m_nXNegtiveMark);
 
-						delete pMarkFont;
+						//delete pMarkFont;
 					}
 				}
-
-				//m_bNeedUpdate = 0;
 
 #if INSTRUMENT_PANEL_USE_MUTEX
 				if (pChannel->hSampleAccess != NULL)
@@ -189,9 +160,6 @@ void CInstrumentPanel_Histogram::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitm
 	int		nHistGram[HISTGRAM_HORZ_DIVISION];
 	memset(nHistGram, 0x00, sizeof(nHistGram));
 
-	double fBiasLevel = (double)(m_nXPositiveMark - m_nXNegtiveMark) / HISTGRAM_HORZ_DIVISION;
-
-
 	BITMAP bm;
 	if ((pGraphBmp != NULL) && (pMemDC != NULL))
 	{
@@ -209,6 +177,7 @@ void CInstrumentPanel_Histogram::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitm
 			pMemDC->FillRect(&rectPicture, m_pWaveformBrush);
 
 			double deltX = (double)rectPicture.Width() / HISTGRAM_HORZ_DIVISION;
+
 			for (int ch = 0; ch < m_nChannleCount; ch++)
 			{
 				SAMPLE_CHANNEL_t* pChannel = m_pChannel[ch];
@@ -222,50 +191,23 @@ void CInstrumentPanel_Histogram::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitm
 
 				if (pChannel->nSampleCount > 0) 
 				{
-
 					CBrush* pPaintBrush = new CBrush;
 					pPaintBrush->CreateSolidBrush(pChannel->color);
 					CBrush* pOldBrush = pMemDC->SelectObject(pPaintBrush);
 
-					if (fBiasLevel > 0)
+					for (i = 0; i < pChannel->nSampleCount; i++)
 					{
-						if (m_nXAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)		//对称型
+						int xPos = XMAP_Value2Pos(pChannel->pnXArray[i], rectPicture);
+						if (xPos >= 0)
 						{
-							for (i = 0; i < pChannel->nSampleCount; i++)
-							{
-								//int distance = pChannel->pstSampleArray[i].x - m_nMeasuredXMeanValue;
-								int distance = pChannel->pnXArray[i] - m_nMeasuredXMeanValue;
-								if ((distance > m_nXNegtiveMark) && (distance < m_nXPositiveMark))
-								{
-									int index = (int)((distance - m_nXNegtiveMark) / fBiasLevel);
-									assert((index >= 0) && (index < HISTGRAM_HORZ_DIVISION));
-									nHistGram[index] ++;
+							int index = (int)(xPos / deltX);
+							assert((index >= 0) && (index < HISTGRAM_HORZ_DIVISION));
+							nHistGram[index] ++;
 
-									if (nHistGram[index] > max_count)
-									{
-										max_count = nHistGram[index];
-									}
-								}
-							}
-						}
-						else if (m_nXAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX)  //非对称型
-						{
-							for (i = 0; i < pChannel->nSampleCount; i++)
+							if (nHistGram[index] > max_count)
 							{
-								if ((pChannel->pnXArray[i] > m_nXNegtiveMark) && (pChannel->pnXArray[i] < m_nXPositiveMark))
-								//if ((pChannel->pstSampleArray[i].x > m_nXNegtiveMark) && (pChannel->pstSampleArray[i].x < m_nXPositiveMark))
-								{
-									//int index = (int)((pChannel->pstSampleArray[i].x - m_nXNegtiveMark) / fBiasLevel);
-									int index = (int)((pChannel->pnXArray[i] - m_nXNegtiveMark) / fBiasLevel);
-									assert((index >= 0) && (index < HISTGRAM_HORZ_DIVISION));
-									nHistGram[index] ++;
-
-									if (nHistGram[index] > max_count)
-									{
-										max_count = nHistGram[index];
-										max_pos = index;
-									}
-								}
+								max_count = nHistGram[index];
+								max_pos = index;
 							}
 						}
 					}
@@ -286,35 +228,33 @@ void CInstrumentPanel_Histogram::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitm
 							pMemDC->FillRect(&rectPaint, pPaintBrush);
 						}
 
-						int mark_x = (int)(rectPicture.left + max_pos * deltX);
+						//int mark_x = (int)(rectPicture.left + max_pos * deltX);
 
-						CString strMark;
-						CRect rectXMark;
+						//CString strMark;
+						//CRect rectXMark;
 
-						strMark.Format("%d\n", (int)(m_nXNegtiveMark + (max_pos + 0.5) * fBiasLevel));
+						//strMark.Format("%d\n", (int)(m_nXNegtiveMark + (max_pos + 0.5) * deltX));
 
-						rectXMark.left = mark_x - RECT_XMARK_WIDTH / 2;
-						rectXMark.right = mark_x + RECT_XMARK_WIDTH / 2;
-						rectXMark.top = rectPicture.top + Y_SEPARATOR;
-						rectXMark.bottom = rectXMark.top + RECT_XMARK_HEIGHT;
+						//rectXMark.left = mark_x - RECT_XMARK_WIDTH / 2;
+						//rectXMark.right = mark_x + RECT_XMARK_WIDTH / 2;
+						//rectXMark.top = rectPicture.top + Y_SEPARATOR;
+						//rectXMark.bottom = rectXMark.top + RECT_XMARK_HEIGHT;
 
-						CFont* pMarkFont = new CFont;
-						pMarkFont->CreateFont(FONT_MARK_HEIGHT, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, NULL);
+						//CFont* pMarkFont = new CFont;
+						//pMarkFont->CreateFont(FONT_MARK_HEIGHT, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, NULL);
 
-						pMemDC->SelectObject(pMarkFont);
-						pMemDC->SetTextColor(SCREEN_MAXLIMITCOLOR);
-						pMemDC->DrawText(strMark, strMark.GetLength(), &rectXMark, DT_CENTER | DT_SINGLELINE | DT_TOP);
+						//pMemDC->SelectObject(pMarkFont);
+						//pMemDC->SetTextColor(SCREEN_MAXLIMITCOLOR);
+						//pMemDC->DrawText(strMark, strMark.GetLength(), &rectXMark, DT_CENTER | DT_SINGLELINE | DT_TOP);
 
-						strMark.Format("%d\n", m_nXNegtiveMark);
+						//strMark.Format("%d\n", m_nXNegtiveMark);
 
-						delete pMarkFont;
+						//delete pMarkFont;
 					}
 
 					pMemDC->SelectObject(pOldBrush);
 					delete pPaintBrush;
 				}
-
-				//m_bNeedUpdate = 0;
 
 #if INSTRUMENT_PANEL_USE_MUTEX
 				if (pChannel->hSampleAccess != NULL)
@@ -355,7 +295,36 @@ void CInstrumentPanel_Histogram::AppendSample(int ID, int sampleValue, SAMPLE_AT
 				m_nMeasuredXMaxValue = attr->max;
 			}
 
-			if (m_nXAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)
+			if (m_nXAxisStyle == AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY)
+			{
+				nNegtiveBias = m_nXNegtiveMark;
+				if (attr->min < m_nXNegtiveMark)
+				{
+					if (attr->min > m_nXFloor)
+					{
+						nNegtiveBias = (int)(floor(attr->min / (double)m_nXStep) * m_nXStep);
+						m_bNeedRedrawAllBmp = 1;
+					}
+				}
+
+				nPositiveBias = m_nXPositiveMark;
+				if (attr->max > m_nXPositiveMark)
+				{
+					if (attr->max < m_nXCeil)
+					{
+						nPositiveBias = (int)(ceil(attr->max / (double)m_nXStep) * m_nXStep);
+						m_bNeedRedrawAllBmp = 1;
+					}
+				}
+
+				if (m_bNeedRedrawAllBmp)
+				{
+					int bias = max(abs(nNegtiveBias), abs(nPositiveBias));
+					m_nXNegtiveMark = -bias;
+					m_nXPositiveMark = bias;
+				}
+			}
+			else if (m_nXAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)
 			{
 				nNegtiveBias = m_nXNegtiveMark;
 				if (attr->min < m_nXNegtiveMark)

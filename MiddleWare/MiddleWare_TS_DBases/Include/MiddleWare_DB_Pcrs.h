@@ -135,4 +135,6 @@ public:
 private:
 };
 
+int MPEG_PCR_minus(PCR_code_t* pcr_code_minuend, PCR_code_t* pcr_code_substractor);
+
 #endif	//_TSMAGIC_DBASE_PCR_H_

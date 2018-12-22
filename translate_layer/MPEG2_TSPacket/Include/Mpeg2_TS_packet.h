@@ -107,7 +107,5 @@ MPEG2_TS_PACKET_LIB int MPEG_decode_TS_packet(uint8_t *buf, int length, transpor
 
 MPEG2_TS_PACKET_LIB int MPEG_encode_TS_packet(uint8_t *buf, int length, transport_packet_t* ptransport_packet);
 
-MPEG2_TS_PACKET_LIB int MPEG_PCR_minus(PCR_code_t* pcr1, PCR_code_t* pcr2);
-
 
 #endif		//__MPEG2_TS_PACKET_H__

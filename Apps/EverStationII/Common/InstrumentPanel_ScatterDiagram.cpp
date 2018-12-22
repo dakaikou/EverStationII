@@ -30,32 +30,24 @@ END_MESSAGE_MAP()
 
 void CInstrumentPanel_ScatterDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp)
 {
-	CRect	rectPaint;
-
-	//assert(m_nXAxisStyle == AXIS_STYLE_FROM_MIN_TO_MAX);
-	//assert(m_nYAxisStyle == AXIS_STYLE_MEAN_SYMMETRY);
-
 	BITMAP bm;
 	if ((pGraphBmp != NULL) && (pMemDC != NULL))
 	{
 		if (pGraphBmp->GetSafeHandle() != NULL)
 		{
 			pGraphBmp->GetBitmap(&bm);
-			pMemDC->SelectObject(pGraphBmp);
-			pMemDC->SetBkColor(SCREEN_BKWAVEFORMCOLOR);
-
 			CRect rectPicture;
 
 			rectPicture.left = 0;
 			rectPicture.top = 0;
 			rectPicture.right = bm.bmWidth;
 			rectPicture.bottom = bm.bmHeight;
+
+			pMemDC->SelectObject(pGraphBmp);
+			pMemDC->SetBkColor(SCREEN_BKWAVEFORMCOLOR);
 			pMemDC->FillRect(&rectPicture, m_pWaveformBrush);
 
 			CPoint	point;
-			double yoffset = rectPicture.bottom - (double)rectPicture.Height() / 2;
-			double diameter = rectPicture.Width() / (double)(m_nXPositiveMark - m_nXNegtiveMark);
-			int radis = (int)ceil(diameter / 4.0);
 
 			for (int ch = 0; ch < m_nChannleCount; ch++)
 			{
@@ -83,58 +75,40 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC
 
 						for (int rdIndex = 0; rdIndex < pChannel->nRdIndex; rdIndex++)
 						{
-							//ratio = double(pChannel->pstSampleArray[i].x - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
-							double ratio = double(pChannel->pnXArray[rdIndex] - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
-							point.x = (int)(rectPicture.left + ratio * rectPicture.Width());
-							if (point.x < rectPicture.left)
-							{
-								point.x = rectPicture.left;
-							}
-							else if (point.x > rectPicture.right)
-							{
-								point.x = rectPicture.right;
-							}
+							point.x = XMAP_Value2Pos(pChannel->pnXArray[rdIndex], rectPicture);
+							point.y = YMAP_Value2Pos(pChannel->pnYArray[rdIndex], rectPicture);
 
-							//ratio = (double)pChannel->pstSampleArray[i].y / m_nYPositiveMark;
-							ratio = (double)pChannel->pnYArray[rdIndex] / m_nYPositiveMark;
-							point.y = (int)(yoffset - ratio * rectPicture.Height() / 2);
-							if (point.y < rectPicture.top)
+							if ((point.x >= 0) && (point.y >= 0))
 							{
-								point.y = rectPicture.top;
+								//pMemDC->TextOutA(point.x, point.y, "O");
+								//pMemDC->SetPixel(point, pChannel->color);
+								//pMemDC->SetPixel(point.x + 1, point.y - 1, pChannel->color);
+								//pMemDC->SetPixel(point.x - 1, point.y - 1, pChannel->color);
+								//pMemDC->SetPixel(point.x, point.y, pChannel->color);
+								//pMemDC->SetPixel(point.x - 1, point.y + 1, pChannel->color);
+								//pMemDC->SetPixel(point.x + 1, point.y + 1, pChannel->color);
+
+								//pMemDC->SetPixel(point.x - 2, point.y, pChannel->color);
+								//pMemDC->SetPixel(point.x - 1, point.y, pChannel->color);
+								//pMemDC->SetPixel(point.x + 1, point.y, pChannel->color);
+								//pMemDC->SetPixel(point.x + 2, point.y, pChannel->color);
+
+								//pMemDC->SetPixel(point.x, point.y - 2, pChannel->color);
+								//pMemDC->SetPixel(point.x, point.y - 1, pChannel->color);
+								//pMemDC->SetPixel(point.x, point.y + 1, pChannel->color);
+								//pMemDC->SetPixel(point.x, point.y + 2, pChannel->color);
+								pMemDC->MoveTo(point.x - 2, point.y);
+								pMemDC->LineTo(point.x + 2, point.y);
+								pMemDC->MoveTo(point.x, point.y - 2);
+								pMemDC->LineTo(point.x, point.y + 2);
+								//RECT rectPoint;
+								//rectPoint.left = point.x - radis;
+								//rectPoint.top = point.y - radis;
+								//rectPoint.right = point.x + radis;
+								//rectPoint.bottom = point.y + radis;
+								//pMemDC->Ellipse(&rectPoint);
+								//pMemDC->FillRect(&rectPoint, pPaintBrush);
 							}
-							else if (point.y > rectPicture.bottom)
-							{
-								point.y = rectPicture.bottom;
-							}
-
-							//pMemDC->TextOutA(point.x, point.y, "O");
-							//pMemDC->SetPixel(point, pChannel->color);
-							//pMemDC->SetPixel(point.x + 1, point.y - 1, pChannel->color);
-							//pMemDC->SetPixel(point.x - 1, point.y - 1, pChannel->color);
-							//pMemDC->SetPixel(point.x, point.y, pChannel->color);
-							//pMemDC->SetPixel(point.x - 1, point.y + 1, pChannel->color);
-							//pMemDC->SetPixel(point.x + 1, point.y + 1, pChannel->color);
-
-							//pMemDC->SetPixel(point.x - 2, point.y, pChannel->color);
-							//pMemDC->SetPixel(point.x - 1, point.y, pChannel->color);
-							//pMemDC->SetPixel(point.x + 1, point.y, pChannel->color);
-							//pMemDC->SetPixel(point.x + 2, point.y, pChannel->color);
-
-							//pMemDC->SetPixel(point.x, point.y - 2, pChannel->color);
-							//pMemDC->SetPixel(point.x, point.y - 1, pChannel->color);
-							//pMemDC->SetPixel(point.x, point.y + 1, pChannel->color);
-							//pMemDC->SetPixel(point.x, point.y + 2, pChannel->color);
-							pMemDC->MoveTo(point.x - 2, point.y);
-							pMemDC->LineTo(point.x + 2, point.y);
-							pMemDC->MoveTo(point.x, point.y - 2);
-							pMemDC->LineTo(point.x, point.y + 2);
-							//RECT rectPoint;
-							//rectPoint.left = point.x - radis;
-							//rectPoint.top = point.y - radis;
-							//rectPoint.right = point.x + radis;
-							//rectPoint.bottom = point.y + radis;
-							//pMemDC->Ellipse(&rectPoint);
-							//pMemDC->FillRect(&rectPoint, pPaintBrush);
 
 							//pChannel->pstSampleArray[i].bConsumed = 1;
 							//pChannel->pbConsumed[i] = 1;
@@ -145,58 +119,40 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC
 						int rdIndex = pChannel->nWrIndex;
 						do
 						{
-							//ratio = double(pChannel->pstSampleArray[i].x - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
-							double ratio = double(pChannel->pnXArray[rdIndex] - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
-							point.x = (int)(rectPicture.left + ratio * rectPicture.Width());
-							if (point.x < rectPicture.left)
-							{
-								point.x = rectPicture.left;
-							}
-							else if (point.x > rectPicture.right)
-							{
-								point.x = rectPicture.right;
-							}
+							point.x = XMAP_Value2Pos(pChannel->pnXArray[rdIndex], rectPicture);
+							point.y = YMAP_Value2Pos(pChannel->pnYArray[rdIndex], rectPicture);
 
-							//ratio = (double)pChannel->pstSampleArray[i].y / m_nYPositiveMark;
-							ratio = (double)pChannel->pnYArray[rdIndex] / m_nYPositiveMark;
-							point.y = (int)(yoffset - ratio * rectPicture.Height() / 2);
-							if (point.y < rectPicture.top)
+							if ((point.x >= 0) && (point.y >= 0))
 							{
-								point.y = rectPicture.top;
+								//pMemDC->TextOutA(point.x, point.y, "O");
+								//pMemDC->SetPixel(point, pChannel->color);
+								//pMemDC->SetPixel(point.x + 1, point.y - 1, pChannel->color);
+								//pMemDC->SetPixel(point.x - 1, point.y - 1, pChannel->color);
+								//pMemDC->SetPixel(point.x, point.y, pChannel->color);
+								//pMemDC->SetPixel(point.x - 1, point.y + 1, pChannel->color);
+								//pMemDC->SetPixel(point.x + 1, point.y + 1, pChannel->color);
+
+								//pMemDC->SetPixel(point.x - 2, point.y, pChannel->color);
+								//pMemDC->SetPixel(point.x - 1, point.y, pChannel->color);
+								//pMemDC->SetPixel(point.x + 1, point.y, pChannel->color);
+								//pMemDC->SetPixel(point.x + 2, point.y, pChannel->color);
+
+								//pMemDC->SetPixel(point.x, point.y - 2, pChannel->color);
+								//pMemDC->SetPixel(point.x, point.y - 1, pChannel->color);
+								//pMemDC->SetPixel(point.x, point.y + 1, pChannel->color);
+								//pMemDC->SetPixel(point.x, point.y + 2, pChannel->color);
+								pMemDC->MoveTo(point.x - 2, point.y);
+								pMemDC->LineTo(point.x + 2, point.y);
+								pMemDC->MoveTo(point.x, point.y - 2);
+								pMemDC->LineTo(point.x, point.y + 2);
+								//RECT rectPoint;
+								//rectPoint.left = point.x - radis;
+								//rectPoint.top = point.y - radis;
+								//rectPoint.right = point.x + radis;
+								//rectPoint.bottom = point.y + radis;
+								//pMemDC->Ellipse(&rectPoint);
+								//pMemDC->FillRect(&rectPoint, pPaintBrush);
 							}
-							else if (point.y > rectPicture.bottom)
-							{
-								point.y = rectPicture.bottom;
-							}
-
-							//pMemDC->TextOutA(point.x, point.y, "O");
-							//pMemDC->SetPixel(point, pChannel->color);
-							//pMemDC->SetPixel(point.x + 1, point.y - 1, pChannel->color);
-							//pMemDC->SetPixel(point.x - 1, point.y - 1, pChannel->color);
-							//pMemDC->SetPixel(point.x, point.y, pChannel->color);
-							//pMemDC->SetPixel(point.x - 1, point.y + 1, pChannel->color);
-							//pMemDC->SetPixel(point.x + 1, point.y + 1, pChannel->color);
-
-							//pMemDC->SetPixel(point.x - 2, point.y, pChannel->color);
-							//pMemDC->SetPixel(point.x - 1, point.y, pChannel->color);
-							//pMemDC->SetPixel(point.x + 1, point.y, pChannel->color);
-							//pMemDC->SetPixel(point.x + 2, point.y, pChannel->color);
-
-							//pMemDC->SetPixel(point.x, point.y - 2, pChannel->color);
-							//pMemDC->SetPixel(point.x, point.y - 1, pChannel->color);
-							//pMemDC->SetPixel(point.x, point.y + 1, pChannel->color);
-							//pMemDC->SetPixel(point.x, point.y + 2, pChannel->color);
-							pMemDC->MoveTo(point.x - 2, point.y);
-							pMemDC->LineTo(point.x + 2, point.y);
-							pMemDC->MoveTo(point.x, point.y - 2);
-							pMemDC->LineTo(point.x, point.y + 2);
-							//RECT rectPoint;
-							//rectPoint.left = point.x - radis;
-							//rectPoint.top = point.y - radis;
-							//rectPoint.right = point.x + radis;
-							//rectPoint.bottom = point.y + radis;
-							//pMemDC->Ellipse(&rectPoint);
-							//pMemDC->FillRect(&rectPoint, pPaintBrush);
 
 							//pChannel->pstSampleArray[i].bConsumed = 1;
 							//pChannel->pbConsumed[rdIndex] = 1;
@@ -210,8 +166,6 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC
 
 						} while (1);
 					}
-
-					//pChannel->bNeedRedrawing = 0;
 
 					delete pWaveformPen;
 					delete pPaintBrush;
@@ -230,20 +184,12 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC
 
 void CInstrumentPanel_ScatterDiagram::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp)
 {
-	//int		i;
-	double  ratio;
-	CRect	rectPaint;
-
-	//assert(m_nXAxisStyle == AXIS_STYLE_FROM_MIN_TO_MAX);
-	//assert(m_nYAxisStyle == AXIS_STYLE_MEAN_SYMMETRY);
-
 	BITMAP bm;
 	if ((pGraphBmp != NULL) && (pMemDC != NULL))
 	{
 		if (pGraphBmp->GetSafeHandle() != NULL)
 		{
 			pGraphBmp->GetBitmap(&bm);
-			pMemDC->SelectObject(pGraphBmp);
 
 			CRect rectPicture;
 
@@ -251,10 +197,12 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheNewSamplesInMemory(CDC* pMemDC, 
 			rectPicture.top = 0;
 			rectPicture.right = bm.bmWidth;
 			rectPicture.bottom = bm.bmHeight;
-			//pMemDC->FillRect(&rectPicture, m_pBkBrush);
+
+			pMemDC->SelectObject(pGraphBmp);
 
 			CPoint	point;
-			double yoffset = rectPicture.bottom - (double)rectPicture.Height() / 2;
+			//double half_height = rectPicture.Height() / 2.0;
+			//double yoffset = rectPicture.bottom - half_height;
 			//double diameter = rectPicture.Width() / (double)(m_nXPositiveMark - m_nXNegtiveMark);
 			//int radis = (int)ceil(diameter / 4.0);
 
@@ -262,7 +210,6 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheNewSamplesInMemory(CDC* pMemDC, 
 			{
 				SAMPLE_CHANNEL_t* pChannel = m_pChannel[ch];
 
-				//if (pChannel->bNeedRedrawing)
 				if (pChannel->bEmpty == 0)
 				{
 #if INSTRUMENT_PANEL_USE_MUTEX
@@ -279,89 +226,62 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheNewSamplesInMemory(CDC* pMemDC, 
 					//pPaintBrush->CreateSolidBrush(pChannel->color);
 					//CBrush* pOldBrush = pMemDC->SelectObject(pPaintBrush);
 
-					//if (pChannel->nSampleCount > 0) 
+					do
 					{
+						int rdIndex = pChannel->nRdIndex;
+						point.x = XMAP_Value2Pos(pChannel->pnXArray[rdIndex], rectPicture);
+						point.y = YMAP_Value2Pos(pChannel->pnYArray[rdIndex], rectPicture);
 
-						//for (i = 0; i < pChannel->nSampleCount; i++)
-						do
+						if ((point.x >= 0) && (point.y >= 0))
 						{
-							//if (pChannel->pstSampleArray[i].bConsumed == 0)
-							//if (pChannel->pbConsumed[i] == 0)
-							{
-								int rdIndex = pChannel->nRdIndex;
-								//ratio = double(pChannel->pstSampleArray[i].x - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
-								ratio = double(pChannel->pnXArray[rdIndex] - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
-								point.x = (int)(rectPicture.left + ratio * rectPicture.Width());
-								if (point.x < rectPicture.left)
-								{
-									point.x = rectPicture.left;
-								}
-								else if (point.x > rectPicture.right)
-								{
-									point.x = rectPicture.right;
-								}
+							//pMemDC->TextOutA(point.x, point.y, "O");
+							//pMemDC->SetPixel(point, pChannel->color);
+							//pMemDC->SetPixel(point.x + 1, point.y - 1, pChannel->color);
+							//pMemDC->SetPixel(point.x - 1, point.y - 1, pChannel->color);
+							//pMemDC->SetPixel(point.x, point.y, pChannel->color);
+							//pMemDC->SetPixel(point.x - 1, point.y + 1, pChannel->color);
+							//pMemDC->SetPixel(point.x + 1, point.y + 1, pChannel->color);
 
-								//ratio = (double)pChannel->pstSampleArray[i].y / m_nYPositiveMark;
-								ratio = (double)pChannel->pnYArray[rdIndex] / m_nYPositiveMark;
-								point.y = (int)(yoffset - ratio * rectPicture.Height() / 2);
-								if (point.y < rectPicture.top)
-								{
-									point.y = rectPicture.top;
-								}
-								else if (point.y > rectPicture.bottom)
-								{
-									point.y = rectPicture.bottom;
-								}
+							//pMemDC->SetPixel(point.x - 2, point.y, pChannel->color);
+							//pMemDC->SetPixel(point.x - 1, point.y, pChannel->color);
+							//pMemDC->SetPixel(point.x + 1, point.y, pChannel->color);
+							//pMemDC->SetPixel(point.x + 2, point.y, pChannel->color);
 
-								//pMemDC->TextOutA(point.x, point.y, "O");
-								//pMemDC->SetPixel(point, pChannel->color);
-								//pMemDC->SetPixel(point.x + 1, point.y - 1, pChannel->color);
-								//pMemDC->SetPixel(point.x - 1, point.y - 1, pChannel->color);
-								//pMemDC->SetPixel(point.x, point.y, pChannel->color);
-								//pMemDC->SetPixel(point.x - 1, point.y + 1, pChannel->color);
-								//pMemDC->SetPixel(point.x + 1, point.y + 1, pChannel->color);
+							//pMemDC->SetPixel(point.x, point.y - 2, pChannel->color);
+							//pMemDC->SetPixel(point.x, point.y - 1, pChannel->color);
+							//pMemDC->SetPixel(point.x, point.y + 1, pChannel->color);
+							//pMemDC->SetPixel(point.x, point.y + 2, pChannel->color);
 
-								//pMemDC->SetPixel(point.x - 2, point.y, pChannel->color);
-								//pMemDC->SetPixel(point.x - 1, point.y, pChannel->color);
-								//pMemDC->SetPixel(point.x + 1, point.y, pChannel->color);
-								//pMemDC->SetPixel(point.x + 2, point.y, pChannel->color);
+							pMemDC->MoveTo(point.x - 2, point.y);
+							pMemDC->LineTo(point.x + 2, point.y);
+							pMemDC->MoveTo(point.x, point.y - 2);
+							pMemDC->LineTo(point.x, point.y + 2);
 
-								//pMemDC->SetPixel(point.x, point.y - 2, pChannel->color);
-								//pMemDC->SetPixel(point.x, point.y - 1, pChannel->color);
-								//pMemDC->SetPixel(point.x, point.y + 1, pChannel->color);
-								//pMemDC->SetPixel(point.x, point.y + 2, pChannel->color);
+							//RECT rectPoint;
+							//rectPoint.left = point.x - radis;
+							//rectPoint.top = point.y - radis;
+							//rectPoint.right = point.x + radis;
+							//rectPoint.bottom = point.y + radis;
+							//pMemDC->Ellipse(&rectPoint);
 
-								pMemDC->MoveTo(point.x - 2, point.y);
-								pMemDC->LineTo(point.x + 2, point.y);
-								pMemDC->MoveTo(point.x, point.y - 2);
-								pMemDC->LineTo(point.x, point.y + 2);
+							//pMemDC->FillRect(&rectPoint, pPaintBrush);
+						}
 
-								//RECT rectPoint;
-								//rectPoint.left = point.x - radis;
-								//rectPoint.top = point.y - radis;
-								//rectPoint.right = point.x + radis;
-								//rectPoint.bottom = point.y + radis;
-								//pMemDC->Ellipse(&rectPoint);
+						//pChannel->pstSampleArray[i].bConsumed = 1;
+						//pChannel->pbConsumed[rdIndex] = 1;
 
-								//pMemDC->FillRect(&rectPoint, pPaintBrush);
+						if (pChannel->bFull == 1) pChannel->bFull = 0;
 
-								//pChannel->pstSampleArray[i].bConsumed = 1;
-								//pChannel->pbConsumed[rdIndex] = 1;
+						pChannel->nRdIndex++;
+						pChannel->nRdIndex %= m_nChannleDepth;
 
-								if (pChannel->bFull == 1) pChannel->bFull = 0;
+						if (pChannel->nRdIndex == pChannel->nWrIndex)
+						{
+							pChannel->bEmpty = 1;
+							break;
+						}
 
-								pChannel->nRdIndex++;
-								pChannel->nRdIndex %= m_nChannleDepth;
-
-								if (pChannel->nRdIndex == pChannel->nWrIndex)
-								{
-									pChannel->bEmpty = 1;
-									break;
-								}
-							}
-
-						} while (1);
-					}
+					} while (1);
 
 					delete pWaveformPen;
 					//delete pPaintBrush;

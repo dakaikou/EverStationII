@@ -73,7 +73,7 @@ BOOL CDlg_TSAnalyzer_Pcr::OnInitDialog()
 	CDialog::OnInitDialog();
 	
 	// TODO: Add extra initialization here
-	int		width;
+	int		width, height;
 	CWnd*	pWnd;
 	CRect   rectTemp;
 	CRect	rectList;
@@ -98,34 +98,59 @@ BOOL CDlg_TSAnalyzer_Pcr::OnInitDialog()
 		m_listPcrLog.InsertColumn(3, "检测结果", LVCFMT_LEFT, width, -1);
 	}
 
-	width = (rectContainer.right - rectList.right - 10 - 10 - 4)/2;
-//	m_imageDebug.Create(IDB_LOG, 16, 1, RGB(0xab, 0xcd, 0xef));
+	width = (rectContainer.right - rectList.right - 10 - 10);
+	height = rectList.Height();
+	//	m_imageDebug.Create(IDB_LOG, 16, 1, RGB(0xab, 0xcd, 0xef));
 //	m_listPcrLog.SetImageList(&m_imageDebug, LVSIL_SMALL);
 
-	CRect rectPcrJitterHistgram;
-	CRect rectPcrIntervalHistgram;
-	CRect rectPcrJitterWaveform;
-	CRect rectPcrIntervalWaveform;
+	CRect rectPcrScatterDiagram(rectList.right + 10, rectList.top, rectList.right + 10, rectList.bottom);
+	CRect rectPcrJitterHistgram(0, 0, 0, 0);
+	CRect rectPcrIntervalHistgram(0, 0, 0, 0);
+	//CRect rectPcrJitterWaveform(0, 0, 0, 0);
+	//CRect rectPcrIntervalWaveform(0, 0, 0, 0);
 
-	rectPcrJitterWaveform.left = rectList.right + 10;
-	rectPcrJitterWaveform.top = rectList.top;
-	rectPcrJitterWaveform.right = rectPcrJitterWaveform.left + width;
-	rectPcrJitterWaveform.bottom = rectPcrJitterWaveform.top + 200;
+	//rectPcrJitterWaveform.left = rectList.right + 10;
+	//rectPcrJitterWaveform.top = rectList.top;
+	//rectPcrJitterWaveform.right = rectPcrJitterWaveform.left + width;
+	//rectPcrJitterWaveform.bottom = rectPcrJitterWaveform.top + height;
 
-	rectPcrIntervalWaveform.left = rectPcrJitterWaveform.right + 4;
-	rectPcrIntervalWaveform.top = rectList.top;
-	rectPcrIntervalWaveform.right = rectPcrIntervalWaveform.left + width;
-	rectPcrIntervalWaveform.bottom = rectPcrJitterWaveform.bottom;
+	//rectPcrIntervalWaveform.left = rectPcrJitterWaveform.right + 4;
+	//rectPcrIntervalWaveform.top = rectList.top;
+	//rectPcrIntervalWaveform.right = rectPcrIntervalWaveform.left + width;
+	//rectPcrIntervalWaveform.bottom = rectPcrJitterWaveform.bottom;
 
-	rectPcrJitterHistgram.left = rectList.right + 10;
-	rectPcrJitterHistgram.top = rectPcrJitterWaveform.bottom + 4;
-	rectPcrJitterHistgram.right = rectPcrJitterHistgram.left + width;
+#if SHOW_PCR_SCATTER_DIAGRAM
+	//rectPcrScatterDiagram.left = rectList.right + 10;
+	//rectPcrScatterDiagram.top = rectList.top;
+#if SHOW_PCR_JITTER_HISTGRAM | SHOW_PCR_INTERVAL_HISTGRAM
+	rectPcrScatterDiagram.right = rectPcrScatterDiagram.left + (int)(width * 0.7) - 2;
+#else
+	rectPcrScatterDiagram.right = rectContainer.right - 10;
+#endif
+	//rectPcrScatterDiagram.bottom = rectList.bottom;
+#endif
+
+#if SHOW_PCR_JITTER_HISTGRAM
+	rectPcrJitterHistgram.left = rectPcrScatterDiagram.right + 5;
+	rectPcrJitterHistgram.top = rectList.top;
+	rectPcrJitterHistgram.right = rectContainer.right - 10;
+#if SHOW_PCR_INTERVAL_HISTGRAM
+	rectPcrJitterHistgram.bottom = rectList.top + (int)(height * 0.5 - 2);
+#else
 	rectPcrJitterHistgram.bottom = rectList.bottom;
+#endif
+#endif
 
-	rectPcrIntervalHistgram.left = rectPcrJitterHistgram.right + 4;
-	rectPcrIntervalHistgram.top = rectPcrJitterHistgram.top;
-	rectPcrIntervalHistgram.right = rectPcrIntervalHistgram.left + width;
+#if SHOW_PCR_INTERVAL_HISTGRAM
+	rectPcrIntervalHistgram.left = rectPcrScatterDiagram.right + 5;
+#if SHOW_PCR_JITTER_HISTGRAM
+	rectPcrIntervalHistgram.top = rectList.top + (int)(height * 0.5 + 2);
+#else
+	rectPcrIntervalHistgram.top = rectList.top;
+#endif
+	rectPcrIntervalHistgram.right = rectContainer.right - 10;
 	rectPcrIntervalHistgram.bottom = rectList.bottom;
+#endif
 
 #if SHOW_PCR_JITTER_HISTGRAM
 	if (!m_PcrJitterHistgramGraph.Create("PCR_AC 直方图", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_BOTTOM | CBRS_FLOAT_MULTI, rectPcrJitterHistgram, this))
@@ -133,51 +158,52 @@ BOOL CDlg_TSAnalyzer_Pcr::OnInitDialog()
 		TRACE0("未能创建TS流码率监控窗口\n");
 		return FALSE; // 未能创建
 	}
-	m_PcrJitterHistgramGraph.Init_X_Axis(AXIS_STYLE_MEAN_SYMMETRY, RANGE_MARK_SHOWN, -200, 200, "ns", -10000, 10000);				//均值点对称型
-	m_PcrJitterHistgramGraph.Init_Y_Axis(AXIS_STYLE_FROM_MIN_TO_MAX, RANGE_MARK_HIDE, 0, 100, "%", 0, 100);				//
+	//m_PcrJitterHistgramGraph.Init_X_Axis(AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY, MEASURE_PANEL_HIDE | RANGE_MARK_SHOWN_PARTIAL, -500, 500, "ns", -100000, 100000, 1000);				//均值点对称型
+	m_PcrJitterHistgramGraph.Init_X_Axis(AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY, MEASURE_PANEL_HIDE | RANGE_MARK_SHOWN_KEYPOINT, -500, 500, "ns", -100000, 100000, 1000);				//均值点对称型
+	m_PcrJitterHistgramGraph.Init_Y_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, MEASURE_PANEL_HIDE | RANGE_MARK_SHOWN_PARTIAL, 0, 100, "%", 0, 100);				//
 #endif
 
-#if SHOW_PCR_JITTER_WAVEFORM
-	if (!m_PcrJitterWaveformGraph.Create("PCR_AC 波形图", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_BOTTOM | CBRS_FLOAT_MULTI, rectPcrJitterWaveform, this))
-	{
-		TRACE0("未能创建TS流码率监控窗口\n");
-		return FALSE; // 未能创建
-	}
-	m_PcrJitterWaveformGraph.Init_X_Axis(AXIS_STYLE_FROM_MIN_TO_MAX, RANGE_MARK_HIDE, 0, -1, "s", 0, -1);				//0到正无穷
-	m_PcrJitterWaveformGraph.Init_Y_Axis(AXIS_STYLE_MEAN_SYMMETRY, RANGE_MARK_SHOWN, -200, 200, "ns", -10000, 10000);				//0点对称型
-#endif
+//#if SHOW_PCR_JITTER_WAVEFORM
+//	if (!m_PcrJitterWaveformGraph.Create("PCR_AC 波形图", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_BOTTOM | CBRS_FLOAT_MULTI, rectPcrJitterWaveform, this))
+//	{
+//		TRACE0("未能创建TS流码率监控窗口\n");
+//		return FALSE; // 未能创建
+//	}
+//	m_PcrJitterWaveformGraph.Init_X_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, RANGE_MARK_HIDE, 0, -1, "s", 0, -1);				//0到正无穷
+//	m_PcrJitterWaveformGraph.Init_Y_Axis(AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY, RANGE_MARK_SHOWN, -500, 500, "ns", -10000, 10000);				//0点对称型
+//#endif
 
 #if SHOW_PCR_SCATTER_DIAGRAM
-	if (!m_PcrScatterDiagramGraph.Create("PCR_AC 散点图", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_BOTTOM | CBRS_FLOAT_MULTI, rectPcrIntervalHistgram, this))
+	if (!m_PcrScatterDiagramGraph.Create("PCR_AC 散点图", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_BOTTOM | CBRS_FLOAT_MULTI, rectPcrScatterDiagram, this))
 	{
 		TRACE0("未能创建TS流码率监控窗口\n");
 		return FALSE; // 未能创建
 	}
-	m_PcrScatterDiagramGraph.Init_X_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, RANGE_MARK_SHOWN, 0, 40000, "us", 0, 150000, 10000);				//单向从小到大型
-	m_PcrScatterDiagramGraph.Init_Y_Axis(AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY, RANGE_MARK_SHOWN, -500, 500, "ns", -100000, 100000, 1000);				//0点对称型
+	m_PcrScatterDiagramGraph.Init_X_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, MEASURE_PANEL_SHOWN | RANGE_MARK_SHOWN_PARTIAL, 0, 40000, "us", 0, 160000, 20000);				//单向从小到大型
+	m_PcrScatterDiagramGraph.Init_Y_Axis(AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY, MEASURE_PANEL_SHOWN | RANGE_MARK_SHOWN_PARTIAL, -500, 500, "ns", -100000, 100000, 1000);				//0点对称型
 	//m_PcrScatterDiagramGraph.Init_X_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, RANGE_MARK_SHOWN, 0, 40000, "us", 0, 150000, 10000);				//单向从小到大型
-	//m_PcrScatterDiagramGraph.Init_Y_Axis(AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY, RANGE_MARK_SHOWN, -500, 500, "ns", -100000, 100000, 100);				//0点对称型
+	//m_PcrScatterDiagramGraph.Init_Y_Axis(AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY, MEASURE_PANEL_SHOWN | RANGE_MARK_SHOWN_TOTAL, -500, 500, "ns", -100000, 100000, 1000);				//0点对称型
 #endif
 
 #if SHOW_PCR_INTERVAL_HISTGRAM
 	if (!m_PcrIntervalHistgramGraph.Create("PCR间隔 直方图", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_BOTTOM | CBRS_FLOAT_MULTI, rectPcrIntervalHistgram, this))
 	{
-		TRACE0("未能创建TS流码率监控窗口\n");
+		TRACE0("未能创建PCR间隔监控窗口\n");
 		return FALSE; // 未能创建
 	}
-	m_PcrIntervalHistgramGraph.Init_X_Axis(AXIS_STYLE_FROM_MIN_TO_MAX, RANGE_MARK_SHOWN, 0, 40, "ms", 0, 150, 10);			//非对称型，DVB要求40ms，MPEG-2要求100ms
-	m_PcrIntervalHistgramGraph.Init_Y_Axis(AXIS_STYLE_FROM_MIN_TO_MAX, RANGE_MARK_HIDE, 0, 100, "%", 0, 100);			//非对称型，DVB要求40ms，MPEG-2要求100ms
+	m_PcrIntervalHistgramGraph.Init_X_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, MEASURE_PANEL_HIDE | RANGE_MARK_SHOWN_KEYPOINT, 0, 40000, "ms", 0, 160000, 20000);			//非对称型，DVB要求40ms，MPEG-2要求100ms
+	m_PcrIntervalHistgramGraph.Init_Y_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, MEASURE_PANEL_HIDE | RANGE_MARK_SHOWN_PARTIAL, 0, 100, "%", 0, 100);			//非对称型，0-100%
 #endif
 
-#if SHOW_PCR_INTERVAL_WAVEFORM
-	if (!m_PcrIntervalWaveformGraph.Create("PCR间隔 波形图", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_BOTTOM | CBRS_FLOAT_MULTI, rectPcrIntervalWaveform, this))
-	{
-		TRACE0("未能创建TS流码率监控窗口\n");
-		return FALSE; // 未能创建
-	}
-	m_PcrIntervalWaveformGraph.Init_X_Axis(AXIS_STYLE_FROM_MIN_TO_MAX, RANGE_MARK_HIDE, 0, -1, "ms", 0, -1);			//0到正无穷
-	m_PcrIntervalWaveformGraph.Init_Y_Axis(AXIS_STYLE_FROM_MIN_TO_MAX, RANGE_MARK_SHOWN, 0, 40, "ms", 0, 150, 10);			//非对称型
-#endif
+//#if SHOW_PCR_INTERVAL_WAVEFORM
+//	if (!m_PcrIntervalWaveformGraph.Create("PCR间隔 波形图", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_BOTTOM | CBRS_FLOAT_MULTI, rectPcrIntervalWaveform, this))
+//	{
+//		TRACE0("未能创建TS流码率监控窗口\n");
+//		return FALSE; // 未能创建
+//	}
+//	m_PcrIntervalWaveformGraph.Init_X_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, RANGE_MARK_HIDE, 0, -1, "ms", 0, -1);			//0到正无穷
+//	m_PcrIntervalWaveformGraph.Init_Y_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, RANGE_MARK_SHOWN, 0, 40, "ms", 0, 150, 10);			//非对称型
+//#endif
 
 	Reset();
 
@@ -223,44 +249,58 @@ void CDlg_TSAnalyzer_Pcr::OnSize(UINT nType, int cx, int cy)
 		m_listPcrLog.SetColumnWidth(columns - 1, listwidth);
 	}
 
-	int width = (rectContainer.right - rectList.right - 10 - 10 - 4) / 2;
-	int height = (rectList.Height() - 4) / 2;
+	int width = (rectContainer.right - rectList.right - 10 - 10);
+	int height = rectList.Height();
 
-	CRect rectPcrJitterHistgram;
-	CRect rectPcrIntervalHistgram;
-	CRect rectPcrJitterWaveform;
-	CRect rectPcrIntervalWaveform;
-	CRect rectPcrScatterDiagram;
+	CRect rectPcrScatterDiagram(rectList.right + 10, rectList.top, rectList.right + 10, rectList.bottom);
+	CRect rectPcrJitterHistgram(0, 0, 0, 0);
+	CRect rectPcrIntervalHistgram(0, 0, 0, 0);
+	//CRect rectPcrJitterWaveform(0, 0, 0, 0);
+	//CRect rectPcrIntervalWaveform(0, 0, 0, 0);
 
-	rectPcrJitterWaveform.left = rectList.right + 10;
-	rectPcrJitterWaveform.top = rectList.top;
-	rectPcrJitterWaveform.right = rectPcrJitterWaveform.left + width;
-	rectPcrJitterWaveform.bottom = rectPcrJitterWaveform.top + height;
+	//rectPcrJitterWaveform.left = rectList.right + 10;
+	//rectPcrJitterWaveform.top = rectList.top;
+	//rectPcrJitterWaveform.right = rectPcrJitterWaveform.left + width;
+	//rectPcrJitterWaveform.bottom = rectPcrJitterWaveform.top + height;
 
-	rectPcrIntervalWaveform.left = rectPcrJitterWaveform.right + 4;
-	rectPcrIntervalWaveform.top = rectList.top;
-	rectPcrIntervalWaveform.right = rectPcrIntervalWaveform.left + width;
-	rectPcrIntervalWaveform.bottom = rectPcrJitterWaveform.bottom;
+	//rectPcrIntervalWaveform.left = rectPcrJitterWaveform.right + 4;
+	//rectPcrIntervalWaveform.top = rectList.top;
+	//rectPcrIntervalWaveform.right = rectPcrIntervalWaveform.left + width;
+	//rectPcrIntervalWaveform.bottom = rectPcrJitterWaveform.bottom;
 
-	rectPcrJitterHistgram.left = rectList.right + 10;
-	rectPcrJitterHistgram.top = rectPcrJitterWaveform.bottom + 4;
-	rectPcrJitterHistgram.right = rectPcrJitterHistgram.left + width;
-	rectPcrJitterHistgram.bottom = rectList.bottom;
-
-	rectPcrIntervalHistgram.left = rectPcrJitterHistgram.right + 4;
-	rectPcrIntervalHistgram.top = rectPcrJitterHistgram.top;
-	rectPcrIntervalHistgram.right = rectPcrIntervalHistgram.left + width;
-	rectPcrIntervalHistgram.bottom = rectList.bottom;
-
-	rectPcrScatterDiagram.left = rectList.right + 10;
-	rectPcrScatterDiagram.top = rectList.top;
+#if SHOW_PCR_SCATTER_DIAGRAM
+	//rectPcrScatterDiagram.left = rectList.right + 10;
+	//rectPcrScatterDiagram.top = rectList.top;
+#if SHOW_PCR_JITTER_HISTGRAM | SHOW_PCR_INTERVAL_HISTGRAM
+	//rectPcrScatterDiagram.right = rectPcrScatterDiagram.left + (int)(width * 0.7) - 2;
+	rectPcrScatterDiagram.right = rectPcrScatterDiagram.left + (int)(width * 0.618) - 2;
+#else
 	rectPcrScatterDiagram.right = rectContainer.right - 10;
-	rectPcrScatterDiagram.bottom = rectList.bottom;
+#endif
+	//rectPcrScatterDiagram.bottom = rectList.bottom;
+#endif
 
-	//rectPcrScatterDiagram.left = rectPcrIntervalHistgram.left;
-	//rectPcrScatterDiagram.top = rectPcrIntervalHistgram.top;
-	//rectPcrScatterDiagram.right = rectPcrIntervalHistgram.right;
-	//rectPcrScatterDiagram.bottom = rectPcrIntervalHistgram.bottom;
+#if SHOW_PCR_JITTER_HISTGRAM
+	rectPcrJitterHistgram.left = rectPcrScatterDiagram.right + 5;
+	rectPcrJitterHistgram.top = rectList.top;
+	rectPcrJitterHistgram.right = rectContainer.right - 10;
+#if SHOW_PCR_INTERVAL_HISTGRAM
+	rectPcrJitterHistgram.bottom = rectList.top + (int)(height * 0.5 - 2);
+#else
+	rectPcrJitterHistgram.bottom = rectList.bottom;
+#endif
+#endif
+
+#if SHOW_PCR_INTERVAL_HISTGRAM
+	rectPcrIntervalHistgram.left = rectPcrScatterDiagram.right + 5;
+#if SHOW_PCR_JITTER_HISTGRAM
+	rectPcrIntervalHistgram.top = rectList.top + (int)(height * 0.5 + 2);
+#else
+	rectPcrIntervalHistgram.top = rectList.top;
+#endif
+	rectPcrIntervalHistgram.right = rectContainer.right - 10;
+	rectPcrIntervalHistgram.bottom = rectList.bottom;
+#endif
 
 #if SHOW_PCR_JITTER_HISTGRAM
 	if (m_PcrJitterHistgramGraph.GetSafeHwnd() != NULL)
@@ -386,7 +426,7 @@ void CDlg_TSAnalyzer_Pcr::UpdatePCRDiagnosis(RECORD_PCR_t* pCurPcrInfo)
 			oldValue = (uint32_t)m_listPcrLog.GetItemData(nOffset + PCR_ITEM_INTERVAL_MEAN_VALUE);
 			if (pCurPcrInfo->interval_mean_value != oldValue)
 			{
-				sprintf_s(pszText, sizeof(pszText), "%d ns", pCurPcrInfo->interval_mean_value);
+				sprintf_s(pszText, sizeof(pszText), "%d us", pCurPcrInfo->interval_mean_value);
 				m_listPcrLog.SetItemText(nOffset + PCR_ITEM_INTERVAL_MEAN_VALUE, 3, pszText);
 				m_listPcrLog.SetItemData(nOffset + PCR_ITEM_INTERVAL_MEAN_VALUE, pCurPcrInfo->interval_mean_value);
 			}
@@ -394,7 +434,7 @@ void CDlg_TSAnalyzer_Pcr::UpdatePCRDiagnosis(RECORD_PCR_t* pCurPcrInfo)
 			oldValue = (uint32_t)m_listPcrLog.GetItemData(nOffset + PCR_ITEM_INTERVAL_MAX_VALUE);
 			if (pCurPcrInfo->interval_max_value != oldValue)
 			{
-				sprintf_s(pszText, sizeof(pszText), "%d ns", pCurPcrInfo->interval_max_value);
+				sprintf_s(pszText, sizeof(pszText), "%d us", pCurPcrInfo->interval_max_value);
 				m_listPcrLog.SetItemText(nOffset + PCR_ITEM_INTERVAL_MAX_VALUE, 3, pszText);
 				m_listPcrLog.SetItemData(nOffset + PCR_ITEM_INTERVAL_MAX_VALUE, pCurPcrInfo->interval_max_value);
 			}
@@ -484,13 +524,13 @@ void CDlg_TSAnalyzer_Pcr::UpdatePCRDiagnosis(RECORD_PCR_t* pCurPcrInfo)
 			m_listPcrLog.InsertItem(nOffset + PCR_ITEM_INTERVAL_MEAN_VALUE, "");
 			m_listPcrLog.SetItemText(nOffset + PCR_ITEM_INTERVAL_MEAN_VALUE, 1, "PCR间隔");
 			m_listPcrLog.SetItemText(nOffset + PCR_ITEM_INTERVAL_MEAN_VALUE, 2, "均值");
-			sprintf_s(pszText, sizeof(pszText), "%d ms", pCurPcrInfo->interval_mean_value);
+			sprintf_s(pszText, sizeof(pszText), "%d us", pCurPcrInfo->interval_mean_value);
 			m_listPcrLog.SetItemText(nOffset + PCR_ITEM_INTERVAL_MEAN_VALUE, 3, pszText);
 			m_listPcrLog.SetItemData(nOffset + PCR_ITEM_INTERVAL_MEAN_VALUE, pCurPcrInfo->interval_mean_value);
 
 			m_listPcrLog.InsertItem(nOffset + PCR_ITEM_INTERVAL_MAX_VALUE, "");
 			m_listPcrLog.SetItemText(nOffset + PCR_ITEM_INTERVAL_MAX_VALUE, 2, "最大值");
-			sprintf_s(pszText, sizeof(pszText), "%d ms", pCurPcrInfo->interval_max_value);
+			sprintf_s(pszText, sizeof(pszText), "%d us", pCurPcrInfo->interval_max_value);
 			m_listPcrLog.SetItemText(nOffset + PCR_ITEM_INTERVAL_MAX_VALUE, 3, pszText);
 			m_listPcrLog.SetItemData(nOffset + PCR_ITEM_INTERVAL_MAX_VALUE, pCurPcrInfo->interval_max_value);
 
@@ -520,10 +560,6 @@ void CDlg_TSAnalyzer_Pcr::UpdatePCRDiagnosis(RECORD_PCR_t* pCurPcrInfo)
 void CDlg_TSAnalyzer_Pcr::UpdatePCRObservation(int ID, int curInterval, int curJitter, PCR_INTERVAL_ATTRIBUTE_t* pIntervalAttr, PCR_JITTER_ATTRIBUTE_t* pJitterAttr)
 {
 	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-
-	//char			pszText[MAX_TXT_CHARS];
-	//int				nItemCount;
-	//int				nOffset;
 
 	SAMPLE_ATTRIBUTE_t attrInterval, attrJitter;
 

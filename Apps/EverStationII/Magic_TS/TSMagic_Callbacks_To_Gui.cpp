@@ -61,7 +61,8 @@ void CALLBACK_REPORT_PCR_Diagnosis(RECORD_PCR_t* pPcrRecord)
 #endif
 }
 
-
+//curInterval -- ns
+//curJitter -- ns
 void CALLBACK_REPORT_PCR_Observation(int ID, int curInterval, int curJitter, PCR_INTERVAL_ATTRIBUTE_t* pIntervalAttr, PCR_JITTER_ATTRIBUTE_t* pJitterAttr)
 {
 #if GUI_REPORT_PCR_OBSERVATION

@@ -98,8 +98,8 @@ BOOL CDlg_TSAnalyzer_Overview::OnInitDialog()
 	}
 	//m_TsRateJitterGraphHistogram.Init_X_Axis(AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY, RANGE_MARK_SHOWN, -100, 100, "bps", -10000, 10000);	//X÷·£®-1000£¨ 1000£©bps£¨Y÷·£®0£¨ 100%£©±»¿˝			
 	//m_TsRateJitterGraphHistogram.Init_Y_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, RANGE_MARK_HIDE, 0, 100, "%", 0, 100);	//X÷·£®-1000£¨ 1000£©bps£¨Y÷·£®0£¨ 100%£©±»¿˝			
-	m_TsRateJitterGraphHistogram.Init_X_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, RANGE_MARK_SHOWN_MINMAX, 100000000, 0, "bps", 0, 100000000, 1000);	//X÷·£®-1000£¨ 1000£©bps£¨Y÷·£®0£¨ 100%£©±»¿˝			
-	m_TsRateJitterGraphHistogram.Init_Y_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, RANGE_MARK_HIDE, 0, 100, "%", 0, 100);	//X÷·£®-1000£¨ 1000£©bps£¨Y÷·£®0£¨ 100%£©±»¿˝			
+	m_TsRateJitterGraphHistogram.Init_X_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, MEASURE_PANEL_SHOWN | RANGE_MARK_SHOWN_KEYPOINT, 100000000, 0, "bps", 0, 100000000, 1000);	//X÷·£®-1000£¨ 1000£©bps£¨Y÷·£®0£¨ 100%£©±»¿˝			
+	m_TsRateJitterGraphHistogram.Init_Y_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, MEASURE_PANEL_HIDE | RANGE_MARK_HIDE, 0, 100, "%", 0, 100);	//X÷·£®-1000£¨ 1000£©bps£¨Y÷·£®0£¨ 100%£©±»¿˝			
 
 	m_nEtr290Count = 0;
 

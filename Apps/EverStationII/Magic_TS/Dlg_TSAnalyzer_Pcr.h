@@ -11,18 +11,18 @@
 // CDlg_TSAnalyzer_Pcr dialog
 #include "MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_Pcrs.h"
 
-//#include "..\Common\InstrumentPanel_Histogram.h"
+#include "..\Common\InstrumentPanel_Histogram.h"
 #include "..\Common\InstrumentPanel_ScatterDiagram.h"
-//#include "..\Common\InstrumentPanel_Waveform.h"
+#include "..\Common\InstrumentPanel_Waveform.h"
 
 #include "TSMagic_GuiApi.h"
 #include "..\resource.h"
 #include "afxcmn.h"
 
-#define SHOW_PCR_JITTER_WAVEFORM			0
-#define SHOW_PCR_INTERVAL_WAVEFORM			0
-#define SHOW_PCR_JITTER_HISTGRAM			0
-#define SHOW_PCR_INTERVAL_HISTGRAM			0
+//#define SHOW_PCR_JITTER_WAVEFORM			0
+//#define SHOW_PCR_INTERVAL_WAVEFORM			0
+#define SHOW_PCR_JITTER_HISTGRAM			1
+#define SHOW_PCR_INTERVAL_HISTGRAM			1
 #define SHOW_PCR_SCATTER_DIAGRAM			1
 
 class CDlg_TSAnalyzer_Pcr : public CDialog

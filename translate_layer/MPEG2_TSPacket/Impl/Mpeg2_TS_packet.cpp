@@ -423,23 +423,4 @@ int MPEG_encode_TS_packet(uint8_t *buf, int length, transport_packet_t* pTS_pack
 //	return haspcr;
 //}
 
-int MPEG_PCR_minus(PCR_code_t* pcr1, PCR_code_t* pcr2)
-{
-	int pcr_code_diff = 0;
-
-	if ((pcr1 != NULL) && (pcr2 != NULL))
-	{
-		pcr_code_diff = pcr1->base_32_30 - pcr2->base_32_30;
-
-		pcr_code_diff <<= 15;
-		pcr_code_diff += (pcr1->base_29_15 - pcr2->base_29_15);
-		pcr_code_diff <<= 15;
-		pcr_code_diff += (pcr1->base_14_0 - pcr2->base_14_0);
-
-		pcr_code_diff *= 300;
-		pcr_code_diff += (pcr1->extension - pcr2->extension);
-	}
-
-	return pcr_code_diff;
-}
 
