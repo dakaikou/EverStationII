@@ -14,7 +14,16 @@
 #include "thirdparty_HW/SmartTS/smartts_drvapi.h"
 
 #include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
+#include "toolbox_libs\TOOL_Math\Include\Sort.h"
 
+static double DIXON_950_alpha_table[] = { 1.000, 1.000, 0.941, 0.765, 0.642, 0.562, 0.507, 0.554, 0.512, 0.477, 0.575, 0.546, 0.521, 0.546, 0.524, 
+                                          0.505, 0.489, 0.475, 0.462, 0.450, 0.440, 0.431, 0.422, 0.413, 0.406, 0.399, 0.393, 0.387, 0.381, 0.376};
+
+static double DIXON_990_alpha_table[] = { 1.000, 1.000, 0.988, 0.889, 0.782, 0.698, 0.637, 0.681, 0.635, 0.597, 0.674, 0.642, 0.617, 0.640, 0.618,
+							 			  0.597, 0.580, 0.564, 0.550, 0.538, 0.526, 0.516, 0.507, 0.497, 0.489, 0.482, 0.474, 0.468, 0.462, 0.456};
+
+static double DIXON_995_alpha_table[] = { 1.000, 1.000, 0.994, 0.920, 0.823, 0.744, 0.680, 0.723, 0.676, 0.638, 0.707, 0.675, 0.649, 0.672, 0.649,
+										  0.629, 0.611, 0.595, 0.580, 0.568, 0.556, 0.545, 0.536, 0.526, 0.519, 0.510, 0.503, 0.496, 0.489, 0.484};
 
 uint32_t thread_receive_transport_stream(LPVOID lpParam)
 {
@@ -208,14 +217,28 @@ CTransportStream::CTransportStream(void)
 	m_llCurReadPos = 0;
 	m_llTotalFileLength					= 0;
 
-	m_bitrate_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
-	m_bitrate_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
-	m_bitrate_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
-	m_bitrate_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
+	m_bitrate_original_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	m_bitrate_original_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
+	m_bitrate_original_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
+	m_bitrate_original_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
 
-	m_bitrate_sample_index = 0;
-	m_bitrate_sample_count = 0;
-	memset(m_bitrate_sample_array, 0, sizeof(m_bitrate_sample_array));
+	m_bitrate_original_sample_index = 0;
+	m_bitrate_original_sample_count = 0;
+	memset(m_bitrate_original_sample_array, 0, sizeof(m_bitrate_original_sample_array));
+
+	m_bitrate_dixon_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	m_bitrate_dixon_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
+	m_bitrate_dixon_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
+	m_bitrate_dixon_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
+
+	m_bitrate_deletion_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	m_bitrate_deletion_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
+	m_bitrate_deletion_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
+	m_bitrate_deletion_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
+
+	//m_bitrate_processed_sample_index = 0;
+	//m_bitrate_processed_sample_count = 0;
+	//memset(m_bitrate_processed_sample_array, 0, sizeof(m_bitrate_processed_sample_array));
 
 	m_bitrate_available = 0;
 
@@ -370,7 +393,8 @@ int CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 	}
 	if (fp_tsrate_dbase != NULL)
 	{
-		fprintf(fp_tsrate_dbase, "当前值, 均值, 标准差\n");
+		//fprintf(fp_tsrate_dbase, "观测值, 最大值(原始), 均值(原始), 最小值(原始), 标准差(原始), 堆栈状态, 最大值(处理后), 均值(处理后), 最小值(处理后), 标准差(处理后)\n");
+		fprintf(fp_tsrate_dbase, "观测值, 均值(原始), 均值(极值删除), 均值(Dixon), 标准差(原始), 标准差(极值删除), 标准差(Dixon)\n");
 	}
 
 #if USE_FIFO_ACCESS_MUTEX
@@ -446,15 +470,30 @@ int CTransportStream::Close()
 
 	m_bSynced = 0;
 
-	m_bitrate_cur_value = UNCREDITABLE_MAX_VALUE;
-	m_bitrate_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
-	m_bitrate_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
-	m_bitrate_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
-	m_bitrate_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
+	//m_bitrate_cur_value = UNCREDITABLE_MAX_VALUE;
+	m_bitrate_original_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
+	m_bitrate_original_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
 
-	m_bitrate_sample_index = 0;
-	m_bitrate_sample_count = 0;
-	memset(m_bitrate_sample_array, 0, sizeof(m_bitrate_sample_array));
+	m_bitrate_original_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	m_bitrate_original_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
+
+	m_bitrate_original_sample_index = 0;
+	m_bitrate_original_sample_count = 0;
+	memset(m_bitrate_original_sample_array, 0, sizeof(m_bitrate_original_sample_array));
+
+	m_bitrate_dixon_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
+	m_bitrate_dixon_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
+	m_bitrate_dixon_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	m_bitrate_dixon_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
+
+	m_bitrate_deletion_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
+	m_bitrate_deletion_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
+	m_bitrate_deletion_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	m_bitrate_deletion_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
+
+	//m_bitrate_processed_sample_index = 0;
+	//m_bitrate_processed_sample_count = 0;
+	//memset(m_bitrate_processed_sample_array, 0, sizeof(m_bitrate_processed_sample_array));
 
 	m_bitrate_available = 0;
 
@@ -565,15 +604,28 @@ int CTransportStream::Reset()
 {
 	int		rtcode = MIDDLEWARE_TS_NO_ERROR;
 
-	m_bitrate_cur_value = UNCREDITABLE_MAX_VALUE;
-	m_bitrate_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
-	m_bitrate_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
-	m_bitrate_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
-	m_bitrate_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
+	//m_bitrate_cur_value = UNCREDITABLE_MAX_VALUE;
+	m_bitrate_original_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
+	m_bitrate_original_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
 
-	m_bitrate_sample_index = 0;
-	m_bitrate_sample_count = 0;
-	memset(m_bitrate_sample_array, 0, sizeof(m_bitrate_sample_array));
+	m_bitrate_original_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	m_bitrate_original_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
+	m_bitrate_original_sample_index = 0;
+	m_bitrate_original_sample_count = 0;
+	memset(m_bitrate_original_sample_array, 0, sizeof(m_bitrate_original_sample_array));
+
+	m_bitrate_dixon_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
+	m_bitrate_dixon_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
+	m_bitrate_dixon_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	m_bitrate_dixon_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
+	//m_bitrate_processed_sample_index = 0;
+	//m_bitrate_processed_sample_count = 0;
+	//memset(m_bitrate_processed_sample_array, 0, sizeof(m_bitrate_processed_sample_array));
+
+	m_bitrate_deletion_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
+	m_bitrate_deletion_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
+	m_bitrate_deletion_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	m_bitrate_deletion_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
 
 	m_bitrate_available = 0;
 
@@ -843,52 +895,13 @@ int CTransportStream::StopGetBitrate(void)
 	return rtcode;
 }
 
-//int CTransportStream::GetBitrateMap(int pbitrate_map[], int count)
-//{
-//	int		rtcode = MIDDLEWARE_TS_UNKNOWN_ERROR;
-////	int		readcount;
-////	double	coeff = 8.0;
-////	
-////	if (m_hFile == -1)
-////	{
-////		coeff *= mf_actual_scan_frequency;
-////
-////		if (count >= mn_actual_timeslice)
-////		{
-////			readcount = mn_actual_timeslice;
-////		}
-////		else
-////		{
-////			readcount = count;
-////		}
-////
-////#ifdef _WIN64
-////#else
-////		//rtcode = smartts_get_asiin_bitrate_map(pbitrate_map, readcount);
-////
-////		//if (rtcode > 0)
-////		//{
-////		//	for (int i = 0; i < readcount; i++)
-////		//	{
-////		//		double temp = pbitrate_map[i];
-////		//		temp *= coeff;
-////		//		pbitrate_map[i] = (ULONG)temp;
-////		//	}
-////		//}
-////#endif
-////
-////	}
-//
-//	return rtcode;
-//}
-
 int CTransportStream::GetBitrate(void)
 {
 	int  rtvalue = -1;
 
 	if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
-		rtvalue = m_bitrate_mean_value;
+		rtvalue = m_bitrate_dixon_mean_value;
 	}
 	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
 	{
@@ -899,7 +912,7 @@ int CTransportStream::GetBitrate(void)
 			ULONG bitrate_value = smartts_get_asiin_bitrate();
 			if (bitrate_value >= 0)
 			{
-				m_bitrate_mean_value = (int)(bitrate_value * 8 * mf_actual_1spulse_frequency);
+				m_bitrate_mean_value = round(bitrate_value * 8 * mf_actual_1spulse_frequency);
 				rtvalue = m_bitrate_mean_value;
 			}
 		}
@@ -922,10 +935,11 @@ int CTransportStream::GetMeasuredBitrateAttribute(BITRATE_ATTRIBUTE_t* pattr)
 	int rtcode = NO_ERROR;
 	if (pattr != NULL)
 	{
-		pattr->min = m_bitrate_min_value;
-		pattr->mean = m_bitrate_mean_value;
-		pattr->max = m_bitrate_max_value;
-		pattr->rms = m_bitrate_rms_value;
+		pattr->min = m_bitrate_dixon_min_value;
+		pattr->max = m_bitrate_dixon_max_value;
+
+		pattr->mean = m_bitrate_dixon_mean_value;
+		pattr->rms = m_bitrate_dixon_rms_value;
 	}
 	else
 	{
@@ -935,56 +949,499 @@ int CTransportStream::GetMeasuredBitrateAttribute(BITRATE_ATTRIBUTE_t* pattr)
 	return rtcode;
 }
 
-int CTransportStream::AddBitrateSample(int bitrate)
+//int CTransportStream::AddBitrateSample(int new_bitrate)
+//{
+//	if (fp_tsrate_dbase != NULL)
+//	{
+//		fprintf(fp_tsrate_dbase, "%d", new_bitrate);
+//	}
+//
+//	if (new_bitrate > m_bitrate_original_max_value)
+//	{
+//		m_bitrate_original_max_value = new_bitrate;
+//		//m_bitrate_processed_max_value = bitrate;
+//	}
+//	if (new_bitrate < m_bitrate_original_min_value)
+//	{
+//		m_bitrate_original_min_value = new_bitrate;
+//		//m_bitrate_processed_min_value = bitrate;
+//	}
+//
+//	m_bitrate_original_sample_array[m_bitrate_original_sample_index] = new_bitrate;
+//	m_bitrate_original_sample_index++;
+//	m_bitrate_original_sample_index %= TS_BITRATE_FIFO_LENGTH;
+//
+//	if (m_bitrate_original_sample_count < TS_BITRATE_FIFO_LENGTH)
+//	{
+//		m_bitrate_original_sample_count++;
+//	}
+//
+//	if (m_bitrate_original_sample_count >= 4)
+//	{
+//		double original_sample_sum = 0;
+//		double original_power_sum = 0;
+//		int	   n = m_bitrate_original_sample_count;
+//		for (int i = 0; i < m_bitrate_original_sample_count; i++)
+//		{
+//			double normal_bitrate = (double)m_bitrate_original_sample_array[i] / m_bitrate_original_max_value;
+//			original_sample_sum += normal_bitrate;
+//			original_power_sum += (normal_bitrate * normal_bitrate);
+//		}
+//		m_bitrate_original_mean_value = (int)round(m_bitrate_original_max_value * original_sample_sum / n);
+//
+//		double original_sigma2 = original_power_sum - (original_sample_sum * original_sample_sum) / n;
+//
+//		if (original_sigma2 < 0)
+//		{
+//			original_sigma2 = 0.0;
+//		}
+//
+//		double original_sigma = sqrt(original_sigma2 / (n - 1));
+//
+//		m_bitrate_original_rms_value = (int)round(m_bitrate_original_max_value*original_sigma);
+//
+//		//int64_t sum_delt2 = 0;
+//		//for (int sample_index = 0; sample_index < m_bitrate_sample_count; sample_index++)
+//		//{
+//		//	sum_delt2 += (int64_t)pow(m_bitrate_sample_array[sample_index] - m_bitrate_mean_value, 2);
+//		//}
+//		//sum_delt2 /= (m_bitrate_sample_count - 1);
+//		//int bitrate_rms_value = round(sqrt((double)sum_delt2));
+//
+//		if (fp_tsrate_dbase != NULL)
+//		{
+//			//fprintf(fp_tsrate_dbase, ", %d, %d, %d", m_bitrate_mean_value, m_bitrate_rms_value, bitrate_rms_value);
+//			fprintf(fp_tsrate_dbase, ", %d, %d, %d, %d", m_bitrate_original_max_value, m_bitrate_original_mean_value, m_bitrate_original_min_value, m_bitrate_original_rms_value);
+//		}
+//
+//		//样本检验
+//		if (m_bitrate_processed_sample_count == 0)
+//		{
+//			int* temp_array = (int*)malloc(m_bitrate_original_sample_count * sizeof(int));
+//			for (int i = 0; i < m_bitrate_original_sample_count; i++)
+//			{
+//				temp_array[i] = m_bitrate_original_sample_array[i];
+//			}
+//			quick_sort_method1(temp_array, 0, m_bitrate_original_sample_count - 1);
+//
+//			for (int i = 0; i < m_bitrate_original_sample_count - 2; i++)
+//			{
+//				m_bitrate_processed_sample_array[i] = temp_array[i + 1];
+//				if (m_bitrate_processed_sample_array[i] > m_bitrate_processed_max_value)
+//				{
+//					m_bitrate_processed_max_value = m_bitrate_processed_sample_array[i];
+//				}
+//				if (m_bitrate_processed_sample_array[i] < m_bitrate_processed_min_value)
+//				{
+//					m_bitrate_processed_min_value = m_bitrate_processed_sample_array[i];
+//				}
+//			}
+//			m_bitrate_processed_sample_count = m_bitrate_original_sample_count - 2;
+//			//m_bitrate_processed_sample_index = m_bitrate_processed_sample_count;
+//
+//			free(temp_array);
+//
+//			if (fp_tsrate_dbase != NULL)
+//			{
+//				fprintf(fp_tsrate_dbase, ", , ,");
+//			}
+//		}
+//		else
+//		{
+//			int bValidBitrate = 1;
+//			int deltBitrate = abs(new_bitrate - m_bitrate_processed_mean_value);
+//			if (deltBitrate > 10)	//+/- 10bps
+//			{
+//				int n = m_bitrate_processed_sample_count + 1;
+//				int* temp_array = (int*)malloc(n * sizeof(int));
+//				for (int i = 0; i < m_bitrate_processed_sample_count; i++)
+//				{
+//					temp_array[i] = m_bitrate_processed_sample_array[i];
+//				}
+//				temp_array[n - 1] = new_bitrate;
+//
+//				quick_sort_method1(temp_array, 0, n - 1);
+//
+//				//Dixon deletion
+//
+//				double rh = 0, rl = 0;
+//				if ((n >= 3) && (n <= 7))
+//				{
+//					if (temp_array[n - 1] > temp_array[0])
+//					{
+//						rh = (double)(temp_array[n - 1] - temp_array[n - 2]) / (temp_array[n - 1] - temp_array[0]);
+//						rl = (double)(temp_array[1] - temp_array[0]) / (temp_array[n - 1] - temp_array[0]);
+//					}
+//				}
+//				else if ((n >= 8) && (n <= 10))
+//				{
+//					if (temp_array[n - 1] > temp_array[1])
+//					{
+//						rh = (double)(temp_array[n - 1] - temp_array[n - 2]) / (temp_array[n - 1] - temp_array[1]);
+//					}
+//					if (temp_array[n - 2] > temp_array[0])
+//					{
+//						rl = (double)(temp_array[1] - temp_array[0]) / (temp_array[n - 2] - temp_array[0]);
+//					}
+//				}
+//				else if ((n >= 11) && (n <= 13))
+//				{
+//					if (temp_array[n - 1] > temp_array[1])
+//					{
+//						rh = (double)(temp_array[n - 1] - temp_array[n - 3]) / (temp_array[n - 1] - temp_array[1]);
+//					}
+//					if (temp_array[n - 2] > temp_array[0])
+//					{
+//						rl = (double)(temp_array[2] - temp_array[0]) / (temp_array[n - 2] - temp_array[0]);
+//					}
+//				}
+//				else if ((n >= 14) && (n <= 30))
+//				{
+//					if (temp_array[n - 1] > temp_array[2])
+//					{
+//						rh = (double)(temp_array[n - 1] - temp_array[n - 3]) / (temp_array[n - 1] - temp_array[2]);
+//					}
+//					if (temp_array[n - 3] > temp_array[0])
+//					{
+//						rl = (double)(temp_array[2] - temp_array[0]) / (temp_array[n - 3] - temp_array[0]);
+//					}
+//				}
+//				free(temp_array);
+//
+//				if (fp_tsrate_dbase != NULL)
+//				{
+//					fprintf(fp_tsrate_dbase, ",%d, %.3f,%.3f", n, rh, rl);
+//				}
+//
+//				if (rh > DIXON_995_alpha_table[n - 1])
+//				{
+//					bValidBitrate = 0;
+//				}
+//			}
+//			else
+//			{
+//				if (fp_tsrate_dbase != NULL)
+//				{
+//					fprintf(fp_tsrate_dbase, ",,,");
+//				}
+//			}
+//
+//			//rewrite
+//			if (bValidBitrate)
+//			{
+//				if (m_bitrate_processed_sample_count >= TS_BITRATE_FIFO_LENGTH)
+//				{
+//					for (int i = 1; i < m_bitrate_processed_sample_count; i++)
+//					{
+//						m_bitrate_processed_sample_array[i - 1] = m_bitrate_processed_sample_array[i];
+//					}
+//				}
+//
+//				if (new_bitrate > m_bitrate_processed_max_value)
+//				{
+//					m_bitrate_processed_max_value = new_bitrate;
+//				}
+//				if (new_bitrate < m_bitrate_processed_min_value)
+//				{
+//					m_bitrate_processed_min_value = new_bitrate;
+//				}
+//
+//				if (m_bitrate_processed_sample_count < TS_BITRATE_FIFO_LENGTH)
+//				{
+//					m_bitrate_processed_sample_count++;
+//				}
+//
+//				m_bitrate_processed_sample_array[m_bitrate_processed_sample_count - 1] = new_bitrate;
+//			}
+//		}
+//
+//		if (m_bitrate_processed_sample_count >= 2)
+//		{
+//			double processed_sample_sum = 0;
+//			double processed_power_sum = 0;
+//			n = m_bitrate_processed_sample_count;
+//			for (int i = 0; i < m_bitrate_processed_sample_count; i++)
+//			{
+//				double normal_bitrate = (double)m_bitrate_processed_sample_array[i] / m_bitrate_processed_max_value;
+//				processed_sample_sum += normal_bitrate;
+//				processed_power_sum += normal_bitrate * normal_bitrate;
+//			}
+//			m_bitrate_processed_mean_value = (int)round(m_bitrate_processed_max_value * processed_sample_sum / n);
+//
+//			double processed_sigma2 = processed_power_sum - (processed_sample_sum * processed_sample_sum) / n;
+//
+//			if (processed_sigma2 < 0)
+//			{
+//				processed_sigma2 = 0.0;
+//			}
+//
+//			double processed_sigma = sqrt(processed_sigma2 / (n - 1));
+//
+//			m_bitrate_processed_rms_value = (int)round(m_bitrate_processed_max_value*processed_sigma);
+//
+//			if (fp_tsrate_dbase != NULL)
+//			{
+//				fprintf(fp_tsrate_dbase, ", %d, %d, %d, %d, ", m_bitrate_processed_max_value, m_bitrate_processed_mean_value, m_bitrate_processed_min_value, m_bitrate_processed_rms_value);
+//
+//				for (int i = 0; i < m_bitrate_processed_sample_count; i++)
+//				{
+//					fprintf(fp_tsrate_dbase, "%d-", m_bitrate_processed_sample_array[i]);
+//				}
+//			}
+//
+//			if (m_bitrate_available == 0) m_bitrate_available = 1;
+//		}
+//		else
+//		{
+//			fprintf(fp_tsrate_dbase, ", , , ,");
+//		}
+//	}
+//	else
+//	{
+//		if (fp_tsrate_dbase != NULL)
+//		{
+//			fprintf(fp_tsrate_dbase, ", , , , , , , ,");
+//		}
+//	}
+//
+//	if (fp_tsrate_dbase != NULL)
+//	{
+//		fprintf(fp_tsrate_dbase, "\n");
+//	}
+//
+//	return NO_ERROR;
+//}
+
+int CTransportStream::AddBitrateSample(int new_bitrate)
 {
-	m_bitrate_cur_value = bitrate;
 	if (fp_tsrate_dbase != NULL)
 	{
-		fprintf(fp_tsrate_dbase, "%d", m_bitrate_cur_value);
+		fprintf(fp_tsrate_dbase, "%d", new_bitrate);
 	}
 
-	if (bitrate > m_bitrate_max_value)
+	if (new_bitrate > m_bitrate_original_max_value)
 	{
-		m_bitrate_max_value = bitrate;
+		m_bitrate_original_max_value = new_bitrate;
 	}
-	if (bitrate < m_bitrate_min_value)
+	if (new_bitrate < m_bitrate_original_min_value)
 	{
-		m_bitrate_min_value = bitrate;
-	}
-
-	m_bitrate_sample_array[m_bitrate_sample_index] = bitrate;
-	m_bitrate_sample_index++;
-	m_bitrate_sample_index %= TS_BITRATE_FIFO_LENGTH;
-
-	if (m_bitrate_sample_count < TS_BITRATE_FIFO_LENGTH)
-	{
-		m_bitrate_sample_count++;
+		m_bitrate_original_min_value = new_bitrate;
 	}
 
-	if (m_bitrate_sample_count >= 2)
+	m_bitrate_original_sample_array[m_bitrate_original_sample_index] = new_bitrate;
+	m_bitrate_original_sample_index++;
+	m_bitrate_original_sample_index %= TS_BITRATE_FIFO_LENGTH;
+
+	if (m_bitrate_original_sample_count < TS_BITRATE_FIFO_LENGTH)
 	{
-		int64_t data_rate_sum = 0;
-		for (int sample_index = 0; sample_index < m_bitrate_sample_count; sample_index++)
+		m_bitrate_original_sample_count++;
+	}
+
+	if (m_bitrate_original_sample_count >= 4)
+	{
+		double original_sample_sum = 0;
+		double original_power_sum = 0;
+		int	   n = m_bitrate_original_sample_count;
+		for (int i = 0; i < m_bitrate_original_sample_count; i++)
 		{
-			data_rate_sum += m_bitrate_sample_array[sample_index];
+			double normal_bitrate = (double)m_bitrate_original_sample_array[i] / m_bitrate_original_max_value;
+			original_sample_sum += normal_bitrate;
+			original_power_sum += (normal_bitrate * normal_bitrate);
 		}
-		m_bitrate_mean_value = (int)(data_rate_sum / m_bitrate_sample_count);
+		m_bitrate_original_mean_value = (int)round(m_bitrate_original_max_value * original_sample_sum / n);
 
-		m_bitrate_available = 1;
+		double original_sigma2 = original_power_sum - (original_sample_sum * original_sample_sum) / n;
 
-		data_rate_sum = 0;
-		for (int sample_index = 0; sample_index < m_bitrate_sample_count; sample_index++)
+		if (original_sigma2 < 0)
 		{
-			data_rate_sum += (int64_t)pow(m_bitrate_sample_array[sample_index] - m_bitrate_mean_value, 2);
+			original_sigma2 = 0.0;
 		}
-		data_rate_sum /= m_bitrate_sample_count;
-		m_bitrate_rms_value = (int)sqrt((double)data_rate_sum);
+
+		double original_sigma = sqrt(original_sigma2 / (n - 1));
+
+		m_bitrate_original_rms_value = (int)round(m_bitrate_original_max_value*original_sigma);
+
+		if (m_bitrate_original_mean_value > m_bitrate_dixon_max_value)
+		{
+			m_bitrate_dixon_max_value = m_bitrate_original_mean_value;
+		}
+		if (m_bitrate_original_mean_value < m_bitrate_dixon_min_value)
+		{
+			m_bitrate_dixon_min_value = m_bitrate_original_mean_value;
+		}
+
+		if (m_bitrate_original_mean_value > m_bitrate_deletion_max_value)
+		{
+			m_bitrate_deletion_max_value = m_bitrate_original_mean_value;
+		}
+		if (m_bitrate_original_mean_value < m_bitrate_deletion_min_value)
+		{
+			m_bitrate_deletion_min_value = m_bitrate_original_mean_value;
+		}
+
+		//int64_t sum_delt2 = 0;
+		//for (int sample_index = 0; sample_index < m_bitrate_sample_count; sample_index++)
+		//{
+		//	sum_delt2 += (int64_t)pow(m_bitrate_sample_array[sample_index] - m_bitrate_mean_value, 2);
+		//}
+		//sum_delt2 /= (m_bitrate_sample_count - 1);
+		//int bitrate_rms_value = round(sqrt((double)sum_delt2));
+
+		//if (fp_tsrate_dbase != NULL)
+		//{
+		//	//fprintf(fp_tsrate_dbase, ", %d, %d, %d", m_bitrate_mean_value, m_bitrate_rms_value, bitrate_rms_value);
+		//	//fprintf(fp_tsrate_dbase, ", %d, %d, %d, %d,", m_bitrate_original_max_value, m_bitrate_original_mean_value, m_bitrate_original_min_value, m_bitrate_original_rms_value);
+		//	fprintf(fp_tsrate_dbase, ", %d", m_bitrate_original_mean_value);
+		//}
+
+		//样本检验
+		//int n = m_bitrate_original_sample_count;
+		int* temp_array = (int*)malloc(n * sizeof(int));
+		for (int i = 0; i < n; i++)
+		{
+			temp_array[i] = m_bitrate_original_sample_array[i];
+		}
+
+		quick_sort_method1(temp_array, 0, n - 1);
+
+		//min max deletion
+		double deletion_sample_sum = 0;
+		double deletion_power_sum = 0;
+		int m = n - 2;
+		for (int i = 1; i < n-1; i++)
+		{
+			double normal_bitrate = (double)temp_array[i] / m_bitrate_dixon_max_value;
+			deletion_sample_sum += normal_bitrate;
+			deletion_power_sum += normal_bitrate * normal_bitrate;
+		}
+		m_bitrate_deletion_mean_value = (int)round(m_bitrate_dixon_max_value * deletion_sample_sum / m);
+
+		double deletion_sigma2 = deletion_power_sum - (deletion_sample_sum * deletion_sample_sum) / m;
+
+		if (deletion_sigma2 < 0)
+		{
+			deletion_sigma2 = 0.0;
+		}
+
+		double deletion_sigma = sqrt(deletion_sigma2 / (m - 1));
+
+		m_bitrate_deletion_rms_value = (int)round(m_bitrate_deletion_max_value*deletion_sigma);
+
+		//Dixon deletion
+		do
+		{
+			double rh = 0, rl = 0;
+			if ((n >= 3) && (n <= 7))
+			{
+				if (temp_array[n - 1] > temp_array[0])
+				{
+					rh = (double)(temp_array[n - 1] - temp_array[n - 2]) / (temp_array[n - 1] - temp_array[0]);
+					rl = (double)(temp_array[1] - temp_array[0]) / (temp_array[n - 1] - temp_array[0]);
+				}
+			}
+			else if ((n >= 8) && (n <= 10))
+			{
+				if (temp_array[n - 1] > temp_array[1])
+				{
+					rh = (double)(temp_array[n - 1] - temp_array[n - 2]) / (temp_array[n - 1] - temp_array[1]);
+				}
+				if (temp_array[n - 2] > temp_array[0])
+				{
+					rl = (double)(temp_array[1] - temp_array[0]) / (temp_array[n - 2] - temp_array[0]);
+				}
+			}
+			else if ((n >= 11) && (n <= 13))
+			{
+				if (temp_array[n - 1] > temp_array[1])
+				{
+					rh = (double)(temp_array[n - 1] - temp_array[n - 3]) / (temp_array[n - 1] - temp_array[1]);
+				}
+				if (temp_array[n - 2] > temp_array[0])
+				{
+					rl = (double)(temp_array[2] - temp_array[0]) / (temp_array[n - 2] - temp_array[0]);
+				}
+			}
+			else if ((n >= 14) && (n <= 30))
+			{
+				if (temp_array[n - 1] > temp_array[2])
+				{
+					rh = (double)(temp_array[n - 1] - temp_array[n - 3]) / (temp_array[n - 1] - temp_array[2]);
+				}
+				if (temp_array[n - 3] > temp_array[0])
+				{
+					rl = (double)(temp_array[2] - temp_array[0]) / (temp_array[n - 3] - temp_array[0]);
+				}
+			}
+
+			//if (fp_tsrate_dbase != NULL)
+			//{
+			//	fprintf(fp_tsrate_dbase, "<n=%d&rh=%.3f&rl=%.3f -", n, rh, rl);
+			//	for (int i = 0; i < n; i++)
+			//	{
+			//		fprintf(fp_tsrate_dbase, "%d ", temp_array[i]);
+			//	}
+			//	fprintf(fp_tsrate_dbase, ">");
+			//}
+
+			if (rh > DIXON_950_alpha_table[n - 1])
+			{
+				n--;
+			}
+			else if (rl > DIXON_950_alpha_table[n - 1])
+			{
+				for (int i = 1; i < n; i++)
+				{
+					temp_array[i - 1] = temp_array[i];
+				}
+
+				n--;
+			}
+			else
+			{
+				break;
+			}
+
+		} while (n >= 3);
+
+		double processed_sample_sum = 0;
+		double processed_power_sum = 0;
+		for (int i = 0; i < n; i++)
+		{
+			double normal_bitrate = (double)temp_array[i] / m_bitrate_dixon_max_value;
+			processed_sample_sum += normal_bitrate;
+			processed_power_sum += normal_bitrate * normal_bitrate;
+		}
+		m_bitrate_dixon_mean_value = (int)round(m_bitrate_dixon_max_value * processed_sample_sum / n);
+
+		double processed_sigma2 = processed_power_sum - (processed_sample_sum * processed_sample_sum) / n;
+
+		if (processed_sigma2 < 0)
+		{
+			processed_sigma2 = 0.0;
+		}
+
+		double processed_sigma = sqrt(processed_sigma2 / (n - 1));
+
+		m_bitrate_dixon_rms_value = (int)round(m_bitrate_dixon_max_value*processed_sigma);
 
 		if (fp_tsrate_dbase != NULL)
 		{
-			fprintf(fp_tsrate_dbase, ", %d, %d", m_bitrate_mean_value, m_bitrate_rms_value);
+			//fprintf(fp_tsrate_dbase, ", %d, %d, %d, %d", m_bitrate_processed_max_value, m_bitrate_processed_mean_value, m_bitrate_processed_min_value, m_bitrate_processed_rms_value);
+			fprintf(fp_tsrate_dbase, ", %d , %d, %d, %d, %d, %d", m_bitrate_original_mean_value, m_bitrate_deletion_mean_value, m_bitrate_dixon_mean_value, m_bitrate_original_rms_value, m_bitrate_deletion_rms_value, m_bitrate_dixon_rms_value);
 		}
+
+		if (m_bitrate_available == 0) m_bitrate_available = 1;
+
+		free(temp_array);
 	}
+	else
+	{
+		//if (fp_tsrate_dbase != NULL)
+		//{
+		//	fprintf(fp_tsrate_dbase, ", , , , , , , ,");
+		//}
+	}
+
 	if (fp_tsrate_dbase != NULL)
 	{
 		fprintf(fp_tsrate_dbase, "\n");

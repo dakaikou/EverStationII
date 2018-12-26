@@ -19,6 +19,9 @@
     <Filter Include="头文件\Include">
       <UniqueIdentifier>{c5dd8612-0ec6-4aee-9fdf-fc3a05cb5646}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\Sort">
+      <UniqueIdentifier>{73ceefab-eeaf-4db8-8a4d-aeba1c4eaad9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -30,19 +33,19 @@
     <ClInclude Include="Include\CRC_32.h">
       <Filter>头文件\Include</Filter>
     </ClInclude>
-    <ClInclude Include="compile.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="Include\Sort.h">
+      <Filter>头文件\Include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="dllmain.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Impl\CRC32\CRC_32.cpp">
       <Filter>源文件\CRC32</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\Sort\Sort.cpp">
+      <Filter>源文件\Sort</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

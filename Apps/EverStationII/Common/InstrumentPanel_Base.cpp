@@ -1051,30 +1051,6 @@ void CInstrumentPanel_Base::OnPaint()
 			DisplayXAlarmLineInMemory(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
 			DisplayYAlarmLineInMemory(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
 
-			//if (m_nXMarkShownOption == RANGE_MARK_SHOWN)
-			//{
-			//	DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectXLeftMark, m_nXNegtiveMark);
-			//	DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectXMidMark, (m_nXNegtiveMark + m_nXPositiveMark) / 2);
-			//	DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectXRightMark, m_nXPositiveMark);
-			//}
-
-			//if (m_nYMarkShownOption == RANGE_MARK_SHOWN)
-			//{
-			//	DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectYBottomMark, m_nYNegtiveMark);
-			//	DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectYMidMark, (m_nYNegtiveMark + m_nYPositiveMark) / 2);
-			//	DisplayMeasureScaleInMemory(m_pMemDC, m_pBkgroundBmp, m_rectYTopMark, m_nYPositiveMark);
-			//}
-
-			//if (m_pBkgroundBmp != NULL)
-			//{
-			//	if (m_pBkgroundBmp->GetSafeHandle() != NULL)
-			//	{
-			//		m_pBkgroundBmp->GetBitmap(&bm);
-			//		m_pMemDC->SelectObject(m_pBkgroundBmp);
-			//		dc.StretchBlt(m_rectClient.left, m_rectClient.top, m_rectClient.Width(), m_rectClient.Height(), m_pMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
-			//	}
-			//}
-
 			DisplayTheWholeSamplesInMemory(m_pMemDC, m_pWaveformBmp);
 
 			m_bNeedRedrawWaveformBmp = 1;
@@ -1193,7 +1169,6 @@ int CInstrumentPanel_Base::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-
 void CInstrumentPanel_Base::Reset(void)
 {
 #if ON_PAINTING_USE_MUTEX
@@ -1209,8 +1184,6 @@ void CInstrumentPanel_Base::Reset(void)
 		m_nYNegtiveMark = m_nYAlarmMinLimit;
 		m_nYPositiveMark = m_nYAlarmMaxLimit;
 		m_nYZeroMark = (m_nYNegtiveMark + m_nYPositiveMark) / 2;
-		//m_nYNegtiveMark = m_nYFloor;
-		//m_nYPositiveMark = m_nYCeil;
 
 		m_nMeasuredXMeanValue = UNCREDITABLE_MAX_VALUE;
 		m_nMeasuredXRmsValue = UNCREDITABLE_MAX_VALUE;			//Ä¬ÈÏÕý¸º1bps
@@ -1220,10 +1193,6 @@ void CInstrumentPanel_Base::Reset(void)
 		m_nXNegtiveMark = m_nXAlarmMinLimit;
 		m_nXPositiveMark = m_nXAlarmMaxLimit;
 		m_nXZeroMark = (m_nXNegtiveMark + m_nXPositiveMark) / 2;
-
-		//m_nObserveMinValue = UNCREDITABLE_MIN_VALUE;
-		//m_nObserveMaxValue = UNCREDITABLE_MAX_VALUE;
-
 
 		for (int i = 0; i < m_nChannleCount; i++)
 		{
@@ -1245,17 +1214,6 @@ void CInstrumentPanel_Base::Reset(void)
 				delete m_pChannel[i]->pnYArray;
 				m_pChannel[i]->pnYArray = NULL;
 			}
-			//if (m_pChannel[i]->pbConsumed != NULL)
-			//{
-			//	delete m_pChannel[i]->pbConsumed;
-			//	m_pChannel[i]->pbConsumed = NULL;
-			//}
-
-			//if (m_pChannel[i]->pstSampleArray != NULL)
-			//{
-			//	delete m_pChannel[i]->pstSampleArray;
-			//	m_pChannel[i]->pstSampleArray = NULL;
-			//}
 
 			delete m_pChannel[i];
 			m_pChannel[i] = NULL;
@@ -1270,8 +1228,6 @@ void CInstrumentPanel_Base::Reset(void)
 
 	Invalidate(FALSE);
 }
-
-
 
 void CInstrumentPanel_Base::AppendXSample(int ID, int x)
 {
@@ -1298,16 +1254,11 @@ void CInstrumentPanel_Base::AppendXSample(int ID, int x)
 			pChannel->pnXArray = new int[m_nChannleDepth];
 			memset(pChannel->pnXArray, 0, sizeof(int) * m_nChannleDepth);
 			pChannel->pnYArray = NULL;
-			//pChannel->pbConsumed = new int[m_nChannleDepth];
-			//memset(pChannel->pbConsumed, 0, sizeof(int) * m_nChannleDepth);
-			//pChannel->pstSampleArray = new SAMPLE_VALUE_t[m_nChannleDepth];
-			//memset(pChannel->pstSampleArray, 0x00, sizeof(SAMPLE_VALUE_t)*m_nChannleDepth);
 			pChannel->nSampleCount = 0;
 			pChannel->nWrIndex = 0;
 			pChannel->nRdIndex = 0;
 			pChannel->bEmpty = 1;
 			pChannel->bFull = 0;
-			//pChannel->bNeedRedrawing = 0;
 
 #if INSTRUMENT_PANEL_USE_MUTEX
 			pChannel->hSampleAccess = ::CreateEvent(NULL, FALSE, TRUE, NULL);
@@ -1331,9 +1282,6 @@ void CInstrumentPanel_Base::AppendXSample(int ID, int x)
 #endif
 
 		pChannel->pnXArray[pChannel->nWrIndex] = x;
-		//pChannel->pbConsumed[pChannel->nWrIndex] = 0;
-		//pChannel->pstSampleArray[pChannel->nSampleIndex].x = x;
-		//pChannel->pstSampleArray[pChannel->nSampleIndex].bConsumed = 0;
 
 		pChannel->nWrIndex++;
 		pChannel->nWrIndex %= m_nChannleDepth;
@@ -1388,16 +1336,12 @@ void CInstrumentPanel_Base::AppendYSample(int ID, int y)
 			pChannel->pnXArray = NULL;
 			pChannel->pnYArray = new int[m_nChannleDepth];
 			memset(pChannel->pnYArray, 0, sizeof(int) * m_nChannleDepth);
-			//pChannel->pbConsumed = new int[m_nChannleDepth];
-			//memset(pChannel->pbConsumed, 0, sizeof(int) * m_nChannleDepth);
-			//pChannel->pstSampleArray = new SAMPLE_VALUE_t[m_nChannleDepth];
-			//memset(pChannel->pstSampleArray, 0x00, sizeof(SAMPLE_VALUE_t)*m_nChannleDepth);
+ 
 			pChannel->nSampleCount = 0;
 			pChannel->nWrIndex = 0;
 			pChannel->nRdIndex = 0;
 			pChannel->bEmpty = 1;
 			pChannel->bFull = 0;
-			//pChannel->bNeedRedrawing = 0;
 
 #if INSTRUMENT_PANEL_USE_MUTEX
 			pChannel->hSampleAccess = ::CreateEvent(NULL, FALSE, TRUE, NULL);
@@ -1422,9 +1366,6 @@ void CInstrumentPanel_Base::AppendYSample(int ID, int y)
 #endif
 
 		pChannel->pnYArray[pChannel->nWrIndex] = y;
-		//pChannel->pbConsumed[pChannel->nWrIndex] = 0;
-		//pChannel->pstSampleArray[pChannel->nSampleIndex].y = y;
-		//pChannel->pstSampleArray[pChannel->nSampleIndex].bConsumed = 0;
 
 		pChannel->nWrIndex++;
 		pChannel->nWrIndex %= m_nChannleDepth;
@@ -1489,16 +1430,9 @@ void CInstrumentPanel_Base::AppendXYSample(int ID, int x, int y)
 			pChannel->pnYArray = new int[m_nChannleDepth];
 			memset(pChannel->pnYArray, 0, sizeof(int) * m_nChannleDepth);
 
-			//pChannel->pbConsumed = new int[m_nChannleDepth];
-			//memset(pChannel->pbConsumed, 0, sizeof(int) * m_nChannleDepth);
-
-			//pChannel->pstSampleArray = new SAMPLE_VALUE_t[m_nChannleDepth];
-			//memset(pChannel->pstSampleArray, 0x00, sizeof(SAMPLE_VALUE_t)*m_nChannleDepth);
-
 			pChannel->nSampleCount = 0;
 			pChannel->nWrIndex = 0;
 			pChannel->nRdIndex = 0;
-			//pChannel->bNeedRedrawing = 0;
 			pChannel->bFull = 0;
 			pChannel->bEmpty = 1;
 
@@ -1528,10 +1462,6 @@ void CInstrumentPanel_Base::AppendXYSample(int ID, int x, int y)
 		{
 			pChannel->pnXArray[pChannel->nWrIndex] = x;
 			pChannel->pnYArray[pChannel->nWrIndex] = y;
-			//pChannel->pbConsumed[pChannel->nWrIndex] = 0;
-			//pChannel->pstSampleArray[pChannel->nSampleIndex].x = x;
-			//pChannel->pstSampleArray[pChannel->nSampleIndex].y = y;
-			//pChannel->pstSampleArray[pChannel->nSampleIndex].bConsumed = 0;
 
 			pChannel->nWrIndex++;
 			pChannel->nWrIndex %= m_nChannleDepth;
@@ -1598,11 +1528,6 @@ void CInstrumentPanel_Base::Init_Y_Axis(int nYAxisStyle, int nYShownOption, int 
 	m_nYFloor = nYFloor;
 	m_nYCeil = nYCeil;
 	m_nYStep = nYStep;
-
-	//if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)
-	//{
-	//	assert((m_nYFloor + m_nYCeil) == 0);
-	//}
 
 	AdjustLayout(m_rectClient);
 }

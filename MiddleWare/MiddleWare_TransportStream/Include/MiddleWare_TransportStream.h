@@ -32,7 +32,7 @@
 
 #define PACKET_BUFFER_SIZE			38352					//188 * 204
 
-#define TS_BITRATE_FIFO_LENGTH		128
+#define TS_BITRATE_FIFO_LENGTH		25						//40ms x 25 = 1s
 
 #define USE_FIFO_ACCESS_MUTEX		1	
 
@@ -66,8 +66,8 @@ public:
 	int			m_nMode;				//0-offline, 1-realtime
 	int			m_nEOF;
 
-	char			m_pszProtocolHead[16];
-	char			m_pszProtocolExt[256];
+	char		m_pszProtocolHead[16];
+	char		m_pszProtocolExt[256];
 
 	double		mf_actual_1spulse_frequency;
 	double		mf_actual_scan_frequency;
@@ -85,15 +85,29 @@ public:
 
 protected:
 	int				m_bitrate_available;
-	int				m_bitrate_sample_index;
-	int				m_bitrate_sample_count;
-	int				m_bitrate_sample_array[TS_BITRATE_FIFO_LENGTH];
 
-	int				m_bitrate_cur_value;
-	int				m_bitrate_min_value;
-	int				m_bitrate_max_value;
-	int				m_bitrate_mean_value;
-	int				m_bitrate_rms_value;
+	int				m_bitrate_original_sample_index;
+	int				m_bitrate_original_sample_count;
+	int				m_bitrate_original_sample_array[TS_BITRATE_FIFO_LENGTH];
+	int				m_bitrate_original_mean_value;
+	int				m_bitrate_original_rms_value;
+	int				m_bitrate_original_min_value;
+	int				m_bitrate_original_max_value;
+
+	//int				m_bitrate_processed_sample_index;
+	//int				m_bitrate_processed_sample_count;
+	//int				m_bitrate_processed_sample_array[TS_BITRATE_FIFO_LENGTH];
+	int				m_bitrate_dixon_mean_value;
+	int				m_bitrate_dixon_rms_value;
+	int				m_bitrate_dixon_min_value;
+	int				m_bitrate_dixon_max_value;
+
+	int				m_bitrate_deletion_mean_value;
+	int				m_bitrate_deletion_rms_value;
+	int				m_bitrate_deletion_min_value;
+	int				m_bitrate_deletion_max_value;
+
+	//int				m_bitrate_cur_value;
 
 	FILE*		fp_tsrate_dbase;
 
@@ -111,7 +125,6 @@ public:
 	int StopGetData(void);
 
 	int	StartGetBitrate(void);
-	//int	GetBitrateMap(int pbitrate_map[], int count);
 	int GetBitrate(void);
 	int	StopGetBitrate(void);
 
@@ -130,6 +143,7 @@ public:
 	int	 GetLastError(void);
 
 protected:
+
 };
 
 
