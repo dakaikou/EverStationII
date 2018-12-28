@@ -217,7 +217,7 @@ CTransportStream::CTransportStream(void)
 	m_llCurReadPos = 0;
 	m_llTotalFileLength					= 0;
 
-	m_bitrate_original_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	//m_bitrate_original_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
 	//m_bitrate_original_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
 	//m_bitrate_original_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
 	//m_bitrate_original_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
@@ -226,12 +226,12 @@ CTransportStream::CTransportStream(void)
 	m_bitrate_original_sample_count = 0;
 	memset(m_bitrate_original_sample_array, 0, sizeof(m_bitrate_original_sample_array));
 
-	m_bitrate_dixon_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	//m_bitrate_dixon_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
 	//m_bitrate_dixon_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
 	//m_bitrate_dixon_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
 	//m_bitrate_dixon_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
 
-	m_bitrate_deletion_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	//m_bitrate_deletion_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
 	//m_bitrate_deletion_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
 	//m_bitrate_deletion_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
 	//m_bitrate_deletion_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
@@ -244,7 +244,7 @@ CTransportStream::CTransportStream(void)
 	m_bitrate_estimate_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
 	m_bitrate_estimate_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
 
-	m_bitrate_available = 0;
+	//m_bitrate_available = 0;
 
 	m_nReceiving = 0;
 	m_nStopReceiving = 1;
@@ -480,7 +480,7 @@ int CTransportStream::Close()
 	//m_bitrate_original_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
 	//m_bitrate_original_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
 
-	m_bitrate_original_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	//m_bitrate_original_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
 	//m_bitrate_original_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
 
 	m_bitrate_original_sample_index = 0;
@@ -489,12 +489,12 @@ int CTransportStream::Close()
 
 	//m_bitrate_dixon_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
 	//m_bitrate_dixon_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
-	m_bitrate_dixon_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	//m_bitrate_dixon_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
 	//m_bitrate_dixon_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
 
 	//m_bitrate_deletion_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
 	//m_bitrate_deletion_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
-	m_bitrate_deletion_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	//m_bitrate_deletion_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
 	//m_bitrate_deletion_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
 
 	m_bitrate_estimate_cur_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
@@ -505,7 +505,7 @@ int CTransportStream::Close()
 	//m_bitrate_processed_sample_count = 0;
 	//memset(m_bitrate_processed_sample_array, 0, sizeof(m_bitrate_processed_sample_array));
 
-	m_bitrate_available = 0;
+	//m_bitrate_available = 0;
 
 	if (fp_tsrate_dbase != NULL)
 	{
@@ -618,7 +618,7 @@ int CTransportStream::Reset()
 	//m_bitrate_original_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
 	//m_bitrate_original_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
 
-	m_bitrate_original_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	//m_bitrate_original_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
 	//m_bitrate_original_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
 	m_bitrate_original_sample_index = 0;
 	m_bitrate_original_sample_count = 0;
@@ -626,7 +626,7 @@ int CTransportStream::Reset()
 
 	//m_bitrate_dixon_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
 	//m_bitrate_dixon_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
-	m_bitrate_dixon_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	//m_bitrate_dixon_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
 	//m_bitrate_dixon_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
 	//m_bitrate_processed_sample_index = 0;
 	//m_bitrate_processed_sample_count = 0;
@@ -634,14 +634,14 @@ int CTransportStream::Reset()
 
 	//m_bitrate_deletion_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
 	//m_bitrate_deletion_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
-	m_bitrate_deletion_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
+	//m_bitrate_deletion_mean_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
 	//m_bitrate_deletion_rms_value = UNCREDITABLE_MAX_VALUE;									//比特率抖动方差
 
 	m_bitrate_estimate_cur_value = UNCREDITABLE_MAX_VALUE;									//平滑后的比特率
 	m_bitrate_estimate_min_value = UNCREDITABLE_MIN_VALUE;									//平滑后的最小比特率
 	m_bitrate_estimate_max_value = UNCREDITABLE_MAX_VALUE;									//平滑后的最大比特率
 
-	m_bitrate_available = 0;
+	//m_bitrate_available = 0;
 
 	return rtcode;
 }
@@ -915,7 +915,7 @@ int CTransportStream::GetBitrate(void)
 
 	if (strcmp(m_pszProtocolHead, "FILE") == 0)
 	{
-		rtvalue = m_bitrate_dixon_mean_value;
+		rtvalue = m_bitrate_estimate_cur_value;
 	}
 	else if (strcmp(m_pszProtocolHead, "ASI") == 0)
 	{
@@ -926,8 +926,8 @@ int CTransportStream::GetBitrate(void)
 			ULONG bitrate_value = smartts_get_asiin_bitrate();
 			if (bitrate_value >= 0)
 			{
-				m_bitrate_mean_value = round(bitrate_value * 8 * mf_actual_1spulse_frequency);
-				rtvalue = m_bitrate_mean_value;
+				m_bitrate_estimate_cur_value = (int)round(bitrate_value * 8 * mf_actual_1spulse_frequency);
+				rtvalue = m_bitrate_estimate_cur_value;
 			}
 		}
 		else if (strcmp(m_pszProtocolExt, "DEKTEC") == 0)
@@ -1524,7 +1524,7 @@ int CTransportStream::AddBitrateSample(int new_bitrate, int(*callback)(int, int)
 			original_sample_sum += normal_bitrate;
 			//original_power_sum += (normal_bitrate * normal_bitrate);
 		}
-		m_bitrate_original_mean_value = (int)round(max_sample_value * original_sample_sum / n);
+		int bitrate_original_mean_value = (int)round(max_sample_value * original_sample_sum / n);
 
 		//double original_sigma2 = original_power_sum - (original_sample_sum * original_sample_sum) / n;
 
@@ -1574,7 +1574,7 @@ int CTransportStream::AddBitrateSample(int new_bitrate, int(*callback)(int, int)
 			deletion_sample_sum += normal_bitrate;
 			//deletion_power_sum += normal_bitrate * normal_bitrate;
 		}
-		m_bitrate_deletion_mean_value = (int)round(max_sample_value * deletion_sample_sum / m);
+		int bitrate_deletion_mean_value = (int)round(max_sample_value * deletion_sample_sum / m);
 
 		//double deletion_sigma2 = deletion_power_sum - (deletion_sample_sum * deletion_sample_sum) / m;
 
@@ -1688,7 +1688,7 @@ int CTransportStream::AddBitrateSample(int new_bitrate, int(*callback)(int, int)
 			dixon_sample_sum += normal_bitrate;
 			//dixon_power_sum += normal_bitrate * normal_bitrate;
 		}
-		m_bitrate_dixon_mean_value = (int)round(max_sample_value * dixon_sample_sum / n);
+		int bitrate_dixon_mean_value = (int)round(max_sample_value * dixon_sample_sum / n);
 
 		//double processed_sigma2 = dixon_power_sum - (dixon_sample_sum * dixon_sample_sum) / n;
 
@@ -1710,17 +1710,17 @@ int CTransportStream::AddBitrateSample(int new_bitrate, int(*callback)(int, int)
 		//	m_bitrate_dixon_min_value = m_bitrate_dixon_mean_value;
 		//}
 
-		int amplitue1 = abs(m_bitrate_deletion_mean_value - m_bitrate_estimate_cur_value);
-		int amplitue2 = abs(m_bitrate_dixon_mean_value - m_bitrate_estimate_cur_value);
+		int amplitue1 = abs(bitrate_deletion_mean_value - m_bitrate_estimate_cur_value);
+		int amplitue2 = abs(bitrate_dixon_mean_value - m_bitrate_estimate_cur_value);
 
 		//基于码率变化是缓慢的假设，没有突变
 		if (amplitue1 < amplitue2)
 		{
-			m_bitrate_estimate_cur_value = m_bitrate_deletion_mean_value;
+			m_bitrate_estimate_cur_value = bitrate_deletion_mean_value;
 		}
 		else
 		{
-			m_bitrate_estimate_cur_value = m_bitrate_dixon_mean_value;
+			m_bitrate_estimate_cur_value = bitrate_dixon_mean_value;
 		}
 
 		if (m_bitrate_estimate_cur_value > m_bitrate_estimate_max_value)
@@ -1735,10 +1735,10 @@ int CTransportStream::AddBitrateSample(int new_bitrate, int(*callback)(int, int)
 		if (fp_tsrate_dbase != NULL)
 		{
 			//fprintf(fp_tsrate_dbase, ", %d, %d, %d, %d", m_bitrate_processed_max_value, m_bitrate_processed_mean_value, m_bitrate_processed_min_value, m_bitrate_processed_rms_value);
-			fprintf(fp_tsrate_dbase, "%d, %d, %d, %d\n", m_bitrate_original_mean_value, m_bitrate_deletion_mean_value, m_bitrate_dixon_mean_value, m_bitrate_estimate_cur_value);
+			fprintf(fp_tsrate_dbase, "%d, %d, %d, %d\n", bitrate_original_mean_value, bitrate_deletion_mean_value, bitrate_dixon_mean_value, m_bitrate_estimate_cur_value);
 		}
 
-		if (m_bitrate_available == 0) m_bitrate_available = 1;
+		//if (m_bitrate_available == 0) m_bitrate_available = 1;
 		if (callback != NULL)
 		{
 			callback(0, m_bitrate_estimate_cur_value);

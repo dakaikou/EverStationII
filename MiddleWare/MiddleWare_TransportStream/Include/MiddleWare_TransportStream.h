@@ -83,15 +83,15 @@ public:
 #endif
 
 protected:
-	int				m_bitrate_available;
+	//int				m_bitrate_available;
 
 	int				m_bitrate_original_sample_index;
 	int				m_bitrate_original_sample_count;
 	int				m_bitrate_original_sample_array[TS_BITRATE_FIFO_LENGTH];
 
-	int				m_bitrate_original_mean_value;
-	int				m_bitrate_dixon_mean_value;
-	int				m_bitrate_deletion_mean_value;
+	//int				m_bitrate_original_mean_value;
+	//int				m_bitrate_dixon_mean_value;
+	//int				m_bitrate_deletion_mean_value;
 
 	int				m_bitrate_estimate_cur_value;
 	int				m_bitrate_estimate_min_value;
