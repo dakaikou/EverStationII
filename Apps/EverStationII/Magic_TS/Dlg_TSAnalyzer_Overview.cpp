@@ -598,16 +598,16 @@ void CDlg_TSAnalyzer_Overview::UpdatePacketLength(int packet_length)
 	}
 }
 
-void CDlg_TSAnalyzer_Overview::UpdateBitrateSample(int current, BITRATE_ATTRIBUTE_t* pattr)
+void CDlg_TSAnalyzer_Overview::UpdateBitrateSample(int bitrate)
 {
 	if (m_nRunning == 1)
 	{
-		SAMPLE_ATTRIBUTE_t attr;
-		attr.max = pattr->max;
-		attr.min = pattr->min;
-		attr.mean = pattr->mean;
-		attr.rms = pattr->rms;
-		m_TsRateJitterGraphHistogram.AppendSample(0, current, &attr);
+		//SAMPLE_ATTRIBUTE_t attr;
+		//attr.max = pattr->max;
+		//attr.min = pattr->min;
+		//attr.mean = pattr->mean;
+		//attr.rms = pattr->rms;
+		m_TsRateJitterGraphHistogram.AppendSample(0, bitrate);
 	}
 }
 

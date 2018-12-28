@@ -25,7 +25,7 @@ public:
 // Operations
 public:
 
-	void AppendSample(int ID, int xsampleValue, int ysampleValue, SAMPLE_ATTRIBUTE_t* xattr=NULL, SAMPLE_ATTRIBUTE_t* yattr=NULL);
+	void AppendSample(int ID, int x, int y);
 	void DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp);
 	void DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp);
 

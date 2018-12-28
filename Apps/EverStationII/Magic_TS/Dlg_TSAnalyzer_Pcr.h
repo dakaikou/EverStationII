@@ -68,7 +68,7 @@ public:
 // Implementation
 public:
 	void UpdatePCRDiagnosis(RECORD_PCR_t* pCurPcrInfo);
-	void UpdatePCRObservation(int ID, int curInterval, int curJitter, PCR_INTERVAL_ATTRIBUTE_t* pIntervalAttr=NULL, PCR_JITTER_ATTRIBUTE_t* pJitterAttr=NULL);
+	void UpdatePCRObservation(int ID, int curInterval, int curJitter);
 	void Reset(void);
 
 protected:

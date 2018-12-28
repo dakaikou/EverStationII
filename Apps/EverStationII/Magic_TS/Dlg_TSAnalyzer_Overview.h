@@ -53,7 +53,7 @@ public:
 	void UpdateNIT(CNIT* pNIT);
 	void UpdatePAT(CPAT* pPAT);
 	void UpdateSDT(CSDT* pSDT);
-	void UpdateBitrateSample(int current, BITRATE_ATTRIBUTE_t* pattr);
+	void UpdateBitrateSample(int bitrate);
 	void UpdatePacketLength(int pklength);
 	void UpdatePacketInfo(void);
 	void UpdatePMT(CPMT* pPMT);

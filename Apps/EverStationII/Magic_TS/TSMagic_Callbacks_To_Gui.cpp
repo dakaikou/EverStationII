@@ -63,7 +63,7 @@ void CALLBACK_REPORT_PCR_Diagnosis(RECORD_PCR_t* pPcrRecord)
 
 //curInterval -- ns
 //curJitter -- ns
-void CALLBACK_REPORT_PCR_Observation(int ID, int curInterval, int curJitter, PCR_INTERVAL_ATTRIBUTE_t* pIntervalAttr, PCR_JITTER_ATTRIBUTE_t* pJitterAttr)
+int CALLBACK_REPORT_PCR_Observation(int ID, int curInterval, int curJitter)
 {
 #if GUI_REPORT_PCR_OBSERVATION
 
@@ -72,14 +72,32 @@ void CALLBACK_REPORT_PCR_Observation(int ID, int curInterval, int curJitter, PCR
 	if (pWindow != NULL)
 	{
 #if GUI_TS_ANALYZER_PCR
-		pWindow->m_dlgTSAnalyzerPcr.UpdatePCRObservation(ID, curInterval, curJitter, pIntervalAttr, pJitterAttr);
+		pWindow->m_dlgTSAnalyzerPcr.UpdatePCRObservation(ID, curInterval, curJitter);
 #endif
 	}
 
 #endif
+
+	return 0;
 }
 
-void CALLBACK_REPORT_bitrates(int cur, BITRATE_ATTRIBUTE_t* pattr)
+//void CALLBACK_REPORT_bitrates(BITRATE_ATTRIBUTE_t* pattr)
+//{
+//#if GUI_REPORT_TS_BITRATE
+//
+//	CTSMagicView* pWindow = CTSMagicView::GetView();
+//
+//	if (pWindow != NULL)
+//	{
+//#if GUI_TS_ANALYZER_OVERVIEW
+//		pWindow->m_dlgTSAnalyzerOverview.UpdateBitrateSample(pattr);
+//#endif
+//	}
+//
+//#endif
+//}
+
+int CALLBACK_REPORT_bitrate(int ID, int bitrate)
 {
 #if GUI_REPORT_TS_BITRATE
 
@@ -88,11 +106,13 @@ void CALLBACK_REPORT_bitrates(int cur, BITRATE_ATTRIBUTE_t* pattr)
 	if (pWindow != NULL)
 	{
 #if GUI_TS_ANALYZER_OVERVIEW
-		pWindow->m_dlgTSAnalyzerOverview.UpdateBitrateSample(cur, pattr);
+		pWindow->m_dlgTSAnalyzerOverview.UpdateBitrateSample(bitrate);
 #endif
 	}
 
 #endif
+
+	return 0;
 }
 
 void CALLBACK_REPORT_dsmcc(int section_number, CPVT* pPVT)

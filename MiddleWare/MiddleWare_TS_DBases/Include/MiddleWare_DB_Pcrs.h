@@ -54,7 +54,7 @@ typedef struct
 	int64_t			TickCount;
 
 	//记录PCR抖动测量值
-	int			jitter_available;
+	//int			jitter_available;
 	int			jitter_cur_value;
 	int			jitter_mean_value;
 	int			jitter_rms_value;			//均方根值
@@ -66,7 +66,7 @@ typedef struct
 	int			jitter_sample_array[PCR_FIFO_LENGTH];
 
 	//记录PCR发送间隔测量值
-	int			interval_available;
+	//int			interval_available;
 	int			interval_cur_value;
 	int			interval_mean_value;
 	int			interval_rms_value;
@@ -107,29 +107,29 @@ protected:
 	RECORD_PCR_t*	m_pPCR_info[MAX_SUPPORTED_PCR_PIDS];
 	int			m_pcr_pid_count;
 
-	int		m_jitter_min_value;
-	int		m_jitter_max_value;
-	int		m_jitter_mean_value;			//随时间变化，逐步收敛稳定
-	int		m_jitter_rms_value;				//随时间变化，逐步收敛稳定
+	//int		m_jitter_min_value;
+	//int		m_jitter_max_value;
+	//int		m_jitter_mean_value;			//随时间变化，逐步收敛稳定
+	//int		m_jitter_rms_value;				//随时间变化，逐步收敛稳定
 
-	int		m_interval_mean_value;
-	int		m_interval_min_value;
-	int		m_interval_max_value;
-	int		m_interval_rms_value;
+	//int		m_interval_mean_value;
+	//int		m_interval_min_value;
+	//int		m_interval_max_value;
+	//int		m_interval_rms_value;
 
 protected:
 
-	int IsValidBitrate(int newValue, int refValue, int var, int timeLine);
+	//int IsValidBitrate(int newValue, int refValue, int var, int timeLine);
 	int VlookupPCRRecord(uint16_t usPCRPID);
 
 public:
 	int GetTotalRecordCount(void);
 	int GetRecordByPID(uint16_t usPCRPID, RECORD_PCR_t* pPcrInfo = NULL);
 	int GetRecordByIndex(int index, RECORD_PCR_t* pPcrInfo = NULL);
-	int AddPCRSample(uint16_t usPcrPID, int64_t pos, PCR_code_t* pPCRCode, int ref_bitrate_mean, int ref_bitrate_var);
+	int AddPCRSample(uint16_t usPcrPID, int64_t pos, PCR_code_t* pPCRCode, int ref_bitrate, int(*callback)(int,int,int));
 
-	int GetMeasuredJitterAttribute(PCR_JITTER_ATTRIBUTE_t* pattr);
-	int GetMeasuredIntervalAttribute(PCR_INTERVAL_ATTRIBUTE_t* pattr);
+	//int GetMeasuredJitterAttribute(PCR_JITTER_ATTRIBUTE_t* pattr);
+	//int GetMeasuredIntervalAttribute(PCR_INTERVAL_ATTRIBUTE_t* pattr);
 
 	void  Reset(void);
 private:

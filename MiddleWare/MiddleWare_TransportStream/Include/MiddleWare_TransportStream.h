@@ -32,18 +32,18 @@
 
 #define PACKET_BUFFER_SIZE			38352					//188 * 204
 
-#define TS_BITRATE_FIFO_LENGTH		25						//40ms x 25 = 1s
+#define TS_BITRATE_FIFO_LENGTH		5						//40ms x 25 = 1s
 
 #define USE_FIFO_ACCESS_MUTEX		1	
 
-typedef struct
-{
-	int	mean;
-	int	rms;
-	int	min;
-	int	max;
-
-} BITRATE_ATTRIBUTE_t;
+//typedef struct
+//{
+//	int	mean;
+//	int	rms;
+//	int	min;
+//	int	max;
+//
+//} BITRATE_ATTRIBUTE_t;
 
 class MW_TS_LIB CTransportStream
 {
@@ -76,7 +76,6 @@ public:
 	int64_t			m_llCurReadPos;
 	int64_t			m_llTotalFileLength;
 
-
 	CFIFO<uint8_t, TSCHUNK_MAX_SIZE>   m_ts_fifo;
 
 #if USE_FIFO_ACCESS_MUTEX
@@ -89,33 +88,24 @@ protected:
 	int				m_bitrate_original_sample_index;
 	int				m_bitrate_original_sample_count;
 	int				m_bitrate_original_sample_array[TS_BITRATE_FIFO_LENGTH];
+
 	int				m_bitrate_original_mean_value;
-	int				m_bitrate_original_rms_value;
-	int				m_bitrate_original_min_value;
-	int				m_bitrate_original_max_value;
-
-	//int				m_bitrate_processed_sample_index;
-	//int				m_bitrate_processed_sample_count;
-	//int				m_bitrate_processed_sample_array[TS_BITRATE_FIFO_LENGTH];
 	int				m_bitrate_dixon_mean_value;
-	int				m_bitrate_dixon_rms_value;
-	int				m_bitrate_dixon_min_value;
-	int				m_bitrate_dixon_max_value;
-
 	int				m_bitrate_deletion_mean_value;
-	int				m_bitrate_deletion_rms_value;
-	int				m_bitrate_deletion_min_value;
-	int				m_bitrate_deletion_max_value;
 
-	//int				m_bitrate_cur_value;
+	int				m_bitrate_estimate_cur_value;
+	int				m_bitrate_estimate_min_value;
+	int				m_bitrate_estimate_max_value;
 
-	FILE*		fp_tsrate_dbase;
+	FILE*			fp_tsrate_dbase;
+
+	//int(*callback_report_bitrate)(int bitrate);
 
 public:
 	~CTransportStream();
 
-	int GetMeasuredBitrateAttribute(BITRATE_ATTRIBUTE_t* pattr);
-	int AddBitrateSample(int bitrate);
+	//int GetMeasuredBitrateAttribute(BITRATE_ATTRIBUTE_t* pattr);
+	int AddBitrateSample(int bitrate, int (*callback)(int, int));
 
 	int Open(char* tsin_option, char* tsin_description, int mode);
 	int Close(void);

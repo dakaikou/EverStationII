@@ -460,59 +460,66 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 							pcr_code.base_14_0 = transport_packet.adaptation_field.program_clock_reference_base_14_0;
 							pcr_code.extension = transport_packet.adaptation_field.program_clock_reference_extension;
 
-							BITRATE_ATTRIBUTE_t bitrate_attr;
-							ptransport_stream->GetMeasuredBitrateAttribute(&bitrate_attr);
+							//BITRATE_ATTRIBUTE_t old_bitrate_attr;
+							//ptransport_stream->GetMeasuredBitrateAttribute(&old_bitrate_attr);
+							int referenceBitrate = ptransport_stream->GetBitrate();
 
-							rtcode = pDB_Pcrs->AddPCRSample(transport_packet.PID, read_byte_pos - packet_length + 12, &pcr_code, bitrate_attr.mean, bitrate_attr.rms);
+							rtcode = pDB_Pcrs->AddPCRSample(transport_packet.PID, read_byte_pos - packet_length + 12, &pcr_code, referenceBitrate, CALLBACK_REPORT_PCR_Observation);
 							if (rtcode == NO_ERROR)
 							{
 								RECORD_PCR_t PCRRecord;
 								//采用获取副本的方式，防止子程序对原始数据进行修改
 								pDB_Pcrs->GetRecordByPID(transport_packet.PID, &PCRRecord);
-
 								CALLBACK_REPORT_PCR_Diagnosis(&PCRRecord);
 
-								int nID = PCRRecord.PCR_PID;
-
-								if (PCRRecord.interval_available && PCRRecord.jitter_available)
+								if (PCRRecord.encoder_bitrate_available)
 								{
-									PCR_INTERVAL_ATTRIBUTE_t interval_attr;
-									PCR_JITTER_ATTRIBUTE_t jitter_attr;
-									pDB_Pcrs->GetMeasuredIntervalAttribute(&interval_attr);
-									pDB_Pcrs->GetMeasuredJitterAttribute(&jitter_attr);
+									ptransport_stream->AddBitrateSample(PCRRecord.encoder_bitrate_cur_value, CALLBACK_REPORT_bitrate);
 
-									CALLBACK_REPORT_PCR_Observation(nID, PCRRecord.interval_cur_value, PCRRecord.jitter_cur_value, &interval_attr, &jitter_attr);
+									//BITRATE_ATTRIBUTE_t new_bitrate_attr;
+									//ptransport_stream->GetMeasuredBitrateAttribute(&new_bitrate_attr);
+									//CALLBACK_REPORT_bitrates(&new_bitrate_attr);
 								}
+
+								//if (PCRRecord.interval_available && PCRRecord.jitter_available)
+								//{
+								//	PCR_INTERVAL_ATTRIBUTE_t interval_attr;
+								//	PCR_JITTER_ATTRIBUTE_t jitter_attr;
+								//	pDB_Pcrs->GetMeasuredIntervalAttribute(&interval_attr);
+								//	pDB_Pcrs->GetMeasuredJitterAttribute(&jitter_attr);
+
+								//	CALLBACK_REPORT_PCR_Observation(PCRRecord.PCR_PID, PCRRecord.interval_cur_value, PCRRecord.jitter_cur_value, &interval_attr, &jitter_attr);
+								//}
 
 								//这里仅是一种码流速率的估算方法,实际上是不可以自己证明自己的，应该通过其他方式计算码率
-								{
-									int64_t sum = 0;
-									int count = 0;
-									int pcr_count = pDB_Pcrs->GetTotalRecordCount();
+								//{
+								//	int64_t sum = 0;
+								//	int count = 0;
+								//	int pcr_count = pDB_Pcrs->GetTotalRecordCount();
 
-									for (int i = 0; i < pcr_count; i++)
-									{
-										if (pDB_Pcrs->GetRecordByIndex(i, &PCRRecord) == NO_ERROR)
-										{
-											if (PCRRecord.encoder_bitrate_available)
-											{
-												sum += PCRRecord.encoder_bitrate_mean_value;
-												count++;
-											}
-										}
-									}
-									if (count > 0)
-									{
-										int bitrate_cur = (int)(sum / count);
+								//	for (int i = 0; i < pcr_count; i++)
+								//	{
+								//		if (pDB_Pcrs->GetRecordByIndex(i, &PCRRecord) == NO_ERROR)
+								//		{
+								//			if (PCRRecord.encoder_bitrate_available)
+								//			{
+								//				sum += PCRRecord.encoder_bitrate_mean_value;
+								//				count++;
+								//			}
+								//		}
+								//	}
+								//	if (count > 0)
+								//	{
+								//		int bitrate_cur = (int)(sum / count);
 
-										ptransport_stream->AddBitrateSample(bitrate_cur);
+								//		ptransport_stream->AddBitrateSample(bitrate_cur);
 
-										ptransport_stream->GetMeasuredBitrateAttribute(&bitrate_attr);
-										CALLBACK_REPORT_bitrates(bitrate_cur, &bitrate_attr);
+								//		ptransport_stream->GetMeasuredBitrateAttribute(&bitrate_attr);
+								//		CALLBACK_REPORT_bitrates(bitrate_cur, &bitrate_attr);
 
-										pDB_TSPackets->m_total_bitrate_from_software = bitrate_cur;
-									}
-								}
+								//		pDB_TSPackets->m_total_bitrate_from_software = bitrate_cur;
+								//	}
+								//}
 							}
 						}
 #endif

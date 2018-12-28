@@ -449,21 +449,21 @@ void CDlg_TSAnalyzer_Pcr::UpdatePCRDiagnosis(RECORD_PCR_t* pCurPcrInfo)
 				m_listPcrLog.SetTextColor(ITEM_TEXT_NORMAL_COLOR);
 			}
 
-			oldValue = (uint32_t)m_listPcrLog.GetItemData(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE);
-			if (pCurPcrInfo->encoder_bitrate_mean_value != oldValue)
-			{
-				sprintf_s(pszText, sizeof(pszText), "%d bps", (int)pCurPcrInfo->encoder_bitrate_mean_value);
-				m_listPcrLog.SetItemText(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE, 3, pszText);
-				m_listPcrLog.SetItemData(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE, pCurPcrInfo->encoder_bitrate_mean_value);
-			}
+			//oldValue = (uint32_t)m_listPcrLog.GetItemData(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE);
+			//if (pCurPcrInfo->encoder_bitrate_mean_value != oldValue)
+			//{
+			//	sprintf_s(pszText, sizeof(pszText), "%d bps", (int)pCurPcrInfo->encoder_bitrate_mean_value);
+			//	m_listPcrLog.SetItemText(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE, 3, pszText);
+			//	m_listPcrLog.SetItemData(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE, pCurPcrInfo->encoder_bitrate_mean_value);
+			//}
 
-			oldValue = (uint32_t)m_listPcrLog.GetItemData(nOffset + PCR_ITEM_DATARATE_VAR_VALUE);
-			if (pCurPcrInfo->encoder_bitrate_rms_value != oldValue)
-			{
-				sprintf_s(pszText, sizeof(pszText), "%d bps", (int)pCurPcrInfo->encoder_bitrate_rms_value);
-				m_listPcrLog.SetItemText(nOffset + PCR_ITEM_DATARATE_VAR_VALUE, 3, pszText);
-				m_listPcrLog.SetItemData(nOffset + PCR_ITEM_DATARATE_VAR_VALUE, pCurPcrInfo->encoder_bitrate_rms_value);
-			}
+			//oldValue = (uint32_t)m_listPcrLog.GetItemData(nOffset + PCR_ITEM_DATARATE_VAR_VALUE);
+			//if (pCurPcrInfo->encoder_bitrate_rms_value != oldValue)
+			//{
+			//	sprintf_s(pszText, sizeof(pszText), "%d bps", (int)pCurPcrInfo->encoder_bitrate_rms_value);
+			//	m_listPcrLog.SetItemText(nOffset + PCR_ITEM_DATARATE_VAR_VALUE, 3, pszText);
+			//	m_listPcrLog.SetItemData(nOffset + PCR_ITEM_DATARATE_VAR_VALUE, pCurPcrInfo->encoder_bitrate_rms_value);
+			//}
 		}
 		else
 		{
@@ -540,67 +540,48 @@ void CDlg_TSAnalyzer_Pcr::UpdatePCRDiagnosis(RECORD_PCR_t* pCurPcrInfo)
 			m_listPcrLog.SetItemText(nOffset + PCR_ITEM_INTERVAL_ERROR_COUNT, 3, pszText);
 			m_listPcrLog.SetItemData(nOffset + PCR_ITEM_INTERVAL_ERROR_COUNT, pCurPcrInfo->pcr_interval_error_count);
 
-			m_listPcrLog.InsertItem(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE, "");
-			m_listPcrLog.SetItemText(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE, 1, "码率");
-			m_listPcrLog.SetItemText(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE, 2, "均值");
-			sprintf_s(pszText, sizeof(pszText), "%d bps", (int)pCurPcrInfo->encoder_bitrate_mean_value);
-			m_listPcrLog.SetItemText(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE, 3, pszText);
-			m_listPcrLog.SetItemData(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE, pCurPcrInfo->encoder_bitrate_mean_value);
+			//m_listPcrLog.InsertItem(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE, "");
+			//m_listPcrLog.SetItemText(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE, 1, "码率");
+			//m_listPcrLog.SetItemText(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE, 2, "均值");
+			//sprintf_s(pszText, sizeof(pszText), "%d bps", (int)pCurPcrInfo->encoder_bitrate_mean_value);
+			//m_listPcrLog.SetItemText(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE, 3, pszText);
+			//m_listPcrLog.SetItemData(nOffset + PCR_ITEM_DATARATE_MEAN_VALUE, pCurPcrInfo->encoder_bitrate_mean_value);
 
-			m_listPcrLog.InsertItem(nOffset + PCR_ITEM_DATARATE_VAR_VALUE, "");
-			m_listPcrLog.SetItemText(nOffset + PCR_ITEM_DATARATE_VAR_VALUE, 2, "方差");
-			sprintf_s(pszText, sizeof(pszText), "%d bps", (int)pCurPcrInfo->encoder_bitrate_rms_value);
-			m_listPcrLog.SetItemText(nOffset + PCR_ITEM_DATARATE_VAR_VALUE, 3, pszText);
-			m_listPcrLog.SetItemData(nOffset + PCR_ITEM_DATARATE_VAR_VALUE, pCurPcrInfo->encoder_bitrate_rms_value);
+			//m_listPcrLog.InsertItem(nOffset + PCR_ITEM_DATARATE_VAR_VALUE, "");
+			//m_listPcrLog.SetItemText(nOffset + PCR_ITEM_DATARATE_VAR_VALUE, 2, "方差");
+			//sprintf_s(pszText, sizeof(pszText), "%d bps", (int)pCurPcrInfo->encoder_bitrate_rms_value);
+			//m_listPcrLog.SetItemText(nOffset + PCR_ITEM_DATARATE_VAR_VALUE, 3, pszText);
+			//m_listPcrLog.SetItemData(nOffset + PCR_ITEM_DATARATE_VAR_VALUE, pCurPcrInfo->encoder_bitrate_rms_value);
 		}
 	}
 }
 
 
-void CDlg_TSAnalyzer_Pcr::UpdatePCRObservation(int ID, int curInterval, int curJitter, PCR_INTERVAL_ATTRIBUTE_t* pIntervalAttr, PCR_JITTER_ATTRIBUTE_t* pJitterAttr)
+void CDlg_TSAnalyzer_Pcr::UpdatePCRObservation(int ID, int curInterval, int curJitter)
 {
 	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
-	SAMPLE_ATTRIBUTE_t attrInterval, attrJitter;
-
-	if (pIntervalAttr != NULL)
-	{
-		attrInterval.max = pIntervalAttr->max;
-		attrInterval.min = pIntervalAttr->min;
-		attrInterval.mean = pIntervalAttr->mean;
-		attrInterval.rms = pIntervalAttr->rms;
+	//SAMPLE_ATTRIBUTE_t attrInterval, attrJitter;
 
 #if SHOW_PCR_INTERVAL_HISTGRAM
-		m_PcrIntervalHistgramGraph.AppendSample(ID, curInterval, &attrInterval);
+	m_PcrIntervalHistgramGraph.AppendSample(ID, curInterval);
 #endif
 
 #if SHOW_PCR_INTERVAL_WAVEFORM
-		m_PcrIntervalWaveformGraph.AppendSample(ID, curInterval, &attrInterval);
+	m_PcrIntervalWaveformGraph.AppendSample(ID, curInterval, &attrInterval);
 #endif
-	}
-
-	if (pJitterAttr != NULL)
-	{
-		attrJitter.max = pJitterAttr->max;
-		attrJitter.min = pJitterAttr->min;
-		attrJitter.mean = pJitterAttr->mean;
-		attrJitter.rms = pJitterAttr->rms;
 
 #if SHOW_PCR_JITTER_HISTGRAM
-		m_PcrJitterHistgramGraph.AppendSample(ID, curJitter, &attrJitter);
+	m_PcrJitterHistgramGraph.AppendSample(ID, curJitter);
 #endif
 
 #if SHOW_PCR_JITTER_WAVEFORM
-		m_PcrJitterWaveformGraph.AppendSample(ID, curJitter, &attrJitter);
+	m_PcrJitterWaveformGraph.AppendSample(ID, curJitter, &attrJitter);
 #endif
-	}
 
-	if ((pIntervalAttr != NULL) && (pJitterAttr != NULL))
-	{
 #if SHOW_PCR_SCATTER_DIAGRAM
-		m_PcrScatterDiagramGraph.AppendSample(ID, curInterval, curJitter, &attrInterval, &attrJitter);
+	m_PcrScatterDiagramGraph.AppendSample(ID, curInterval, curJitter);
 #endif
-	}
 }
 
 

@@ -30,6 +30,78 @@ END_MESSAGE_MAP()
 
 void CInstrumentPanel_ScatterDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp)
 {
+	int    xn = 0;
+	double xsample_sum = 0;
+	double xpower_sum = 0;
+
+	for (int ch = 0; ch < m_nChannleCount; ch++)
+	{
+		SAMPLE_CHANNEL_t* pChannel = m_pChannel[ch];
+		if (pChannel->nSampleCount > 0) {
+
+			for (int i = 0; i < pChannel->nSampleCount; i++)
+			{
+				double normal_sample = (double)pChannel->pnXArray[i] / m_nMeasuredXMaxValue;
+				xsample_sum += normal_sample;
+				xpower_sum += (normal_sample * normal_sample);
+			}
+		}
+
+		xn += pChannel->nSampleCount;
+	}
+
+	if (xn > 1)
+	{
+		m_nMeasuredXMeanValue = (int)round(m_nMeasuredXMaxValue * xsample_sum / xn);
+
+		double power_sigma = xpower_sum - (xsample_sum * xsample_sum) / xn;
+
+		if (power_sigma < 0)
+		{
+			power_sigma = 0.0;
+		}
+
+		double sigma = sqrt(power_sigma / (xn - 1));
+
+		m_nMeasuredXRmsValue = (int)round(m_nMeasuredXMaxValue*sigma);
+	}
+
+	int    yn = 0;
+	double ysample_sum = 0;
+	double ypower_sum = 0;
+
+	for (int ch = 0; ch < m_nChannleCount; ch++)
+	{
+		SAMPLE_CHANNEL_t* pChannel = m_pChannel[ch];
+		if (pChannel->nSampleCount > 0) {
+
+			for (int i = 0; i < pChannel->nSampleCount; i++)
+			{
+				double normal_sample = (double)pChannel->pnYArray[i] / m_nMeasuredYMaxValue;
+				ysample_sum += normal_sample;
+				ypower_sum += (normal_sample * normal_sample);
+			}
+		}
+
+		yn += pChannel->nSampleCount;
+	}
+
+	if (yn > 1)
+	{
+		m_nMeasuredYMeanValue = (int)round(m_nMeasuredYMaxValue * ysample_sum / yn);
+
+		double power_sigma = ypower_sum - (ysample_sum * ysample_sum) / yn;
+
+		if (power_sigma < 0)
+		{
+			power_sigma = 0.0;
+		}
+
+		double sigma = sqrt(power_sigma / (yn - 1));
+
+		m_nMeasuredYRmsValue = (int)round(m_nMeasuredYMaxValue*sigma);
+	}
+
 	BITMAP bm;
 	if ((pGraphBmp != NULL) && (pMemDC != NULL))
 	{
@@ -184,6 +256,78 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC
 
 void CInstrumentPanel_ScatterDiagram::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp)
 {
+	int    xn = 0;
+	double xsample_sum = 0;
+	double xpower_sum = 0;
+
+	for (int ch = 0; ch < m_nChannleCount; ch++)
+	{
+		SAMPLE_CHANNEL_t* pChannel = m_pChannel[ch];
+		if (pChannel->nSampleCount > 0) {
+
+			for (int i = 0; i < pChannel->nSampleCount; i++)
+			{
+				double normal_sample = (double)pChannel->pnXArray[i] / m_nMeasuredXMaxValue;
+				xsample_sum += normal_sample;
+				xpower_sum += (normal_sample * normal_sample);
+			}
+		}
+
+		xn += pChannel->nSampleCount;
+	}
+
+	if (xn > 1)
+	{
+		m_nMeasuredXMeanValue = (int)round(m_nMeasuredXMaxValue * xsample_sum / xn);
+
+		double power_sigma = xpower_sum - (xsample_sum * xsample_sum) / xn;
+
+		if (power_sigma < 0)
+		{
+			power_sigma = 0.0;
+		}
+
+		double sigma = sqrt(power_sigma / (xn - 1));
+
+		m_nMeasuredXRmsValue = (int)round(m_nMeasuredXMaxValue*sigma);
+	}
+
+	int    yn = 0;
+	double ysample_sum = 0;
+	double ypower_sum = 0;
+
+	for (int ch = 0; ch < m_nChannleCount; ch++)
+	{
+		SAMPLE_CHANNEL_t* pChannel = m_pChannel[ch];
+		if (pChannel->nSampleCount > 0) {
+
+			for (int i = 0; i < pChannel->nSampleCount; i++)
+			{
+				double normal_sample = (double)pChannel->pnYArray[i] / m_nMeasuredYMaxValue;
+				ysample_sum += normal_sample;
+				ypower_sum += (normal_sample * normal_sample);
+			}
+		}
+
+		yn += pChannel->nSampleCount;
+	}
+
+	if (yn > 1)
+	{
+		m_nMeasuredYMeanValue = (int)round(m_nMeasuredYMaxValue * ysample_sum / yn);
+
+		double power_sigma = ypower_sum - (ysample_sum * ysample_sum) / yn;
+
+		if (power_sigma < 0)
+		{
+			power_sigma = 0.0;
+		}
+
+		double sigma = sqrt(power_sigma / (yn - 1));
+
+		m_nMeasuredYRmsValue = (int)round(m_nMeasuredYMaxValue*sigma);
+	}
+
 	BITMAP bm;
 	if ((pGraphBmp != NULL) && (pMemDC != NULL))
 	{
@@ -305,7 +449,7 @@ void CInstrumentPanel_ScatterDiagram::DisplayTheNewSamplesInMemory(CDC* pMemDC, 
 //nSampleCurValue -- 样本当前测量值
 //nSampleMeanValue -- 样本长期测量均值
 //nSampleVarValue -- 样本长期最大偏离度
-void CInstrumentPanel_ScatterDiagram::AppendSample(int ID, int xsampleValue, int ysampleValue, SAMPLE_ATTRIBUTE_t* xattr, SAMPLE_ATTRIBUTE_t* yattr)
+void CInstrumentPanel_ScatterDiagram::AppendSample(int ID, int x, int y)
 {
 #if ON_PAINTING_USE_MUTEX
 	DWORD wait_state = ::WaitForSingleObject(m_hPaintingAccess, INFINITE);
@@ -314,134 +458,122 @@ void CInstrumentPanel_ScatterDiagram::AppendSample(int ID, int xsampleValue, int
 #endif
 		int nNegtiveBias, nPositiveBias;
 
-		if (xattr != NULL)
+		if (x < m_nMeasuredXMinValue)
 		{
-			m_nMeasuredXMeanValue = xattr->mean;
-			m_nMeasuredXRmsValue = xattr->rms;
+			m_nMeasuredXMinValue = x;
+		}
+		if (x > m_nMeasuredXMaxValue)
+		{
+			m_nMeasuredXMaxValue = x;
+		}
 
-			if (xattr->min < m_nMeasuredXMinValue)
+		assert(m_nXAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX);
+
+		if (m_nMeasuredXMinValue < m_nXNegtiveMark)
+		{
+			if (m_nMeasuredXMinValue > m_nXFloor)
 			{
-				m_nMeasuredXMinValue = xattr->min;
+				m_nXNegtiveMark = (int)(floor(m_nMeasuredXMinValue / (double)m_nXStep) * m_nXStep);
+				m_bNeedRedrawAllBmp = 1;
 			}
-			if (xattr->max > m_nMeasuredXMaxValue)
+		}
+		if (m_nMeasuredXMaxValue > m_nXPositiveMark)
+		{
+			if (m_nMeasuredXMaxValue < m_nXCeil)
 			{
-				m_nMeasuredXMaxValue = xattr->max;
+				m_nXPositiveMark = (int)(ceil(m_nMeasuredXMaxValue / (double)m_nXStep) * m_nXStep);
+				m_bNeedRedrawAllBmp = 1;
 			}
+		}
 
-			assert(m_nXAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX);
+		if (y < m_nMeasuredYMinValue)
+		{
+			m_nMeasuredYMinValue = y;
+		}
+		if (y > m_nMeasuredYMaxValue)
+		{
+			m_nMeasuredYMaxValue = y;
+		}
 
-			if (xattr->min < m_nXNegtiveMark)
+		if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)
+		{
+			nNegtiveBias = m_nYNegtiveMark;
+			if (m_nMeasuredYMinValue < m_nYNegtiveMark)
 			{
-				if (xattr->min > m_nXFloor)
+				if (m_nMeasuredYMinValue > m_nYFloor)
 				{
-					m_nXNegtiveMark = (int)(floor(xattr->min / (double)m_nXStep) * m_nXStep);
+					nNegtiveBias = (int)(floor(m_nMeasuredYMinValue / (double)m_nYStep) * m_nYStep);
 					m_bNeedRedrawAllBmp = 1;
 				}
 			}
-			if (xattr->max > m_nXPositiveMark)
+
+			nPositiveBias = m_nYPositiveMark;
+			if (m_nMeasuredYMaxValue > m_nYPositiveMark)
 			{
-				if (xattr->max < m_nXCeil)
+				if (m_nMeasuredYMaxValue < m_nYCeil)
 				{
-					m_nXPositiveMark = (int)(ceil(xattr->max / (double)m_nXStep) * m_nXStep);
+					nPositiveBias = (int)(ceil(m_nMeasuredYMaxValue / (double)m_nYStep) * m_nYStep);
+					m_bNeedRedrawAllBmp = 1;
+				}
+			}
+
+			if (m_bNeedRedrawAllBmp)
+			{
+				int bias = max(abs(nNegtiveBias), abs(nPositiveBias));
+				m_nYNegtiveMark = -bias;
+				m_nYPositiveMark = bias;
+			}
+		}
+		else if (m_nYAxisStyle == AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY)
+		{
+			nNegtiveBias = m_nYNegtiveMark;
+			if (m_nMeasuredYMinValue < m_nYNegtiveMark)
+			{
+				if (m_nMeasuredYMinValue > m_nYFloor)
+				{
+					nNegtiveBias = (int)(floor(m_nMeasuredYMinValue / (double)m_nYStep) * m_nYStep);
+					m_bNeedRedrawAllBmp = 1;
+				}
+			}
+
+			nPositiveBias = m_nYPositiveMark;
+			if (m_nMeasuredYMaxValue > m_nYPositiveMark)
+			{
+				if (m_nMeasuredYMaxValue < m_nYCeil)
+				{
+					nPositiveBias = (int)(ceil(m_nMeasuredYMaxValue / (double)m_nYStep) * m_nYStep);
+					m_bNeedRedrawAllBmp = 1;
+				}
+			}
+
+			if (m_bNeedRedrawAllBmp)
+			{
+				int bias = max(abs(nNegtiveBias), abs(nPositiveBias));
+				m_nYNegtiveMark = -bias;
+				m_nYPositiveMark = bias;
+			}
+		}
+		else if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX)
+		{
+			if (m_nMeasuredYMinValue < m_nYNegtiveMark)
+			{
+				if (m_nMeasuredYMinValue > m_nYFloor)
+				{
+					m_nYNegtiveMark = (int)(floor(m_nMeasuredYMinValue / (double)m_nYStep) * m_nYStep);
+					m_bNeedRedrawAllBmp = 1;
+				}
+			}
+			if (m_nMeasuredYMaxValue > m_nYPositiveMark)
+			{
+				if (m_nMeasuredYMaxValue < m_nYCeil)
+				{
+					m_nYPositiveMark = (int)(ceil(m_nMeasuredYMaxValue / (double)m_nYStep) * m_nYStep);
 					m_bNeedRedrawAllBmp = 1;
 				}
 			}
 		}
 
-		if (yattr != NULL)
-		{
-			m_nMeasuredYMeanValue = yattr->mean;
-			m_nMeasuredYRmsValue = yattr->rms;
-
-			if (yattr->min < m_nMeasuredYMinValue)
-			{
-				m_nMeasuredYMinValue = yattr->min;
-			}
-			if (yattr->max > m_nMeasuredYMaxValue)
-			{
-				m_nMeasuredYMaxValue = yattr->max;
-			}
-
-			if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)
-			{
-				nNegtiveBias = m_nYNegtiveMark;
-				if (yattr->min < m_nYNegtiveMark)
-				{
-					if (yattr->min > m_nYFloor)
-					{
-						nNegtiveBias = (int)(floor(yattr->min / (double)m_nYStep) * m_nYStep);
-						m_bNeedRedrawAllBmp = 1;
-					}
-				}
-
-				nPositiveBias = m_nYPositiveMark;
-				if (yattr->max > m_nYPositiveMark)
-				{
-					if (yattr->max < m_nYCeil)
-					{
-						nPositiveBias = (int)(ceil(yattr->max / (double)m_nYStep) * m_nYStep);
-						m_bNeedRedrawAllBmp = 1;
-					}
-				}
-
-				if (m_bNeedRedrawAllBmp)
-				{
-					int bias = max(abs(nNegtiveBias), abs(nPositiveBias));
-					m_nYNegtiveMark = -bias;
-					m_nYPositiveMark = bias;
-				}
-			}
-			else if (m_nYAxisStyle == AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY)
-			{
-				nNegtiveBias = m_nYNegtiveMark;
-				if (yattr->min < m_nYNegtiveMark)
-				{
-					if (yattr->min > m_nYFloor)
-					{
-						nNegtiveBias = (int)(floor(yattr->min / (double)m_nYStep) * m_nYStep);
-						m_bNeedRedrawAllBmp = 1;
-					}
-				}
-
-				nPositiveBias = m_nYPositiveMark;
-				if (yattr->max > m_nYPositiveMark)
-				{
-					if (yattr->max < m_nYCeil)
-					{
-						nPositiveBias = (int)(ceil(yattr->max / (double)m_nYStep) * m_nYStep);
-						m_bNeedRedrawAllBmp = 1;
-					}
-				}
-
-				if (m_bNeedRedrawAllBmp)
-				{
-					int bias = max(abs(nNegtiveBias), abs(nPositiveBias));
-					m_nYNegtiveMark = -bias;
-					m_nYPositiveMark = bias;
-				}
-			}
-			else if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX)
-			{
-				if (yattr->min < m_nYNegtiveMark)
-				{
-					if (yattr->min > m_nYFloor)
-					{
-						m_nYNegtiveMark = (int)(floor(yattr->min / (double)m_nYStep) * m_nYStep);
-						m_bNeedRedrawAllBmp = 1;
-					}
-				}
-				if (yattr->max > m_nYPositiveMark)
-				{
-					if (yattr->max < m_nYCeil)
-					{
-						m_nYPositiveMark = (int)(ceil(yattr->max / (double)m_nYStep) * m_nYStep);
-						m_bNeedRedrawAllBmp = 1;
-					}
-				}
-			}
-		}
-
-		CInstrumentPanel_Base::AppendXYSample(ID, xsampleValue, ysampleValue);
+		CInstrumentPanel_Base::AppendXYSample(ID, x, y);
 
 #if ON_PAINTING_USE_MUTEX
 		::ReleaseMutex(m_hPaintingAccess);
