@@ -61,12 +61,6 @@
     <Filter Include="头文件\MFCExt\TreeList">
       <UniqueIdentifier>{9f8fe803-e1ec-46fd-8786-a6f8565fb541}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\MFCExt\ChartCtrl">
-      <UniqueIdentifier>{de028405-8dd9-44a5-99e6-0eb3a82ddc63}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\MFCExt\ChartCtrl">
-      <UniqueIdentifier>{ebe39316-19f7-4786-a4d8-e6d0712575b1}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

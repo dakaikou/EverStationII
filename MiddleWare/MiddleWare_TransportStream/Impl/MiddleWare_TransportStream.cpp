@@ -16,14 +16,14 @@
 #include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
 #include "toolbox_libs\TOOL_Math\Include\Sort.h"
 
-static double DIXON_950_alpha_table[] = { 1.000, 1.000, 0.941, 0.765, 0.642, 0.562, 0.507, 0.554, 0.512, 0.477, 0.575, 0.546, 0.521, 0.546, 0.524, 
-                                          0.505, 0.489, 0.475, 0.462, 0.450, 0.440, 0.431, 0.422, 0.413, 0.406, 0.399, 0.393, 0.387, 0.381, 0.376};
-
-static double DIXON_990_alpha_table[] = { 1.000, 1.000, 0.988, 0.889, 0.782, 0.698, 0.637, 0.681, 0.635, 0.597, 0.674, 0.642, 0.617, 0.640, 0.618,
-							 			  0.597, 0.580, 0.564, 0.550, 0.538, 0.526, 0.516, 0.507, 0.497, 0.489, 0.482, 0.474, 0.468, 0.462, 0.456};
-
-static double DIXON_995_alpha_table[] = { 1.000, 1.000, 0.994, 0.920, 0.823, 0.744, 0.680, 0.723, 0.676, 0.638, 0.707, 0.675, 0.649, 0.672, 0.649,
-										  0.629, 0.611, 0.595, 0.580, 0.568, 0.556, 0.545, 0.536, 0.526, 0.519, 0.510, 0.503, 0.496, 0.489, 0.484};
+//static double DIXON_950_alpha_table[] = { 1.000, 1.000, 0.941, 0.765, 0.642, 0.562, 0.507, 0.554, 0.512, 0.477, 0.575, 0.546, 0.521, 0.546, 0.524, 
+//                                          0.505, 0.489, 0.475, 0.462, 0.450, 0.440, 0.431, 0.422, 0.413, 0.406, 0.399, 0.393, 0.387, 0.381, 0.376};
+//
+//static double DIXON_990_alpha_table[] = { 1.000, 1.000, 0.988, 0.889, 0.782, 0.698, 0.637, 0.681, 0.635, 0.597, 0.674, 0.642, 0.617, 0.640, 0.618,
+//							 			  0.597, 0.580, 0.564, 0.550, 0.538, 0.526, 0.516, 0.507, 0.497, 0.489, 0.482, 0.474, 0.468, 0.462, 0.456};
+//
+//static double DIXON_995_alpha_table[] = { 1.000, 1.000, 0.994, 0.920, 0.823, 0.744, 0.680, 0.723, 0.676, 0.638, 0.707, 0.675, 0.649, 0.672, 0.649,
+//										  0.629, 0.611, 0.595, 0.580, 0.568, 0.556, 0.545, 0.536, 0.526, 0.519, 0.510, 0.503, 0.496, 0.489, 0.484};
 
 uint32_t thread_receive_transport_stream(LPVOID lpParam)
 {
@@ -400,7 +400,8 @@ int CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 		//fprintf(fp_tsrate_dbase, "观测值, 最大值(原始), 均值(原始), 最小值(原始), 标准差(原始), 堆栈状态, 最大值(处理后), 均值(处理后), 最小值(处理后), 标准差(处理后)\n");
 		//fprintf(fp_tsrate_dbase, "观测值, 堆栈状态, 均值(原始), 均值(极值删除), 均值(Dixon), 标准差(原始), 标准差(极值删除), 标准差(Dixon)\n");
 		//fprintf(fp_tsrate_dbase, "堆栈状态, 均值(原始), 均值(极值删除), 均值(Dixon), 标准差(原始), 标准差(极值删除), 标准差(Dixon)\n");
-		fprintf(fp_tsrate_dbase, "均值(原始), 均值(极值删除), 均值(Dixon), 均值(择优后)\n");
+		//fprintf(fp_tsrate_dbase, "均值(原始), 均值(极值删除), 均值(Dixon), 均值(择优后)\n");
+		fprintf(fp_tsrate_dbase, "均值(原始), 均值(极值删除), 均值(择优后)\n");
 	}
 
 #if USE_FIFO_ACCESS_MUTEX
@@ -1504,6 +1505,7 @@ int CTransportStream::AddBitrateSample(int new_bitrate, int(*callback)(int, int)
 		int	   n = m_bitrate_original_sample_count;
 		int	   max_sample_value = UNCREDITABLE_MAX_VALUE;
 		int    min_sample_value = UNCREDITABLE_MIN_VALUE;
+		double original_sample_sum = 0;
 		for (int i = 0; i < m_bitrate_original_sample_count; i++)
 		{
 			if (m_bitrate_original_sample_array[i] > max_sample_value)
@@ -1514,67 +1516,68 @@ int CTransportStream::AddBitrateSample(int new_bitrate, int(*callback)(int, int)
 			{
 				min_sample_value = m_bitrate_original_sample_array[i];
 			}
+
+			original_sample_sum += (double)m_bitrate_original_sample_array[i];
 		}
 
-		double original_sample_sum = 0;
-		//double original_power_sum = 0;
-		for (int i = 0; i < m_bitrate_original_sample_count; i++)
-		{
-			double normal_bitrate = (double)m_bitrate_original_sample_array[i] / max_sample_value;
-			original_sample_sum += normal_bitrate;
-			//original_power_sum += (normal_bitrate * normal_bitrate);
-		}
-		int bitrate_original_mean_value = (int)round(max_sample_value * original_sample_sum / n);
-
-		//double original_sigma2 = original_power_sum - (original_sample_sum * original_sample_sum) / n;
-
-		//if (original_sigma2 < 0)
+		////double original_power_sum = 0;
+		//for (int i = 0; i < m_bitrate_original_sample_count; i++)
 		//{
-		//	original_sigma2 = 0.0;
+		//	double normal_bitrate = (double)m_bitrate_original_sample_array[i] / max_sample_value;
+		//	original_sample_sum += normal_bitrate;
+		//	//original_power_sum += (normal_bitrate * normal_bitrate);
 		//}
+		int bitrate_original_mean_value = (int)round(original_sample_sum / n);
 
-		//double original_sigma = sqrt(original_sigma2 / (n - 1));
+		////double original_sigma2 = original_power_sum - (original_sample_sum * original_sample_sum) / n;
 
-		//m_bitrate_original_rms_value = (int)round(max_sample_value*original_sigma);
+		////if (original_sigma2 < 0)
+		////{
+		////	original_sigma2 = 0.0;
+		////}
 
-		//int64_t sum_delt2 = 0;
-		//for (int sample_index = 0; sample_index < m_bitrate_sample_count; sample_index++)
-		//{
-		//	sum_delt2 += (int64_t)pow(m_bitrate_sample_array[sample_index] - m_bitrate_mean_value, 2);
-		//}
-		//sum_delt2 /= (m_bitrate_sample_count - 1);
-		//int bitrate_rms_value = round(sqrt((double)sum_delt2));
+		////double original_sigma = sqrt(original_sigma2 / (n - 1));
 
-		//if (fp_tsrate_dbase != NULL)
-		//{
-		//	//fprintf(fp_tsrate_dbase, ", %d, %d, %d", m_bitrate_mean_value, m_bitrate_rms_value, bitrate_rms_value);
-		//	//fprintf(fp_tsrate_dbase, ", %d, %d, %d, %d,", m_bitrate_original_max_value, m_bitrate_original_mean_value, m_bitrate_original_min_value, m_bitrate_original_rms_value);
-		//	fprintf(fp_tsrate_dbase, ", %d", m_bitrate_original_mean_value);
-		//}
+		////m_bitrate_original_rms_value = (int)round(max_sample_value*original_sigma);
+
+		////int64_t sum_delt2 = 0;
+		////for (int sample_index = 0; sample_index < m_bitrate_sample_count; sample_index++)
+		////{
+		////	sum_delt2 += (int64_t)pow(m_bitrate_sample_array[sample_index] - m_bitrate_mean_value, 2);
+		////}
+		////sum_delt2 /= (m_bitrate_sample_count - 1);
+		////int bitrate_rms_value = round(sqrt((double)sum_delt2));
+
+		////if (fp_tsrate_dbase != NULL)
+		////{
+		////	//fprintf(fp_tsrate_dbase, ", %d, %d, %d", m_bitrate_mean_value, m_bitrate_rms_value, bitrate_rms_value);
+		////	//fprintf(fp_tsrate_dbase, ", %d, %d, %d, %d,", m_bitrate_original_max_value, m_bitrate_original_mean_value, m_bitrate_original_min_value, m_bitrate_original_rms_value);
+		////	fprintf(fp_tsrate_dbase, ", %d", m_bitrate_original_mean_value);
+		////}
 
 		//样本检验
 		//int n = m_bitrate_original_sample_count;
-		int* temp_array = (int*)malloc(n * sizeof(int));
-		for (int i = 0; i < n; i++)
-		{
-			temp_array[i] = m_bitrate_original_sample_array[i];
-		}
+		//int* temp_array = (int*)malloc(n * sizeof(int));
+		//for (int i = 0; i < n; i++)
+		//{
+		//	temp_array[i] = m_bitrate_original_sample_array[i];
+		//}
 
-		quick_sort_method1(temp_array, 0, n - 1);
-		assert(temp_array[0] == min_sample_value);
-		assert(temp_array[n - 1] == max_sample_value);
+		//quick_sort_method1(temp_array, 0, n - 1);
+		//assert(temp_array[0] == min_sample_value);
+		//assert(temp_array[n - 1] == max_sample_value);
 
 		//min max deletion
-		double deletion_sample_sum = 0;
+		double deletion_sample_sum = original_sample_sum - max_sample_value - min_sample_value;
 		//double deletion_power_sum = 0;
 		int m = n - 2;
-		for (int i = 1; i < n - 1; i++)
-		{
-			double normal_bitrate = (double)temp_array[i] / max_sample_value;
-			deletion_sample_sum += normal_bitrate;
-			//deletion_power_sum += normal_bitrate * normal_bitrate;
-		}
-		int bitrate_deletion_mean_value = (int)round(max_sample_value * deletion_sample_sum / m);
+		//for (int i = 1; i < n - 1; i++)
+		//{
+		//	double normal_bitrate = (double)temp_array[i] / max_sample_value;
+		//	deletion_sample_sum += normal_bitrate;
+		//	//deletion_power_sum += normal_bitrate * normal_bitrate;
+		//}
+		int bitrate_deletion_mean_value = (int)round(deletion_sample_sum / m);
 
 		//double deletion_sigma2 = deletion_power_sum - (deletion_sample_sum * deletion_sample_sum) / m;
 
@@ -1597,98 +1600,98 @@ int CTransportStream::AddBitrateSample(int new_bitrate, int(*callback)(int, int)
 		//}
 
 		//Dixon deletion
-		do
-		{
-			//if (fp_tsrate_dbase != NULL)
-			//{
-			//	fprintf(fp_tsrate_dbase, "[");
-			//	for (int i = 0; i < n; i++)
-			//	{
-			//		fprintf(fp_tsrate_dbase, "%d ", temp_array[i]);
-			//	}
-			//	fprintf(fp_tsrate_dbase, "] ");
-			//}
+		//do
+		//{
+		//	//if (fp_tsrate_dbase != NULL)
+		//	//{
+		//	//	fprintf(fp_tsrate_dbase, "[");
+		//	//	for (int i = 0; i < n; i++)
+		//	//	{
+		//	//		fprintf(fp_tsrate_dbase, "%d ", temp_array[i]);
+		//	//	}
+		//	//	fprintf(fp_tsrate_dbase, "] ");
+		//	//}
 
-			double rh = 0, rl = 0;
-			if ((n >= 3) && (n <= 7))
-			{
-				if (temp_array[n - 1] > temp_array[0])
-				{
-					rh = (double)(temp_array[n - 1] - temp_array[n - 2]) / (temp_array[n - 1] - temp_array[0]);
-					rl = (double)(temp_array[1] - temp_array[0]) / (temp_array[n - 1] - temp_array[0]);
-				}
-			}
-			else if ((n >= 8) && (n <= 10))
-			{
-				if (temp_array[n - 1] > temp_array[1])
-				{
-					rh = (double)(temp_array[n - 1] - temp_array[n - 2]) / (temp_array[n - 1] - temp_array[1]);
-				}
-				if (temp_array[n - 2] > temp_array[0])
-				{
-					rl = (double)(temp_array[1] - temp_array[0]) / (temp_array[n - 2] - temp_array[0]);
-				}
-			}
-			else if ((n >= 11) && (n <= 13))
-			{
-				if (temp_array[n - 1] > temp_array[1])
-				{
-					rh = (double)(temp_array[n - 1] - temp_array[n - 3]) / (temp_array[n - 1] - temp_array[1]);
-				}
-				if (temp_array[n - 2] > temp_array[0])
-				{
-					rl = (double)(temp_array[2] - temp_array[0]) / (temp_array[n - 2] - temp_array[0]);
-				}
-			}
-			else if ((n >= 14) && (n <= 30))
-			{
-				if (temp_array[n - 1] > temp_array[2])
-				{
-					rh = (double)(temp_array[n - 1] - temp_array[n - 3]) / (temp_array[n - 1] - temp_array[2]);
-				}
-				if (temp_array[n - 3] > temp_array[0])
-				{
-					rl = (double)(temp_array[2] - temp_array[0]) / (temp_array[n - 3] - temp_array[0]);
-				}
-			}
+		//	double rh = 0, rl = 0;
+		//	if ((n >= 3) && (n <= 7))
+		//	{
+		//		if (temp_array[n - 1] > temp_array[0])
+		//		{
+		//			rh = (double)(temp_array[n - 1] - temp_array[n - 2]) / (temp_array[n - 1] - temp_array[0]);
+		//			rl = (double)(temp_array[1] - temp_array[0]) / (temp_array[n - 1] - temp_array[0]);
+		//		}
+		//	}
+		//	else if ((n >= 8) && (n <= 10))
+		//	{
+		//		if (temp_array[n - 1] > temp_array[1])
+		//		{
+		//			rh = (double)(temp_array[n - 1] - temp_array[n - 2]) / (temp_array[n - 1] - temp_array[1]);
+		//		}
+		//		if (temp_array[n - 2] > temp_array[0])
+		//		{
+		//			rl = (double)(temp_array[1] - temp_array[0]) / (temp_array[n - 2] - temp_array[0]);
+		//		}
+		//	}
+		//	else if ((n >= 11) && (n <= 13))
+		//	{
+		//		if (temp_array[n - 1] > temp_array[1])
+		//		{
+		//			rh = (double)(temp_array[n - 1] - temp_array[n - 3]) / (temp_array[n - 1] - temp_array[1]);
+		//		}
+		//		if (temp_array[n - 2] > temp_array[0])
+		//		{
+		//			rl = (double)(temp_array[2] - temp_array[0]) / (temp_array[n - 2] - temp_array[0]);
+		//		}
+		//	}
+		//	else if ((n >= 14) && (n <= 30))
+		//	{
+		//		if (temp_array[n - 1] > temp_array[2])
+		//		{
+		//			rh = (double)(temp_array[n - 1] - temp_array[n - 3]) / (temp_array[n - 1] - temp_array[2]);
+		//		}
+		//		if (temp_array[n - 3] > temp_array[0])
+		//		{
+		//			rl = (double)(temp_array[2] - temp_array[0]) / (temp_array[n - 3] - temp_array[0]);
+		//		}
+		//	}
 
-			//if (fp_tsrate_dbase != NULL)
-			//{
-			//	fprintf(fp_tsrate_dbase, "<n=%d&rh=%.3f&rl=%.3f>", n, rh, rl);
-			//}
+		//	//if (fp_tsrate_dbase != NULL)
+		//	//{
+		//	//	fprintf(fp_tsrate_dbase, "<n=%d&rh=%.3f&rl=%.3f>", n, rh, rl);
+		//	//}
 
-			if ((rh <= DIXON_950_alpha_table[n - 1]) && (rl <= DIXON_950_alpha_table[n - 1]))
-			{
-				break;
-			}
-			else
-			{
-				if (rh > DIXON_950_alpha_table[n - 1])
-				{
-					n--;
-				}
-				if (rl > DIXON_950_alpha_table[n - 1])
-				{
-					for (int i = 1; i < n; i++)
-					{
-						temp_array[i - 1] = temp_array[i];
-					}
+		//	if ((rh <= DIXON_950_alpha_table[n - 1]) && (rl <= DIXON_950_alpha_table[n - 1]))
+		//	{
+		//		break;
+		//	}
+		//	else
+		//	{
+		//		if (rh > DIXON_950_alpha_table[n - 1])
+		//		{
+		//			n--;
+		//		}
+		//		if (rl > DIXON_950_alpha_table[n - 1])
+		//		{
+		//			for (int i = 1; i < n; i++)
+		//			{
+		//				temp_array[i - 1] = temp_array[i];
+		//			}
 
-					n--;
-				}
-			}
+		//			n--;
+		//		}
+		//	}
 
-		} while (n >= 3);
+		//} while (n >= 3);
 
-		double dixon_sample_sum = 0;
-		//double dixon_power_sum = 0;
-		for (int i = 0; i < n; i++)
-		{
-			double normal_bitrate = (double)temp_array[i] / max_sample_value;
-			dixon_sample_sum += normal_bitrate;
-			//dixon_power_sum += normal_bitrate * normal_bitrate;
-		}
-		int bitrate_dixon_mean_value = (int)round(max_sample_value * dixon_sample_sum / n);
+		//double dixon_sample_sum = 0;
+		////double dixon_power_sum = 0;
+		//for (int i = 0; i < n; i++)
+		//{
+		//	double normal_bitrate = (double)temp_array[i] / max_sample_value;
+		//	dixon_sample_sum += normal_bitrate;
+		//	//dixon_power_sum += normal_bitrate * normal_bitrate;
+		//}
+		//int bitrate_dixon_mean_value = (int)round(max_sample_value * dixon_sample_sum / n);
 
 		//double processed_sigma2 = dixon_power_sum - (dixon_sample_sum * dixon_sample_sum) / n;
 
@@ -1710,17 +1713,24 @@ int CTransportStream::AddBitrateSample(int new_bitrate, int(*callback)(int, int)
 		//	m_bitrate_dixon_min_value = m_bitrate_dixon_mean_value;
 		//}
 
-		int amplitue1 = abs(bitrate_deletion_mean_value - m_bitrate_estimate_cur_value);
-		int amplitue2 = abs(bitrate_dixon_mean_value - m_bitrate_estimate_cur_value);
-
-		//基于码率变化是缓慢的假设，没有突变
-		if (amplitue1 < amplitue2)
+		if (m_bitrate_estimate_cur_value > 0)
 		{
-			m_bitrate_estimate_cur_value = bitrate_deletion_mean_value;
+			int amplitue1 = abs(bitrate_deletion_mean_value - m_bitrate_estimate_cur_value);
+			int amplitue2 = abs(bitrate_original_mean_value - m_bitrate_estimate_cur_value);
+
+			//基于码率变化是缓慢的假设，没有突变
+			if (amplitue1 < amplitue2)
+			{
+				m_bitrate_estimate_cur_value = bitrate_deletion_mean_value;
+			}
+			else
+			{
+				m_bitrate_estimate_cur_value = bitrate_original_mean_value;
+			}
 		}
 		else
 		{
-			m_bitrate_estimate_cur_value = bitrate_dixon_mean_value;
+			m_bitrate_estimate_cur_value = bitrate_deletion_mean_value;
 		}
 
 		if (m_bitrate_estimate_cur_value > m_bitrate_estimate_max_value)
@@ -1735,7 +1745,7 @@ int CTransportStream::AddBitrateSample(int new_bitrate, int(*callback)(int, int)
 		if (fp_tsrate_dbase != NULL)
 		{
 			//fprintf(fp_tsrate_dbase, ", %d, %d, %d, %d", m_bitrate_processed_max_value, m_bitrate_processed_mean_value, m_bitrate_processed_min_value, m_bitrate_processed_rms_value);
-			fprintf(fp_tsrate_dbase, "%d, %d, %d, %d\n", bitrate_original_mean_value, bitrate_deletion_mean_value, bitrate_dixon_mean_value, m_bitrate_estimate_cur_value);
+			fprintf(fp_tsrate_dbase, "%d, %d, %d\n", bitrate_original_mean_value, bitrate_deletion_mean_value, m_bitrate_estimate_cur_value);
 		}
 
 		//if (m_bitrate_available == 0) m_bitrate_available = 1;
@@ -1744,7 +1754,7 @@ int CTransportStream::AddBitrateSample(int new_bitrate, int(*callback)(int, int)
 			callback(0, m_bitrate_estimate_cur_value);
 		}
 
-		free(temp_array);
+		//free(temp_array);
 
 		m_bitrate_original_sample_count = 0;
 	}
