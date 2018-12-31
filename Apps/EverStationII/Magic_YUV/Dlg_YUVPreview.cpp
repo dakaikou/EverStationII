@@ -89,7 +89,7 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 		VIDEO_get_width_and_height_info(i, NULL, pszItem, sizeof(pszItem));
 		pCmbBox->AddString(pszItem);
 	}
-	pCmbBox->SetCurSel(VIDEO_CIF);
+	pCmbBox->SetCurSel(VIDEO_4CIF);
 
 	pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FOURCC);
 	pCmbBox->ResetContent();
@@ -104,6 +104,16 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 		pCmbBox->GetLBText(nSel, pszFourCC);
 		DecodeFourCC2Text(pszFourCC, pszItem, sizeof(pszItem));
 	}
+
+	//ÉèÖÃ²¥·ÅÖ¡ÂÊ
+	pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FRAMERATE);
+	pCmbBox->ResetContent();
+
+	pCmbBox->AddString("7.5P");
+	pCmbBox->AddString("15P");
+	pCmbBox->AddString("30P");
+	pCmbBox->AddString("60P");
+	pCmbBox->SetCurSel(3);
 
 	pWnd = GetDlgItem(IDC_STATIC_FORMAT);
 	pWnd->SetWindowText(pszItem);
@@ -160,6 +170,14 @@ void CDlg_YUVPreview::OnBtnPreview()
 			strcpy_s(decode_info.pszFourCC, sizeof(decode_info.pszFourCC), "YV12");
 		}
 
+		char strFrameRate[16];
+		pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FRAMERATE);
+		nSel = pCmbBox->GetCurSel();
+		if (nSel != CB_ERR)
+		{
+			pCmbBox->GetLBText(nSel, strFrameRate);
+		}
+
 		decode_info.luma_width = wh.width;
 		decode_info.luma_height = wh.height;
 		decode_info.luma_pix_count = decode_info.luma_width * decode_info.luma_height; 
@@ -167,6 +185,27 @@ void CDlg_YUVPreview::OnBtnPreview()
 
 		decode_info.display_width = decode_info.luma_width;
 		decode_info.display_height = decode_info.luma_height;
+
+		if (strcmp(strFrameRate, "7.5P") == 0)
+		{
+			decode_info.framerate = 7.0;
+		}
+		else if (strcmp(strFrameRate, "15P") == 0)
+		{
+			decode_info.framerate = 15.0;
+		}
+		else if (strcmp(strFrameRate, "30P") == 0)
+		{
+			decode_info.framerate = 30.0;
+		}
+		else if (strcmp(strFrameRate, "60P") == 0)
+		{
+			decode_info.framerate = 60.0;
+		}
+		else
+		{
+			decode_info.framerate = 60.0;
+		}
 
 //		if (strcmp(decode_info.pszFourCC, "IYUV") == 0)
 //		{
@@ -204,14 +243,15 @@ void CDlg_YUVPreview::OnBtnPreview()
 
 		decode_info.frame_buf_size = decode_info.luma_buf_size + decode_info.chroma_buf_size + decode_info.chroma_buf_size;
 
-		if (m_YUVDecoder.IsOpened())
-		{
-			m_YUVDecoder.Close();
-		}
+		//if (m_YUVDecoder.IsOpened())
+		//{
+		//	m_YUVDecoder.Close();
+		//}
 
-		m_YUVDecoder.Open(YUV_FILE_YUV, strPath.GetBuffer(128), &decode_info);
+		m_YUVDecoder.Open((STREAM_FILE | YUV_FILE_YUV), strPath.GetBuffer(128), &decode_info);
 
-		m_dlgVideo.OfflineStream((STREAM_YUVVES | STREAM_FILE), &m_YUVDecoder, 0);
+		m_dlgVideo.AttachVideoDecoder(&m_YUVDecoder);
+		m_dlgVideo.ShowWindow(SW_SHOW);
 	}
 }
 

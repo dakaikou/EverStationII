@@ -13,6 +13,14 @@ typedef enum
 
 typedef enum
 {
+	YUV_FILE_UNKNOWN = 0,
+	YUV_FILE_YUV,
+	YUV_FILE_DY_DU_DV,
+	YUV_FILE_DYUV,
+} YUV_FILE_TYPE_e;
+
+typedef enum
+{
 	CC_Y		= 0,		//0
 	CC_Cb,					//1
 	CC_Cr					//2
@@ -20,42 +28,44 @@ typedef enum
 
 typedef struct
 {
-	int		size;				//the byte counts for this structure
-	int		getparams;			//determine whether these parameters are usable
+	int			size;				//the byte counts for this structure
+	int			getparams;			//determine whether these parameters are usable
 
-	int		graph_with_grid;
+	int			graph_with_grid;
 
-	int		chroma_format;
+	int			chroma_format;
 	char		pszFourCC[5];
 
-	int		luma_width;
-	int		luma_height;
-	int		luma_buf_size;
-	int		luma_pix_count;
-	uint8_t*		pucY;
+	double		framerate;
 
-	int		chroma_width;
-	int		chroma_height;
-	int		chroma_buf_size;
-	int		chroma_pix_count;
-	uint8_t*		pucU;
-	uint8_t*		pucV;
+	int			luma_width;
+	int			luma_height;
+	int			luma_buf_size;
+	int			luma_pix_count;
+	//uint8_t*	pucY;
 
-	int		frame_buf_size;
+	int			chroma_width;
+	int			chroma_height;
+	int			chroma_buf_size;
+	int			chroma_pix_count;
+	//uint8_t*	pucU;
+	//uint8_t*	pucV;
 
-	int	    display_width;
-	int		display_height;
+	int			frame_buf_size;
 
-	int		mb_width;								//mpeg_sequence_header & mpeg_sequence_extension	
-	int		mb_height_frame;						//mpeg_sequence_header & mpeg_sequence_extension	
-	int		mb_height_field;						//mpeg_sequence_header & mpeg_sequence_extension	
-	int		mb_count;
-	int		luma_mbw;
-	int		luma_mbh;
-	int		chroma_mbw;
-	int		chroma_mbh;
+	int		    display_width;
+	int			display_height;
 
-	int		blockcount;
+	int			mb_width;								//mpeg_sequence_header & mpeg_sequence_extension	
+	int			mb_height_frame;						//mpeg_sequence_header & mpeg_sequence_extension	
+	int			mb_height_field;						//mpeg_sequence_header & mpeg_sequence_extension	
+	int			mb_count;
+	int			luma_mbw;
+	int			luma_mbh;
+	int			chroma_mbw;
+	int			chroma_mbh;
+
+	int			blockcount;
 
 } Video_decode_info_t, *pVideo_decode_info_t;
 

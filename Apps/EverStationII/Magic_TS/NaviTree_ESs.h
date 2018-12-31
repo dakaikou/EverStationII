@@ -34,6 +34,7 @@ public:
 
 private:
 	void DeleteChildItems(HTREEITEM hParentItem);
+	void FiringCatchThread(void);
 
 private:
 

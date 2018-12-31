@@ -172,7 +172,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Impl\ESDecoder.cpp" />
-    <ClCompile Include="Impl\ESDecoder_segment_tools.cpp" />
+    <ClCompile Include="Impl\ESDecoder_Utilities.cpp" />
     <ClCompile Include="Impl\VESDecoder.cpp" />
     <ClCompile Include="Impl\VideoDecoder_YUV.cpp" />
     <ClCompile Include="dllmain.cpp" />
@@ -192,8 +192,9 @@
     <ClInclude Include="Include\common\video_common.h" />
     <ClInclude Include="Include\ESDecoder.h" />
     <ClInclude Include="Include\ESDecoder_ErrorCode.h" />
-    <ClInclude Include="Include\ESDecoder_segment_tools.h" />
-    <ClInclude Include="Include\videodecoder_yuv.h" />
+    <ClInclude Include="Include\ESDecoder_Utilities.h" />
+    <ClInclude Include="Include\VESDecoder.h" />
+    <ClInclude Include="Include\VideoDecoder_YUV.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

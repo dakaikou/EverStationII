@@ -21,7 +21,7 @@ static char THIS_FILE[] = __FILE__;
 // CDlg_TSAnalyzer_PesEs dialog
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
-#include "MiddleWare/MiddleWare_ESDecoder/Include\ESDecoder_segment_tools.h"
+#include "MiddleWare/MiddleWare_ESDecoder/Include\ESDecoder_Utilities.h"
 
 #include "translate_layer/MPEG2_DVB_Section\Include\Mpeg2_StreamType.h"
 #include "translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_Utilities.h"
@@ -49,7 +49,7 @@ CDlg_TSAnalyzer_PesEs::CDlg_TSAnalyzer_PesEs(CWnd* pParent /*=NULL*/)
 	//{{AFX_DATA_INIT(CDlg_TSAnalyzer_PesEs)
 	//}}AFX_DATA_INIT
 
-	fp_debug = NULL;
+	//fp_debug = NULL;
 
 	m_pTree = NULL;
 	m_pList = NULL;
@@ -66,10 +66,6 @@ void CDlg_TSAnalyzer_PesEs::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_PesEs, CDialog)
 	//{{AFX_MSG_MAP(CDlg_TSAnalyzer_PesEs)
 	ON_WM_SIZE()
-//	ON_BN_CLICKED(IDC_BTN_PESES_WATCH, OnBtnWatch)
-//	ON_BN_CLICKED(IDC_BTN_PESES_DTS, OnBtnDts)
-//	ON_BN_CLICKED(IDC_BTN_PESES_PTS, OnBtnPts)
-//	ON_BN_CLICKED(IDC_BTN_PESES_TRIGGER, OnBtnTrigger)
 	//}}AFX_MSG_MAP
 	
 END_MESSAGE_MAP()
@@ -118,8 +114,8 @@ BOOL CDlg_TSAnalyzer_PesEs::OnInitDialog()
 	//m_pActiveAudDecoder = NULL;
 	//m_pActiveVidDecoder = NULL;
 
-	m_dlgTV.Create(IDD_SHOW_VIDEO, this);
-	m_dlgTV.ShowWindow(SW_HIDE);
+	//m_dlgTV.Create(IDD_SHOW_VIDEO, this);
+	//m_dlgTV.ShowWindow(SW_HIDE);
 
 	//m_dlgDtsPts.Create(IDD_TS_DTS_PTS, this);
 	//m_dlgDtsPts.ShowWindow(SW_HIDE);
@@ -137,11 +133,11 @@ void CDlg_TSAnalyzer_PesEs::OnSize(UINT nType, int cx, int cy)
 	// TODO: Add your message handler code here
 	if (m_wndSplitter.GetSafeHwnd() != NULL)
 	{
-		m_wndSplitter.SetWindowPos(NULL, 5, 5, cx - 10, cy - 50, 0);
+		m_wndSplitter.SetWindowPos(NULL, 5, 5, cx - 10, cy - 10, 0);
 
-		m_wndSplitter.SetColumnInfo(0, 400, 0);
+		m_wndSplitter.SetColumnInfo(0, 500, 0);
 
-		int n2ColWidth = cx - 400 - 10;
+		int n2ColWidth = cx - 500 - 10;
 
 		int nHexViewWidth = 740;
 		if (n2ColWidth < 1480)
@@ -155,44 +151,44 @@ void CDlg_TSAnalyzer_PesEs::OnSize(UINT nType, int cx, int cy)
 		m_wndSplitter.RecalcLayout();
 	}
 
-	CWnd*	pWnd;
-	CRect	rect;
+	//CWnd*	pWnd;
+	//CRect	rect;
 
-	pWnd = GetDlgItem(IDC_BTN_PESES_PTS);
-	if (pWnd->GetSafeHwnd() != NULL)
-	{
-		pWnd->GetWindowRect(&rect);
-		ScreenToClient(&rect);
+	//pWnd = GetDlgItem(IDC_BTN_PESES_PTS);
+	//if (pWnd->GetSafeHwnd() != NULL)
+	//{
+	//	pWnd->GetWindowRect(&rect);
+	//	ScreenToClient(&rect);
 
-		pWnd->SetWindowPos(NULL, rect.left, cy - rect.Height() - 10, rect.Width(), rect.Height(), 0);
-	}
+	//	pWnd->SetWindowPos(NULL, rect.left, cy - rect.Height() - 10, rect.Width(), rect.Height(), 0);
+	//}
 
-	pWnd = GetDlgItem(IDC_BTN_PESES_DTS);
-	if (pWnd->GetSafeHwnd() != NULL)
-	{
-		pWnd->GetWindowRect(&rect);
-		ScreenToClient(&rect);
+	//pWnd = GetDlgItem(IDC_BTN_PESES_DTS);
+	//if (pWnd->GetSafeHwnd() != NULL)
+	//{
+	//	pWnd->GetWindowRect(&rect);
+	//	ScreenToClient(&rect);
 
-		pWnd->SetWindowPos(NULL, rect.left, cy - rect.Height() - 10, rect.Width(), rect.Height(), 0);
-	}
+	//	pWnd->SetWindowPos(NULL, rect.left, cy - rect.Height() - 10, rect.Width(), rect.Height(), 0);
+	//}
 
-	pWnd = GetDlgItem(IDC_BTN_PESES_BUFFER);
-	if (pWnd->GetSafeHwnd() != NULL)
-	{
-		pWnd->GetWindowRect(&rect);
-		ScreenToClient(&rect);
+	//pWnd = GetDlgItem(IDC_BTN_PESES_BUFFER);
+	//if (pWnd->GetSafeHwnd() != NULL)
+	//{
+	//	pWnd->GetWindowRect(&rect);
+	//	ScreenToClient(&rect);
 
-		pWnd->SetWindowPos(NULL, rect.left, cy - rect.Height() - 10, rect.Width(), rect.Height(), 0);
-	}
+	//	pWnd->SetWindowPos(NULL, rect.left, cy - rect.Height() - 10, rect.Width(), rect.Height(), 0);
+	//}
 
-	pWnd = GetDlgItem(IDC_BTN_PESES_WATCH);
-	if (pWnd->GetSafeHwnd() != NULL)
-	{
-		pWnd->GetWindowRect(&rect);
-		ScreenToClient(&rect);
+	//pWnd = GetDlgItem(IDC_BTN_PESES_WATCH);
+	//if (pWnd->GetSafeHwnd() != NULL)
+	//{
+	//	pWnd->GetWindowRect(&rect);
+	//	ScreenToClient(&rect);
 
-		pWnd->SetWindowPos(NULL, rect.left, cy - rect.Height() - 10, rect.Width(), rect.Height(), 0);
-	}
+	//	pWnd->SetWindowPos(NULL, rect.left, cy - rect.Height() - 10, rect.Width(), rect.Height(), 0);
+	//}
 }
 
 void CDlg_TSAnalyzer_PesEs::Reset(void)
@@ -201,40 +197,40 @@ void CDlg_TSAnalyzer_PesEs::Reset(void)
 	m_pTree->Reset();
 	m_pList->Reset();
 
-	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	CWnd* pWnd;
+	//CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+	//CWnd* pWnd;
 //	char pszText[128];
 
-	pWnd = GetDlgItem(IDC_BTN_PESES_PTS);
-	pWnd->EnableWindow(FALSE);
+	//pWnd = GetDlgItem(IDC_BTN_PESES_PTS);
+	//pWnd->EnableWindow(FALSE);
 
-	pWnd = GetDlgItem(IDC_BTN_PESES_DTS);
-	pWnd->EnableWindow(FALSE);
+	//pWnd = GetDlgItem(IDC_BTN_PESES_DTS);
+	//pWnd->EnableWindow(FALSE);
 
-	pWnd = GetDlgItem(IDC_BTN_PESES_BUFFER);
-	pWnd->EnableWindow(FALSE);
+	//pWnd = GetDlgItem(IDC_BTN_PESES_BUFFER);
+	//pWnd->EnableWindow(FALSE);
 
-	pWnd = GetDlgItem(IDC_BTN_PESES_WATCH);
-	pWnd->EnableWindow(FALSE);
+	//pWnd = GetDlgItem(IDC_BTN_PESES_WATCH);
+	//pWnd->EnableWindow(FALSE);
 
-	m_dwVidCode = 0x00000000;
-	m_dwAudCode = 0x00000000;
+	//m_dwVidCode = 0x00000000;
+	//m_dwAudCode = 0x00000000;
 
-	if (m_dlgTV.IsWindowVisible())
-	{
-		m_dlgTV.ShowWindow(SW_HIDE);
-	}
+	//if (m_dlgTV.IsWindowVisible())
+	//{
+	//	m_dlgTV.ShowWindow(SW_HIDE);
+	//}
 
 //	if (m_dlgDtsPts.IsWindowVisible())
 //	{
 //		m_dlgDtsPts.ShowWindow(SW_HIDE);
 //	}
 
-	if (fp_debug != NULL)
-	{
-		fclose(fp_debug);
-		fp_debug = NULL;
-	}
+	//if (fp_debug != NULL)
+	//{
+	//	fclose(fp_debug);
+	//	fp_debug = NULL;
+	//}
 
 //	if (m_pActiveDecoder != NULL)
 //	{
@@ -1198,45 +1194,45 @@ void CDlg_TSAnalyzer_PesEs::OnBtnPts()
 	m_dlgDtsPts.ShowWindow(SW_SHOWNORMAL);
 }
 */
-void CDlg_TSAnalyzer_PesEs::OnBtnWatch() 
-{
-	// TODO: Add your control notification handler code here
-	int nVidType;
-	int nAudType;
-	int nVidStreamType = STREAM_UNKNOWN;
-	int nAudStreamType = STREAM_UNKNOWN;
-
-	if (!m_dlgTV.IsWindowVisible())
-	{
-		nVidType = (m_dwVidCode & 0xFC000000) >> 26;
-		nAudType = (m_dwAudCode & 0xFC000000) >> 26;
-
-		switch (nVidType)
-		{
-		case 1:
-			nVidStreamType = STREAM_MPEGVES;
-			break;
-		case 6:
-			nVidStreamType = STREAM_H264VES;
-			break;
-		}
-
-		switch (nAudType)
-		{
-		case 2:
-			nAudStreamType = STREAM_MPEGAES;
-			break;
-		case 3:
-			nAudStreamType = STREAM_AC3AES;
-			break;
-		case 4:
-			nAudStreamType = STREAM_AACAES;
-			break;
-		}
-
-		//m_dlgTV.RealTimeStream(nVidStreamType, m_pActiveVidDecoder, nAudStreamType, m_pActiveAudDecoder);
-	}
-}
+//void CDlg_TSAnalyzer_PesEs::OnBtnWatch() 
+//{
+//	// TODO: Add your control notification handler code here
+//	int nVidType;
+//	int nAudType;
+//	int nVidStreamType = STREAM_UNKNOWN;
+//	int nAudStreamType = STREAM_UNKNOWN;
+//
+//	if (!m_dlgTV.IsWindowVisible())
+//	{
+//		nVidType = (m_dwVidCode & 0xFC000000) >> 26;
+//		nAudType = (m_dwAudCode & 0xFC000000) >> 26;
+//
+//		switch (nVidType)
+//		{
+//		case 1:
+//			nVidStreamType = STREAM_MPEGVES;
+//			break;
+//		case 6:
+//			nVidStreamType = STREAM_H264VES;
+//			break;
+//		}
+//
+//		switch (nAudType)
+//		{
+//		case 2:
+//			nAudStreamType = STREAM_MPEGAES;
+//			break;
+//		case 3:
+//			nAudStreamType = STREAM_AC3AES;
+//			break;
+//		case 4:
+//			nAudStreamType = STREAM_AACAES;
+//			break;
+//		}
+//
+//		//m_dlgTV.RealTimeStream(nVidStreamType, m_pActiveVidDecoder, nAudStreamType, m_pActiveAudDecoder);
+//	}
+//}
 
 
 

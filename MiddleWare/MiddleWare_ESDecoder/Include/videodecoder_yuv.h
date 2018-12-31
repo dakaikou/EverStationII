@@ -18,14 +18,6 @@
 #include <stdio.h>
 
 #include "./VESDecoder.h"
-#include "./common/video_common.h"
-
-typedef enum
-{
-	YUV_FILE_DY_DU_DV	= 0,
-	YUV_FILE_DYUV,
-	YUV_FILE_YUV
-} YUV_FILE_TYPE_e;
 
 class MW_ES_LIB CYUV_VideoDecoder : public CVESDecoder
 {
@@ -36,36 +28,21 @@ public:
 public:
 /*------------------syntax part---------------------------*/
 public:
-
-	int		Open(int nFileType, char* pszFileName, Video_decode_info_t* pdecode_info);
-	int		Close(void);
-	void	Reset(void);
-
-	int	OpenVideo(HWND hWnd, char* pszFourCC, int strSize);
-	int	CloseVideo(void);
-
 	void	SetGrid(void);
 
 	int		Preview_FirstPicture(void);
 	int		Preview_LastPicture(void);
 
-	int		Preview_NextPicture(void);
-	int		Preview_PrePicture(void);
+	int		Preview_Forward1Picture(void);
+	int		Preview_Backward1Picture(void);
 	
-	int		Preview_ForwardPicture(void);
-	int		Preview_BackwardPicture(void);
+	int		Preview_ForwardNPicture(int n);
+	int		Preview_BackwardNPicture(int n);
 
-	int		Preview_AtPercent(int nPercent);
-	int		Preview_EOF(void);
-
-	int		Get_decode_info(Video_decode_info_t* pdecode_info);
+	int		Preview_SeekAtPercent(int nPercent);
+	int		Preview_beEOF(void);
 
 protected:
-
-//	Video_decode_info_t	m_DecodeInfo;
-
-	int		m_nFileType;
-	uint8_t*		m_pucFrameBuf[3];
 
 private:
 };

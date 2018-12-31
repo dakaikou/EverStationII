@@ -29,14 +29,31 @@ class MW_ES_LIB CVESDecoder : public CESDecoder
 public:
 	CVESDecoder(void);
 
-	int		OpenVideo(HWND hWnd);
-	int		CloseVideo(void);
-	void		Reset(void);
+	int		Open(uint32_t dwStreamType, char* pszFileName, Video_decode_info_t* pdecode_info);
+	int		Close(void);
+
+	int		OpenDirectxWnd(HWND hWnd);
+	int		CloseDirectxWnd(void);
+
+	//virtual int	Preview_FirstPicture(void);
+	//virtual int	Preview_LastPicture(void);
+
+	//virtual int	Preview_NextPicture(void);
+	//virtual int	Preview_PrePicture(void);
+
+	//virtual int	Preview_ForwardPicture(void);
+	//virtual int	Preview_BackwardPicture(void);
+
+	//virtual int	Preview_AtPercent(int nPercent);
+	//virtual int	Preview_EOF(void);
 
 protected:
 
 	HWND					m_hVidWnd;
 	Video_decode_info_t		m_VidDecodeInfo;
+
+	//int						m_nFileType;
+	uint8_t*				m_pucOutputFrameBuf[3];
 
 private:		//direct audio output
 
@@ -44,7 +61,7 @@ private:		//direct audio output
 	CTALForDirectDraw*		m_pDirectDraw;
 
 	int						m_nDebugFrameCount;
-	uint32_t				m_dwTimeCount;
+	uint32_t				m_dwDebugTimeTick;
 
 
 protected:
@@ -52,6 +69,8 @@ public:
 	
 	int DirectDraw_Render_yuv(void);
 	int DirectDraw_Paint(void);
+	void GetDecodeInfo(Video_decode_info_t* pparam);
+	HWND GetWndHandle(void);
 
 public:
 	~CVESDecoder();

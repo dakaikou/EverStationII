@@ -3,202 +3,27 @@
 #include <malloc.h>
 #include <io.h>
 #include <fcntl.h>
+#include <assert.h>
 
 #include "../Include/VideoDecoder_YUV.h"
+#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 
 CYUV_VideoDecoder::CYUV_VideoDecoder(void)
 {
-	m_pucFrameBuf[CC_Y] = NULL;
-	m_pucFrameBuf[CC_Cb] = NULL;
-	m_pucFrameBuf[CC_Cr] = NULL;
-
-//	memset(&m_VidDecodeInfo, 0x00, sizeof(Video_decode_info_t));
 }
 
 CYUV_VideoDecoder::~CYUV_VideoDecoder(void)
 {
-	Reset();
 }
 
-int CYUV_VideoDecoder::Open(int nFileType, char* pszFileName, Video_decode_info_t* pdecode_info)
-{
-	m_nFileType = nFileType;
-	strcpy_s(m_pszFileName, pszFileName);
-
-	memcpy(&m_VidDecodeInfo, pdecode_info, sizeof(Video_decode_info_t));
-
-	m_pucFrameBuf[CC_Y] = (uint8_t*)malloc(m_VidDecodeInfo.luma_buf_size);
-	m_pucFrameBuf[CC_Cb] = (uint8_t*)malloc(m_VidDecodeInfo.chroma_buf_size);
-	m_pucFrameBuf[CC_Cr] = (uint8_t*)malloc(m_VidDecodeInfo.chroma_buf_size);
-	memset(m_pucFrameBuf[CC_Y], 0x00, m_VidDecodeInfo.luma_buf_size);
-	memset(m_pucFrameBuf[CC_Cb], 0x80, m_VidDecodeInfo.chroma_buf_size);
-	memset(m_pucFrameBuf[CC_Cr], 0x80, m_VidDecodeInfo.chroma_buf_size);
-
-	m_VidDecodeInfo.pucY = m_pucFrameBuf[CC_Y];
-	m_VidDecodeInfo.pucU = m_pucFrameBuf[CC_Cb];
-	m_VidDecodeInfo.pucV = m_pucFrameBuf[CC_Cr];
-
-	if (m_nFileType == YUV_FILE_YUV)
-	{
-		_sopen_s(&m_hFile, m_pszFileName, _O_BINARY | _O_RDONLY, _SH_DENYWR, 0);
-		if (m_hFile > 0)
-		{
-			_lseeki64(m_hFile, 0, SEEK_END);
-			m_nFileTotalSize = _tell(m_hFile);
-
-			_lseek(m_hFile, 0, SEEK_SET);
-		}
-	}
-
-	return 0;
-}
-
-int CYUV_VideoDecoder::Close(void)
-{
-	Reset();
-
-	return 0;
-}
-
-void CYUV_VideoDecoder::Reset(void)
-{
-	int		 i;
-
-	memset(&m_VidDecodeInfo, 0x00, sizeof(Video_decode_info_t));
-
-	for (i = 0; i < 3; i++)
-	{
-		if (m_pucFrameBuf[i] != NULL)
-		{
-			free(m_pucFrameBuf[i]);
-			m_pucFrameBuf[i] = NULL;
-		}
-	}
-
-	if (m_hFile > 0)
-	{
-		_close(m_hFile);
-		m_hFile = 0;
-	}
-}
-
-int CYUV_VideoDecoder::OpenVideo(HWND hWnd, char* pszFourCC, int strSize)
-{
-//	if (pwidth != NULL)
-//	{
-//		*pwidth = m_VidDecodeInfo.display_width;
-//	}
-//	if (pheight != NULL)
-//	{
-//		*pheight = m_VidDecodeInfo.display_height;
-//	}
-//	if (pszFourCC != NULL)
-//	{
-//		strcpy_s(pszFourCC, m_VidDecodeInfo.pszFourCC);
-//	}
-
-	return CVESDecoder::OpenVideo(hWnd);
-}
-
-int CYUV_VideoDecoder::CloseVideo(void)
-{
-	return CVESDecoder::CloseVideo();
-}
-
-int CYUV_VideoDecoder::Preview_NextPicture(void)
-{
-	int		rdsize;
-	int		end_of_file = 0;
-	int		seek_count = 0;
-
-	if (_tell(m_hFile) < m_nFileTotalSize)
-	{
-		if (m_nFileType == YUV_FILE_YUV)
-		{
-//			if (end_of_file)
-//			{
-//				_lseeki64(m_hFile, 0, SEEK_SET);
-//				seek_count ++;
-//				end_of_file = 0;
-//			}
-
-			rdsize = _read(m_hFile, m_pucFrameBuf[CC_Y], m_VidDecodeInfo.luma_buf_size);
-			if (rdsize < m_VidDecodeInfo.luma_buf_size)
-			{
-				end_of_file = 1;
-			}
-
-			rdsize = _read(m_hFile, m_pucFrameBuf[CC_Cb], m_VidDecodeInfo.chroma_buf_size);
-			if (rdsize < m_VidDecodeInfo.chroma_buf_size)
-			{
-				//end of the file
-				end_of_file = 1;
-			}
-
-			rdsize = _read(m_hFile, m_pucFrameBuf[CC_Cr], m_VidDecodeInfo.chroma_buf_size);
-			if (rdsize < m_VidDecodeInfo.chroma_buf_size)
-			{
-				//end of the file
-				end_of_file = 1;
-			}
-		}
-		else if (m_nFileType == YUV_FILE_DY_DU_DV)
-		{
-			char pszFileName[256];
-
-			sprintf_s(pszFileName, "%s.y", m_pszFileName);
-			FILE* fpY = NULL;
-			fopen_s(&fpY, pszFileName, "rb");
-			if (fpY != NULL)
-			{
-				fread(m_pucFrameBuf[CC_Y], 1, m_VidDecodeInfo.luma_buf_size, fpY);
-				fclose(fpY);
-			}
-
-			sprintf_s(pszFileName, "%s.u", m_pszFileName);
-			FILE* fpU = NULL;
-			fopen_s(&fpU, pszFileName, "rb");
-			if (fpU != NULL)
-			{
-				fread(m_pucFrameBuf[CC_Cb], 1, m_VidDecodeInfo.chroma_buf_size, fpU);
-				fclose(fpU);
-			}
-
-			sprintf_s(pszFileName, "%s.v", m_pszFileName);
-			FILE* fpV = NULL;
-			fopen_s(&fpV, pszFileName, "rb");
-			if (fpV != NULL)
-			{
-				fread(m_pucFrameBuf[CC_Cr], 1, m_VidDecodeInfo.chroma_buf_size, fpV);
-				fclose(fpV);
-
-			}
-		}
-
-		DirectDraw_Render_yuv();
-//		::SendMessage(m_hVidWnd, WM_UPDATE_PICTURE, (WPARAM)&m_VidDecodeInfo, NULL);
-	}
-
-	int percent = 0;
-
-	if (m_nFileTotalSize > 0)
-	{
-		int filepos = _tell(m_hFile);
-		
-		percent = (int)(filepos * 100 / m_nFileTotalSize);
-	}
-
-	return percent;	
-}
-
-int	CYUV_VideoDecoder::Preview_EOF(void)
+//implementation of virtual fuction
+int	CYUV_VideoDecoder::Preview_beEOF(void)
 {
 	int	bEOF = FALSE;
 
-	int filepos = _tell(m_hFile);
-	int endpos = m_nFileTotalSize - (m_nFileTotalSize % m_VidDecodeInfo.frame_buf_size);
+	int64_t endpos = m_nFileTotalSize - (m_nFileTotalSize % m_VidDecodeInfo.frame_buf_size);
 
-	if (filepos >= endpos)
+	if (m_nCurReadPos >= endpos)
 	{
 		bEOF = TRUE;
 	}
@@ -206,81 +31,175 @@ int	CYUV_VideoDecoder::Preview_EOF(void)
 	return bEOF;
 }
 
-int CYUV_VideoDecoder::Preview_PrePicture(void)
+//implementation of virtual fuction
+int CYUV_VideoDecoder::Preview_Forward1Picture(void)
 {
-	int64_t filepos = _telli64(m_hFile);
+	int		rdsize;
+	//int		end_of_file = 0;
+	//int		seek_count = 0;
+	int		percent = 100;
+
+	if (m_nCurReadPos < m_nFileTotalSize)
+	{
+		if (m_dwStreamType == (STREAM_FILE | YUV_FILE_YUV))
+		{
+			rdsize = _read(m_hFile, m_pucOutputFrameBuf[CC_Y], m_VidDecodeInfo.luma_buf_size);
+			if (rdsize < m_VidDecodeInfo.luma_buf_size)
+			{
+				//end_of_file = 1;
+				assert(0);
+			}
+
+			rdsize = _read(m_hFile, m_pucOutputFrameBuf[CC_Cb], m_VidDecodeInfo.chroma_buf_size);
+			if (rdsize < m_VidDecodeInfo.chroma_buf_size)
+			{
+				//end of the file
+				//end_of_file = 1;
+				assert(0);
+			}
+
+			rdsize = _read(m_hFile, m_pucOutputFrameBuf[CC_Cr], m_VidDecodeInfo.chroma_buf_size);
+			if (rdsize < m_VidDecodeInfo.chroma_buf_size)
+			{
+				//end of the file
+				//end_of_file = 1;
+				assert(0);
+			}
+
+			//m_nCurReadPos = _telli64(m_hFile);
+			m_nCurReadPos += m_VidDecodeInfo.frame_buf_size;
+
+			percent = (int)(m_nCurReadPos * 100.0 / m_nFileTotalSize);
+		}
+		//else if (m_dwStreamType == (STREAM_FILE | YUV_FILE_DY_DU_DV))
+		//{
+		//	char pszFileName[256];
+
+		//	sprintf_s(pszFileName, "%s.y", m_pszFileName);
+		//	FILE* fpY = NULL;
+		//	fopen_s(&fpY, pszFileName, "rb");
+		//	if (fpY != NULL)
+		//	{
+		//		fread(m_pucOutputFrameBuf[CC_Y], 1, m_VidDecodeInfo.luma_buf_size, fpY);
+		//		fclose(fpY);
+		//	}
+
+		//	sprintf_s(pszFileName, "%s.u", m_pszFileName);
+		//	FILE* fpU = NULL;
+		//	fopen_s(&fpU, pszFileName, "rb");
+		//	if (fpU != NULL)
+		//	{
+		//		fread(m_pucOutputFrameBuf[CC_Cb], 1, m_VidDecodeInfo.chroma_buf_size, fpU);
+		//		fclose(fpU);
+		//	}
+
+		//	sprintf_s(pszFileName, "%s.v", m_pszFileName);
+		//	FILE* fpV = NULL;
+		//	fopen_s(&fpV, pszFileName, "rb");
+		//	if (fpV != NULL)
+		//	{
+		//		fread(m_pucOutputFrameBuf[CC_Cr], 1, m_VidDecodeInfo.chroma_buf_size, fpV);
+		//		fclose(fpV);
+
+		//	}
+		//}
+
+		DirectDraw_Render_yuv();
+	}
+
+	return percent;	
+}
+
+//implementation of virtual fuction
+int CYUV_VideoDecoder::Preview_Backward1Picture(void)
+{
+	int64_t filepos = m_nCurReadPos;
 	
-	filepos -= (m_VidDecodeInfo.frame_buf_size << 1);
+	filepos -= (m_VidDecodeInfo.frame_buf_size * (1+1));
 	if (filepos < 0)
 	{
 		_lseeki64(m_hFile, 0, SEEK_SET);
+		m_nCurReadPos = 0;
 	}
 	else
 	{
 		_lseeki64(m_hFile, filepos, SEEK_SET);
+		m_nCurReadPos = filepos;
 	}
 
-	return Preview_NextPicture();
+	return Preview_Forward1Picture();
 }
 
-int CYUV_VideoDecoder::Preview_ForwardPicture(void)
+//implementation of virtual fuction
+int CYUV_VideoDecoder::Preview_ForwardNPicture(int n)
 {
-	int filepos = _tell(m_hFile);
+	int64_t filepos = m_nCurReadPos;
 
-	filepos += m_VidDecodeInfo.frame_buf_size * 5;
+	filepos += m_VidDecodeInfo.frame_buf_size * (n-1);
+
+	//if move exceed the last frame, than seek at the last frame
 	if (filepos > (m_nFileTotalSize - m_VidDecodeInfo.frame_buf_size))
 	{
 		filepos = (m_nFileTotalSize - m_VidDecodeInfo.frame_buf_size);
 	}
 	filepos -= (filepos % m_VidDecodeInfo.frame_buf_size);
-	_lseek(m_hFile, filepos, SEEK_SET);
+	_lseeki64(m_hFile, filepos, SEEK_SET);
+	m_nCurReadPos = filepos;
 
-	return Preview_NextPicture();
+	return Preview_Forward1Picture();
 }
 
-int CYUV_VideoDecoder::Preview_BackwardPicture(void)
+//implementation of virtual fuction
+int CYUV_VideoDecoder::Preview_BackwardNPicture(int n)
 {
-	int64_t filepos = _telli64(m_hFile);
+	int64_t filepos = m_nCurReadPos;
 
-	filepos -= m_VidDecodeInfo.frame_buf_size * 5;
+	filepos -= m_VidDecodeInfo.frame_buf_size * (n+1);
 	if (filepos < 0)
 	{
 		filepos = 0;
 	}
 	_lseeki64(m_hFile, filepos, SEEK_SET);
+	m_nCurReadPos = filepos;
 
-	return Preview_NextPicture();
+	return Preview_Forward1Picture();
 }
 
+//implementation of virtual fuction
 int CYUV_VideoDecoder::Preview_LastPicture(void)
 {
-	int filepos = m_nFileTotalSize - m_VidDecodeInfo.frame_buf_size;
-	
-	filepos -= filepos % m_VidDecodeInfo.frame_buf_size;
+	int64_t filepos = m_nFileTotalSize - m_VidDecodeInfo.frame_buf_size;
+	filepos -= (filepos % m_VidDecodeInfo.frame_buf_size);
 
-	_lseek(m_hFile, filepos, SEEK_SET);
+	_lseeki64(m_hFile, filepos, SEEK_SET);
+	m_nCurReadPos = filepos;
 
-	return Preview_NextPicture();
+	return Preview_Forward1Picture();
 }
 
+//implementation of virtual fuction
 int CYUV_VideoDecoder::Preview_FirstPicture(void)
 {
-	_lseek(m_hFile, 0, SEEK_SET);
+	_lseeki64(m_hFile, 0, SEEK_SET);
+	m_nCurReadPos = 0;
 
-	return Preview_NextPicture();
+	return Preview_Forward1Picture();
 }
 
-int CYUV_VideoDecoder::Preview_AtPercent(int nPercent)
+//implementation of virtual fuction
+int CYUV_VideoDecoder::Preview_SeekAtPercent(int nPercent)
 {
-	int		 offset;
+	int64_t		 offset;
 
-	offset = m_nFileTotalSize * nPercent / 100;
-	offset -= offset % m_VidDecodeInfo.frame_buf_size;
-	_lseek(m_hFile, offset, SEEK_SET);
+	offset = (int64_t)((m_nFileTotalSize / 100.0)  * nPercent);
+	offset -= (offset % m_VidDecodeInfo.frame_buf_size);
+	_lseeki64(m_hFile, offset, SEEK_SET);
+	m_nCurReadPos = offset;
 
-	return Preview_NextPicture();
+	return Preview_Forward1Picture();
 }
 
+//implementation of virtual fuction
 void CYUV_VideoDecoder::SetGrid(void)
 {
 /*	
@@ -303,24 +222,6 @@ void CYUV_VideoDecoder::SetGrid(void)
 		}
 	}
 */	
-}
-
-int	CYUV_VideoDecoder::Get_decode_info(Video_decode_info_t* pdecode_info)
-{
-	int	rtcode = 0;
-
-	if (pdecode_info != NULL)
-	{
-		memcpy(pdecode_info, &m_VidDecodeInfo, sizeof(Video_decode_info_t));
-
-		//¨º1¨®??a??¡¤?¡¤¡§?¨¦¨°?¨¨¡¤¡À¡ê¨®|¨®?3¨¬D¨°???¨¹¦Ì?¦Ì??¨²o?¦Ì??¡À¡À?¡ê??T?????¡äDT??2??¨¢???¦Ì?¨²o?¦Ì???DD
-	}
-	else
-	{
-		rtcode = -1;
-	}
-
-	return rtcode;
 }
 
 void DecodeFourCC2Text(char* pszFourCC, char* pszText, int size)

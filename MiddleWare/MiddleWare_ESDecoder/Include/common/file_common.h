@@ -41,11 +41,11 @@ typedef struct
 typedef struct
 {
 	char		ID[4];
-	int		file_size;
+	int			file_size;
 	char		type[4];
 	char		format[4];
 	
-	int		length;
+	int			length;
 	union
 	{
 		formatchunk_t	waveFormat;

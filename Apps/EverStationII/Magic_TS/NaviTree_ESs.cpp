@@ -365,8 +365,84 @@ void CNaviTree_ESs::DeleteChildItems(HTREEITEM hParentItem)
 void CNaviTree_ESs::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// TODO: Add your control notification handler code here
+	FiringCatchThread();
 
-//	GUI_PESES_SYNTAX_ITEM_ID_u	ItemId;
+	*pResult = 0;
+}
+
+
+void CNaviTree_ESs::OnNMRClick(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: 在此添加控件通知处理程序代码
+	int			  nClassType;
+	int			  nPID;
+	int			  nStreamType;
+	int			  nSubType;
+
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+	CTreeCtrl& treeCtrl = GetTreeCtrl();
+
+	HTREEITEM hSelItem = treeCtrl.GetSelectedItem();
+	DWORD dwItemData = (uint32_t)treeCtrl.GetItemData(hSelItem);
+
+	if ((dwItemData & 0xffff0000) != 0x00000000)
+	{
+		nClassType = (dwItemData & 0xE0000000) >> 29;
+		nPID = (dwItemData & 0x1FFF0000) >> 16;
+		nStreamType = (dwItemData & 0x0000FF00) >> 8;
+		nSubType = (dwItemData & 0x000000FF);
+
+		if (((pTSMagicView->m_kThreadParams.offline == 1) && (pTSMagicView->m_kThreadParams.main_thread_stopped == 1)) ||
+			(pTSMagicView->m_kThreadParams.offline == 0))
+		{
+			CMenu	menu, *pSubMenu;
+			menu.LoadMenu(IDR_RIGHT_KEY_MENU);//装载自定义的右键菜单
+
+			pSubMenu = menu.GetSubMenu(1);//获取第一个弹出菜单，所以第一个菜单必须有子菜单
+
+			CPoint oPoint;//定义一个用于确定光标位置的位置
+			GetCursorPos(&oPoint);//获取当前光标的位置，以便使得菜单可以跟随光标
+
+			if (nClassType == TSPAYLOAD_CLASS_PES_VIDEO)
+			{
+				pSubMenu->EnableMenuItem(ID_ES_VIDEO_PREVIEW, MF_ENABLED);
+			}
+			else if (nClassType == TSPAYLOAD_CLASS_PES_AUDIO)
+			{
+				pSubMenu->EnableMenuItem(ID_ES_AUDIO_PREVIEW, MF_ENABLED);
+			}
+
+			pSubMenu->TrackPopupMenu(TPM_LEFTALIGN, oPoint.x, oPoint.y, this); //在指定位置显示弹出菜单
+		}
+	}
+
+	*pResult = 0;
+}
+
+
+void CNaviTree_ESs::OnEsVideoPreview()
+{
+	// TODO: 在此添加命令处理程序代码
+	CDlg_ShowVideo	m_dlgTV;
+
+	m_dlgTV.DoModal();
+}
+
+
+void CNaviTree_ESs::OnEsAudioPreview()
+{
+	// TODO: 在此添加命令处理程序代码
+}
+
+
+void CNaviTree_ESs::OnEsSyntaxAnalyse()
+{
+	// TODO: 在此添加命令处理程序代码
+	FiringCatchThread();
+}
+
+void CNaviTree_ESs::FiringCatchThread(void)
+{
 	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 	char		  pszText[MAX_TXT_CHARS];
 	int			  nClassType;
@@ -450,76 +526,4 @@ void CNaviTree_ESs::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 			}
 		}
 	}
-
-	*pResult = 0;
-}
-
-
-
-
-void CNaviTree_ESs::OnNMRClick(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	// TODO: 在此添加控件通知处理程序代码
-	int			  nClassType;
-	int			  nPID;
-	int			  nStreamType;
-	int			  nSubType;
-
-	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	CTreeCtrl& treeCtrl = GetTreeCtrl();
-
-	HTREEITEM hSelItem = treeCtrl.GetSelectedItem();
-	DWORD dwItemData = (uint32_t)treeCtrl.GetItemData(hSelItem);
-
-	if ((dwItemData & 0xffff0000) != 0x00000000)
-	{
-		nClassType = (dwItemData & 0xE0000000) >> 29;
-		nPID = (dwItemData & 0x1FFF0000) >> 16;
-		nStreamType = (dwItemData & 0x0000FF00) >> 8;
-		nSubType = (dwItemData & 0x000000FF);
-
-		if (((pTSMagicView->m_kThreadParams.offline == 1) && (pTSMagicView->m_kThreadParams.main_thread_stopped == 1)) ||
-			(pTSMagicView->m_kThreadParams.offline == 0))
-		{
-			CMenu	menu, *pSubMenu;
-			menu.LoadMenu(IDR_RIGHT_KEY_MENU);//装载自定义的右键菜单
-
-			pSubMenu = menu.GetSubMenu(1);//获取第一个弹出菜单，所以第一个菜单必须有子菜单
-
-			CPoint oPoint;//定义一个用于确定光标位置的位置
-			GetCursorPos(&oPoint);//获取当前光标的位置，以便使得菜单可以跟随光标
-
-			pSubMenu->TrackPopupMenu(TPM_LEFTALIGN, oPoint.x, oPoint.y, this); //在指定位置显示弹出菜单
-
-			pSubMenu->EnableMenuItem(ID_ES_VIDEO_PREVIEW, MF_GRAYED | MF_BYCOMMAND);
-			pSubMenu->EnableMenuItem(ID_ES_AUDIO_PREVIEW, MF_GRAYED | MF_BYCOMMAND);
-			//if (nClassType == TSPAYLOAD_CLASS_SECTION)
-			//{
-			//}
-			//else if (nClassType == TSPAYLOAD_CLASS_PES_DATA)
-			//{
-			//	pSubMenu->EnableMenuItem(ID_DOWNLOAD_OCDC, 1);
-			//}
-		}
-	}
-
-	*pResult = 0;
-}
-
-
-void CNaviTree_ESs::OnEsVideoPreview()
-{
-	// TODO: 在此添加命令处理程序代码
-}
-
-
-void CNaviTree_ESs::OnEsAudioPreview()
-{
-	// TODO: 在此添加命令处理程序代码
-}
-
-
-void CNaviTree_ESs::OnEsSyntaxAnalyse()
-{
-	// TODO: 在此添加命令处理程序代码
 }

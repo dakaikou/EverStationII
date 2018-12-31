@@ -179,7 +179,6 @@
   <ItemGroup>
     <ClCompile Include="Impl\MiddleWare_Utilities_MediaFile.cpp" />
     <ClCompile Include="Impl\MiddleWare_Utilities_Video.cpp" />
-    <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

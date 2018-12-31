@@ -8,16 +8,15 @@
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 #include "../Include/ESDecoder.h"
+#include "../Include/ESDecoder_ErrorCode.h"
 
 CESDecoder::CESDecoder(void)
 {
 	m_hFile = -1;
+	memset(m_pszFileName, sizeof(m_pszFileName), 0x00);
+	m_dwStreamType = 0;
 
-	m_nStreamType = 0;
-	
-	m_hMsgWnd = NULL;
-
-	av_es_parse = NULL;
+	m_callback_av_es_parse = NULL;
 
 	m_nPrePcrPos = -1;
 	m_nPrePtsPos = -1;
@@ -25,80 +24,68 @@ CESDecoder::CESDecoder(void)
 
 	m_usES_PID = 0xffff;
 	m_usPCR_PID = 0xffff;
-
-	//m_nWriteCount = 0;
 }
 
 CESDecoder::~CESDecoder()
 {
-	Reset();
+	//Reset();
 }
 
-int CESDecoder::Open(HWND hMsgWnd, int nStreamType, char* pszFileName)
+int CESDecoder::Open(uint32_t dwStreamType, char* pszFileName)
 {
-	//m_fifo.rdptr = m_fifo.wrptr = m_fifo.buf;
-	//m_fifo.endptr = m_fifo.buf + FIFO_BUF_SIZE;
-	//m_fifo.bitleft = 0;
-	//m_fifo.rdbit_offset = 0;
+	m_dwStreamType = dwStreamType;
 
-	m_nStreamType = nStreamType;
-
-	if (m_nStreamType & STREAM_FILE)
+	if (m_dwStreamType & STREAM_FILE)
 	{
 		strcpy_s(m_pszFileName, pszFileName);
 
 		_sopen_s(&m_hFile, m_pszFileName, _O_BINARY | _O_RDONLY, _SH_DENYWR, 0);
 
-		_lseek(m_hFile, 0, SEEK_END);
-		m_nFileTotalSize = _tell(m_hFile);
+		_lseeki64(m_hFile, 0, SEEK_END);
+		m_nFileTotalSize = _telli64(m_hFile);
 
-		_lseek(m_hFile, 0, SEEK_SET);
+		_lseeki64(m_hFile, 0, SEEK_SET);
 		m_nFileStartPos = 0;
-
-		//m_fifo.hFile = m_hFile;
+		m_nCurReadPos = 0;
 	}
-	else
-	{
-		//m_fifo.hFile = -1;
-	}
-
-	//m_nTriggerType = ES_TRIGGER_ONESHOT;		
-	//m_bTriggering = 0;
-
-	//m_hMsgWnd = hMsgWnd;
 
 	return 0;
 }
 
-int CESDecoder::IsOpened(void)
-{
-	return (m_hMsgWnd != NULL);
-}
+//int CESDecoder::IsOpened(void)
+//{
+//	return (m_hMsgWnd != NULL);
+//}
 
 int CESDecoder::Close()
 {
-	//m_fifo.rdptr = m_fifo.wrptr = m_fifo.buf;
-	//m_fifo.endptr = m_fifo.buf + FIFO_BUF_SIZE;
-	//m_fifo.bitleft = 0;
-	//m_fifo.rdbit_offset = 0;
-
-	//if (m_nStreamType & STREAM_FILE)
-	//{
-	//	if (m_hFile != -1)
-	//	{
-	//		_close(m_hFile);
-	//		m_hFile = -1;
-	//	}
-	//}
-
-	//m_fifo.hFile = -1;
-
-//	m_nTriggerType = AV_TRIGGER_ONESHOT;		
-//	m_bTriggering = 0;
-
-	Reset();
+	if (m_dwStreamType & STREAM_FILE)
+	{
+		if (m_hFile != -1)
+		{
+			_close(m_hFile);
+			m_hFile = -1;
+		}
+		memset(m_pszFileName, sizeof(m_pszFileName), 0x00);
+	}
 
 	return 0;
+}
+
+int	CESDecoder::GetTitle(char* pszTitle, int strLen)
+{
+	int rtcode = ESDECODER_NO_ERROR;
+
+	if (strlen(m_pszFileName) > 0)
+	{
+		strcpy_s(pszTitle, strLen, m_pszFileName);
+	}
+	else
+	{
+		rtcode = ESDECODER_UNKNOWN_ERROR;
+	}
+
+	return rtcode;
 }
 
 // pos -- first ts packet byte position
@@ -188,51 +175,51 @@ int CESDecoder::Close()
 int CESDecoder::WriteTSPacket(transport_packet_t* pts_packet, int64_t pos)
 {
 	int				rtcode = NO_ERROR;
-	uint8_t*		payload_buf;
-	int			payload_length;
-	uint8_t		pes_header_length;
+	//uint8_t*		payload_buf;
+	//int			payload_length;
+	//uint8_t		pes_header_length;
 
 	//	m_nPos = pos;
 
-	if (IsOpened() && (m_nStreamType == STREAM_TS))
-	{
+	//if (IsOpened() && (m_nStreamType == STREAM_TS))
+	//{
 
-		if (pts_packet->PID == m_usES_PID)
-		{
+	//	if (pts_packet->PID == m_usES_PID)
+	//	{
 
-			if (pts_packet->transport_error_indicator == 0)				//packet with no error
-			{
-				if (pts_packet->transport_scrambling_control == 0)		//not scrambled
-				{
-					payload_buf = pts_packet->payload_buf;
-					payload_length = pts_packet->payload_length;
+	//		if (pts_packet->transport_error_indicator == 0)				//packet with no error
+	//		{
+	//			if (pts_packet->transport_scrambling_control == 0)		//not scrambled
+	//			{
+	//				payload_buf = pts_packet->payload_buf;
+	//				payload_length = pts_packet->payload_length;
 
-					//get pes stream
+	//				//get pes stream
 
-					if (pts_packet->payload_unit_start_indicator)
-					{
-						//discard the pes header
-						pes_header_length = payload_buf[8] + 9;
+	//				if (pts_packet->payload_unit_start_indicator)
+	//				{
+	//					//discard the pes header
+	//					pes_header_length = payload_buf[8] + 9;
 
-						MPEG_decode_PES_packet(payload_buf, pes_header_length, &m_PES_packet);
-						//if (m_hMsgWnd != NULL)
-						//{
-						//	::SendMessage(m_hMsgWnd, WM_UPDATE_PES_HEADER, (WPARAM)&m_PES_packet, m_PES_packet.stream_id);
-						//}
+	//					MPEG_decode_PES_packet(payload_buf, pes_header_length, &m_PES_packet);
+	//					//if (m_hMsgWnd != NULL)
+	//					//{
+	//					//	::SendMessage(m_hMsgWnd, WM_UPDATE_PES_HEADER, (WPARAM)&m_PES_packet, m_PES_packet.stream_id);
+	//					//}
 
-						payload_buf += pes_header_length;
-						payload_length -= pes_header_length;
-					}
+	//					payload_buf += pes_header_length;
+	//					payload_length -= pes_header_length;
+	//				}
 
-					//copy data
-					WriteESData(payload_buf, payload_length);
-				}
-			}
-		}
-	}
-	else
-	{
-	}
+	//				//copy data
+	//				WriteESData(payload_buf, payload_length);
+	//			}
+	//		}
+	//	}
+	//}
+	//else
+	//{
+	//}
 
 	return rtcode;
 }
@@ -338,84 +325,123 @@ int CESDecoder::FillData(void)
 	return rtcode;
 }
 
-void CESDecoder::Reset(void)
-{
-	m_nTriggerType = ES_TRIGGER_ONESHOT;		
-	m_bTriggering = 0;
-
-	m_nPrePcrPos = -1;
-	m_nPrePtsPos = -1;
-	m_nPreDtsPos = -1;
-
-	m_usES_PID = 0xffff;
-	m_usPCR_PID = 0xffff;
-}
+//void CESDecoder::Reset(void)
+//{
+//	m_nTriggerType = ES_TRIGGER_ONESHOT;		
+//	m_bTriggering = 0;
+//
+//	m_nPrePcrPos = -1;
+//	m_nPrePtsPos = -1;
+//	m_nPreDtsPos = -1;
+//
+//	m_usES_PID = 0xffff;
+//	m_usPCR_PID = 0xffff;
+//}
 
 //返回旧的触发类型
-int CESDecoder::SetTrigger(int nTriggerType)
+//int CESDecoder::SetTrigger(int nTriggerType)
+//{
+//	int rtcode = 0;
+//	
+//	//rtcode = m_nTriggerType;
+//
+//	//m_nTriggerType = nTriggerType;
+//
+//	return rtcode;
+//}
+
+//int	CESDecoder::Preview_SetFileRatio(int nPercent)
+//{
+//	int64_t	    offset;
+//	float		dRatio = nPercent / 100.0f;
+//
+//	offset = m_nFileStartPos + (int64_t)((m_nFileTotalSize - m_nFileStartPos) * dRatio);
+//
+//	//if (m_hFile != -1)
+//	//{
+//	//	_lseek(m_hFile, offset, SEEK_SET);
+//	//}
+//
+//	//m_fifo.rdptr = m_fifo.wrptr = m_fifo.buf;
+//	//m_fifo.bitleft = 0;
+//	//m_fifo.rdbit_offset = 0;
+//	//m_fifo.endptr = m_fifo.buf + FIFO_BUF_SIZE;
+//
+//	return 0;
+//}
+
+//int	CESDecoder::Preview_EOF(void)
+//{
+//	int bEOF = 0;
+//
+//	bEOF = (Preview_GetFilePos() >= m_nFileTotalSize) ? 1 : 0;
+//
+//	return bEOF;
+//}
+//
+//int	CESDecoder::Preview_GetFilePos(void)
+//{
+//	int filepos = 0;
+//	
+//	//if (m_hFile != -1)
+//	//{
+//	//	filepos = _tell(m_hFile);
+//	//}
+//
+//	return filepos;
+//}
+//
+//int CESDecoder::Preview_GetFileRatio(void)
+//{
+//	int64_t filepos = 0;
+//	int percent = 0;
+//
+//	//filepos = Preview_GetFilePos() - (m_fifo.endptr - m_fifo.rdptr);
+//
+//	//if (m_nFileTotalSize > 0)
+//	//{
+//	//	percent = (int)((filepos - m_nFileStartPos) * 100.0f / (m_nFileTotalSize - m_nFileStartPos));
+//	//}
+//
+//	return percent;
+//}
+
+int CESDecoder::Preview_FirstPicture(void)
 {
-	int rtcode = 0;
-	
-	//rtcode = m_nTriggerType;
-
-	//m_nTriggerType = nTriggerType;
-
-	return rtcode;
+	return -1;
 }
 
-int	CESDecoder::Preview_SetFileRatio(int nPercent)
+int CESDecoder::Preview_LastPicture(void)
 {
-	int	   offset;
-	float  dRatio = nPercent / 100.0f;
-
-	offset = m_nFileStartPos + (int)((m_nFileTotalSize - m_nFileStartPos) * dRatio);
-
-	//if (m_hFile != -1)
-	//{
-	//	_lseek(m_hFile, offset, SEEK_SET);
-	//}
-
-	//m_fifo.rdptr = m_fifo.wrptr = m_fifo.buf;
-	//m_fifo.bitleft = 0;
-	//m_fifo.rdbit_offset = 0;
-	//m_fifo.endptr = m_fifo.buf + FIFO_BUF_SIZE;
-
-	return 0;
+	return -1;
 }
 
-int	CESDecoder::Preview_EOF(void)
+int CESDecoder::Preview_Forward1Picture(void)
 {
-	int bEOF = 0;
-
-	bEOF = (Preview_GetFilePos() >= m_nFileTotalSize) ? 1 : 0;
-
-	return bEOF;
+	return -1;
 }
 
-int	CESDecoder::Preview_GetFilePos(void)
+int CESDecoder::Preview_Backward1Picture(void)
 {
-	int filepos = 0;
-	
-	//if (m_hFile != -1)
-	//{
-	//	filepos = _tell(m_hFile);
-	//}
-
-	return filepos;
+	return -1;
 }
 
-int CESDecoder::Preview_GetFileRatio(void)
+int CESDecoder::Preview_ForwardNPicture(int n)
 {
-	int64_t filepos = 0;
-	int percent = 0;
-
-	//filepos = Preview_GetFilePos() - (m_fifo.endptr - m_fifo.rdptr);
-
-	//if (m_nFileTotalSize > 0)
-	//{
-	//	percent = (int)((filepos - m_nFileStartPos) * 100.0f / (m_nFileTotalSize - m_nFileStartPos));
-	//}
-
-	return percent;
+	return -1;
 }
 
+int CESDecoder::Preview_BackwardNPicture(int n)
+{
+	return -1;
+}
+
+int CESDecoder::Preview_SeekAtPercent(int nPercent)
+{
+	return -1;
+}
+
+int CESDecoder::Preview_beEOF(void)
+{
+	return -1;
+}

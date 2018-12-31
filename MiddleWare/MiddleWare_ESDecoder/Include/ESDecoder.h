@@ -18,34 +18,35 @@
 #include <stdint.h>
 
 #include <windows.h>
-#include <mmsystem.h>
+//#include <mmsystem.h>
 
 #include "translate_layer/Mpeg_PESPacket/Include/MPEG_PES_packet.h"
 #include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
 
-#include "./common/audio_common.h"
-#include "./common/file_common.h"
+//#include "./common/audio_common.h"
+//#include "./common/file_common.h"
 
-#include "thirdparty_libs/directx/include/dsound.h"
+//#include "thirdparty_libs/directx/include/dsound.h"
 
-#define DS_NOTIFY_COUNT			2
+#define WM_REPORT_VIDEO_DECODE_FPS		WM_USER	+ 2500
+#define DS_NOTIFY_COUNT					2
 
-typedef enum
-{
-	ES_TRIGGER_NONE	= 0,
-	ES_TRIGGER_ONESHOT,
-	ES_TRIGGER_CONTINUE
-} ES_TRIGGER_STYLE_e;
+//typedef enum
+//{
+//	ES_TRIGGER_NONE	= 0,
+//	ES_TRIGGER_ONESHOT,
+//	ES_TRIGGER_CONTINUE
+//} ES_TRIGGER_STYLE_e;
 
-typedef struct
-{
-	uint32_t		syncword;
-	uint32_t		start_code;
-
-	uint8_t*		rbsp_byte;
-	int		NumBytesInRBSP;
-
-} AV_nal_unit_t, *pAV_nal_unit_t;
+//typedef struct
+//{
+//	uint32_t		syncword;
+//	uint32_t		start_code;
+//
+//	uint8_t*		rbsp_byte;
+//	int				NumBytesInRBSP;
+//
+//} AV_nal_unit_t, *pAV_nal_unit_t;
 
 class MW_ES_LIB CESDecoder
 {
@@ -61,54 +62,45 @@ protected:
 	int64_t			m_nPrePtsPos;
 	int64_t			m_nPreDtsPos;
 
-	uint16_t			m_usES_PID;
-	uint16_t			m_usPCR_PID;
+	uint16_t		m_usES_PID;
+	uint16_t		m_usPCR_PID;
 
-	uint8_t			m_nStreamType;
+	uint32_t		m_dwStreamType;
 
-	int			(*av_es_parse)(PVOID* pvoid);
+	int				(*m_callback_av_es_parse)(PVOID* pvoid);
 
 	//pull mode functions
 	char			m_pszFileName[256];
 
-	int			m_hFile;
-	int			m_nFileTotalSize;
-	int			m_nFileStartPos;
-
-	//int			m_nWriteCount;
-
-public:
-
-	HWND		m_hMsgWnd;
-
-	int			m_nTriggerType;
-	int			m_bTriggering;
+	int				m_hFile;
+	int64_t			m_nFileTotalSize;
+	int64_t			m_nFileStartPos;
+	int64_t			m_nCurReadPos;
 
 public:
 
-	//FIFO_t		m_fifo;
-
-public:
-
-	virtual	int	 Open(HWND hMsgWnd, int nStreamType, char* pszFileName);
-	virtual int  Close(void);
+	int			Open(uint32_t dwStreamType, char* pszFileName);
+	int			Close(void);
+	int			GetTitle(char* pszTitle, int strLen);
 	
 	int			WriteTSPacket(transport_packet_t* pts_packet, int64_t pos);
 //	int			WriteTSPacket(U8* buf, int length, int64_t pos);
 	int			WriteESData(uint8_t* buf, int length);
 	int			FillData(void);
-	int			IsOpened(void);
 	int			SetParams(uint16_t ES_PID, uint16_t  PCR_PID);
 
-	int	Preview_EOF(void);
-	int	Preview_GetFilePos(void);
-
-	int	Preview_SetFileRatio(int nPercent);
-	int Preview_GetFileRatio(void);
-
 public:
-	void		Reset(void);
-	int			SetTrigger(int nTriggerType);
+	virtual int	Preview_FirstPicture(void);
+	virtual int	Preview_LastPicture(void);
+
+	virtual int	Preview_Forward1Picture(void);
+	virtual int	Preview_Backward1Picture(void);
+
+	virtual int	Preview_ForwardNPicture(int n);
+	virtual int	Preview_BackwardNPicture(int n);
+
+	virtual int	Preview_SeekAtPercent(int nPercent);
+	virtual int	Preview_beEOF(void);
 
 public:
 	~CESDecoder();

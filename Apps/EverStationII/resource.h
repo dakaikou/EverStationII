@@ -137,7 +137,6 @@
 #define IDR_TOOLBAR_FRAME_256           311
 #define IDD_CONFIG_SYSDEBUG             313
 #define IDD_CONFIG_WINPCAP              314
-#define IDD_CDlg_EpgContainer           315
 #define IDD_CONFIG_TSINPUT              317
 #define IDD_TS_ANALYZER_NORMAL          318
 #define IDD_TS_ANALYZER_EPG1            319
@@ -240,10 +239,6 @@
 #define IDC_TREE_TS_PROGRAMS            1078
 #define IDC_STATIC_ES_VIDEO             1079
 #define IDC_STATIC_ES_AUDIO             1080
-#define IDC_BTN_PESES_PTS               1088
-#define IDC_BTN_PESES_DTS               1089
-#define IDC_BTN_PESES_BUFFER            1090
-#define IDC_BTN_PESES_WATCH             1091
 #define IDC_BTN_TSPACKET_RESET          1092
 #define IDC_BTN_NEXT_FRAME              1100
 #define IDC_BTN_NEXT_5FRAME             1101
@@ -361,6 +356,12 @@
 #define ID_ES_SYNTAX_ANALYSE            32787
 #define ID_TS_DECIMATE_TO_PES           32788
 #define ID_TS_DECIMATE_TO_SECTION       32789
+#define ID_ES32790                      32790
+#define ID_ES32791                      32791
+#define ID_ES_PTS_ANALYSE               32792
+#define ID_ES_DTS_ANALYSE               32793
+#define ID_ES32794                      32794
+#define ID_ES_BUF_ANALYSE               32795
 #define IDC_BTN_YUVMAGIC                32845
 #define IDC_BTN_PSMAGIC                 32849
 
@@ -369,7 +370,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        319
-#define _APS_NEXT_COMMAND_VALUE         32790
+#define _APS_NEXT_COMMAND_VALUE         32796
 #define _APS_NEXT_CONTROL_VALUE         1012
 #define _APS_NEXT_SYMED_VALUE           320
 #endif

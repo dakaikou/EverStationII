@@ -23,7 +23,7 @@ static char THIS_FILE[] = __FILE__;
 //#include "MiddleWare_ESDecoder/Include/VideoDecoder_AVS.h"
 //#include "MiddleWare_ESDecoder/Include/AudioDecoder_AAC.h"
 //#include "MiddleWare_ESDecoder/Include/AudioDecoder_AC3.h"
-#include "MiddleWare/MiddleWare_ESDecoder/Include/VideoDecoder_YUV.h"
+#include "MiddleWare/MiddleWare_ESDecoder/Include/ESDecoder_ErrorCode.h"
 //#include "MiddleWare_ESDecoder/Include/AudioDecoder_WAVE.h"
 
 CDlg_ShowVideo::CDlg_ShowVideo(CWnd* pParent /*=NULL*/)
@@ -31,7 +31,7 @@ CDlg_ShowVideo::CDlg_ShowVideo(CWnd* pParent /*=NULL*/)
 {
 	//{{AFX_DATA_INIT(CDlg_ShowVideo)
 	//}}AFX_DATA_INIT
-	m_nVidStreamType = STREAM_UNKNOWN;
+	//m_nVidStreamType = STREAM_UNKNOWN;
 	m_nAudStreamType = STREAM_UNKNOWN;
 	m_nGraphWidth = 0;
 	m_nGraphHeight = 0;
@@ -82,7 +82,6 @@ BEGIN_MESSAGE_MAP(CDlg_ShowVideo, CDialog)
 	ON_WM_MOVE()
 	ON_BN_CLICKED(IDC_CHECK_CYCLE, OnCheckCycle)
 	//}}AFX_MSG_MAP
-//	ON_MESSAGE(WM_UPDATE_PICTURE, OnUpdatePicture)
 	ON_MESSAGE(WM_REPORT_VIDEO_DECODE_FPS, OnReportVideoDecodeFPS)
 END_MESSAGE_MAP()
 
@@ -100,39 +99,13 @@ void CDlg_ShowVideo::OnClose()
 	}
 	else
 	{
-		switch (m_nVidStreamType & (~STREAM_FILE))
+		if (m_pVidDecoder != NULL)
 		{
-		//case STREAM_PS:
-
-		//	((CMPEG_PS_Decoder*)m_pVidDecoder)->CloseVideo();
-		//	break;
-
-		//case STREAM_MPEGVES:
-
-		//	((CMPEG_VideoDecoder*)m_pVidDecoder)->CloseVideo();
-
-		//	break;
-		//	
-		//case STREAM_AVSVES:
-
-		//	((CAVS_VideoDecoder*)m_pVidDecoder)->CloseVideo();
-		//	break;
-
-		//case STREAM_H264VES:
-
-		//	((CH264_VideoDecoder*)m_pVidDecoder)->CloseVideo();
-		//	break;
-
-		case STREAM_YUVVES:
-
-			((CYUV_VideoDecoder*)m_pVidDecoder)->CloseVideo();
-			break;
-
-		default:
-			break;
+			m_pVidDecoder->CloseDirectxWnd();
+			m_pVidDecoder = NULL;
 		}
 
-		m_nVidStreamType = STREAM_UNKNOWN;
+		//m_nVidStreamType = STREAM_UNKNOWN;
 
 		//if (!(m_nAudStreamType & STREAM_FILE))
 		//{
@@ -160,7 +133,6 @@ void CDlg_ShowVideo::OnClose()
 
 		m_nAudStreamType = STREAM_UNKNOWN;
 
-		m_pVidDecoder = NULL;
 		m_pAudDecoder = NULL;
 
 	//	if (m_pdlgInfo != NULL)
@@ -217,12 +189,14 @@ void CDlg_ShowVideo::SetControls(int offline, int audioonly)
 //	pWnd->EnableWindow(!audioonly);
 }
 
-void CDlg_ShowVideo::AdjustLayout(int audioonly)
+void CDlg_ShowVideo::AdjustLayout(int videoWidth, int videoHeight)
 {
 	CWnd*	pWnd;
 
 	CRect rcWindow;
 	CRect rcClient;
+	CRect rcLeftBtn;
+	CRect rcRightBtn;
 
 	int		nScreenX = GetSystemMetrics(SM_CXSCREEN);
 	int		nScreenY = GetSystemMetrics(SM_CYSCREEN);
@@ -234,18 +208,26 @@ void CDlg_ShowVideo::AdjustLayout(int audioonly)
 	GetWindowRect(&rcWindow);
 	GetClientRect(&rcClient);
 
-	nYDelt = rcWindow.Height() - rcClient.Height() + 80;
-	if (audioonly)
-	{
-		height = nYDelt;
-	}
-	else
-	{
-		height = 576 + nYDelt;
-	}
+	CWnd* pLeftBtnWnd = GetDlgItem(IDC_BTN_FIRST_FRAME);
+	pLeftBtnWnd->GetWindowRect(&rcLeftBtn);
+
+	CWnd* pRightBtnWnd = GetDlgItem(IDC_BTN_SAVE_BMP);
+	pRightBtnWnd->GetWindowRect(&rcRightBtn);
+
+	nYDelt = rcWindow.Height() - rcClient.Height() + rcLeftBtn.Height() + 30;
+	height = videoHeight + nYDelt;
+	//if (audioonly)
+	//{
+	//	height = nYDelt;
+	//}
+	//else
+	//{
+	//	height = 576 + nYDelt;
+	//}
 
 	nXDelt = rcWindow.Width() - rcClient.Width();
-	width = 960 + nXDelt;
+	width = videoWidth + nXDelt + 6;
+	if (width < 640) width = 640;
 
 	rcWindow.left = (nScreenX - width) / 2;
 	rcWindow.top = (nScreenY - height) / 2;
@@ -393,41 +375,52 @@ void CDlg_ShowVideo::AdjustLayout(int audioonly)
 	}
 }
 
-void CDlg_ShowVideo::RealTimeStream(int vid_stream_type, PVOID pVidDecoder, int aud_stream_type, PVOID pAudDecoder)
+//void CDlg_ShowVideo::RealTimeStream(int vid_stream_type, PVOID pVidDecoder, int aud_stream_type, PVOID pAudDecoder)
+//{
+//	SetControls(0, 0);
+//	AdjustLayout(1000, 600);
+//
+//	m_nVidStreamType = vid_stream_type;
+//	m_nAudStreamType = aud_stream_type;
+//
+//	m_pVidDecoder = (CVESDecoder*)pVidDecoder;
+//	m_pAudDecoder = pAudDecoder;
+//
+//	m_bIsAudio = 0;
+//
+//	ShowWindow(SW_SHOW);
+//}
+
+void CDlg_ShowVideo::AttachVideoDecoder(PVOID pDecoder)
 {
-	SetControls(0, 0);
-	AdjustLayout(0);
+	assert(pDecoder != NULL);
 
-	m_nVidStreamType = vid_stream_type;
-	m_nAudStreamType = aud_stream_type;
+	int videoWidth = 500;
+	int videoHeight = 300;
 
-	m_pVidDecoder = pVidDecoder;
-	m_pAudDecoder = pAudDecoder;
+	SetControls(1, 0);
 
-	m_bIsAudio = 0;
+	//if (bAudio)
+	//{
+	//	m_nAudStreamType = stream_type;
+	//	m_pAudDecoder = pDecoder;
+	//}
+	//else
+	//{
+	//	m_nVidStreamType = stream_type;
+		m_pVidDecoder = (CVESDecoder*)pDecoder;
 
-	ShowWindow(SW_SHOW);
-}
+		Video_decode_info_t decode_info;
+		m_pVidDecoder->GetDecodeInfo(&decode_info);
+		videoWidth = decode_info.display_width;
+		videoHeight = decode_info.display_height;
+	//}
 
-void CDlg_ShowVideo::OfflineStream(int stream_type, PVOID pDecoder, int bAudio)
-{
-	SetControls(1, bAudio);
-	AdjustLayout(bAudio);
+	AdjustLayout(videoWidth, videoHeight);
 
-	if (bAudio)
-	{
-		m_nAudStreamType = stream_type;
-		m_pAudDecoder = pDecoder;
-	}
-	else
-	{
-		m_nVidStreamType = stream_type;
-		m_pVidDecoder = pDecoder;
-	}
+	//m_bIsAudio = bAudio;
 
-	m_bIsAudio = bAudio;
-
-	ShowWindow(SW_SHOW);
+	//ShowWindow(SW_SHOW);
 }
 
 void CDlg_ShowVideo::OnShowWindow(BOOL bShow, UINT nStatus) 
@@ -442,68 +435,23 @@ void CDlg_ShowVideo::OnShowWindow(BOOL bShow, UINT nStatus)
 	{
 		CenterWindow();
 
-		hWnd = this->GetSafeHwnd();
-
-		switch (m_nVidStreamType & (~STREAM_FILE))
+		if (m_pVidDecoder != NULL)
 		{
-//		case STREAM_PS:
-//	
-//			((CMPEG_PS_Decoder*)m_pVidDecoder)->OpenVideo(hWnd, m_pszFourCC, sizeof(m_pszFourCC));
-//			
-//			if (m_nVidStreamType & STREAM_FILE)
-//			{
-////				nPos = ((CMPEG_PS_Decoder*)m_pVidDecoder)->Preview_FirstPicture();
-//			}
-//
-//			break;
-//
-//		case STREAM_MPEGVES:
-//	
-//			((CMPEG_VideoDecoder*)m_pVidDecoder)->OpenVideo(hWnd, m_pszFourCC, sizeof(m_pszFourCC));
-//			
-//			if (m_nVidStreamType & STREAM_FILE)
-//			{
-//				nPos = ((CMPEG_VideoDecoder*)m_pVidDecoder)->Preview_FirstPicture();
-//			}
-//
-//			break;
-//
-//		case STREAM_H264VES:
-//
-//			((CH264_VideoDecoder*)m_pVidDecoder)->OpenVideo(hWnd, m_pszFourCC, sizeof(m_pszFourCC));
-//
-//			if (m_nVidStreamType & STREAM_FILE)
-//			{
-//				nPos = ((CH264_VideoDecoder*)m_pVidDecoder)->Preview_FirstPicture();
-//			}
-//			break;
-//
-//		case STREAM_AVSVES:
-//
-//			((CAVS_VideoDecoder*)m_pVidDecoder)->OpenVideo(hWnd, m_pszFourCC, sizeof(m_pszFourCC));
-//
-//			if (m_nVidStreamType & STREAM_FILE)
-//			{
-//				nPos = ((CAVS_VideoDecoder*)m_pVidDecoder)->Preview_FirstPicture();
-//			}
-//			break;
-//
-		case STREAM_YUVVES:
-			
-			((CYUV_VideoDecoder*)m_pVidDecoder)->OpenVideo(hWnd, m_pszFourCC, sizeof(m_pszFourCC));
-
-			if (m_nVidStreamType & STREAM_FILE)
+			if (m_pVidDecoder->GetWndHandle() == NULL)
 			{
-				nPos = ((CYUV_VideoDecoder*)m_pVidDecoder)->Preview_FirstPicture();
+				char pszTitle[256];
+				if (m_pVidDecoder->GetTitle(pszTitle, sizeof(pszTitle)) == ESDECODER_NO_ERROR)
+				{
+					SetWindowText(pszTitle);
+				}
+
+				hWnd = this->GetSafeHwnd();
+				m_pVidDecoder->OpenDirectxWnd(hWnd);
+
+				nPos = m_pVidDecoder->Preview_FirstPicture();
+				m_sldFile.SetPos(nPos);
 			}
-
-			break;
-
-		default:
-			break;
 		}
-
-		m_sldFile.SetPos(nPos);
 
 //		if (!(m_nAudStreamType & STREAM_FILE))
 //		{
@@ -540,17 +488,17 @@ void CDlg_ShowVideo::OnPaint()
 	CPaintDC dc(this); // device context for painting
 	
 	// TODO: Add your message handler code here
-	switch (m_nVidStreamType & (~STREAM_FILE))
-	{
-	case STREAM_PS:
-		break;
-	default:
+	//switch (m_nVidStreamType & (~STREAM_FILE))
+	//{
+	//case STREAM_PS:
+	//	break;
+	//default:
 		if (m_pVidDecoder != NULL)
 		{
-			((CVESDecoder*)m_pVidDecoder)->DirectDraw_Paint();
+			m_pVidDecoder->DirectDraw_Paint();
 		}
-		break;
-	}
+	//	break;
+	//}
 	// Do not call CDialog::OnPaint() for painting messages
 }
 
@@ -589,32 +537,13 @@ void CDlg_ShowVideo::OnBtnNextFrame()
 	}
 	else
 	{
-		if (m_nVidStreamType & STREAM_FILE)
-		{
-			switch (m_nVidStreamType & (~STREAM_FILE))
+		//if (m_nVidStreamType & STREAM_FILE)
+		//{
+			if (m_pVidDecoder != NULL)
 			{
-			//case STREAM_PS:
-			//	break;
-			//case STREAM_MPEGVES:
-			//	nPos = ((CMPEG_VideoDecoder*)m_pVidDecoder)->Preview_NextPicture();
-			//	break;
-			//
-			//case STREAM_AVSVES:
-			//	nPos = ((CAVS_VideoDecoder*)m_pVidDecoder)->Preview_NextPicture();
-			//	break;
-
-			//case STREAM_H264VES:
-			//	nPos = ((CH264_VideoDecoder*)m_pVidDecoder)->Preview_NextPicture();
-			//	break;
-
-			case STREAM_YUVVES:
-				nPos = ((CYUV_VideoDecoder*)m_pVidDecoder)->Preview_NextPicture();
-				break;
-
-			default:
-				break;
+				nPos = m_pVidDecoder->Preview_Forward1Picture();
 			}
-		}
+		//}
 	}
 
 	m_sldFile.SetPos(nPos);
@@ -633,18 +562,13 @@ void CDlg_ShowVideo::OnBtnNext5frame()
 	}
 	else
 	{
-		if (m_nVidStreamType & STREAM_FILE)
-		{
-			switch (m_nVidStreamType & (~STREAM_FILE))
+		//if (m_nVidStreamType & STREAM_FILE)
+		//{
+			if (m_pVidDecoder != NULL)
 			{
-			case STREAM_YUVVES:
-				nPos = ((CYUV_VideoDecoder*)m_pVidDecoder)->Preview_ForwardPicture();
-				break;
-
-			default:
-				break;
+				nPos = m_pVidDecoder->Preview_ForwardNPicture(5);
 			}
-		}
+		//}
 	}
 
 	m_sldFile.SetPos(nPos);
@@ -697,31 +621,9 @@ void CDlg_ShowVideo::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		}
 		else
 		{
-			switch (m_nVidStreamType & ~STREAM_FILE)
+			if (m_pVidDecoder != NULL)
 			{
-			//case STREAM_PS:
-			//	nPercent = ((CMPEG_PS_Decoder*)m_pVidDecoder)->Preview_AtPercent(nPercent);
-			//	break;
-			//	break;
-
-			//case STREAM_MPEGVES:
-			//	nPercent = ((CMPEG_VideoDecoder*)m_pVidDecoder)->Preview_AtPercent(nPercent);
-			//	break;
-
-			//case STREAM_AVSVES:
-			//	nPercent = ((CAVS_VideoDecoder*)m_pVidDecoder)->Preview_AtPercent(nPercent);
-			//	break;
-			//
-			//case STREAM_H264VES:
-			//	nPercent = ((CH264_VideoDecoder*)m_pVidDecoder)->Preview_AtPercent(nPercent);
-			//	break;
-
-			case STREAM_YUVVES:
-				nPercent = ((CYUV_VideoDecoder*)m_pVidDecoder)->Preview_AtPercent(nPercent);
-				break;
-
-			default:
-				break;
+				nPercent = m_pVidDecoder->Preview_SeekAtPercent(nPercent);
 			}
 		}
 
@@ -766,7 +668,7 @@ void CDlg_ShowVideo::OnBtnSaveBmp()
 						systime.wMinute,
 						systime.wSecond);
 
-	CFileDialog dlg(FALSE, "bmp", pszFileName, OFN_HIDEREADONLY | OFN_ALLOWMULTISELECT, szFilter);
+	CFileDialog dlg(true, "bmp", pszFileName, OFN_HIDEREADONLY | OFN_ALLOWMULTISELECT, szFilter);
 
 	if (dlg.DoModal() == IDOK)
 	{
@@ -883,6 +785,11 @@ void CDlg_ShowVideo::OnBtnGrid()
 	//default:
 	//	break;
 	//}
+
+	if (m_pVidDecoder != NULL)
+	{
+		//m_pVidDecoder->SetGrid();
+	}
 }
 
 void CDlg_ShowVideo::OnLButtonDblClk(UINT nFlags, CPoint point) 
@@ -1027,22 +934,13 @@ void CDlg_ShowVideo::OnBtnFirstFrame()
 	}
 	else
 	{
-		if (m_nVidStreamType & STREAM_FILE)
-		{
-			switch (m_nVidStreamType & (~STREAM_FILE))
+		//if (m_nVidStreamType & STREAM_FILE)
+		//{
+			if (m_pVidDecoder != NULL)
 			{
-			//case STREAM_MPEGVES:
-			//	nPos = ((CMPEG_VideoDecoder*)m_pVidDecoder)->Preview_FirstPicture();
-			//	break;
-
-			case STREAM_YUVVES:
-				nPos = ((CYUV_VideoDecoder*)m_pVidDecoder)->Preview_FirstPicture();
-				break;
-
-			default:
-				break;
+				nPos = m_pVidDecoder->Preview_FirstPicture();
 			}
-		}
+		//}
 	}
 
 	m_sldFile.SetPos(nPos);
@@ -1073,18 +971,13 @@ void CDlg_ShowVideo::OnBtnLastFrame()
 	}
 	else
 	{
-		if (m_nVidStreamType & STREAM_FILE)
-		{
-			switch (m_nVidStreamType & (~STREAM_FILE))
+		//if (m_nVidStreamType & STREAM_FILE)
+		//{
+			if (m_pVidDecoder != NULL)
 			{
-			case STREAM_YUVVES:
-				nPos = ((CYUV_VideoDecoder*)m_pVidDecoder)->Preview_LastPicture();
-				break;
-
-			default:
-				break;
+				nPos = m_pVidDecoder->Preview_LastPicture();
 			}
-		}
+		//}
 	}
 
 	m_sldFile.SetPos(nPos);
@@ -1105,8 +998,8 @@ void CDlg_ShowVideo::OnBtnPlay()
 	pWnd->GetWindowText(strText);
 	if (strText == "播放")
 	{
-		if (m_nAudStreamType & STREAM_FILE)		//如果是播放音频文件
-		{
+		//if (m_nAudStreamType & STREAM_FILE)		//如果是播放音频文件
+		//{
 			//switch (m_nAudStreamType & (~STREAM_FILE))
 			//{
 			//case STREAM_MPEGAES:
@@ -1126,18 +1019,18 @@ void CDlg_ShowVideo::OnBtnPlay()
 			//default:
 			//	break;
 			//}
-		}
+		//}
 
-		if (m_nVidStreamType & STREAM_FILE)
-		{
-			switch (m_nVidStreamType & (~STREAM_FILE))
-			{
-			case STREAM_PS:
-				//((CMPEG_PS_Decoder*)m_pVidDecoder)->OpenAudio(hWnd);
-//				((CMPEG_PS_Decoder*)m_pVidDecoder)->ExtDebug();
-				break;
-			}
-		}
+		//if (m_nVidStreamType & STREAM_FILE)
+		//{
+//			switch (m_nVidStreamType & (~STREAM_FILE))
+//			{
+//			case STREAM_PS:
+//				//((CMPEG_PS_Decoder*)m_pVidDecoder)->OpenAudio(hWnd);
+////				((CMPEG_PS_Decoder*)m_pVidDecoder)->ExtDebug();
+//				break;
+//			}
+		//}
 
 		pWnd->SetWindowText("停止");
 
@@ -1180,15 +1073,15 @@ void CDlg_ShowVideo::OnBtnPlay()
 			//}
 		}
 
-		if (m_nVidStreamType & STREAM_FILE)
-		{
+		//if (m_nVidStreamType & STREAM_FILE)
+		//{
 			//switch (m_nVidStreamType & (~STREAM_FILE))
 			//{
 			//case STREAM_PS:
 			//	((CMPEG_PS_Decoder*)m_pVidDecoder)->CloseAudio();
 			//	break;
 			//}
-		}
+		//}
 
 		pWnd->SetWindowText("播放");
 
@@ -1228,18 +1121,13 @@ void CDlg_ShowVideo::OnBtnPre5frame()
 	}
 	else
 	{
-		if (m_nVidStreamType & STREAM_FILE)
-		{
-			switch (m_nVidStreamType & (~STREAM_FILE))
+		//if (m_nVidStreamType & STREAM_FILE)
+		//{
+			if (m_pVidDecoder != NULL)
 			{
-			case STREAM_YUVVES:
-				nPos = ((CYUV_VideoDecoder*)m_pVidDecoder)->Preview_BackwardPicture();
-				break;
-
-			default:
-				break;
+				nPos = m_pVidDecoder->Preview_BackwardNPicture(5);
 			}
-		}
+		//}
 	}
 
 	m_sldFile.SetPos(nPos);
@@ -1270,18 +1158,13 @@ void CDlg_ShowVideo::OnBtnPreFrame()
 	}
 	else
 	{
-		if (m_nVidStreamType & STREAM_FILE)
-		{
-			switch (m_nVidStreamType & (~STREAM_FILE))
+		//if (m_nVidStreamType & STREAM_FILE)
+		//{
+			if (m_pVidDecoder != NULL)
 			{
-			case STREAM_YUVVES:
-				nPos = ((CYUV_VideoDecoder*)m_pVidDecoder)->Preview_PrePicture();
-				break;
-
-			default:
-				break;
+				nPos = m_pVidDecoder->Preview_Backward1Picture();
 			}
-		}
+		//}
 	}
 	m_sldFile.SetPos(nPos);
 	UpdateData(FALSE);
@@ -1292,65 +1175,44 @@ uint32_t VideoPlay_Thread(PVOID pVoid)
 	CDlg_ShowVideo* pdlg = (CDlg_ShowVideo*)pVoid;
 	int				nPos = 0;
 
+	DWORD			dwStartTick = ::GetTickCount();
+	int				frameCount = 0;
+
+	Video_decode_info_t  video_decode_info;
+	pdlg->m_pVidDecoder->GetDecodeInfo(&video_decode_info);
+
+	double frame_interval = 1000.0 / video_decode_info.framerate;
+
 	do
 	{
-		if (pdlg->m_nVidStreamType & STREAM_FILE)
+		nPos = pdlg->m_pVidDecoder->Preview_Forward1Picture();
+		frameCount++;
+
+		if (pdlg->m_bCycle)
 		{
-			switch (pdlg->m_nVidStreamType & (~STREAM_FILE))
+			if (pdlg->m_pVidDecoder->Preview_beEOF())
 			{
-			//case STREAM_PS:
-			//	
-			//	nPos = ((CMPEG_PS_Decoder*)pdlg->m_pVidDecoder)->Preview_NextPack();
-			//	break;
-
-			case STREAM_YUVVES:
-				nPos = ((CYUV_VideoDecoder*)pdlg->m_pVidDecoder)->Preview_NextPicture();
-				break;
-			
-			//case STREAM_MPEGVES:
-			//	nPos = ((CMPEG_VideoDecoder*)pdlg->m_pVidDecoder)->Preview_NextPicture();
-			//	break;
-
-			default:
-				break;
-			}
-		}
-
-//		if (pdlg->m_bCycle)
-
-		{
-			if (pdlg->m_nVidStreamType & STREAM_FILE)
-			{
-				switch (pdlg->m_nVidStreamType & (~STREAM_FILE))
-				{
-				//case STREAM_PS:
-
-				//	if (((CMPEG_PS_Decoder*)pdlg->m_pVidDecoder)->Preview_EOF())
-				//	{
-				//		nPos = ((CMPEG_PS_Decoder*)pdlg->m_pVidDecoder)->Preview_AtPercent(0);
-				//	}
-
-				//	break;
-
-				case STREAM_YUVVES:
-					if (((CYUV_VideoDecoder*)pdlg->m_pVidDecoder)->Preview_EOF())
-					{
-						nPos = ((CYUV_VideoDecoder*)pdlg->m_pVidDecoder)->Preview_FirstPicture();
-					}
-					break;
-
-				case STREAM_MPEGVES:
-					break;
-
-				default:
-					break;
-				}
+				nPos = pdlg->m_pVidDecoder->Preview_FirstPicture();
 			}
 		}
 
 		pdlg->m_sldFile.SetPos(nPos);
 
-//		Sleep(10);
+		int timeThread = (int)round(frameCount * frame_interval);
+		while (pdlg->m_bPlaying)
+		{
+			DWORD dwNowTick = ::GetTickCount();
+			int timeElapse = dwNowTick - dwStartTick;
+			if (timeElapse >= timeThread)
+			{
+				if (frameCount == 1000000)
+				{
+					frameCount = 0;
+					dwStartTick = dwNowTick;
+				}
+				break;
+			}
+		}
 
 	} while(pdlg->m_bPlaying);
 
@@ -1386,7 +1248,7 @@ uint32_t AudioPlay_Thread(PVOID pVoid)
 			//}
 		}
 
-//		if (pdlg->m_bCycle)
+		if (pdlg->m_bCycle)
 		{
 			if (pdlg->m_nAudStreamType & STREAM_FILE)
 			{

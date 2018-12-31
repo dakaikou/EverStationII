@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include "../Include/ESDecoder_segment_tools.h"
+#include "../Include/ESDecoder_Utilities.h"
 #include "../Include/ESDecoder_ErrorCode.h"
 
 //返回第一个同步字的偏移量

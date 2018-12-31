@@ -76,14 +76,14 @@ protected:
 
 	//void UpdateDtsPts(PES_packet_t* pPES_packet, int bAud);
 
-	CImageList	m_ESImageList;
-	CDlg_ShowVideo	m_dlgTV;
+	//CImageList	m_ESImageList;
+	//CDlg_ShowVideo	m_dlgTV;
 
-	int				m_dwAudCode;
-	int				m_dwVidCode;
-	unsigned short	m_usPCRPID;
+	//int				m_dwAudCode;
+	//int				m_dwVidCode;
+	//unsigned short	m_usPCRPID;
 
-	FILE*			fp_debug;
+	//FILE*			fp_debug;
 
 	//CMPEG_VideoDecoder		m_M2VDecoder;
 	//CH264_VideoDecoder		m_H264Decoder;
@@ -102,7 +102,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 //	afx_msg void OnBtnTrigger();
-	afx_msg void OnBtnWatch();
+	//afx_msg void OnBtnWatch();
 //	afx_msg void OnBtnDts();
 //	afx_msg void OnBtnPts();
 	//}}AFX_MSG

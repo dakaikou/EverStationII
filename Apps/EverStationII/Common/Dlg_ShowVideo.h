@@ -12,6 +12,8 @@
 #include "..\MFCExt\tooltip2\tooltip2.h"
 #include "..\resource.h"
 
+#include "MiddleWare/MiddleWare_ESDecoder/Include/VESDecoder.h"
+
 typedef enum
 {
 	SHOWOPTION_VIDEO_AUDIO		= 0,
@@ -27,9 +29,9 @@ public:
 
 public:
 
-	int				m_nVidStreamType;	
+	//int				m_nVidStreamType;	
 	int				m_nAudStreamType;
-	PVOID			m_pVidDecoder;
+	CVESDecoder*	m_pVidDecoder;
 	PVOID			m_pAudDecoder;
 
 	int				m_nGraphWidth;
@@ -51,10 +53,11 @@ public:
 	RECT			m_rectDst;
 	RECT			m_rectSrc;
 
-	void			RealTimeStream(int vid_stream_type, PVOID pVidDecoder, int aud_stream_type, PVOID pAudDecoder);
-	void			OfflineStream(int stream_type, PVOID pDecoder, int bAudio);
+	//void			RealTimeStream(int vid_stream_type, PVOID pVidDecoder, int aud_stream_type, PVOID pAudDecoder);
+	//void			OfflineStream(int stream_type, PVOID pDecoder, int bAudio);
+	void			AttachVideoDecoder(PVOID pDecoder);
 
-	void			AdjustLayout(int audioonly);
+	void			AdjustLayout(int videoWidth, int videoHeight);
 	void			SetControls(int offline, int audioonly);
 // Dialog Data
 	//{{AFX_DATA(CDlg_ShowVideo)

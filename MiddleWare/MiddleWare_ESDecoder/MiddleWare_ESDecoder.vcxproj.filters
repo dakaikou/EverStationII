@@ -30,13 +30,13 @@
     <ClCompile Include="Impl\ESDecoder.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ESDecoder_segment_tools.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Impl\VESDecoder.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Impl\VideoDecoder_YUV.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\ESDecoder_Utilities.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,9 +50,6 @@
     <ClInclude Include="Include\ESDecoder_ErrorCode.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\ESDecoder_segment_tools.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Include\common\audio_common.h">
       <Filter>头文件\common</Filter>
     </ClInclude>
@@ -62,7 +59,13 @@
     <ClInclude Include="Include\common\video_common.h">
       <Filter>头文件\common</Filter>
     </ClInclude>
-    <ClInclude Include="Include\videodecoder_yuv.h">
+    <ClInclude Include="Include\VESDecoder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\VideoDecoder_YUV.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ESDecoder_Utilities.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
