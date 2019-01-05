@@ -17,10 +17,10 @@
 
 #include <stdint.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Section.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Descriptor.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Section.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Section.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Descriptor.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Section.h"
 
 #include "MiddleWare_PSISI_Common.h"
 #include "MiddleWare_PSISI_SysCapability.h"

@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_section.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_section.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
 #include "../Include/MPEG_DVB_Common_XML.h"
 #include "../Include/Mpeg2_PSI_section_XML.h"
 #include "../Include/Mpeg2_PSI_Descriptor_XML.h"

@@ -17,8 +17,8 @@
 
 #include <stdint.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_DataBroadcast.h"
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_DataBroadcast.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 int DVB_Databroadcast_present_multiprotocol_encapsulation_info_to_xml(TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, multiprotocol_encapsulation_info_t* pmultiprotocol_encapsulation_info);
 

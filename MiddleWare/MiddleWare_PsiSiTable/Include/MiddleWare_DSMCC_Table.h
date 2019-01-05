@@ -17,12 +17,12 @@
 
 #include <stdint.h>
 
-#include "translate_layer\MPEG2_DVB_Section\Include\MPEG2_DVB_Common.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Descriptor.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Section.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_UNM_DII.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_UNM_DSI.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_DDM_DDB.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_Common.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Descriptor.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Section.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_UNM_DII.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_UNM_DSI.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_DDM_DDB.h"
 
 #include "MiddleWare_PSISI_Common.h"
 

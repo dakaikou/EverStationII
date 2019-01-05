@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_MHP_Descriptor.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_MHP_Utilities.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_MHP_Descriptor.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_MHP_Utilities.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
 #include "../Include/DVB_MHP_Descriptor_XML.h"
 
 //±Í«©£∫tag = 0x00£¨defined in TS 101 812

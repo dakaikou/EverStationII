@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_PesEs dialog
 #include "..\Magic_TS\TSMagic_GuiApi.h"

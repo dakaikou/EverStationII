@@ -12,14 +12,11 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Utilities.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Section.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
-
-//#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Utilities.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Section.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
 
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
-//#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 
 #include "..\Common\define.h"

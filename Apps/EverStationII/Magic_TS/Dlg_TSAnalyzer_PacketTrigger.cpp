@@ -21,9 +21,9 @@ static char THIS_FILE[] = __FILE__;
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 #include "syntax_express_xml/XML_MPEG2_TSPacket/Include/Mpeg2_TS_packet_xml.h"
-#include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_PID.h"
-#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "syntax_translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_PID.h"
+#include "Utilities\Directory\Include\TOOL_Directory.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 //using namespace std;
 //using namespace tinyxml2;

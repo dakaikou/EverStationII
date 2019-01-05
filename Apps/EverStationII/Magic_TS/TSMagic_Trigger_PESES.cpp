@@ -9,8 +9,8 @@
 #include "TSMagic_ErrorCode.h"
 #include "TSMagic_Trigger_PESES.h"
 
-#include "translate_layer/Mpeg_PESPacket/Include/MPEG_stream_id.h"
-#include "translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_ErrorCode.h"
+#include "syntax_translate_layer/Mpeg_PESPacket/Include/MPEG_stream_id.h"
+#include "syntax_translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_PESSplicer.h"
 #include "MiddleWare\MiddleWare_TS_PayloadSplicer\Include\MiddleWare_PesSplicer_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TransportStream.h"

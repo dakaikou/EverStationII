@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_BIOP.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Utilities.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_BIOP.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Utilities.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
 
 #include "../../Include/MPEG_DVB_Common_XML.h"
 

@@ -2,9 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "translate_layer/ES_DRA/Include/dra_audio_sequence.h"
-#include "translate_layer/ES_DRA/Include/dra_audio_errorcode.h"
-#include "translate_layer/ES_DRA/Include/dra_audio_utilities.h"
+#include "syntax_translate_layer/ES_DRA/Include/dra_audio_sequence.h"
+#include "syntax_translate_layer/ES_DRA/Include/dra_audio_errorcode.h"
+#include "syntax_translate_layer/ES_DRA/Include/dra_audio_utilities.h"
 #include "../Include/dra_audio_sequence_xml.h"
 
 

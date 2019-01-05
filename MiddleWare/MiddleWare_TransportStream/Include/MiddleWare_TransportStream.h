@@ -18,7 +18,7 @@
 #include <stdint.h>
 
 #include "../Template/FIFO.h"
-#include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
+#include "syntax_translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
 
 /*-------------------------------------------------------
 	CTransportStream Class definition

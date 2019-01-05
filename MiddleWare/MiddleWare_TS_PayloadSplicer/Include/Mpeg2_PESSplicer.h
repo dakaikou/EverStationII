@@ -17,7 +17,7 @@
 
 #include <stdint.h>
 
-#include "translate_layer\Mpeg2_TSPacket\Include\Mpeg2_TS_packet.h"
+#include "syntax_translate_layer\Mpeg2_TSPacket\Include\Mpeg2_TS_packet.h"
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TransportStream.h"
 
 class MW_PES_LIB CPESSplicer

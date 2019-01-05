@@ -6,7 +6,7 @@
 #include "../../Include/dsmcc/Mpeg2_DSMCC_UNM_DII_DC_XML.h"
 #include "../../Include/MPEG_DVB_Common_XML.h"
 
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
 
 /////////////////////////////////////////////
 int	MPEG2_DSMCC_DII_DC_DecodeModuleInfo_to_xml(uint8_t* buf, int size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, DC_ModuleInfo_t* pModuleInfo)

@@ -111,6 +111,7 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 
 	pCmbBox->AddString("7.5P");
 	pCmbBox->AddString("15P");
+	pCmbBox->AddString("25P");
 	pCmbBox->AddString("30P");
 	pCmbBox->AddString("60P");
 	pCmbBox->SetCurSel(3);
@@ -193,6 +194,10 @@ void CDlg_YUVPreview::OnBtnPreview()
 		else if (strcmp(strFrameRate, "15P") == 0)
 		{
 			decode_info.framerate = 15.0;
+		}
+		else if (strcmp(strFrameRate, "25P") == 0)
+		{
+			decode_info.framerate = 25.0;
 		}
 		else if (strcmp(strFrameRate, "30P") == 0)
 		{

@@ -17,8 +17,8 @@
 
 #include <stdint.h>
 
-#include "translate_layer/ES_MPA/Include/mpeg_audio_sequence.h"
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "syntax_translate_layer/ES_MPA/Include/mpeg_audio_sequence.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 //public functions
 XML_ES_MPA_LIB int mpga_present_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);

@@ -20,7 +20,7 @@
 #include <stdint.h>
 
 #include "translate_layer/MPEG_DVB_Section/Include/DVB_IPDC_Descriptor.h"
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 
 #endif

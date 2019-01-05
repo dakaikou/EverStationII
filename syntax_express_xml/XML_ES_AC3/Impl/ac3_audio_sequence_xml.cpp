@@ -3,9 +3,11 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "translate_layer/ES_AC3/Include/ac3_audio_sequence.h"
-#include "translate_layer/ES_AC3/Include/ac3_audio_errorcode.h"
-#include "translate_layer/ES_AC3/Include/ac3_audio_utilities.h"
+#include "syntax_translate_layer/ES_AC3/Include/ac3_audio_sequence.h"
+#include "syntax_translate_layer/ES_AC3/Include/ac3_audio_errorcode.h"
+#include "syntax_translate_layer/ES_AC3/Include/ac3_audio_utilities.h"
+
+#include "thirdparty_abstract_layer\TALForXML\Include\TALForXML.h"
 
 #include "../Include/ac3_audio_sequence_xml.h"
 

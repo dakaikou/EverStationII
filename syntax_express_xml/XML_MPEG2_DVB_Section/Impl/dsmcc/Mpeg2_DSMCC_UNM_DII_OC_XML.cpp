@@ -4,8 +4,8 @@
 
 /////////////////////////////////////////////
 #include "../../Include/dsmcc/Mpeg2_DSMCC_UNM_DII_OC_XML.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Utilities.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Utilities.h"
 
 /////////////////////////////////////////////
 int	MPEG2_DSMCC_DII_OC_DecodeModuleInfo_to_xml(uint8_t* buf, int size, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, BIOP::ModuleInfo_t* pModuleInfo)

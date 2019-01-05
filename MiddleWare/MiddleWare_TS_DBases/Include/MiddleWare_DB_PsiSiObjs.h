@@ -20,7 +20,7 @@
 #include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_PSISI_Table.h"
 #include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_DSMCC_Table.h"
 
-#include "thirdparty_AL\TALForXML\Include\TALForXML.h"
+#include "thirdparty_abstract_layer\TALForXML\Include\TALForXML.h"
 
 #define DEBUG_PAT			1
 #define DEBUG_PMT			1

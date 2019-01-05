@@ -17,9 +17,9 @@
 
 #include <stdint.h>
 
-#include "translate_layer/ES_H264/Include/h264_video_sequence.h"
+#include "syntax_translate_layer/ES_H264/Include/h264_video_sequence.h"
 
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 XML_ES_H264_LIB int h264_present_unaligned_nal_to_xml(uint8_t* segment_buf, int prefix_length, int nal_length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
 XML_ES_H264_LIB int h264_present_unknown_nal_to_xml(uint8_t* segment_buf, int prefix_length, int nal_length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);

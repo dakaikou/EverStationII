@@ -20,8 +20,8 @@
 #include <windows.h>
 //#include <mmsystem.h>
 
-#include "translate_layer/Mpeg_PESPacket/Include/MPEG_PES_packet.h"
-#include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
+#include "syntax_translate_layer/Mpeg_PESPacket/Include/MPEG_PES_packet.h"
+#include "syntax_translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
 
 //#include "./common/audio_common.h"
 //#include "./common/file_common.h"

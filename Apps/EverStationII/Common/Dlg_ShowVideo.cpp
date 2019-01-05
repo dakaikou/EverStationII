@@ -2,7 +2,11 @@
 //
 
 #include "stdafx.h"
+
+#include <assert.h>
+
 #include "Dlg_ShowVideo.h"
+
 
 #include "../Magic_TS/TSMagic_GuiApi_MSG.h"
 

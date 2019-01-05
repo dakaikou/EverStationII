@@ -17,8 +17,8 @@
 
 #include <stdint.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_section.h"
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_section.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 XML_MPEG_DVB_LIB	int MPEG2_DSMCC_DecodeSection_to_XML(uint8_t *section_buf, int section_size, TALForXMLDoc* pxmlDoc, dsmcc_section_t* pDSMCCSection = NULL);
 XML_MPEG_DVB_LIB	int MPEG2_DSMCC_PresentSection_to_XML(TALForXMLDoc* pxmlDoc, dsmcc_section_t* pdsmcc_section);

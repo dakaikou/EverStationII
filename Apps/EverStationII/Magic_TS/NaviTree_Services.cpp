@@ -14,9 +14,9 @@ static char THIS_FILE[] = __FILE__;
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
-#include "translate_layer\MPEG2_DVB_Section\Include\DVB_SI_Utilities.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
+#include "syntax_translate_layer\MPEG2_DVB_Section\Include\DVB_SI_Utilities.h"
 
 #include "TSMagicView.h"
 /////////////////////////////////////////////////////////////////////////////

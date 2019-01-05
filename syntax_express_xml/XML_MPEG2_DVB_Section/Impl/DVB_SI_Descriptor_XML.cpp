@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Impl/DVB_SI_Utilities_Inner.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Impl/DVB_SI_Utilities_Inner.h"
 
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Utilities.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Descriptor.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Utilities.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Descriptor.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
 
 #include "../Include/DVB_Databroadcast_XML.h"
 #include "../Include/DVB_SI_Descriptor_XML.h"

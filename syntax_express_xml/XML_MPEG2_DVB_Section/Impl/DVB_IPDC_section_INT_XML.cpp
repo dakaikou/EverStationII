@@ -4,9 +4,9 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_IPDC_section.h"
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_IPDC_section.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 #include "../Include/DVB_IPDC_section_XML.h"
 #include "../Include/MPEG_DVB_Common_XML.h"

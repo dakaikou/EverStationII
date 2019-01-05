@@ -11,8 +11,8 @@
 #include "TSMagic_ErrorCode.h"
 #include "TSMagic_Decimate_TSPacket.h"
 
-#include "translate_layer/Mpeg_PESPacket/Include/MPEG_stream_id.h"
-#include "translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_ErrorCode.h"
+#include "syntax_translate_layer/Mpeg_PESPacket/Include/MPEG_stream_id.h"
+#include "syntax_translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TransportStream\Include\MiddleWare_TS_ErrorCode.h"
 #include "thirdparty_libs\glog\glog\logging.h"
 

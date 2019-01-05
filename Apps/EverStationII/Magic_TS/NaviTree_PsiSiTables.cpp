@@ -11,8 +11,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
 
 #include "..\Common\define.h"
 #include "..\Magic_TS\TSMagic_GuiApi_MSG.h"

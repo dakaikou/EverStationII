@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "translate_layer/ES_H264/Include/h264_video_errorcode.h"
+#include "syntax_translate_layer/ES_H264/Include/h264_video_errorcode.h"
 #include "../Include/h264_video_sequence_xml.h"
 
 int h264_present_unaligned_nal_to_xml(uint8_t* segment_buf, int prefix_length, int nal_length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)

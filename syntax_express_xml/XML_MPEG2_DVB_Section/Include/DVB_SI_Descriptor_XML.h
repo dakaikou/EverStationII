@@ -17,8 +17,8 @@
 
 #include <stdint.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Descriptor.h"
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Descriptor.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 /*TAG = DVB_SI_NETWORK_NAME_DESCRIPTOR						0x40	*/
 XML_MPEG_DVB_LIB int DVB_SI_decode_network_name_descriptor_to_xml(uint8_t *buf, int length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, network_name_descriptor_t* pnetwork_name_descriptor = NULL);

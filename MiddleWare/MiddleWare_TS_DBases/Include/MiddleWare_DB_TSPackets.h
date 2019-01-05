@@ -19,7 +19,7 @@
 
 #include <Windows.h>
 
-#include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
+#include "syntax_translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
 
 #define MAX_PID_COUNT						8192
 #define PID_STYLE_VERIFY_COUNTDOWNS			3

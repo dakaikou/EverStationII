@@ -1,8 +1,8 @@
 
 #include "../Include/SIOWithUDP.h"
 
-#include "translate_layer/INET_IPv4/Include/INET_IPv4.h"
-#include "toolbox_libs/TOOL_Directory/include/TOOL_Directory.h"
+#include "syntax_translate_layer/INET_IPv4/Include/INET_IPv4.h"
+#include "Utilities/Directory/include/TOOL_Directory.h"
 
 //#include <sys/types.h>
 //#include <sys/stat.h>

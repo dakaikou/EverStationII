@@ -31,7 +31,7 @@ static char THIS_FILE[] = __FILE__;
 #include ".\tsmagicview.h"
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
-#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
+#include "Utilities\Directory\Include\TOOL_Directory.h"
 
 IMPLEMENT_DYNCREATE(CTSMagicView, CFormView)
 

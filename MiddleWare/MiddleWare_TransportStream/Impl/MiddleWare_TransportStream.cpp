@@ -13,8 +13,8 @@
 #include "streamio_layer/SIOWithFile/Include/SIOWithFile.h"
 #include "thirdparty_HW/SmartTS/smartts_drvapi.h"
 
-#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
-#include "toolbox_libs\TOOL_Math\Include\Sort.h"
+#include "Utilities\Directory\Include\TOOL_Directory.h"
+#include "Utilities\Math\Include\Sort.h"
 
 //static double DIXON_950_alpha_table[] = { 1.000, 1.000, 0.941, 0.765, 0.642, 0.562, 0.507, 0.554, 0.512, 0.477, 0.575, 0.546, 0.521, 0.546, 0.524, 
 //                                          0.505, 0.489, 0.475, 0.462, 0.450, 0.440, 0.431, 0.422, 0.413, 0.406, 0.399, 0.393, 0.387, 0.381, 0.376};

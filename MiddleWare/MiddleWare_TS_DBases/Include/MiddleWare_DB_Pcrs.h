@@ -17,7 +17,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
+#include "syntax_translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
 
 #define PCR_FIFO_LENGTH						1024
 #define MAX_SUPPORTED_PCR_PIDS				10

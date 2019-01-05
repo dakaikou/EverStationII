@@ -17,12 +17,12 @@
 
 #include <stdint.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_Common.h"
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_Common.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 XML_MPEG_DVB_LIB int report_descriptor_length_error_to_xml(uint8_t *buf, int length, int max_length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
-XML_MPEG_DVB_LIB	int present_reserved_descriptor_to_xml(uint8_t *buf, int length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, reserved_descriptor_t* preserved_descriptor = NULL);
+XML_MPEG_DVB_LIB int present_reserved_descriptor_to_xml(uint8_t *buf, int length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, reserved_descriptor_t* preserved_descriptor = NULL);
 
-XML_MPEG_DVB_LIB	int MPEG_DVB_present_reserved_descriptor_to_xml(TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, reserved_descriptor_t* preserved_descriptor);
+XML_MPEG_DVB_LIB int MPEG_DVB_present_reserved_descriptor_to_xml(TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, reserved_descriptor_t* preserved_descriptor);
 
 #endif

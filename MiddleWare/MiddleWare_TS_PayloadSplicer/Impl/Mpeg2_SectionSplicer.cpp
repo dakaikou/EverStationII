@@ -6,7 +6,7 @@
 
 #include "../Include/MiddleWare_SectionSplicer_ErrorCode.h"
 #include "../Include/Mpeg2_SectionSplicer.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
 
 CSectionSplicer::CSectionSplicer(void)
 {

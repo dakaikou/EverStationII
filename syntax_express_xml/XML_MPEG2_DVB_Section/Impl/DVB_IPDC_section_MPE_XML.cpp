@@ -3,8 +3,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_IPDC_section.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_IPDC_section.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
 #include "../Include/DVB_IPDC_section_XML.h"
 
 /////////////////////////////////////////////

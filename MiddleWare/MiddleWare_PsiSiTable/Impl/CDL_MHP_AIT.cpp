@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_MHP_Section.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
-#include "translate_layer/MPEG2_DVB_Section/Include\MPEG2_DVB_ErrorCode.h"
-#include "MiddleWare/MiddleWare_PsiSiTable/Include\MiddleWare_PSISI_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_MHP_Section.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include\MPEG2_DVB_ErrorCode.h"
+#include "../Include/MiddleWare_PSISI_ErrorCode.h"
 #include "../Include/MiddleWare_DSMCC_Table.h"
 
 /////////////////////////////////////////////

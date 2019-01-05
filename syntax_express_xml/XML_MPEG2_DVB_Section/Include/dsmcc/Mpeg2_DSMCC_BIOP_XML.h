@@ -17,9 +17,9 @@
 
 #include <stdint.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_BIOP.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/dsmcc/Mpeg2_DSMCC_BIOP.h"
 
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 //无法预测IOR()结构体的长度，除非计算一遍，因此第一个参数串入比特串指针
 int	MPEG2_DSMCC_BIOP_PresentIOR_to_xml(TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, BIOP::IOR_t* pIOR);

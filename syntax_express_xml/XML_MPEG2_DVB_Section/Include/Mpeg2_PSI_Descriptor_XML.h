@@ -17,8 +17,8 @@
 
 #include <stdint.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 /*TAG = PSI_VIDEO_STREAM_DESCRIPTOR			0x02*/
 XML_MPEG_DVB_LIB int MPEG2_PSI_decode_video_stream_descriptor_to_xml(uint8_t *buf, int length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, video_stream_descriptor_t* pvideo_stream_descriptor = NULL);

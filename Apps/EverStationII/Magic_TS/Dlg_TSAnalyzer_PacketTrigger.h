@@ -9,7 +9,7 @@
 #include "..\resource.h"
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_PacketTrigger dialog
-#include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
+#include "syntax_translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
 
 #include "TSMagic_Trigger_TSPacket.h"
 

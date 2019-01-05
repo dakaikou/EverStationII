@@ -13,9 +13,9 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
-#include "translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_Utilities.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
+#include "syntax_translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_Utilities.h"
 
 #include "../resource.h"
 #include "..\Common\define.h"

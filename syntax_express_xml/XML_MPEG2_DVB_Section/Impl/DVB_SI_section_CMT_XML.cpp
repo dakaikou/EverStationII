@@ -1,8 +1,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_SI_section.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_SI_section.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
 #include "../Include/DVB_SI_section_XML.h"
 
 int DVB_SI_CMT_PresentSection_to_XML(TALForXMLDoc* pxmlDoc, CA_message_section_t* pcmt_section)

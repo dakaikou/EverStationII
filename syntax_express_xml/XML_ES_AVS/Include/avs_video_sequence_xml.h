@@ -17,8 +17,8 @@
 
 #include <stdint.h>
 
-#include "translate_layer/ES_AVS/Include/avs_video_sequence.h"
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "syntax_translate_layer/ES_AVS/Include/avs_video_sequence.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 XML_ES_AVS_LIB int avs_present_unaligned_nal_to_xml(uint8_t *nal_buf, int nal_length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
 XML_ES_AVS_LIB int avs_present_unknown_nal_to_xml(uint8_t *nal_buf, int nal_length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);

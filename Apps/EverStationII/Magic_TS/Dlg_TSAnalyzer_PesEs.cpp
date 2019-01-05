@@ -23,25 +23,20 @@ static char THIS_FILE[] = __FILE__;
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 #include "MiddleWare/MiddleWare_ESDecoder/Include\ESDecoder_Utilities.h"
 
-#include "translate_layer/MPEG2_DVB_Section\Include\Mpeg2_StreamType.h"
-#include "translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_Utilities.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section\Include\Mpeg2_StreamType.h"
+#include "syntax_translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_Utilities.h"
+#include "syntax_translate_layer\ES_MPA\Include\mpeg_audio_errorcode.h"
+
 #include "syntax_express_xml/XML_MPEG_PESPacket/Include/MPEG_PES_Packet_xml.h"
-
-//#include "libs_ES\ES_MPV\Include\mpeg_video_sequence.h"
-#include "translate_layer\ES_MPA\Include\mpeg_audio_errorcode.h"
-
 #include "syntax_express_xml\XML_ES_MPV\Include\mpeg_video_sequence_xml.h"
-
-//#include "libs_ES\ES_AVS\Include\avs_video_sequence.h"
 #include "syntax_express_xml\XML_ES_AVS\Include\avs_video_sequence_xml.h"
-
 #include "syntax_express_xml\XML_ES_H264\Include\h264_video_sequence_xml.h"
 #include "syntax_express_xml\XML_ES_MPA\Include\mpeg_audio_sequence_xml.h"
 #include "syntax_express_xml\XML_ES_AC3\Include\ac3_audio_sequence_xml.h"
 #include "syntax_express_xml\XML_ES_AAC\Include\aac_audio_sequence_xml.h"
 #include "syntax_express_xml\XML_ES_DRA\Include\dra_audio_sequence_xml.h"
 
-#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
+#include "Utilities\Directory\Include\TOOL_Directory.h"
 
 CDlg_TSAnalyzer_PesEs::CDlg_TSAnalyzer_PesEs(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlg_TSAnalyzer_PesEs::IDD, pParent)

@@ -15,8 +15,8 @@
 #   define XML_TSPACKET_LIB
 #endif
 
-#include "thirdparty_AL\TALForXML\Include\TALForXML.h"
-#include "translate_layer/MPEG2_TSPacket/Include/Mpeg2_TS_packet.h"
+#include "thirdparty_abstract_layer\TALForXML\Include\TALForXML.h"
+#include "syntax_translate_layer/MPEG2_TSPacket/Include/Mpeg2_TS_packet.h"
 
 using namespace tinyxml2;
 

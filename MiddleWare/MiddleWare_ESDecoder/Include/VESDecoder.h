@@ -18,7 +18,7 @@
 #include <windows.h>
 #include <mmsystem.h>
 
-#include "thirdparty_AL\TALForDirectX\Include\TALForDirectDraw.h"
+#include "thirdparty_abstract_layer\TALForDirectX\Include\TALForDirectDraw.h"
 
 #include "./common/video_common.h"
 

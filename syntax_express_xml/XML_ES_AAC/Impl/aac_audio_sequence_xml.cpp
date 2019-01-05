@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "translate_layer/ES_AAC/Include/aac_audio_sequence.h"
-#include "translate_layer/ES_AAC/Include/aac_audio_errorcode.h"
+#include "syntax_translate_layer/ES_AAC/Include/aac_audio_sequence.h"
+#include "syntax_translate_layer/ES_AAC/Include/aac_audio_errorcode.h"
 #include "../Include/aac_audio_sequence_xml.h"
 
 int aac_present_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)

@@ -1,10 +1,10 @@
 #include <string.h>
 #include <assert.h>
 
-#include "translate_layer/MPEG_PESPacket/Include/MPEG_PES_ErrorCode.h"
-#include "translate_layer/MPEG_PESPacket/Include/MPEG_PES_packet.h"
-#include "translate_layer/MPEG_PESPacket/Include/MPEG_PES_Utilities.h"
-#include "translate_layer/MPEG_PESPacket/Include/Mpeg_stream_id.h"
+#include "syntax_translate_layer/MPEG_PESPacket/Include/MPEG_PES_ErrorCode.h"
+#include "syntax_translate_layer/MPEG_PESPacket/Include/MPEG_PES_packet.h"
+#include "syntax_translate_layer/MPEG_PESPacket/Include/MPEG_PES_Utilities.h"
+#include "syntax_translate_layer/MPEG_PESPacket/Include/Mpeg_stream_id.h"
 
 #include "../Include/MPEG_PES_packet_XML.h"
 

@@ -22,7 +22,7 @@
 #include "MiddleWare\MiddleWare_TS_PayloadSplicer\Include\MiddleWare_PesSplicer_ErrorCode.h"
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TS_ErrorCode.h"
-#include "translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_Utilities.h"
+#include "syntax_translate_layer/Mpeg2_TSPacket\Include\Mpeg2_TS_Utilities.h"
 
 #include "thirdparty_libs\glog\glog\logging.h"
 

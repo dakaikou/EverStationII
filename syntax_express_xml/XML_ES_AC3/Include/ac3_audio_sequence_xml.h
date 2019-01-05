@@ -15,9 +15,9 @@
 #   define XML_ES_AC3_LIB
 #endif
 
-#include "translate_layer/ES_AC3/Include/ac3_audio_sequence.h"
+#include "syntax_translate_layer/ES_AC3/Include/ac3_audio_sequence.h"
 
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 XML_ES_AC3_LIB int ac3_present_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);
 XML_ES_AC3_LIB int ac3_present_unknown_nal_to_xml(uint8_t* nal_buf, int nal_length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode);

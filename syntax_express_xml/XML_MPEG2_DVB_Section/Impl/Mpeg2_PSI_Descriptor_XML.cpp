@@ -3,12 +3,12 @@
 #include <assert.h>
 #include <stdint.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Utilities.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_SI_Utilities.h"
 
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_Common.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_Common.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Utilities.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
 
 #include "../Include/Mpeg2_PSI_Descriptor_XML.h"
 

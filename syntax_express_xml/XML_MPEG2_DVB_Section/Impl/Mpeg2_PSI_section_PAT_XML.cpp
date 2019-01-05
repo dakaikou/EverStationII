@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_section.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_section.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
 #include "../Include/Mpeg2_PSI_section_XML.h"
 
 int MPEG2_PSI_PAT_PresentSection_to_XML(TALForXMLDoc* pxmlDoc, program_association_section_t* ppat_section)

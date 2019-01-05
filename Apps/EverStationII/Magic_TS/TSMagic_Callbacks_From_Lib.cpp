@@ -9,12 +9,12 @@
 #include "TSMagic_Callbacks_From_Lib.h"
 #include "TSMagic_Callbacks_To_Gui.h"
 
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_Common.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_IPDC_Section.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_MHP_Section.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_Common.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_table_id.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_IPDC_Section.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_MHP_Section.h"
 
 #include "MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_Pcrs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_TSPackets.h"

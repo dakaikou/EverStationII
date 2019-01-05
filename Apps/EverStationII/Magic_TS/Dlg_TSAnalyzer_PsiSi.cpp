@@ -14,8 +14,8 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_PsiSi dialog
 
-#include "translate_layer\MPEG2_DVB_Section\Include\Mpeg2_table_id.h"
-#include "translate_layer\MPEG2_DVB_Section\Include\DVB_table_id.h"
+#include "syntax_translate_layer\MPEG2_DVB_Section\Include\Mpeg2_table_id.h"
+#include "syntax_translate_layer\MPEG2_DVB_Section\Include\DVB_table_id.h"
 
 #include "syntax_express_xml\XML_MPEG2_DVB_Section\Include\Mpeg2_DSMCC_section_XML.h"
 #include "syntax_express_xml\XML_MPEG2_DVB_Section\Include\Mpeg2_PSI_section_XML.h"
@@ -23,7 +23,7 @@ static char THIS_FILE[] = __FILE__;
 #include "syntax_express_xml\XML_MPEG2_DVB_Section\Include\DVB_IPDC_section_XML.h"
 #include "syntax_express_xml\XML_MPEG2_DVB_Section\Include\DVB_MHP_section_XML.h"
 
-#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
+#include "Utilities\Directory\Include\TOOL_Directory.h"
 
 
 CDlg_TSAnalyzer_PsiSi::CDlg_TSAnalyzer_PsiSi(CWnd* pParent /*=NULL*/)

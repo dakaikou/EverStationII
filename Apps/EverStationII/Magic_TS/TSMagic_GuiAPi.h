@@ -10,7 +10,7 @@
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_OCDCs.h"
 
-#include "translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
+#include "syntax_translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
 
 #include "TSMagic_Trigger_Section.h"
 #include "TSMagic_Trigger_TSPacket.h"

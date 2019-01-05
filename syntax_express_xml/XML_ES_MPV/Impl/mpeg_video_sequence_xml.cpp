@@ -2,10 +2,10 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "translate_layer/ES_MPV/Include/mpeg_video_sequence.h"
-#include "translate_layer/ES_MPV/Include/mpeg_video_errorcode.h"
-#include "translate_layer/ES_MPV/Include/mpeg_video_sequence.h"
-#include "translate_layer/ES_MPV/Include/mpeg_video_utilities.h"
+#include "syntax_translate_layer/ES_MPV/Include/mpeg_video_sequence.h"
+#include "syntax_translate_layer/ES_MPV/Include/mpeg_video_errorcode.h"
+#include "syntax_translate_layer/ES_MPV/Include/mpeg_video_sequence.h"
+#include "syntax_translate_layer/ES_MPV/Include/mpeg_video_utilities.h"
 #include "../Include/mpeg_video_sequence_xml.h"
 
 int mpgv_present_unaligned_nal_to_xml(uint8_t* nal_buf, int nal_length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)

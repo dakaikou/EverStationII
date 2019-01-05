@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "translate_layer/MPEG2_TSPacket/Include/Mpeg2_TS_ErrorCode.h"
-#include "translate_layer/MPEG2_TSPacket/Include/Mpeg2_TS_packet.h"
-#include "translate_layer/MPEG2_TSPacket/Include/Mpeg2_TS_Utilities.h"
+#include "syntax_translate_layer/MPEG2_TSPacket/Include/Mpeg2_TS_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_TSPacket/Include/Mpeg2_TS_packet.h"
+#include "syntax_translate_layer/MPEG2_TSPacket/Include/Mpeg2_TS_Utilities.h"
 
 #include "../Include/Mpeg2_TS_packet_XML.h"
 

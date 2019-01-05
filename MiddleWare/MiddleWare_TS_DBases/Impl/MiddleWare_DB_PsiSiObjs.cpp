@@ -7,15 +7,15 @@
 #include "../Include/MiddleWare_DB_PsiSiObjs.h"
 #include "../Include/MiddleWare_DB_ErrorCode.h"
 
-#include "translate_layer\MPEG2_DVB_Section\Include\DVB_table_id.h"
-#include "translate_layer\MPEG2_DVB_Section\Include\Mpeg2_table_id.h"
-#include "translate_layer\MPEG2_DVB_Section\Include\DVB_SI_Utilities.h"
-#include "translate_layer\MPEG2_DVB_Section\Include\Mpeg2_DSMCC_Utilities.h"
+#include "syntax_translate_layer\MPEG2_DVB_Section\Include\DVB_table_id.h"
+#include "syntax_translate_layer\MPEG2_DVB_Section\Include\Mpeg2_table_id.h"
+#include "syntax_translate_layer\MPEG2_DVB_Section\Include\DVB_SI_Utilities.h"
+#include "syntax_translate_layer\MPEG2_DVB_Section\Include\Mpeg2_DSMCC_Utilities.h"
 
 #include "syntax_express_xml\XML_MPEG2_DVB_Section\Include\dsmcc\Mpeg2_DSMCC_DDM_XML.h"
 #include "syntax_express_xml\XML_MPEG2_DVB_Section\Include\dsmcc\Mpeg2_DSMCC_BIOP_XML.h"
 
-#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
+#include "Utilities\Directory\Include\TOOL_Directory.h"
 
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))

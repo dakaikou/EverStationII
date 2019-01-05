@@ -26,7 +26,7 @@ static char THIS_FILE[] = __FILE__;
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TransportStream.h"
 //#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 
-#include "translate_layer\MPEG2_TSPacket\Include\Mpeg2_TS_Utilities.h"
+#include "syntax_translate_layer\Mpeg2_TSPacket\Include\Mpeg2_TS_Utilities.h"
 
 CDlg_TSAnalyzer_Packets::CDlg_TSAnalyzer_Packets(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlg_TSAnalyzer_Packets::IDD, pParent)

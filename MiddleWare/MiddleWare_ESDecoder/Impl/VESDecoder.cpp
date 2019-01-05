@@ -8,7 +8,7 @@
 #include <math.h>
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
-#include "thirdparty_AL\TALForDirectX\Include\TALForDirectDraw.h"
+#include "thirdparty_abstract_layer\TALForDirectX\Include\TALForDirectDraw.h"
 
 #include "../Include/common/video_common.h"
 #include "../Include/VESDecoder.h"

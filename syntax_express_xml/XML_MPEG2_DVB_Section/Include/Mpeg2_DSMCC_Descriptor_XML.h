@@ -17,8 +17,8 @@
 
 #include <stdint.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Descriptor.h"
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Descriptor.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 XML_MPEG_DVB_LIB int MPEG2_DSMCC_decode_name_descriptor_to_xml(uint8_t* buf, int length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, name_descriptor_t* pname_descriptor = NULL);
 XML_MPEG_DVB_LIB int MPEG2_DSMCC_present_name_descriptor_to_xml(TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, name_descriptor_t* pname_descriptor);

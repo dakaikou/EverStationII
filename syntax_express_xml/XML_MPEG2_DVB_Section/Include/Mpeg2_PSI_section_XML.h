@@ -17,8 +17,8 @@
 
 #include <stdint.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_section.h"
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_section.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 XML_MPEG_DVB_LIB int MPEG2_PSI_PAT_PresentSection_to_XML(TALForXMLDoc* pxmlDoc, program_association_section_t* ppat_section);
 XML_MPEG_DVB_LIB	int MPEG2_PSI_PMT_PresentSection_to_XML(TALForXMLDoc* pxmlDoc, TS_program_map_section_t* ppmt_section);

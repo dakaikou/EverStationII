@@ -23,8 +23,8 @@
 #include "MiddleWare/MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_ESDecoder/Include/ESDecoder.h"
 
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
-#include "translate_layer/MPEG2_TSPacket\Include\Mpeg2_TS_Utilities.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_TSPacket\Include\Mpeg2_TS_Utilities.h"
 
 //#include "MiddleWare_ESDecoder/Include/VideoDecoder_Mpeg2.h"
 //#include "MiddleWare_ESDecoder/Include/VideoDecoder_H264.h"

@@ -17,8 +17,8 @@
 
 #include <stdint.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/DVB_MHP_Descriptor.h"
-#include "thirdparty_AL/TALForXML/Include/TALForXML.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/DVB_MHP_Descriptor.h"
+#include "thirdparty_abstract_layer/TALForXML/Include/TALForXML.h"
 
 XML_MPEG_DVB_LIB int DVB_MHP_decode_application_descriptor_to_xml(uint8_t* buf, int length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, application_descriptor_t* papplication_descriptor = NULL);
 XML_MPEG_DVB_LIB int DVB_MHP_present_application_descriptor_to_xml(TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode, application_descriptor_t* papplication_descriptor);

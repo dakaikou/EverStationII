@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include <assert.h>
 
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_Common.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_Common.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
 #include "../Include/MPEG_DVB_Common_XML.h"
 
 //int report_descriptor_length_error_to_xml(uint8_t *buf, int length, int max_length, TALForXMLDoc* pxmlDoc, tinyxml2::XMLElement* pxmlParentNode)

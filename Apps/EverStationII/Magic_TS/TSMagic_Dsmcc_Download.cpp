@@ -7,13 +7,13 @@
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_OCDCs.h"
 
-#include "translate_layer/MPEG2_TSPacket/Include/Mpeg2_TS_ErrorCode.h"
-#include "translate_layer/MPEG2_TSPacket\Include\Mpeg2_TS_Utilities.h"
-#include "translate_layer/MPEG2_DVB_Section\Include\MPEG2_DVB_ErrorCode.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
-#include "translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Utilities.h"
+#include "syntax_translate_layer/MPEG2_TSPacket/Include/Mpeg2_TS_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_TSPacket\Include\Mpeg2_TS_Utilities.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section\Include\MPEG2_DVB_ErrorCode.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
+#include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_DSMCC_Utilities.h"
 
-#include "toolbox_libs\TOOL_Directory\Include\TOOL_Directory.h"
+#include "Utilities\Directory\Include\TOOL_Directory.h"
 
 #include "..\Common\define.h"
 

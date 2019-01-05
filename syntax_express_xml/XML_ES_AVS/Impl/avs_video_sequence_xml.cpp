@@ -2,9 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "translate_layer/ES_AVS/Include/avs_video_sequence.h"
-#include "translate_layer/ES_AVS/Include/avs_video_utilities.h"
-#include "translate_layer/ES_AVS/Include/avs_video_errorcode.h"
+#include "syntax_translate_layer/ES_AVS/Include/avs_video_sequence.h"
+#include "syntax_translate_layer/ES_AVS/Include/avs_video_utilities.h"
+#include "syntax_translate_layer/ES_AVS/Include/avs_video_errorcode.h"
 #include "../Include/avs_video_sequence_xml.h"
 
 int avs_present_unaligned_nal_to_xml(uint8_t *nal_buf, int nal_length, TALForXMLDoc* pxmlDoc, XMLElement* pxmlParentNode)
