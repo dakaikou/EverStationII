@@ -77,18 +77,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\$(platform)\</OutDir>
-    <TargetName>$(ProjectName)_v4.51D(x32)</TargetName>
+    <TargetName>$(ProjectName)_v4.53D(x32)</TargetName>
     <IntDir>$(Configuration)\$(platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\$(platform)\</OutDir>
-    <TargetName>$(ProjectName)_v4.51D(x64)</TargetName>
+    <TargetName>$(ProjectName)_v4.53D(x64)</TargetName>
     <IntDir>$(Configuration)\$(platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_v4.51(x32)</TargetName>
+    <TargetName>$(ProjectName)_v4.53(x32)</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)\$(platform)\</OutDir>
     <IntDir>$(Configuration)\$(platform)\</IntDir>
   </PropertyGroup>
@@ -96,7 +96,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(platform)\</IntDir>
-    <TargetName>$(ProjectName)_v4.51(x64)</TargetName>
+    <TargetName>$(ProjectName)_v4.53(x64)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
