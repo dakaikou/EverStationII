@@ -1769,7 +1769,6 @@ int CTransportStream::AddBitrateSample(int new_bitrate, int(*callback)(int, int)
 	return NO_ERROR;
 }
 
-//only valid when file operation
 void CTransportStream::SeekToBegin(void)
 {
 	m_llCurReadPos = 0;
@@ -1777,8 +1776,6 @@ void CTransportStream::SeekToBegin(void)
 	{
 		file_seek(0);
 		m_nEOF = 0;
-
-		m_ts_fifo.Reset();
 	}
 }
 
