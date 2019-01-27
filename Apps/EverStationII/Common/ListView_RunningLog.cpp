@@ -146,6 +146,30 @@ void CListCtrl_RunningLog::OnSize(UINT nType, int cx, int cy)
 	SetColumnWidth(columns - 1, width);
 }
 
+//void CListCtrl_RunningLog::AppendLogW(int type, wchar_t* pszItem)
+//{
+//	if (pszItem != NULL)
+//	{
+//		if (m_hLogAccess != NULL)
+//		{
+//			::WaitForSingleObject(m_hLogAccess, INFINITE);
+//		}
+//
+//		if (m_nLogCount < LOG_ITEM_BUF_COUNT)
+//		{
+//			m_logItem[m_nLogCount].type = type;
+//			//strcpy_s(m_logItem[m_nLogCount].pszText, sizeof(m_logItem[m_nLogCount].pszText), pszItem);
+//
+//			m_nLogCount++;
+//		}
+//
+//		if (m_hLogAccess != NULL)
+//		{
+//			::SetEvent(m_hLogAccess);
+//		}
+//	}
+//}
+
 void CListCtrl_RunningLog::AppendLog(int type, char* pszItem)
 {
 	if (pszItem != NULL)

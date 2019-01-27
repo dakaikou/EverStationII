@@ -2,7 +2,7 @@
 #include "../Include/SIOWithUDP.h"
 
 #include "syntax_translate_layer/INET_IPv4/Include/INET_IPv4.h"
-#include "Utilities/Directory/include/TOOL_Directory.h"
+//#include "Utilities/Directory/include/TOOL_Directory.h"
 
 //#include <sys/types.h>
 //#include <sys/stat.h>
@@ -86,7 +86,10 @@ int udp_receive_init(char* pszDstIP, int dst_port)
 	FILE*		fp_debug = NULL;
 
 	GetModuleFileNameA(NULL, pszExeFile, sizeof(pszExeFile)); 
-	len = DIR_GetModulePathLength(pszExeFile);
+	char* ptemp = strrchr(pszExeFile, '\\');
+	len = (int)(ptemp - pszExeFile);
+
+	//len = DIR_GetModulePathLength(pszExeFile);
 	assert(len > 0);
 
 	memcpy(pszExePath, pszExeFile, len);

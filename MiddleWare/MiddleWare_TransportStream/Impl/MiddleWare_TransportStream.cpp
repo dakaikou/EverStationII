@@ -289,7 +289,10 @@ int CTransportStream::Open(char* tsin_option, char* tsin_description, int mode)
 	int		len;
 
 	GetModuleFileNameA(NULL, pszExeFile, MAX_PATH);
-	len = DIR_GetModulePathLength(pszExeFile);
+	char* ptemp = strrchr(pszExeFile, '\\');
+	len = (int)(ptemp - pszExeFile);
+
+	//len = DIR_GetModulePathLength(pszExeFile);
 	assert(len > 0);
 
 	memcpy(pszIniFile, pszExeFile, len);
@@ -1769,6 +1772,7 @@ int CTransportStream::AddBitrateSample(int new_bitrate, int(*callback)(int, int)
 	return NO_ERROR;
 }
 
+//only valid when file operation
 void CTransportStream::SeekToBegin(void)
 {
 	m_llCurReadPos = 0;
@@ -1776,6 +1780,8 @@ void CTransportStream::SeekToBegin(void)
 	{
 		file_seek(0);
 		m_nEOF = 0;
+
+		m_ts_fifo.Reset();
 	}
 }
 

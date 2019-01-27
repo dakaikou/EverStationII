@@ -79,7 +79,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\$(platform)\</OutDir>
-    <TargetName>XML_ES_AACD(x64)</TargetName>
+    <TargetName>$(ProjectName)D(x64)</TargetName>
     <IntDir>$(Configuration)\$(platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

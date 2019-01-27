@@ -82,7 +82,10 @@ void CDB_Pcrs::Reset(void)
 	int		len;
 
 	GetModuleFileNameA(NULL, pszExeFile, sizeof(pszExeFile));
-	len = DIR_GetModulePathLength(pszExeFile);
+	char* ptemp = strrchr(pszExeFile, '\\');
+	len = (int)(ptemp - pszExeFile);
+
+	//len = DIR_GetModulePathLength(pszExeFile);
 	assert(len > 0);
 
 	memcpy(pszIniFile, pszExeFile, len);

@@ -855,6 +855,15 @@ void ts_section_trigger_loop(pthread_params_t pThreadParams)
 				}
 				else if (rtcode == MIDDLEWARE_TS_FILE_EOF_ERROR)
 				{
+					SectionSplicer.Reset();
+					pSectionTrigger->Reset();
+
+					stream_synced = 0;
+
+					sprintf_s(pszDebug, sizeof(pszDebug), "SECTION捕捉<ID:0x%08X>: 到达文件尾！（文件位置：0x%llx）\n", randNum, read_byte_pos);
+					::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
+					LOG(INFO) << pszDebug;
+
 					ptransport_stream->SeekToBegin();
 				}
 				else if (rtcode == MIDDLEWARE_TS_FIFO_EMPTY_ERROR)

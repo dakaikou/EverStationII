@@ -38,6 +38,7 @@ protected:
 
 public:
 	void AppendLog(int type, char* pszItem);
+	//void AppendLogW(int type, wchar_t* pszItem);
 	void Open(void);
 	void Close(void);
 	void ShowLog(void);

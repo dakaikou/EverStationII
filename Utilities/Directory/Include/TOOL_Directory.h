@@ -17,7 +17,7 @@
 
 #include <stdint.h>
 
-TOOL_DIRECTORY_LIB int DIR_GetModulePathLength(char* pszFile);
+//TOOL_DIRECTORY_LIB int DIR_GetModulePathLength(char* pszFile);
 TOOL_DIRECTORY_LIB int DIR_BuildDirectory(char* pszFilePath);
 
 #endif

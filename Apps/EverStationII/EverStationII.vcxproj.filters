@@ -300,6 +300,9 @@
     <ClInclude Include="Common\Dlg_ShowVideo.h">
       <Filter>头文件\Common</Filter>
     </ClInclude>
+    <ClInclude Include="Common\GuiApi_MSG.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

@@ -6,24 +6,24 @@
 
 #include "../Include/TOOL_Directory.h"
 
-int	DIR_GetModulePathLength(char* pszFile)
-{
-	char*		 pdest;
-	int			 idx = -1;
-
-	//获取应用程序的路径
-	if (pszFile != NULL)
-	{
-		pdest = strchr(pszFile, '\\');
-		while (pdest != NULL)
-		{
-			idx = (int)(pdest - pszFile);
-			pdest = strchr(pszFile + idx + 1, '\\');
-		}
-	}
-
-	return idx;
-}
+//int	DIR_GetModulePathLength(char* pszFile)
+//{
+//	char*		 pdest;
+//	int			 idx = -1;
+//
+//	//获取应用程序的路径
+//	if (pszFile != NULL)
+//	{
+//		pdest = strchr(pszFile, '\\');
+//		while (pdest != NULL)
+//		{
+//			idx = (int)(pdest - pszFile);
+//			pdest = strchr(pszFile + idx + 1, '\\');
+//		}
+//	}
+//
+//	return idx;
+//}
 
 int DIR_BuildDirectory(char* pszFilePath)
 {

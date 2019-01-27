@@ -257,7 +257,10 @@ void CTSMagicView::loadCfg()
 	char	url[MAX_PATH];
 
 	GetModuleFileNameA(NULL, pszExeFile, MAX_PATH); 
-	len = DIR_GetModulePathLength(pszExeFile);
+	char* ptemp = strrchr(pszExeFile, '\\');
+	len = (int)(ptemp - pszExeFile);
+
+	//len = DIR_GetModulePathLength(pszExeFile);
 	assert(len > 0);
 
 	memcpy(pszIniFile, pszExeFile, len);
@@ -611,8 +614,8 @@ void CTSMagicView::OnBtnOpen()
 				rtcode = m_transport_stream.Open("FILE", strFileName.GetBuffer(256), 0);
 				if (rtcode == MIDDLEWARE_TS_NO_ERROR)
 				{
-					CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
-					pFrame->m_DockPane_RunningLog.Open();
+					//CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
+					//pFrame->m_DockPane_RunningLog.Open();
 
 					pWnd = GetDlgItem(IDC_BTN_OPEN);
 					pWnd->EnableWindow(FALSE);
@@ -726,8 +729,8 @@ void CTSMagicView::OnBtnOpen()
 //			}
 //		}
 
-		CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
-		pFrame->m_DockPane_RunningLog.Close();
+		//CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
+		//pFrame->m_DockPane_RunningLog.Close();
 	}
 }
 
@@ -746,8 +749,8 @@ void CTSMagicView::OnBtnStream()
 		rtcode = m_transport_stream.Open(m_strTSInputOption.GetBuffer(16), m_strTSInputAttribute.GetBuffer(256), 1);
 		if (rtcode == 0)
 		{
-			CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
-			pFrame->m_DockPane_RunningLog.Open();
+			//CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
+			//pFrame->m_DockPane_RunningLog.Open();
 
 			//memset(m_kThreadParams.pszFileName, '\0', MAX_PATH);
 			sprintf_s(m_kThreadParams.pszFileName, sizeof(m_kThreadParams.pszFileName), m_strTSInputAttribute.GetBuffer(256));
@@ -863,8 +866,8 @@ void CTSMagicView::OnBtnStream()
 		pWnd = GetDlgItem(IDC_BTN_STREAM);
 		pWnd->EnableWindow(FALSE);
 
-		CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
-		pFrame->m_DockPane_RunningLog.Close();
+		//CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
+		//pFrame->m_DockPane_RunningLog.Close();
 
 		//必须等到主线程的退出
 //		while (m_kThreadParams.main_thread_stopped == 0)
