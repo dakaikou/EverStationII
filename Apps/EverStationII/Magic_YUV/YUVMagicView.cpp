@@ -127,89 +127,11 @@ void CYUVMagicView::AdjustLayout(int cx, int cy)
 	}
 }
 
-BOOL CALLBACK MyInfoEnumProc(
-	HMONITOR hMonitor,
-	HDC hdcMonitor,
-	LPRECT lprcMonitor,
-	LPARAM dwData
-)
-{
-	MONITORINFOEX mi;
-	ZeroMemory(&mi, sizeof(mi));
-	mi.cbSize = sizeof(mi);
-	GetMonitorInfo(hMonitor, &mi);
-	//wprintf(L"DisplayDevice: %s\n", mi.szDevice);
-
-	return TRUE;
-}
-
 void CYUVMagicView::OnInitialUpdate() 
 {
 	CFormView::OnInitialUpdate();
 	
 	// TODO: Add your specialized code here and/or call the base class
-
-
-	DISPLAY_DEVICE dd;//声明一个该结构体变量
-	DWORD i = 0;
-	ZeroMemory(&dd, sizeof(dd));//msdn文档中要求，在填充该结构体前，要
-													  //先初始化DisplayDevice.cb,所以，意味着要给该结构体预先分配内存，把结构体中所有成员变量都清0
-													  //也就是满足了DisplayDevice.cb初始化的工作。
-	dd.cb = sizeof(dd);//该结构体需要的空间
-
-	char pszDebug[256];
-	CWnd* pMainWnd = AfxGetMainWnd();
-	HWND hMainWnd = pMainWnd->GetSafeHwnd();
-
-	sprintf_s(pszDebug, sizeof(pszDebug), "YUVMagicView check monitor plugins...\n");
-	::SendMessage(hMainWnd, WM_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_OPEN);
-	LOG(INFO) << pszDebug;
-
-	for (i = 0; EnumDisplayDevices(NULL, i, &dd, 0); i++)
-	{
-		sprintf_s(pszDebug, sizeof(pszDebug), "Device %d:\n", i);
-		LOG(INFO) << pszDebug;
-		::SendMessage(hMainWnd, WM_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
-
-		sprintf_s(pszDebug, sizeof(pszDebug), "DeviceName:'%s'\n", dd.DeviceName);
-		LOG(INFO) << pszDebug;
-		::SendMessage(hMainWnd, WM_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
-
-		sprintf_s(pszDebug, sizeof(pszDebug), "DeviceString: '%s'\n", dd.DeviceString);
-		LOG(INFO) << pszDebug;
-		::SendMessage(hMainWnd, WM_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
-
-		sprintf_s(pszDebug, sizeof(pszDebug), "StateFlags:   %s%s%s%s%s\n",
-			((dd.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP) ?	"desktop " : ""),
-			((dd.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) ? "primary " : ""),
-			((dd.StateFlags & DISPLAY_DEVICE_VGA_COMPATIBLE) ? "vga " : ""),
-			((dd.StateFlags & DISPLAY_DEVICE_MULTI_DRIVER) ? "multi " : ""),
-			((dd.StateFlags & DISPLAY_DEVICE_MIRRORING_DRIVER) ? "mirror " : ""));
-		LOG(INFO) << pszDebug;
-		::SendMessage(hMainWnd, WM_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
-
-		// Get more info about the device
-		DISPLAY_DEVICE dd2;
-		ZeroMemory(&dd2, sizeof(dd2));
-		dd2.cb = sizeof(dd2);
-		EnumDisplayDevices(dd.DeviceName, 0, &dd2, 0);
-		sprintf_s(pszDebug, sizeof(pszDebug), "DeviceID: '%s'\n", dd2.DeviceID);
-		LOG(INFO) << pszDebug;
-		::SendMessage(hMainWnd, WM_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
-
-		sprintf_s(pszDebug, sizeof(pszDebug), "Monitor Name: '%s'\n", dd2.DeviceString);
-		LOG(INFO) << pszDebug;
-		::SendMessage(hMainWnd, WM_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
-	}
-	sprintf_s(pszDebug, sizeof(pszDebug), "EnumDisplayMonitors():->");
-	LOG(INFO) << pszDebug;
-	EnumDisplayMonitors(NULL, NULL, MyInfoEnumProc, 0);
-
-	int numMonitor = GetSystemMetrics(SM_CMONITORS);
-	sprintf_s(pszDebug, sizeof(pszDebug), "GetSystemMetrics(): %d\n", numMonitor);
-	LOG(INFO) << pszDebug;
-	::SendMessage(hMainWnd, WM_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
-
 	InitConsoleTab();
 	
 	m_bInitDone = 1;

@@ -15,6 +15,7 @@ static char THIS_FILE[] = __FILE__;
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_Video.h"
 
+#include "..\MainFrm.h"
 #include "..\Common\Dlg_ShowVideo.h"
 #include "..\Magic_YUV\GuiApi_YUV.h"
 
@@ -257,6 +258,18 @@ void CDlg_YUVPreview::OnBtnPreview()
 
 		m_dlgVideo.AttachVideoDecoder(&m_YUVDecoder);
 		m_dlgVideo.ShowWindow(SW_SHOW);
+
+		CMainFrame* pMainFrame = (CMainFrame*)AfxGetMainWnd();
+		if (pMainFrame->m_rectSecondDesktop.right > pMainFrame->m_rectSecondDesktop.left)
+		{
+			m_dlgVideo.MoveWindow(&(pMainFrame->m_rectSecondDesktop));
+		}
+		else
+		{
+			m_dlgVideo.MoveWindow(&(pMainFrame->m_rectPrimaryDesktop));
+		}
+
+		m_dlgVideo.EnlargeClientAreaToFullScreen();
 	}
 }
 

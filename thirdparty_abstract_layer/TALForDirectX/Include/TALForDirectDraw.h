@@ -47,6 +47,9 @@ private:		//direct audio output
 	LPDIRECTDRAWCLIPPER		m_pcClipper;
 	DDSURFACEDESC2		    m_ddsd;    // DirectDraw ±Ì√Ê√Ë ˆ
 
+	int			m_nOldScreenWidth;
+	int			m_nOldScreenHeight;
+
 public:
 	~CTALForDirectDraw();
 };

@@ -75,8 +75,15 @@ public:
 
 // Implementation
 protected:
+	BOOL					m_bFullScreen;
+	CRect					m_rectFullScreen;
+	WINDOWPLACEMENT			m_stOldWndPlacement;		//结构中包含了有关窗口在屏幕上位置的信息
 
 	CString					m_strFileName;
+
+public:
+	void EnlargeClientAreaToFullScreen(void);
+	void RestoreClientAreaToInitial(void);
 
 	// Generated message map functions
 	//{{AFX_MSG(CDlg_ShowVideo)
@@ -104,6 +111,8 @@ protected:
 	afx_msg LRESULT OnReportVideoDecodeFPS(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 };
 
 uint32_t VideoPlay_Thread(PVOID pVoid);

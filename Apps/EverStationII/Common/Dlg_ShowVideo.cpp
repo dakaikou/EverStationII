@@ -7,7 +7,7 @@
 
 #include "Dlg_ShowVideo.h"
 
-
+#include "../MainFrm.h"
 #include "../Magic_TS/TSMagic_GuiApi_MSG.h"
 
 #ifdef _DEBUG
@@ -52,6 +52,8 @@ CDlg_ShowVideo::CDlg_ShowVideo(CWnd* pParent /*=NULL*/)
 	m_fViewRatio = 1.0f;
 	
 	strcpy_s(m_pszFourCC, sizeof(m_pszFourCC), "");
+
+	m_bFullScreen = false;
 }
 
 
@@ -87,6 +89,7 @@ BEGIN_MESSAGE_MAP(CDlg_ShowVideo, CDialog)
 	ON_BN_CLICKED(IDC_CHECK_CYCLE, OnCheckCycle)
 	//}}AFX_MSG_MAP
 	ON_MESSAGE(WM_REPORT_VIDEO_DECODE_FPS, OnReportVideoDecodeFPS)
+	ON_WM_GETMINMAXINFO()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -197,20 +200,20 @@ void CDlg_ShowVideo::AdjustLayout(int videoWidth, int videoHeight)
 {
 	CWnd*	pWnd;
 
-	CRect rcWindow;
-	CRect rcClient;
+	//CRect rcWindow;
+	//CRect rcClient;
 	CRect rcLeftBtn;
 	CRect rcRightBtn;
 
 	int		nScreenX = GetSystemMetrics(SM_CXSCREEN);
 	int		nScreenY = GetSystemMetrics(SM_CYSCREEN);
-	int		nXDelt;
-	int		nYDelt;
-	int		width;
-	int		height;
+	//int		nXDelt;
+	//int		nYDelt;
+	//int		width;
+	//int		height;
 
-	GetWindowRect(&rcWindow);
-	GetClientRect(&rcClient);
+	//GetWindowRect(&rcWindow);
+	//GetClientRect(&rcClient);
 
 	CWnd* pLeftBtnWnd = GetDlgItem(IDC_BTN_FIRST_FRAME);
 	pLeftBtnWnd->GetWindowRect(&rcLeftBtn);
@@ -218,8 +221,8 @@ void CDlg_ShowVideo::AdjustLayout(int videoWidth, int videoHeight)
 	CWnd* pRightBtnWnd = GetDlgItem(IDC_BTN_SAVE_BMP);
 	pRightBtnWnd->GetWindowRect(&rcRightBtn);
 
-	nYDelt = rcWindow.Height() - rcClient.Height() + rcLeftBtn.Height() + 30;
-	height = videoHeight + nYDelt;
+	//nYDelt = rcWindow.Height() - rcClient.Height() + rcLeftBtn.Height() + 30;
+	//height = videoHeight + nYDelt;
 	//if (audioonly)
 	//{
 	//	height = nYDelt;
@@ -229,16 +232,16 @@ void CDlg_ShowVideo::AdjustLayout(int videoWidth, int videoHeight)
 	//	height = 576 + nYDelt;
 	//}
 
-	nXDelt = rcWindow.Width() - rcClient.Width();
-	width = videoWidth + nXDelt + 6;
-	if (width < 640) width = 640;
+	//nXDelt = rcWindow.Width() - rcClient.Width();
+	//width = videoWidth + nXDelt + 6;
+	//if (width < 640) width = 640;
 
-	rcWindow.left = (nScreenX - width) / 2;
-	rcWindow.top = (nScreenY - height) / 2;
-	rcWindow.right = rcWindow.left + width;
-	rcWindow.bottom = rcWindow.top + height;
+	//rcWindow.left = (nScreenX - width) / 2;
+	//rcWindow.top = (nScreenY - height) / 2;
+	//rcWindow.right = rcWindow.left + width;
+	//rcWindow.bottom = rcWindow.top + height;
 
-	MoveWindow(&rcWindow);
+	//MoveWindow(&rcWindow);
 
 	m_bCycle = TRUE;
 	CButton* pBtn = (CButton*)GetDlgItem(IDC_CHECK_CYCLE);
@@ -248,21 +251,21 @@ void CDlg_ShowVideo::AdjustLayout(int videoWidth, int videoHeight)
 		pBtn->SetCheck(m_bCycle);
 	}
 
-	CRect	rectClient;
+	//CRect	rectClient;
 	CRect	rectCtrl;
 	int		yOffset;
 	int		xOffset;
 
-	GetClientRect(&rectClient);
+	//GetClientRect(&rectClient);
 
-	yOffset = rectClient.bottom - 5;
+	yOffset = nScreenY - 25;
 
 	pWnd = GetDlgItem(IDC_SLIDER_FILE);
 	if (::IsWindow(pWnd->GetSafeHwnd()))
 	{
 		pWnd->ShowWindow(SW_SHOW);
 		pWnd->GetClientRect(&rectCtrl);
-		pWnd->MoveWindow(10, yOffset - rectCtrl.Height(), rectClient.Width() - 20, rectCtrl.Height());
+		pWnd->MoveWindow(10, yOffset - rectCtrl.Height(), nScreenX - 20, rectCtrl.Height());
 		yOffset -= rectCtrl.Height();
 	}
 
@@ -332,7 +335,7 @@ void CDlg_ShowVideo::AdjustLayout(int videoWidth, int videoHeight)
 		xOffset += rectCtrl.Width() + 5;
 	}
 
-	xOffset = rectClient.right - 10;
+	xOffset = nScreenX - 20;
 	pWnd = GetDlgItem(IDC_BTN_SAVE_BMP);
 	if (::IsWindow(pWnd->GetSafeHwnd()))
 	{
@@ -420,7 +423,7 @@ void CDlg_ShowVideo::AttachVideoDecoder(PVOID pDecoder)
 		videoHeight = decode_info.display_height;
 	//}
 
-	AdjustLayout(videoWidth, videoHeight);
+	//AdjustLayout(videoWidth, videoHeight);
 
 	//m_bIsAudio = bAudio;
 
@@ -437,7 +440,8 @@ void CDlg_ShowVideo::OnShowWindow(BOOL bShow, UINT nStatus)
 
 	if (bShow)
 	{
-		CenterWindow();
+		//EnlargeClientAreaToFullScreen();
+		//CenterWindow();
 
 		if (m_pVidDecoder != NULL)
 		{
@@ -799,6 +803,14 @@ void CDlg_ShowVideo::OnBtnGrid()
 void CDlg_ShowVideo::OnLButtonDblClk(UINT nFlags, CPoint point) 
 {
 	// TODO: Add your message handler code here and/or call default
+	if (!m_bFullScreen)
+	{
+		EnlargeClientAreaToFullScreen();
+	}
+	else
+	{
+		RestoreClientAreaToInitial();
+	}
 /*
 	int		 mb_row;
 	int		 mb_col;
@@ -879,6 +891,8 @@ void CDlg_ShowVideo::OnLButtonDblClk(UINT nFlags, CPoint point)
 		m_ToolTip.Show(point);
 	}
 */	
+	//Invalidate(FALSE);
+
 	CDialog::OnLButtonDblClk(nFlags, point);
 }
 
@@ -1324,4 +1338,67 @@ LRESULT CDlg_ShowVideo::OnReportVideoDecodeFPS(WPARAM wParam, LPARAM lParam)
 	pWnd->SetWindowText(strFPS);
 
 	return 0;
+}
+
+void CDlg_ShowVideo::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	if (m_bFullScreen)
+	{
+		lpMMI->ptMaxSize.x = m_rectFullScreen.Width();
+		lpMMI->ptMaxSize.y = m_rectFullScreen.Height();
+		lpMMI->ptMaxPosition.x = m_rectFullScreen.left;
+		lpMMI->ptMaxPosition.y = m_rectFullScreen.top;
+		lpMMI->ptMaxTrackSize.x = m_rectFullScreen.Width();
+		lpMMI->ptMaxTrackSize.y = m_rectFullScreen.Height();
+	}
+
+	CDialog::OnGetMinMaxInfo(lpMMI);
+}
+
+void CDlg_ShowVideo::EnlargeClientAreaToFullScreen(void)
+{
+	if (m_bFullScreen == false)
+	{
+		//获取系统屏幕宽高  
+		int g_iCurScreenWidth = GetSystemMetrics(SM_CXSCREEN);
+		int g_iCurScreenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+		//用m_struOldWndpl得到当前窗口的显示状态和窗体位置，以供退出全屏后使用  
+		GetWindowPlacement(&m_stOldWndPlacement);
+
+		//计算出窗口全屏显示客户端所应该设置的窗口大小，主要为了将不需要显示的窗体边框等部分排除在屏幕外  
+		CRect rectWholeDlg;
+		CRect rectClient;
+
+		GetWindowRect(&rectWholeDlg);//得到当前窗体的总的相对于屏幕的坐标  
+		RepositionBars(0, 0xffff, AFX_IDW_PANE_FIRST, reposQuery, &rectClient);//得到窗口客户区坐标  
+		ClientToScreen(&rectClient);//将客户区相对窗体的坐标转为相对屏幕坐标  
+		m_rectFullScreen.left = m_stOldWndPlacement.rcNormalPosition.left + (rectWholeDlg.left - rectClient.left);
+		m_rectFullScreen.top = m_stOldWndPlacement.rcNormalPosition.top + (rectWholeDlg.top - rectClient.top);
+		m_rectFullScreen.right = m_stOldWndPlacement.rcNormalPosition.right + (rectWholeDlg.right - rectClient.right);
+		m_rectFullScreen.bottom = m_stOldWndPlacement.rcNormalPosition.bottom + (rectWholeDlg.bottom - rectClient.bottom);
+
+		//设置窗口对象参数，为全屏做好准备并进入全屏状态  
+		WINDOWPLACEMENT struWndpl;
+		struWndpl.length = sizeof(WINDOWPLACEMENT);
+		struWndpl.flags = 0;
+		struWndpl.showCmd = SW_SHOWNORMAL;
+		struWndpl.rcNormalPosition = m_rectFullScreen;
+		SetWindowPlacement(&struWndpl);//该函数设置指定窗口的显示状态和显示大小位置等，是我们该程序最为重要的函数  
+
+		m_bFullScreen = true;
+	}
+}
+
+void CDlg_ShowVideo::RestoreClientAreaToInitial(void)
+{
+	if (m_bFullScreen)
+	{
+		SetWindowPlacement(&m_stOldWndPlacement);
+
+		//CenterWindow();
+
+		m_bFullScreen = false;
+	}
 }

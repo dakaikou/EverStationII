@@ -17,6 +17,9 @@ CTALForDirectDraw::CTALForDirectDraw(void)
 	m_lpDDSOverlay = NULL;
 	m_lpDDSPrimary = NULL;
 	m_pcClipper = NULL;
+
+	m_nOldScreenWidth = -1;
+	m_nOldScreenHeight = -1;
 }
 
 CTALForDirectDraw::~CTALForDirectDraw()
@@ -304,24 +307,56 @@ int CTALForDirectDraw::RePaint(void)
 	{
 		m_lpDDSPrimary->SetClipper(m_pcClipper);
 
+		//RECT  rcWindow;
+		//::GetWindowRect(hWnd, &rcWindow);
+
 		RECT  rcClient;
 		::GetClientRect(hWnd, &rcClient);
+
+		int nWidth = rcClient.right - rcClient.left;
+		int nHeight = rcClient.bottom - rcClient.top;
+		if (nWidth > m_nOldScreenWidth)
+		{
+			m_nOldScreenWidth = nWidth;
+ 		}
+		if (nHeight > m_nOldScreenHeight)
+		{
+			m_nOldScreenHeight = nHeight;
+		}
+
+		//int g_iCurScreenWidth = GetSystemMetrics(SM_CXSCREEN);
+		//int g_iCurScreenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+		//WINDOWPLACEMENT			m_stOldWndPlacement;		//结构中包含了有关窗口在屏幕上位置的信息
+		//GetWindowPlacement(hWnd, &m_stOldWndPlacement);
+		//int iCurScreenWidth = (m_stOldWndPlacement.rcNormalPosition.right - m_stOldWndPlacement.rcNormalPosition.left) -
+		//	((rcWindow.right - rcWindow.left) - (rcClient.right - rcClient.left));
+
+		//int iCurScreenHeight = (m_stOldWndPlacement.rcNormalPosition.bottom - m_stOldWndPlacement.rcNormalPosition.top) -
+		//	((rcWindow.bottom - rcWindow.top) - (rcClient.bottom - rcClient.top));
+		//int iCurScreenWidth = (m_stOldWndPlacement.rcNormalPosition.right - m_stOldWndPlacement.rcNormalPosition.left)/100 * 100;
+		//int iCurScreenHeight = (m_stOldWndPlacement.rcNormalPosition.bottom - m_stOldWndPlacement.rcNormalPosition.top)/100 * 100;
+
+		int iCurScreenWidth = m_nOldScreenWidth;
+		int iCurScreenHeight = m_nOldScreenHeight;
 
 		int dstwidth = 0;
 		int dstheight = 0;
 
 		dstwidth = (int)(m_ddsd.dwWidth * m_fViewRatio);
 		dstheight = (int)(m_ddsd.dwHeight * m_fViewRatio);
-		if (dstwidth > 1000)
-		{
-			dstwidth = 960;
-			dstheight = 540;
-		}
+		//if (dstwidth > 1000)
+		//{
+		//	dstwidth = 960;
+		//	dstheight = 540;
+		//}
 
 		POINT pt;
 
-		pt.x = (rcClient.right - rcClient.left - dstwidth) / 2;
-		pt.y = (rcClient.bottom - rcClient.top - dstheight - 80) / 2;
+		//pt.x = (rcClient.right - rcClient.left - dstwidth) / 2;
+		//pt.y = (rcClient.bottom - rcClient.top - dstheight - 80) / 2;
+		pt.x = (iCurScreenWidth - dstwidth) / 2;
+		pt.y = (iCurScreenHeight - dstheight) / 2;
 
 		::ClientToScreen(hWnd, &pt);
 		
