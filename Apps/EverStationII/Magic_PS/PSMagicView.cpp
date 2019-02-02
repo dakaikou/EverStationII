@@ -223,7 +223,7 @@ void CPSMagicView::OnInitialUpdate()
 
 	m_bInitDone = 1;
 
-	m_dlgVideo.Create(IDD_SHOW_VIDEO, this);
+	m_dlgVideo.Create(IDD_SHOW_VIDEO_SCREEN, this);
 	m_dlgVideo.ShowWindow(SW_HIDE);
 }
 

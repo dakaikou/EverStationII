@@ -79,7 +79,7 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 	CWnd*	    pWnd;
 	CRect		rect(0, 0, 720, 576);
 
-	m_dlgVideo.Create(IDD_SHOW_VIDEO, this);
+	m_dlgVideo.Create(IDD_SHOW_VIDEO_SCREEN, this);
 	m_dlgVideo.ShowWindow(SW_HIDE);
 
 	pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_WH);
@@ -268,7 +268,6 @@ void CDlg_YUVPreview::OnBtnPreview()
 		{
 			m_dlgVideo.MoveWindow(&(pMainFrame->m_rectPrimaryDesktop));
 		}
-
 		m_dlgVideo.EnlargeClientAreaToFullScreen();
 	}
 }
@@ -562,4 +561,12 @@ void CDlg_YUVPreview::OnSelchangeCmbFourcc()
 	pWnd = GetDlgItem(IDC_STATIC_FORMAT);
 	pWnd->SetWindowText(pszItem);
 	
+}
+
+BOOL CDlg_YUVPreview::DestroyWindow()
+{
+	// TODO: 在此添加专用代码和/或调用基类
+	m_dlgVideo.DestroyWindow();
+
+	return CDialog::DestroyWindow();
 }

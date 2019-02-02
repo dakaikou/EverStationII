@@ -220,6 +220,7 @@
     <ClInclude Include="ChildFrm.h" />
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="Common\Define.h" />
+    <ClInclude Include="Common\Dlg_PlayController.h" />
     <ClInclude Include="Common\Dlg_Progress.h" />
     <ClInclude Include="Common\Dlg_ShowVideo.h" />
     <ClInclude Include="Common\GuiApi_MSG.h" />
@@ -302,6 +303,7 @@
     <ClCompile Include="ChildFrm.cpp" />
     <ClCompile Include="ClassView.cpp" />
     <ClCompile Include="Common\Dlg_Decimate.cpp" />
+    <ClCompile Include="Common\Dlg_PlayController.cpp" />
     <ClCompile Include="Common\Dlg_Progress.cpp" />
     <ClCompile Include="Common\Dlg_ShowVideo.cpp" />
     <ClCompile Include="Common\HexEditView_ByteBuffer.cpp" />

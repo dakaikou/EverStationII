@@ -109,7 +109,7 @@ BOOL CDlg_TSAnalyzer_PesEs::OnInitDialog()
 	//m_pActiveAudDecoder = NULL;
 	//m_pActiveVidDecoder = NULL;
 
-	//m_dlgTV.Create(IDD_SHOW_VIDEO, this);
+	//m_dlgTV.Create(IDD_SHOW_VIDEO_SCREEN, this);
 	//m_dlgTV.ShowWindow(SW_HIDE);
 
 	//m_dlgDtsPts.Create(IDD_TS_DTS_PTS, this);

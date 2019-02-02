@@ -107,7 +107,7 @@
 #define IDR_OUTPUT_POPUP                182
 #define IDR_PROPERTIES                  183
 #define IDB_PROPERTIES_HC               184
-#define IDD_SHOW_VIDEO                  184
+#define IDD_SHOW_VIDEO_SCREEN           184
 #define IDD_YUV_COMBINE                 185
 #define IDD_DYUV_FILE                   186
 #define IDD_ANALYSE_PROGRESS            187
@@ -139,8 +139,11 @@
 #define IDD_CONFIG_WINPCAP              314
 #define IDD_CONFIG_TSINPUT              317
 #define IDD_TS_ANALYZER_NORMAL          318
+#define IDD_SHOW_VIDEO2                 318
 #define IDD_TS_ANALYZER_EPG1            319
 #define IDD_TS_ANALYZER_DSMCC           319
+#define IDD_SHOW_VIDEO1                 320
+#define IDD_SHOW_VIDEO_CTRL             320
 #define IDB_BITMAP_TREESTATE            384
 #define IDC_BTN_TSMAGIC                 1000
 #define IDC_STATIC_APPNAME              1000
@@ -251,6 +254,8 @@
 #define IDC_BTN_PRE_5FRAME              1107
 #define IDC_BTN_PRE_FRAME               1108
 #define IDC_BTN_PLAY                    1109
+#define IDC_BTN_PLAY2                   1110
+#define IDC_BTN_EXIT                    1110
 #define IDC_BTN_ES_WATCH                1111
 #define IDC_BTN_ES_TRIGGER              1112
 #define IDC_EDIT_ES_GOP_TIME            1113

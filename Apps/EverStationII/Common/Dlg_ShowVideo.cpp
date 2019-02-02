@@ -44,6 +44,7 @@ CDlg_ShowVideo::CDlg_ShowVideo(CWnd* pParent /*=NULL*/)
 
 	m_bPlaying = 0;
 	m_bIsAudio = 0;
+	m_bCycle = 1;
 //	m_pdlgInfo = NULL;
 
 	m_pVidDecoder = NULL;
@@ -54,6 +55,9 @@ CDlg_ShowVideo::CDlg_ShowVideo(CWnd* pParent /*=NULL*/)
 	strcpy_s(m_pszFourCC, sizeof(m_pszFourCC), "");
 
 	m_bFullScreen = false;
+	m_pdlgPlayController = NULL;
+
+	m_bForcingShowController = false;
 }
 
 
@@ -61,7 +65,6 @@ void CDlg_ShowVideo::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CDlg_ShowVideo)
-	DDX_Control(pDX, IDC_SLIDER_FILE, m_sldFile);
 	//}}AFX_DATA_MAP
 }
 
@@ -71,25 +74,27 @@ BEGIN_MESSAGE_MAP(CDlg_ShowVideo, CDialog)
 	ON_WM_CLOSE()
 	ON_WM_SHOWWINDOW()
 	ON_WM_PAINT()
-	ON_BN_CLICKED(IDC_BTN_NEXT_FRAME, OnBtnNextFrame)
-	ON_BN_CLICKED(IDC_BTN_NEXT_5FRAME, OnBtnNext5frame)
-	ON_BN_CLICKED(IDC_BTN_SAVE_BMP, OnBtnSaveBmp)
-	ON_WM_HSCROLL()
+	//ON_BN_CLICKED(IDC_BTN_NEXT_FRAME, OnBtnNextFrame)
+	//ON_BN_CLICKED(IDC_BTN_NEXT_5FRAME, OnBtnNext5frame)
+	//ON_BN_CLICKED(IDC_BTN_SAVE_BMP, OnBtnSaveBmp)
+	//ON_WM_HSCROLL()
 	ON_WM_SIZE()
 	ON_WM_MOUSEMOVE()
-	ON_BN_CLICKED(IDC_BTN_GRID, OnBtnGrid)
+	//ON_BN_CLICKED(IDC_BTN_GRID, OnBtnGrid)
 	ON_WM_LBUTTONDBLCLK()
-	ON_BN_CLICKED(IDC_BTN_INFO, OnBtnInfo)
-	ON_BN_CLICKED(IDC_BTN_FIRST_FRAME, OnBtnFirstFrame)
-	ON_BN_CLICKED(IDC_BTN_LAST_FRAME, OnBtnLastFrame)
-	ON_BN_CLICKED(IDC_BTN_PLAY, OnBtnPlay)
-	ON_BN_CLICKED(IDC_BTN_PRE_5FRAME, OnBtnPre5frame)
-	ON_BN_CLICKED(IDC_BTN_PRE_FRAME, OnBtnPreFrame)
+	//ON_BN_CLICKED(IDC_BTN_INFO, OnBtnInfo)
+	//ON_BN_CLICKED(IDC_BTN_FIRST_FRAME, OnBtnFirstFrame)
+	//ON_BN_CLICKED(IDC_BTN_LAST_FRAME, OnBtnLastFrame)
+	//ON_BN_CLICKED(IDC_BTN_PLAY, OnBtnPlay)
+	//ON_BN_CLICKED(IDC_BTN_PRE_5FRAME, OnBtnPre5frame)
+	//ON_BN_CLICKED(IDC_BTN_PRE_FRAME, OnBtnPreFrame)
 	ON_WM_MOVE()
-	ON_BN_CLICKED(IDC_CHECK_CYCLE, OnCheckCycle)
+	//ON_BN_CLICKED(IDC_CHECK_CYCLE, OnCheckCycle)
 	//}}AFX_MSG_MAP
 	ON_MESSAGE(WM_REPORT_VIDEO_DECODE_FPS, OnReportVideoDecodeFPS)
 	ON_WM_GETMINMAXINFO()
+	ON_WM_DESTROY()
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -142,245 +147,200 @@ void CDlg_ShowVideo::OnClose()
 
 		m_pAudDecoder = NULL;
 
-	//	if (m_pdlgInfo != NULL)
-	//	{
-	//		delete m_pdlgInfo;
-	//		m_pdlgInfo = NULL;
-	//	}
+		m_pdlgPlayController->ShowWindow(SW_HIDE);
+
+		m_bFullScreen = false;
 
 		CDialog::OnClose();
 	}
 }
 
-void CDlg_ShowVideo::SetControls(int offline, int audioonly)
-{
-	CWnd* pWnd;
 
-	pWnd = GetDlgItem(IDC_CHECK_CYCLE);
-	pWnd->EnableWindow(offline);
-
-	pWnd = GetDlgItem(IDC_SLIDER_FILE);
-	pWnd->EnableWindow(offline);
-
-	pWnd = GetDlgItem(IDC_BTN_FIRST_FRAME);
-	pWnd->EnableWindow(offline);
-
-	pWnd = GetDlgItem(IDC_BTN_PRE_5FRAME);
-	pWnd->EnableWindow(offline);
-
-	pWnd = GetDlgItem(IDC_BTN_PRE_FRAME);
-	pWnd->EnableWindow(offline);
-
-	pWnd = GetDlgItem(IDC_BTN_PLAY);
-	pWnd->EnableWindow(offline);
-
-	pWnd = GetDlgItem(IDC_BTN_NEXT_FRAME);
-	pWnd->EnableWindow(offline);
-
-	pWnd = GetDlgItem(IDC_BTN_NEXT_5FRAME);
-	pWnd->EnableWindow(offline);
-
-	pWnd = GetDlgItem(IDC_BTN_LAST_FRAME);
-	pWnd->EnableWindow(offline);
-
-	pWnd = GetDlgItem(IDC_BTN_INFO);
-	pWnd->EnableWindow(offline & (!audioonly));
-
-	pWnd = GetDlgItem(IDC_BTN_GRID);
-	pWnd->EnableWindow(offline & (!audioonly));
-
-	pWnd = GetDlgItem(IDC_BTN_SAVE_BMP);
-	pWnd->EnableWindow(offline & (!audioonly));
-
+//void CDlg_ShowVideo::AdjustLayout(int videoWidth, int videoHeight)
+//{
+//	CWnd*	pWnd;
+//
+//	//CRect rcWindow;
+//	//CRect rcClient;
+//	CRect rcLeftBtn;
+//	CRect rcRightBtn;
+//
+//	int		nScreenX = GetSystemMetrics(SM_CXSCREEN);
+//	int		nScreenY = GetSystemMetrics(SM_CYSCREEN);
+//	//int		nXDelt;
+//	//int		nYDelt;
+//	//int		width;
+//	//int		height;
+//
+//	//GetWindowRect(&rcWindow);
+//	//GetClientRect(&rcClient);
+//
+//	CWnd* pLeftBtnWnd = GetDlgItem(IDC_BTN_FIRST_FRAME);
+//	pLeftBtnWnd->GetWindowRect(&rcLeftBtn);
+//
+//	CWnd* pRightBtnWnd = GetDlgItem(IDC_BTN_SAVE_BMP);
+//	pRightBtnWnd->GetWindowRect(&rcRightBtn);
+//
+//	//nYDelt = rcWindow.Height() - rcClient.Height() + rcLeftBtn.Height() + 30;
+//	//height = videoHeight + nYDelt;
+//	//if (audioonly)
+//	//{
+//	//	height = nYDelt;
+//	//}
+//	//else
+//	//{
+//	//	height = 576 + nYDelt;
+//	//}
+//
+//	//nXDelt = rcWindow.Width() - rcClient.Width();
+//	//width = videoWidth + nXDelt + 6;
+//	//if (width < 640) width = 640;
+//
+//	//rcWindow.left = (nScreenX - width) / 2;
+//	//rcWindow.top = (nScreenY - height) / 2;
+//	//rcWindow.right = rcWindow.left + width;
+//	//rcWindow.bottom = rcWindow.top + height;
+//
+//	//MoveWindow(&rcWindow);
+//
+//	m_bCycle = TRUE;
+//	CButton* pBtn = (CButton*)GetDlgItem(IDC_CHECK_CYCLE);
+//	if (::IsWindow(pBtn->GetSafeHwnd()))
+//	{
+//		pBtn->ShowWindow(SW_SHOW);
+//		pBtn->SetCheck(m_bCycle);
+//	}
+//
+//	//CRect	rectClient;
+//	CRect	rectCtrl;
+//	int		yOffset;
+//	int		xOffset;
+//
+//	//GetClientRect(&rectClient);
+//
+//	yOffset = nScreenY - 25;
+//
+//	pWnd = GetDlgItem(IDC_SLIDER_FILE);
+//	if (::IsWindow(pWnd->GetSafeHwnd()))
+//	{
+//		pWnd->ShowWindow(SW_SHOW);
+//		pWnd->GetClientRect(&rectCtrl);
+//		pWnd->MoveWindow(10, yOffset - rectCtrl.Height(), nScreenX - 20, rectCtrl.Height());
+//		yOffset -= rectCtrl.Height();
+//	}
+//
+//	yOffset -= 5;
+//	xOffset = 10;
+//	
+//	pWnd = GetDlgItem(IDC_BTN_FIRST_FRAME);
+//	if (::IsWindow(pWnd->GetSafeHwnd()))
+//	{
+//		pWnd->ShowWindow(SW_SHOW);
+//		pWnd->GetClientRect(&rectCtrl);
+//		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
+//		xOffset += rectCtrl.Width() + 5;
+//	}
+//
+//	pWnd = GetDlgItem(IDC_BTN_PRE_5FRAME);
+//	if (::IsWindow(pWnd->GetSafeHwnd()))
+//	{
+//		pWnd->ShowWindow(SW_SHOW);
+//		pWnd->GetClientRect(&rectCtrl);
+//		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
+//		xOffset += rectCtrl.Width() + 5;
+//	}
+//
+//	pWnd = GetDlgItem(IDC_BTN_PRE_FRAME);
+//	if (::IsWindow(pWnd->GetSafeHwnd()))
+//	{
+//		pWnd->ShowWindow(SW_SHOW);
+//		pWnd->GetClientRect(&rectCtrl);
+//		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
+//		xOffset += rectCtrl.Width() + 5;
+//	}
+//
+//	pWnd = GetDlgItem(IDC_BTN_PLAY);
+//	if (::IsWindow(pWnd->GetSafeHwnd()))
+//	{
+//		pWnd->ShowWindow(SW_SHOW);
+//		pWnd->GetClientRect(&rectCtrl);
+//		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
+//		xOffset += rectCtrl.Width() + 5;
+//	}
+//
+//	pWnd = GetDlgItem(IDC_BTN_NEXT_FRAME);
+//	if (::IsWindow(pWnd->GetSafeHwnd()))
+//	{
+//		pWnd->ShowWindow(SW_SHOW);
+//		pWnd->GetClientRect(&rectCtrl);
+//		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
+//		xOffset += rectCtrl.Width() + 5;
+//	}
+//
+//	pWnd = GetDlgItem(IDC_BTN_NEXT_5FRAME);
+//	if (::IsWindow(pWnd->GetSafeHwnd()))
+//	{
+//		pWnd->ShowWindow(SW_SHOW);
+//		pWnd->GetClientRect(&rectCtrl);
+//		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
+//		xOffset += rectCtrl.Width() + 5;
+//	}
+//
+//	pWnd = GetDlgItem(IDC_BTN_LAST_FRAME);
+//	if (::IsWindow(pWnd->GetSafeHwnd()))
+//	{
+//		pWnd->ShowWindow(SW_SHOW);
+//		pWnd->GetClientRect(&rectCtrl);
+//		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
+//		xOffset += rectCtrl.Width() + 5;
+//	}
+//
+//	xOffset = nScreenX - 20;
+//	pWnd = GetDlgItem(IDC_BTN_SAVE_BMP);
+//	if (::IsWindow(pWnd->GetSafeHwnd()))
+//	{
+//		pWnd->ShowWindow(SW_SHOW);
+//		pWnd->GetClientRect(&rectCtrl);
+//		pWnd->MoveWindow(xOffset - rectCtrl.Width(), yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
+//		xOffset -= rectCtrl.Width() + 5;
+//	}
+//
+//	pWnd = GetDlgItem(IDC_BTN_INFO);
+//	if (::IsWindow(pWnd->GetSafeHwnd()))
+//	{
+//		pWnd->ShowWindow(SW_SHOW);
+//		pWnd->GetClientRect(&rectCtrl);
+//		pWnd->MoveWindow(xOffset - rectCtrl.Width(), yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
+//		xOffset -= rectCtrl.Width() + 5;
+//	}
+//
+//	pWnd = GetDlgItem(IDC_BTN_GRID);
+//	if (::IsWindow(pWnd->GetSafeHwnd()))
+//	{
+//		pWnd->ShowWindow(SW_SHOW);
+//		pWnd->GetClientRect(&rectCtrl);
+//		pWnd->MoveWindow(xOffset - rectCtrl.Width(), yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
+//		xOffset -= rectCtrl.Width() + 5;
+//	}
+//
+//	pWnd = GetDlgItem(IDC_CHECK_CYCLE);
+//	if (::IsWindow(pWnd->GetSafeHwnd()))
+//	{
+//		pWnd->ShowWindow(SW_SHOW);
+//		pWnd->GetClientRect(&rectCtrl);
+//		pWnd->MoveWindow(xOffset - rectCtrl.Width(), yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
+//		xOffset -= rectCtrl.Width() + 5;
+//	}
+//
 //	pWnd = GetDlgItem(IDC_STATIC_INFO_FPS);
-//	pWnd->EnableWindow(!audioonly);
-}
-
-void CDlg_ShowVideo::AdjustLayout(int videoWidth, int videoHeight)
-{
-	CWnd*	pWnd;
-
-	//CRect rcWindow;
-	//CRect rcClient;
-	CRect rcLeftBtn;
-	CRect rcRightBtn;
-
-	int		nScreenX = GetSystemMetrics(SM_CXSCREEN);
-	int		nScreenY = GetSystemMetrics(SM_CYSCREEN);
-	//int		nXDelt;
-	//int		nYDelt;
-	//int		width;
-	//int		height;
-
-	//GetWindowRect(&rcWindow);
-	//GetClientRect(&rcClient);
-
-	CWnd* pLeftBtnWnd = GetDlgItem(IDC_BTN_FIRST_FRAME);
-	pLeftBtnWnd->GetWindowRect(&rcLeftBtn);
-
-	CWnd* pRightBtnWnd = GetDlgItem(IDC_BTN_SAVE_BMP);
-	pRightBtnWnd->GetWindowRect(&rcRightBtn);
-
-	//nYDelt = rcWindow.Height() - rcClient.Height() + rcLeftBtn.Height() + 30;
-	//height = videoHeight + nYDelt;
-	//if (audioonly)
-	//{
-	//	height = nYDelt;
-	//}
-	//else
-	//{
-	//	height = 576 + nYDelt;
-	//}
-
-	//nXDelt = rcWindow.Width() - rcClient.Width();
-	//width = videoWidth + nXDelt + 6;
-	//if (width < 640) width = 640;
-
-	//rcWindow.left = (nScreenX - width) / 2;
-	//rcWindow.top = (nScreenY - height) / 2;
-	//rcWindow.right = rcWindow.left + width;
-	//rcWindow.bottom = rcWindow.top + height;
-
-	//MoveWindow(&rcWindow);
-
-	m_bCycle = TRUE;
-	CButton* pBtn = (CButton*)GetDlgItem(IDC_CHECK_CYCLE);
-	if (::IsWindow(pBtn->GetSafeHwnd()))
-	{
-		pBtn->ShowWindow(SW_SHOW);
-		pBtn->SetCheck(m_bCycle);
-	}
-
-	//CRect	rectClient;
-	CRect	rectCtrl;
-	int		yOffset;
-	int		xOffset;
-
-	//GetClientRect(&rectClient);
-
-	yOffset = nScreenY - 25;
-
-	pWnd = GetDlgItem(IDC_SLIDER_FILE);
-	if (::IsWindow(pWnd->GetSafeHwnd()))
-	{
-		pWnd->ShowWindow(SW_SHOW);
-		pWnd->GetClientRect(&rectCtrl);
-		pWnd->MoveWindow(10, yOffset - rectCtrl.Height(), nScreenX - 20, rectCtrl.Height());
-		yOffset -= rectCtrl.Height();
-	}
-
-	yOffset -= 5;
-	xOffset = 10;
-	
-	pWnd = GetDlgItem(IDC_BTN_FIRST_FRAME);
-	if (::IsWindow(pWnd->GetSafeHwnd()))
-	{
-		pWnd->ShowWindow(SW_SHOW);
-		pWnd->GetClientRect(&rectCtrl);
-		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-		xOffset += rectCtrl.Width() + 5;
-	}
-
-	pWnd = GetDlgItem(IDC_BTN_PRE_5FRAME);
-	if (::IsWindow(pWnd->GetSafeHwnd()))
-	{
-		pWnd->ShowWindow(SW_SHOW);
-		pWnd->GetClientRect(&rectCtrl);
-		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-		xOffset += rectCtrl.Width() + 5;
-	}
-
-	pWnd = GetDlgItem(IDC_BTN_PRE_FRAME);
-	if (::IsWindow(pWnd->GetSafeHwnd()))
-	{
-		pWnd->ShowWindow(SW_SHOW);
-		pWnd->GetClientRect(&rectCtrl);
-		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-		xOffset += rectCtrl.Width() + 5;
-	}
-
-	pWnd = GetDlgItem(IDC_BTN_PLAY);
-	if (::IsWindow(pWnd->GetSafeHwnd()))
-	{
-		pWnd->ShowWindow(SW_SHOW);
-		pWnd->GetClientRect(&rectCtrl);
-		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-		xOffset += rectCtrl.Width() + 5;
-	}
-
-	pWnd = GetDlgItem(IDC_BTN_NEXT_FRAME);
-	if (::IsWindow(pWnd->GetSafeHwnd()))
-	{
-		pWnd->ShowWindow(SW_SHOW);
-		pWnd->GetClientRect(&rectCtrl);
-		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-		xOffset += rectCtrl.Width() + 5;
-	}
-
-	pWnd = GetDlgItem(IDC_BTN_NEXT_5FRAME);
-	if (::IsWindow(pWnd->GetSafeHwnd()))
-	{
-		pWnd->ShowWindow(SW_SHOW);
-		pWnd->GetClientRect(&rectCtrl);
-		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-		xOffset += rectCtrl.Width() + 5;
-	}
-
-	pWnd = GetDlgItem(IDC_BTN_LAST_FRAME);
-	if (::IsWindow(pWnd->GetSafeHwnd()))
-	{
-		pWnd->ShowWindow(SW_SHOW);
-		pWnd->GetClientRect(&rectCtrl);
-		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-		xOffset += rectCtrl.Width() + 5;
-	}
-
-	xOffset = nScreenX - 20;
-	pWnd = GetDlgItem(IDC_BTN_SAVE_BMP);
-	if (::IsWindow(pWnd->GetSafeHwnd()))
-	{
-		pWnd->ShowWindow(SW_SHOW);
-		pWnd->GetClientRect(&rectCtrl);
-		pWnd->MoveWindow(xOffset - rectCtrl.Width(), yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-		xOffset -= rectCtrl.Width() + 5;
-	}
-
-	pWnd = GetDlgItem(IDC_BTN_INFO);
-	if (::IsWindow(pWnd->GetSafeHwnd()))
-	{
-		pWnd->ShowWindow(SW_SHOW);
-		pWnd->GetClientRect(&rectCtrl);
-		pWnd->MoveWindow(xOffset - rectCtrl.Width(), yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-		xOffset -= rectCtrl.Width() + 5;
-	}
-
-	pWnd = GetDlgItem(IDC_BTN_GRID);
-	if (::IsWindow(pWnd->GetSafeHwnd()))
-	{
-		pWnd->ShowWindow(SW_SHOW);
-		pWnd->GetClientRect(&rectCtrl);
-		pWnd->MoveWindow(xOffset - rectCtrl.Width(), yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-		xOffset -= rectCtrl.Width() + 5;
-	}
-
-	pWnd = GetDlgItem(IDC_CHECK_CYCLE);
-	if (::IsWindow(pWnd->GetSafeHwnd()))
-	{
-		pWnd->ShowWindow(SW_SHOW);
-		pWnd->GetClientRect(&rectCtrl);
-		pWnd->MoveWindow(xOffset - rectCtrl.Width(), yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-		xOffset -= rectCtrl.Width() + 5;
-	}
-
-	pWnd = GetDlgItem(IDC_STATIC_INFO_FPS);
-	if (::IsWindow(pWnd->GetSafeHwnd()))
-	{
-		pWnd->ShowWindow(SW_SHOW);
-		pWnd->GetClientRect(&rectCtrl);
-		pWnd->MoveWindow(xOffset - rectCtrl.Width() - 10, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-		xOffset -= rectCtrl.Width() + 5;
-	}
-}
+//	if (::IsWindow(pWnd->GetSafeHwnd()))
+//	{
+//		pWnd->ShowWindow(SW_SHOW);
+//		pWnd->GetClientRect(&rectCtrl);
+//		pWnd->MoveWindow(xOffset - rectCtrl.Width() - 10, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
+//		xOffset -= rectCtrl.Width() + 5;
+//	}
+//}
 
 //void CDlg_ShowVideo::RealTimeStream(int vid_stream_type, PVOID pVidDecoder, int aud_stream_type, PVOID pAudDecoder)
 //{
@@ -405,7 +365,7 @@ void CDlg_ShowVideo::AttachVideoDecoder(PVOID pDecoder)
 	int videoWidth = 500;
 	int videoHeight = 300;
 
-	SetControls(1, 0);
+	m_pdlgPlayController->SetControls(1, 0);
 
 	//if (bAudio)
 	//{
@@ -457,7 +417,7 @@ void CDlg_ShowVideo::OnShowWindow(BOOL bShow, UINT nStatus)
 				m_pVidDecoder->OpenDirectxWnd(hWnd);
 
 				nPos = m_pVidDecoder->Preview_FirstPicture();
-				m_sldFile.SetPos(nPos);
+				m_pdlgPlayController->m_sldFile.SetPos(nPos);
 			}
 		}
 
@@ -483,9 +443,23 @@ void CDlg_ShowVideo::OnShowWindow(BOOL bShow, UINT nStatus)
 //				break;
 //			}
 //		}
+
+		if (m_pdlgPlayController != NULL)
+		{
+			m_pdlgPlayController->ShowWindow(SW_SHOW);
+
+			m_bForcingShowController = true;
+
+			m_dwTimerID = 0xff56f344;
+			SetTimer(m_dwTimerID, 2000, NULL);
+		}
 	}
 	else
 	{
+		if (m_pdlgPlayController != NULL)
+		{
+			m_pdlgPlayController->ShowWindow(SW_HIDE);
+		}
 	}
 
 	UpdateData(FALSE);
@@ -510,13 +484,10 @@ void CDlg_ShowVideo::OnPaint()
 	// Do not call CDialog::OnPaint() for painting messages
 }
 
-void CDlg_ShowVideo::OnBtnNextFrame() 
+int CDlg_ShowVideo::PreviewNextFrame() 
 {
 	// TODO: Add your control notification handler code here
-	UpdateData(TRUE);
-
-	int nPos = m_sldFile.GetPos();
-
+	int nPos = -1;
 	if (m_bIsAudio)
 	{
 		if (m_nAudStreamType & STREAM_FILE)
@@ -554,16 +525,13 @@ void CDlg_ShowVideo::OnBtnNextFrame()
 		//}
 	}
 
-	m_sldFile.SetPos(nPos);
-	UpdateData(FALSE);
+	return nPos;
 }
 
-void CDlg_ShowVideo::OnBtnNext5frame() 
+int CDlg_ShowVideo::PreviewNext5Frame() 
 {
 	// TODO: Add your control notification handler code here
-	UpdateData(TRUE);
-
-	int nPos = m_sldFile.GetPos();
+	int nPos = -1;
 
 	if (m_bIsAudio)
 	{
@@ -579,87 +547,89 @@ void CDlg_ShowVideo::OnBtnNext5frame()
 		//}
 	}
 
-	m_sldFile.SetPos(nPos);
-	UpdateData(FALSE);
+	return nPos;
 }
 
-void CDlg_ShowVideo::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
-{
-	// TODO: Add your message handler code here and/or call default
-	int min;
-	int max;
-
-	UpdateData(TRUE);
-
-	int nPercent;
-
-	if (pScrollBar == (CScrollBar*)&m_sldFile)
-	{
-		nPercent = m_sldFile.GetPos();
-	
-		m_sldFile.GetRange(min, max);
-		if (nPercent < min)
-		{
-			nPercent = min;
-		}
-		else if (nPercent > max)
-		{
-			nPercent = max;
-		}
-
-		if (m_bIsAudio)
-		{
-			//switch (m_nAudStreamType & ~STREAM_FILE)
-			//{
-			//case STREAM_AC3AES:
-			//	nPercent = ((CAC3_AudioDecoder*)m_pAudDecoder)->Preview_AtPercent(nPercent);
-			//	break;
-
-			//case STREAM_MPEGAES:
-			//	nPercent = ((CMPEG_AudioDecoder*)m_pAudDecoder)->Preview_AtPercent(nPercent);
-			//	break;
-
-			//case STREAM_WAVEAES:
-			//	nPercent = ((CWAVE_AudioDecoder*)m_pAudDecoder)->Preview_AtPercent(nPercent);
-			//	break;
-
-			//default:
-			//	break;
-			//}
-		}
-		else
-		{
-			if (m_pVidDecoder != NULL)
-			{
-				nPercent = m_pVidDecoder->Preview_SeekAtPercent(nPercent);
-			}
-		}
-
-		m_sldFile.SetPos(nPercent);
-		UpdateData(FALSE);
-	}
-
-	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
-}
+//void CDlg_ShowVideo::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+//{
+//	// TODO: Add your message handler code here and/or call default
+//	int min;
+//	int max;
+//
+//	UpdateData(TRUE);
+//
+//	int nPercent;
+//
+//	if (pScrollBar == (CScrollBar*)&m_sldFile)
+//	{
+//		nPercent = m_sldFile.GetPos();
+//	
+//		m_sldFile.GetRange(min, max);
+//		if (nPercent < min)
+//		{
+//			nPercent = min;
+//		}
+//		else if (nPercent > max)
+//		{
+//			nPercent = max;
+//		}
+//
+//		if (m_bIsAudio)
+//		{
+//			//switch (m_nAudStreamType & ~STREAM_FILE)
+//			//{
+//			//case STREAM_AC3AES:
+//			//	nPercent = ((CAC3_AudioDecoder*)m_pAudDecoder)->Preview_AtPercent(nPercent);
+//			//	break;
+//
+//			//case STREAM_MPEGAES:
+//			//	nPercent = ((CMPEG_AudioDecoder*)m_pAudDecoder)->Preview_AtPercent(nPercent);
+//			//	break;
+//
+//			//case STREAM_WAVEAES:
+//			//	nPercent = ((CWAVE_AudioDecoder*)m_pAudDecoder)->Preview_AtPercent(nPercent);
+//			//	break;
+//
+//			//default:
+//			//	break;
+//			//}
+//		}
+//		else
+//		{
+//			if (m_pVidDecoder != NULL)
+//			{
+//				nPercent = m_pVidDecoder->Preview_SeekAtPercent(nPercent);
+//			}
+//		}
+//
+//		m_sldFile.SetPos(nPercent);
+//		UpdateData(FALSE);
+//	}
+//
+//	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
+//}
 
 BOOL CDlg_ShowVideo::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
 	
 	// TODO: Add extra initialization here
-	m_sldFile.SetRange(0, 100);
-	m_sldFile.SetPos(0);
-	m_sldFile.SetPageSize(10);
-
 //	AdjustLayout(0);
 
-	UpdateData(FALSE);
+	m_pdlgPlayController = new CDlg_PlayController;
+	m_pdlgPlayController->Create(IDD_SHOW_VIDEO_CTRL, this);
+
+	m_pdlgPlayController->m_sldFile.SetRange(0, 100);
+	m_pdlgPlayController->m_sldFile.SetPos(0);
+	m_pdlgPlayController->m_sldFile.SetPageSize(10);
+
+	//UpdateData(FALSE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CDlg_ShowVideo::OnBtnSaveBmp() 
+void CDlg_ShowVideo::SaveSnapshot(void) 
 {
 	// TODO: Add your control notification handler code here
 	SYSTEMTIME		systime;
@@ -749,6 +719,18 @@ void CDlg_ShowVideo::OnSize(UINT nType, int cx, int cy)
 void CDlg_ShowVideo::OnMouseMove(UINT nFlags, CPoint point) 
 {
 	// TODO: Add your message handler code here and/or call default
+
+	if (m_bForcingShowController == 0)
+	{
+		if (m_rectPlayControl.PtInRect(point))
+		{
+			m_pdlgPlayController->ShowWindow(SW_SHOW);
+		}
+		else
+		{
+			m_pdlgPlayController->ShowWindow(SW_HIDE);
+		}
+	}
 /*
 	int		 mb_row;
 	int		 mb_col;
@@ -920,12 +902,10 @@ void CDlg_ShowVideo::OnBtnInfo()
 //	}
 }
 
-void CDlg_ShowVideo::OnBtnFirstFrame() 
+int CDlg_ShowVideo::PreviewFirstFrame() 
 {
 	// TODO: Add your control notification handler code here
-	UpdateData(TRUE);
-
-	int nPos = m_sldFile.GetPos();
+	int nPos = -1;
 
 	if (m_bIsAudio)
 	{
@@ -961,16 +941,13 @@ void CDlg_ShowVideo::OnBtnFirstFrame()
 		//}
 	}
 
-	m_sldFile.SetPos(nPos);
-	UpdateData(FALSE);
+	return nPos;
 }
 
-void CDlg_ShowVideo::OnBtnLastFrame() 
+int CDlg_ShowVideo::PreviewLastFrame() 
 {
 	// TODO: Add your control notification handler code here
-	UpdateData(TRUE);
-
-	int nPos = m_sldFile.GetPos();
+	int nPos = -1;
 
 	if (m_bIsAudio)
 	{
@@ -998,128 +975,125 @@ void CDlg_ShowVideo::OnBtnLastFrame()
 		//}
 	}
 
-	m_sldFile.SetPos(nPos);
-	UpdateData(FALSE);
+	return nPos;
 }
 
-void CDlg_ShowVideo::OnBtnPlay() 
+//void CDlg_ShowVideo::OnBtnPlay() 
+//{
+//	// TODO: Add your control notification handler code here
+//	HWND	hWnd = this->GetSafeHwnd();
+////	int		nPos;
+//
+//	UpdateData(TRUE);
+//
+//	CWnd* pWnd = GetDlgItem(IDC_BTN_PLAY);
+//	CString strText;
+//
+//	pWnd->GetWindowText(strText);
+//	if (strText == "播放")
+//	{
+//		//if (m_nAudStreamType & STREAM_FILE)		//如果是播放音频文件
+//		//{
+//			//switch (m_nAudStreamType & (~STREAM_FILE))
+//			//{
+//			//case STREAM_MPEGAES:
+//
+//			//	((CMPEG_AudioDecoder*)m_pAudDecoder)->OpenAudio(hWnd);
+//			//	break;
+//
+//			//case STREAM_WAVEAES:
+//
+//			//	((CWAVE_AudioDecoder*)m_pAudDecoder)->OpenAudio(hWnd);
+//			//	break;
+//
+//			//case STREAM_AC3AES:
+//			//	((CAC3_AudioDecoder*)m_pAudDecoder)->OpenAudio(hWnd);
+//			//	break;
+//
+//			//default:
+//			//	break;
+//			//}
+//		//}
+//
+//		//if (m_nVidStreamType & STREAM_FILE)
+//		//{
+////			switch (m_nVidStreamType & (~STREAM_FILE))
+////			{
+////			case STREAM_PS:
+////				//((CMPEG_PS_Decoder*)m_pVidDecoder)->OpenAudio(hWnd);
+//////				((CMPEG_PS_Decoder*)m_pVidDecoder)->ExtDebug();
+////				break;
+////			}
+//		//}
+//
+//		pWnd->SetWindowText("停止");
+//
+//		m_bPlaying = 1;
+//
+//		if (m_bIsAudio)
+//		{
+//			m_hThread = ::CreateThread(NULL, 1024, (LPTHREAD_START_ROUTINE)AudioPlay_Thread, this, 0, &m_dwID);
+//		}
+//		else
+//		{
+//			m_hThread = ::CreateThread(NULL, 1024, (LPTHREAD_START_ROUTINE)VideoPlay_Thread, this, 0, &m_dwID);
+//		}
+//
+//		m_sldFile.EnableWindow(FALSE);
+//	}
+//	else
+//	{
+//		if (m_nAudStreamType & STREAM_FILE)
+//		{
+//			//switch (m_nAudStreamType & (~STREAM_FILE))
+//			//{
+//			//case STREAM_MPEGAES:
+//
+//			//	((CMPEG_AudioDecoder*)m_pAudDecoder)->CloseAudio();
+//			//	break;
+//
+//			//case STREAM_AC3AES:
+//
+//			//	((CAC3_AudioDecoder*)m_pAudDecoder)->CloseAudio();
+//			//	break;
+//
+//			//case STREAM_WAVEAES:
+//
+//			//	((CWAVE_AudioDecoder*)m_pAudDecoder)->CloseAudio();
+//			//	break;
+//
+//			//default:
+//			//	break;
+//			//}
+//		}
+//
+//		//if (m_nVidStreamType & STREAM_FILE)
+//		//{
+//			//switch (m_nVidStreamType & (~STREAM_FILE))
+//			//{
+//			//case STREAM_PS:
+//			//	((CMPEG_PS_Decoder*)m_pVidDecoder)->CloseAudio();
+//			//	break;
+//			//}
+//		//}
+//
+//		pWnd->SetWindowText("播放");
+//
+//		m_bPlaying = 0;
+//
+//		m_sldFile.EnableWindow(TRUE);
+//
+//		CWnd* pWnd = GetDlgItem(IDC_STATIC_INFO_FPS);
+//		pWnd->SetWindowText("");
+//	}
+//
+//	UpdateData(FALSE);
+//}
+
+int CDlg_ShowVideo::PreviewPre5Frame() 
 {
 	// TODO: Add your control notification handler code here
-	HWND	hWnd = this->GetSafeHwnd();
-//	int		nPos;
-
-	UpdateData(TRUE);
-
-	CWnd* pWnd = GetDlgItem(IDC_BTN_PLAY);
-	CString strText;
-
-	pWnd->GetWindowText(strText);
-	if (strText == "播放")
-	{
-		//if (m_nAudStreamType & STREAM_FILE)		//如果是播放音频文件
-		//{
-			//switch (m_nAudStreamType & (~STREAM_FILE))
-			//{
-			//case STREAM_MPEGAES:
-
-			//	((CMPEG_AudioDecoder*)m_pAudDecoder)->OpenAudio(hWnd);
-			//	break;
-
-			//case STREAM_WAVEAES:
-
-			//	((CWAVE_AudioDecoder*)m_pAudDecoder)->OpenAudio(hWnd);
-			//	break;
-
-			//case STREAM_AC3AES:
-			//	((CAC3_AudioDecoder*)m_pAudDecoder)->OpenAudio(hWnd);
-			//	break;
-
-			//default:
-			//	break;
-			//}
-		//}
-
-		//if (m_nVidStreamType & STREAM_FILE)
-		//{
-//			switch (m_nVidStreamType & (~STREAM_FILE))
-//			{
-//			case STREAM_PS:
-//				//((CMPEG_PS_Decoder*)m_pVidDecoder)->OpenAudio(hWnd);
-////				((CMPEG_PS_Decoder*)m_pVidDecoder)->ExtDebug();
-//				break;
-//			}
-		//}
-
-		pWnd->SetWindowText("停止");
-
-		m_bPlaying = 1;
-
-		if (m_bIsAudio)
-		{
-			m_hThread = ::CreateThread(NULL, 1024, (LPTHREAD_START_ROUTINE)AudioPlay_Thread, this, 0, &m_dwID);
-		}
-		else
-		{
-			m_hThread = ::CreateThread(NULL, 1024, (LPTHREAD_START_ROUTINE)VideoPlay_Thread, this, 0, &m_dwID);
-		}
-
-		m_sldFile.EnableWindow(FALSE);
-	}
-	else
-	{
-		if (m_nAudStreamType & STREAM_FILE)
-		{
-			//switch (m_nAudStreamType & (~STREAM_FILE))
-			//{
-			//case STREAM_MPEGAES:
-
-			//	((CMPEG_AudioDecoder*)m_pAudDecoder)->CloseAudio();
-			//	break;
-
-			//case STREAM_AC3AES:
-
-			//	((CAC3_AudioDecoder*)m_pAudDecoder)->CloseAudio();
-			//	break;
-
-			//case STREAM_WAVEAES:
-
-			//	((CWAVE_AudioDecoder*)m_pAudDecoder)->CloseAudio();
-			//	break;
-
-			//default:
-			//	break;
-			//}
-		}
-
-		//if (m_nVidStreamType & STREAM_FILE)
-		//{
-			//switch (m_nVidStreamType & (~STREAM_FILE))
-			//{
-			//case STREAM_PS:
-			//	((CMPEG_PS_Decoder*)m_pVidDecoder)->CloseAudio();
-			//	break;
-			//}
-		//}
-
-		pWnd->SetWindowText("播放");
-
-		m_bPlaying = 0;
-
-		m_sldFile.EnableWindow(TRUE);
-
-		CWnd* pWnd = GetDlgItem(IDC_STATIC_INFO_FPS);
-		pWnd->SetWindowText("");
-	}
-
-	UpdateData(FALSE);
-}
-
-void CDlg_ShowVideo::OnBtnPre5frame() 
-{
-	// TODO: Add your control notification handler code here
-	UpdateData(TRUE);
-
-	int nPos = m_sldFile.GetPos();
+	int nPos = -1;
 
 	if (m_bIsAudio)
 	{
@@ -1148,16 +1122,13 @@ void CDlg_ShowVideo::OnBtnPre5frame()
 		//}
 	}
 
-	m_sldFile.SetPos(nPos);
-	UpdateData(FALSE);
+	return nPos;
 }
 
-void CDlg_ShowVideo::OnBtnPreFrame() 
+int CDlg_ShowVideo::PreviewPreFrame() 
 {
 	// TODO: Add your control notification handler code here
-	UpdateData(TRUE);
-
-	int nPos = m_sldFile.GetPos();
+	int nPos = -1;
 
 	if (m_bIsAudio)
 	{
@@ -1184,8 +1155,8 @@ void CDlg_ShowVideo::OnBtnPreFrame()
 			}
 		//}
 	}
-	m_sldFile.SetPos(nPos);
-	UpdateData(FALSE);
+
+	return nPos;
 }
 
 uint32_t VideoPlay_Thread(PVOID pVoid)
@@ -1214,7 +1185,7 @@ uint32_t VideoPlay_Thread(PVOID pVoid)
 			}
 		}
 
-		pdlg->m_sldFile.SetPos(nPos);
+		pdlg->m_pdlgPlayController->m_sldFile.SetPos(nPos);
 
 		int timeThread = (int)round(frameCount * frame_interval);
 		while (pdlg->m_bPlaying)
@@ -1299,7 +1270,7 @@ uint32_t AudioPlay_Thread(PVOID pVoid)
 			}
 		}
 
-		pdlg->m_sldFile.SetPos(nPos);
+		pdlg->m_pdlgPlayController->m_sldFile.SetPos(nPos);
 
 		frame_count ++;
 
@@ -1311,19 +1282,19 @@ uint32_t AudioPlay_Thread(PVOID pVoid)
 	return 0;
 }
 
-void CDlg_ShowVideo::OnCheckCycle() 
-{
-	// TODO: Add your control notification handler code here
-//	int bCycle;
-
-	CButton* pBtn = (CButton*)GetDlgItem(IDC_CHECK_CYCLE);
-//	bCycle = pBtn->GetCheck();
-
-	m_bCycle = (m_bCycle == 0) ? 1 : 0;
-	pBtn->SetCheck(m_bCycle);
-
-	UpdateData(FALSE);
-}
+//void CDlg_ShowVideo::OnCheckCycle() 
+//{
+//	// TODO: Add your control notification handler code here
+////	int bCycle;
+//
+//	CButton* pBtn = (CButton*)GetDlgItem(IDC_CHECK_CYCLE);
+////	bCycle = pBtn->GetCheck();
+//
+//	m_bCycle = (m_bCycle == 0) ? 1 : 0;
+//	pBtn->SetCheck(m_bCycle);
+//
+//	UpdateData(FALSE);
+//}
 
 
 LRESULT CDlg_ShowVideo::OnReportVideoDecodeFPS(WPARAM wParam, LPARAM lParam)
@@ -1334,8 +1305,12 @@ LRESULT CDlg_ShowVideo::OnReportVideoDecodeFPS(WPARAM wParam, LPARAM lParam)
 
 	fps = 0.001f * FPS;
 	strFPS.Format("%.3f fps", fps);
-	CWnd* pWnd = GetDlgItem(IDC_STATIC_INFO_FPS);
-	pWnd->SetWindowText(strFPS);
+
+	//CDC* pDC = GetDC();
+	//pDC->TextOutA(10, 10, strFPS);
+	//ReleaseDC(pDC);
+
+	m_pdlgPlayController->ReportFPS(strFPS);
 
 	return 0;
 }
@@ -1361,8 +1336,8 @@ void CDlg_ShowVideo::EnlargeClientAreaToFullScreen(void)
 	if (m_bFullScreen == false)
 	{
 		//获取系统屏幕宽高  
-		int g_iCurScreenWidth = GetSystemMetrics(SM_CXSCREEN);
-		int g_iCurScreenHeight = GetSystemMetrics(SM_CYSCREEN);
+		//int g_iCurScreenWidth = GetSystemMetrics(SM_CXSCREEN);
+		//int g_iCurScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 
 		//用m_struOldWndpl得到当前窗口的显示状态和窗体位置，以供退出全屏后使用  
 		GetWindowPlacement(&m_stOldWndPlacement);
@@ -1387,6 +1362,27 @@ void CDlg_ShowVideo::EnlargeClientAreaToFullScreen(void)
 		struWndpl.rcNormalPosition = m_rectFullScreen;
 		SetWindowPlacement(&struWndpl);//该函数设置指定窗口的显示状态和显示大小位置等，是我们该程序最为重要的函数  
 
+		if (m_pdlgPlayController != NULL)
+		{
+			CRect rectClient;
+			GetClientRect(&rectClient);
+
+			CRect rectDlg;
+			m_pdlgPlayController->GetWindowRect(&rectDlg);
+
+			m_pdlgPlayController->ShowWindow(SW_SHOW);
+
+			int nXOffset = (rectClient.Width() - rectDlg.Width()) / 2;
+			//int nYOffset = rectClient.bottom - rectDlg.Height();
+
+			m_rectPlayControl.left = nXOffset;
+			m_rectPlayControl.top = rectClient.bottom - rectDlg.Height();
+			m_rectPlayControl.right = m_rectPlayControl.left + rectDlg.Width();
+			m_rectPlayControl.bottom = rectClient.bottom;
+
+			m_pdlgPlayController->MoveWindow(&m_rectPlayControl);
+		}
+
 		m_bFullScreen = true;
 	}
 }
@@ -1398,7 +1394,51 @@ void CDlg_ShowVideo::RestoreClientAreaToInitial(void)
 		SetWindowPlacement(&m_stOldWndPlacement);
 
 		//CenterWindow();
+		if (m_pdlgPlayController != NULL)
+		{
+			CRect rectClient;
+			GetClientRect(&rectClient);
+
+			CRect rectDlg;
+			m_pdlgPlayController->GetWindowRect(&rectDlg);
+
+			m_pdlgPlayController->ShowWindow(SW_SHOW);
+
+			int nXOffset = (rectClient.Width() - rectDlg.Width()) / 2;
+			//int nYOffset = rectClient.bottom - rectDlg.Height();
+
+			m_rectPlayControl.left = nXOffset;
+			m_rectPlayControl.top = rectClient.bottom - rectDlg.Height();
+			m_rectPlayControl.right = m_rectPlayControl.left + rectDlg.Width();
+			m_rectPlayControl.bottom = rectClient.bottom;
+
+			m_pdlgPlayController->MoveWindow(&m_rectPlayControl);
+		}
 
 		m_bFullScreen = false;
 	}
+}
+
+void CDlg_ShowVideo::OnDestroy()
+{
+	CDialog::OnDestroy();
+
+	// TODO: 在此处添加消息处理程序代码
+	if (m_pdlgPlayController != NULL)
+	{
+		delete m_pdlgPlayController;
+		m_pdlgPlayController = NULL;
+	}
+}
+
+
+void CDlg_ShowVideo::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	m_pdlgPlayController->ShowWindow(SW_HIDE);
+	KillTimer(m_dwTimerID);
+
+	m_bForcingShowController = false;
+
+	CDialog::OnTimer(nIDEvent);
 }

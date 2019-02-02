@@ -108,8 +108,7 @@ public:
 	afx_msg void OnSelchangeTabConsole(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-//	afx_msg void OnTSMagicOfflineThreadMsg(WPARAM wParam, LPARAM lParam);
-//	afx_msg void OnTSMagicRealtimeThreadMsg(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnDestroy();
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -56,6 +56,7 @@ BEGIN_MESSAGE_MAP(CYUVMagicView, CFormView)
 	//}}AFX_MSG_MAP
 //	ON_MESSAGE(WM_TSMAGIC_OFFLINE_THREAD, OnTSMagicOfflineThreadMsg)
 //	ON_MESSAGE(WM_TSMAGIC_REALTIME_THREAD, OnTSMagicRealtimeThreadMsg)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -288,3 +289,20 @@ CYUVMagicView* CYUVMagicView::GetView(void)
 	return pView;
 }
 
+void CYUVMagicView::OnDestroy()
+{
+	CFormView::OnDestroy();
+
+	// TODO: 在此处添加消息处理程序代码
+#if GUI_YUV_PREVIEW
+	m_dlgPreview.DestroyWindow();
+#endif
+
+#if GUI_YUV_EXCHANGE
+	m_dlgExchange.DestroyWindow();
+#endif
+
+#if GUI_YUV_COMBINE
+	m_dlgCombine.DestroyWindow();
+#endif
+}

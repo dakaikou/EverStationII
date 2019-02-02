@@ -270,7 +270,7 @@ void CESMagicView::OnInitialUpdate()
 
 	InitTree();
 
-	m_dlgVideo.Create(IDD_SHOW_VIDEO, this);
+	m_dlgVideo.Create(IDD_SHOW_VIDEO_SCREEN, this);
 	m_dlgVideo.ShowWindow(SW_HIDE);
 
 	m_dlgProgress.Create(IDD_ANALYSE_PROGRESS, this);

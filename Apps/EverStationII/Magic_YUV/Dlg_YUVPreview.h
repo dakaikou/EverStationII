@@ -57,6 +57,8 @@ protected:
 	afx_msg void OnSelchangeCmbFourcc();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+public:
+	virtual BOOL DestroyWindow();
 };
 
 //{{AFX_INSERT_LOCATION}}
