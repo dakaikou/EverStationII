@@ -282,7 +282,7 @@ void CInstrumentPanel_Base::DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, 
 			pMemDC->SetTextColor(SCREEN_TEXTCOLOR);
 
 			//start point 
-			//if (m_nXMarkShownOption != RANGE_MARK_HIDE)
+			//if (m_nYMarkShownOption != RANGE_MARK_HIDE)
 			{
 				strMark.Format("%d\n", m_nYNegtiveMark);
 				rectYMark.top = rectGridArea.bottom - RECT_YMARK_HEIGHT / 2;

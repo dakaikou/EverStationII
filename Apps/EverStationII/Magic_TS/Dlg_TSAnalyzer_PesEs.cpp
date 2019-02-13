@@ -63,6 +63,7 @@ BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_PesEs, CDialog)
 	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
 	
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1276,4 +1277,12 @@ BOOL CDlg_TSAnalyzer_PesEs::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pRes
 	}
 
 	return CDialog::OnNotify(wParam, lParam, pResult);
+}
+
+
+void CDlg_TSAnalyzer_PesEs::OnDestroy()
+{
+	CDialog::OnDestroy();
+
+	// TODO: 在此处添加消息处理程序代码
 }

@@ -12,7 +12,9 @@
 #include "..\MFCExt\tooltip2\tooltip2.h"
 #include "..\resource.h"
 
-#include "Dlg_PlayController.h"
+#include "Dlg_VideoPanelPlayController.h"
+#include "Dlg_VideoPanelChromaStats.h"
+#include "Dlg_VideoPanelLumaStats.h"
 
 #include "MiddleWare/MiddleWare_ESDecoder/Include/VESDecoder.h"
 
@@ -23,11 +25,11 @@ typedef enum
 	SHOWOPTION_AUDIO_ONLY
 } SHOWOPTION_TYPE_e;
 
-class CDlg_ShowVideo : public CDialog
+class CDlg_VideoShowScreen : public CDialog
 {
 // Construction
 public:
-	CDlg_ShowVideo(CWnd* pParent = NULL);   // standard constructor
+	CDlg_VideoShowScreen(CWnd* pParent = NULL);   // standard constructor
 
 public:
 
@@ -36,10 +38,10 @@ public:
 	CVESDecoder*	m_pVidDecoder;
 	PVOID			m_pAudDecoder;
 
-	int				m_nGraphWidth;
-	int				m_nGraphHeight;
-	int				m_nMbWidth;
-	int				m_nMbHeight;
+	//int				m_nGraphWidth;
+	//int				m_nGraphHeight;
+	//int				m_nMbWidth;
+	//int				m_nMbHeight;
 	char			m_pszFourCC[5];
 
 public:
@@ -52,13 +54,15 @@ public:
 	DWORD			m_dwTimerID;
 	//HANDLE			m_hThread;
 	//DWORD			m_dwID;
-	float			m_fViewRatio;
-	int				m_nX;
-	int				m_nY;
-	RECT			m_rectDst;
-	RECT			m_rectSrc;
+	//float			m_fViewRatio;
+	//int				m_nX;
+	//int				m_nY;
+	//RECT			m_rectDst;
+	//RECT			m_rectSrc;
 
-	CDlg_PlayController*  m_pdlgPlayController;
+	CDlg_VideoPanelPlayController*	m_pdlgPlayController;
+	CDlg_VideoPanelLumaStats*		m_pdlgLumaStats;
+	CDlg_VideoPanelChromaStats*    m_pdlgChromaStats;
 
 	//void			RealTimeStream(int vid_stream_type, PVOID pVidDecoder, int aud_stream_type, PVOID pAudDecoder);
 	//void			OfflineStream(int stream_type, PVOID pDecoder, int bAudio);
@@ -84,6 +88,9 @@ protected:
 	BOOL					m_bFullScreen;
 	CRect					m_rectFullScreen;
 	CRect					m_rectPlayControl;
+	CRect					m_rectChromaStats;
+	CRect					m_rectLumaStats;
+
 	WINDOWPLACEMENT			m_stOldWndPlacement;		//结构中包含了有关窗口在屏幕上位置的信息
 
 	CString					m_strFileName;
@@ -91,6 +98,7 @@ protected:
 public:
 	void EnlargeClientAreaToFullScreen(void);
 	void RestoreClientAreaToInitial(void);
+	void SetGrid(void);
 
 	int PreviewNextFrame(void);
 	int PreviewNext5Frame(void);
@@ -106,22 +114,11 @@ public:
 	afx_msg void OnClose();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnPaint();
-	//afx_msg void OnBtnNextFrame();
-	//afx_msg void OnBtnNext5frame();
-	//afx_msg void OnBtnSaveBmp();
-	//afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnBtnGrid();
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnBtnInfo();
-	//afx_msg void OnBtnFirstFrame();
-	//afx_msg void OnBtnLastFrame();
-	//afx_msg void OnBtnPlay();
-	//afx_msg void OnBtnPre5frame();
-	//afx_msg void OnBtnPreFrame();
-	//afx_msg void OnCheckCycle();
 	//}}AFX_MSG
 
 	afx_msg LRESULT OnReportVideoDecodeFPS(WPARAM wParam, LPARAM lParam);

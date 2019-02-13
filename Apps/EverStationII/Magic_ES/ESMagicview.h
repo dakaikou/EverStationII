@@ -15,7 +15,7 @@
 #endif
 
 #include "..\resource.h"
-#include "..\Common\Dlg_ShowVideo.h"
+#include "..\Common\Dlg_VideoShowScreen.h"
 
 //#define GUI_ES_OVERVIEW			0
 
@@ -57,7 +57,7 @@ protected:
 	int					m_bInitDone;
 	int					m_bOpened;
 
-	CDlg_ShowVideo		m_dlgVideo;
+	CDlg_VideoShowScreen		m_dlgVideo;
 
 	//CMPEG_VideoDecoder	m_MPGVDecoder;
 	//CH264_VideoDecoder	m_H264Decoder;

@@ -81,6 +81,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	CListCtrl m_listPcrLog;
+	afx_msg void OnDestroy();
 };
 
 //{{AFX_INSERT_LOCATION}}

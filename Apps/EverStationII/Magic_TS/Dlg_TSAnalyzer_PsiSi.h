@@ -80,6 +80,8 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
+public:
+	afx_msg void OnDestroy();
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -224,6 +224,10 @@ void CYUV_VideoDecoder::SetGrid(void)
 */	
 }
 
+void CYUV_VideoDecoder::SaveSnapshot(const char* dstfilename)
+{
+}
+
 void DecodeFourCC2Text(char* pszFourCC, char* pszText, int size)
 {
 	if ((pszFourCC != NULL) && (pszText != NULL))

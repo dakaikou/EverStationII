@@ -63,6 +63,7 @@ BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_Pcr, CDialog)
 	//{{AFX_MSG_MAP(CDlg_TSAnalyzer_Pcr)
 	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -611,3 +612,11 @@ void CDlg_TSAnalyzer_Pcr::Reset(void)
 	UpdateData(FALSE);
 }
 
+
+
+void CDlg_TSAnalyzer_Pcr::OnDestroy()
+{
+	CDialog::OnDestroy();
+
+	// TODO: 在此处添加消息处理程序代码
+}

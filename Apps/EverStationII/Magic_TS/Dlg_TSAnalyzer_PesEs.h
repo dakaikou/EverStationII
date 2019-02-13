@@ -12,7 +12,7 @@
 // CDlg_TSAnalyzer_PesEs dialog
 #include "..\Magic_TS\TSMagic_GuiApi.h"
 
-#include "..\Common\Dlg_ShowVideo.h"
+#include "..\Common\Dlg_VideoShowScreen.h"
 #include "..\Common\TreeView_XMLBrowser.h"
 #include "..\Common\HexEditView_ByteBuffer.h"
 
@@ -143,6 +143,7 @@ public:
 
 	DECLARE_MESSAGE_MAP()
 	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
+	afx_msg void OnDestroy();
 };
 
 //{{AFX_INSERT_LOCATION}}

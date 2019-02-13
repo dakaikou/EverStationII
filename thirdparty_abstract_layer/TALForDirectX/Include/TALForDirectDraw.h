@@ -33,7 +33,7 @@ protected:
 	float		m_fViewRatio;
 
 public:
-	virtual int OpenVideo(HWND hWnd, int luma_width, int luma_height, char* pszFourCC, float frame_rate=25);
+	virtual int OpenVideo(HWND hWnd, int luma_width, int luma_height, char* pszFourCC);
 	virtual int CloseVideo(void);
 	virtual int RenderYUV(LPBYTE lpY, int y_size, LPBYTE lpU, int u_size, LPBYTE lpV, int v_size);
 	virtual int RePaint(void);

@@ -184,3 +184,11 @@ void CVESDecoder::GetDecodeInfo(Video_decode_info_t* pparam)
 	}
 }
 
+void CVESDecoder::SetGrid(void)
+{
+
+}
+
+void CVESDecoder::SaveSnapshot(const char* dstfilename)
+{
+}

@@ -38,6 +38,7 @@ BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_Epg, CDialog)
 	//{{AFX_MSG_MAP(CDlg_TSAnalyzer_Epg)
 	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -109,3 +110,11 @@ void CDlg_TSAnalyzer_Epg::UpdateNIT(CNIT* pNIT)
 	m_pServiceListPane->UpdateNIT(pNIT);
 }
 
+
+
+void CDlg_TSAnalyzer_Epg::OnDestroy()
+{
+	CDialog::OnDestroy();
+
+	// TODO: 在此处添加消息处理程序代码
+}

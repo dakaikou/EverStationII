@@ -14,11 +14,11 @@
 #include "NaviTree_Bouquets.h"
 #include "..\resource.h"
 
-class CDlg_TS_Analyzer_Bouquets : public CDialog
+class CDlg_TSAnalyzer_Bouquets : public CDialog
 {
 // Construction
 public:
-	CDlg_TS_Analyzer_Bouquets(CWnd* pParent = NULL);   // standard constructor
+	CDlg_TSAnalyzer_Bouquets(CWnd* pParent = NULL);   // standard constructor
 
 // Dialog Data
 	//{{AFX_DATA(CDlg_TS_Analyzer_Bouquets)
@@ -56,6 +56,8 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnDestroy();
 };
 
 //{{AFX_INSERT_LOCATION}}

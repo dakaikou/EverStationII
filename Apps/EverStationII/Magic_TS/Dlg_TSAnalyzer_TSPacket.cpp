@@ -72,6 +72,7 @@ BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_Packets, CDialog)
 	ON_COMMAND(ID_TS_DECIMATE_TO_ES, &CDlg_TSAnalyzer_Packets::OnTsDecimateToEs)
 	ON_COMMAND(ID_TS_DECIMATE_TO_PES, &CDlg_TSAnalyzer_Packets::OnTsDecimateToPes)
 	ON_COMMAND(ID_TS_DECIMATE_TO_TS, &CDlg_TSAnalyzer_Packets::OnTsDecimateToTs)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1251,4 +1252,12 @@ void CDlg_TSAnalyzer_Packets::OnTsDecimateToTs()
 {
 	// TODO: 在此添加命令处理程序代码
 	OnBtnDecimateTS2TS();
+}
+
+
+void CDlg_TSAnalyzer_Packets::OnDestroy()
+{
+	CDialog::OnDestroy();
+
+	// TODO: 在此处添加消息处理程序代码
 }

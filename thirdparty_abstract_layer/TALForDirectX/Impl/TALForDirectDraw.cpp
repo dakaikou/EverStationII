@@ -30,7 +30,7 @@ CTALForDirectDraw::~CTALForDirectDraw()
 	assert(m_lpDDSPrimary == NULL);
 }
 
-int CTALForDirectDraw::OpenVideo(HWND hWnd, int luma_width, int luma_height, char* pszFourCC, float frame_rate)
+int CTALForDirectDraw::OpenVideo(HWND hWnd, int luma_width, int luma_height, char* pszFourCC)
 {
 	int rtcode = -1;
 

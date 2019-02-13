@@ -53,6 +53,7 @@ BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_Teletext, CDialog)
 	//ON_MESSAGE(WM_UPDATE_PES_HEADER, OnUpdatePesHeader)
 
 	ON_NOTIFY(NM_CLICK, IDC_LIST_TELETEXT_PID, &CDlg_TSAnalyzer_Teletext::OnNMClickListTeletextPid)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -402,4 +403,12 @@ void CDlg_TSAnalyzer_Teletext::OnNMClickListTeletextPid(NMHDR *pNMHDR, LRESULT *
 	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
 	// TODO: 在此添加控件通知处理程序代码
 	*pResult = 0;
+}
+
+
+void CDlg_TSAnalyzer_Teletext::OnDestroy()
+{
+	CDialog::OnDestroy();
+
+	// TODO: 在此处添加消息处理程序代码
 }

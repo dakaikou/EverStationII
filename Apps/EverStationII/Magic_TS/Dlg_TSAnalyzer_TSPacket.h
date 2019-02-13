@@ -77,6 +77,7 @@ public:
 	afx_msg void OnTsDecimateToEs();
 	afx_msg void OnTsDecimateToPes();
 	afx_msg void OnTsDecimateToTs();
+	afx_msg void OnDestroy();
 };
 
 //{{AFX_INSERT_LOCATION}}

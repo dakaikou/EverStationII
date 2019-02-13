@@ -127,7 +127,7 @@ public:
 #endif
 
 #if GUI_TS_ANALYZER_BOUQUETS
-	CDlg_TS_Analyzer_Bouquets		m_dlgTSAnalyzerBouquets;
+	CDlg_TSAnalyzer_Bouquets		m_dlgTSAnalyzerBouquets;
 #endif
 
 #if GUI_TS_ANALYZER_EPG
@@ -308,6 +308,7 @@ public:
 //	afx_msg void OnDestroy();
 	//afx_msg void OnTimer(UINT nIDEvent);
 	//CProgressCtrl m_progressFile;
+	afx_msg void OnDestroy();
 };
 
 /////////////////////////////////////////////////////////////////////////////

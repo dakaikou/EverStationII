@@ -59,6 +59,7 @@ BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_Overview, CDialog)
 //	ON_BN_CLICKED(IDC_RADIO_SMARTTS, OnBnClickedRadioSmartts)
 //	ON_BN_CLICKED(IDC_RADIO_DEKTEC, OnBnClickedRadioDektec)
 //	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_TS_BANDWIDTH, &CDlg_TSAnalyzer_Overview::OnLvnItemchangedListTsBandwidth)
+ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -776,3 +777,11 @@ void CDlg_TSAnalyzer_Overview::OnBnClickedRadioDektec()
 
 
 
+
+
+void CDlg_TSAnalyzer_Overview::OnDestroy()
+{
+	CDialog::OnDestroy();
+
+	// TODO: 在此处添加消息处理程序代码
+}

@@ -73,7 +73,7 @@ protected:
 	void UpdateDtsPts(PES_packet_t* pPES_packet, int bAud);
 
 	CImageList	m_ESImageList;
-	CDlg_ShowVideo	m_dlgTV;
+	CDlg_VideoShowScreen	m_dlgTV;
 
 	int				m_dwAudCode;
 	int				m_dwVidCode;

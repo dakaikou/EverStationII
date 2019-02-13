@@ -15,8 +15,8 @@ static char THIS_FILE[] = __FILE__;
 // CDlg_TS_Analyzer_Bouquets dialog
 
 
-CDlg_TS_Analyzer_Bouquets::CDlg_TS_Analyzer_Bouquets(CWnd* pParent /*=NULL*/)
-	: CDialog(CDlg_TS_Analyzer_Bouquets::IDD, pParent)
+CDlg_TSAnalyzer_Bouquets::CDlg_TSAnalyzer_Bouquets(CWnd* pParent /*=NULL*/)
+	: CDialog(CDlg_TSAnalyzer_Bouquets::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CDlg_TS_Analyzer_Bouquets)
 		// NOTE: the ClassWizard will add member initialization here
@@ -24,7 +24,7 @@ CDlg_TS_Analyzer_Bouquets::CDlg_TS_Analyzer_Bouquets(CWnd* pParent /*=NULL*/)
 }
 
 
-void CDlg_TS_Analyzer_Bouquets::DoDataExchange(CDataExchange* pDX)
+void CDlg_TSAnalyzer_Bouquets::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CDlg_TS_Analyzer_Bouquets)
@@ -33,15 +33,16 @@ void CDlg_TS_Analyzer_Bouquets::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CDlg_TS_Analyzer_Bouquets, CDialog)
+BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_Bouquets, CDialog)
 	//{{AFX_MSG_MAP(CDlg_TS_Analyzer_Bouquets)
 	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TS_Analyzer_Bouquets message handlers
-void CDlg_TS_Analyzer_Bouquets::Reset(void)
+void CDlg_TSAnalyzer_Bouquets::Reset(void)
 {
 	m_pPane->Reset();
 	m_pInfoTree->Reset();
@@ -53,7 +54,7 @@ void CDlg_TS_Analyzer_Bouquets::Reset(void)
 //	m_pTree->Set(offline);
 //}
 
-BOOL CDlg_TS_Analyzer_Bouquets::OnInitDialog() 
+BOOL CDlg_TSAnalyzer_Bouquets::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
 	
@@ -87,7 +88,7 @@ BOOL CDlg_TS_Analyzer_Bouquets::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CDlg_TS_Analyzer_Bouquets::OnSize(UINT nType, int cx, int cy) 
+void CDlg_TSAnalyzer_Bouquets::OnSize(UINT nType, int cx, int cy) 
 {
 	CDialog::OnSize(nType, cx, cy);
 	
@@ -101,4 +102,12 @@ void CDlg_TS_Analyzer_Bouquets::OnSize(UINT nType, int cx, int cy)
 
 		m_wndSplitter.RecalcLayout();
 	}
+}
+
+
+void CDlg_TSAnalyzer_Bouquets::OnDestroy()
+{
+	CDialog::OnDestroy();
+
+	// TODO: 在此处添加消息处理程序代码
 }

@@ -17,7 +17,7 @@
 #include "..\resource.h"
 
 #include "..\Common\Dlg_Progress.h"
-#include "..\Common\Dlg_ShowVideo.h"
+#include "..\Common\Dlg_VideoShowScreen.h"
 #include "..\Common\Dlg_Decimate.h"
 //#include "..\Common\GuiCommon_TreeFunction.h"
 
@@ -52,7 +52,7 @@ public:
 
 protected:
 	int					m_bInitDone;
-	CDlg_ShowVideo		m_dlgVideo;
+	CDlg_VideoShowScreen		m_dlgVideo;
 
 	PS_PACKINFO_t		m_packinfo;
 	PS_VIDEOINFO_t		m_videoinfo;

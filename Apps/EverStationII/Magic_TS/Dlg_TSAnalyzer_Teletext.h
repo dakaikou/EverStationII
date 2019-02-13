@@ -104,6 +104,7 @@ public:
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnNMClickListTeletextPid(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnDestroy();
 };
 
 //{{AFX_INSERT_LOCATION}}

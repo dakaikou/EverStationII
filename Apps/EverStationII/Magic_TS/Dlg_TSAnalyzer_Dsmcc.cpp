@@ -36,6 +36,7 @@ BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_Dsmcc, CDialog)
 	//{{AFX_MSG_MAP(CDlg_TSAnalyzer_Dsmcc)
 	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -115,3 +116,11 @@ void CDlg_TSAnalyzer_Dsmcc::UpdateDSMCC(CPVT* pPVT)
 	m_pNaviPane->UpdateDSMCC(pPVT);
 }
 
+
+
+void CDlg_TSAnalyzer_Dsmcc::OnDestroy()
+{
+	CDialog::OnDestroy();
+
+	// TODO: 在此处添加消息处理程序代码
+}

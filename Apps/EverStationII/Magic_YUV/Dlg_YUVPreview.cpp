@@ -16,7 +16,7 @@ static char THIS_FILE[] = __FILE__;
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_Video.h"
 
 #include "..\MainFrm.h"
-#include "..\Common\Dlg_ShowVideo.h"
+#include "..\Common\Dlg_VideoShowScreen.h"
 #include "..\Magic_YUV\GuiApi_YUV.h"
 
 CDlg_YUVPreview::CDlg_YUVPreview(CWnd* pParent /*=NULL*/)

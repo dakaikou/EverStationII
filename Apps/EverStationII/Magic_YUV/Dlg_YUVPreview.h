@@ -10,7 +10,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_YUVPreview dialog
 #include "..\resource.h"
-#include "..\Common\Dlg_ShowVideo.h"
+#include "..\Common\Dlg_VideoShowScreen.h"
 #include "..\Common\Dlg_Progress.h"
 
 #include "..\Common\YUVPlayer.h"
@@ -46,7 +46,7 @@ public:
 
 protected:
 
-	CDlg_ShowVideo		m_dlgVideo;
+	CDlg_VideoShowScreen		m_dlgVideo;
 	CYUV_VideoDecoder	m_YUVDecoder;
 
 	// Generated message map functions

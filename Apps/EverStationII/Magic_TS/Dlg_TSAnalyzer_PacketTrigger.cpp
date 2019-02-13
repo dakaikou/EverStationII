@@ -73,6 +73,7 @@ BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_PacketTrigger, CDialog)
 	//}}AFX_MSG_MAP
 	ON_WM_HSCROLL()
 	ON_WM_SIZE()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1310,3 +1311,11 @@ BOOL CDlg_TSAnalyzer_PacketTrigger::OnNotify(WPARAM wParam, LPARAM lParam, LRESU
 	return CDialog::OnNotify(wParam, lParam, pResult);	
 }
 
+
+
+void CDlg_TSAnalyzer_PacketTrigger::OnDestroy()
+{
+	CDialog::OnDestroy();
+
+	// TODO: 在此处添加消息处理程序代码
+}

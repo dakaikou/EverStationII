@@ -79,6 +79,7 @@ protected:
 public:
 	CListCtrl m_listBandwidth;
 	CListCtrl m_listTSOverview;
+	afx_msg void OnDestroy();
 };
 
 //{{AFX_INSERT_LOCATION}}

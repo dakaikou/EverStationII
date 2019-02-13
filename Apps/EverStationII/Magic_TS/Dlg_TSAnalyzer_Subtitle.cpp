@@ -50,6 +50,7 @@ BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_Subtitle, CDialog)
 
 	//ON_MESSAGE(WM_UPDATE_PES_HEADER, OnUpdatePesHeader)
 
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -389,8 +390,9 @@ LRESULT CDlg_TSAnalyzer_Subtitle::OnUpdatePesHeader(WPARAM wParam, LPARAM lParam
 	return 0;
 }
 
+void CDlg_TSAnalyzer_Subtitle::OnDestroy()
+{
+	CDialog::OnDestroy();
 
-
-
-
-
+	// TODO: 在此处添加消息处理程序代码
+}

@@ -128,6 +128,7 @@ BEGIN_MESSAGE_MAP(CTSMagicView, CFormView)
 	//ON_WM_TIMER()
 	//ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_TS_MONITOR, OnLvnItemchangedListTsMonitor)
 	//ON_NOTIFY(LVN_ITEMCHANGED, IDC_PROGRESS_FILERATIO, OnLvnItemchangedProgressFileratio)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1666,3 +1667,76 @@ CMFCStatusBar& CTSMagicView::GetStatusBar() const
 	return ((CMainFrame*)AfxGetMainWnd())->GetStatusBar();
 }
 
+
+
+void CTSMagicView::OnDestroy()
+{
+	CFormView::OnDestroy();
+
+	// TODO: 在此处添加消息处理程序代码
+	m_dlgTSTriggerWaiting.DestroyWindow();
+	m_dlgPESTriggerWaiting.DestroyWindow();
+	m_dlgESTriggerWaiting.DestroyWindow();
+	m_dlgSectionTriggerWaiting.DestroyWindow();
+	m_dlgDsmccDownloadWaiting.DestroyWindow();
+	m_dlgTSDecimateProgress.DestroyWindow();
+	m_dlgSignalStatus.DestroyWindow();
+
+#if GUI_TS_ANALYZER_OVERVIEW
+	m_dlgTSAnalyzerOverview.DestroyWindow();
+#endif
+
+#if GUI_TS_ANALYZER_PACKETS
+	m_dlgTSAnalyzerPackets.DestroyWindow();
+#endif
+
+#if GUI_TS_ANALYZER_PK_TRIGGER
+	m_dlgPacketTrigger.DestroyWindow();
+#endif
+
+#if GUI_TS_ANALYZER_PSISI
+	m_dlgTSAnalyzerPsiSi.DestroyWindow();
+#endif
+
+#if GUI_TS_ANALYZER_BOUQUETS
+	m_dlgTSAnalyzerBouquets.DestroyWindow();
+#endif
+
+#if GUI_TS_ANALYZER_EPG
+	m_dlgTSAnalyzerEpg.DestroyWindow();
+#endif
+
+#if GUI_TS_ANALYZER_NETWORK
+	m_dlgTSAnalyzerServices.DestroyWindow();
+#endif
+
+#if GUI_TS_ANALYZER_PCR
+	m_dlgTSAnalyzerPcr.DestroyWindow();
+#endif
+
+#if GUI_TS_ANALYZER_PESES
+	m_dlgTSAnalyzerPesEs.DestroyWindow();
+#endif
+
+#if GUI_TS_ANALYZER_ES
+	m_dlgTSAnalyzerEs.DestroyWindow();
+#endif
+
+#if GUI_TS_ANALYZER_TELETEXT
+	m_dlgTSAnalyzerTeletext.DestroyWindow();
+#endif
+
+#if GUI_TS_ANALYZER_SUBTITLE
+	m_dlgTSAnalyzerSubtitle.DestroyWindow();
+#endif
+
+#if GUI_TS_ANALYZER_OCDC
+	//	m_dlgTSAnalyzerOCDC.DestroyWindow();
+	m_dlgTSAnalyzerDsmcc.DestroyWindow();
+#endif
+
+#if GUI_TS_PK_MODIFY
+	m_dlgPacketModify.DestroyWindow();
+#endif
+
+}

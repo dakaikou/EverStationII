@@ -423,7 +423,7 @@ void CNaviTree_ESs::OnNMRClick(NMHDR *pNMHDR, LRESULT *pResult)
 void CNaviTree_ESs::OnEsVideoPreview()
 {
 	// TODO: 在此添加命令处理程序代码
-	CDlg_ShowVideo	m_dlgTV;
+	CDlg_VideoShowScreen	m_dlgTV;
 
 	m_dlgTV.DoModal();
 }

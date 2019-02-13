@@ -91,6 +91,7 @@ public:
 	afx_msg LRESULT OnUpdatePesHeader(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnDestroy();
 };
 
 //{{AFX_INSERT_LOCATION}}

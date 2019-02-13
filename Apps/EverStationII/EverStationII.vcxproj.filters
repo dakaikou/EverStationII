@@ -297,13 +297,19 @@
     <ClInclude Include="Magic_TS\TSMagic_Dsmcc_Download.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
-    <ClInclude Include="Common\Dlg_ShowVideo.h">
-      <Filter>头文件\Common</Filter>
-    </ClInclude>
     <ClInclude Include="Common\GuiApi_MSG.h">
       <Filter>头文件\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Common\Dlg_PlayController.h">
+    <ClInclude Include="Common\Dlg_VideoPanelChromaStats.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Dlg_VideoPanelLumaStats.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Dlg_VideoPanelPlayController.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Dlg_VideoShowScreen.h">
       <Filter>头文件\Common</Filter>
     </ClInclude>
   </ItemGroup>
@@ -402,9 +408,6 @@
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
     <ClCompile Include="Common\Dlg_Decimate.cpp">
-      <Filter>源文件\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\Dlg_ShowVideo.cpp">
       <Filter>源文件\Common</Filter>
     </ClCompile>
     <ClCompile Include="Common\ListView_ByteBuffer.cpp">
@@ -536,7 +539,16 @@
     <ClCompile Include="Magic_TS\TSMagic_Dsmcc_Download.cpp">
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
-    <ClCompile Include="Common\Dlg_PlayController.cpp">
+    <ClCompile Include="Common\Dlg_VideoPanelChromaStats.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Dlg_VideoPanelLumaStats.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Dlg_VideoPanelPlayController.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Dlg_VideoShowScreen.cpp">
       <Filter>源文件\Common</Filter>
     </ClCompile>
   </ItemGroup>

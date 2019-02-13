@@ -220,9 +220,11 @@
     <ClInclude Include="ChildFrm.h" />
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="Common\Define.h" />
-    <ClInclude Include="Common\Dlg_PlayController.h" />
     <ClInclude Include="Common\Dlg_Progress.h" />
-    <ClInclude Include="Common\Dlg_ShowVideo.h" />
+    <ClInclude Include="Common\Dlg_VideoPanelPlayController.h" />
+    <ClInclude Include="Common\Dlg_VideoPanelChromaStats.h" />
+    <ClInclude Include="Common\Dlg_VideoPanelLumaStats.h" />
+    <ClInclude Include="Common\Dlg_VideoShowScreen.h" />
     <ClInclude Include="Common\GuiApi_MSG.h" />
     <ClInclude Include="Common\HexEditView_ByteBuffer.h" />
     <ClInclude Include="Common\InstrumentPanel_Base.h" />
@@ -303,9 +305,11 @@
     <ClCompile Include="ChildFrm.cpp" />
     <ClCompile Include="ClassView.cpp" />
     <ClCompile Include="Common\Dlg_Decimate.cpp" />
-    <ClCompile Include="Common\Dlg_PlayController.cpp" />
     <ClCompile Include="Common\Dlg_Progress.cpp" />
-    <ClCompile Include="Common\Dlg_ShowVideo.cpp" />
+    <ClCompile Include="Common\Dlg_VideoPanelPlayController.cpp" />
+    <ClCompile Include="Common\Dlg_VideoPanelChromaStats.cpp" />
+    <ClCompile Include="Common\Dlg_VideoPanelLumaStats.cpp" />
+    <ClCompile Include="Common\Dlg_VideoShowScreen.cpp" />
     <ClCompile Include="Common\HexEditView_ByteBuffer.cpp" />
     <ClCompile Include="Common\InstrumentPanel_Base.cpp" />
     <ClCompile Include="Common\InstrumentPanel_Histogram.cpp" />

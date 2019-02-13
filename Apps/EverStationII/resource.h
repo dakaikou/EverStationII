@@ -144,6 +144,9 @@
 #define IDD_TS_ANALYZER_DSMCC           319
 #define IDD_SHOW_VIDEO1                 320
 #define IDD_SHOW_VIDEO_CTRL             320
+#define IDD_SHOW_VIDEO_LUMINANCE        321
+#define IDD_SHOW_VIDEO_LUMINANCE1       322
+#define IDD_SHOW_VIDEO_CHROMA           322
 #define IDB_BITMAP_TREESTATE            384
 #define IDC_BTN_TSMAGIC                 1000
 #define IDC_STATIC_APPNAME              1000
@@ -254,7 +257,6 @@
 #define IDC_BTN_PRE_5FRAME              1107
 #define IDC_BTN_PRE_FRAME               1108
 #define IDC_BTN_PLAY                    1109
-#define IDC_BTN_PLAY2                   1110
 #define IDC_BTN_EXIT                    1110
 #define IDC_BTN_ES_WATCH                1111
 #define IDC_BTN_ES_TRIGGER              1112
