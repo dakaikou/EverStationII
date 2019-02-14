@@ -57,7 +57,7 @@ void CESMagicView::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CESMagicView, CFormView)
 	//{{AFX_MSG_MAP(CESMagicView)
 	ON_WM_SIZE()
-	ON_BN_CLICKED(IDC_BTN_OPEN, OnBtnOpen)
+	ON_BN_CLICKED(IDC_BTN_OPEN, OnBtnOpenOrClose)
 	ON_BN_CLICKED(IDC_BTN_PREVIEW, OnBtnPreview)
 	ON_BN_CLICKED(IDC_BTN_ES2TS, OnBtnES2TS)
 	//}}AFX_MSG_MAP
@@ -342,7 +342,7 @@ CESMagicView* CESMagicView::GetView(void)
 	return pView;
 }
 
-void CESMagicView::OnBtnOpen() 
+void CESMagicView::OnBtnOpenOrClose() 
 {
 	// TODO: Add your control notification handler code here
 	CComboBox* pCmbCtrl = (CComboBox*)GetDlgItem(IDC_CMB_ES_TYPE);

@@ -50,6 +50,7 @@ public:
 	int				m_bPlaying;
 	int				m_bCycle;
 
+	BOOL			m_bForcingShowStats;
 	BOOL			m_bForcingShowController;
 	DWORD			m_dwTimerID;
 	//HANDLE			m_hThread;
@@ -60,16 +61,14 @@ public:
 	//RECT			m_rectDst;
 	//RECT			m_rectSrc;
 
-	CDlg_VideoPanelPlayController*	m_pdlgPlayController;
-	CDlg_VideoPanelLumaStats*		m_pdlgLumaStats;
-	CDlg_VideoPanelChromaStats*    m_pdlgChromaStats;
+	CDlg_VideoPanelPlayController*	m_pPanelPlayController;
+	CDlg_VideoPanelLumaStats*		m_pPanelLumaStats;
+	CDlg_VideoPanelChromaStats*    m_pPanelChromaStats;
 
-	//void			RealTimeStream(int vid_stream_type, PVOID pVidDecoder, int aud_stream_type, PVOID pAudDecoder);
-	//void			OfflineStream(int stream_type, PVOID pDecoder, int bAudio);
 	void			AttachVideoDecoder(PVOID pDecoder);
+	void			DetachVideoDecoder(PVOID pDecoder);
 
-	//void			AdjustLayout(int videoWidth, int videoHeight);
-// Dialog Data
+	// Dialog Data
 	//{{AFX_DATA(CDlg_ShowVideo)
 	enum { IDD = IDD_SHOW_VIDEO_SCREEN };
 	//CSliderCtrl	m_sldFile;
@@ -95,10 +94,13 @@ protected:
 
 	CString					m_strFileName;
 
+	HWND					m_hParentWnd;
+
 public:
 	void EnlargeClientAreaToFullScreen(void);
 	void RestoreClientAreaToInitial(void);
 	void SetGrid(void);
+	void ShowStats(void);
 
 	int PreviewNextFrame(void);
 	int PreviewNext5Frame(void);
@@ -111,23 +113,23 @@ public:
 
 	// Generated message map functions
 	//{{AFX_MSG(CDlg_ShowVideo)
-	afx_msg void OnClose();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnPaint();
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
-	afx_msg void OnBtnInfo();
 	//}}AFX_MSG
 
 	afx_msg LRESULT OnReportVideoDecodeFPS(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnPlayThreadExit(WPARAM, LPARAM);
 
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 	afx_msg void OnDestroy();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 };
 
 uint32_t VideoPlay_Thread(PVOID pVoid);

@@ -79,7 +79,7 @@ protected:
 
 public:
 
-	int			Open(uint32_t dwStreamType, char* pszFileName);
+	int			Open(uint32_t dwStreamType, const char* pszFileName);
 	int			Close(void);
 	int			GetTitle(char* pszTitle, int strLen);
 	

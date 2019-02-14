@@ -83,7 +83,7 @@ public:
 	// Generated message map functions
 	//{{AFX_MSG(CPSMagicView)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnBtnOpen();
+	afx_msg void OnBtnOpenOrClose();
 	afx_msg void OnBtnEsDispatch();
 	afx_msg void OnBtnPsPreview();
 	//}}AFX_MSG

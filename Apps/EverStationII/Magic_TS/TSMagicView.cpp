@@ -91,7 +91,7 @@ void CTSMagicView::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTSMagicView, CFormView)
 	//{{AFX_MSG_MAP(CTSMagicView)
 	ON_WM_SIZE()
-	ON_BN_CLICKED(IDC_BTN_OPEN, OnBtnOpen)
+	ON_BN_CLICKED(IDC_BTN_OPEN, OnBtnOpenOrClose)
 	ON_BN_CLICKED(IDC_BTN_STREAM, OnBtnStream)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_TSMAGIC, OnSelchangeTabConsole)
 	//ON_COMMAND(IDC_TOOL_PCR_DEBUG, OnToolPcrDebug)
@@ -592,7 +592,7 @@ void CTSMagicView::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
-void CTSMagicView::OnBtnOpen() 
+void CTSMagicView::OnBtnOpenOrClose() 
 {
 	// TODO: Add your command handler code here
 	int		rtcode = 0;

@@ -270,7 +270,7 @@ public:
 	// Generated message map functions
 	//{{AFX_MSG(CTSMagicView)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnBtnOpen();
+	afx_msg void OnBtnOpenOrClose();
 	afx_msg void OnBtnStream();
 	afx_msg void OnSelchangeTabConsole(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnToolPcrDebug();

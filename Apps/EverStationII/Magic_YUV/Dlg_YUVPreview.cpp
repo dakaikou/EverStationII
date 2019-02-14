@@ -17,6 +17,7 @@ static char THIS_FILE[] = __FILE__;
 
 #include "..\MainFrm.h"
 #include "..\Common\Dlg_VideoShowScreen.h"
+#include "..\Common\GuiApi_MSG.h"
 #include "..\Magic_YUV\GuiApi_YUV.h"
 
 CDlg_YUVPreview::CDlg_YUVPreview(CWnd* pParent /*=NULL*/)
@@ -37,10 +38,11 @@ void CDlg_YUVPreview::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CDlg_YUVPreview, CDialog)
 	//{{AFX_MSG_MAP(CDlg_YUVPreview)
-	ON_BN_CLICKED(IDC_BTN_PREVIEW, OnBtnPreview)
-	ON_BN_CLICKED(IDC_BTN_OPEN, OnBtnOpen)
+	ON_BN_CLICKED(IDC_BTN_OPEN, OnBtnOpenOrClose)
 	ON_CBN_SELCHANGE(IDC_CMB_FOURCC, OnSelchangeCmbFourcc)
 	//}}AFX_MSG_MAP
+	ON_MESSAGE(WM_PLAY_THREAD_EXIT, OnPlayThreadExit)
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -58,10 +60,6 @@ void CDlg_YUVPreview::Reset(void)
 	pWnd = GetDlgItem(IDC_BTN_OPEN);
 	pWnd->EnableWindow(TRUE);
 	pWnd->SetWindowText("打开");
-
-	pWnd = GetDlgItem(IDC_BTN_PREVIEW);
-	pWnd->EnableWindow(FALSE);
-//	pWnd->SetWindowText("预览");
 
 	UpdateData(FALSE);
 }
@@ -120,8 +118,11 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 	pWnd = GetDlgItem(IDC_STATIC_FORMAT);
 	pWnd->SetWindowText(pszItem);
 
-	m_dlgProgress.Create(IDD_ANALYSE_PROGRESS, this);
-	m_dlgProgress.ShowWindow(SW_HIDE);
+	//m_dlgProgress.Create(IDD_ANALYSE_PROGRESS, this);
+	//m_dlgProgress.ShowWindow(SW_HIDE);
+
+	pWnd = GetDlgItem(IDC_STATIC_MONITORS);
+	pWnd->SetWindowText("");
 
 	Reset();
 	
@@ -129,150 +130,7 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CDlg_YUVPreview::OnBtnPreview() 
-{
-	// TODO: Add your control notification handler code here
-	int			nSel;
-	CString		strPath;
-	CString		strBtn;
-	CWnd*		pWnd = NULL;
-
-	WIDTH_HEIGHT_t			wh;
-	Video_decode_info_t		decode_info;
-	CComboBox*				pCmbBox = NULL;
-
-	if (!m_dlgVideo.IsWindowVisible())
-	{
-		pWnd = GetDlgItem(IDC_EDIT_YUV);
-		pWnd->GetWindowText(strPath);
-
-		pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_WH);
-		nSel = pCmbBox->GetCurSel();
-		if (nSel != CB_ERR)
-		{
-			VIDEO_get_width_and_height_info(nSel, &wh, NULL, 0);
-		}
-		else
-		{
-			wh.width = 352;
-			wh.height = 288;
-		}
-
-		//获得参数
-		memset(&decode_info, 0x00, sizeof(Video_decode_info_t));
-
-		pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FOURCC);
-		nSel = pCmbBox->GetCurSel();
-		if (nSel != CB_ERR)
-		{
-			pCmbBox->GetLBText(nSel, decode_info.pszFourCC);
-		}
-		else
-		{
-			strcpy_s(decode_info.pszFourCC, sizeof(decode_info.pszFourCC), "YV12");
-		}
-
-		char strFrameRate[16];
-		pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FRAMERATE);
-		nSel = pCmbBox->GetCurSel();
-		if (nSel != CB_ERR)
-		{
-			pCmbBox->GetLBText(nSel, strFrameRate);
-		}
-
-		decode_info.luma_width = wh.width;
-		decode_info.luma_height = wh.height;
-		decode_info.luma_pix_count = decode_info.luma_width * decode_info.luma_height; 
-		decode_info.luma_buf_size = decode_info.luma_pix_count;
-
-		decode_info.display_width = decode_info.luma_width;
-		decode_info.display_height = decode_info.luma_height;
-
-		if (strcmp(strFrameRate, "7.5P") == 0)
-		{
-			decode_info.framerate = 7.0;
-		}
-		else if (strcmp(strFrameRate, "15P") == 0)
-		{
-			decode_info.framerate = 15.0;
-		}
-		else if (strcmp(strFrameRate, "25P") == 0)
-		{
-			decode_info.framerate = 25.0;
-		}
-		else if (strcmp(strFrameRate, "30P") == 0)
-		{
-			decode_info.framerate = 30.0;
-		}
-		else if (strcmp(strFrameRate, "60P") == 0)
-		{
-			decode_info.framerate = 60.0;
-		}
-		else
-		{
-			decode_info.framerate = 60.0;
-		}
-
-//		if (strcmp(decode_info.pszFourCC, "IYUV") == 0)
-//		{
-//			decode_info.chroma_width = (wh.width >> 1);
-//			decode_info.chroma_height = (wh.height >> 1);
-//			decode_info.chroma_pix_count = decode_info.chroma_width * decode_info.chroma_height;
-//			decode_info.chroma_buf_size = decode_info.chroma_pix_count;
-//			decode_info.chroma_format = CHROMA_FORMAT_4_2_0;
-//		}
-//		else if (strcmp(decode_info.pszFourCC, "YV16") == 0)
-//		{
-//			decode_info.chroma_width = (wh.width >> 1);
-//			decode_info.chroma_height = wh.height;
-//			decode_info.chroma_pix_count = decode_info.chroma_width * decode_info.chroma_height;
-//			decode_info.chroma_buf_size = decode_info.chroma_pix_count;
-//			decode_info.chroma_format = CHROMA_FORMAT_4_2_2;
-//		}
-
-		if (strcmp(decode_info.pszFourCC, "YUY2") == 0)
-		{
-			decode_info.chroma_width = (wh.width >> 1);
-			decode_info.chroma_height = wh.height;
-			decode_info.chroma_pix_count = decode_info.chroma_width * decode_info.chroma_height;
-			decode_info.chroma_buf_size = decode_info.chroma_pix_count;
-			decode_info.chroma_format = CHROMA_FORMAT_4_2_2;
-		}
-		else
-		{
-			decode_info.chroma_width = (wh.width >> 1);
-			decode_info.chroma_height = (wh.height >> 1);
-			decode_info.chroma_pix_count = decode_info.chroma_width * decode_info.chroma_height;
-			decode_info.chroma_buf_size = decode_info.chroma_pix_count;
-			decode_info.chroma_format = CHROMA_FORMAT_4_2_0;
-		}
-
-		decode_info.frame_buf_size = decode_info.luma_buf_size + decode_info.chroma_buf_size + decode_info.chroma_buf_size;
-
-		//if (m_YUVDecoder.IsOpened())
-		//{
-		//	m_YUVDecoder.Close();
-		//}
-
-		m_YUVDecoder.Open((STREAM_FILE | YUV_FILE_YUV), strPath.GetBuffer(128), &decode_info);
-
-		m_dlgVideo.AttachVideoDecoder(&m_YUVDecoder);
-		m_dlgVideo.ShowWindow(SW_SHOW);
-
-		CMainFrame* pMainFrame = (CMainFrame*)AfxGetMainWnd();
-		if (pMainFrame->m_rectSecondDesktop.right > pMainFrame->m_rectSecondDesktop.left)
-		{
-			m_dlgVideo.MoveWindow(&(pMainFrame->m_rectSecondDesktop));
-		}
-		else
-		{
-			m_dlgVideo.MoveWindow(&(pMainFrame->m_rectPrimaryDesktop));
-		}
-		m_dlgVideo.EnlargeClientAreaToFullScreen();
-	}
-}
-
-void CDlg_YUVPreview::OnBtnOpen() 
+void CDlg_YUVPreview::OnBtnOpenOrClose() 
 {
 	// TODO: Add your control notification handler code here
 	char szFilter[128];
@@ -301,6 +159,14 @@ void CDlg_YUVPreview::OnBtnOpen()
 
 		if (dlg.DoModal() == IDOK)
 		{
+			int			nSel;
+			CString		strBtn;
+			CWnd*		pWnd = NULL;
+
+			WIDTH_HEIGHT_t			wh;
+			Video_decode_info_t		decode_info;
+			CComboBox*				pCmbBox = NULL;
+
 			CString strPath = dlg.GetPathName();
 
 			pWnd = GetDlgItem(IDC_EDIT_YUV);
@@ -309,16 +175,145 @@ void CDlg_YUVPreview::OnBtnOpen()
 			pWnd = GetDlgItem(IDC_BTN_OPEN);
 			pWnd->SetWindowText("关闭");
 
-			pWnd = GetDlgItem(IDC_BTN_PREVIEW);
-			pWnd->EnableWindow(TRUE);
+			pWnd = GetDlgItem(IDC_EDIT_YUV);
+			pWnd->GetWindowText(strPath);
+
+			pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_WH);
+			nSel = pCmbBox->GetCurSel();
+			if (nSel != CB_ERR)
+			{
+				VIDEO_get_width_and_height_info(nSel, &wh, NULL, 0);
+			}
+			else
+			{
+				wh.width = 352;
+				wh.height = 288;
+			}
+
+			//获得参数
+			memset(&decode_info, 0x00, sizeof(Video_decode_info_t));
+
+			pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FOURCC);
+			nSel = pCmbBox->GetCurSel();
+			if (nSel != CB_ERR)
+			{
+				pCmbBox->GetLBText(nSel, decode_info.pszFourCC);
+			}
+			else
+			{
+				strcpy_s(decode_info.pszFourCC, sizeof(decode_info.pszFourCC), "YV12");
+			}
+
+			char strFrameRate[16];
+			pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FRAMERATE);
+			nSel = pCmbBox->GetCurSel();
+			if (nSel != CB_ERR)
+			{
+				pCmbBox->GetLBText(nSel, strFrameRate);
+			}
+
+			decode_info.luma_width = wh.width;
+			decode_info.luma_height = wh.height;
+			decode_info.luma_pix_count = decode_info.luma_width * decode_info.luma_height;
+			decode_info.luma_buf_size = decode_info.luma_pix_count;
+
+			decode_info.display_width = decode_info.luma_width;
+			decode_info.display_height = decode_info.luma_height;
+
+			if (strcmp(strFrameRate, "7.5P") == 0)
+			{
+				decode_info.framerate = 7.0;
+			}
+			else if (strcmp(strFrameRate, "15P") == 0)
+			{
+				decode_info.framerate = 15.0;
+			}
+			else if (strcmp(strFrameRate, "25P") == 0)
+			{
+				decode_info.framerate = 25.0;
+			}
+			else if (strcmp(strFrameRate, "30P") == 0)
+			{
+				decode_info.framerate = 30.0;
+			}
+			else if (strcmp(strFrameRate, "60P") == 0)
+			{
+				decode_info.framerate = 60.0;
+			}
+			else
+			{
+				decode_info.framerate = 60.0;
+			}
+
+			//		if (strcmp(decode_info.pszFourCC, "IYUV") == 0)
+			//		{
+			//			decode_info.chroma_width = (wh.width >> 1);
+			//			decode_info.chroma_height = (wh.height >> 1);
+			//			decode_info.chroma_pix_count = decode_info.chroma_width * decode_info.chroma_height;
+			//			decode_info.chroma_buf_size = decode_info.chroma_pix_count;
+			//			decode_info.chroma_format = CHROMA_FORMAT_4_2_0;
+			//		}
+			//		else if (strcmp(decode_info.pszFourCC, "YV16") == 0)
+			//		{
+			//			decode_info.chroma_width = (wh.width >> 1);
+			//			decode_info.chroma_height = wh.height;
+			//			decode_info.chroma_pix_count = decode_info.chroma_width * decode_info.chroma_height;
+			//			decode_info.chroma_buf_size = decode_info.chroma_pix_count;
+			//			decode_info.chroma_format = CHROMA_FORMAT_4_2_2;
+			//		}
+
+			if (strcmp(decode_info.pszFourCC, "YUY2") == 0)
+			{
+				decode_info.chroma_width = (wh.width >> 1);
+				decode_info.chroma_height = wh.height;
+				decode_info.chroma_pix_count = decode_info.chroma_width * decode_info.chroma_height;
+				decode_info.chroma_buf_size = decode_info.chroma_pix_count;
+				decode_info.chroma_format = CHROMA_FORMAT_4_2_2;
+			}
+			else
+			{
+				decode_info.chroma_width = (wh.width >> 1);
+				decode_info.chroma_height = (wh.height >> 1);
+				decode_info.chroma_pix_count = decode_info.chroma_width * decode_info.chroma_height;
+				decode_info.chroma_buf_size = decode_info.chroma_pix_count;
+				decode_info.chroma_format = CHROMA_FORMAT_4_2_0;
+			}
+
+			decode_info.frame_buf_size = decode_info.luma_buf_size + decode_info.chroma_buf_size + decode_info.chroma_buf_size;
+
+			//if (m_YUVDecoder.IsOpened())
+			//{
+			//	m_YUVDecoder.Close();
+			//}
+
+			m_YUVDecoder.Open((STREAM_FILE | YUV_FILE_YUV), strPath.GetBuffer(128), &decode_info);
+
+			m_dlgVideo.AttachVideoDecoder(&m_YUVDecoder);
+
+			//在第二屏全屏播放
+			CMainFrame* pMainFrame = (CMainFrame*)AfxGetMainWnd();
+			if (pMainFrame->m_rectSecondDesktop.right > pMainFrame->m_rectSecondDesktop.left)
+			{
+				m_dlgVideo.MoveWindow(&(pMainFrame->m_rectSecondDesktop));
+			}
+			else
+			{
+				m_dlgVideo.MoveWindow(&(pMainFrame->m_rectPrimaryDesktop));
+			}
+
+			m_dlgVideo.EnlargeClientAreaToFullScreen();
+			m_dlgVideo.ShowWindow(SW_SHOW);
 		}
 	}
 	else
 	{
-		pWnd->SetWindowText("打开");
+		if (m_dlgVideo.IsWindowVisible())
+		{
+			m_dlgVideo.ShowWindow(SW_HIDE);
+			m_dlgVideo.DetachVideoDecoder(&m_YUVDecoder);
+		}
 
-		pWnd = GetDlgItem(IDC_BTN_PREVIEW);
-		pWnd->EnableWindow(FALSE);
+		pWnd->SetWindowText("打开");
 
 		pWnd = GetDlgItem(IDC_EDIT_YUV);
 		pWnd->SetWindowText("");
@@ -569,4 +564,27 @@ BOOL CDlg_YUVPreview::DestroyWindow()
 	m_dlgVideo.DestroyWindow();
 
 	return CDialog::DestroyWindow();
+}
+
+LRESULT CDlg_YUVPreview::OnPlayThreadExit(WPARAM wParam, LPARAM lParam)
+{
+	OnBtnOpenOrClose();
+
+	return 0;
+}
+
+
+void CDlg_YUVPreview::OnSize(UINT nType, int cx, int cy)
+{
+	CDialog::OnSize(nType, cx, cy);
+
+	// TODO: 在此处添加消息处理程序代码
+	CRect rect;
+	CWnd* pWnd = GetDlgItem(IDC_STATIC_MONITORS);
+	if (pWnd->GetSafeHwnd() != NULL)
+	{
+		pWnd->GetWindowRect(&rect);
+		ScreenToClient(&rect);
+		pWnd->SetWindowPos(NULL, rect.left, rect.top, rect.Width(), cy - rect.top - 5, 0);
+	}
 }

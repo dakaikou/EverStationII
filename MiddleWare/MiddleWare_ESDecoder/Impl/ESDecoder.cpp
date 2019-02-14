@@ -31,7 +31,7 @@ CESDecoder::~CESDecoder()
 	//Reset();
 }
 
-int CESDecoder::Open(uint32_t dwStreamType, char* pszFileName)
+int CESDecoder::Open(uint32_t dwStreamType, const char* pszFileName)
 {
 	m_dwStreamType = dwStreamType;
 

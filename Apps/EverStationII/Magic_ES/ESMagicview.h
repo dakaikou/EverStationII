@@ -96,7 +96,7 @@ public:
 	//{{AFX_MSG(CESMagicView)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnSelchangeTabConsole(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnBtnOpen();
+	afx_msg void OnBtnOpenOrClose();
 	afx_msg void OnBtnPreview();
 	afx_msg void OnBtnES2TS();
 	//}}AFX_MSG

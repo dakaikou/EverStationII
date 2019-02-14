@@ -39,26 +39,28 @@ public:
 // Implementation
 public:
 
-	CDlg_Progress	m_dlgProgress;
+	//CDlg_Progress	m_dlgProgress;
 
 	void Reset(void);
 //	void Set(void);
 
 protected:
 
-	CDlg_VideoShowScreen		m_dlgVideo;
-	CYUV_VideoDecoder	m_YUVDecoder;
+	CDlg_VideoShowScreen m_dlgVideo;
+	CYUV_VideoDecoder	 m_YUVDecoder;
 
 	// Generated message map functions
 	//{{AFX_MSG(CDlg_YUVPreview)
 	virtual BOOL OnInitDialog();
-	afx_msg void OnBtnPreview();
-	afx_msg void OnBtnOpen();
+	afx_msg void OnBtnOpenOrClose();
 	afx_msg void OnSelchangeCmbFourcc();
 	//}}AFX_MSG
+	afx_msg LRESULT OnPlayThreadExit(WPARAM, LPARAM);
+
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL DestroyWindow();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 };
 
 //{{AFX_INSERT_LOCATION}}

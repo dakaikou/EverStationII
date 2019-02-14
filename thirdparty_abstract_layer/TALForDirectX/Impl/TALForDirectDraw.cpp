@@ -261,32 +261,6 @@ int CTALForDirectDraw::RenderYUV(LPBYTE lpY, int y_size, LPBYTE lpU, int u_size,
 
 				RePaint();
 				
-				//if (m_dwTickCount == 0)
-				//{
-				//	m_dwTickCount = GetTickCount();
-				//}
-				//else
-				//{
-				//	ULONGLONG newTickCount;
-
-				//	newTickCount = GetTickCount();
-				//	ULONGLONG dwTimeDiff = newTickCount - m_dwTickCount;
-
-				//	if (dwTimeDiff >= 1000)
-				//	{
-				//		uint32_t fps = (uint32_t)(m_nDebugFrameCount * 1000000 / dwTimeDiff);
-
-				//		//::SendMessage(m_hVidWnd, WM_REPORT_VIDEO_DECODE_FPS, (WPARAM)fps, NULL);
-
-				//		m_nDebugFrameCount = 0;
-				//		m_dwTickCount = newTickCount;
-				//	}
-				//	else
-				//	{
-				//		m_nDebugFrameCount++;
-				//	}
-				//}
-
 				break;
 			}
 

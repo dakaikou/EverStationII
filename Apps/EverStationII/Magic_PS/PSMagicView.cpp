@@ -54,7 +54,7 @@ void CPSMagicView::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CPSMagicView, CFormView)
 	//{{AFX_MSG_MAP(CPSMagicView)
 	ON_WM_SIZE()
-	ON_BN_CLICKED(IDC_BTN_OPEN, OnBtnOpen)
+	ON_BN_CLICKED(IDC_BTN_OPEN, OnBtnOpenOrClose)
 	ON_BN_CLICKED(IDC_BTN_DISPATCH, OnBtnEsDispatch)
 	ON_BN_CLICKED(IDC_BTN_PS_PREVIEW, OnBtnPsPreview)
 	//}}AFX_MSG_MAP
@@ -304,7 +304,7 @@ CPSMagicView* CPSMagicView::GetView(void)
 }
 
 
-void CPSMagicView::OnBtnOpen() 
+void CPSMagicView::OnBtnOpenOrClose() 
 {
 	// TODO: Add your control notification handler code here
 

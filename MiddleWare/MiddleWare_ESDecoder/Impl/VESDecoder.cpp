@@ -42,7 +42,7 @@ CVESDecoder::~CVESDecoder()
 //	CESDecoder::Reset();
 //}
 
-int CVESDecoder::Open(uint32_t dwStreamType, char* pszFileName, Video_decode_info_t* pdecode_info)
+int CVESDecoder::Open(uint32_t dwStreamType, const char* pszFileName, const Video_decode_info_t* pdecode_info)
 {
 	//m_nFileType = nFileType;
 	//strcpy_s(m_pszFileName, pszFileName);
@@ -102,7 +102,7 @@ HWND CVESDecoder::GetWndHandle(void)
 	return m_hVidWnd;
 }
 
-int CVESDecoder::OpenDirectxWnd(HWND hWnd)
+int CVESDecoder::AttachWnd(HWND hWnd)
 {
 	HRESULT ddRval = -1;
 
@@ -112,13 +112,15 @@ int CVESDecoder::OpenDirectxWnd(HWND hWnd)
 
 	assert(m_pDirectDraw == NULL);
 	m_pDirectDraw = new CTALForDirectDraw;
-	ddRval = m_pDirectDraw->OpenVideo(hWnd, m_VidDecodeInfo.luma_width, m_VidDecodeInfo.luma_height, m_VidDecodeInfo.pszFourCC);
+	ddRval = m_pDirectDraw->OpenVideo(m_hVidWnd, m_VidDecodeInfo.luma_width, m_VidDecodeInfo.luma_height, m_VidDecodeInfo.pszFourCC);
 
 	return ddRval;
 }
 
-int CVESDecoder::CloseDirectxWnd(void)
+int CVESDecoder::DetachWnd(HWND hWnd)
 {
+	assert(hWnd == m_hVidWnd);
+
 	HRESULT ddRval = -1;
 
 	if (m_pDirectDraw != NULL)

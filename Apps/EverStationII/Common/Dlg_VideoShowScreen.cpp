@@ -5,7 +5,9 @@
 
 #include <assert.h>
 
+#include "GuiApi_MSG.h"
 #include "Dlg_VideoShowScreen.h"
+#include "../Magic_YUV/Dlg_YUVPreview.h"
 
 #include "../MainFrm.h"
 #include "../Magic_TS/TSMagic_GuiApi_MSG.h"
@@ -55,11 +57,12 @@ CDlg_VideoShowScreen::CDlg_VideoShowScreen(CWnd* pParent /*=NULL*/)
 	strcpy_s(m_pszFourCC, sizeof(m_pszFourCC), "");
 
 	m_bFullScreen = false;
-	m_pdlgPlayController = NULL;
-	m_pdlgChromaStats = NULL;
-	m_pdlgLumaStats = NULL;
+	m_pPanelPlayController = NULL;
+	m_pPanelChromaStats = NULL;
+	m_pPanelLumaStats = NULL;
 
 	m_bForcingShowController = false;
+	m_bForcingShowStats = false;
 }
 
 
@@ -73,7 +76,6 @@ void CDlg_VideoShowScreen::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CDlg_VideoShowScreen, CDialog)
 	//{{AFX_MSG_MAP(CDlg_ShowVideo)
-	ON_WM_CLOSE()
 	ON_WM_SHOWWINDOW()
 	ON_WM_PAINT()
 	ON_WM_SIZE()
@@ -85,252 +87,70 @@ BEGIN_MESSAGE_MAP(CDlg_VideoShowScreen, CDialog)
 	ON_WM_TIMER()
 	//}}AFX_MSG_MAP
 	ON_MESSAGE(WM_REPORT_VIDEO_DECODE_FPS, OnReportVideoDecodeFPS)
+	ON_MESSAGE(WM_PLAY_THREAD_EXIT, OnPlayThreadExit)
+	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_ShowVideo message handlers
 
-void CDlg_VideoShowScreen::OnClose() 
-{
-	// TODO: Add your message handler code here and/or call default
-//	m_ToolTip.Close();
-
-	if (m_bPlaying)
-	{
-		MessageBox("请先退出播放线程", "视频预览", MB_OK);
-	}
-	else
-	{
-		if (m_pVidDecoder != NULL)
-		{
-			m_pVidDecoder->CloseDirectxWnd();
-			m_pVidDecoder = NULL;
-		}
-
-		//m_nVidStreamType = STREAM_UNKNOWN;
-
-		//if (!(m_nAudStreamType & STREAM_FILE))
-		//{
-		//	switch (m_nAudStreamType & (~STREAM_FILE))
-		//	{
-		//	case STREAM_MPEGAES:
-
-		//		((CMPEG_AudioDecoder*)m_pAudDecoder)->CloseAudio();
-		//		break;
-
-		//	case STREAM_AC3AES:
-
-		//		((CAC3_AudioDecoder*)m_pAudDecoder)->CloseAudio();
-		//		break;
-
-		//	case STREAM_WAVEAES:
-
-		//		((CWAVE_AudioDecoder*)m_pAudDecoder)->CloseAudio();
-		//		break;
-
-		//	default:
-		//		break;
-		//	}
-		//}
-
-		m_nAudStreamType = STREAM_UNKNOWN;
-
-		m_pAudDecoder = NULL;
-
-		m_pdlgPlayController->ShowWindow(SW_HIDE);
-		m_pdlgChromaStats->ShowWindow(SW_HIDE);
-		m_pdlgLumaStats->ShowWindow(SW_HIDE);
-
-		m_bFullScreen = false;
-
-		CDialog::OnClose();
-	}
-}
-
-
-//void CDlg_ShowVideo::AdjustLayout(int videoWidth, int videoHeight)
+//void CDlg_VideoShowScreen::OnClose()
 //{
-//	CWnd*	pWnd;
+//	// TODO: Add your message handler code here and/or call default
+////	m_ToolTip.Close();
 //
-//	//CRect rcWindow;
-//	//CRect rcClient;
-//	CRect rcLeftBtn;
-//	CRect rcRightBtn;
-//
-//	int		nScreenX = GetSystemMetrics(SM_CXSCREEN);
-//	int		nScreenY = GetSystemMetrics(SM_CYSCREEN);
-//	//int		nXDelt;
-//	//int		nYDelt;
-//	//int		width;
-//	//int		height;
-//
-//	//GetWindowRect(&rcWindow);
-//	//GetClientRect(&rcClient);
-//
-//	CWnd* pLeftBtnWnd = GetDlgItem(IDC_BTN_FIRST_FRAME);
-//	pLeftBtnWnd->GetWindowRect(&rcLeftBtn);
-//
-//	CWnd* pRightBtnWnd = GetDlgItem(IDC_BTN_SAVE_BMP);
-//	pRightBtnWnd->GetWindowRect(&rcRightBtn);
-//
-//	//nYDelt = rcWindow.Height() - rcClient.Height() + rcLeftBtn.Height() + 30;
-//	//height = videoHeight + nYDelt;
-//	//if (audioonly)
-//	//{
-//	//	height = nYDelt;
-//	//}
-//	//else
-//	//{
-//	//	height = 576 + nYDelt;
-//	//}
-//
-//	//nXDelt = rcWindow.Width() - rcClient.Width();
-//	//width = videoWidth + nXDelt + 6;
-//	//if (width < 640) width = 640;
-//
-//	//rcWindow.left = (nScreenX - width) / 2;
-//	//rcWindow.top = (nScreenY - height) / 2;
-//	//rcWindow.right = rcWindow.left + width;
-//	//rcWindow.bottom = rcWindow.top + height;
-//
-//	//MoveWindow(&rcWindow);
-//
-//	m_bCycle = TRUE;
-//	CButton* pBtn = (CButton*)GetDlgItem(IDC_CHECK_CYCLE);
-//	if (::IsWindow(pBtn->GetSafeHwnd()))
+//	if (m_bPlaying)
 //	{
-//		pBtn->ShowWindow(SW_SHOW);
-//		pBtn->SetCheck(m_bCycle);
+//		MessageBox("请先退出播放线程", "视频预览", MB_OK);
 //	}
-//
-//	//CRect	rectClient;
-//	CRect	rectCtrl;
-//	int		yOffset;
-//	int		xOffset;
-//
-//	//GetClientRect(&rectClient);
-//
-//	yOffset = nScreenY - 25;
-//
-//	pWnd = GetDlgItem(IDC_SLIDER_FILE);
-//	if (::IsWindow(pWnd->GetSafeHwnd()))
+//	else
 //	{
-//		pWnd->ShowWindow(SW_SHOW);
-//		pWnd->GetClientRect(&rectCtrl);
-//		pWnd->MoveWindow(10, yOffset - rectCtrl.Height(), nScreenX - 20, rectCtrl.Height());
-//		yOffset -= rectCtrl.Height();
-//	}
+//		//m_pPanelPlayController->ShowWindow(SW_HIDE);
+//		//m_pPanelChromaStats->ShowWindow(SW_HIDE);
+//		//m_pPanelLumaStats->ShowWindow(SW_HIDE);
 //
-//	yOffset -= 5;
-//	xOffset = 10;
-//	
-//	pWnd = GetDlgItem(IDC_BTN_FIRST_FRAME);
-//	if (::IsWindow(pWnd->GetSafeHwnd()))
-//	{
-//		pWnd->ShowWindow(SW_SHOW);
-//		pWnd->GetClientRect(&rectCtrl);
-//		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-//		xOffset += rectCtrl.Width() + 5;
-//	}
+//		//if (m_pVidDecoder != NULL)
+//		//{
+//		//	HWND hWnd = this->GetSafeHwnd();
+//		//	m_pVidDecoder->DetachWnd(hWnd);
+//		//	m_pVidDecoder = NULL;
+//		//}
 //
-//	pWnd = GetDlgItem(IDC_BTN_PRE_5FRAME);
-//	if (::IsWindow(pWnd->GetSafeHwnd()))
-//	{
-//		pWnd->ShowWindow(SW_SHOW);
-//		pWnd->GetClientRect(&rectCtrl);
-//		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-//		xOffset += rectCtrl.Width() + 5;
-//	}
+//		//m_nVidStreamType = STREAM_UNKNOWN;
 //
-//	pWnd = GetDlgItem(IDC_BTN_PRE_FRAME);
-//	if (::IsWindow(pWnd->GetSafeHwnd()))
-//	{
-//		pWnd->ShowWindow(SW_SHOW);
-//		pWnd->GetClientRect(&rectCtrl);
-//		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-//		xOffset += rectCtrl.Width() + 5;
-//	}
+//		//if (!(m_nAudStreamType & STREAM_FILE))
+//		//{
+//		//	switch (m_nAudStreamType & (~STREAM_FILE))
+//		//	{
+//		//	case STREAM_MPEGAES:
 //
-//	pWnd = GetDlgItem(IDC_BTN_PLAY);
-//	if (::IsWindow(pWnd->GetSafeHwnd()))
-//	{
-//		pWnd->ShowWindow(SW_SHOW);
-//		pWnd->GetClientRect(&rectCtrl);
-//		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-//		xOffset += rectCtrl.Width() + 5;
-//	}
+//		//		((CMPEG_AudioDecoder*)m_pAudDecoder)->CloseAudio();
+//		//		break;
 //
-//	pWnd = GetDlgItem(IDC_BTN_NEXT_FRAME);
-//	if (::IsWindow(pWnd->GetSafeHwnd()))
-//	{
-//		pWnd->ShowWindow(SW_SHOW);
-//		pWnd->GetClientRect(&rectCtrl);
-//		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-//		xOffset += rectCtrl.Width() + 5;
-//	}
+//		//	case STREAM_AC3AES:
 //
-//	pWnd = GetDlgItem(IDC_BTN_NEXT_5FRAME);
-//	if (::IsWindow(pWnd->GetSafeHwnd()))
-//	{
-//		pWnd->ShowWindow(SW_SHOW);
-//		pWnd->GetClientRect(&rectCtrl);
-//		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-//		xOffset += rectCtrl.Width() + 5;
-//	}
+//		//		((CAC3_AudioDecoder*)m_pAudDecoder)->CloseAudio();
+//		//		break;
 //
-//	pWnd = GetDlgItem(IDC_BTN_LAST_FRAME);
-//	if (::IsWindow(pWnd->GetSafeHwnd()))
-//	{
-//		pWnd->ShowWindow(SW_SHOW);
-//		pWnd->GetClientRect(&rectCtrl);
-//		pWnd->MoveWindow(xOffset, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-//		xOffset += rectCtrl.Width() + 5;
-//	}
+//		//	case STREAM_WAVEAES:
 //
-//	xOffset = nScreenX - 20;
-//	pWnd = GetDlgItem(IDC_BTN_SAVE_BMP);
-//	if (::IsWindow(pWnd->GetSafeHwnd()))
-//	{
-//		pWnd->ShowWindow(SW_SHOW);
-//		pWnd->GetClientRect(&rectCtrl);
-//		pWnd->MoveWindow(xOffset - rectCtrl.Width(), yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-//		xOffset -= rectCtrl.Width() + 5;
-//	}
+//		//		((CWAVE_AudioDecoder*)m_pAudDecoder)->CloseAudio();
+//		//		break;
 //
-//	pWnd = GetDlgItem(IDC_BTN_INFO);
-//	if (::IsWindow(pWnd->GetSafeHwnd()))
-//	{
-//		pWnd->ShowWindow(SW_SHOW);
-//		pWnd->GetClientRect(&rectCtrl);
-//		pWnd->MoveWindow(xOffset - rectCtrl.Width(), yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-//		xOffset -= rectCtrl.Width() + 5;
-//	}
+//		//	default:
+//		//		break;
+//		//	}
+//		//}
 //
-//	pWnd = GetDlgItem(IDC_BTN_GRID);
-//	if (::IsWindow(pWnd->GetSafeHwnd()))
-//	{
-//		pWnd->ShowWindow(SW_SHOW);
-//		pWnd->GetClientRect(&rectCtrl);
-//		pWnd->MoveWindow(xOffset - rectCtrl.Width(), yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-//		xOffset -= rectCtrl.Width() + 5;
-//	}
+//		//m_nAudStreamType = STREAM_UNKNOWN;
 //
-//	pWnd = GetDlgItem(IDC_CHECK_CYCLE);
-//	if (::IsWindow(pWnd->GetSafeHwnd()))
-//	{
-//		pWnd->ShowWindow(SW_SHOW);
-//		pWnd->GetClientRect(&rectCtrl);
-//		pWnd->MoveWindow(xOffset - rectCtrl.Width(), yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-//		xOffset -= rectCtrl.Width() + 5;
-//	}
+//		//m_pAudDecoder = NULL;
 //
-//	pWnd = GetDlgItem(IDC_STATIC_INFO_FPS);
-//	if (::IsWindow(pWnd->GetSafeHwnd()))
-//	{
-//		pWnd->ShowWindow(SW_SHOW);
-//		pWnd->GetClientRect(&rectCtrl);
-//		pWnd->MoveWindow(xOffset - rectCtrl.Width() - 10, yOffset - rectCtrl.Height(), rectCtrl.Width(), rectCtrl.Height());
-//		xOffset -= rectCtrl.Width() + 5;
+//		//m_bFullScreen = false;
+//
+//		ShowWindow(SW_HIDE);
+//
+//		CDialog::OnClose();
 //	}
 //}
 
@@ -352,34 +172,23 @@ void CDlg_VideoShowScreen::OnClose()
 
 void CDlg_VideoShowScreen::AttachVideoDecoder(PVOID pDecoder)
 {
-	assert(pDecoder != NULL);
+	assert(m_pVidDecoder == NULL);
 
-	int videoWidth = 500;
-	int videoHeight = 300;
-
-	m_pdlgPlayController->SetControls(1, 0);
-
-	//if (bAudio)
-	//{
-	//	m_nAudStreamType = stream_type;
-	//	m_pAudDecoder = pDecoder;
-	//}
-	//else
-	//{
-	//	m_nVidStreamType = stream_type;
+	if (pDecoder != NULL)
+	{
 		m_pVidDecoder = (CVESDecoder*)pDecoder;
+	}
+}
 
-		Video_decode_info_t decode_info;
-		m_pVidDecoder->GetDecodeInfo(&decode_info);
-		videoWidth = decode_info.display_width;
-		videoHeight = decode_info.display_height;
-	//}
+void CDlg_VideoShowScreen::DetachVideoDecoder(PVOID pDecoder)
+{
+	if (pDecoder != NULL)
+	{
+		assert(m_pVidDecoder == pDecoder);
 
-	//AdjustLayout(videoWidth, videoHeight);
-
-	//m_bIsAudio = bAudio;
-
-	//ShowWindow(SW_SHOW);
+		//inform the playing thread to exit
+		m_pVidDecoder = NULL;
+	}
 }
 
 void CDlg_VideoShowScreen::OnShowWindow(BOOL bShow, UINT nStatus) 
@@ -387,88 +196,70 @@ void CDlg_VideoShowScreen::OnShowWindow(BOOL bShow, UINT nStatus)
 	CDialog::OnShowWindow(bShow, nStatus);
 	
 	// TODO: Add your message handler code here
-	HWND		hWnd;
 	int			nPercent = 0;
 
 	if (bShow)
 	{
-		//EnlargeClientAreaToFullScreen();
-		//CenterWindow();
-
 		if (m_pVidDecoder != NULL)
 		{
-			if (m_pVidDecoder->GetWndHandle() == NULL)
+			char pszTitle[256];
+			if (m_pVidDecoder->GetTitle(pszTitle, sizeof(pszTitle)) == ESDECODER_NO_ERROR)
 			{
-				char pszTitle[256];
-				if (m_pVidDecoder->GetTitle(pszTitle, sizeof(pszTitle)) == ESDECODER_NO_ERROR)
-				{
-					SetWindowText(pszTitle);
-				}
-
-				hWnd = this->GetSafeHwnd();
-				m_pVidDecoder->OpenDirectxWnd(hWnd);
-
-				nPercent = m_pVidDecoder->Preview_FirstPicture();
-				m_pdlgPlayController->m_sldFile.SetPos(nPercent);
+				SetWindowText(pszTitle);
 			}
-		}
 
-//		if (!(m_nAudStreamType & STREAM_FILE))
-//		{
-//			switch (m_nAudStreamType & (~STREAM_FILE))
-//			{
-//			case STREAM_MPEGAES:
-//
-//				((CMPEG_AudioDecoder*)m_pAudDecoder)->OpenAudio(hWnd);
-//				break;
-//
-//			case STREAM_WAVEAES:
-//
-//				((CWAVE_AudioDecoder*)m_pAudDecoder)->OpenAudio(hWnd);
-//				break;
-//
-//			case STREAM_AC3AES:
-//				((CAC3_AudioDecoder*)m_pAudDecoder)->OpenAudio(hWnd);
-//				break;
-//
-//			default:
-//				break;
-//			}
-//		}
+			HWND hWnd = this->GetSafeHwnd();
+			m_pVidDecoder->AttachWnd(hWnd);
 
-		if (m_pdlgPlayController != NULL)
-		{
-			m_pdlgPlayController->ShowWindow(SW_SHOW);
+			nPercent = m_pVidDecoder->Preview_FirstPicture();
+
+			if (m_pPanelPlayController != NULL)
+			{
+				m_pPanelPlayController->m_sldFile.SetPos(nPercent);
+				m_pPanelPlayController->ShowWindow(SW_SHOW);
+			}
+
+			if (m_pPanelLumaStats != NULL)
+			{
+				m_pPanelLumaStats->ShowWindow(SW_SHOW);
+			}
+
+			if (m_pPanelChromaStats != NULL)
+			{
+				m_pPanelChromaStats->ShowWindow(SW_SHOW);
+			}
 
 			m_bForcingShowController = true;
+			m_bForcingShowStats = true;
 
 			m_dwTimerID = 0xff56f344;
 			SetTimer(m_dwTimerID, 2000, NULL);
 		}
-
-		if (m_pdlgLumaStats != NULL)
-		{
-			m_pdlgLumaStats->ShowWindow(SW_SHOW);
-		}
-		if (m_pdlgChromaStats != NULL)
-		{
-			m_pdlgChromaStats->ShowWindow(SW_SHOW);
-		}
 	}
 	else
 	{
-		if (m_pdlgPlayController != NULL)
+		if (m_pVidDecoder != NULL)
 		{
-			m_pdlgPlayController->ShowWindow(SW_HIDE);
-		}
-		if (m_pdlgLumaStats != NULL)
-		{
-			m_pdlgLumaStats->ShowWindow(SW_HIDE);
-		}
-		if (m_pdlgChromaStats != NULL)
-		{
-			m_pdlgChromaStats->ShowWindow(SW_HIDE);
-		}
+			if (m_bPlaying == 1) m_bPlaying = 0;
+
+			HWND hWnd = this->GetSafeHwnd();
+			m_pVidDecoder->DetachWnd(hWnd);
+
+			if (m_pPanelPlayController != NULL)
+			{
+				m_pPanelPlayController->ShowWindow(SW_HIDE);
+			}
+			if (m_pPanelLumaStats != NULL)
+			{
+				m_pPanelLumaStats->ShowWindow(SW_HIDE);
+			}
+			if (m_pPanelChromaStats != NULL)
+			{
+				m_pPanelChromaStats->ShowWindow(SW_HIDE);
+			}
+
+			m_bFullScreen = false;
+ 		}
 	}
 
 	UpdateData(FALSE);
@@ -564,22 +355,18 @@ BOOL CDlg_VideoShowScreen::OnInitDialog()
 	CDialog::OnInitDialog();
 	
 	// TODO: Add extra initialization here
-//	AdjustLayout(0);
+	m_pPanelPlayController = new CDlg_VideoPanelPlayController;
+	m_pPanelPlayController->Create(IDD_SHOW_VIDEO_CTRL, this);
 
-	m_pdlgPlayController = new CDlg_VideoPanelPlayController;
-	m_pdlgPlayController->Create(IDD_SHOW_VIDEO_CTRL, this);
+	m_pPanelLumaStats = new CDlg_VideoPanelLumaStats;
+	m_pPanelLumaStats->Create(IDD_SHOW_VIDEO_LUMINANCE, this);
 
-	m_pdlgLumaStats = new CDlg_VideoPanelLumaStats;
-	m_pdlgLumaStats->Create(IDD_SHOW_VIDEO_LUMINANCE, this);
+	m_pPanelChromaStats = new CDlg_VideoPanelChromaStats;
+	m_pPanelChromaStats->Create(IDD_SHOW_VIDEO_CHROMA, this);
 
-	m_pdlgChromaStats = new CDlg_VideoPanelChromaStats;
-	m_pdlgChromaStats->Create(IDD_SHOW_VIDEO_CHROMA, this);
-
-	m_pdlgPlayController->m_sldFile.SetRange(0, 100);
-	m_pdlgPlayController->m_sldFile.SetPos(0);
-	m_pdlgPlayController->m_sldFile.SetPageSize(10);
-
-	//UpdateData(FALSE);
+	m_pPanelPlayController->m_sldFile.SetRange(0, 100);
+	m_pPanelPlayController->m_sldFile.SetPos(0);
+	m_pPanelPlayController->m_sldFile.SetPageSize(10);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -629,29 +416,32 @@ void CDlg_VideoShowScreen::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		if (m_rectPlayControl.PtInRect(point))
 		{
-			m_pdlgPlayController->ShowWindow(SW_SHOW);
+			m_pPanelPlayController->ShowWindow(SW_SHOW);
 		}
 		else
 		{
-			m_pdlgPlayController->ShowWindow(SW_HIDE);
+			m_pPanelPlayController->ShowWindow(SW_HIDE);
 		}
+	}
 
+	if (m_bForcingShowStats == 0)
+	{
 		if (m_rectLumaStats.PtInRect(point))
 		{
-			m_pdlgLumaStats->ShowWindow(SW_SHOW);
+			m_pPanelLumaStats->ShowWindow(SW_SHOW);
 		}
 		else
 		{
-			m_pdlgLumaStats->ShowWindow(SW_HIDE);
+			m_pPanelLumaStats->ShowWindow(SW_HIDE);
 		}
 
 		if (m_rectChromaStats.PtInRect(point))
 		{
-			m_pdlgChromaStats->ShowWindow(SW_SHOW);
+			m_pPanelChromaStats->ShowWindow(SW_SHOW);
 		}
 		else
 		{
-			m_pdlgChromaStats->ShowWindow(SW_HIDE);
+			m_pPanelChromaStats->ShowWindow(SW_HIDE);
 		}
 	}
 /*
@@ -801,28 +591,21 @@ void CDlg_VideoShowScreen::OnLButtonDblClk(UINT nFlags, CPoint point)
 	CDialog::OnLButtonDblClk(nFlags, point);
 }
 
-void CDlg_VideoShowScreen::OnBtnInfo() 
+void CDlg_VideoShowScreen::ShowStats(void)
 {
 	// TODO: Add your control notification handler code here
-//	m_ToolTip.Close();
-
-//	if (m_pdlgInfo == NULL)
-//	{
-//		m_pdlgInfo = new CDlg_DecodeInfo;
-//		m_pdlgInfo->Create(IDD_DECODE_INFO, this);
-//		m_pdlgInfo->ShowWindow(SW_SHOW);
-//	}
-//	else
-//	{
-//		if (m_pdlgInfo->IsWindowVisible())
-//		{
-//			m_pdlgInfo->ShowWindow(SW_HIDE);
-//		}
-//		else
-//		{
-//			m_pdlgInfo->ShowWindow(SW_SHOW);
-//		}
-//	}
+	if (m_bForcingShowStats == 0)
+	{
+		m_bForcingShowStats = 1;
+		m_pPanelChromaStats->ShowWindow(SW_SHOW);
+		m_pPanelLumaStats->ShowWindow(SW_SHOW);
+	}
+	else
+	{
+		m_bForcingShowStats = 0;
+		m_pPanelChromaStats->ShowWindow(SW_HIDE);
+		m_pPanelLumaStats->ShowWindow(SW_HIDE);
+	}
 }
 
 int CDlg_VideoShowScreen::PreviewFirstFrame() 
@@ -973,7 +756,7 @@ int CDlg_VideoShowScreen::PreviewPreFrame()
 uint32_t VideoPlay_Thread(PVOID pVoid)
 {
 	CDlg_VideoShowScreen* pdlg = (CDlg_VideoShowScreen*)pVoid;
-	int				nPercent = 0;
+	int				nOldPercent = 0;
 
 	DWORD			dwStartTick = ::GetTickCount();
 	int				frameCount = 0;
@@ -985,7 +768,7 @@ uint32_t VideoPlay_Thread(PVOID pVoid)
 
 	do
 	{
-		nPercent = pdlg->m_pVidDecoder->Preview_Forward1Picture();
+		int nPercent = pdlg->m_pVidDecoder->Preview_Forward1Picture();
 		frameCount++;
 
 		if (pdlg->m_bCycle)
@@ -996,14 +779,18 @@ uint32_t VideoPlay_Thread(PVOID pVoid)
 			}
 		}
 
-		pdlg->m_pdlgPlayController->m_sldFile.SetPos(nPercent);
+		if (nPercent != nOldPercent)
+		{
+			pdlg->m_pPanelPlayController->m_sldFile.SetPos(nPercent);
+		}
 
-		int timeThread = (int)round(frameCount * frame_interval);
+		//停下来等
+		int timeThreadHold = (int)round(frameCount * frame_interval);
 		while (pdlg->m_bPlaying)
 		{
 			DWORD dwNowTick = ::GetTickCount();
 			int timeElapse = dwNowTick - dwStartTick;
-			if (timeElapse >= timeThread)
+			if (timeElapse >= timeThreadHold)
 			{
 				if (frameCount == 1000000)
 				{
@@ -1081,7 +868,7 @@ uint32_t AudioPlay_Thread(PVOID pVoid)
 			}
 		}
 
-		pdlg->m_pdlgPlayController->m_sldFile.SetPos(nPercent);
+		pdlg->m_pPanelPlayController->m_sldFile.SetPos(nPercent);
 
 		frame_count ++;
 
@@ -1106,10 +893,19 @@ LRESULT CDlg_VideoShowScreen::OnReportVideoDecodeFPS(WPARAM wParam, LPARAM lPara
 	//pDC->TextOutA(10, 10, strFPS);
 	//ReleaseDC(pDC);
 
-	m_pdlgPlayController->ReportFPS(strFPS);
+	m_pPanelPlayController->ReportFPS(strFPS);
 
 	return 0;
 }
+
+LRESULT CDlg_VideoShowScreen::OnPlayThreadExit(WPARAM wParam, LPARAM lParam)
+{
+	//ShowWindow(SW_HIDE);
+	::SendMessage(m_hParentWnd, WM_PLAY_THREAD_EXIT, 0, NULL);
+
+	return 0;
+}
+
 
 void CDlg_VideoShowScreen::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 {
@@ -1161,9 +957,9 @@ void CDlg_VideoShowScreen::EnlargeClientAreaToFullScreen(void)
 
 		GetClientRect(&rectClient);		//获得的是相对坐标
 
-		if (m_pdlgPlayController != NULL)
+		if (m_pPanelPlayController != NULL)
 		{
-			m_pdlgPlayController->GetWindowRect(&rectDlg);
+			m_pPanelPlayController->GetWindowRect(&rectDlg);
 
 			int nXOffset = (rectClient.Width() - rectDlg.Width()) / 2;
 
@@ -1179,14 +975,14 @@ void CDlg_VideoShowScreen::EnlargeClientAreaToFullScreen(void)
 			struWndpl.flags = 0;
 			struWndpl.showCmd = SW_SHOWNORMAL;
 			struWndpl.rcNormalPosition = rectPlayControl;
-			BOOL bStatus = m_pdlgPlayController->SetWindowPlacement(&struWndpl);
+			BOOL bStatus = m_pPanelPlayController->SetWindowPlacement(&struWndpl);
 
-			m_pdlgPlayController->ShowWindow(SW_SHOW);
+			m_pPanelPlayController->ShowWindow(SW_SHOW);
 		}
 
-		if (m_pdlgLumaStats != NULL)
+		if (m_pPanelLumaStats != NULL)
 		{
-			m_pdlgLumaStats->GetWindowRect(&rectDlg);
+			m_pPanelLumaStats->GetWindowRect(&rectDlg);
 
 			m_rectLumaStats.left = rectClient.right - rectDlg.Width();
 			m_rectLumaStats.top = rectClient.top;
@@ -1200,14 +996,14 @@ void CDlg_VideoShowScreen::EnlargeClientAreaToFullScreen(void)
 			struWndpl.flags = 0;
 			struWndpl.showCmd = SW_SHOWNORMAL;
 			struWndpl.rcNormalPosition = rectLumaStats;
-			m_pdlgLumaStats->SetWindowPlacement(&struWndpl);
+			m_pPanelLumaStats->SetWindowPlacement(&struWndpl);
 
-			m_pdlgLumaStats->ShowWindow(SW_SHOW);
+			m_pPanelLumaStats->ShowWindow(SW_SHOW);
 		}
 
-		if (m_pdlgChromaStats != NULL)
+		if (m_pPanelChromaStats != NULL)
 		{
-			m_pdlgChromaStats->GetWindowRect(&rectDlg);
+			m_pPanelChromaStats->GetWindowRect(&rectDlg);
 
 			m_rectChromaStats.left = rectClient.right - rectDlg.Width();
 			m_rectChromaStats.top = m_rectLumaStats.bottom;
@@ -1221,9 +1017,9 @@ void CDlg_VideoShowScreen::EnlargeClientAreaToFullScreen(void)
 			struWndpl.flags = 0;
 			struWndpl.showCmd = SW_SHOWNORMAL;
 			struWndpl.rcNormalPosition = rectChromaStats;
-			m_pdlgChromaStats->SetWindowPlacement(&struWndpl);
+			m_pPanelChromaStats->SetWindowPlacement(&struWndpl);
 
-			m_pdlgChromaStats->ShowWindow(SW_SHOW);
+			m_pPanelChromaStats->ShowWindow(SW_SHOW);
 		}
 
 		m_bFullScreen = true;
@@ -1241,9 +1037,9 @@ void CDlg_VideoShowScreen::RestoreClientAreaToInitial(void)
 		CRect rectDlg;
 		GetClientRect(&rectClient);
 
-		if (m_pdlgPlayController != NULL)
+		if (m_pPanelPlayController != NULL)
 		{
-			m_pdlgPlayController->GetWindowRect(&rectDlg);
+			m_pPanelPlayController->GetWindowRect(&rectDlg);
 
 			int nXOffset = (rectClient.Width() - rectDlg.Width()) / 2;
 
@@ -1259,14 +1055,14 @@ void CDlg_VideoShowScreen::RestoreClientAreaToInitial(void)
 			struWndpl.flags = 0;
 			struWndpl.showCmd = SW_SHOWNORMAL;
 			struWndpl.rcNormalPosition = rectPlayControl;
-			BOOL bStatus = m_pdlgPlayController->SetWindowPlacement(&struWndpl);
+			BOOL bStatus = m_pPanelPlayController->SetWindowPlacement(&struWndpl);
 
-			m_pdlgPlayController->ShowWindow(SW_SHOW);
+			m_pPanelPlayController->ShowWindow(SW_SHOW);
 		}
 
-		if (m_pdlgLumaStats != NULL)
+		if (m_pPanelLumaStats != NULL)
 		{
-			m_pdlgLumaStats->GetWindowRect(&rectDlg);
+			m_pPanelLumaStats->GetWindowRect(&rectDlg);
 
 			m_rectLumaStats.left = rectClient.right - rectDlg.Width();
 			m_rectLumaStats.top = rectClient.top;
@@ -1280,14 +1076,14 @@ void CDlg_VideoShowScreen::RestoreClientAreaToInitial(void)
 			struWndpl.flags = 0;
 			struWndpl.showCmd = SW_SHOWNORMAL;
 			struWndpl.rcNormalPosition = rectLumaStats;
-			m_pdlgLumaStats->SetWindowPlacement(&struWndpl);
+			m_pPanelLumaStats->SetWindowPlacement(&struWndpl);
 
-			m_pdlgLumaStats->ShowWindow(SW_SHOW);
+			m_pPanelLumaStats->ShowWindow(SW_SHOW);
 		}
 
-		if (m_pdlgChromaStats != NULL)
+		if (m_pPanelChromaStats != NULL)
 		{
-			m_pdlgChromaStats->GetWindowRect(&rectDlg);
+			m_pPanelChromaStats->GetWindowRect(&rectDlg);
 
 			m_rectChromaStats.left = rectClient.right - rectDlg.Width();
 			m_rectChromaStats.top = m_rectLumaStats.bottom;
@@ -1301,9 +1097,9 @@ void CDlg_VideoShowScreen::RestoreClientAreaToInitial(void)
 			struWndpl.flags = 0;
 			struWndpl.showCmd = SW_SHOWNORMAL;
 			struWndpl.rcNormalPosition = rectChromaStats;
-			m_pdlgChromaStats->SetWindowPlacement(&struWndpl);
+			m_pPanelChromaStats->SetWindowPlacement(&struWndpl);
 
-			m_pdlgChromaStats->ShowWindow(SW_SHOW);
+			m_pPanelChromaStats->ShowWindow(SW_SHOW);
 		}
 
 		m_bFullScreen = false;
@@ -1315,22 +1111,22 @@ void CDlg_VideoShowScreen::OnDestroy()
 	CDialog::OnDestroy();
 
 	// TODO: 在此处添加消息处理程序代码
-	if (m_pdlgPlayController != NULL)
+	if (m_pPanelPlayController != NULL)
 	{
-		delete m_pdlgPlayController;
-		m_pdlgPlayController = NULL;
+		delete m_pPanelPlayController;
+		m_pPanelPlayController = NULL;
 	}
 
-	if (m_pdlgLumaStats != NULL)
+	if (m_pPanelLumaStats != NULL)
 	{
-		delete m_pdlgLumaStats;
-		m_pdlgLumaStats = NULL;
+		delete m_pPanelLumaStats;
+		m_pPanelLumaStats = NULL;
 	}
 
-	if (m_pdlgChromaStats != NULL)
+	if (m_pPanelChromaStats != NULL)
 	{
-		delete m_pdlgChromaStats;
-		m_pdlgChromaStats = NULL;
+		delete m_pPanelChromaStats;
+		m_pPanelChromaStats = NULL;
 	}
 }
 
@@ -1338,13 +1134,28 @@ void CDlg_VideoShowScreen::OnDestroy()
 void CDlg_VideoShowScreen::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
+
+	//oneshot Timer
 	KillTimer(m_dwTimerID);
 
-	m_pdlgPlayController->ShowWindow(SW_HIDE);
-	m_pdlgChromaStats->ShowWindow(SW_HIDE);
-	m_pdlgLumaStats->ShowWindow(SW_HIDE);
+	m_pPanelPlayController->ShowWindow(SW_HIDE);
+	m_pPanelChromaStats->ShowWindow(SW_HIDE);
+	m_pPanelLumaStats->ShowWindow(SW_HIDE);
 
 	m_bForcingShowController = false;
+	m_bForcingShowStats = false;
 
 	CDialog::OnTimer(nIDEvent);
+}
+
+
+int CDlg_VideoShowScreen::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CDialog::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	// TODO:  在此添加您专用的创建代码
+	m_hParentWnd = lpCreateStruct->hwndParent;
+
+	return 0;
 }

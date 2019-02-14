@@ -29,11 +29,11 @@ class MW_ES_LIB CVESDecoder : public CESDecoder
 public:
 	CVESDecoder(void);
 
-	int		Open(uint32_t dwStreamType, char* pszFileName, Video_decode_info_t* pdecode_info);
+	int		Open(uint32_t dwStreamType, const char* pszFileName, const Video_decode_info_t* pdecode_info);
 	int		Close(void);
 
-	int		OpenDirectxWnd(HWND hWnd);
-	int		CloseDirectxWnd(void);
+	int		AttachWnd(HWND hWnd);
+	int		DetachWnd(HWND hWnd);
 
 protected:
 
