@@ -54,7 +54,7 @@ CDlg_VideoShowScreen::CDlg_VideoShowScreen(CWnd* pParent /*=NULL*/)
 
 	//m_fViewRatio = 1.0f;
 	
-	strcpy_s(m_pszFourCC, sizeof(m_pszFourCC), "");
+	//strcpy_s(m_pszFourCC, sizeof(m_pszFourCC), "");
 
 	m_bFullScreen = false;
 	m_pPanelPlayController = NULL;
@@ -400,6 +400,14 @@ void CDlg_VideoShowScreen::SaveSnapshot(void)
 	}
 }
 
+void CDlg_VideoShowScreen::EnlargeVideo(void)
+{
+	if (m_pVidDecoder != NULL)
+	{
+		m_pVidDecoder->EnlargeVideo();
+	}
+}
+
 
 void CDlg_VideoShowScreen::OnSize(UINT nType, int cx, int cy) 
 {
@@ -468,7 +476,7 @@ void CDlg_VideoShowScreen::OnMouseMove(UINT nFlags, CPoint point)
 	CDialog::OnMouseMove(nFlags, point);
 }
 
-void CDlg_VideoShowScreen::SetGrid(void) 
+void CDlg_VideoShowScreen::ToggleGrid(void) 
 {
 	// TODO: Add your control notification handler code here
 	//switch (m_nVidStreamType & (~STREAM_FILE))
@@ -491,7 +499,7 @@ void CDlg_VideoShowScreen::SetGrid(void)
 
 	if (m_pVidDecoder != NULL)
 	{
-		m_pVidDecoder->SetGrid();
+		m_pVidDecoder->ToggleGrid();
 	}
 }
 
@@ -761,10 +769,10 @@ uint32_t VideoPlay_Thread(PVOID pVoid)
 	DWORD			dwStartTick = ::GetTickCount();
 	int				frameCount = 0;
 
-	Video_decode_info_t  video_decode_info;
-	pdlg->m_pVidDecoder->GetDecodeInfo(&video_decode_info);
+	//Video_decode_info_t  video_decode_info;
+	float frame_rate = pdlg->m_pVidDecoder->GetDisplayFrameRate();
 
-	double frame_interval = 1000.0 / video_decode_info.framerate;
+	double frame_interval = 1000.0 / frame_rate;
 
 	do
 	{
@@ -1103,6 +1111,8 @@ void CDlg_VideoShowScreen::RestoreClientAreaToInitial(void)
 		}
 
 		m_bFullScreen = false;
+
+		//Invalidate();
 	}
 }
 

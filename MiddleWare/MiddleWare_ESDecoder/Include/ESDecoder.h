@@ -28,7 +28,6 @@
 
 //#include "thirdparty_libs/directx/include/dsound.h"
 
-#define WM_REPORT_VIDEO_DECODE_FPS		WM_USER	+ 2500
 #define DS_NOTIFY_COUNT					2
 
 //typedef enum

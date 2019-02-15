@@ -20,8 +20,18 @@
 #include <windows.h>
 #include <mmsystem.h>
 
-
 #include "thirdparty_libs/directx/include/ddraw.h"
+
+#define WM_REPORT_VIDEO_DECODE_FPS		WM_USER	+ 0x46ED
+
+typedef struct
+{
+	int luma_width;
+	int luma_height;
+	int chroma_width;
+	int chroma_height;
+
+} FRAME_PARAMS_t;
 
 class TAL_DIRECTX_LIB CTALForDirectDraw
 {
@@ -30,13 +40,18 @@ public:
 
 protected:
 	HWND		m_hVidWnd;
-	float		m_fViewRatio;
+	int			m_nGrid;
+	int			m_nDebugFrameCount;
+	uint32_t	m_dwDebugTimeTick;
+
+	POINT		m_ptOrigin;
 
 public:
-	virtual int OpenVideo(HWND hWnd, int luma_width, int luma_height, char* pszFourCC);
+	virtual int OpenVideo(HWND hWnd, int canvas_width, int canvas_height, char* pszFourCC);
 	virtual int CloseVideo(void);
-	virtual int RenderYUV(LPBYTE lpY, int y_size, LPBYTE lpU, int u_size, LPBYTE lpV, int v_size);
+	virtual int RenderYUV(const LPBYTE lpFrameBuf, int frameSize, const FRAME_PARAMS_t* pstFrameParams);
 	virtual int RePaint(void);
+	virtual int ToggleGrid(void);
 
 private:		//direct audio output
 
@@ -46,9 +61,6 @@ private:		//direct audio output
 	LPDIRECTDRAWSURFACE7    m_lpDDSOverlay;  // DirectDraw 离屏表面指针
 	LPDIRECTDRAWCLIPPER		m_pcClipper;
 	DDSURFACEDESC2		    m_ddsd;    // DirectDraw 表面描述
-
-	int			m_nOldScreenWidth;
-	int			m_nOldScreenHeight;
 
 public:
 	~CTALForDirectDraw();

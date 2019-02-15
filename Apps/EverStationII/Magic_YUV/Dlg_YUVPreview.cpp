@@ -92,8 +92,9 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 
 	pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FOURCC);
 	pCmbBox->ResetContent();
-//	pCmbBox->AddString("IYUV");
-//	pCmbBox->AddString("YV16");
+	pCmbBox->AddString("IYUV");
+	pCmbBox->AddString("I420");
+	//	pCmbBox->AddString("YV16");
 	pCmbBox->AddString("YV12");
 	pCmbBox->AddString("YUY2");
 	pCmbBox->SetCurSel(0);
@@ -164,7 +165,7 @@ void CDlg_YUVPreview::OnBtnOpenOrClose()
 			CWnd*		pWnd = NULL;
 
 			WIDTH_HEIGHT_t			wh;
-			Video_decode_info_t		decode_info;
+			YUV_SOURCE_PARAM_t		stYUVParams;
 			CComboBox*				pCmbBox = NULL;
 
 			CString strPath = dlg.GetPathName();
@@ -191,17 +192,17 @@ void CDlg_YUVPreview::OnBtnOpenOrClose()
 			}
 
 			//获得参数
-			memset(&decode_info, 0x00, sizeof(Video_decode_info_t));
+			memset(&stYUVParams, 0x00, sizeof(YUV_SOURCE_PARAM_t));
 
 			pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FOURCC);
 			nSel = pCmbBox->GetCurSel();
 			if (nSel != CB_ERR)
 			{
-				pCmbBox->GetLBText(nSel, decode_info.pszFourCC);
+				pCmbBox->GetLBText(nSel, stYUVParams.pszFourCC);
 			}
 			else
 			{
-				strcpy_s(decode_info.pszFourCC, sizeof(decode_info.pszFourCC), "YV12");
+				strcpy_s(stYUVParams.pszFourCC, sizeof(stYUVParams.pszFourCC), "YV12");
 			}
 
 			char strFrameRate[16];
@@ -212,81 +213,36 @@ void CDlg_YUVPreview::OnBtnOpenOrClose()
 				pCmbBox->GetLBText(nSel, strFrameRate);
 			}
 
-			decode_info.luma_width = wh.width;
-			decode_info.luma_height = wh.height;
-			decode_info.luma_pix_count = decode_info.luma_width * decode_info.luma_height;
-			decode_info.luma_buf_size = decode_info.luma_pix_count;
-
-			decode_info.display_width = decode_info.luma_width;
-			decode_info.display_height = decode_info.luma_height;
+			stYUVParams.luma_width = wh.width;
+			stYUVParams.luma_height = wh.height;
+			stYUVParams.quantizationBits = 8;			//default value chendelin 2019.2.15
 
 			if (strcmp(strFrameRate, "7.5P") == 0)
 			{
-				decode_info.framerate = 7.0;
+				stYUVParams.framerate = 7.5;
 			}
 			else if (strcmp(strFrameRate, "15P") == 0)
 			{
-				decode_info.framerate = 15.0;
+				stYUVParams.framerate = 15.0;
 			}
 			else if (strcmp(strFrameRate, "25P") == 0)
 			{
-				decode_info.framerate = 25.0;
+				stYUVParams.framerate = 25.0;
 			}
 			else if (strcmp(strFrameRate, "30P") == 0)
 			{
-				decode_info.framerate = 30.0;
+				stYUVParams.framerate = 30.0;
 			}
 			else if (strcmp(strFrameRate, "60P") == 0)
 			{
-				decode_info.framerate = 60.0;
+				stYUVParams.framerate = 60.0;
 			}
 			else
 			{
-				decode_info.framerate = 60.0;
+				stYUVParams.framerate = 60.0;
 			}
 
-			//		if (strcmp(decode_info.pszFourCC, "IYUV") == 0)
-			//		{
-			//			decode_info.chroma_width = (wh.width >> 1);
-			//			decode_info.chroma_height = (wh.height >> 1);
-			//			decode_info.chroma_pix_count = decode_info.chroma_width * decode_info.chroma_height;
-			//			decode_info.chroma_buf_size = decode_info.chroma_pix_count;
-			//			decode_info.chroma_format = CHROMA_FORMAT_4_2_0;
-			//		}
-			//		else if (strcmp(decode_info.pszFourCC, "YV16") == 0)
-			//		{
-			//			decode_info.chroma_width = (wh.width >> 1);
-			//			decode_info.chroma_height = wh.height;
-			//			decode_info.chroma_pix_count = decode_info.chroma_width * decode_info.chroma_height;
-			//			decode_info.chroma_buf_size = decode_info.chroma_pix_count;
-			//			decode_info.chroma_format = CHROMA_FORMAT_4_2_2;
-			//		}
-
-			if (strcmp(decode_info.pszFourCC, "YUY2") == 0)
-			{
-				decode_info.chroma_width = (wh.width >> 1);
-				decode_info.chroma_height = wh.height;
-				decode_info.chroma_pix_count = decode_info.chroma_width * decode_info.chroma_height;
-				decode_info.chroma_buf_size = decode_info.chroma_pix_count;
-				decode_info.chroma_format = CHROMA_FORMAT_4_2_2;
-			}
-			else
-			{
-				decode_info.chroma_width = (wh.width >> 1);
-				decode_info.chroma_height = (wh.height >> 1);
-				decode_info.chroma_pix_count = decode_info.chroma_width * decode_info.chroma_height;
-				decode_info.chroma_buf_size = decode_info.chroma_pix_count;
-				decode_info.chroma_format = CHROMA_FORMAT_4_2_0;
-			}
-
-			decode_info.frame_buf_size = decode_info.luma_buf_size + decode_info.chroma_buf_size + decode_info.chroma_buf_size;
-
-			//if (m_YUVDecoder.IsOpened())
-			//{
-			//	m_YUVDecoder.Close();
-			//}
-
-			m_YUVDecoder.Open((STREAM_FILE | YUV_FILE_YUV), strPath.GetBuffer(128), &decode_info);
+			m_YUVDecoder.Open((STREAM_FILE | YUV_FILE_YUV), strPath.GetBuffer(128), &stYUVParams);
 
 			m_dlgVideo.AttachVideoDecoder(&m_YUVDecoder);
 
@@ -321,220 +277,6 @@ void CDlg_YUVPreview::OnBtnOpenOrClose()
 		m_YUVDecoder.Close();
 	}
 }
-
-/*
-void CDlg_YUVPreview::OnBtnExchange() 
-{
-	// TODO: Add your control notification handler code here
-	FILE* fp_src;
-	FILE* fp_dst;
-	WIDTH_HEIGHT_t	wh;
-	int file_size;
-	int rdcount;
-//	int src_chroma_size;
-	int src_chroma_width;
-	int src_chroma_height;
-//	int dst_chroma_size;
-	int dst_chroma_width;
-	int dst_chroma_height;
-	int nSel;
-	int nSrcChroma;
-	int nDstChroma;
-	int w, h;
-//	int rdsize;
-	unsigned char*	srcbuf;
-	unsigned char*  dstbuf;
-	CString			strSrcFile;
-	CString			strDstFile;
-
-	CWnd*		pWnd;
-	CComboBox*  pCmbBox;
-
-	UpdateData(TRUE);
-
-	pWnd = GetDlgItem(IDC_BTN_EXCHANGE);
-	pWnd->EnableWindow(FALSE);
-
-	pWnd = GetDlgItem(IDC_BTN_RESET);
-	pWnd->EnableWindow(FALSE);
-
-	pWnd = GetDlgItem(IDC_EDIT_SRC_YUV);
-	pWnd->GetWindowText(strSrcFile);
-
-	if (strSrcFile != "")
-	{
-		fp_src = fopen(strSrcFile.GetBuffer(128), "rb");
-		if (fp_src)
-		{
-			fseek(fp_src, 0, SEEK_END);
-			file_size = ftell(fp_src);
-			fseek(fp_src, 0, SEEK_SET);
-
-			pWnd = GetDlgItem(IDC_EDIT_DST_YUV);
-			pWnd->GetWindowText(strDstFile);
-
-			if (strDstFile != "")
-			{
-				fp_dst = fopen(strDstFile.GetBuffer(128), "wb");
-				if (fp_dst)
-				{
-					pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_SRC_WH);
-					nSel = pCmbBox->GetCurSel();
-					VIDEO_get_width_and_height_info(nSel, &wh, NULL);
-
-					pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_SRC_CHROMA);
-					nSrcChroma = pCmbBox->GetCurSel();
-					switch (nSrcChroma)
-					{
-					case CHROMA_FORMAT_4_2_0:		//4:2:0
-						src_chroma_width = wh.width / 2;
-						src_chroma_height = wh.height / 2;
-						break;
-					case CHROMA_FORMAT_4_2_2:		//4:2:2
-						src_chroma_width = wh.width / 2;
-						src_chroma_height = wh.height;
-						break;
-					case CHROMA_FORMAT_4_4_4:		//4:4:4
-						src_chroma_width = wh.width;
-						src_chroma_height = wh.height;
-						break;
-					}
-								
-					pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_DST_CHROMA);
-					nDstChroma = pCmbBox->GetCurSel();
-
-					switch (nDstChroma)
-					{
-					case CHROMA_FORMAT_4_2_0:		//4:2:0
-						dst_chroma_width = wh.width / 2;
-						dst_chroma_height = wh.height / 2;
-						break;
-					case CHROMA_FORMAT_4_2_2:		//4:2:2
-						dst_chroma_width = wh.width / 2;
-						dst_chroma_height = wh.height;
-						break;
-					case CHROMA_FORMAT_4_4_4:		//4:4:4
-						dst_chroma_width = wh.width;
-						dst_chroma_height = wh.height;
-						break;
-					}
-
-					srcbuf = (unsigned char*)malloc(wh.width);
-					dstbuf = (unsigned char*)malloc(wh.width);
-
-					m_dlgProgress.SetWindowText("视频序列色度格式转换");
-					m_dlgProgress.ShowWindow(SW_SHOW);
-
-					rdcount = 0;
-					do
-					{
-						//Y
-						for (h = 0; h < wh.height; h++)
-						{
-							rdcount += fread(srcbuf, wh.width, sizeof(char), fp_src);
-							file_size -= wh.width;
-
-							fwrite(srcbuf, wh.width, sizeof(char), fp_dst);
-						}
-
-						//U & V
-						for (h = 0; h < (src_chroma_height * 2); h++)
-						{
-							rdcount += fread(srcbuf, src_chroma_width, sizeof(char), fp_src);
-							file_size -= src_chroma_width;
-
-							if ((nSrcChroma == CHROMA_FORMAT_4_2_0) && (nDstChroma == CHROMA_FORMAT_4_2_2))				//4:2:0 -> 4:2:2
-							{
-								fwrite(srcbuf, src_chroma_width, sizeof(char), fp_dst);
-								fwrite(srcbuf, src_chroma_width, sizeof(char), fp_dst);
-							}
-							else if ((nSrcChroma == CHROMA_FORMAT_4_2_0) && (nDstChroma == CHROMA_FORMAT_4_4_4))				//4:2:0 -> 4:4:4
-							{
-								for (w = 0; w < src_chroma_width; w++)
-								{
-									dstbuf[w*2 + 0] = srcbuf[w];
-									dstbuf[w*2 + 1] = srcbuf[w];
-								}
-
-								fwrite(dstbuf, dst_chroma_width, sizeof(char), fp_dst);
-								fwrite(dstbuf, dst_chroma_width, sizeof(char), fp_dst);
-							}
-							else if ((nSrcChroma == CHROMA_FORMAT_4_2_2) && (nDstChroma == CHROMA_FORMAT_4_4_4))				//4:2:2 -> 4:4:4
-							{
-								for (w = 0; w < src_chroma_width; w++)
-								{
-									dstbuf[w*2 + 0] = srcbuf[w];
-									dstbuf[w*2 + 1] = srcbuf[w];
-								}
-
-								fwrite(dstbuf, dst_chroma_width, sizeof(char), fp_dst);
-							}
-							else if ((nSrcChroma == CHROMA_FORMAT_4_2_2) && (nDstChroma == CHROMA_FORMAT_4_2_0))				//4:2:2 -> 4:2:0
-							{
-								if ((h % 2) == 0)
-								{
-									fwrite(srcbuf, dst_chroma_width, sizeof(char), fp_dst);
-								}
-							}
-							else if ((nSrcChroma == CHROMA_FORMAT_4_4_4) && (nDstChroma == CHROMA_FORMAT_4_2_0))				//4:4:4 -> 4:2:0
-							{
-								if ((h % 2) == 0)
-								{
-									for (w = 0; w < src_chroma_width; w++)
-									{
-										if ((w % 2) == 0)
-										{
-											dstbuf[w/2] = srcbuf[w];
-										}
-									}
-									fwrite(dstbuf, dst_chroma_width, sizeof(char), fp_dst);
-								}
-							}
-							else if ((nSrcChroma == CHROMA_FORMAT_4_4_4) && (nDstChroma == CHROMA_FORMAT_4_2_2))				//4:4:4 -> 4:2:2
-							{
-								for (w = 0; w < src_chroma_width; w++)
-								{
-									if ((w % 2) == 0)
-									{
-										dstbuf[w/2] = srcbuf[w];
-									}
-								}
-								fwrite(dstbuf, dst_chroma_width, sizeof(char), fp_dst);
-							}
-							else
-							{
-								fwrite(srcbuf, src_chroma_width, sizeof(char), fp_dst);
-							}
-						}
-
-					} while (file_size > 0);
-
-					m_dlgProgress.ShowWindow(SW_HIDE);
-
-					fclose(fp_dst);
-				}
-			}
-			else
-			{
-				MessageBox("请选择一个目标文件!", "视频序列色度格式转换", MB_OK | MB_ICONEXCLAMATION);
-			}
-
-			fclose(fp_src);
-		}
-	}
-	else
-	{
-		MessageBox("请选择一个源文件!", "视频序列色度格式转换", MB_OK | MB_ICONEXCLAMATION);
-	}
-
-	pWnd = GetDlgItem(IDC_BTN_EXCHANGE);
-	pWnd->EnableWindow(TRUE);
-
-	pWnd = GetDlgItem(IDC_BTN_RESET);
-	pWnd->EnableWindow(TRUE);
-}
-*/
-
 
 void CDlg_YUVPreview::OnSelchangeCmbFourcc() 
 {

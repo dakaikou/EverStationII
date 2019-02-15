@@ -28,8 +28,8 @@ public:
 public:
 /*------------------syntax part---------------------------*/
 public:
-	void	SetGrid(void);
-	void	SaveSnapshot(const char* dstfilename);
+	//void	ToggleGrid(void);
+	//void	SaveSnapshot(const char* dstfilename);
 
 	int		Preview_FirstPicture(void);
 	int		Preview_LastPicture(void);

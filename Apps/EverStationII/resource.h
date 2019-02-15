@@ -145,7 +145,6 @@
 #define IDD_SHOW_VIDEO1                 320
 #define IDD_SHOW_VIDEO_CTRL             320
 #define IDD_SHOW_VIDEO_LUMINANCE        321
-#define IDD_SHOW_VIDEO_LUMINANCE1       322
 #define IDD_SHOW_VIDEO_CHROMA           322
 #define IDB_BITMAP_TREESTATE            384
 #define IDC_BTN_TSMAGIC                 1000
@@ -259,6 +258,8 @@
 #define IDC_BTN_PLAY                    1109
 #define IDC_BTN_EXIT                    1110
 #define IDC_BTN_ES_WATCH                1111
+#define IDC_BTN_SAVE_BMP2               1111
+#define IDC_BTN_ENLARGE_SCREEN          1111
 #define IDC_BTN_ES_TRIGGER              1112
 #define IDC_EDIT_ES_GOP_TIME            1113
 #define IDC_STATIC_ES_GOP_TIME          1114

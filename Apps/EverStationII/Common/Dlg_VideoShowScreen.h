@@ -42,7 +42,7 @@ public:
 	//int				m_nGraphHeight;
 	//int				m_nMbWidth;
 	//int				m_nMbHeight;
-	char			m_pszFourCC[5];
+	//char			m_pszFourCC[5];
 
 public:
 
@@ -99,8 +99,10 @@ protected:
 public:
 	void EnlargeClientAreaToFullScreen(void);
 	void RestoreClientAreaToInitial(void);
-	void SetGrid(void);
+	void ToggleGrid(void);
+	void EnlargeVideo(void);
 	void ShowStats(void);
+	void SaveSnapshot(void);
 
 	int PreviewNextFrame(void);
 	int PreviewNext5Frame(void);
@@ -108,8 +110,6 @@ public:
 	int PreviewPreFrame(void);
 	int PreviewPre5Frame(void);
 	int PreviewFirstFrame(void);
-
-	void SaveSnapshot(void);
 
 	// Generated message map functions
 	//{{AFX_MSG(CDlg_ShowVideo)
