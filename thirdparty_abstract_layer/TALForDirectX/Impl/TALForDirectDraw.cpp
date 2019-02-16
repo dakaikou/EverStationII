@@ -14,10 +14,10 @@ CTALForDirectDraw::CTALForDirectDraw(void)
 	m_pcClipper = NULL;
 
 	m_nGrid = 0;
-	m_bFullScreen = 0;
+	m_dEnlargeCoeff = 1.0;
 
-	m_ptOrigin.x = -1;
-	m_ptOrigin.y = -1;
+	//m_ptOrigin.x = -1;
+	//m_ptOrigin.y = -1;
 }
 
 CTALForDirectDraw::~CTALForDirectDraw()
@@ -101,6 +101,19 @@ int CTALForDirectDraw::OpenVideo(HWND hWnd, int canvas_width, int canvas_height,
 
 							m_nDebugFrameCount = 0;
 							m_dwDebugTimeTick = 0;
+
+							//RECT  rcClient;
+							//::GetClientRect(m_hVidWnd, &rcClient);
+
+							//int nClientWidth = rcClient.right - rcClient.left;
+							//int nClientHeight = rcClient.bottom - rcClient.top;
+
+							//double dWidthEnlargeCoeff = (double)nClientWidth / m_ddsd.dwWidth;
+							//double dHeightEnlargeCoeff = (double)nClientHeight / m_ddsd.dwWidth;
+							//m_dMaxEnlargeCoeff = min(dWidthEnlargeCoeff, dHeightEnlargeCoeff);
+
+							//int nStep = (int)(m_dMaxEnlargeCoeff / 0.25);
+							//m_dEnlargeCoeff = nStep * 0.25;
 						}
 						else
 						{
@@ -394,13 +407,27 @@ int CTALForDirectDraw::ToggleGrid(void)
 
 int CTALForDirectDraw::ToggleScreen(void)
 {
-	if (m_bFullScreen)
+	m_dEnlargeCoeff *= 2.0;
+
+	if (m_dEnlargeCoeff > 4.0)
 	{
-		m_bFullScreen = false;
+		m_dEnlargeCoeff = 0.25;
 	}
 	else
 	{
-		m_bFullScreen = true;
+		RECT  rcClient;
+		::GetClientRect(m_hVidWnd, &rcClient);
+
+		int nClientWidth = rcClient.right - rcClient.left;
+		int nClientHeight = rcClient.bottom - rcClient.top;
+
+		int dstWidth = (int)(m_ddsd.dwWidth * m_dEnlargeCoeff);
+		int dstHeight = (int)(m_ddsd.dwHeight * m_dEnlargeCoeff);
+
+		if ((dstWidth > nClientWidth) || (dstHeight > nClientHeight))
+		{
+			m_dEnlargeCoeff = 0.25;
+		}
 	}
 
 	return 0;
@@ -410,7 +437,6 @@ int CTALForDirectDraw::ToggleScreen(void)
 int CTALForDirectDraw::RePaint(void)
 {
 	HRESULT	ddRval = -1;
-	//HWND	hWnd = m_hVidWnd;
 
 	if ((m_lpDDSPrimary != NULL) && 
 		(m_lpDDSOverlay != NULL) &&
@@ -422,42 +448,46 @@ int CTALForDirectDraw::RePaint(void)
 		RECT  rcClient;
 		::GetClientRect(m_hVidWnd, &rcClient);
 
-		if ((m_ptOrigin.x < 0) || (m_ptOrigin.y < 0))
+		POINT ptOrigin;
+
+		int nClientWidth = rcClient.right - rcClient.left;
+		int nClientHeight = rcClient.bottom - rcClient.top;
+
+		int dstWidth = (int)(m_ddsd.dwWidth * m_dEnlargeCoeff);
+		int dstHeight = (int)(m_ddsd.dwHeight * m_dEnlargeCoeff);
+		if (m_dEnlargeCoeff == 1.0)		//Solve the 4K video display bug
 		{
-			int nClientWidth = rcClient.right - rcClient.left;
-			int nClientHeight = rcClient.bottom - rcClient.top;
-
-			//int dstWidth = (int)(m_ddsd.dwWidth * m_fViewRatio);
-			//int dstHeight = (int)(m_ddsd.dwHeight * m_fViewRatio);
-
-			m_ptOrigin.x = (nClientWidth - m_ddsd.dwWidth) / 2;
-			m_ptOrigin.y = (nClientHeight - m_ddsd.dwHeight) / 2;
+			if (dstWidth > nClientWidth) dstWidth = nClientWidth;
+			if (dstHeight > nClientHeight) dstHeight = nClientHeight;
 		}
+
+		ptOrigin.x = (nClientWidth - dstWidth) / 2;
+		ptOrigin.y = (nClientHeight - dstHeight) / 2;
 
 		POINT ptScreen;
 		RECT  rectSrc, rectDst;
 
-		if (m_bFullScreen == false)
-		{
-			ptScreen = m_ptOrigin;
+		//if (m_bFullScreen == false)
+		//{
+			ptScreen = ptOrigin;
 			::ClientToScreen(m_hVidWnd, &ptScreen);
 
 			rectDst.left = ptScreen.x;
 			rectDst.top = ptScreen.y;
-			rectDst.right = rectDst.left + m_ddsd.dwWidth;
-			rectDst.bottom = rectDst.top + m_ddsd.dwHeight;
-		}
-		else
-		{
-			ptScreen.x = 0;
-			ptScreen.y = 0;
-			::ClientToScreen(m_hVidWnd, &ptScreen);
+			rectDst.right = rectDst.left + dstWidth;
+			rectDst.bottom = rectDst.top + dstHeight;
+		//}
+		//else
+		//{
+		//	ptScreen.x = 0;
+		//	ptScreen.y = 0;
+		//	::ClientToScreen(m_hVidWnd, &ptScreen);
 
-			rectDst.left = ptScreen.x;
-			rectDst.top = ptScreen.y;
-			rectDst.right = rectDst.left + (rcClient.right - rcClient.left);
-			rectDst.bottom = rectDst.top + (rcClient.bottom - rcClient.top);
-		}
+		//	rectDst.left = ptScreen.x;
+		//	rectDst.top = ptScreen.y;
+		//	rectDst.right = rectDst.left + (rcClient.right - rcClient.left);
+		//	rectDst.bottom = rectDst.top + (rcClient.bottom - rcClient.top);
+		//}
 
 		rectSrc.left = 0;
 		rectSrc.top = 0;
@@ -466,7 +496,7 @@ int CTALForDirectDraw::RePaint(void)
 
 		ddRval = m_lpDDSPrimary->Blt(&rectDst, m_lpDDSOverlay, &rectSrc, DDBLT_WAIT, NULL);
 
-		if (m_bFullScreen == false)
+		//if (m_bFullScreen == false)
 		{
 			if (m_nGrid > 0)
 			{
@@ -476,13 +506,15 @@ int CTALForDirectDraw::RePaint(void)
 
 				for (DWORD row = m_nGrid; row < m_ddsd.dwHeight; row += m_nGrid)
 				{
-					::MoveToEx(hDC, m_ptOrigin.x, m_ptOrigin.y + row, NULL);
-					::LineTo(hDC, m_ptOrigin.x + m_ddsd.dwWidth, m_ptOrigin.y + row);
+					int delty = (int)(row * m_dEnlargeCoeff);
+					::MoveToEx(hDC, ptOrigin.x, ptOrigin.y + delty, NULL);
+					::LineTo(hDC, ptOrigin.x + dstWidth, ptOrigin.y + delty);
 				}
 				for (DWORD col = m_nGrid; col < m_ddsd.dwWidth; col += m_nGrid)
 				{
-					::MoveToEx(hDC, m_ptOrigin.x + col, m_ptOrigin.y, NULL);
-					::LineTo(hDC, m_ptOrigin.x + col, m_ptOrigin.y + m_ddsd.dwHeight);
+					int deltx = (int)(col * m_dEnlargeCoeff);
+					::MoveToEx(hDC, ptOrigin.x + deltx, ptOrigin.y, NULL);
+					::LineTo(hDC, ptOrigin.x + deltx, ptOrigin.y + dstHeight);
 				}
 
 				::ReleaseDC(m_hVidWnd, hDC);

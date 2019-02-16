@@ -37,12 +37,7 @@ CDlg_VideoShowScreen::CDlg_VideoShowScreen(CWnd* pParent /*=NULL*/)
 {
 	//{{AFX_DATA_INIT(CDlg_ShowVideo)
 	//}}AFX_DATA_INIT
-	//m_nVidStreamType = STREAM_UNKNOWN;
 	m_nAudStreamType = STREAM_UNKNOWN;
-	//m_nGraphWidth = 0;
-	//m_nGraphHeight = 0;
-	//m_nMbWidth = 16;
-	//m_nMbHeight = 16;
 
 	m_bPlaying = 0;
 	m_bIsAudio = 0;
@@ -51,10 +46,6 @@ CDlg_VideoShowScreen::CDlg_VideoShowScreen(CWnd* pParent /*=NULL*/)
 
 	m_pVidDecoder = NULL;
 	m_pAudDecoder = NULL;
-
-	//m_fViewRatio = 1.0f;
-	
-	//strcpy_s(m_pszFourCC, sizeof(m_pszFourCC), "");
 
 	m_bFullScreen = false;
 	m_pPanelPlayController = NULL;
@@ -89,6 +80,7 @@ BEGIN_MESSAGE_MAP(CDlg_VideoShowScreen, CDialog)
 	ON_MESSAGE(WM_REPORT_VIDEO_DECODE_FPS, OnReportVideoDecodeFPS)
 	ON_MESSAGE(WM_PLAY_THREAD_EXIT, OnPlayThreadExit)
 	ON_WM_CREATE()
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -97,6 +89,10 @@ END_MESSAGE_MAP()
 //void CDlg_VideoShowScreen::OnClose()
 //{
 //	// TODO: Add your message handler code here and/or call default
+
+	//::SendMessage(m_hParentWnd, WM_PLAY_THREAD_EXIT, 0, NULL);
+
+
 ////	m_ToolTip.Close();
 //
 //	if (m_bPlaying)
@@ -241,16 +237,16 @@ void CDlg_VideoShowScreen::OnShowWindow(BOOL bShow, UINT nStatus)
 
 		if (m_pPanelLumaStats != NULL)
 		{
-			m_pPanelLumaStats->ShowWindow(SW_SHOW);
+			m_pPanelLumaStats->ShowWindow(SW_HIDE);
 		}
 
 		if (m_pPanelChromaStats != NULL)
 		{
-			m_pPanelChromaStats->ShowWindow(SW_SHOW);
+			m_pPanelChromaStats->ShowWindow(SW_HIDE);
 		}
 
 		m_bForcingShowController = true;
-		m_bForcingShowStats = true;
+		m_bForcingShowStats = false;
 
 		m_dwTimerID = 0xff56f344;
 		SetTimer(m_dwTimerID, 2000, NULL);
@@ -269,11 +265,10 @@ void CDlg_VideoShowScreen::OnShowWindow(BOOL bShow, UINT nStatus)
 		{
 			m_pPanelChromaStats->ShowWindow(SW_HIDE);
 		}
+		m_bForcingShowStats = false;
 
 		m_bFullScreen = false;
 	}
-
-	//UpdateData(FALSE);
 }
 
 void CDlg_VideoShowScreen::OnPaint() 
@@ -371,9 +366,11 @@ BOOL CDlg_VideoShowScreen::OnInitDialog()
 
 	m_pPanelLumaStats = new CDlg_VideoPanelLumaStats;
 	m_pPanelLumaStats->Create(IDD_SHOW_VIDEO_LUMINANCE, this);
+	m_pPanelLumaStats->ShowWindow(SW_HIDE);
 
 	m_pPanelChromaStats = new CDlg_VideoPanelChromaStats;
 	m_pPanelChromaStats->Create(IDD_SHOW_VIDEO_CHROMA, this);
+	m_pPanelChromaStats->ShowWindow(SW_HIDE);
 
 	m_pPanelPlayController->m_sldFile.SetRange(0, 100);
 	m_pPanelPlayController->m_sldFile.SetPos(0);
@@ -416,6 +413,8 @@ void CDlg_VideoShowScreen::EnlargeVideo(void)
 	if (m_pVidDecoder != NULL)
 	{
 		m_pVidDecoder->EnlargeVideo();
+
+		Invalidate();
 	}
 }
 
@@ -443,26 +442,26 @@ void CDlg_VideoShowScreen::OnMouseMove(UINT nFlags, CPoint point)
 		}
 	}
 
-	if (m_bForcingShowStats == 0)
-	{
-		if (m_rectLumaStats.PtInRect(point))
-		{
-			m_pPanelLumaStats->ShowWindow(SW_SHOW);
-		}
-		else
-		{
-			m_pPanelLumaStats->ShowWindow(SW_HIDE);
-		}
+	//if (m_bForcingShowStats == 0)
+	//{
+	//	if (m_rectLumaStats.PtInRect(point))
+	//	{
+	//		m_pPanelLumaStats->ShowWindow(SW_SHOW);
+	//	}
+	//	else
+	//	{
+	//		m_pPanelLumaStats->ShowWindow(SW_HIDE);
+	//	}
 
-		if (m_rectChromaStats.PtInRect(point))
-		{
-			m_pPanelChromaStats->ShowWindow(SW_SHOW);
-		}
-		else
-		{
-			m_pPanelChromaStats->ShowWindow(SW_HIDE);
-		}
-	}
+	//	if (m_rectChromaStats.PtInRect(point))
+	//	{
+	//		m_pPanelChromaStats->ShowWindow(SW_SHOW);
+	//	}
+	//	else
+	//	{
+	//		m_pPanelChromaStats->ShowWindow(SW_HIDE);
+	//	}
+	//}
 /*
 	int		 mb_row;
 	int		 mb_col;
@@ -1017,7 +1016,7 @@ void CDlg_VideoShowScreen::EnlargeClientAreaToFullScreen(void)
 			struWndpl.rcNormalPosition = rectLumaStats;
 			m_pPanelLumaStats->SetWindowPlacement(&struWndpl);
 
-			m_pPanelLumaStats->ShowWindow(SW_SHOW);
+			m_pPanelLumaStats->ShowWindow(SW_HIDE);
 		}
 
 		if (m_pPanelChromaStats != NULL)
@@ -1038,7 +1037,7 @@ void CDlg_VideoShowScreen::EnlargeClientAreaToFullScreen(void)
 			struWndpl.rcNormalPosition = rectChromaStats;
 			m_pPanelChromaStats->SetWindowPlacement(&struWndpl);
 
-			m_pPanelChromaStats->ShowWindow(SW_SHOW);
+			m_pPanelChromaStats->ShowWindow(SW_HIDE);
 		}
 
 		m_bFullScreen = true;
@@ -1097,7 +1096,7 @@ void CDlg_VideoShowScreen::RestoreClientAreaToInitial(void)
 			struWndpl.rcNormalPosition = rectLumaStats;
 			m_pPanelLumaStats->SetWindowPlacement(&struWndpl);
 
-			m_pPanelLumaStats->ShowWindow(SW_SHOW);
+			m_pPanelLumaStats->ShowWindow(SW_HIDE);
 		}
 
 		if (m_pPanelChromaStats != NULL)
@@ -1118,7 +1117,7 @@ void CDlg_VideoShowScreen::RestoreClientAreaToInitial(void)
 			struWndpl.rcNormalPosition = rectChromaStats;
 			m_pPanelChromaStats->SetWindowPlacement(&struWndpl);
 
-			m_pPanelChromaStats->ShowWindow(SW_SHOW);
+			m_pPanelChromaStats->ShowWindow(SW_HIDE);
 		}
 
 		m_bFullScreen = false;
@@ -1160,11 +1159,11 @@ void CDlg_VideoShowScreen::OnTimer(UINT_PTR nIDEvent)
 	KillTimer(m_dwTimerID);
 
 	m_pPanelPlayController->ShowWindow(SW_HIDE);
-	m_pPanelChromaStats->ShowWindow(SW_HIDE);
-	m_pPanelLumaStats->ShowWindow(SW_HIDE);
+	//m_pPanelChromaStats->ShowWindow(SW_HIDE);
+	//m_pPanelLumaStats->ShowWindow(SW_HIDE);
 
 	m_bForcingShowController = false;
-	m_bForcingShowStats = false;
+	//m_bForcingShowStats = false;
 
 	CDialog::OnTimer(nIDEvent);
 }
@@ -1179,4 +1178,13 @@ int CDlg_VideoShowScreen::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_hParentWnd = lpCreateStruct->hwndParent;
 
 	return 0;
+}
+
+
+void CDlg_VideoShowScreen::OnClose()
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	::SendMessage(m_hParentWnd, WM_PLAY_THREAD_EXIT, 0, NULL);
+
+	CDialog::OnClose();
 }

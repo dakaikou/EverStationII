@@ -41,11 +41,12 @@ public:
 protected:
 	HWND		m_hVidWnd;
 	int			m_nGrid;
-	bool		m_bFullScreen;
+	double		m_dEnlargeCoeff;
+	//double		m_dMaxEnlargeCoeff;
 	int			m_nDebugFrameCount;
 	uint32_t	m_dwDebugTimeTick;
 
-	POINT		m_ptOrigin;
+	//POINT		m_ptOrigin;
 
 public:
 	virtual int OpenVideo(HWND hWnd, int canvas_width, int canvas_height, unsigned int dwFourCC);
