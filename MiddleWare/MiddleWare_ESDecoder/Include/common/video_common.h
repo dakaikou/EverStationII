@@ -11,10 +11,11 @@ typedef enum
 
 typedef struct
 {
-	int			luma_width;
-	int			luma_height;
-	char		pszFourCC[5];
-	double		framerate;
+	int			 luma_width;
+	int			 luma_height;
+	//char		pszFourCC[5];
+	unsigned int dwFourCC;
+	double		 framerate;
 
 	int			quantizationBits;
 

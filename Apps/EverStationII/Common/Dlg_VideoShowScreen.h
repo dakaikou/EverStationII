@@ -32,17 +32,9 @@ public:
 	CDlg_VideoShowScreen(CWnd* pParent = NULL);   // standard constructor
 
 public:
-
-	//int				m_nVidStreamType;	
 	int				m_nAudStreamType;
 	CVESDecoder*	m_pVidDecoder;
 	PVOID			m_pAudDecoder;
-
-	//int				m_nGraphWidth;
-	//int				m_nGraphHeight;
-	//int				m_nMbWidth;
-	//int				m_nMbHeight;
-	//char			m_pszFourCC[5];
 
 public:
 
@@ -53,17 +45,10 @@ public:
 	BOOL			m_bForcingShowStats;
 	BOOL			m_bForcingShowController;
 	DWORD			m_dwTimerID;
-	//HANDLE			m_hThread;
-	//DWORD			m_dwID;
-	//float			m_fViewRatio;
-	//int				m_nX;
-	//int				m_nY;
-	//RECT			m_rectDst;
-	//RECT			m_rectSrc;
 
 	CDlg_VideoPanelPlayController*	m_pPanelPlayController;
 	CDlg_VideoPanelLumaStats*		m_pPanelLumaStats;
-	CDlg_VideoPanelChromaStats*    m_pPanelChromaStats;
+	CDlg_VideoPanelChromaStats*     m_pPanelChromaStats;
 
 	void			AttachVideoDecoder(PVOID pDecoder);
 	void			DetachVideoDecoder(PVOID pDecoder);
@@ -71,7 +56,6 @@ public:
 	// Dialog Data
 	//{{AFX_DATA(CDlg_ShowVideo)
 	enum { IDD = IDD_SHOW_VIDEO_SCREEN };
-	//CSliderCtrl	m_sldFile;
 	//}}AFX_DATA
 
 

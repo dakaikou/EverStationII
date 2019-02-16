@@ -14,6 +14,7 @@ CTALForDirectDraw::CTALForDirectDraw(void)
 	m_pcClipper = NULL;
 
 	m_nGrid = 0;
+	m_bFullScreen = 0;
 
 	m_ptOrigin.x = -1;
 	m_ptOrigin.y = -1;
@@ -27,7 +28,7 @@ CTALForDirectDraw::~CTALForDirectDraw()
 	assert(m_lpDDSPrimary == NULL);
 }
 
-int CTALForDirectDraw::OpenVideo(HWND hWnd, int canvas_width, int canvas_height, char* pszFourCC)
+int CTALForDirectDraw::OpenVideo(HWND hWnd, int canvas_width, int canvas_height, unsigned int dwFourCC)
 {
 	int rtcode = -1;
 
@@ -61,7 +62,7 @@ int CTALForDirectDraw::OpenVideo(HWND hWnd, int canvas_width, int canvas_height,
 				m_ddsd.ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
 				m_ddsd.ddpfPixelFormat.dwFlags = DDPF_FOURCC | DDPF_YUV;
 
-				DWORD dwFourCC = MAKEFOURCC(pszFourCC[0], pszFourCC[1], pszFourCC[2], pszFourCC[3]);
+				//DWORD dwFourCC = MAKEFOURCC(pszFourCC[0], pszFourCC[1], pszFourCC[2], pszFourCC[3]);
 				m_ddsd.ddpfPixelFormat.dwFourCC = dwFourCC;
 				m_ddsd.ddpfPixelFormat.dwYUVBitCount = 12;			//default value
 
@@ -391,6 +392,21 @@ int CTALForDirectDraw::ToggleGrid(void)
 	return 0;
 }
 
+int CTALForDirectDraw::ToggleScreen(void)
+{
+	if (m_bFullScreen)
+	{
+		m_bFullScreen = false;
+	}
+	else
+	{
+		m_bFullScreen = true;
+	}
+
+	return 0;
+}
+
+
 int CTALForDirectDraw::RePaint(void)
 {
 	HRESULT	ddRval = -1;
@@ -403,11 +419,11 @@ int CTALForDirectDraw::RePaint(void)
 		m_lpDDSPrimary->SetClipper(m_pcClipper);
 
 		//Get the current window client area
-		if (m_ptOrigin.x == -1)
-		{
-			RECT  rcClient;
-			::GetClientRect(m_hVidWnd, &rcClient);
+		RECT  rcClient;
+		::GetClientRect(m_hVidWnd, &rcClient);
 
+		if ((m_ptOrigin.x < 0) || (m_ptOrigin.y < 0))
+		{
 			int nClientWidth = rcClient.right - rcClient.left;
 			int nClientHeight = rcClient.bottom - rcClient.top;
 
@@ -419,15 +435,29 @@ int CTALForDirectDraw::RePaint(void)
 		}
 
 		POINT ptScreen;
-		ptScreen = m_ptOrigin;
-		::ClientToScreen(m_hVidWnd, &ptScreen);
-		
 		RECT  rectSrc, rectDst;
 
-		rectDst.left = ptScreen.x;
-		rectDst.top = ptScreen.y;
-		rectDst.right = rectDst.left + m_ddsd.dwWidth;
-		rectDst.bottom = rectDst.top + m_ddsd.dwHeight;
+		if (m_bFullScreen == false)
+		{
+			ptScreen = m_ptOrigin;
+			::ClientToScreen(m_hVidWnd, &ptScreen);
+
+			rectDst.left = ptScreen.x;
+			rectDst.top = ptScreen.y;
+			rectDst.right = rectDst.left + m_ddsd.dwWidth;
+			rectDst.bottom = rectDst.top + m_ddsd.dwHeight;
+		}
+		else
+		{
+			ptScreen.x = 0;
+			ptScreen.y = 0;
+			::ClientToScreen(m_hVidWnd, &ptScreen);
+
+			rectDst.left = ptScreen.x;
+			rectDst.top = ptScreen.y;
+			rectDst.right = rectDst.left + (rcClient.right - rcClient.left);
+			rectDst.bottom = rectDst.top + (rcClient.bottom - rcClient.top);
+		}
 
 		rectSrc.left = 0;
 		rectSrc.top = 0;
@@ -436,25 +466,28 @@ int CTALForDirectDraw::RePaint(void)
 
 		ddRval = m_lpDDSPrimary->Blt(&rectDst, m_lpDDSOverlay, &rectSrc, DDBLT_WAIT, NULL);
 
-		HDC hDC = ::GetDC(m_hVidWnd);
-		//::TextOutA(hDC, 10, 10, "fuck", 4);
-		//::Rectangle(hDC, ptClient.x, ptClient.y, ptClient.x + dstWidth, ptClient.y + dstHeight);
-
-		if (m_nGrid > 0)
+		if (m_bFullScreen == false)
 		{
-			for (DWORD row = m_nGrid; row < m_ddsd.dwHeight; row += m_nGrid)
+			if (m_nGrid > 0)
 			{
-				::MoveToEx(hDC, m_ptOrigin.x, m_ptOrigin.y + row, NULL);
-				::LineTo(hDC, m_ptOrigin.x + m_ddsd.dwWidth, m_ptOrigin.y + row);
-			}
-			for (DWORD col = m_nGrid; col < m_ddsd.dwWidth; col += m_nGrid)
-			{
-				::MoveToEx(hDC, m_ptOrigin.x + col, m_ptOrigin.y, NULL);
-				::LineTo(hDC, m_ptOrigin.x + col, m_ptOrigin.y + m_ddsd.dwHeight);
+				HDC hDC = ::GetDC(m_hVidWnd);
+				//::TextOutA(hDC, 10, 10, "fuck", 4);
+				//::Rectangle(hDC, ptClient.x, ptClient.y, ptClient.x + dstWidth, ptClient.y + dstHeight);
+
+				for (DWORD row = m_nGrid; row < m_ddsd.dwHeight; row += m_nGrid)
+				{
+					::MoveToEx(hDC, m_ptOrigin.x, m_ptOrigin.y + row, NULL);
+					::LineTo(hDC, m_ptOrigin.x + m_ddsd.dwWidth, m_ptOrigin.y + row);
+				}
+				for (DWORD col = m_nGrid; col < m_ddsd.dwWidth; col += m_nGrid)
+				{
+					::MoveToEx(hDC, m_ptOrigin.x + col, m_ptOrigin.y, NULL);
+					::LineTo(hDC, m_ptOrigin.x + col, m_ptOrigin.y + m_ddsd.dwHeight);
+				}
+
+				::ReleaseDC(m_hVidWnd, hDC);
 			}
 		}
-
-		::ReleaseDC(m_hVidWnd, hDC);
 
 		m_lpDDSPrimary->SetClipper(NULL);
 	}

@@ -445,3 +445,8 @@ int CESDecoder::Preview_beEOF(void)
 {
 	return -1;
 }
+
+int	CESDecoder::Preview_CurPicture(void)
+{
+	return -1;
+}

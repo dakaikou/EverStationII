@@ -69,13 +69,8 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 	CDialog::OnInitDialog();
 	
 	// TODO: Add extra initialization here
-	int			i;
-	int			nSel;
-	char		pszItem[128];
-	char		pszFourCC[5];
 	CComboBox*  pCmbBox;
 	CWnd*	    pWnd;
-	CRect		rect(0, 0, 720, 576);
 
 	m_dlgVideo.Create(IDD_SHOW_VIDEO_SCREEN, this);
 	m_dlgVideo.ShowWindow(SW_HIDE);
@@ -83,41 +78,88 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 	pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_WH);
 	pCmbBox->ResetContent();
 	
-	for (i = 0; i < VIDEO_FORMAT_MAX; i++)
-	{
-		VIDEO_get_width_and_height_info(i, NULL, pszItem, sizeof(pszItem));
-		pCmbBox->AddString(pszItem);
-	}
-	pCmbBox->SetCurSel(VIDEO_4CIF);
+	//setup the candidate width and height
+	int nIndex = pCmbBox->AddString("176x144 [QCIF]");
+	pCmbBox->SetItemData(nIndex, (176 << 16) | 144);
 
+	nIndex = pCmbBox->AddString("352x288 [CIF]");
+	pCmbBox->SetItemData(nIndex, (352 << 16) | 288);
+
+	nIndex = pCmbBox->AddString("704x576 [4CIF]");
+	pCmbBox->SetItemData(nIndex, (704 << 16) | 576);
+
+	nIndex = pCmbBox->AddString("1408x1152 [16CIF]");
+	pCmbBox->SetItemData(nIndex, (1408 << 16) | 1152);
+
+	nIndex = pCmbBox->AddString("352x240 [SIF@NTSC]");
+	pCmbBox->SetItemData(nIndex, (352 << 16) | 240);
+
+	nIndex = pCmbBox->AddString("352x288 [SIF@PAL/SECAM]");
+	pCmbBox->SetItemData(nIndex, (352 << 16) | 288);
+
+	nIndex = pCmbBox->AddString("704x480 [4SIF@NTSC]");
+	pCmbBox->SetItemData(nIndex, (704 << 16) | 480);
+
+	nIndex = pCmbBox->AddString("704x576 [4SIF@PAL/SECAM]");
+	pCmbBox->SetItemData(nIndex, (704 << 16) | 576);
+
+	nIndex = pCmbBox->AddString("720x486 [D1@NTSC]");
+	pCmbBox->SetItemData(nIndex, (720 << 16) | 486);
+
+	nIndex = pCmbBox->AddString("720x576 [D1@PAL/SECAM]");
+	pCmbBox->SetItemData(nIndex, (720 << 16) | 576);
+
+	nIndex = pCmbBox->AddString("1920x1080 [HD]");
+	pCmbBox->SetItemData(nIndex, (1920 << 16) | 1080);
+
+	pCmbBox->SetCurSel(2);
+
+	//setup the candidate sample structure
 	pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FOURCC);
 	pCmbBox->ResetContent();
-	pCmbBox->AddString("IYUV");
-	pCmbBox->AddString("I420");
-	//	pCmbBox->AddString("YV16");
-	pCmbBox->AddString("YV12");
-	pCmbBox->AddString("YUY2");
+	nIndex = pCmbBox->AddString("IYUV [4:2:0 Y-U-V]");
+	pCmbBox->SetItemData(nIndex, 0x56555949);
+
+	nIndex = pCmbBox->AddString("I420 [4:2:0 Y-U-V]");
+	pCmbBox->SetItemData(nIndex, 0x30323449);
+
+	nIndex = pCmbBox->AddString("YV12 [4:2:0 Y-V-U]");
+	pCmbBox->SetItemData(nIndex, 0x32315659);
+
+	//nIndex = pCmbBox->AddString("YUY2");
+	//pCmbBox->SetItemData(nIndex, 0x56555949);
+
 	pCmbBox->SetCurSel(0);
-	nSel = pCmbBox->GetCurSel();
-	if (nSel != CB_ERR)
-	{
-		pCmbBox->GetLBText(nSel, pszFourCC);
-		DecodeFourCC2Text(pszFourCC, pszItem, sizeof(pszItem));
-	}
 
 	//设置播放帧率
 	pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FRAMERATE);
 	pCmbBox->ResetContent();
 
-	pCmbBox->AddString("7.5P");
-	pCmbBox->AddString("15P");
-	pCmbBox->AddString("25P");
-	pCmbBox->AddString("30P");
-	pCmbBox->AddString("60P");
-	pCmbBox->SetCurSel(3);
+	nIndex = pCmbBox->AddString("7.5P");
+	pCmbBox->SetItemData(nIndex, 7500);
 
-	pWnd = GetDlgItem(IDC_STATIC_FORMAT);
-	pWnd->SetWindowText(pszItem);
+	nIndex = pCmbBox->AddString("15P");
+	pCmbBox->SetItemData(nIndex, 15000);
+
+	nIndex = pCmbBox->AddString("24P");
+	pCmbBox->SetItemData(nIndex, 24000);
+
+	nIndex = pCmbBox->AddString("25P");
+	pCmbBox->SetItemData(nIndex, 25000);
+
+	nIndex = pCmbBox->AddString("29.97P");
+	pCmbBox->SetItemData(nIndex, 29970);
+
+	nIndex = pCmbBox->AddString("30P");
+	pCmbBox->SetItemData(nIndex, 30000);
+
+	nIndex = pCmbBox->AddString("60P");
+	pCmbBox->SetItemData(nIndex, 60000);
+
+	pCmbBox->SetCurSel(5);
+
+	//pWnd = GetDlgItem(IDC_STATIC_FORMAT);
+	//pWnd->SetWindowText(pszItem);
 
 	//m_dlgProgress.Create(IDD_ANALYSE_PROGRESS, this);
 	//m_dlgProgress.ShowWindow(SW_HIDE);
@@ -164,8 +206,10 @@ void CDlg_YUVPreview::OnBtnOpenOrClose()
 			CString		strBtn;
 			CWnd*		pWnd = NULL;
 
-			WIDTH_HEIGHT_t			wh;
 			YUV_SOURCE_PARAM_t		stYUVParams;
+			//获得参数
+			memset(&stYUVParams, 0x00, sizeof(YUV_SOURCE_PARAM_t));
+
 			CComboBox*				pCmbBox = NULL;
 
 			CString strPath = dlg.GetPathName();
@@ -183,64 +227,41 @@ void CDlg_YUVPreview::OnBtnOpenOrClose()
 			nSel = pCmbBox->GetCurSel();
 			if (nSel != CB_ERR)
 			{
-				VIDEO_get_width_and_height_info(nSel, &wh, NULL, 0);
+				DWORD dwItemData = pCmbBox->GetItemData(nSel);
+				stYUVParams.luma_width = ((dwItemData & 0xffff0000) >> 16);
+				stYUVParams.luma_height = (dwItemData & 0x0000ffff);
 			}
 			else
 			{
-				wh.width = 352;
-				wh.height = 288;
+				stYUVParams.luma_width = 352;
+				stYUVParams.luma_height = 288;
 			}
-
-			//获得参数
-			memset(&stYUVParams, 0x00, sizeof(YUV_SOURCE_PARAM_t));
 
 			pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FOURCC);
 			nSel = pCmbBox->GetCurSel();
 			if (nSel != CB_ERR)
 			{
-				pCmbBox->GetLBText(nSel, stYUVParams.pszFourCC);
+				stYUVParams.dwFourCC = pCmbBox->GetItemData(nSel);
 			}
 			else
 			{
-				strcpy_s(stYUVParams.pszFourCC, sizeof(stYUVParams.pszFourCC), "YV12");
+				stYUVParams.dwFourCC = 0x30323449;			//I420
 			}
 
-			char strFrameRate[16];
+			//char strFrameRate[16];
 			pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FRAMERATE);
 			nSel = pCmbBox->GetCurSel();
 			if (nSel != CB_ERR)
 			{
-				pCmbBox->GetLBText(nSel, strFrameRate);
-			}
-
-			stYUVParams.luma_width = wh.width;
-			stYUVParams.luma_height = wh.height;
-			stYUVParams.quantizationBits = 8;			//default value chendelin 2019.2.15
-
-			if (strcmp(strFrameRate, "7.5P") == 0)
-			{
-				stYUVParams.framerate = 7.5;
-			}
-			else if (strcmp(strFrameRate, "15P") == 0)
-			{
-				stYUVParams.framerate = 15.0;
-			}
-			else if (strcmp(strFrameRate, "25P") == 0)
-			{
-				stYUVParams.framerate = 25.0;
-			}
-			else if (strcmp(strFrameRate, "30P") == 0)
-			{
-				stYUVParams.framerate = 30.0;
-			}
-			else if (strcmp(strFrameRate, "60P") == 0)
-			{
-				stYUVParams.framerate = 60.0;
+				int frame_rate_x_1000 = pCmbBox->GetItemData(nSel);
+				stYUVParams.framerate = frame_rate_x_1000 / 1000.0;
 			}
 			else
 			{
-				stYUVParams.framerate = 60.0;
+				stYUVParams.framerate = 50;
 			}
+
+			stYUVParams.quantizationBits = 8;			//default value chendelin 2019.2.15
 
 			m_YUVDecoder.Open((STREAM_FILE | YUV_FILE_YUV), strPath.GetBuffer(128), &stYUVParams);
 
@@ -281,22 +302,22 @@ void CDlg_YUVPreview::OnBtnOpenOrClose()
 void CDlg_YUVPreview::OnSelchangeCmbFourcc() 
 {
 	// TODO: Add your control notification handler code here
-	int			nSel;
-	CComboBox*	pCmbBox;
-	CWnd*		pWnd;
-	char		pszFourCC[5];
-	char		pszItem[128];
+	//int			nSel;
+	//CComboBox*	pCmbBox;
+	//CWnd*		pWnd;
+	//char		pszFourCC[5];
+	//char		pszItem[128];
 
-	pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FOURCC);
-	nSel = pCmbBox->GetCurSel();
-	if (nSel != CB_ERR)
-	{
-		pCmbBox->GetLBText(nSel, pszFourCC);
-		DecodeFourCC2Text(pszFourCC, pszItem, sizeof(pszItem));
-	}
+	//pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FOURCC);
+	//nSel = pCmbBox->GetCurSel();
+	//if (nSel != CB_ERR)
+	//{
+	//	pCmbBox->GetLBText(nSel, pszFourCC);
+	//	//DecodeFourCC2Text(pszFourCC, pszItem, sizeof(pszItem));
+	//}
 
-	pWnd = GetDlgItem(IDC_STATIC_FORMAT);
-	pWnd->SetWindowText(pszItem);
+	//pWnd = GetDlgItem(IDC_STATIC_FORMAT);
+	//pWnd->SetWindowText(pszItem);
 	
 }
 

@@ -41,17 +41,19 @@ public:
 protected:
 	HWND		m_hVidWnd;
 	int			m_nGrid;
+	bool		m_bFullScreen;
 	int			m_nDebugFrameCount;
 	uint32_t	m_dwDebugTimeTick;
 
 	POINT		m_ptOrigin;
 
 public:
-	virtual int OpenVideo(HWND hWnd, int canvas_width, int canvas_height, char* pszFourCC);
+	virtual int OpenVideo(HWND hWnd, int canvas_width, int canvas_height, unsigned int dwFourCC);
 	virtual int CloseVideo(void);
 	virtual int RenderYUV(const LPBYTE lpFrameBuf, int frameSize, const FRAME_PARAMS_t* pstFrameParams);
 	virtual int RePaint(void);
 	virtual int ToggleGrid(void);
+	virtual int ToggleScreen(void);
 
 private:		//direct audio output
 

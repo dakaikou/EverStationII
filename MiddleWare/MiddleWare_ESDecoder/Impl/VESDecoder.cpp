@@ -51,50 +51,72 @@ int CVESDecoder::Open(uint32_t dwStreamType, const char* pszFileName, const YUV_
 		m_VidDecodeInfo.display_width = psourceInfo->luma_width;
 		m_VidDecodeInfo.display_height = psourceInfo->luma_height;
 
-		strcpy_s(m_VidDecodeInfo.source_pszFourCC, sizeof(m_VidDecodeInfo.source_pszFourCC), psourceInfo->pszFourCC);
+		m_VidDecodeInfo.source_FourCC = psourceInfo->dwFourCC;
+
+		//strcpy_s(m_VidDecodeInfo.source_pszFourCC, sizeof(m_VidDecodeInfo.source_pszFourCC), psourceInfo->pszFourCC);
 
 		m_VidDecodeInfo.source_luma_width = psourceInfo->luma_width;
 		m_VidDecodeInfo.source_luma_height = psourceInfo->luma_height;
 
-		m_VidDecodeInfo.source_quantization_bits = psourceInfo->quantizationBits;
+		m_VidDecodeInfo.source_bpp = psourceInfo->quantizationBits;
 
 		//calculation
 		m_VidDecodeInfo.luma_pix_count = m_VidDecodeInfo.source_luma_width * m_VidDecodeInfo.source_luma_height;
-		m_VidDecodeInfo.luma_buf_size = m_VidDecodeInfo.luma_pix_count * (m_VidDecodeInfo.source_quantization_bits / 8);
+		m_VidDecodeInfo.luma_buf_size = m_VidDecodeInfo.luma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
 
-//		if (strcmp(decode_info.pszFourCC, "IYUV") == 0)
-//		{
-//			decode_info.chroma_width = (wh.width >> 1);
-//			decode_info.chroma_height = (wh.height >> 1);
-//			decode_info.chroma_pix_count = decode_info.chroma_width * decode_info.chroma_height;
-//			decode_info.chroma_buf_size = decode_info.chroma_pix_count;
-//			decode_info.chroma_format = CHROMA_FORMAT_4_2_0;
-//		}
-//		else if (strcmp(decode_info.pszFourCC, "YV16") == 0)
-//		{
-//			decode_info.chroma_width = (wh.width >> 1);
-//			decode_info.chroma_height = wh.height;
-//			decode_info.chroma_pix_count = decode_info.chroma_width * decode_info.chroma_height;
-//			decode_info.chroma_buf_size = decode_info.chroma_pix_count;
-//			decode_info.chroma_format = CHROMA_FORMAT_4_2_2;
-//		}
-
-		if (strcmp(m_VidDecodeInfo.source_pszFourCC, "YUY2") == 0)
+		switch (m_VidDecodeInfo.source_FourCC)
 		{
-			m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_2;
-			m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-			m_VidDecodeInfo.source_chroma_height = m_VidDecodeInfo.source_luma_height;
-			m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-			m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_quantization_bits / 8);
-		}
-		else
-		{
+		case 0x56555949:		//IYUV
 			m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_0;
 			m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
 			m_VidDecodeInfo.source_chroma_height = (m_VidDecodeInfo.source_luma_height >> 1);
 			m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-			m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_quantization_bits / 8);
+			m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
+
+			break;
+
+		case 0x30323449:		//I420
+			m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_0;
+			m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
+			m_VidDecodeInfo.source_chroma_height = (m_VidDecodeInfo.source_luma_height >> 1);
+			m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
+			m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
+
+			break;
+
+		case 0x32315659:		//YV12
+			m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_2;
+			m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
+			m_VidDecodeInfo.source_chroma_height = m_VidDecodeInfo.source_luma_height;
+			m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
+			m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
+
+			break;
+
+		default:
+			m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_0;
+			m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
+			m_VidDecodeInfo.source_chroma_height = (m_VidDecodeInfo.source_luma_height >> 1);
+			m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
+			m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
+			break;
 		}
+		//else if (strcmp(m_VidDecodeInfo.source_pszFourCC, "YUY2") == 0)
+		//{
+		//	m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_2;
+		//	m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
+		//	m_VidDecodeInfo.source_chroma_height = m_VidDecodeInfo.source_luma_height;
+		//	m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
+		//	m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
+		//}
+		//else
+		//{
+		//	m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_0;
+		//	m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
+		//	m_VidDecodeInfo.source_chroma_height = (m_VidDecodeInfo.source_luma_height >> 1);
+		//	m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
+		//	m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
+		//}
 
 		m_VidDecodeInfo.frame_buf_size = m_VidDecodeInfo.luma_buf_size + m_VidDecodeInfo.chroma_buf_size + m_VidDecodeInfo.chroma_buf_size;
 
@@ -134,7 +156,7 @@ int CVESDecoder::AttachWnd(HWND hWnd)
 
 	assert(m_pDirectDraw == NULL);
 	m_pDirectDraw = new CTALForDirectDraw;
-	ddRval = m_pDirectDraw->OpenVideo(hWnd, m_VidDecodeInfo.display_width, m_VidDecodeInfo.display_height, m_VidDecodeInfo.source_pszFourCC);
+	ddRval = m_pDirectDraw->OpenVideo(hWnd, m_VidDecodeInfo.display_width, m_VidDecodeInfo.display_height, m_VidDecodeInfo.source_FourCC);
 
 	return ddRval;
 }
@@ -209,4 +231,8 @@ void CVESDecoder::SaveSnapshot(const char* dstfilename)
 
 void CVESDecoder::EnlargeVideo(void)
 {
+	assert(m_pDirectDraw != NULL);
+
+	m_pDirectDraw->ToggleScreen();
+	HRESULT	ddRval = m_pDirectDraw->RePaint();
 }

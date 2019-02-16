@@ -177,6 +177,15 @@ void CDlg_VideoShowScreen::AttachVideoDecoder(PVOID pDecoder)
 	if (pDecoder != NULL)
 	{
 		m_pVidDecoder = (CVESDecoder*)pDecoder;
+
+		char pszTitle[256];
+		if (m_pVidDecoder->GetTitle(pszTitle, sizeof(pszTitle)) == ESDECODER_NO_ERROR)
+		{
+			SetWindowText(pszTitle);
+		}
+
+		HWND hWnd = this->GetSafeHwnd();
+		m_pVidDecoder->AttachWnd(hWnd);
 	}
 }
 
@@ -185,6 +194,19 @@ void CDlg_VideoShowScreen::DetachVideoDecoder(PVOID pDecoder)
 	if (pDecoder != NULL)
 	{
 		assert(m_pVidDecoder == pDecoder);
+
+		if (m_pVidDecoder != NULL)
+		{
+			if (m_bPlaying == 1) m_bPlaying = 0;
+
+			HWND hWnd = this->GetSafeHwnd();
+			m_pVidDecoder->DetachWnd(hWnd);
+
+			if (m_pPanelPlayController != NULL)
+			{
+				m_pPanelPlayController->InformStopped();
+			}
+		}
 
 		//inform the playing thread to exit
 		m_pVidDecoder = NULL;
@@ -196,73 +218,62 @@ void CDlg_VideoShowScreen::OnShowWindow(BOOL bShow, UINT nStatus)
 	CDialog::OnShowWindow(bShow, nStatus);
 	
 	// TODO: Add your message handler code here
-	int			nPercent = 0;
 
 	if (bShow)
 	{
 		if (m_pVidDecoder != NULL)
 		{
-			char pszTitle[256];
-			if (m_pVidDecoder->GetTitle(pszTitle, sizeof(pszTitle)) == ESDECODER_NO_ERROR)
+			if (m_bPlaying == 0)
 			{
-				SetWindowText(pszTitle);
+				int nPercent = m_pVidDecoder->Preview_CurPicture();
+
+				if (m_pPanelPlayController != NULL)
+				{
+					m_pPanelPlayController->m_sldFile.SetPos(nPercent);
+				}
 			}
-
-			HWND hWnd = this->GetSafeHwnd();
-			m_pVidDecoder->AttachWnd(hWnd);
-
-			nPercent = m_pVidDecoder->Preview_FirstPicture();
-
-			if (m_pPanelPlayController != NULL)
-			{
-				m_pPanelPlayController->m_sldFile.SetPos(nPercent);
-				m_pPanelPlayController->ShowWindow(SW_SHOW);
-			}
-
-			if (m_pPanelLumaStats != NULL)
-			{
-				m_pPanelLumaStats->ShowWindow(SW_SHOW);
-			}
-
-			if (m_pPanelChromaStats != NULL)
-			{
-				m_pPanelChromaStats->ShowWindow(SW_SHOW);
-			}
-
-			m_bForcingShowController = true;
-			m_bForcingShowStats = true;
-
-			m_dwTimerID = 0xff56f344;
-			SetTimer(m_dwTimerID, 2000, NULL);
 		}
+
+		if (m_pPanelPlayController != NULL)
+		{
+			m_pPanelPlayController->ShowWindow(SW_SHOW);
+		}
+
+		if (m_pPanelLumaStats != NULL)
+		{
+			m_pPanelLumaStats->ShowWindow(SW_SHOW);
+		}
+
+		if (m_pPanelChromaStats != NULL)
+		{
+			m_pPanelChromaStats->ShowWindow(SW_SHOW);
+		}
+
+		m_bForcingShowController = true;
+		m_bForcingShowStats = true;
+
+		m_dwTimerID = 0xff56f344;
+		SetTimer(m_dwTimerID, 2000, NULL);
 	}
 	else
 	{
-		if (m_pVidDecoder != NULL)
+		if (m_pPanelPlayController != NULL)
 		{
-			if (m_bPlaying == 1) m_bPlaying = 0;
+			m_pPanelPlayController->ShowWindow(SW_HIDE);
+		}
+		if (m_pPanelLumaStats != NULL)
+		{
+			m_pPanelLumaStats->ShowWindow(SW_HIDE);
+		}
+		if (m_pPanelChromaStats != NULL)
+		{
+			m_pPanelChromaStats->ShowWindow(SW_HIDE);
+		}
 
-			HWND hWnd = this->GetSafeHwnd();
-			m_pVidDecoder->DetachWnd(hWnd);
-
-			if (m_pPanelPlayController != NULL)
-			{
-				m_pPanelPlayController->ShowWindow(SW_HIDE);
-			}
-			if (m_pPanelLumaStats != NULL)
-			{
-				m_pPanelLumaStats->ShowWindow(SW_HIDE);
-			}
-			if (m_pPanelChromaStats != NULL)
-			{
-				m_pPanelChromaStats->ShowWindow(SW_HIDE);
-			}
-
-			m_bFullScreen = false;
- 		}
+		m_bFullScreen = false;
 	}
 
-	UpdateData(FALSE);
+	//UpdateData(FALSE);
 }
 
 void CDlg_VideoShowScreen::OnPaint() 
@@ -770,7 +781,7 @@ uint32_t VideoPlay_Thread(PVOID pVoid)
 	int				frameCount = 0;
 
 	//Video_decode_info_t  video_decode_info;
-	float frame_rate = pdlg->m_pVidDecoder->GetDisplayFrameRate();
+	double frame_rate = pdlg->m_pVidDecoder->GetDisplayFrameRate();
 
 	double frame_interval = 1000.0 / frame_rate;
 

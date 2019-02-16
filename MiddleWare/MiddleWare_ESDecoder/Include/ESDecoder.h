@@ -98,6 +98,7 @@ public:
 	virtual int	Preview_ForwardNPicture(int n);
 	virtual int	Preview_BackwardNPicture(int n);
 
+	virtual int	Preview_CurPicture(void);
 	virtual int	Preview_SeekAtPercent(int nPercent);
 	virtual int	Preview_beEOF(void);
 

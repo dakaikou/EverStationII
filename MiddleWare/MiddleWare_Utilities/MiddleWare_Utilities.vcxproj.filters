@@ -24,18 +24,12 @@
     <ClInclude Include="Include\MiddleWare_Utilities_MediaFile.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MiddleWare_Utilities_Video.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Impl\MiddleWare_Utilities_MediaFile.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\MiddleWare_Utilities_Video.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

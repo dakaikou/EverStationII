@@ -43,12 +43,13 @@ typedef struct
 	double		display_framerate;
 
 	int			source_chroma_format;		//CHROMA_FORMAT_MONO¡¢CHROMA_FORMAT_4_2_0¡¢CHROMA_FORMAT_4_2_2¡¢CHROMA_FORMAT_4_4_4
-	char		source_pszFourCC[5];
+	//char		source_pszFourCC[5];
+	unsigned int source_FourCC;
 
 	int			source_luma_width;
 	int			source_luma_height;
 
-	int			source_quantization_bits;
+	int			source_bpp;
 
 	int			source_chroma_width;
 	int			source_chroma_height;
@@ -103,7 +104,6 @@ public:
 	
 	int FeedToDirectDraw(void);
 	int DirectDraw_Paint(void);
-	//void GetDecodeInfo(Video_decode_info_t* pparam);
 	double GetDisplayFrameRate(void);
 
 	virtual void ToggleGrid(void);

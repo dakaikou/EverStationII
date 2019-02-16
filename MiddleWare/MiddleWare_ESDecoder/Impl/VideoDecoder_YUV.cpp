@@ -147,32 +147,51 @@ int CYUV_VideoDecoder::Preview_SeekAtPercent(int nPercent)
 	return Preview_Forward1Picture();
 }
 
-void DecodeFourCC2Text(char* pszFourCC, char* pszText, int size)
+int	CYUV_VideoDecoder::Preview_CurPicture(void)
 {
-	if ((pszFourCC != NULL) && (pszText != NULL))
+	int64_t filepos = m_nCurReadPos;
+
+	filepos -= m_VidDecodeInfo.frame_buf_size;
+	if (filepos < 0)
 	{
-		if (strcmp(pszFourCC, "IYUV") == 0)
-		{
-			strcpy_s(pszText, size, "YUV4:2:0	Y-U-V");
-		}
-		else if (strcmp(pszFourCC, "YV12") == 0)
-		{
-			strcpy_s(pszText, size, "YUV4:2:0	Y-V-U");
-		}
-		else if (strcmp(pszFourCC, "YUY2") == 0)
-		{
-			strcpy_s(pszText, size, "YUV4:2:2	Y-U-Y-V");
-		}
-		else if (strcmp(pszFourCC, "YV16") == 0)
-		{
-			strcpy_s(pszText, size, "YUV4:2:2	Y-V-U");
-		}
-		else
-		{
-			strcpy_s(pszText, size, "");
-		}
+		_lseeki64(m_hFile, 0, SEEK_SET);
+		m_nCurReadPos = 0;
 	}
+	else
+	{
+		_lseeki64(m_hFile, filepos, SEEK_SET);
+		m_nCurReadPos = filepos;
+	}
+
+	return Preview_Forward1Picture();
 }
+
+//void DecodeFourCC2Text(char* pszFourCC, char* pszText, int size)
+//{
+//	if ((pszFourCC != NULL) && (pszText != NULL))
+//	{
+//		if (strcmp(pszFourCC, "IYUV") == 0)
+//		{
+//			strcpy_s(pszText, size, "YUV4:2:0	Y-U-V");
+//		}
+//		else if (strcmp(pszFourCC, "YV12") == 0)
+//		{
+//			strcpy_s(pszText, size, "YUV4:2:0	Y-V-U");
+//		}
+//		else if (strcmp(pszFourCC, "YUY2") == 0)
+//		{
+//			strcpy_s(pszText, size, "YUV4:2:2	Y-U-Y-V");
+//		}
+//		else if (strcmp(pszFourCC, "YV16") == 0)
+//		{
+//			strcpy_s(pszText, size, "YUV4:2:2	Y-V-U");
+//		}
+//		else
+//		{
+//			strcpy_s(pszText, size, "");
+//		}
+//	}
+//}
 
 
 

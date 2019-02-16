@@ -255,7 +255,7 @@
 #define IDC_BTN_FIRST_FRAME             1106
 #define IDC_BTN_PRE_5FRAME              1107
 #define IDC_BTN_PRE_FRAME               1108
-#define IDC_BTN_PLAY                    1109
+#define IDC_BTN_PLAY_OR_STOP            1109
 #define IDC_BTN_EXIT                    1110
 #define IDC_BTN_ES_WATCH                1111
 #define IDC_BTN_SAVE_BMP2               1111

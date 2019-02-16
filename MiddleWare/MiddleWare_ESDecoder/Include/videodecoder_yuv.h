@@ -40,6 +40,7 @@ public:
 	int		Preview_ForwardNPicture(int n);
 	int		Preview_BackwardNPicture(int n);
 
+	int		Preview_CurPicture(void);
 	int		Preview_SeekAtPercent(int nPercent);
 	int		Preview_beEOF(void);
 
@@ -48,7 +49,7 @@ protected:
 private:
 };
 
-MW_ES_LIB void DecodeFourCC2Text(char* pszFourCC, char* pszText, int strSize);
+//MW_ES_LIB void DecodeFourCC2Text(char* pszFourCC, char* pszText, int strSize);
 
 
 #endif
