@@ -258,8 +258,8 @@
 #define IDC_BTN_PLAY_OR_STOP            1109
 #define IDC_BTN_EXIT                    1110
 #define IDC_BTN_ES_WATCH                1111
-#define IDC_BTN_SAVE_BMP2               1111
-#define IDC_BTN_ENLARGE_SCREEN          1111
+#define IDC_BTN_ENLARGE_CANVAS          1111
+#define IDC_BTN_ENLARGE_VIEW            1112
 #define IDC_BTN_ES_TRIGGER              1112
 #define IDC_EDIT_ES_GOP_TIME            1113
 #define IDC_STATIC_ES_GOP_TIME          1114
@@ -299,6 +299,7 @@
 #define IDC_CMB_FRAMERATE               1153
 #define IDC_CMB_FOURCC                  1154
 #define IDC_CHECK_CYCLE                 1154
+#define IDC_CMB_COLORSPACE              1155
 #define IDC_CMB_DISPLAY                 1157
 #define IDC_CMB_COMPONENT               1158
 #define IDC_BTN_RESET                   1159

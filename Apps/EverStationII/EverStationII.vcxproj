@@ -83,7 +83,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\$(platform)\</OutDir>
-    <TargetName>$(ProjectName)_v4.53D(x64)</TargetName>
+    <TargetName>$(ProjectName)_v4.54D(x64)</TargetName>
     <IntDir>$(Configuration)\$(platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -228,6 +228,7 @@
     <ClInclude Include="Common\GuiApi_MSG.h" />
     <ClInclude Include="Common\HexEditView_ByteBuffer.h" />
     <ClInclude Include="Common\InstrumentPanel_Base.h" />
+    <ClInclude Include="Common\InstrumentPanel_ColorSpaceDiagram.h" />
     <ClInclude Include="Common\InstrumentPanel_Histogram.h" />
     <ClInclude Include="Common\InstrumentPanel_ScatterDiagram.h" />
     <ClInclude Include="Common\InstrumentPanel_Waveform.h" />
@@ -312,6 +313,7 @@
     <ClCompile Include="Common\Dlg_VideoShowScreen.cpp" />
     <ClCompile Include="Common\HexEditView_ByteBuffer.cpp" />
     <ClCompile Include="Common\InstrumentPanel_Base.cpp" />
+    <ClCompile Include="Common\InstrumentPanel_ColorSpaceDiagram.cpp" />
     <ClCompile Include="Common\InstrumentPanel_Histogram.cpp" />
     <ClCompile Include="Common\InstrumentPanel_ScatterDiagram.cpp" />
     <ClCompile Include="Common\InstrumentPanel_Waveform.cpp" />

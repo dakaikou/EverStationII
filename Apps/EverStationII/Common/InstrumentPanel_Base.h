@@ -230,7 +230,8 @@ protected:
 	virtual void DisplayXAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
 	virtual void DisplayYAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
 
-	void DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectWaveform);
+	virtual void DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectWaveform);
+
 	void DisplayMeasurePanelInMemory(CDC* pMemDC, CBitmap* pBkBmp);
 
 	void AdjustLayout(CRect rectContainer);

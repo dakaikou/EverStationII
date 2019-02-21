@@ -24,6 +24,8 @@
 
 #include "ESDecoder.h"
 
+#define USE_FIFO_ACCESS_MUTEX		1	
+
 typedef enum
 {
 	CHROMA_FORMAT_MONO = 0,
@@ -40,6 +42,7 @@ typedef struct
 	int			display_grid_size;	//0、8、16、32、64
 	int		    display_width;
 	int			display_height;
+	int			display_decimate_coeff;		//-4\-2\0\2\4
 	double		display_framerate;
 
 	int			source_chroma_format;		//CHROMA_FORMAT_MONO、CHROMA_FORMAT_4_2_0、CHROMA_FORMAT_4_2_2、CHROMA_FORMAT_4_4_4
@@ -86,13 +89,26 @@ public:
 	int		Open(uint32_t dwStreamType, const char* pszFileName, const YUV_SOURCE_PARAM_t* psource_info = NULL);
 	int		Close(void);
 
-	int		AttachWnd(HWND hWnd);
+	int		AttachWnd(HWND hWnd, int(*callback_luma)(HWND, WPARAM, LPARAM) = NULL, int(*callback_chroma)(HWND, WPARAM, LPARAM) = NULL);
 	int		DetachWnd(HWND hWnd);
+
+	int			m_bCommandRun;
+	int			m_bRunning;
+#if USE_FIFO_ACCESS_MUTEX
+	HANDLE			m_hFifoAccess;
+#endif
+
+	int						m_bSourceDataAvailable;
 
 protected:
 
 	VIDEO_DECODE_Params_t	m_VidDecodeInfo;
-	uint8_t*				m_pucOutputFrameBuf;
+	uint8_t*				m_pucSourceFrameBuf;
+	//uint8_t*				m_pucOutputFrameBuf;
+
+	HWND	m_hwnd_for_caller;
+	int(*m_callback_report_yuv_luma_stats)(HWND hWnd, WPARAM wParam, LPARAM lParam);
+	int(*m_callback_report_yuv_chroma_stats)(HWND hWnd, WPARAM wParam, LPARAM lParam);
 
 private:		//direct audio output
 
@@ -100,18 +116,25 @@ private:		//direct audio output
 	CTALForDirectDraw*		m_pDirectDraw;
 
 protected:
+	//int			m_nCanvasWidth;
+	//int			m_nCanvasHeight;
+	//int			m_dCanvasEnlargeCoeff;		//-4/-2/0/2/4
 public:
 	
+	int DirectDraw_RePaint(void);
+
 	int FeedToDirectDraw(void);
-	int DirectDraw_Paint(void);
 	double GetDisplayFrameRate(void);
 
 	virtual void ToggleGrid(void);
+	virtual void ToggleView(void);
+	virtual void ToggleCanvas(void);
 	virtual void SaveSnapshot(const char* dstfilename);
-	virtual void EnlargeVideo(void);
 public:
 	~CVESDecoder();
 };
+
+uint32_t thread_frame_process(LPVOID lpParam);
 
 #endif
 

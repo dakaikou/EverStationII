@@ -53,9 +53,8 @@ protected:
 	//{{AFX_MSG(CDlg_YUVPreview)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnBtnOpenOrClose();
-	afx_msg void OnSelchangeCmbFourcc();
 	//}}AFX_MSG
-	afx_msg LRESULT OnPlayThreadExit(WPARAM, LPARAM);
+	afx_msg LRESULT OnReportPlayThreadExit(WPARAM, LPARAM);
 
 	DECLARE_MESSAGE_MAP()
 public:

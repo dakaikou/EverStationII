@@ -28,9 +28,6 @@ public:
 public:
 /*------------------syntax part---------------------------*/
 public:
-	//void	ToggleGrid(void);
-	//void	SaveSnapshot(const char* dstfilename);
-
 	int		Preview_FirstPicture(void);
 	int		Preview_LastPicture(void);
 

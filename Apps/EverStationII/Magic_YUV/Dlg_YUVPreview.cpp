@@ -39,9 +39,8 @@ void CDlg_YUVPreview::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlg_YUVPreview, CDialog)
 	//{{AFX_MSG_MAP(CDlg_YUVPreview)
 	ON_BN_CLICKED(IDC_BTN_OPEN, OnBtnOpenOrClose)
-	ON_CBN_SELCHANGE(IDC_CMB_FOURCC, OnSelchangeCmbFourcc)
 	//}}AFX_MSG_MAP
-	ON_MESSAGE(WM_PLAY_THREAD_EXIT, OnPlayThreadExit)
+	ON_MESSAGE(WM_PLAY_THREAD_EXIT, OnReportPlayThreadExit)
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
@@ -128,6 +127,18 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 
 	//nIndex = pCmbBox->AddString("YUY2");
 	//pCmbBox->SetItemData(nIndex, 0x56555949);
+
+	pCmbBox->SetCurSel(0);
+
+	//setup the color space
+	pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_COLORSPACE);
+	pCmbBox->ResetContent();
+
+	nIndex = pCmbBox->AddString("ITU-R.BT.709");
+	pCmbBox->SetItemData(nIndex, 709);
+
+	nIndex = pCmbBox->AddString("ITU-R.BT.2020");
+	pCmbBox->SetItemData(nIndex, 2020);
 
 	pCmbBox->SetCurSel(0);
 
@@ -248,12 +259,23 @@ void CDlg_YUVPreview::OnBtnOpenOrClose()
 				stYUVParams.dwFourCC = 0x30323449;			//I420
 			}
 
+			pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_COLORSPACE);
+			nSel = pCmbBox->GetCurSel();
+			if (nSel != CB_ERR)
+			{
+				stYUVParams.nColorSpace = pCmbBox->GetItemData(nSel);
+			}
+			else
+			{
+				stYUVParams.nColorSpace = 709;			//ITU-R.BT.709
+			}
+
 			//char strFrameRate[16];
 			pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FRAMERATE);
 			nSel = pCmbBox->GetCurSel();
 			if (nSel != CB_ERR)
 			{
-				int frame_rate_x_1000 = pCmbBox->GetItemData(nSel);
+				int frame_rate_x_1000 = (int)(pCmbBox->GetItemData(nSel));
 				stYUVParams.framerate = frame_rate_x_1000 / 1000.0;
 			}
 			else
@@ -299,28 +321,6 @@ void CDlg_YUVPreview::OnBtnOpenOrClose()
 	}
 }
 
-void CDlg_YUVPreview::OnSelchangeCmbFourcc() 
-{
-	// TODO: Add your control notification handler code here
-	//int			nSel;
-	//CComboBox*	pCmbBox;
-	//CWnd*		pWnd;
-	//char		pszFourCC[5];
-	//char		pszItem[128];
-
-	//pCmbBox = (CComboBox*)GetDlgItem(IDC_CMB_FOURCC);
-	//nSel = pCmbBox->GetCurSel();
-	//if (nSel != CB_ERR)
-	//{
-	//	pCmbBox->GetLBText(nSel, pszFourCC);
-	//	//DecodeFourCC2Text(pszFourCC, pszItem, sizeof(pszItem));
-	//}
-
-	//pWnd = GetDlgItem(IDC_STATIC_FORMAT);
-	//pWnd->SetWindowText(pszItem);
-	
-}
-
 BOOL CDlg_YUVPreview::DestroyWindow()
 {
 	// TODO: 在此添加专用代码和/或调用基类
@@ -329,7 +329,7 @@ BOOL CDlg_YUVPreview::DestroyWindow()
 	return CDialog::DestroyWindow();
 }
 
-LRESULT CDlg_YUVPreview::OnPlayThreadExit(WPARAM wParam, LPARAM lParam)
+LRESULT CDlg_YUVPreview::OnReportPlayThreadExit(WPARAM wParam, LPARAM lParam)
 {
 	OnBtnOpenOrClose();
 

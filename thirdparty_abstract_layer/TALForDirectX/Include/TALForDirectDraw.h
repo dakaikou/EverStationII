@@ -39,31 +39,44 @@ public:
 	CTALForDirectDraw(void);
 
 protected:
-	HWND		m_hVidWnd;
 	int			m_nGrid;
-	double		m_dEnlargeCoeff;
-	//double		m_dMaxEnlargeCoeff;
+	//double		m_dCanvasEnlargeCoeff;
+	double		m_dViewEnlargeCoeff;
 	int			m_nDebugFrameCount;
 	uint32_t	m_dwDebugTimeTick;
 
-	//POINT		m_ptOrigin;
-
 public:
-	virtual int OpenVideo(HWND hWnd, int canvas_width, int canvas_height, unsigned int dwFourCC);
+	virtual int OpenVideo(HWND hWnd, int source_width, int source_height, unsigned int dwFourCC);
 	virtual int CloseVideo(void);
-	virtual int RenderYUV(const LPBYTE lpFrameBuf, int frameSize, const FRAME_PARAMS_t* pstFrameParams);
-	virtual int RePaint(void);
+	virtual int FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frameSize, const FRAME_PARAMS_t* pstFrameParams);
+	virtual int RenderOnPrimarySurface(void);
 	virtual int ToggleGrid(void);
-	virtual int ToggleScreen(void);
+	//virtual int ToggleCanvas(void);
+	virtual int ToggleView(void);
 
 private:		//direct audio output
 
 	//direct draw variables
 	LPDIRECTDRAW7           m_lpDD;    // DirectDraw 对象指针
 	LPDIRECTDRAWSURFACE7    m_lpDDSPrimary;  // DirectDraw 主表面指针
-	LPDIRECTDRAWSURFACE7    m_lpDDSOverlay;  // DirectDraw 离屏表面指针
+	LPDIRECTDRAWSURFACE7    m_lpDDSOffscreen;  // DirectDraw 离屏表面指针
 	LPDIRECTDRAWCLIPPER		m_pcClipper;
-	DDSURFACEDESC2		    m_ddsd;    // DirectDraw 表面描述
+
+	int						m_nSourceWidth;
+	int						m_nSourceHeight;
+	//int						m_nCanvasWidth;
+	//int						m_nCanvasHeight;
+	//int						m_nViewWidth;
+	//int						m_nViewHeight;
+	HWND					m_hVidWnd;
+	DWORD					m_dwFourCC;
+
+	//FRAME_PARAMS_t			m_stTemporalFrameParams;
+	//LPBYTE					m_pTemporalFrameBuf;
+	//int						m_pTemporalFrameSize;
+
+	int AllocateDirectDrawResource(HWND hWnd, int canvas_width, int canvas_height, unsigned int dwFourCC);
+	int ReleaseDirectDrawResource(void);
 
 public:
 	~CTALForDirectDraw();

@@ -38,13 +38,14 @@ public:
 
 public:
 
-	int				m_bIsAudio;
+	int				m_bCommandPlay;
 	int				m_bPlaying;
+
+	int				m_bIsAudio;
 	int				m_bCycle;
 
 	BOOL			m_bForcingShowStats;
 	BOOL			m_bForcingShowController;
-	DWORD			m_dwTimerID;
 
 	CDlg_VideoPanelPlayController*	m_pPanelPlayController;
 	CDlg_VideoPanelLumaStats*		m_pPanelLumaStats;
@@ -84,7 +85,8 @@ public:
 	void EnlargeClientAreaToFullScreen(void);
 	void RestoreClientAreaToInitial(void);
 	void ToggleGrid(void);
-	void EnlargeVideo(void);
+	void ToggleCanvas(void);
+	void ToggleView(void);
 	void ShowStats(void);
 	void SaveSnapshot(void);
 
@@ -106,16 +108,20 @@ public:
 	//}}AFX_MSG
 
 	afx_msg LRESULT OnReportVideoDecodeFPS(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnPlayThreadExit(WPARAM, LPARAM);
+	afx_msg LRESULT OnReportPlayThreadWorkingProgress(WPARAM, LPARAM);
+	afx_msg LRESULT OnReportPlayThreadExit(WPARAM, LPARAM);
 
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 	afx_msg void OnDestroy();
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	//afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnClose();
 };
+
+int CALLBACK_report_yuv_luma_stats(HWND hWnd, WPARAM wParam, LPARAM lParam);
+int CALLBACK_report_yuv_chroma_stats(HWND hWnd, WPARAM wParam, LPARAM lParam);
 
 uint32_t VideoPlay_Thread(PVOID pVoid);
 uint32_t AudioPlay_Thread(PVOID pVoid);

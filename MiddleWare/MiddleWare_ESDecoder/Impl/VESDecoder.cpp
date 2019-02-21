@@ -15,7 +15,8 @@
 
 CVESDecoder::CVESDecoder(void)
 {
-	m_pucOutputFrameBuf = NULL;
+	m_pucSourceFrameBuf = NULL;
+	//m_pucOutputFrameBuf = NULL;
 
 	m_pDirectDraw = NULL;
 
@@ -24,6 +25,17 @@ CVESDecoder::CVESDecoder(void)
 
 	m_VidDecodeInfo.size = sizeof(VIDEO_DECODE_Params_t);
 	m_VidDecodeInfo.getparams = 0;
+
+	m_callback_report_yuv_luma_stats = NULL;
+	m_hwnd_for_caller = NULL;
+
+#if USE_FIFO_ACCESS_MUTEX
+	m_hFifoAccess = NULL;
+#endif
+	m_bCommandRun = 0;
+	m_bRunning = 0;
+
+	m_bSourceDataAvailable = 0;
 }
 
 CVESDecoder::~CVESDecoder()
@@ -50,6 +62,7 @@ int CVESDecoder::Open(uint32_t dwStreamType, const char* pszFileName, const YUV_
 		m_VidDecodeInfo.display_framerate = psourceInfo->framerate;
 		m_VidDecodeInfo.display_width = psourceInfo->luma_width;
 		m_VidDecodeInfo.display_height = psourceInfo->luma_height;
+		m_VidDecodeInfo.display_decimate_coeff = 0;
 
 		m_VidDecodeInfo.source_FourCC = psourceInfo->dwFourCC;
 
@@ -120,8 +133,9 @@ int CVESDecoder::Open(uint32_t dwStreamType, const char* pszFileName, const YUV_
 
 		m_VidDecodeInfo.frame_buf_size = m_VidDecodeInfo.luma_buf_size + m_VidDecodeInfo.chroma_buf_size + m_VidDecodeInfo.chroma_buf_size;
 
-		m_pucOutputFrameBuf = (uint8_t*)malloc(m_VidDecodeInfo.frame_buf_size);
-		memset(m_pucOutputFrameBuf, 0x00, m_VidDecodeInfo.frame_buf_size);
+		m_pucSourceFrameBuf = (uint8_t*)malloc(m_VidDecodeInfo.frame_buf_size);
+		memset(m_pucSourceFrameBuf, 0x00, m_VidDecodeInfo.frame_buf_size);
+		m_bSourceDataAvailable = 0;
 
 		rtcode = CESDecoder::Open(dwStreamType, pszFileName);
 	}
@@ -139,31 +153,68 @@ int CVESDecoder::Close(void)
 
 	memset(&m_VidDecodeInfo, 0x00, sizeof(VIDEO_DECODE_Params_t));
 
-	if (m_pucOutputFrameBuf != NULL)
+	if (m_pucSourceFrameBuf != NULL)
 	{
-		free(m_pucOutputFrameBuf);
-		m_pucOutputFrameBuf = NULL;
+		free(m_pucSourceFrameBuf);
+		m_pucSourceFrameBuf = NULL;
 	}
+	m_bSourceDataAvailable = 0;
 
 	rtcode = CESDecoder::Close();
 
 	return rtcode;
 }
 
-int CVESDecoder::AttachWnd(HWND hWnd)
+int CVESDecoder::AttachWnd(HWND hWnd, int(*callback_luma)(HWND, WPARAM, LPARAM), int(*callback_chroma)(HWND, WPARAM, LPARAM))
 {
 	HRESULT ddRval = -1;
+
+	m_hwnd_for_caller = hWnd;
 
 	assert(m_pDirectDraw == NULL);
 	m_pDirectDraw = new CTALForDirectDraw;
 	ddRval = m_pDirectDraw->OpenVideo(hWnd, m_VidDecodeInfo.display_width, m_VidDecodeInfo.display_height, m_VidDecodeInfo.source_FourCC);
+
+	if (callback_luma != NULL)
+	{
+		m_callback_report_yuv_luma_stats = callback_luma;
+	}
+	if (callback_chroma != NULL)
+	{
+		m_callback_report_yuv_chroma_stats = callback_chroma;
+	}
+
+#if USE_FIFO_ACCESS_MUTEX
+	m_hFifoAccess = ::CreateMutex(NULL, FALSE, NULL);
+#endif
+	m_bCommandRun = true;
+	m_bRunning = false;
+	::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)thread_frame_process, (LPVOID)this, 0, 0);
 
 	return ddRval;
 }
 
 int CVESDecoder::DetachWnd(HWND hWnd)
 {
+	m_bCommandRun = false;
+
+	while (m_bRunning == 1)
+	{
+		Sleep(10);
+	}
+
 	//assert(hWnd == m_hVidWnd);
+#if USE_FIFO_ACCESS_MUTEX
+	uint32_t wait_state = ::WaitForSingleObject(m_hFifoAccess, INFINITE);
+	if (wait_state == WAIT_OBJECT_0)
+	{
+#endif
+
+#if USE_FIFO_ACCESS_MUTEX
+		::CloseHandle(m_hFifoAccess);
+		m_hFifoAccess = NULL;
+	}
+#endif
 
 	HRESULT ddRval = -1;
 
@@ -174,29 +225,61 @@ int CVESDecoder::DetachWnd(HWND hWnd)
 		m_pDirectDraw = NULL;
 	}
 
+	m_callback_report_yuv_luma_stats = NULL;
+	m_callback_report_yuv_chroma_stats = NULL;
+
 	return ddRval;
 }
 
 int CVESDecoder::FeedToDirectDraw(void)
 {
+	int rtcode = ESDECODER_UNKNOWN_ERROR;
 	assert(m_pDirectDraw != NULL);
 
 	FRAME_PARAMS_t stFrameParams;
-	stFrameParams.luma_width = m_VidDecodeInfo.source_luma_width;
-	stFrameParams.luma_height = m_VidDecodeInfo.source_luma_height;
-	stFrameParams.chroma_width = m_VidDecodeInfo.source_chroma_width;
-	stFrameParams.chroma_height = m_VidDecodeInfo.source_chroma_height;
+	uint8_t* pucOutputFrameBuf = (uint8_t*)malloc(m_VidDecodeInfo.frame_buf_size);
 
-	HRESULT ddRval = m_pDirectDraw->RenderYUV(m_pucOutputFrameBuf, m_VidDecodeInfo.frame_buf_size, &stFrameParams);
+#if USE_FIFO_ACCESS_MUTEX
+	uint32_t wait_state = ::WaitForSingleObject(m_hFifoAccess, INFINITE);
+	if (wait_state == WAIT_OBJECT_0)
+	{
+#endif
+		stFrameParams.luma_width = m_VidDecodeInfo.source_luma_width;
+		stFrameParams.luma_height = m_VidDecodeInfo.source_luma_height;
+		stFrameParams.chroma_width = m_VidDecodeInfo.source_chroma_width;
+		stFrameParams.chroma_height = m_VidDecodeInfo.source_chroma_height;
 
-	return ddRval;
+		//very simple image processing
+		memcpy(pucOutputFrameBuf, m_pucSourceFrameBuf, m_VidDecodeInfo.frame_buf_size);
+
+		m_bSourceDataAvailable = 0;
+#if USE_FIFO_ACCESS_MUTEX
+		::ReleaseMutex(m_hFifoAccess);
+	}
+#endif
+
+	HRESULT ddRval = m_pDirectDraw->FeedToOffScreenSurface(pucOutputFrameBuf, m_VidDecodeInfo.frame_buf_size, &stFrameParams);
+
+	if (m_callback_report_yuv_luma_stats != NULL)
+	{
+		m_callback_report_yuv_luma_stats(m_hwnd_for_caller, 0x45678912, 0x23456789);
+	}
+
+	if (m_callback_report_yuv_chroma_stats != NULL)
+	{
+		m_callback_report_yuv_chroma_stats(m_hwnd_for_caller, 0x86091335, 0x67521189);
+	}
+
+	free(pucOutputFrameBuf);
+
+	return rtcode;
 }
 
-int CVESDecoder::DirectDraw_Paint(void)
+int CVESDecoder::DirectDraw_RePaint(void)
 {
 	assert(m_pDirectDraw != NULL);
 
-	HRESULT	ddRval = m_pDirectDraw->RePaint();
+	HRESULT	ddRval = m_pDirectDraw->RenderOnPrimarySurface();
 	
 	return ddRval;
 }
@@ -220,7 +303,6 @@ void CVESDecoder::ToggleGrid(void)
 	assert(m_pDirectDraw != NULL);
 
 	m_pDirectDraw->ToggleGrid();
-	HRESULT	ddRval = m_pDirectDraw->RePaint();
 
 	return;
 }
@@ -229,10 +311,68 @@ void CVESDecoder::SaveSnapshot(const char* dstfilename)
 {
 }
 
-void CVESDecoder::EnlargeVideo(void)
+void CVESDecoder::ToggleCanvas(void)
 {
 	assert(m_pDirectDraw != NULL);
 
-	m_pDirectDraw->ToggleScreen();
-	HRESULT	ddRval = m_pDirectDraw->RePaint();
+	m_VidDecodeInfo.display_decimate_coeff += 2;
+	if (m_VidDecodeInfo.display_decimate_coeff > 4)
+	{
+		m_VidDecodeInfo.display_decimate_coeff = -4;
+	}
+
+	if (m_VidDecodeInfo.display_decimate_coeff == 0)
+	{
+		m_VidDecodeInfo.display_width = m_VidDecodeInfo.source_luma_width;
+		m_VidDecodeInfo.display_height = m_VidDecodeInfo.source_luma_height;
+	}
+	else if (m_VidDecodeInfo.display_decimate_coeff > 0)
+	{
+		m_VidDecodeInfo.display_width = m_VidDecodeInfo.source_luma_width * m_VidDecodeInfo.display_decimate_coeff;
+		m_VidDecodeInfo.display_height = m_VidDecodeInfo.source_luma_height * m_VidDecodeInfo.display_decimate_coeff;
+	}
+	else if (m_VidDecodeInfo.display_decimate_coeff < 0)
+	{
+		m_VidDecodeInfo.display_width = - m_VidDecodeInfo.source_luma_width / m_VidDecodeInfo.display_decimate_coeff;
+		m_VidDecodeInfo.display_height = - m_VidDecodeInfo.source_luma_height / m_VidDecodeInfo.display_decimate_coeff;
+	}
+
+	m_pDirectDraw->CloseVideo();
+	m_pDirectDraw->OpenVideo(m_hwnd_for_caller, m_VidDecodeInfo.display_width, m_VidDecodeInfo.display_height, m_VidDecodeInfo.source_FourCC);
+
+	//FeedToDirectDraw();
+
+	//m_pDirectDraw->ToggleCanvas();
+}
+
+void CVESDecoder::ToggleView(void)
+{
+	assert(m_pDirectDraw != NULL);
+
+	m_pDirectDraw->ToggleView();
+}
+
+
+uint32_t thread_frame_process(LPVOID lpParam)
+{
+	int rtcode = ESDECODER_UNKNOWN_ERROR;
+
+	CVESDecoder* pDecoder = (CVESDecoder*)lpParam;
+
+	if (pDecoder != NULL)
+	{
+		pDecoder->m_bRunning = 1;
+		while (pDecoder->m_bCommandRun)
+		{
+			if (pDecoder->m_bSourceDataAvailable)
+			{
+				pDecoder->FeedToDirectDraw();
+			}
+		}
+		pDecoder->m_bRunning = 0;
+
+		rtcode = ESDECODER_NO_ERROR;
+	}
+
+	return rtcode;
 }

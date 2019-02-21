@@ -39,7 +39,9 @@ CDlg_VideoShowScreen::CDlg_VideoShowScreen(CWnd* pParent /*=NULL*/)
 	//}}AFX_DATA_INIT
 	m_nAudStreamType = STREAM_UNKNOWN;
 
+	m_bCommandPlay = 0;
 	m_bPlaying = 0;
+
 	m_bIsAudio = 0;
 	m_bCycle = 1;
 //	m_pdlgInfo = NULL;
@@ -52,8 +54,10 @@ CDlg_VideoShowScreen::CDlg_VideoShowScreen(CWnd* pParent /*=NULL*/)
 	m_pPanelChromaStats = NULL;
 	m_pPanelLumaStats = NULL;
 
-	m_bForcingShowController = false;
+	m_bForcingShowController = true;
 	m_bForcingShowStats = false;
+
+	//m_dwTimerID = 0xff56f344;
 }
 
 
@@ -77,10 +81,11 @@ BEGIN_MESSAGE_MAP(CDlg_VideoShowScreen, CDialog)
 	ON_WM_DESTROY()
 	ON_WM_TIMER()
 	//}}AFX_MSG_MAP
-	ON_MESSAGE(WM_REPORT_VIDEO_DECODE_FPS, OnReportVideoDecodeFPS)
-	ON_MESSAGE(WM_PLAY_THREAD_EXIT, OnPlayThreadExit)
 	ON_WM_CREATE()
 	ON_WM_CLOSE()
+	ON_MESSAGE(WM_REPORT_VIDEO_DECODE_FPS, OnReportVideoDecodeFPS)
+	ON_MESSAGE(WM_PLAY_THREAD_EXIT, OnReportPlayThreadExit)
+	ON_MESSAGE(WM_PLAY_WORKING_PROGRESS, OnReportPlayThreadWorkingProgress)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -181,7 +186,7 @@ void CDlg_VideoShowScreen::AttachVideoDecoder(PVOID pDecoder)
 		}
 
 		HWND hWnd = this->GetSafeHwnd();
-		m_pVidDecoder->AttachWnd(hWnd);
+		m_pVidDecoder->AttachWnd(hWnd, CALLBACK_report_yuv_luma_stats, CALLBACK_report_yuv_chroma_stats);
 	}
 }
 
@@ -193,7 +198,11 @@ void CDlg_VideoShowScreen::DetachVideoDecoder(PVOID pDecoder)
 
 		if (m_pVidDecoder != NULL)
 		{
-			if (m_bPlaying == 1) m_bPlaying = 0;
+			if (m_bCommandPlay == 1) m_bCommandPlay = 0;
+			while (m_bPlaying)
+			{
+				Sleep(100);
+			}
 
 			HWND hWnd = this->GetSafeHwnd();
 			m_pVidDecoder->DetachWnd(hWnd);
@@ -248,8 +257,7 @@ void CDlg_VideoShowScreen::OnShowWindow(BOOL bShow, UINT nStatus)
 		m_bForcingShowController = true;
 		m_bForcingShowStats = false;
 
-		m_dwTimerID = 0xff56f344;
-		SetTimer(m_dwTimerID, 2000, NULL);
+		//SetTimer(m_dwTimerID, 2000, NULL);
 	}
 	else
 	{
@@ -283,7 +291,7 @@ void CDlg_VideoShowScreen::OnPaint()
 	//default:
 		if (m_pVidDecoder != NULL)
 		{
-			m_pVidDecoder->DirectDraw_Paint();
+			m_pVidDecoder->DirectDraw_RePaint();
 		}
 	//	break;
 	//}
@@ -408,16 +416,25 @@ void CDlg_VideoShowScreen::SaveSnapshot(void)
 	}
 }
 
-void CDlg_VideoShowScreen::EnlargeVideo(void)
+void CDlg_VideoShowScreen::ToggleCanvas(void)
 {
 	if (m_pVidDecoder != NULL)
 	{
-		m_pVidDecoder->EnlargeVideo();
+		m_pVidDecoder->ToggleCanvas();
 
-		Invalidate();
+		Invalidate();		//必须增加这句调用，强制窗口重绘客户区，否则DirectDraw的窗口变化后，原来的画面还会残留在窗口客户区
 	}
 }
 
+void CDlg_VideoShowScreen::ToggleView(void)
+{
+	if (m_pVidDecoder != NULL)
+	{
+		m_pVidDecoder->ToggleView();
+
+		Invalidate();		//必须增加这句调用，强制窗口重绘客户区，否则DirectDraw的窗口变化后，原来的画面还会残留在窗口客户区
+	}
+}
 
 void CDlg_VideoShowScreen::OnSize(UINT nType, int cx, int cy) 
 {
@@ -430,7 +447,7 @@ void CDlg_VideoShowScreen::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 
-	if (m_bForcingShowController == 0)
+	//if (m_bForcingShowController == 0)
 	{
 		if (m_rectPlayControl.PtInRect(point))
 		{
@@ -784,42 +801,53 @@ uint32_t VideoPlay_Thread(PVOID pVoid)
 
 	double frame_interval = 1000.0 / frame_rate;
 
+	pdlg->m_bPlaying = 1;
 	do
 	{
-		int nPercent = pdlg->m_pVidDecoder->Preview_Forward1Picture();
-		frameCount++;
-
-		if (pdlg->m_bCycle)
+		if (pdlg->m_pVidDecoder != NULL)
 		{
-			if (pdlg->m_pVidDecoder->Preview_beEOF())
+			int nPercent = pdlg->m_pVidDecoder->Preview_Forward1Picture();
+			frameCount++;
+
+			if (pdlg->m_bCycle)
 			{
-				nPercent = pdlg->m_pVidDecoder->Preview_FirstPicture();
-			}
-		}
-
-		if (nPercent != nOldPercent)
-		{
-			pdlg->m_pPanelPlayController->m_sldFile.SetPos(nPercent);
-		}
-
-		//停下来等
-		int timeThreadHold = (int)round(frameCount * frame_interval);
-		while (pdlg->m_bPlaying)
-		{
-			DWORD dwNowTick = ::GetTickCount();
-			int timeElapse = dwNowTick - dwStartTick;
-			if (timeElapse >= timeThreadHold)
-			{
-				if (frameCount == 1000000)
+				if (pdlg->m_pVidDecoder->Preview_beEOF())
 				{
-					frameCount = 0;
-					dwStartTick = dwNowTick;
+					nPercent = pdlg->m_pVidDecoder->Preview_FirstPicture();
 				}
-				break;
+			}
+
+			if (nPercent != nOldPercent)
+			{
+				pdlg->SendMessage(WM_PLAY_WORKING_PROGRESS, NULL, nPercent);
+				nOldPercent = nPercent;
+			}
+
+			//停下来等
+			int timeThreadHold = (int)round(frameCount * frame_interval);
+			while (pdlg->m_bCommandPlay)
+			{
+				DWORD dwNowTick = ::GetTickCount();
+				int timeElapse = dwNowTick - dwStartTick;
+				if (timeElapse >= timeThreadHold)
+				{
+					if (frameCount == 1000000)
+					{
+						frameCount = 0;
+						dwStartTick = dwNowTick;
+					}
+					break;
+				}
 			}
 		}
+		else
+		{
+			break;
+		}
 
-	} while(pdlg->m_bPlaying);
+	} while(pdlg->m_bCommandPlay);
+
+	pdlg->m_bPlaying = 0;
 
 	return 0;
 }
@@ -829,6 +857,8 @@ uint32_t AudioPlay_Thread(PVOID pVoid)
 	CDlg_VideoShowScreen* pdlg = (CDlg_VideoShowScreen*)pVoid;
 	int				nPercent = 0;
 	int				frame_count = 0;
+
+	pdlg->m_bPlaying = 1;
 
 	do
 	{
@@ -886,21 +916,41 @@ uint32_t AudioPlay_Thread(PVOID pVoid)
 			}
 		}
 
-		pdlg->m_pPanelPlayController->m_sldFile.SetPos(nPercent);
+		//pdlg->m_pPanelPlayController->m_sldFile.SetPos(nPercent);
 
 		frame_count ++;
 
 //		Sleep(10);
 
 //	} while(pdlg->m_bPlaying && (frame_count < 3000));
-	} while(pdlg->m_bPlaying);
+	} while(pdlg->m_bCommandPlay);
+
+	pdlg->m_bPlaying = 0;
+
+	return 0;
+}
+
+int CALLBACK_report_yuv_luma_stats(HWND hWnd, WPARAM wParam, LPARAM lParam)
+{
+	CDlg_VideoShowScreen* pdlg = (CDlg_VideoShowScreen*)CWnd::FromHandle(hWnd);
+
+	pdlg->m_pPanelLumaStats->ReportStats(wParam, lParam);
+
+	return 0;
+}
+
+int CALLBACK_report_yuv_chroma_stats(HWND hWnd, WPARAM wParam, LPARAM lParam)
+{
+	CDlg_VideoShowScreen* pdlg = (CDlg_VideoShowScreen*)CWnd::FromHandle(hWnd);
+
+	pdlg->m_pPanelChromaStats->ReportStats(wParam, lParam);
 
 	return 0;
 }
 
 LRESULT CDlg_VideoShowScreen::OnReportVideoDecodeFPS(WPARAM wParam, LPARAM lParam)
 {
-	uint32_t	FPS = (uint32_t)wParam;
+	uint32_t	FPS = (uint32_t)lParam;
 	float fps;
 	CString strFPS;
 
@@ -916,7 +966,7 @@ LRESULT CDlg_VideoShowScreen::OnReportVideoDecodeFPS(WPARAM wParam, LPARAM lPara
 	return 0;
 }
 
-LRESULT CDlg_VideoShowScreen::OnPlayThreadExit(WPARAM wParam, LPARAM lParam)
+LRESULT CDlg_VideoShowScreen::OnReportPlayThreadExit(WPARAM wParam, LPARAM lParam)
 {
 	//ShowWindow(SW_HIDE);
 	::SendMessage(m_hParentWnd, WM_PLAY_THREAD_EXIT, 0, NULL);
@@ -924,6 +974,12 @@ LRESULT CDlg_VideoShowScreen::OnPlayThreadExit(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+LRESULT CDlg_VideoShowScreen::OnReportPlayThreadWorkingProgress(WPARAM wParam, LPARAM lParam)
+{
+	m_pPanelPlayController->m_sldFile.SetPos((int)lParam);
+
+	return 0;
+}
 
 void CDlg_VideoShowScreen::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 {
@@ -1151,22 +1207,22 @@ void CDlg_VideoShowScreen::OnDestroy()
 }
 
 
-void CDlg_VideoShowScreen::OnTimer(UINT_PTR nIDEvent)
-{
-	// TODO: 在此添加消息处理程序代码和/或调用默认值
-
-	//oneshot Timer
-	KillTimer(m_dwTimerID);
-
-	m_pPanelPlayController->ShowWindow(SW_HIDE);
-	//m_pPanelChromaStats->ShowWindow(SW_HIDE);
-	//m_pPanelLumaStats->ShowWindow(SW_HIDE);
-
-	m_bForcingShowController = false;
-	//m_bForcingShowStats = false;
-
-	CDialog::OnTimer(nIDEvent);
-}
+//void CDlg_VideoShowScreen::OnTimer(UINT_PTR nIDEvent)
+//{
+//	// TODO: 在此添加消息处理程序代码和/或调用默认值
+//
+//	//oneshot Timer
+//	KillTimer(m_dwTimerID);
+//
+//	m_pPanelPlayController->ShowWindow(SW_HIDE);
+//	//m_pPanelChromaStats->ShowWindow(SW_HIDE);
+//	//m_pPanelLumaStats->ShowWindow(SW_HIDE);
+//
+//	m_bForcingShowController = false;
+//	//m_bForcingShowStats = false;
+//
+//	CDialog::OnTimer(nIDEvent);
+//}
 
 
 int CDlg_VideoShowScreen::OnCreate(LPCREATESTRUCT lpCreateStruct)

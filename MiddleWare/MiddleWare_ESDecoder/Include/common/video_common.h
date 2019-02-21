@@ -13,11 +13,11 @@ typedef struct
 {
 	int			 luma_width;
 	int			 luma_height;
-	//char		pszFourCC[5];
 	unsigned int dwFourCC;
+	int			 nColorSpace;				//709\2020
 	double		 framerate;
 
-	int			quantizationBits;
+	int			quantizationBits;			//8\10\12
 
 } YUV_SOURCE_PARAM_t;
 

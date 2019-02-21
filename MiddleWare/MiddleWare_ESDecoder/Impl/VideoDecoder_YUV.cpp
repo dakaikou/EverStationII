@@ -41,7 +41,12 @@ int CYUV_VideoDecoder::Preview_Forward1Picture(void)
 	{
 		if (m_dwStreamType == (STREAM_FILE | YUV_FILE_YUV))
 		{
-			rdsize = _read(m_hFile, m_pucOutputFrameBuf, m_VidDecodeInfo.frame_buf_size);
+#if USE_FIFO_ACCESS_MUTEX
+			uint32_t wait_state = ::WaitForSingleObject(m_hFifoAccess, INFINITE);
+			if (wait_state == WAIT_OBJECT_0)
+			{
+#endif
+			rdsize = _read(m_hFile, m_pucSourceFrameBuf, m_VidDecodeInfo.frame_buf_size);
 			if (rdsize < m_VidDecodeInfo.frame_buf_size)
 			{
 				assert(0);
@@ -50,9 +55,14 @@ int CYUV_VideoDecoder::Preview_Forward1Picture(void)
 			m_nCurReadPos += m_VidDecodeInfo.frame_buf_size;
 
 			percent = (int)(m_nCurReadPos * 100.0 / m_nFileTotalSize);
-		}
 
-		FeedToDirectDraw();
+			m_bSourceDataAvailable = 1;
+
+#if USE_FIFO_ACCESS_MUTEX
+			::ReleaseMutex(m_hFifoAccess);
+			}
+#endif
+		}
 	}
 
 	return percent;	
