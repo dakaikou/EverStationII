@@ -300,6 +300,8 @@
 #define IDC_CMB_FOURCC                  1154
 #define IDC_CHECK_CYCLE                 1154
 #define IDC_CMB_COLORSPACE              1155
+#define IDC_CHECK_CYCLE2                1155
+#define IDC_CHECK_FRAMERATE_CTRL        1155
 #define IDC_CMB_DISPLAY                 1157
 #define IDC_CMB_COMPONENT               1158
 #define IDC_BTN_RESET                   1159

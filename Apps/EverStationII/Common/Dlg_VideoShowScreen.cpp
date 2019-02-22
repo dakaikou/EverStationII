@@ -39,11 +39,12 @@ CDlg_VideoShowScreen::CDlg_VideoShowScreen(CWnd* pParent /*=NULL*/)
 	//}}AFX_DATA_INIT
 	m_nAudStreamType = STREAM_UNKNOWN;
 
-	m_bCommandPlay = 0;
-	m_bPlaying = 0;
+	m_bPlayResponseStatus = 0;
+	m_bPlayControllStatus = 0;
 
 	m_bIsAudio = 0;
 	m_bCycle = 1;
+	m_bFrameRateCtrl = 0;
 //	m_pdlgInfo = NULL;
 
 	m_pVidDecoder = NULL;
@@ -57,7 +58,8 @@ CDlg_VideoShowScreen::CDlg_VideoShowScreen(CWnd* pParent /*=NULL*/)
 	m_bForcingShowController = true;
 	m_bForcingShowStats = false;
 
-	//m_dwTimerID = 0xff56f344;
+	m_dwTimerID = 0xff56f344;
+	m_nPlayProgressPercent = 0;
 }
 
 
@@ -80,11 +82,11 @@ BEGIN_MESSAGE_MAP(CDlg_VideoShowScreen, CDialog)
 	ON_WM_GETMINMAXINFO()
 	ON_WM_DESTROY()
 	ON_WM_TIMER()
-	//}}AFX_MSG_MAP
 	ON_WM_CREATE()
 	ON_WM_CLOSE()
+	//}}AFX_MSG_MAP
 	ON_MESSAGE(WM_REPORT_VIDEO_DECODE_FPS, OnReportVideoDecodeFPS)
-	ON_MESSAGE(WM_PLAY_THREAD_EXIT, OnReportPlayThreadExit)
+	ON_MESSAGE(WM_PLAY_CONTROLLER_REPORT_EXIT, OnReportPlayThreadExit)
 	ON_MESSAGE(WM_PLAY_WORKING_PROGRESS, OnReportPlayThreadWorkingProgress)
 END_MESSAGE_MAP()
 
@@ -95,7 +97,7 @@ END_MESSAGE_MAP()
 //{
 //	// TODO: Add your message handler code here and/or call default
 
-	//::SendMessage(m_hParentWnd, WM_PLAY_THREAD_EXIT, 0, NULL);
+	//::PostMessage(m_hParentWnd, WM_PLAY_THREAD_EXIT, 0, NULL);
 
 
 ////	m_ToolTip.Close();
@@ -198,11 +200,11 @@ void CDlg_VideoShowScreen::DetachVideoDecoder(PVOID pDecoder)
 
 		if (m_pVidDecoder != NULL)
 		{
-			if (m_bCommandPlay == 1) m_bCommandPlay = 0;
-			while (m_bPlaying)
-			{
-				Sleep(100);
-			}
+			//if (m_bCommandPlay == 1) m_bCommandPlay = 0;
+			//while (m_bPlaying)
+			//{
+			//	Sleep(10);
+			//}
 
 			HWND hWnd = this->GetSafeHwnd();
 			m_pVidDecoder->DetachWnd(hWnd);
@@ -228,7 +230,7 @@ void CDlg_VideoShowScreen::OnShowWindow(BOOL bShow, UINT nStatus)
 	{
 		if (m_pVidDecoder != NULL)
 		{
-			if (m_bPlaying == 0)
+			if (m_bPlayResponseStatus == 0)			
 			{
 				int nPercent = m_pVidDecoder->Preview_CurPicture();
 
@@ -257,10 +259,12 @@ void CDlg_VideoShowScreen::OnShowWindow(BOOL bShow, UINT nStatus)
 		m_bForcingShowController = true;
 		m_bForcingShowStats = false;
 
-		//SetTimer(m_dwTimerID, 2000, NULL);
+		SetTimer(m_dwTimerID, 200, NULL);
 	}
 	else
 	{
+		KillTimer(m_dwTimerID);
+
 		if (m_pPanelPlayController != NULL)
 		{
 			m_pPanelPlayController->ShowWindow(SW_HIDE);
@@ -383,6 +387,10 @@ BOOL CDlg_VideoShowScreen::OnInitDialog()
 	m_pPanelPlayController->m_sldFile.SetRange(0, 100);
 	m_pPanelPlayController->m_sldFile.SetPos(0);
 	m_pPanelPlayController->m_sldFile.SetPageSize(10);
+
+#if USE_SURFACE_ACCESS_MUTEX
+	m_hProgressDataAccess = ::CreateMutex(NULL, FALSE, NULL);
+#endif
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -788,12 +796,36 @@ int CDlg_VideoShowScreen::PreviewPreFrame()
 	return nPercent;
 }
 
+void CDlg_VideoShowScreen::StartVideoPlayThread(void)
+{
+	m_bPlayResponseStatus = 0;
+	m_bPlayControllStatus = 1;
+
+	//::CreateThread(NULL, 1024, (LPTHREAD_START_ROUTINE)AudioPlay_Thread, this, 0, 0);
+	::CreateThread(NULL, 1024, (LPTHREAD_START_ROUTINE)VideoPlay_Thread, this, 0, 0);
+
+	while (m_bPlayResponseStatus == 0)
+	{
+		Sleep(10);
+	}
+}
+
+void CDlg_VideoShowScreen::StopVideoPlayThread(void)
+{
+	m_bPlayControllStatus = 0;
+
+	while (m_bPlayResponseStatus == 1)
+	{
+		Sleep(10);
+	}
+}
+
 uint32_t VideoPlay_Thread(PVOID pVoid)
 {
 	CDlg_VideoShowScreen* pdlg = (CDlg_VideoShowScreen*)pVoid;
 	int				nOldPercent = 0;
-
-	DWORD			dwStartTick = ::GetTickCount();
+	int				nNewPercent;
+	DWORD			dwStartTick = 0;
 	int				frameCount = 0;
 
 	//Video_decode_info_t  video_decode_info;
@@ -801,53 +833,83 @@ uint32_t VideoPlay_Thread(PVOID pVoid)
 
 	double frame_interval = 1000.0 / frame_rate;
 
-	pdlg->m_bPlaying = 1;
+	pdlg->m_bPlayResponseStatus = 1;
 	do
 	{
 		if (pdlg->m_pVidDecoder != NULL)
 		{
-			int nPercent = pdlg->m_pVidDecoder->Preview_Forward1Picture();
-			frameCount++;
-
-			if (pdlg->m_bCycle)
+			nNewPercent = -1;
+			if (pdlg->m_pVidDecoder->Preview_beEOF())
 			{
-				if (pdlg->m_pVidDecoder->Preview_beEOF())
+				if (pdlg->m_bCycle)
 				{
-					nPercent = pdlg->m_pVidDecoder->Preview_FirstPicture();
+					nNewPercent = pdlg->m_pVidDecoder->Preview_FirstPicture();
 				}
 			}
-
-			if (nPercent != nOldPercent)
+			else
 			{
-				pdlg->SendMessage(WM_PLAY_WORKING_PROGRESS, NULL, nPercent);
-				nOldPercent = nPercent;
+				nNewPercent = pdlg->m_pVidDecoder->Preview_Forward1Picture();
 			}
 
-			//停下来等
-			int timeThreadHold = (int)round(frameCount * frame_interval);
-			while (pdlg->m_bCommandPlay)
+			if (nNewPercent >= 0)
 			{
-				DWORD dwNowTick = ::GetTickCount();
-				int timeElapse = dwNowTick - dwStartTick;
-				if (timeElapse >= timeThreadHold)
+				pdlg->m_nPlayProgressPercent = nNewPercent;
+
+				if (frameCount == 0)
 				{
-					if (frameCount == 1000000)
+					dwStartTick = ::GetTickCount();
+				}
+
+				if (nNewPercent != nOldPercent)
+				{
+					//频繁向界面发送消息，会阻塞界面响应其他按键消息，谨慎调用该语句
+					//::PostMessage(pdlg->GetSafeHwnd(), WM_PLAY_WORKING_PROGRESS, NULL, nNewPercent);
+					nOldPercent = nNewPercent;
+
+					pdlg->OnReportPlayThreadWorkingProgress(NULL, nNewPercent);
+				}
+
+				//停下来等
+				if (pdlg->m_bFrameRateCtrl)
+				{
+					frameCount++;
+
+					int timeThreadHold = (int)round(frameCount * frame_interval);
+					while (pdlg->m_bPlayControllStatus == 1)
 					{
-						frameCount = 0;
-						dwStartTick = dwNowTick;
+						DWORD dwNowTick = ::GetTickCount();
+						int timeElapse = dwNowTick - dwStartTick;
+						if (timeElapse >= timeThreadHold)
+						{
+							if (frameCount == 1000000)
+							{
+								frameCount = 100;
+								dwStartTick = dwNowTick - (int)round(frameCount * frame_interval);
+							}
+							break;
+						}
 					}
-					break;
 				}
+				else
+				{
+					frameCount = 0;
+				}
+			}
+			else
+			{
+				//assert(0);
+				//break;
 			}
 		}
 		else
 		{
+			assert(0);
 			break;
 		}
 
-	} while(pdlg->m_bCommandPlay);
+	} while(pdlg->m_bPlayControllStatus == 1);
 
-	pdlg->m_bPlaying = 0;
+	pdlg->m_bPlayResponseStatus = 0;
 
 	return 0;
 }
@@ -858,7 +920,7 @@ uint32_t AudioPlay_Thread(PVOID pVoid)
 	int				nPercent = 0;
 	int				frame_count = 0;
 
-	pdlg->m_bPlaying = 1;
+	pdlg->m_bPlayResponseStatus = 1;
 
 	do
 	{
@@ -923,9 +985,9 @@ uint32_t AudioPlay_Thread(PVOID pVoid)
 //		Sleep(10);
 
 //	} while(pdlg->m_bPlaying && (frame_count < 3000));
-	} while(pdlg->m_bCommandPlay);
+	} while(pdlg->m_bPlayControllStatus);
 
-	pdlg->m_bPlaying = 0;
+	pdlg->m_bPlayResponseStatus = 0;
 
 	return 0;
 }
@@ -968,15 +1030,27 @@ LRESULT CDlg_VideoShowScreen::OnReportVideoDecodeFPS(WPARAM wParam, LPARAM lPara
 
 LRESULT CDlg_VideoShowScreen::OnReportPlayThreadExit(WPARAM wParam, LPARAM lParam)
 {
-	//ShowWindow(SW_HIDE);
-	::SendMessage(m_hParentWnd, WM_PLAY_THREAD_EXIT, 0, NULL);
+	//消息接力
+	::PostMessage(m_hParentWnd, WM_VIDEO_CONTAINER_REPORT_EXIT, 0, NULL);
 
 	return 0;
 }
 
 LRESULT CDlg_VideoShowScreen::OnReportPlayThreadWorkingProgress(WPARAM wParam, LPARAM lParam)
 {
-	m_pPanelPlayController->m_sldFile.SetPos((int)lParam);
+	//m_pPanelPlayController->m_sldFile.SetPos((int)lParam);
+#if USE_PROGRESS_DATA_ACCESS_MUTEX
+	uint32_t wait_state = ::WaitForSingleObject(m_hProgressDataAccess, INFINITE);
+	if (wait_state == WAIT_OBJECT_0)
+	{
+#endif
+		//To Do anything here
+		m_nPlayProgressPercent = (int)lParam;
+
+#if USE_SURFACE_ACCESS_MUTEX
+		::ReleaseMutex(m_hProgressDataAccess);
+	}
+#endif
 
 	return 0;
 }
@@ -1204,25 +1278,51 @@ void CDlg_VideoShowScreen::OnDestroy()
 		delete m_pPanelChromaStats;
 		m_pPanelChromaStats = NULL;
 	}
+
+#if USE_PROGRESS_DATA_ACCESS_MUTEX
+	uint32_t wait_state = ::WaitForSingleObject(m_hProgressDataAccess, INFINITE);
+	if (wait_state == WAIT_OBJECT_0)
+	{
+#endif
+		//To Do anything here
+
+#if USE_SURFACE_ACCESS_MUTEX
+		::ReleaseMutex(m_hProgressDataAccess);
+		::CloseHandle(m_hProgressDataAccess);
+		m_hProgressDataAccess = NULL;
+	}
+#endif
+
 }
 
 
-//void CDlg_VideoShowScreen::OnTimer(UINT_PTR nIDEvent)
-//{
-//	// TODO: 在此添加消息处理程序代码和/或调用默认值
-//
-//	//oneshot Timer
-//	KillTimer(m_dwTimerID);
-//
-//	m_pPanelPlayController->ShowWindow(SW_HIDE);
-//	//m_pPanelChromaStats->ShowWindow(SW_HIDE);
-//	//m_pPanelLumaStats->ShowWindow(SW_HIDE);
-//
-//	m_bForcingShowController = false;
-//	//m_bForcingShowStats = false;
-//
-//	CDialog::OnTimer(nIDEvent);
-//}
+void CDlg_VideoShowScreen::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+
+	if (nIDEvent == m_dwTimerID)
+	{
+#if USE_PROGRESS_DATA_ACCESS_MUTEX
+		uint32_t wait_state = ::WaitForSingleObject(m_hProgressDataAccess, INFINITE);
+		if (wait_state == WAIT_OBJECT_0)
+		{
+#endif
+			m_pPanelPlayController->m_sldFile.SetPos(m_nPlayProgressPercent);
+#if USE_PROGRESS_DATA_ACCESS_MUTEX
+			::ReleaseMutex(m_hProgressDataAccess);
+		}
+#endif
+	}
+
+	//m_pPanelPlayController->ShowWindow(SW_HIDE);
+	////m_pPanelChromaStats->ShowWindow(SW_HIDE);
+	////m_pPanelLumaStats->ShowWindow(SW_HIDE);
+
+	//m_bForcingShowController = false;
+	////m_bForcingShowStats = false;
+
+	CDialog::OnTimer(nIDEvent);
+}
 
 
 int CDlg_VideoShowScreen::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -1240,7 +1340,7 @@ int CDlg_VideoShowScreen::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void CDlg_VideoShowScreen::OnClose()
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-	::SendMessage(m_hParentWnd, WM_PLAY_THREAD_EXIT, 0, NULL);
+	::PostMessage(m_hParentWnd, WM_VIDEO_CONTAINER_REPORT_EXIT, 0, NULL);
 
 	CDialog::OnClose();
 }

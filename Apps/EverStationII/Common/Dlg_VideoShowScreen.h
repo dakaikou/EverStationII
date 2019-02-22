@@ -18,6 +18,12 @@
 
 #include "MiddleWare/MiddleWare_ESDecoder/Include/VESDecoder.h"
 
+#define USE_PROGRESS_DATA_ACCESS_MUTEX			1
+#define FRAME_RATE_CONTROLL_IN_GUI_THREAD		0
+
+#define WM_PLAY_CONTROLLER_REPORT_EXIT	WM_USER + 0x4203
+#define WM_VIDEO_CONTAINER_REPORT_EXIT	WM_USER + 0x81D8
+
 typedef enum
 {
 	SHOWOPTION_VIDEO_AUDIO		= 0,
@@ -38,11 +44,14 @@ public:
 
 public:
 
-	int				m_bCommandPlay;
-	int				m_bPlaying;
+	int				m_bPlayControllStatus;		//²¥·Å¿ØÖÆÃüÁî
+	int				m_bPlayResponseStatus;		//²¥·Å×´Ì¬·´À¡
+
+	int				m_nPlayProgressPercent;
 
 	int				m_bIsAudio;
 	int				m_bCycle;
+	int				m_bFrameRateCtrl;
 
 	BOOL			m_bForcingShowStats;
 	BOOL			m_bForcingShowController;
@@ -53,6 +62,9 @@ public:
 
 	void			AttachVideoDecoder(PVOID pDecoder);
 	void			DetachVideoDecoder(PVOID pDecoder);
+
+	void			StartVideoPlayThread(void);
+	void			StopVideoPlayThread(void);
 
 	// Dialog Data
 	//{{AFX_DATA(CDlg_ShowVideo)
@@ -80,6 +92,12 @@ protected:
 	CString					m_strFileName;
 
 	HWND					m_hParentWnd;
+
+	DWORD					m_dwTimerID;
+
+#if USE_SURFACE_ACCESS_MUTEX
+	HANDLE		m_hProgressDataAccess;
+#endif
 
 public:
 	void EnlargeClientAreaToFullScreen(void);
@@ -115,7 +133,7 @@ public:
 public:
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 	afx_msg void OnDestroy();
-	//afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnClose();
 };

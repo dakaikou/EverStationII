@@ -23,6 +23,7 @@
 #include "thirdparty_libs/directx/include/ddraw.h"
 
 #define WM_REPORT_VIDEO_DECODE_FPS		WM_USER	+ 0x46ED
+#define USE_SURFACE_ACCESS_MUTEX		1	
 
 typedef struct
 {
@@ -38,20 +39,27 @@ class TAL_DIRECTX_LIB CTALForDirectDraw
 public:
 	CTALForDirectDraw(void);
 
+#if USE_SURFACE_ACCESS_MUTEX
+	HANDLE		m_hSurfaceAccess;
+#endif
+	int			m_bSurfaceDataAvailable;
+	int			m_bRenderControllStatus;
+	int			m_bRenderResponseStatus;
+
+	double		m_dFrameRate;
+
 protected:
 	int			m_nGrid;
-	//double		m_dCanvasEnlargeCoeff;
 	double		m_dViewEnlargeCoeff;
 	int			m_nDebugFrameCount;
 	uint32_t	m_dwDebugTimeTick;
 
 public:
-	virtual int OpenVideo(HWND hWnd, int source_width, int source_height, unsigned int dwFourCC);
+	virtual int OpenVideo(HWND hWnd, int source_width, int source_height, unsigned int dwFourCC, double dFrameRate);
 	virtual int CloseVideo(void);
 	virtual int FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frameSize, const FRAME_PARAMS_t* pstFrameParams);
 	virtual int RenderOnPrimarySurface(void);
 	virtual int ToggleGrid(void);
-	//virtual int ToggleCanvas(void);
 	virtual int ToggleView(void);
 
 private:		//direct audio output
@@ -78,9 +86,15 @@ private:		//direct audio output
 	int AllocateDirectDrawResource(HWND hWnd, int canvas_width, int canvas_height, unsigned int dwFourCC);
 	int ReleaseDirectDrawResource(void);
 
+	void StartRenderThread(void);
+	void StopRenderThread(void);
+
 public:
 	~CTALForDirectDraw();
 };
+
+uint32_t thread_surface_render_process(LPVOID lpParam);
+
 
 #endif	//__API_DIRECT_DRAW_WRAPPER_H__
 

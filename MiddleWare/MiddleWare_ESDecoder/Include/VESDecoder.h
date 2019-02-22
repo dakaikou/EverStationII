@@ -24,7 +24,7 @@
 
 #include "ESDecoder.h"
 
-#define USE_FIFO_ACCESS_MUTEX		1	
+#define USE_FRAMEBUF_ACCESS_MUTEX		1	
 
 typedef enum
 {
@@ -92,10 +92,13 @@ public:
 	int		AttachWnd(HWND hWnd, int(*callback_luma)(HWND, WPARAM, LPARAM) = NULL, int(*callback_chroma)(HWND, WPARAM, LPARAM) = NULL);
 	int		DetachWnd(HWND hWnd);
 
-	int			m_bCommandRun;
-	int			m_bRunning;
-#if USE_FIFO_ACCESS_MUTEX
-	HANDLE			m_hFifoAccess;
+	void    StartFrameProcessThread(void);
+	void    StopFrameProcessThread(void);
+
+	int			m_bFrameProcessControllStatus;
+	int			m_bFrameProcessResponseStatus;
+#if USE_FRAMEBUF_ACCESS_MUTEX
+	HANDLE		m_hFrameBufAccess;
 #endif
 
 	int						m_bSourceDataAvailable;
@@ -104,7 +107,7 @@ protected:
 
 	VIDEO_DECODE_Params_t	m_VidDecodeInfo;
 	uint8_t*				m_pucSourceFrameBuf;
-	//uint8_t*				m_pucOutputFrameBuf;
+	uint8_t*				m_pucOutputFrameBuf;
 
 	HWND	m_hwnd_for_caller;
 	int(*m_callback_report_yuv_luma_stats)(HWND hWnd, WPARAM wParam, LPARAM lParam);
@@ -123,7 +126,7 @@ public:
 	
 	int DirectDraw_RePaint(void);
 
-	int FeedToDirectDraw(void);
+	int FrameProcessAndFeedToDirectDraw(void);
 	double GetDisplayFrameRate(void);
 
 	virtual void ToggleGrid(void);

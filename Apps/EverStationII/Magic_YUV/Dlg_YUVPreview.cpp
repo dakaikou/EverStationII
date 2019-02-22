@@ -38,9 +38,9 @@ void CDlg_YUVPreview::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CDlg_YUVPreview, CDialog)
 	//{{AFX_MSG_MAP(CDlg_YUVPreview)
-	ON_BN_CLICKED(IDC_BTN_OPEN, OnBtnOpenOrClose)
+	ON_BN_CLICKED(IDC_BTN_OPEN, OnBtnFileOpenOrClose)
 	//}}AFX_MSG_MAP
-	ON_MESSAGE(WM_PLAY_THREAD_EXIT, OnReportPlayThreadExit)
+	ON_MESSAGE(WM_VIDEO_CONTAINER_REPORT_EXIT, OnReportPlayThreadExit)
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
@@ -184,7 +184,7 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CDlg_YUVPreview::OnBtnOpenOrClose() 
+void CDlg_YUVPreview::OnBtnFileOpenOrClose() 
 {
 	// TODO: Add your control notification handler code here
 	char szFilter[128];
@@ -308,6 +308,8 @@ void CDlg_YUVPreview::OnBtnOpenOrClose()
 	{
 		if (m_dlgVideo.IsWindowVisible())
 		{
+			m_dlgVideo.StopVideoPlayThread();
+
 			m_dlgVideo.ShowWindow(SW_HIDE);
 			m_dlgVideo.DetachVideoDecoder(&m_YUVDecoder);
 		}
@@ -331,7 +333,8 @@ BOOL CDlg_YUVPreview::DestroyWindow()
 
 LRESULT CDlg_YUVPreview::OnReportPlayThreadExit(WPARAM wParam, LPARAM lParam)
 {
-	OnBtnOpenOrClose();
+	//OnBtnFileOpenOrClose();
+	PostMessage(WM_COMMAND, MAKEWPARAM(IDC_BTN_OPEN, BN_CLICKED), NULL);
 
 	return 0;
 }

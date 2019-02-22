@@ -17,23 +17,69 @@ CTALForDirectDraw::CTALForDirectDraw(void)
 	//m_dCanvasEnlargeCoeff = 1.0;
 	m_dViewEnlargeCoeff = 1.0;
 
+	m_dFrameRate = 30.0;				//default value 30/s
 	m_nSourceWidth = -1;
 	m_nSourceHeight = -1;
 	//m_nCanvasWidth = -1;
 	//m_nCanvasHeight = -1;
 	//m_nViewWidth = -1;
 	//m_nViewHeight = -1;
+
+#if USE_SURFACE_ACCESS_MUTEX
+	m_hSurfaceAccess = ::CreateMutex(NULL, FALSE, NULL);
+#endif
+	m_bRenderControllStatus = false;
+	m_bRenderResponseStatus = false;
+
+	m_bSurfaceDataAvailable = 0;
 }
 
 CTALForDirectDraw::~CTALForDirectDraw()
 {
+#if USE_SURFACE_ACCESS_MUTEX
+	uint32_t wait_state = ::WaitForSingleObject(m_hSurfaceAccess, INFINITE);
+	if (wait_state == WAIT_OBJECT_0)
+	{
+#endif
+		m_bSurfaceDataAvailable = 0;
+#if USE_SURFACE_ACCESS_MUTEX
+		::ReleaseMutex(m_hSurfaceAccess);
+		::CloseHandle(m_hSurfaceAccess);
+		m_hSurfaceAccess = NULL;
+	}
+#endif
+
 	assert(m_lpDD == NULL);
 	assert(m_pcClipper == NULL);
 	assert(m_lpDDSOffscreen == NULL);
 	assert(m_lpDDSPrimary == NULL);
 }
 
-int CTALForDirectDraw::OpenVideo(HWND hWnd, int source_width, int source_height, unsigned int dwFourCC)
+void CTALForDirectDraw::StartRenderThread(void)
+{
+	m_bRenderControllStatus = true;
+	m_bRenderResponseStatus = false;
+	m_bSurfaceDataAvailable = false;
+	::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)thread_surface_render_process, (LPVOID)this, 0, 0);
+
+	while (m_bRenderResponseStatus == 0)
+	{
+		Sleep(10);
+	}
+}
+
+void CTALForDirectDraw::StopRenderThread(void)
+{
+	//notify the render process to exit
+	m_bRenderControllStatus = false;
+
+	while (m_bRenderResponseStatus == 1)
+	{
+		Sleep(10);
+	}
+}
+
+int CTALForDirectDraw::OpenVideo(HWND hWnd, int source_width, int source_height, unsigned int dwFourCC, double framerate)
 {
 	int					rtcode = -1;
 
@@ -58,7 +104,11 @@ int CTALForDirectDraw::OpenVideo(HWND hWnd, int source_width, int source_height,
 
 	m_dwFourCC = dwFourCC;
 
+	m_dFrameRate = framerate;
+
 	rtcode = AllocateDirectDrawResource(m_hVidWnd, m_nSourceWidth, m_nSourceHeight, m_dwFourCC);
+
+	StartRenderThread();
 
 	return rtcode;
 }
@@ -66,6 +116,8 @@ int CTALForDirectDraw::OpenVideo(HWND hWnd, int source_width, int source_height,
 int CTALForDirectDraw::CloseVideo(void)
 {
 	int					rtcode = -1;
+
+	StopRenderThread();
 
 	rtcode = ReleaseDirectDrawResource();
 
@@ -88,8 +140,8 @@ int CTALForDirectDraw::AllocateDirectDrawResource(HWND hWnd, int canvas_width, i
 	int					rtcode = -1;
 	DDSURFACEDESC2		ddsd;    // DirectDraw 表面描述
 
-								 // 创建DirectCraw对象
-								 //use the system default display hardware
+	// 创建DirectCraw对象
+	//use the system default display hardware
 	rtcode = DirectDrawCreateEx(NULL, (VOID**)&m_lpDD, IID_IDirectDraw7, NULL);
 	if (rtcode == DD_OK)
 	{
@@ -136,26 +188,26 @@ int CTALForDirectDraw::AllocateDirectDrawResource(HWND hWnd, int canvas_width, i
 				ddsd.ddpfPixelFormat.dwFourCC = dwFourCC;
 				ddsd.ddpfPixelFormat.dwYUVBitCount = 8;			//default value
 
-																//	if (dwFourCC == 0x56555949)			//IYUV: Planar YUV, YUV420 Y-U-V, the same as I420
-																//	{
-																//		m_ddsd.ddpfPixelFormat.dwYUVBitCount = 12;
-																//	}
-																//	else if (dwFourCC == 0x30323449)			//I420: Planar YUV, YUV420 Y-U-V, the same as IYUV
-																//	{
-																//		m_ddsd.ddpfPixelFormat.dwYUVBitCount = 12;
-																//	}
-																//	else if (dwFourCC == 0x32315659)			//YV12: Planar YUV, YUV420 Y-V-U
-																//	{
-																//		m_ddsd.ddpfPixelFormat.dwYUVBitCount = 12;
-																//	}
-																////	else if (dwFourCC == 0x36315659)			//YV16: Planar YUV422 Y-U-V
-																////	{
-																////		m_ddsd.ddpfPixelFormat.dwYUVBitCount = 16;
-																////	}
-																//	else										//YUV420 Y-V-U
-																//	{
-																//		m_ddsd.ddpfPixelFormat.dwYUVBitCount = 12;
-																//	}
+			//	if (dwFourCC == 0x56555949)			//IYUV: Planar YUV, YUV420 Y-U-V, the same as I420
+			//	{
+			//		m_ddsd.ddpfPixelFormat.dwYUVBitCount = 12;
+			//	}
+			//	else if (dwFourCC == 0x30323449)			//I420: Planar YUV, YUV420 Y-U-V, the same as IYUV
+			//	{
+			//		m_ddsd.ddpfPixelFormat.dwYUVBitCount = 12;
+			//	}
+			//	else if (dwFourCC == 0x32315659)			//YV12: Planar YUV, YUV420 Y-V-U
+			//	{
+			//		m_ddsd.ddpfPixelFormat.dwYUVBitCount = 12;
+			//	}
+		////	else if (dwFourCC == 0x36315659)			//YV16: Planar YUV422 Y-U-V
+		////	{
+		////		m_ddsd.ddpfPixelFormat.dwYUVBitCount = 16;
+		////	}
+			//	else										//YUV420 Y-V-U
+			//	{
+			//		m_ddsd.ddpfPixelFormat.dwYUVBitCount = 12;
+			//	}
 
 				rtcode = m_lpDD->CreateSurface(&ddsd, &m_lpDDSOffscreen, NULL);
 				if (rtcode == DD_OK)
@@ -362,7 +414,7 @@ int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frame
 						//为了精确到小数帧，故意放大1000倍之后报送给上层应用，上层应用需要缩小1000之后得到浮点数
 						uint32_t fps = (int)round(1000.0 * m_nDebugFrameCount / (dwTickDiff / 1000.0));
 
-						::SendMessage(m_hVidWnd, WM_REPORT_VIDEO_DECODE_FPS, NULL, (LPARAM)fps);		//chendelin
+						::PostMessage(m_hVidWnd, WM_REPORT_VIDEO_DECODE_FPS, NULL, (LPARAM)fps);		//chendelin
 
 						m_nDebugFrameCount = 0;
 						m_dwDebugTimeTick = curTick;
@@ -371,7 +423,16 @@ int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frame
 
 				m_lpDDSOffscreen->Unlock(NULL);
 
-				RenderOnPrimarySurface();
+#if USE_SURFACE_ACCESS_MUTEX
+				uint32_t wait_state = ::WaitForSingleObject(m_hSurfaceAccess, INFINITE);
+				if (wait_state == WAIT_OBJECT_0)
+				{
+#endif
+					m_bSurfaceDataAvailable = 1;
+#if USE_SURFACE_ACCESS_MUTEX
+					::ReleaseMutex(m_hSurfaceAccess);
+				}
+#endif
 				
 				break;
 			}
@@ -411,48 +472,6 @@ int CTALForDirectDraw::ToggleGrid(void)
 
 	return 0;
 }
-
-//int CTALForDirectDraw::ToggleCanvas(void)
-//{
-//	int rtcode = -1;
-//
-//	//4:1\2:1\1:1\1:2\1:4 轮回
-//	m_dCanvasEnlargeCoeff *= 2.0;
-//
-//	if (m_dCanvasEnlargeCoeff > 4.0)
-//	{
-//		m_dCanvasEnlargeCoeff = 0.25;
-//	}
-//
-//	RECT  rcClient;
-//	::GetClientRect(m_hVidWnd, &rcClient);
-//
-//	int nClientWidth = rcClient.right - rcClient.left;
-//	int nClientHeight = rcClient.bottom - rcClient.top;
-//
-//	m_dViewEnlargeCoeff = m_dCanvasEnlargeCoeff;
-//
-//	int nCanvasWidth = (int)(m_nSourceWidth * m_dCanvasEnlargeCoeff);
-//	int nCanvasHeight = (int)(m_nSourceHeight * m_dCanvasEnlargeCoeff);
-//
-//	if (nCanvasHeight > nClientHeight)
-//	{
-//		m_dViewEnlargeCoeff = (double)nClientHeight / m_nSourceHeight;
-//	}
-//	else if (nCanvasWidth > nClientWidth)
-//	{
-//		m_dViewEnlargeCoeff = (double)nClientWidth / m_nSourceWidth;
-//	}
-//
-//	//m_nViewWidth = (int)(m_nSourceWidth * m_dViewEnlargeCoeff);
-//	//m_nViewHeight = (int)(m_nSourceHeight * m_dViewEnlargeCoeff);
-//
-//	ReleaseDirectDrawResource();
-//	AllocateDirectDrawResource(m_hVidWnd, nCanvasWidth, nCanvasHeight, m_dwFourCC);
-//	rtcode = FeedToOffScreenSurface(m_pTemporalFrameBuf, m_pTemporalFrameSize, &m_stTemporalFrameParams);
-//
-//	return rtcode;
-//}
 
 int CTALForDirectDraw::ToggleView(void)
 {
@@ -553,8 +572,28 @@ int CTALForDirectDraw::RenderOnPrimarySurface(void)
 
 		if (m_lpDDSPrimary != NULL)
 		{
-			ddRval = m_lpDDSPrimary->Blt(&rectDst, m_lpDDSOffscreen, &rectSrc, DDBLT_WAIT, NULL);
-			//ddRval = m_lpDDSPrimary->BltFast(rectDst.left, rectDst.top, m_lpDDSOverlay, &rectSrc, DDBLTFAST_WAIT);
+#if USE_SURFACE_ACCESS_MUTEX
+			uint32_t wait_state = ::WaitForSingleObject(m_hSurfaceAccess, INFINITE);
+			if (wait_state == WAIT_OBJECT_0)
+			{
+#endif
+			//DDSURFACEDESC2		ddsd;    // DirectDraw 表面描述
+			//ZeroMemory(&ddsd, sizeof(DDSURFACEDESC2));
+			//ddsd.dwSize = sizeof(DDSURFACEDESC2);
+
+			//ddRval = m_lpDDSOffscreen->Lock(NULL, &ddsd, DDLOCK_WAIT | DDLOCK_READONLY, NULL);
+			//if (ddRval == DD_OK)
+			//{
+				ddRval = m_lpDDSPrimary->Blt(&rectDst, m_lpDDSOffscreen, &rectSrc, DDBLT_WAIT, NULL);
+				//ddRval = m_lpDDSPrimary->BltFast(rectDst.left, rectDst.top, m_lpDDSOverlay, &rectSrc, DDBLTFAST_WAIT);
+			//	m_lpDDSOffscreen->Unlock(NULL);
+			//}
+
+				m_bSurfaceDataAvailable = 0;
+#if USE_SURFACE_ACCESS_MUTEX
+				::ReleaseMutex(m_hSurfaceAccess);
+			}
+#endif
 		}
 
 		if (m_nGrid > 0)
@@ -588,4 +627,55 @@ int CTALForDirectDraw::RenderOnPrimarySurface(void)
 	return ddRval;
 }
 
+//why should we run a thread to render surface? I don't know.  chendelin 2019.2.21
+uint32_t thread_surface_render_process(LPVOID lpParam)
+{
+	int				rtcode = -1;
+	DWORD			dwStartTick = 0;
+	int				frameCount = 0;
+
+	CTALForDirectDraw* pFather = (CTALForDirectDraw*)lpParam;
+
+	if (pFather != NULL)
+	{
+		double frame_rate = pFather->m_dFrameRate;
+		double frame_interval = 1000.0 / frame_rate;
+
+		pFather->m_bRenderResponseStatus = 1;
+		while (pFather->m_bRenderControllStatus)
+		{
+			if (pFather->m_bSurfaceDataAvailable)
+			{
+				pFather->RenderOnPrimarySurface();
+				//frameCount++;
+				//if (frameCount == 1)
+				//{
+				//	dwStartTick = ::GetTickCount();
+				//}
+
+				////停下来等
+				//int timeThreadHold = (int)round(frameCount * frame_interval);
+				//while (pFather->m_bRenderControllStatus)
+				//{
+				//	DWORD dwNowTick = ::GetTickCount();
+				//	int timeElapse = dwNowTick - dwStartTick;
+				//	if (timeElapse >= timeThreadHold)
+				//	{
+				//		if (frameCount == 1000000)
+				//		{
+				//			frameCount = 0;
+				//			dwStartTick = dwNowTick;
+				//		}
+				//		break;
+				//	}
+				//}
+			}
+		}
+		pFather->m_bRenderResponseStatus = 0;
+
+		rtcode = 0;
+	}
+
+	return rtcode;
+}
 

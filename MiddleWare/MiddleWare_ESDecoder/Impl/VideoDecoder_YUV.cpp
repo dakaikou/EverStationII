@@ -41,8 +41,8 @@ int CYUV_VideoDecoder::Preview_Forward1Picture(void)
 	{
 		if (m_dwStreamType == (STREAM_FILE | YUV_FILE_YUV))
 		{
-#if USE_FIFO_ACCESS_MUTEX
-			uint32_t wait_state = ::WaitForSingleObject(m_hFifoAccess, INFINITE);
+#if USE_FRAMEBUF_ACCESS_MUTEX
+			uint32_t wait_state = ::WaitForSingleObject(m_hFrameBufAccess, INFINITE);
 			if (wait_state == WAIT_OBJECT_0)
 			{
 #endif
@@ -58,8 +58,8 @@ int CYUV_VideoDecoder::Preview_Forward1Picture(void)
 
 			m_bSourceDataAvailable = 1;
 
-#if USE_FIFO_ACCESS_MUTEX
-			::ReleaseMutex(m_hFifoAccess);
+#if USE_FRAMEBUF_ACCESS_MUTEX
+			::ReleaseMutex(m_hFrameBufAccess);
 			}
 #endif
 		}
