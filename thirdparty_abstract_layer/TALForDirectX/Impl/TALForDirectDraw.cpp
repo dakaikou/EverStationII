@@ -55,6 +55,7 @@ CTALForDirectDraw::~CTALForDirectDraw()
 	assert(m_lpDDSPrimary == NULL);
 }
 
+#if RENDER_IN_THREAD
 void CTALForDirectDraw::StartRenderThread(void)
 {
 	m_bRenderControllStatus = true;
@@ -78,6 +79,7 @@ void CTALForDirectDraw::StopRenderThread(void)
 		Sleep(10);
 	}
 }
+#endif
 
 int CTALForDirectDraw::OpenVideo(HWND hWnd, int source_width, int source_height, unsigned int dwFourCC, double framerate)
 {
@@ -108,7 +110,9 @@ int CTALForDirectDraw::OpenVideo(HWND hWnd, int source_width, int source_height,
 
 	rtcode = AllocateDirectDrawResource(m_hVidWnd, m_nSourceWidth, m_nSourceHeight, m_dwFourCC);
 
+#if RENDER_IN_THREAD
 	StartRenderThread();
+#endif
 
 	return rtcode;
 }
@@ -117,7 +121,9 @@ int CTALForDirectDraw::CloseVideo(void)
 {
 	int					rtcode = -1;
 
+#if RENDER_IN_THREAD
 	StopRenderThread();
+#endif
 
 	rtcode = ReleaseDirectDrawResource();
 
@@ -423,6 +429,8 @@ int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frame
 
 				m_lpDDSOffscreen->Unlock(NULL);
 
+#if RENDER_IN_THREAD
+
 #if USE_SURFACE_ACCESS_MUTEX
 				uint32_t wait_state = ::WaitForSingleObject(m_hSurfaceAccess, INFINITE);
 				if (wait_state == WAIT_OBJECT_0)
@@ -433,7 +441,12 @@ int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frame
 					::ReleaseMutex(m_hSurfaceAccess);
 				}
 #endif
-				
+
+#else
+				RenderOnPrimarySurface();
+
+#endif // RENDER_IN_THREAD
+
 				break;
 			}
 			else if (ddRval == 0x887601C2)
@@ -627,6 +640,7 @@ int CTALForDirectDraw::RenderOnPrimarySurface(void)
 	return ddRval;
 }
 
+#if RENDER_IN_THREAD
 //why should we run a thread to render surface? I don't know.  chendelin 2019.2.21
 uint32_t thread_surface_render_process(LPVOID lpParam)
 {
@@ -678,4 +692,6 @@ uint32_t thread_surface_render_process(LPVOID lpParam)
 
 	return rtcode;
 }
+
+#endif
 

@@ -41,27 +41,35 @@ int CYUV_VideoDecoder::Preview_Forward1Picture(void)
 	{
 		if (m_dwStreamType == (STREAM_FILE | YUV_FILE_YUV))
 		{
-#if USE_FRAMEBUF_ACCESS_MUTEX
-			uint32_t wait_state = ::WaitForSingleObject(m_hFrameBufAccess, INFINITE);
-			if (wait_state == WAIT_OBJECT_0)
+			uint32_t wait_state0 = ::WaitForSingleObject(m_hSourceFrameBufEmptyEvent, INFINITE);
+			if (wait_state0 == WAIT_OBJECT_0)
 			{
-#endif
-			rdsize = _read(m_hFile, m_pucSourceFrameBuf, m_VidDecodeInfo.frame_buf_size);
-			if (rdsize < m_VidDecodeInfo.frame_buf_size)
-			{
-				assert(0);
+				::ResetEvent(m_hSourceFrameBufEmptyEvent);
+
+//#if USE_FRAMEBUF_ACCESS_MUTEX
+//				uint32_t wait_state = ::WaitForSingleObject(m_hSourceFrameBufAccess, INFINITE);
+//				if (wait_state == WAIT_OBJECT_0)
+//				{
+//#endif
+					rdsize = _read(m_hFile, m_pucSourceFrameBuf, m_VidDecodeInfo.frame_buf_size);
+					if (rdsize < m_VidDecodeInfo.frame_buf_size)
+					{
+						assert(0);
+					}
+
+					m_nCurReadPos += m_VidDecodeInfo.frame_buf_size;
+
+					percent = (int)(m_nCurReadPos * 100.0 / m_nFileTotalSize);
+
+					//m_bSourceDataAvailable = 1;
+
+//#if USE_FRAMEBUF_ACCESS_MUTEX
+//					::ReleaseMutex(m_hSourceFrameBufAccess);
+//				}
+//#endif
+
+				::SetEvent(m_hSourceFrameBufFullEvent);
 			}
-
-			m_nCurReadPos += m_VidDecodeInfo.frame_buf_size;
-
-			percent = (int)(m_nCurReadPos * 100.0 / m_nFileTotalSize);
-
-			m_bSourceDataAvailable = 1;
-
-#if USE_FRAMEBUF_ACCESS_MUTEX
-			::ReleaseMutex(m_hFrameBufAccess);
-			}
-#endif
 		}
 	}
 

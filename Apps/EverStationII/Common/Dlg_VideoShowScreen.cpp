@@ -60,6 +60,8 @@ CDlg_VideoShowScreen::CDlg_VideoShowScreen(CWnd* pParent /*=NULL*/)
 
 	m_dwTimerID = 0xff56f344;
 	m_nPlayProgressPercent = 0;
+
+	m_dCheckedFrameRate = 0.0;
 }
 
 
@@ -339,6 +341,7 @@ int CDlg_VideoShowScreen::PreviewNextFrame()
 			if (m_pVidDecoder != NULL)
 			{
 				nPercent = m_pVidDecoder->Preview_Forward1Picture();
+				m_nPlayProgressPercent = nPercent;
 			}
 		//}
 	}
@@ -361,6 +364,7 @@ int CDlg_VideoShowScreen::PreviewNext5Frame()
 			if (m_pVidDecoder != NULL)
 			{
 				nPercent = m_pVidDecoder->Preview_ForwardNPicture(5);
+				m_nPlayProgressPercent = nPercent;
 			}
 		//}
 	}
@@ -686,6 +690,7 @@ int CDlg_VideoShowScreen::PreviewFirstFrame()
 			if (m_pVidDecoder != NULL)
 			{
 				nPercent = m_pVidDecoder->Preview_FirstPicture();
+				m_nPlayProgressPercent = nPercent;
 			}
 		//}
 	}
@@ -720,6 +725,7 @@ int CDlg_VideoShowScreen::PreviewLastFrame()
 			if (m_pVidDecoder != NULL)
 			{
 				nPercent = m_pVidDecoder->Preview_LastPicture();
+				m_nPlayProgressPercent = nPercent;
 			}
 		//}
 	}
@@ -755,6 +761,7 @@ int CDlg_VideoShowScreen::PreviewPre5Frame()
 			if (m_pVidDecoder != NULL)
 			{
 				nPercent = m_pVidDecoder->Preview_BackwardNPicture(5);
+				m_nPlayProgressPercent = nPercent;
 			}
 		//}
 	}
@@ -789,6 +796,7 @@ int CDlg_VideoShowScreen::PreviewPreFrame()
 			if (m_pVidDecoder != NULL)
 			{
 				nPercent = m_pVidDecoder->Preview_Backward1Picture();
+				m_nPlayProgressPercent = nPercent;
 			}
 		//}
 	}
@@ -1012,18 +1020,8 @@ int CALLBACK_report_yuv_chroma_stats(HWND hWnd, WPARAM wParam, LPARAM lParam)
 
 LRESULT CDlg_VideoShowScreen::OnReportVideoDecodeFPS(WPARAM wParam, LPARAM lParam)
 {
-	uint32_t	FPS = (uint32_t)lParam;
-	float fps;
-	CString strFPS;
-
-	fps = 0.001f * FPS;
-	strFPS.Format("%.3f fps", fps);
-
-	//CDC* pDC = GetDC();
-	//pDC->TextOutA(10, 10, strFPS);
-	//ReleaseDC(pDC);
-
-	m_pPanelPlayController->ReportFPS(strFPS);
+	uint32_t	fps = (uint32_t)lParam;
+	m_dCheckedFrameRate = 0.001 * fps;
 
 	return 0;
 }
@@ -1308,6 +1306,16 @@ void CDlg_VideoShowScreen::OnTimer(UINT_PTR nIDEvent)
 		{
 #endif
 			m_pPanelPlayController->m_sldFile.SetPos(m_nPlayProgressPercent);
+
+			CString strFPS;
+			strFPS.Format("%.3f fps", m_dCheckedFrameRate);
+
+			//CDC* pDC = GetDC();
+			//pDC->TextOutA(10, 10, strFPS);
+			//ReleaseDC(pDC);
+
+			m_pPanelPlayController->ReportFPS(strFPS);
+
 #if USE_PROGRESS_DATA_ACCESS_MUTEX
 			::ReleaseMutex(m_hProgressDataAccess);
 		}

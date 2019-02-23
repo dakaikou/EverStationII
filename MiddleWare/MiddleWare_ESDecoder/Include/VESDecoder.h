@@ -25,6 +25,7 @@
 #include "ESDecoder.h"
 
 #define USE_FRAMEBUF_ACCESS_MUTEX		1	
+#define USE_FRAMERATE_CONTROLL			0
 
 typedef enum
 {
@@ -97,11 +98,16 @@ public:
 
 	int			m_bFrameProcessControllStatus;
 	int			m_bFrameProcessResponseStatus;
+
 #if USE_FRAMEBUF_ACCESS_MUTEX
-	HANDLE		m_hFrameBufAccess;
+	HANDLE		m_hSourceFrameBufAccess;
+	HANDLE		m_hOutputFrameBufAccess;
 #endif
 
-	int						m_bSourceDataAvailable;
+	HANDLE		m_hSourceFrameBufEmptyEvent;
+	HANDLE		m_hSourceFrameBufFullEvent;
+
+	//int						m_bSourceDataAvailable;
 
 protected:
 
@@ -127,6 +133,7 @@ public:
 	int DirectDraw_RePaint(void);
 
 	int FrameProcessAndFeedToDirectDraw(void);
+	int FeedToDirectDraw(void);
 	double GetDisplayFrameRate(void);
 
 	virtual void ToggleGrid(void);

@@ -25,6 +25,8 @@
 #define WM_REPORT_VIDEO_DECODE_FPS		WM_USER	+ 0x46ED
 #define USE_SURFACE_ACCESS_MUTEX		1	
 
+#define RENDER_IN_THREAD				0	
+
 typedef struct
 {
 	int luma_width;
@@ -86,8 +88,10 @@ private:		//direct audio output
 	int AllocateDirectDrawResource(HWND hWnd, int canvas_width, int canvas_height, unsigned int dwFourCC);
 	int ReleaseDirectDrawResource(void);
 
+#if RENDER_IN_THREAD
 	void StartRenderThread(void);
 	void StopRenderThread(void);
+#endif
 
 public:
 	~CTALForDirectDraw();

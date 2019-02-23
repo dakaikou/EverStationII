@@ -48,6 +48,7 @@ public:
 	int				m_bPlayResponseStatus;		//²¥·Å×´Ì¬·´À¡
 
 	int				m_nPlayProgressPercent;
+	double			m_dCheckedFrameRate;
 
 	int				m_bIsAudio;
 	int				m_bCycle;

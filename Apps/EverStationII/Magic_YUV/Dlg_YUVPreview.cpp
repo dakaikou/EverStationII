@@ -164,8 +164,17 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 	nIndex = pCmbBox->AddString("30P");
 	pCmbBox->SetItemData(nIndex, 30000);
 
+	nIndex = pCmbBox->AddString("50P");
+	pCmbBox->SetItemData(nIndex, 50000);
+
 	nIndex = pCmbBox->AddString("60P");
 	pCmbBox->SetItemData(nIndex, 60000);
+
+	nIndex = pCmbBox->AddString("100P");
+	pCmbBox->SetItemData(nIndex, 100000);
+
+	nIndex = pCmbBox->AddString("120P");
+	pCmbBox->SetItemData(nIndex, 120000);
 
 	pCmbBox->SetCurSel(5);
 
