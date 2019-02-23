@@ -375,24 +375,24 @@ int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frame
 					lpSurf = (LPBYTE)ddsd.lpSurface;
 					if ((lpSurf != NULL) && (lpFrame != NULL))
 					{
-						for (i = 0; i < pstFrameParams->luma_height; i++)
+						for (i = 0; i < pstFrameParams->Y_height; i++)
 						{
-							memcpy(lpSurf, lpFrame, pstFrameParams->luma_width);
-							lpFrame += pstFrameParams->luma_width;
+							memcpy(lpSurf, lpFrame, pstFrameParams->Y_width);
+							lpFrame += pstFrameParams->Y_width;
 							lpSurf += pitchLuma;
 						}
 
-						for (i = 0; i < pstFrameParams->chroma_height; i++)
+						for (i = 0; i < pstFrameParams->U_height; i++)
 						{
-							memcpy(lpSurf, lpFrame, pstFrameParams->chroma_width);
-							lpFrame += pstFrameParams->chroma_width;
+							memcpy(lpSurf, lpFrame, pstFrameParams->U_width);
+							lpFrame += pstFrameParams->U_width;
 							lpSurf += pitchChroma;
 						}
 
-						for (i = 0; i < pstFrameParams->chroma_height; i++)
+						for (i = 0; i < pstFrameParams->V_height; i++)
 						{
-							memcpy(lpSurf, lpFrame, pstFrameParams->chroma_width);
-							lpFrame += pstFrameParams->chroma_width;
+							memcpy(lpSurf, lpFrame, pstFrameParams->V_width);
+							lpFrame += pstFrameParams->V_width;
 							lpSurf += pitchChroma;
 						}
 					}

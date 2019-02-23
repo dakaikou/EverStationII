@@ -29,10 +29,17 @@
 
 typedef struct
 {
-	int luma_width;
-	int luma_height;
-	int chroma_width;
-	int chroma_height;
+	int Y_width;
+	int Y_height;
+	int Y_frameSize;
+
+	int U_width;
+	int U_height;
+	int U_frameSize;
+
+	int V_width;
+	int V_height;
+	int V_frameSize;
 
 } FRAME_PARAMS_t;
 

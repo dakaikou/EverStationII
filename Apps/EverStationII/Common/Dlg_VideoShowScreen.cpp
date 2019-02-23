@@ -840,6 +840,7 @@ uint32_t VideoPlay_Thread(PVOID pVoid)
 	double frame_rate = pdlg->m_pVidDecoder->GetDisplayFrameRate();
 
 	double frame_interval = 1000.0 / frame_rate;
+	int	   frameDeviation = (int)(5 * frame_interval);
 
 	pdlg->m_bPlayResponseStatus = 1;
 	do
@@ -887,14 +888,32 @@ uint32_t VideoPlay_Thread(PVOID pVoid)
 					{
 						DWORD dwNowTick = ::GetTickCount();
 						int timeElapse = dwNowTick - dwStartTick;
-						if (timeElapse >= timeThreadHold)
+						if (timeElapse < 0)
 						{
-							if (frameCount == 1000000)
-							{
-								frameCount = 100;
-								dwStartTick = dwNowTick - (int)round(frameCount * frame_interval);
-							}
+							//this case occured when the time tick counter overflow
+							frameCount = 0;
 							break;
+						}
+						else
+						{
+							if (timeElapse >= timeThreadHold)
+							{
+								//normally this deviation is less than 1 frame interval
+								if ((timeElapse - timeThreadHold) > frameDeviation)
+								{
+									frameCount = 0;
+								}
+								else 
+								{
+									if (frameCount >= 100000000)
+									{
+										frameCount = 0;
+										//dwStartTick = dwNowTick - (int)round(frameCount * frame_interval);
+									}
+								}
+
+								break;
+							}
 						}
 					}
 				}
