@@ -196,11 +196,11 @@ void CDlg_VideoShowScreen::AttachVideoDecoder(PVOID pDecoder)
 
 void CDlg_VideoShowScreen::DetachVideoDecoder(PVOID pDecoder)
 {
-	if (pDecoder != NULL)
+	if (m_pVidDecoder != NULL)
 	{
 		assert(m_pVidDecoder == pDecoder);
 
-		if (m_pVidDecoder != NULL)
+		//if (m_pVidDecoder != NULL)
 		{
 			//if (m_bCommandPlay == 1) m_bCommandPlay = 0;
 			//while (m_bPlaying)
@@ -428,25 +428,35 @@ void CDlg_VideoShowScreen::SaveSnapshot(void)
 	}
 }
 
-void CDlg_VideoShowScreen::ToggleCanvas(void)
+void CDlg_VideoShowScreen::CanvasEnlarge(void)
 {
 	if (m_pVidDecoder != NULL)
 	{
-		m_pVidDecoder->ToggleCanvas();
+		m_pVidDecoder->CanvasEnlarge();
 
 		Invalidate();		//必须增加这句调用，强制窗口重绘客户区，否则DirectDraw的窗口变化后，原来的画面还会残留在窗口客户区
 	}
 }
 
-void CDlg_VideoShowScreen::ToggleView(void)
+void CDlg_VideoShowScreen::CanvasReduce(void)
 {
 	if (m_pVidDecoder != NULL)
 	{
-		m_pVidDecoder->ToggleView();
+		m_pVidDecoder->CanvasReduce();
 
 		Invalidate();		//必须增加这句调用，强制窗口重绘客户区，否则DirectDraw的窗口变化后，原来的画面还会残留在窗口客户区
 	}
 }
+
+//void CDlg_VideoShowScreen::ToggleView(void)
+//{
+//	if (m_pVidDecoder != NULL)
+//	{
+//		m_pVidDecoder->ToggleView();
+//
+//		Invalidate();		//必须增加这句调用，强制窗口重绘客户区，否则DirectDraw的窗口变化后，原来的画面还会残留在窗口客户区
+//	}
+//}
 
 void CDlg_VideoShowScreen::OnSize(UINT nType, int cx, int cy) 
 {
@@ -1092,10 +1102,6 @@ void CDlg_VideoShowScreen::EnlargeClientAreaToFullScreen(void)
 {
 	if (m_bFullScreen == false)
 	{
-		//获取系统屏幕宽高  
-		//int g_iCurScreenWidth = GetSystemMetrics(SM_CXSCREEN);
-		//int g_iCurScreenHeight = GetSystemMetrics(SM_CYSCREEN);
-
 		//用m_struOldWndpl得到当前窗口的显示状态和窗体位置，以供退出全屏后使用  
 		GetWindowPlacement(&m_stOldWndPlacement);
 
@@ -1126,11 +1132,12 @@ void CDlg_VideoShowScreen::EnlargeClientAreaToFullScreen(void)
 		{
 			m_pPanelPlayController->GetWindowRect(&rectDlg);
 
-			int nXOffset = (rectClient.Width() - rectDlg.Width()) / 2;
+			int nXOffset = (rectClient.Width() - PLAYCTRL_BKBMP_WIDTH) / 2;
 
 			m_rectPlayControl.left = nXOffset;
-			m_rectPlayControl.top = rectClient.bottom - rectDlg.Height();
-			m_rectPlayControl.right = m_rectPlayControl.left + rectDlg.Width();
+			//m_rectPlayControl.top = rectClient.bottom - rectDlg.Height();
+			m_rectPlayControl.top = rectClient.bottom - PLAYCTRL_BKBMP_HEIGHT - 70;
+			m_rectPlayControl.right = m_rectPlayControl.left + PLAYCTRL_BKBMP_WIDTH;
 			m_rectPlayControl.bottom = rectClient.bottom;
 
 			CRect rectPlayControl = m_rectPlayControl;
@@ -1206,11 +1213,13 @@ void CDlg_VideoShowScreen::RestoreClientAreaToInitial(void)
 		{
 			m_pPanelPlayController->GetWindowRect(&rectDlg);
 
-			int nXOffset = (rectClient.Width() - rectDlg.Width()) / 2;
+			int nXOffset = (rectClient.Width() - PLAYCTRL_BKBMP_WIDTH) / 2;
 
 			m_rectPlayControl.left = nXOffset;
-			m_rectPlayControl.top = rectClient.bottom - rectDlg.Height();
-			m_rectPlayControl.right = m_rectPlayControl.left + rectDlg.Width();
+			//m_rectPlayControl.top = rectClient.bottom - rectDlg.Height();
+			m_rectPlayControl.top = rectClient.bottom - PLAYCTRL_BKBMP_HEIGHT - 70;
+			//m_rectPlayControl.right = m_rectPlayControl.left + rectDlg.Width();
+			m_rectPlayControl.right = m_rectPlayControl.left + PLAYCTRL_BKBMP_WIDTH;
 			m_rectPlayControl.bottom = rectClient.bottom;
 
 			CRect rectPlayControl = m_rectPlayControl;

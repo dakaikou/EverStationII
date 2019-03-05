@@ -335,6 +335,9 @@ void CDlg_YUVPreview::OnBtnFileOpenOrClose()
 BOOL CDlg_YUVPreview::DestroyWindow()
 {
 	// TODO: 在此添加专用代码和/或调用基类
+	m_dlgVideo.StopVideoPlayThread();
+	m_dlgVideo.DetachVideoDecoder(&m_YUVDecoder);
+
 	m_dlgVideo.DestroyWindow();
 
 	return CDialog::DestroyWindow();

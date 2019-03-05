@@ -219,6 +219,7 @@
   <ItemGroup>
     <ClInclude Include="ChildFrm.h" />
     <ClInclude Include="ClassView.h" />
+    <ClInclude Include="Common\BitmapButton_HoverEffect.h" />
     <ClInclude Include="Common\Define.h" />
     <ClInclude Include="Common\Dlg_Progress.h" />
     <ClInclude Include="Common\Dlg_VideoPanelPlayController.h" />
@@ -305,6 +306,7 @@
   <ItemGroup>
     <ClCompile Include="ChildFrm.cpp" />
     <ClCompile Include="ClassView.cpp" />
+    <ClCompile Include="Common\BitmapButton_HoverEffect.cpp" />
     <ClCompile Include="Common\Dlg_Decimate.cpp" />
     <ClCompile Include="Common\Dlg_Progress.cpp" />
     <ClCompile Include="Common\Dlg_VideoPanelPlayController.cpp" />
@@ -398,11 +400,20 @@
     <ResourceCompile Include="EverStationII.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\..\素材-GUI\v3.54.20190301\btn_showgrid_disabled.bmp" />
+    <Image Include="..\..\..\..\素材-GUI\播放器按钮-播放-1-Normal - 64x64.bmp" />
+    <Image Include="..\..\..\..\素材-GUI\播放器按钮-播放-2-Focuse - 64x64.bmp" />
+    <Image Include="..\..\..\..\素材-GUI\播放器按钮-播放-3-Down - 64x64.bmp" />
+    <Image Include="..\..\..\..\素材-GUI\播放器按钮-播放-4-Disabled - 64x64.bmp" />
     <Image Include="res\bitmap1.bmp" />
+    <Image Include="res\bitmap2.bmp" />
     <Image Include="res\bitmap_t.bmp" />
+    <Image Include="res\bmp00001.bmp" />
     <Image Include="res\bmp00002.bmp" />
+    <Image Include="res\bmp00003.bmp" />
     <Image Include="res\bmp00004.bmp" />
     <Image Include="res\bmp00005.bmp" />
+    <Image Include="res\bmp00006.bmp" />
     <Image Include="res\bm_bkgnd.bmp" />
     <Image Include="res\bm_bkgnd2.bmp" />
     <Image Include="res\bm_checkbox.bmp" />
@@ -410,6 +421,70 @@
     <Image Include="res\bm_def_sort.bmp" />
     <Image Include="res\bm_def_tree.bmp" />
     <Image Include="res\bm_lockbox.bmp" />
+    <Image Include="res\btn_cyclectrl_disabled.bmp" />
+    <Image Include="res\btn_cyclectrl_focus.bmp" />
+    <Image Include="res\btn_cyclectrl_normal.bmp" />
+    <Image Include="res\btn_cyclectrl_selected.bmp" />
+    <Image Include="res\btn_framectrl_disabled.bmp" />
+    <Image Include="res\btn_framectrl_focus.bmp" />
+    <Image Include="res\btn_framectrl_normal.bmp" />
+    <Image Include="res\btn_framectrl_selected.bmp" />
+    <Image Include="res\btn_headframe_disabled.bmp" />
+    <Image Include="res\btn_headframe_focus.bmp" />
+    <Image Include="res\btn_headframe_normal.bmp" />
+    <Image Include="res\btn_headframe_selected.bmp" />
+    <Image Include="res\btn_infoctrl_disabled.bmp" />
+    <Image Include="res\btn_infoctrl_focus.bmp" />
+    <Image Include="res\btn_infoctrl_normal.bmp" />
+    <Image Include="res\btn_infoctrl_selected.bmp" />
+    <Image Include="res\btn_next1frame_disabled.bmp" />
+    <Image Include="res\btn_next1frame_focus.bmp" />
+    <Image Include="res\btn_next1frame_normal.bmp" />
+    <Image Include="res\btn_next1frame_selected.bmp" />
+    <Image Include="res\btn_nextnframe_disabled.bmp" />
+    <Image Include="res\btn_nextnframe_focus.bmp" />
+    <Image Include="res\btn_nextnframe_normal.bmp" />
+    <Image Include="res\btn_nextnframe_selected.bmp" />
+    <Image Include="res\btn_play_disabled.bmp" />
+    <Image Include="res\btn_play_focus.bmp" />
+    <Image Include="res\btn_play_normal.bmp" />
+    <Image Include="res\btn_play_selected.bmp" />
+    <Image Include="res\btn_power_disabled.bmp" />
+    <Image Include="res\btn_power_focus.bmp" />
+    <Image Include="res\btn_power_normal.bmp" />
+    <Image Include="res\btn_power_selected.bmp" />
+    <Image Include="res\btn_pre1frame_disabled.bmp" />
+    <Image Include="res\btn_pre1frame_focus.bmp" />
+    <Image Include="res\btn_pre1frame_normal.bmp" />
+    <Image Include="res\btn_pre1frame_selected.bmp" />
+    <Image Include="res\btn_prenframe_disabled.bmp" />
+    <Image Include="res\btn_prenframe_focus.bmp" />
+    <Image Include="res\btn_prenframe_normal.bmp" />
+    <Image Include="res\btn_prenframe_selected.bmp" />
+    <Image Include="res\btn_screen_enlarge_disabled.bmp" />
+    <Image Include="res\btn_screen_enlarge_focus.bmp" />
+    <Image Include="res\btn_screen_enlarge_normal.bmp" />
+    <Image Include="res\btn_screen_enlarge_selected.bmp" />
+    <Image Include="res\btn_screen_reduce_disabled.bmp" />
+    <Image Include="res\btn_screen_reduce_focus.bmp" />
+    <Image Include="res\btn_screen_reduce_normal.bmp" />
+    <Image Include="res\btn_screen_reduce_selected.bmp" />
+    <Image Include="res\btn_showgrid_disabled.bmp" />
+    <Image Include="res\btn_showgrid_focus.bmp" />
+    <Image Include="res\btn_showgrid_normal.bmp" />
+    <Image Include="res\btn_showgrid_selected.bmp" />
+    <Image Include="res\btn_snapshot_disabled.bmp" />
+    <Image Include="res\btn_snapshot_focus.bmp" />
+    <Image Include="res\btn_snapshot_normal.bmp" />
+    <Image Include="res\btn_snapshot_selected.bmp" />
+    <Image Include="res\btn_stop_disabled.bmp" />
+    <Image Include="res\btn_stop_focus.bmp" />
+    <Image Include="res\btn_stop_normal.bmp" />
+    <Image Include="res\btn_stop_selected.bmp" />
+    <Image Include="res\btn_tailframe_disabled.bmp" />
+    <Image Include="res\btn_tailframe_focus.bmp" />
+    <Image Include="res\btn_tailframe_normal.bmp" />
+    <Image Include="res\btn_tailframe_selected.bmp" />
     <Image Include="res\classview.bmp" />
     <Image Include="res\classview_hc.bmp" />
     <Image Include="res\class_view.ico" />
@@ -429,6 +504,7 @@
     <Image Include="res\menu_ima.bmp" />
     <Image Include="res\output_wnd.ico" />
     <Image Include="res\output_wnd_hc.ico" />
+    <Image Include="res\playctrl.bmp" />
     <Image Include="res\properties.bmp" />
     <Image Include="res\properties_hc.bmp" />
     <Image Include="res\properties_wnd.ico" />
@@ -443,6 +519,10 @@
     <Image Include="res\Toolbar256.bmp" />
     <Image Include="res\toolbar_everstation_256.bmp" />
     <Image Include="res\userimages.bmp" />
+    <Image Include="res\播放器按钮-播放-1-Normal - 64x64.bmp" />
+    <Image Include="res\播放器按钮-播放-2-Focuse - 64x64.bmp" />
+    <Image Include="res\播放器按钮-播放-3-Down - 64x64.bmp" />
+    <Image Include="res\播放器按钮-播放-4-Disabled - 64x64.bmp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\EverStationII.rc2" />

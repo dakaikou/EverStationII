@@ -129,6 +129,7 @@ private:		//direct audio output
 
 	//direct draw variables
 	CTALForDirectDraw*		m_pDirectDraw;
+	int CanvasSetup(int decimate_coeff);
 
 protected:
 	//int			m_nCanvasWidth;
@@ -144,7 +145,8 @@ public:
 
 	virtual void ToggleGrid(void);
 	virtual void ToggleView(void);
-	virtual void ToggleCanvas(void);
+	virtual int CanvasEnlarge(void);
+	virtual int CanvasReduce(void);
 	virtual void SaveSnapshot(const char* dstfilename);
 public:
 	~CVESDecoder();

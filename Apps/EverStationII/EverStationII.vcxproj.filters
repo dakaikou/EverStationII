@@ -315,6 +315,9 @@
     <ClInclude Include="Common\InstrumentPanel_ColorSpaceDiagram.h">
       <Filter>头文件\Common</Filter>
     </ClInclude>
+    <ClInclude Include="Common\BitmapButton_HoverEffect.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -557,6 +560,9 @@
     <ClCompile Include="Common\InstrumentPanel_ColorSpaceDiagram.cpp">
       <Filter>源文件\Common</Filter>
     </ClCompile>
+    <ClCompile Include="Common\BitmapButton_HoverEffect.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\file_view.ico">
@@ -692,6 +698,240 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="res\toolbar_ever.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bmp00001.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bitmap2.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="..\..\..\..\素材-GUI\播放器按钮-播放-1-Normal - 64x64.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="..\..\..\..\素材-GUI\播放器按钮-播放-2-Focuse - 64x64.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="..\..\..\..\素材-GUI\播放器按钮-播放-3-Down - 64x64.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="..\..\..\..\素材-GUI\播放器按钮-播放-4-Disabled - 64x64.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\播放器按钮-播放-1-Normal - 64x64.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\播放器按钮-播放-2-Focuse - 64x64.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\播放器按钮-播放-3-Down - 64x64.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\播放器按钮-播放-4-Disabled - 64x64.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_power_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_play_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_play_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_play_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_play_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_power_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_power_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_power_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="..\..\..\..\素材-GUI\v3.54.20190301\btn_showgrid_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_showgrid_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_showgrid_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_showgrid_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_showgrid_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_next1frame_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_next1frame_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_next1frame_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_next1frame_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_nextnframe_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_nextnframe_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_nextnframe_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_nextnframe_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_tailframe_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_tailframe_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_tailframe_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_tailframe_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_pre1frame_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_pre1frame_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_pre1frame_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_pre1frame_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_prenframe_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_prenframe_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_prenframe_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_prenframe_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_headframe_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_headframe_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_headframe_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_headframe_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_snapshot_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_snapshot_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_snapshot_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_snapshot_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_infoctrl_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_infoctrl_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_infoctrl_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_infoctrl_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_cyclectrl_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_cyclectrl_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_cyclectrl_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_cyclectrl_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_framectrl_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_framectrl_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_framectrl_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_framectrl_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_screen_enlarge_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_screen_enlarge_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_screen_enlarge_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_screen_enlarge_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_screen_reduce_disabled.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_screen_reduce_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_screen_reduce_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_screen_reduce_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bmp00006.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bmp00003.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\playctrl.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_stop_normal.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_stop_focus.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_stop_selected.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\btn_stop_disabled.bmp">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

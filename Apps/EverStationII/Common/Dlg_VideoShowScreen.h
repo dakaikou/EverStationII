@@ -104,8 +104,10 @@ public:
 	void EnlargeClientAreaToFullScreen(void);
 	void RestoreClientAreaToInitial(void);
 	void ToggleGrid(void);
-	void ToggleCanvas(void);
-	void ToggleView(void);
+	//void ToggleCanvas(void);
+	void CanvasEnlarge(void);
+	void CanvasReduce(void);
+	//void ToggleView(void);
 	void ShowStats(void);
 	void SaveSnapshot(void);
 
