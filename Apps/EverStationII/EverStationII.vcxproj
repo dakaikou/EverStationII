@@ -509,6 +509,22 @@
     <Image Include="res\properties_hc.bmp" />
     <Image Include="res\properties_wnd.ico" />
     <Image Include="res\properties_wnd_hc.ico" />
+    <Image Include="res\radiobtn_cyclectrl_checked_disabled.bmp" />
+    <Image Include="res\radiobtn_cyclectrl_checked_focus.bmp" />
+    <Image Include="res\radiobtn_cyclectrl_checked_normal.bmp" />
+    <Image Include="res\radiobtn_cyclectrl_checked_selected.bmp" />
+    <Image Include="res\radiobtn_cyclectrl_unchecked_disabled.bmp" />
+    <Image Include="res\radiobtn_cyclectrl_unchecked_focus.bmp" />
+    <Image Include="res\radiobtn_cyclectrl_unchecked_normal.bmp" />
+    <Image Include="res\radiobtn_cyclectrl_unchecked_selected.bmp" />
+    <Image Include="res\radiobtn_framectrl_checked_disabled.bmp" />
+    <Image Include="res\radiobtn_framectrl_checked_focus.bmp" />
+    <Image Include="res\radiobtn_framectrl_checked_normal.bmp" />
+    <Image Include="res\radiobtn_framectrl_checked_selected.bmp" />
+    <Image Include="res\radiobtn_framectrl_unchecked_disabled.bmp" />
+    <Image Include="res\radiobtn_framectrl_unchecked_focus.bmp" />
+    <Image Include="res\radiobtn_framectrl_unchecked_normal.bmp" />
+    <Image Include="res\radiobtn_framectrl_unchecked_selected.bmp" />
     <Image Include="res\sort.bmp" />
     <Image Include="res\sort_hc.bmp" />
     <Image Include="res\Toolbar.bmp" />
@@ -519,10 +535,20 @@
     <Image Include="res\Toolbar256.bmp" />
     <Image Include="res\toolbar_everstation_256.bmp" />
     <Image Include="res\userimages.bmp" />
+    <Image Include="res\播放器按钮-停止-48x48.bmp" />
     <Image Include="res\播放器按钮-播放-1-Normal - 64x64.bmp" />
     <Image Include="res\播放器按钮-播放-2-Focuse - 64x64.bmp" />
+    <Image Include="res\播放器按钮-播放-24x24.bmp" />
     <Image Include="res\播放器按钮-播放-3-Down - 64x64.bmp" />
     <Image Include="res\播放器按钮-播放-4-Disabled - 64x64.bmp" />
+    <Image Include="res\播放器按钮-播放-48x48.bmp" />
+    <Image Include="res\播放器按钮-播放-60x60.bmp" />
+    <Image Include="res\播放器按钮-播放-64x64.bmp" />
+    <Image Include="res\素材-右箭头-24x24.bmp" />
+    <Image Include="res\素材-右箭头-36x36.bmp" />
+    <Image Include="res\素材-右箭头.bmp" />
+    <Image Include="res\苹果风格文件夹-视频-20140415.bmp" />
+    <Image Include="res\苹果风格文件夹-视频-24x24.bmp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\EverStationII.rc2" />

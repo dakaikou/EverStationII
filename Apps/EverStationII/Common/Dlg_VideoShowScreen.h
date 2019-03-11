@@ -22,7 +22,7 @@
 #define FRAME_RATE_CONTROLL_IN_GUI_THREAD		0
 
 #define WM_PLAY_CONTROLLER_REPORT_EXIT	WM_USER + 0x4203
-#define WM_VIDEO_CONTAINER_REPORT_EXIT	WM_USER + 0x81D8
+#define WM_VIDEO_CONTAINER_REPORT_PLAY_EXIT	WM_USER + 0x81D8
 
 typedef enum
 {
@@ -45,7 +45,6 @@ public:
 public:
 
 	int				m_bPlayControllStatus;		//播放控制命令
-	int				m_bPlayResponseStatus;		//播放状态反馈
 
 	int				m_nPlayProgressPercent;
 	double			m_dCheckedFrameRate;
@@ -82,12 +81,14 @@ public:
 
 // Implementation
 protected:
+	int				m_bPlayResponseStatus;		//播放状态反馈
+
 	BOOL					m_bFullScreen;
 	CRect					m_rectFullScreen;
 	CRect					m_rectPlayControl;
 	CRect					m_rectChromaStats;
 	CRect					m_rectLumaStats;
-
+	//CBrush					m_bkBrush;
 	WINDOWPLACEMENT			m_stOldWndPlacement;		//结构中包含了有关窗口在屏幕上位置的信息
 
 	CString					m_strFileName;
@@ -95,6 +96,8 @@ protected:
 	HWND					m_hParentWnd;
 
 	DWORD					m_dwTimerID;
+	MMRESULT				m_mmTimerID;
+	UINT				    m_wTimerRes;
 
 #if USE_SURFACE_ACCESS_MUTEX
 	HANDLE		m_hProgressDataAccess;
@@ -139,13 +142,15 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnClose();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };
 
 int CALLBACK_report_yuv_luma_stats(HWND hWnd, WPARAM wParam, LPARAM lParam);
 int CALLBACK_report_yuv_chroma_stats(HWND hWnd, WPARAM wParam, LPARAM lParam);
 
-uint32_t VideoPlay_Thread(PVOID pVoid);
-uint32_t AudioPlay_Thread(PVOID pVoid);
+//uint32_t VideoPlay_Thread(PVOID pVoid);
+//uint32_t AudioPlay_Thread(PVOID pVoid);
+void CALLBACK VideoPlay_TimerHandler(UINT uTimerID, UINT msg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2);
 
 
 //{{AFX_INSERT_LOCATION}}

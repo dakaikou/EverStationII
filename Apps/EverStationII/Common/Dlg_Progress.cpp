@@ -179,6 +179,11 @@ void CDlg_Progress::AddMsg(char* pszMsg)
 	m_listLog.EnsureVisible(count, 0);
 }
 
+void CDlg_Progress::SetTitle(CString strTitle)
+{
+	SetWindowText(strTitle);
+}
+
 void CDlg_Progress::Reset(void)
 {
 	m_progress.SetPos(0);

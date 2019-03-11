@@ -28,6 +28,7 @@ public:
 public:
 /*------------------syntax part---------------------------*/
 public:
+	int		Open(uint32_t dwStreamType, const char* pszFileName, const YUV_SOURCE_PARAM_t* psource_info = NULL);
 	int		Preview_FirstPicture(void);
 	int		Preview_LastPicture(void);
 
@@ -41,7 +42,13 @@ public:
 	int		Preview_SeekAtPercent(int nPercent);
 	int		Preview_beEOF(void);
 
+	int		Preview_Picture(int nFrameNum);
+	int		GetFrameCount(void);
+
 protected:
+
+	int		m_nTotalFrameCount;
+	int		m_nFrameEndPos;
 
 private:
 };

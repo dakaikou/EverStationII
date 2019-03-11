@@ -17,6 +17,7 @@ class CDlg_Progress : public CDialog
 public:
 	CDlg_Progress(CWnd* pParent = NULL);   // standard constructor
 
+	void		SetTitle(CString strTitle);
 	void		SetPos(int ratio);					//num%
 	void		AddMsg(char* pszMsg);
 	void		Reset(void);

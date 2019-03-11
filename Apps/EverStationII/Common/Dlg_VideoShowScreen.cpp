@@ -20,6 +20,7 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_ShowVideo dialog
+#define TARGET_RESOLUTION		 1         // 1-millisecond target resolution
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 //#include "MiddleWare_ESDecoder/Include/Decoder_MPEG2_PS.h"
@@ -44,7 +45,7 @@ CDlg_VideoShowScreen::CDlg_VideoShowScreen(CWnd* pParent /*=NULL*/)
 
 	m_bIsAudio = 0;
 	m_bCycle = 1;
-	m_bFrameRateCtrl = 0;
+	m_bFrameRateCtrl = 1;
 //	m_pdlgInfo = NULL;
 
 	m_pVidDecoder = NULL;
@@ -90,6 +91,7 @@ BEGIN_MESSAGE_MAP(CDlg_VideoShowScreen, CDialog)
 	ON_MESSAGE(WM_REPORT_VIDEO_DECODE_FPS, OnReportVideoDecodeFPS)
 	ON_MESSAGE(WM_PLAY_CONTROLLER_REPORT_EXIT, OnReportPlayThreadExit)
 	ON_MESSAGE(WM_PLAY_WORKING_PROGRESS, OnReportPlayThreadWorkingProgress)
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -191,6 +193,8 @@ void CDlg_VideoShowScreen::AttachVideoDecoder(PVOID pDecoder)
 
 		HWND hWnd = this->GetSafeHwnd();
 		m_pVidDecoder->AttachWnd(hWnd, CALLBACK_report_yuv_luma_stats, CALLBACK_report_yuv_chroma_stats);
+
+		m_nPlayProgressPercent = 0;
 	}
 }
 
@@ -234,11 +238,11 @@ void CDlg_VideoShowScreen::OnShowWindow(BOOL bShow, UINT nStatus)
 		{
 			if (m_bPlayResponseStatus == 0)			
 			{
-				int nPercent = m_pVidDecoder->Preview_CurPicture();
+				m_nPlayProgressPercent = m_pVidDecoder->Preview_CurPicture();
 
 				if (m_pPanelPlayController != NULL)
 				{
-					m_pPanelPlayController->m_sldFile.SetPos(nPercent);
+					m_pPanelPlayController->m_sldFile.SetPos(m_nPlayProgressPercent);
 				}
 			}
 		}
@@ -395,6 +399,11 @@ BOOL CDlg_VideoShowScreen::OnInitDialog()
 #if USE_SURFACE_ACCESS_MUTEX
 	m_hProgressDataAccess = ::CreateMutex(NULL, FALSE, NULL);
 #endif
+
+	//m_bkBrush.CreateSolidBrush(RGB(255, 180, 100));		//prepare for background
+
+	//::SetWindowLong(m_hWnd, GWL_EXSTYLE, GetWindowLong(m_hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+	//::SetLayeredWindowAttributes(m_hWnd, 0, 200, LWA_ALPHA); // 120是透明度，范围是0～255  
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -816,20 +825,48 @@ int CDlg_VideoShowScreen::PreviewPreFrame()
 
 void CDlg_VideoShowScreen::StartVideoPlayThread(void)
 {
-	m_bPlayResponseStatus = 0;
-	m_bPlayControllStatus = 1;
+	TIMECAPS tc;
 
-	//::CreateThread(NULL, 1024, (LPTHREAD_START_ROUTINE)AudioPlay_Thread, this, 0, 0);
-	::CreateThread(NULL, 1024, (LPTHREAD_START_ROUTINE)VideoPlay_Thread, this, 0, 0);
-
-	while (m_bPlayResponseStatus == 0)
+	if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) == TIMERR_NOERROR)
 	{
-		Sleep(10);
+		// Error; application can't continue.
+		UINT maxResolution = max(tc.wPeriodMin, TARGET_RESOLUTION);
+		m_wTimerRes = min(maxResolution, tc.wPeriodMax);
+
+		double frame_rate = m_pVidDecoder->GetDisplayFrameRate();
+		UINT frame_interval = (UINT)round(1000.0 / frame_rate);
+
+		m_mmTimerID = timeSetEvent(
+			frame_interval,
+			m_wTimerRes,
+			VideoPlay_TimerHandler,
+			(DWORD_PTR)this,
+			TIME_PERIODIC);
+
+		timeBeginPeriod(m_wTimerRes);
+
+		m_bPlayResponseStatus = 0;
+		m_bPlayControllStatus = 1;
+
+		//::CreateThread(NULL, 1024, (LPTHREAD_START_ROUTINE)AudioPlay_Thread, this, 0, 0);
+		//::CreateThread(NULL, 1024, (LPTHREAD_START_ROUTINE)VideoPlay_Thread, this, 0, 0);
+
+		//while (m_bPlayResponseStatus == 0)
+		//{
+		//	Sleep(10);
+		//}
+	}
+	else
+	{
+
 	}
 }
 
 void CDlg_VideoShowScreen::StopVideoPlayThread(void)
 {
+	timeEndPeriod(m_wTimerRes);
+	timeKillEvent(m_mmTimerID);
+
 	m_bPlayControllStatus = 0;
 
 	while (m_bPlayResponseStatus == 1)
@@ -838,196 +875,231 @@ void CDlg_VideoShowScreen::StopVideoPlayThread(void)
 	}
 }
 
-uint32_t VideoPlay_Thread(PVOID pVoid)
+void CALLBACK VideoPlay_TimerHandler(UINT uTimerID, UINT msg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2)
 {
-	CDlg_VideoShowScreen* pdlg = (CDlg_VideoShowScreen*)pVoid;
-	int				nOldPercent = 0;
-	int				nNewPercent;
-	DWORD			dwStartTick = 0;
-	int				frameCount = 0;
+	CDlg_VideoShowScreen* pdlg = (CDlg_VideoShowScreen*)dwUser;
 
-	//Video_decode_info_t  video_decode_info;
-	double frame_rate = pdlg->m_pVidDecoder->GetDisplayFrameRate();
+	//int				nOldPercent = 0;
+	int				nNewPercent = -1;
 
-	double frame_interval = 1000.0 / frame_rate;
-	int	   frameDeviation = (int)(5 * frame_interval);
-
-	pdlg->m_bPlayResponseStatus = 1;
-	do
+	if (pdlg->m_pVidDecoder->Preview_beEOF())
 	{
-		if (pdlg->m_pVidDecoder != NULL)
-		{
-			nNewPercent = -1;
-			if (pdlg->m_pVidDecoder->Preview_beEOF())
-			{
-				if (pdlg->m_bCycle)
-				{
-					nNewPercent = pdlg->m_pVidDecoder->Preview_FirstPicture();
-				}
-			}
-			else
-			{
-				nNewPercent = pdlg->m_pVidDecoder->Preview_Forward1Picture();
-			}
-
-			if (nNewPercent >= 0)
-			{
-				pdlg->m_nPlayProgressPercent = nNewPercent;
-
-				if (frameCount == 0)
-				{
-					dwStartTick = ::GetTickCount();
-				}
-
-				if (nNewPercent != nOldPercent)
-				{
-					//频繁向界面发送消息，会阻塞界面响应其他按键消息，谨慎调用该语句
-					//::PostMessage(pdlg->GetSafeHwnd(), WM_PLAY_WORKING_PROGRESS, NULL, nNewPercent);
-					nOldPercent = nNewPercent;
-
-					pdlg->OnReportPlayThreadWorkingProgress(NULL, nNewPercent);
-				}
-
-				//停下来等
-				if (pdlg->m_bFrameRateCtrl)
-				{
-					frameCount++;
-
-					int timeThreadHold = (int)round(frameCount * frame_interval);
-					while (pdlg->m_bPlayControllStatus == 1)
-					{
-						DWORD dwNowTick = ::GetTickCount();
-						int timeElapse = dwNowTick - dwStartTick;
-						if (timeElapse < 0)
-						{
-							//this case occured when the time tick counter overflow
-							frameCount = 0;
-							break;
-						}
-						else
-						{
-							if (timeElapse >= timeThreadHold)
-							{
-								//normally this deviation is less than 1 frame interval
-								if ((timeElapse - timeThreadHold) > frameDeviation)
-								{
-									frameCount = 0;
-								}
-								else 
-								{
-									if (frameCount >= 100000000)
-									{
-										frameCount = 0;
-										//dwStartTick = dwNowTick - (int)round(frameCount * frame_interval);
-									}
-								}
-
-								break;
-							}
-						}
-					}
-				}
-				else
-				{
-					frameCount = 0;
-				}
-			}
-			else
-			{
-				//assert(0);
-				//break;
-			}
-		}
-		else
-		{
-			assert(0);
-			break;
-		}
-
-	} while(pdlg->m_bPlayControllStatus == 1);
-
-	pdlg->m_bPlayResponseStatus = 0;
-
-	return 0;
-}
-
-uint32_t AudioPlay_Thread(PVOID pVoid)
-{
-	CDlg_VideoShowScreen* pdlg = (CDlg_VideoShowScreen*)pVoid;
-	int				nPercent = 0;
-	int				frame_count = 0;
-
-	pdlg->m_bPlayResponseStatus = 1;
-
-	do
-	{
-		if (pdlg->m_nAudStreamType & STREAM_FILE)
-		{
-			//switch (pdlg->m_nAudStreamType & (~STREAM_FILE))
-			//{
-			//case STREAM_AC3AES:
-			//	nPercent = ((CAC3_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_NextFrame(0);
-			//	break;
-
-			//case STREAM_MPEGAES:
-			//	nPercent = ((CMPEG_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_NextFrame(0);
-			//	break;
-
-			//case STREAM_WAVEAES:
-			//	nPercent = ((CWAVE_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_NextFrame(0);
-			//	break;
-
-			//default:
-			//	break;
-			//}
-		}
-
 		if (pdlg->m_bCycle)
 		{
-			if (pdlg->m_nAudStreamType & STREAM_FILE)
-			{
-				//switch (pdlg->m_nAudStreamType & (~STREAM_FILE))
-				//{
-				//case STREAM_AC3AES:
-				//	if (((CAC3_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_EOF())
-				//	{
-				//		nPercent = ((CAC3_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_FirstFrame();
-				//	}
-				//	break;
-
-				//case STREAM_MPEGAES:
-				//	if (((CMPEG_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_EOF())
-				//	{
-				//		nPercent = ((CMPEG_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_FirstFrame();
-				//	}
-				//	break;
-
-				//case STREAM_WAVEAES:
-				//	if (((CWAVE_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_EOF())
-				//	{
-				//		nPercent = ((CWAVE_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_FirstFrame();
-				//	}
-				//	break;
-
-				//default:
-				//	break;
-				//}
-			}
+			nNewPercent = pdlg->m_pVidDecoder->Preview_FirstPicture();
 		}
+	}
+	else
+	{
+		nNewPercent = pdlg->m_pVidDecoder->Preview_Forward1Picture();
+	}
 
-		//pdlg->m_pPanelPlayController->m_sldFile.SetPos(nPercent);
+	if (nNewPercent >= 0)
+	{
+		pdlg->m_nPlayProgressPercent = nNewPercent;
+		//if (nNewPercent != nOldPercent)
+		//{
+		//	//频繁向界面发送消息，会阻塞界面响应其他按键消息，谨慎调用该语句
+		//	//::PostMessage(pdlg->GetSafeHwnd(), WM_PLAY_WORKING_PROGRESS, NULL, nNewPercent);
+		//	nOldPercent = nNewPercent;
 
-		frame_count ++;
-
-//		Sleep(10);
-
-//	} while(pdlg->m_bPlaying && (frame_count < 3000));
-	} while(pdlg->m_bPlayControllStatus);
-
-	pdlg->m_bPlayResponseStatus = 0;
-
-	return 0;
+		//	//pdlg->OnReportPlayThreadWorkingProgress(NULL, nNewPercent);
+		//}
+	}
 }
+
+//uint32_t VideoPlay_Thread(PVOID pVoid)
+//{
+//	CDlg_VideoShowScreen* pdlg = (CDlg_VideoShowScreen*)pVoid;
+//	int				nOldPercent = 0;
+//	int				nNewPercent;
+//	DWORD			dwStartTick = 0;
+//	int				frameCount = 0;
+//
+//	//Video_decode_info_t  video_decode_info;
+//	double frame_rate = pdlg->m_pVidDecoder->GetDisplayFrameRate();
+//
+//	double frame_interval = 1000.0 / frame_rate;
+//	int	   frameDeviation = (int)(5 * frame_interval);
+//
+//	pdlg->m_bPlayResponseStatus = 1;
+//	do
+//	{
+//		//if (pdlg->m_pVidDecoder != NULL)
+//		//{
+//		//	nNewPercent = -1;
+//		//	if (pdlg->m_pVidDecoder->Preview_beEOF())
+//		//	{
+//		//		if (pdlg->m_bCycle)
+//		//		{
+//		//			nNewPercent = pdlg->m_pVidDecoder->Preview_FirstPicture();
+//		//		}
+//		//	}
+//		//	else
+//		//	{
+//		//		nNewPercent = pdlg->m_pVidDecoder->Preview_Forward1Picture();
+//		//	}
+//
+//		//	if (nNewPercent >= 0)
+//		//	{
+//		//		pdlg->m_nPlayProgressPercent = nNewPercent;
+//
+//		//		if (frameCount == 0)
+//		//		{
+//		//			dwStartTick = ::GetTickCount();
+//		//		}
+//
+//		//		if (nNewPercent != nOldPercent)
+//		//		{
+//		//			//频繁向界面发送消息，会阻塞界面响应其他按键消息，谨慎调用该语句
+//		//			//::PostMessage(pdlg->GetSafeHwnd(), WM_PLAY_WORKING_PROGRESS, NULL, nNewPercent);
+//		//			nOldPercent = nNewPercent;
+//
+//		//			pdlg->OnReportPlayThreadWorkingProgress(NULL, nNewPercent);
+//		//		}
+//
+//		//		//停下来等
+//		//		if (pdlg->m_bFrameRateCtrl)
+//		//		{
+//		//			frameCount++;
+//
+//		//			int timeThreadHold = (int)round(frameCount * frame_interval);
+//		//			while (pdlg->m_bPlayControllStatus == 1)
+//		//			{
+//		//				DWORD dwNowTick = ::GetTickCount();				//时间精度10~16ms，很难满足多媒体播放精度要求，待改进   chendelin 2019.3.10
+//		//				int timeElapse = dwNowTick - dwStartTick;
+//		//				if (timeElapse < 0)
+//		//				{
+//		//					//this case occured when the time tick counter overflow
+//		//					frameCount = 0;
+//		//					break;
+//		//				}
+//		//				else
+//		//				{
+//		//					if (timeElapse >= timeThreadHold)
+//		//					{
+//		//						//normally this deviation is less than 1 frame interval
+//		//						if ((timeElapse - timeThreadHold) > frameDeviation)
+//		//						{
+//		//							frameCount = 0;
+//		//						}
+//		//						else 
+//		//						{
+//		//							if (frameCount >= 100000000)
+//		//							{
+//		//								frameCount = 0;
+//		//								//dwStartTick = dwNowTick - (int)round(frameCount * frame_interval);
+//		//							}
+//		//						}
+//
+//		//						break;
+//		//					}
+//		//				}
+//		//			}
+//		//		}
+//		//		else
+//		//		{
+//		//			frameCount = 0;
+//		//		}
+//		//	}
+//		//	else
+//		//	{
+//		//		//assert(0);
+//		//		//break;
+//		//	}
+//		//}
+//		//else
+//		//{
+//		//	assert(0);
+//		//	break;
+//		//}
+//
+//		Sleep((DWORD)round(frame_interval));
+//
+//	} while(pdlg->m_bPlayControllStatus == 1);
+//
+//	pdlg->m_bPlayResponseStatus = 0;
+//
+//	return 0;
+//}
+
+//uint32_t AudioPlay_Thread(PVOID pVoid)
+//{
+//	CDlg_VideoShowScreen* pdlg = (CDlg_VideoShowScreen*)pVoid;
+//	int				nPercent = 0;
+//	int				frame_count = 0;
+//
+//	pdlg->m_bPlayResponseStatus = 1;
+//
+//	do
+//	{
+//		if (pdlg->m_nAudStreamType & STREAM_FILE)
+//		{
+//			//switch (pdlg->m_nAudStreamType & (~STREAM_FILE))
+//			//{
+//			//case STREAM_AC3AES:
+//			//	nPercent = ((CAC3_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_NextFrame(0);
+//			//	break;
+//
+//			//case STREAM_MPEGAES:
+//			//	nPercent = ((CMPEG_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_NextFrame(0);
+//			//	break;
+//
+//			//case STREAM_WAVEAES:
+//			//	nPercent = ((CWAVE_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_NextFrame(0);
+//			//	break;
+//
+//			//default:
+//			//	break;
+//			//}
+//		}
+//
+//		if (pdlg->m_bCycle)
+//		{
+//			if (pdlg->m_nAudStreamType & STREAM_FILE)
+//			{
+//				//switch (pdlg->m_nAudStreamType & (~STREAM_FILE))
+//				//{
+//				//case STREAM_AC3AES:
+//				//	if (((CAC3_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_EOF())
+//				//	{
+//				//		nPercent = ((CAC3_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_FirstFrame();
+//				//	}
+//				//	break;
+//
+//				//case STREAM_MPEGAES:
+//				//	if (((CMPEG_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_EOF())
+//				//	{
+//				//		nPercent = ((CMPEG_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_FirstFrame();
+//				//	}
+//				//	break;
+//
+//				//case STREAM_WAVEAES:
+//				//	if (((CWAVE_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_EOF())
+//				//	{
+//				//		nPercent = ((CWAVE_AudioDecoder*)pdlg->m_pAudDecoder)->Preview_FirstFrame();
+//				//	}
+//				//	break;
+//
+//				//default:
+//				//	break;
+//				//}
+//			}
+//		}
+//
+//		//pdlg->m_pPanelPlayController->m_sldFile.SetPos(nPercent);
+//
+//		frame_count ++;
+//
+////		Sleep(10);
+//
+////	} while(pdlg->m_bPlaying && (frame_count < 3000));
+//	} while(pdlg->m_bPlayControllStatus);
+//
+//	pdlg->m_bPlayResponseStatus = 0;
+//
+//	return 0;
+//}
 
 int CALLBACK_report_yuv_luma_stats(HWND hWnd, WPARAM wParam, LPARAM lParam)
 {
@@ -1058,7 +1130,7 @@ LRESULT CDlg_VideoShowScreen::OnReportVideoDecodeFPS(WPARAM wParam, LPARAM lPara
 LRESULT CDlg_VideoShowScreen::OnReportPlayThreadExit(WPARAM wParam, LPARAM lParam)
 {
 	//消息接力
-	::PostMessage(m_hParentWnd, WM_VIDEO_CONTAINER_REPORT_EXIT, 0, NULL);
+	::PostMessage(m_hParentWnd, WM_VIDEO_CONTAINER_REPORT_PLAY_EXIT, 0, NULL);
 
 	return 0;
 }
@@ -1376,7 +1448,21 @@ int CDlg_VideoShowScreen::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void CDlg_VideoShowScreen::OnClose()
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-	::PostMessage(m_hParentWnd, WM_VIDEO_CONTAINER_REPORT_EXIT, 0, NULL);
+	::PostMessage(m_hParentWnd, WM_VIDEO_CONTAINER_REPORT_PLAY_EXIT, 0, NULL);
 
 	CDialog::OnClose();
+}
+
+
+HBRUSH CDlg_VideoShowScreen::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// TODO:  在此更改 DC 的任何特性
+	//if (nCtlColor == CTLCOLOR_DLG)   // 判断是否是对话框  
+	//{
+	//	return   m_bkBrush; // 返回刚才创建的背景刷子  
+	//}
+	// TODO:  如果默认的不是所需画笔，则返回另一个画笔
+	return hbr;
 }

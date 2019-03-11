@@ -91,7 +91,8 @@ class MW_ES_LIB CVESDecoder : public CESDecoder
 public:
 	CVESDecoder(void);
 
-	int		Open(uint32_t dwStreamType, const char* pszFileName, const YUV_SOURCE_PARAM_t* psource_info = NULL);
+	//int		Open(uint32_t dwStreamType, const char* pszFileName, const YUV_SOURCE_PARAM_t* psource_info = NULL);
+	int		Open(uint32_t dwStreamType, const char* pszFileName);
 	int		Close(void);
 
 	int		AttachWnd(HWND hWnd, int(*callback_luma)(HWND, WPARAM, LPARAM) = NULL, int(*callback_chroma)(HWND, WPARAM, LPARAM) = NULL);
