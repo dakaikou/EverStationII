@@ -48,7 +48,11 @@ CDlg_VideoShowScreen::CDlg_VideoShowScreen(CWnd* pParent /*=NULL*/)
 	m_bFrameRateCtrl = 1;
 //	m_pdlgInfo = NULL;
 
-	m_pVidDecoder = NULL;
+	for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
+	{
+		m_pVidDecoder[i] = NULL;
+	}
+	m_nVidDecoderCount = 0;
 	m_pAudDecoder = NULL;
 
 	m_bFullScreen = false;
@@ -179,50 +183,59 @@ END_MESSAGE_MAP()
 
 void CDlg_VideoShowScreen::AttachVideoDecoder(PVOID pDecoder)
 {
-	assert(m_pVidDecoder == NULL);
+	//assert(m_pVidDecoder == NULL);
 
 	if (pDecoder != NULL)
 	{
-		m_pVidDecoder = (CVESDecoder*)pDecoder;
-
-		char pszTitle[256];
-		if (m_pVidDecoder->GetTitle(pszTitle, sizeof(pszTitle)) == ESDECODER_NO_ERROR)
+		for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
 		{
-			SetWindowText(pszTitle);
+			if (m_pVidDecoder[i] == NULL)
+			{
+				m_pVidDecoder[i] = (CVESDecoder*)pDecoder;
+				m_nVidDecoderCount++;
+
+				//char pszTitle[256];
+				//if (m_pVidDecoder[i]->GetTitle(pszTitle, sizeof(pszTitle)) == ESDECODER_NO_ERROR)
+				//{
+				//	SetWindowText(pszTitle);
+				//}
+				HWND hWnd = this->GetSafeHwnd();
+				m_pVidDecoder[i]->AttachWnd(hWnd, CALLBACK_report_yuv_luma_stats, CALLBACK_report_yuv_chroma_stats);
+
+				m_nPlayProgressPercent = 0;
+
+				break;
+			}
 		}
-
-		HWND hWnd = this->GetSafeHwnd();
-		m_pVidDecoder->AttachWnd(hWnd, CALLBACK_report_yuv_luma_stats, CALLBACK_report_yuv_chroma_stats);
-
-		m_nPlayProgressPercent = 0;
 	}
 }
 
 void CDlg_VideoShowScreen::DetachVideoDecoder(PVOID pDecoder)
 {
-	if (m_pVidDecoder != NULL)
+	for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
 	{
-		assert(m_pVidDecoder == pDecoder);
-
-		//if (m_pVidDecoder != NULL)
+		if (m_pVidDecoder[i] != NULL)
 		{
-			//if (m_bCommandPlay == 1) m_bCommandPlay = 0;
-			//while (m_bPlaying)
-			//{
-			//	Sleep(10);
-			//}
+			//assert(m_pVidDecoder == pDecoder);
 
-			HWND hWnd = this->GetSafeHwnd();
-			m_pVidDecoder->DetachWnd(hWnd);
-
-			if (m_pPanelPlayController != NULL)
+			if (m_pVidDecoder[i] == pDecoder)
 			{
-				m_pPanelPlayController->InformStopped();
-			}
-		}
+				HWND hWnd = this->GetSafeHwnd();
+				m_pVidDecoder[i]->DetachWnd(hWnd);
 
-		//inform the playing thread to exit
-		m_pVidDecoder = NULL;
+				if (m_pPanelPlayController != NULL)
+				{
+					m_pPanelPlayController->InformStopped();
+				}
+
+				m_pVidDecoder[i] = NULL;
+				m_nVidDecoderCount--;
+
+				break;
+			}
+
+			//inform the playing thread to exit
+		}
 	}
 }
 
@@ -234,16 +247,21 @@ void CDlg_VideoShowScreen::OnShowWindow(BOOL bShow, UINT nStatus)
 
 	if (bShow)
 	{
-		if (m_pVidDecoder != NULL)
+		if (m_bPlayResponseStatus == 0)			
 		{
-			if (m_bPlayResponseStatus == 0)			
-			{
-				m_nPlayProgressPercent = m_pVidDecoder->Preview_CurPicture();
+			SetupDisplayWnd();
 
-				if (m_pPanelPlayController != NULL)
+			for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
+			{
+				if (m_pVidDecoder[i] != NULL)
 				{
-					m_pPanelPlayController->m_sldFile.SetPos(m_nPlayProgressPercent);
+					m_nPlayProgressPercent = m_pVidDecoder[i]->Preview_CurPicture();
 				}
+			}
+
+			if (m_pPanelPlayController != NULL)
+			{
+				m_pPanelPlayController->m_sldFile.SetPos(m_nPlayProgressPercent);
 			}
 		}
 
@@ -292,20 +310,14 @@ void CDlg_VideoShowScreen::OnShowWindow(BOOL bShow, UINT nStatus)
 void CDlg_VideoShowScreen::OnPaint() 
 {
 	CPaintDC dc(this); // device context for painting
-	
-	// TODO: Add your message handler code here
-	//switch (m_nVidStreamType & (~STREAM_FILE))
-	//{
-	//case STREAM_PS:
-	//	break;
-	//default:
-		if (m_pVidDecoder != NULL)
+
+	for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
+	{
+		if (m_pVidDecoder[i] != NULL)
 		{
-			m_pVidDecoder->DirectDraw_RePaint();
+			m_pVidDecoder[i]->DirectDraw_RePaint();
 		}
-	//	break;
-	//}
-	// Do not call CDialog::OnPaint() for painting messages
+	}
 }
 
 int CDlg_VideoShowScreen::PreviewNextFrame() 
@@ -340,14 +352,14 @@ int CDlg_VideoShowScreen::PreviewNextFrame()
 	}
 	else
 	{
-		//if (m_nVidStreamType & STREAM_FILE)
-		//{
-			if (m_pVidDecoder != NULL)
+		for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
+		{
+			if (m_pVidDecoder[i] != NULL)
 			{
-				nPercent = m_pVidDecoder->Preview_Forward1Picture();
+				nPercent = m_pVidDecoder[i]->Preview_Forward1Picture();
 				m_nPlayProgressPercent = nPercent;
 			}
-		//}
+		}
 	}
 
 	return nPercent;
@@ -363,14 +375,14 @@ int CDlg_VideoShowScreen::PreviewNext5Frame()
 	}
 	else
 	{
-		//if (m_nVidStreamType & STREAM_FILE)
-		//{
-			if (m_pVidDecoder != NULL)
+		for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
+		{
+			if (m_pVidDecoder[i] != NULL)
 			{
-				nPercent = m_pVidDecoder->Preview_ForwardNPicture(5);
+				nPercent = m_pVidDecoder[i]->Preview_ForwardNPicture(5);
 				m_nPlayProgressPercent = nPercent;
 			}
-		//}
+		}
 	}
 
 	return nPercent;
@@ -432,28 +444,80 @@ void CDlg_VideoShowScreen::SaveSnapshot(void)
 	{
 		CString strFile = dlg.GetFileName();
 	
-		m_pVidDecoder->SaveSnapshot(strFile.GetBuffer(128));
+		for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
+		{
+			if (m_pVidDecoder[i] != NULL)
+			m_pVidDecoder[i]->SaveSnapshot(strFile.GetBuffer(128));
+		}
 //		DirectDraw_Save(strFile.GetBuffer(128));
 	}
 }
 
 void CDlg_VideoShowScreen::CanvasEnlarge(void)
 {
-	if (m_pVidDecoder != NULL)
+	for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
 	{
-		m_pVidDecoder->CanvasEnlarge();
-
-		Invalidate();		//必须增加这句调用，强制窗口重绘客户区，否则DirectDraw的窗口变化后，原来的画面还会残留在窗口客户区
+		if (m_pVidDecoder[i] != NULL)
+		{
+			m_pVidDecoder[i]->CanvasEnlarge();
+		}
 	}
+
+	SetupDisplayWnd();
+
+	Invalidate();		//必须增加这句调用，强制窗口重绘客户区，否则DirectDraw的窗口变化后，原来的画面还会残留在窗口客户区
 }
 
 void CDlg_VideoShowScreen::CanvasReduce(void)
 {
-	if (m_pVidDecoder != NULL)
+	for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
 	{
-		m_pVidDecoder->CanvasReduce();
+		if (m_pVidDecoder[i] != NULL)
+		{
+			m_pVidDecoder[i]->CanvasReduce();
+		}
+	}
 
-		Invalidate();		//必须增加这句调用，强制窗口重绘客户区，否则DirectDraw的窗口变化后，原来的画面还会残留在窗口客户区
+	SetupDisplayWnd();
+
+	Invalidate();		//必须增加这句调用，强制窗口重绘客户区，否则DirectDraw的窗口变化后，原来的画面还会残留在窗口客户区
+}
+
+
+void CDlg_VideoShowScreen::SetupDisplayWnd(void)
+{
+	RECT rcWnd;
+	RECT rcClient;
+	GetClientRect(&rcClient);
+	rcWnd = rcClient;
+
+	int total_width = 0;
+	int total_height = 0;
+	int width, height;
+
+	for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
+	{
+		if (m_pVidDecoder[i] != NULL)
+		{
+			m_pVidDecoder[i]->GetCanvasWH(&width, &height);
+			total_width += width;
+			total_height += height;
+		}
+	}
+
+	rcWnd.left = rcClient.left + ((rcClient.right - rcClient.left) - total_width) / 2;
+
+	for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
+	{
+		if (m_pVidDecoder[i] != NULL)
+		{
+			m_pVidDecoder[i]->GetCanvasWH(&width, &height);
+			rcWnd.right = rcWnd.left + width;
+
+			m_pVidDecoder[i]->SetClientRect(rcWnd);
+
+			rcWnd.left = rcWnd.right;
+		}
 	}
 }
 
@@ -555,9 +619,12 @@ void CDlg_VideoShowScreen::ToggleGrid(void)
 	//	break;
 	//}
 
-	if (m_pVidDecoder != NULL)
+	for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
 	{
-		m_pVidDecoder->ToggleGrid();
+		if (m_pVidDecoder[i] != NULL)
+		{
+			m_pVidDecoder[i]->ToggleGrid();
+		}
 	}
 }
 
@@ -704,14 +771,14 @@ int CDlg_VideoShowScreen::PreviewFirstFrame()
 	}
 	else
 	{
-		//if (m_nVidStreamType & STREAM_FILE)
-		//{
-			if (m_pVidDecoder != NULL)
+		for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
+		{
+			if (m_pVidDecoder[i] != NULL)
 			{
-				nPercent = m_pVidDecoder->Preview_FirstPicture();
+				nPercent = m_pVidDecoder[i]->Preview_FirstPicture();
 				m_nPlayProgressPercent = nPercent;
 			}
-		//}
+		}
 	}
 
 	return nPercent;
@@ -739,14 +806,14 @@ int CDlg_VideoShowScreen::PreviewLastFrame()
 	}
 	else
 	{
-		//if (m_nVidStreamType & STREAM_FILE)
-		//{
-			if (m_pVidDecoder != NULL)
+		for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
+		{
+			if (m_pVidDecoder[i] != NULL)
 			{
-				nPercent = m_pVidDecoder->Preview_LastPicture();
+				nPercent = m_pVidDecoder[i]->Preview_LastPicture();
 				m_nPlayProgressPercent = nPercent;
 			}
-		//}
+		}
 	}
 
 	return nPercent;
@@ -775,14 +842,14 @@ int CDlg_VideoShowScreen::PreviewPre5Frame()
 	}
 	else
 	{
-		//if (m_nVidStreamType & STREAM_FILE)
-		//{
-			if (m_pVidDecoder != NULL)
+		for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
+		{
+			if (m_pVidDecoder[i] != NULL)
 			{
-				nPercent = m_pVidDecoder->Preview_BackwardNPicture(5);
+				nPercent = m_pVidDecoder[i]->Preview_BackwardNPicture(5);
 				m_nPlayProgressPercent = nPercent;
 			}
-		//}
+		}
 	}
 
 	return nPercent;
@@ -810,14 +877,14 @@ int CDlg_VideoShowScreen::PreviewPreFrame()
 	}
 	else
 	{
-		//if (m_nVidStreamType & STREAM_FILE)
-		//{
-			if (m_pVidDecoder != NULL)
+		for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
+		{
+			if (m_pVidDecoder[i] != NULL)
 			{
-				nPercent = m_pVidDecoder->Preview_Backward1Picture();
+				nPercent = m_pVidDecoder[i]->Preview_Backward1Picture();
 				m_nPlayProgressPercent = nPercent;
 			}
-		//}
+		}
 	}
 
 	return nPercent;
@@ -833,7 +900,7 @@ void CDlg_VideoShowScreen::StartVideoPlayThread(void)
 		UINT maxResolution = max(tc.wPeriodMin, TARGET_RESOLUTION);
 		m_wTimerRes = min(maxResolution, tc.wPeriodMax);
 
-		double frame_rate = m_pVidDecoder->GetDisplayFrameRate();
+		double frame_rate = m_pVidDecoder[0]->GetDisplayFrameRate();
 		UINT frame_interval = (UINT)round(1000.0 / frame_rate);
 
 		m_mmTimerID = timeSetEvent(
@@ -873,6 +940,11 @@ void CDlg_VideoShowScreen::StopVideoPlayThread(void)
 	{
 		Sleep(10);
 	}
+
+	if (m_pPanelPlayController != NULL)
+	{
+		m_pPanelPlayController->InformStopped();
+	}
 }
 
 void CALLBACK VideoPlay_TimerHandler(UINT uTimerID, UINT msg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2)
@@ -882,16 +954,25 @@ void CALLBACK VideoPlay_TimerHandler(UINT uTimerID, UINT msg, DWORD_PTR dwUser, 
 	//int				nOldPercent = 0;
 	int				nNewPercent = -1;
 
-	if (pdlg->m_pVidDecoder->Preview_beEOF())
+	for (int i = 0; i < MAX_ATTACHED_VIDEO_DECODERS; i++)
 	{
-		if (pdlg->m_bCycle)
+		if (pdlg->m_pVidDecoder[i] != NULL)
 		{
-			nNewPercent = pdlg->m_pVidDecoder->Preview_FirstPicture();
+			if (pdlg->m_pVidDecoder[i]->Preview_beEOF())
+			{
+				if (pdlg->m_bCycle)
+				{
+					nNewPercent = pdlg->m_pVidDecoder[i]->Preview_FirstPicture();
+				}
+			}
+			else
+			{
+				if (pdlg->m_pVidDecoder[i] != NULL)
+				{
+					nNewPercent = pdlg->m_pVidDecoder[i]->Preview_Forward1Picture();
+				}
+			}
 		}
-	}
-	else
-	{
-		nNewPercent = pdlg->m_pVidDecoder->Preview_Forward1Picture();
 	}
 
 	if (nNewPercent >= 0)

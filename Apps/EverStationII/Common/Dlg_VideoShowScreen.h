@@ -24,6 +24,8 @@
 #define WM_PLAY_CONTROLLER_REPORT_EXIT	WM_USER + 0x4203
 #define WM_VIDEO_CONTAINER_REPORT_PLAY_EXIT	WM_USER + 0x81D8
 
+#define MAX_ATTACHED_VIDEO_DECODERS				3
+
 typedef enum
 {
 	SHOWOPTION_VIDEO_AUDIO		= 0,
@@ -39,7 +41,9 @@ public:
 
 public:
 	int				m_nAudStreamType;
-	CVESDecoder*	m_pVidDecoder;
+
+	CVESDecoder*	m_pVidDecoder[MAX_ATTACHED_VIDEO_DECODERS];
+	int				m_nVidDecoderCount;
 	PVOID			m_pAudDecoder;
 
 public:
@@ -81,7 +85,7 @@ public:
 
 // Implementation
 protected:
-	int				m_bPlayResponseStatus;		//²¥·Å×´Ì¬·´À¡
+	int						m_bPlayResponseStatus;		//²¥·Å×´Ì¬·´À¡
 
 	BOOL					m_bFullScreen;
 	CRect					m_rectFullScreen;
@@ -113,6 +117,8 @@ public:
 	//void ToggleView(void);
 	void ShowStats(void);
 	void SaveSnapshot(void);
+
+	void SetupDisplayWnd(void);
 
 	int PreviewNextFrame(void);
 	int PreviewNext5Frame(void);

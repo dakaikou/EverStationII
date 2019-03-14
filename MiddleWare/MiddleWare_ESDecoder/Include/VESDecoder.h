@@ -97,6 +97,7 @@ public:
 
 	int		AttachWnd(HWND hWnd, int(*callback_luma)(HWND, WPARAM, LPARAM) = NULL, int(*callback_chroma)(HWND, WPARAM, LPARAM) = NULL);
 	int		DetachWnd(HWND hWnd);
+	int     SetClientRect(RECT rcClient);
 
 	void    StartFrameProcessThread(void);
 	void    StopFrameProcessThread(void);
@@ -113,6 +114,8 @@ public:
 	HANDLE		m_hSourceFrameBufFullEvent;
 
 protected:
+
+	//RECT					m_rcWnd;
 
 	VIDEO_DECODE_Params_t	m_VidDecodeInfo;
 	uint8_t*				m_pucSourceFrameBuf;
@@ -143,9 +146,10 @@ public:
 	int FrameProcessAndFeedToDirectDraw(void);
 	int FeedToDirectDraw(const LPBYTE lpFrameBuf, int frameSize, const FRAME_PARAMS_t* pstFrameParams);
 	double GetDisplayFrameRate(void);
+	int GetCanvasWH(int* pnwidth, int* pnheight);
 
 	virtual void ToggleGrid(void);
-	virtual void ToggleView(void);
+	//virtual void ToggleView(void);
 	virtual int CanvasEnlarge(void);
 	virtual int CanvasReduce(void);
 	virtual void SaveSnapshot(const char* dstfilename);

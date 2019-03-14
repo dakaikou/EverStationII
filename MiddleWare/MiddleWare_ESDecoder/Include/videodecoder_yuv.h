@@ -28,7 +28,7 @@ public:
 public:
 /*------------------syntax part---------------------------*/
 public:
-	int		Open(uint32_t dwStreamType, const char* pszFileName, const YUV_SOURCE_PARAM_t* psource_info = NULL);
+	int		Open(uint32_t dwStreamType, const char* pszFileName, const YUV_SERIAL_PARAM_t* psource_info = NULL);
 	int		Preview_FirstPicture(void);
 	int		Preview_LastPicture(void);
 
@@ -47,8 +47,8 @@ public:
 
 protected:
 
-	int		m_nTotalFrameCount;
-	int		m_nFrameEndPos;
+	int			m_nTotalFrameCount;
+	int64_t		m_nFrameEndPos;
 
 private:
 };

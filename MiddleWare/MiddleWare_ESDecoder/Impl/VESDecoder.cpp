@@ -84,117 +84,7 @@ int CVESDecoder::Open(uint32_t dwStreamType, const char* pszFileName)
 {
 	int rtcode = ESDECODER_UNKNOWN_ERROR;
 
-	//if (psourceInfo != NULL)
-	{
-		//m_VidDecodeInfo.size = sizeof(VIDEO_DECODE_Params_t);
-
-		////information got from caller
-		//m_VidDecodeInfo.display_framerate = psourceInfo->framerate;
-		//m_VidDecodeInfo.display_Y_width = psourceInfo->luma_width;
-		//m_VidDecodeInfo.display_Y_height = psourceInfo->luma_height;
-		//m_VidDecodeInfo.display_decimate_coeff = 0;
-
-		//m_VidDecodeInfo.source_FourCC = psourceInfo->dwFourCC;
-		////strcpy_s(m_VidDecodeInfo.source_pszFourCC, sizeof(m_VidDecodeInfo.source_pszFourCC), psourceInfo->pszFourCC);
-
-		//m_VidDecodeInfo.source_luma_width = psourceInfo->luma_width;
-		//m_VidDecodeInfo.source_luma_height = psourceInfo->luma_height;
-
-		//m_VidDecodeInfo.source_bpp = psourceInfo->quantizationBits;
-
-		////calculation
-		//m_VidDecodeInfo.luma_pix_count = m_VidDecodeInfo.source_luma_width * m_VidDecodeInfo.source_luma_height;
-		//m_VidDecodeInfo.luma_buf_size = m_VidDecodeInfo.luma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-
-		//switch (m_VidDecodeInfo.source_FourCC)
-		//{
-		//case 0x56555949:		//IYUV
-		//	m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_0;
-		//	m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-		//	m_VidDecodeInfo.source_chroma_height = (m_VidDecodeInfo.source_luma_height >> 1);
-		//	m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-		//	m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-
-		//	break;
-
-		//case 0x30323449:		//I420
-		//	m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_0;
-		//	m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-		//	m_VidDecodeInfo.source_chroma_height = (m_VidDecodeInfo.source_luma_height >> 1);
-		//	m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-		//	m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-
-		//	break;
-
-		//case 0x32315659:		//YV12
-		//	m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_2;
-		//	m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-		//	m_VidDecodeInfo.source_chroma_height = m_VidDecodeInfo.source_luma_height;
-		//	m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-		//	m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-
-		//	break;
-
-		//default:
-		//	m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_0;
-		//	m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-		//	m_VidDecodeInfo.source_chroma_height = (m_VidDecodeInfo.source_luma_height >> 1);
-		//	m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-		//	m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-		//	break;
-		//}
-		////else if (strcmp(m_VidDecodeInfo.source_pszFourCC, "YUY2") == 0)
-		////{
-		////	m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_2;
-		////	m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-		////	m_VidDecodeInfo.source_chroma_height = m_VidDecodeInfo.source_luma_height;
-		////	m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-		////	m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-		////}
-		////else
-		////{
-		////	m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_0;
-		////	m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-		////	m_VidDecodeInfo.source_chroma_height = (m_VidDecodeInfo.source_luma_height >> 1);
-		////	m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-		////	m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-		////}
-
-		//m_VidDecodeInfo.frame_buf_size = m_VidDecodeInfo.luma_buf_size + m_VidDecodeInfo.chroma_buf_size + m_VidDecodeInfo.chroma_buf_size;
-
-		//m_VidDecodeInfo.display_U_width = m_VidDecodeInfo.source_chroma_width;
-		//m_VidDecodeInfo.display_U_height = m_VidDecodeInfo.source_chroma_height;
-
-		//m_VidDecodeInfo.display_V_width = m_VidDecodeInfo.source_chroma_width;
-		//m_VidDecodeInfo.display_V_height = m_VidDecodeInfo.source_chroma_height;
-
-		//m_stOutputFrameParams.Y_width = m_VidDecodeInfo.display_Y_width;
-		//m_stOutputFrameParams.Y_height = m_VidDecodeInfo.display_Y_height;
-		//m_stOutputFrameParams.Y_frameSize = m_VidDecodeInfo.display_Y_width * m_VidDecodeInfo.display_Y_height;
-
-		//m_stOutputFrameParams.U_width = m_VidDecodeInfo.display_U_width;
-		//m_stOutputFrameParams.U_height = m_VidDecodeInfo.display_U_height;
-		//m_stOutputFrameParams.U_frameSize = m_VidDecodeInfo.display_U_width * m_VidDecodeInfo.display_U_height;
-
-		//m_stOutputFrameParams.V_width = m_VidDecodeInfo.display_V_width;
-		//m_stOutputFrameParams.V_height = m_VidDecodeInfo.display_V_height;
-		//m_stOutputFrameParams.V_frameSize = m_VidDecodeInfo.display_V_width * m_VidDecodeInfo.display_V_height;
-
-		//m_nOutputFrameSize = m_stOutputFrameParams.Y_frameSize + m_stOutputFrameParams.U_frameSize + m_stOutputFrameParams.V_frameSize;			//RGB 3 plane
-
-		//m_pucOutputFrameBuf = (uint8_t*)malloc(m_nOutputFrameSize);			//RGB 3 plane
-		//memset(m_pucOutputFrameBuf, 0x00, m_nOutputFrameSize);
-
-		//m_nSourceFrameSize = m_VidDecodeInfo.frame_buf_size;
-		//m_pucSourceFrameBuf = (uint8_t*)malloc(m_nSourceFrameSize);
-		//memset(m_pucSourceFrameBuf, 0x00, m_nSourceFrameSize);
-
-		rtcode = CESDecoder::Open(dwStreamType, pszFileName);
-	}
-	//else
-	//{
-	//	rtcode = ESDECODER_PARAMETER_ERROR;
-	//}
+	rtcode = CESDecoder::Open(dwStreamType, pszFileName);
 
 	return rtcode;
 }
@@ -212,7 +102,7 @@ int CVESDecoder::Close(void)
 	}
 	//m_bSourceDataAvailable = 0;
 
-	assert(m_bFrameProcessResponseStatus == 0);
+	//assert(m_bFrameProcessResponseStatus == 0);
 
 	if (m_pucOutputFrameBuf != NULL)
 	{
@@ -271,6 +161,16 @@ int CVESDecoder::AttachWnd(HWND hWnd, int(*callback_luma)(HWND, WPARAM, LPARAM),
 	}
 
 	StartFrameProcessThread();
+
+	return ddRval;
+}
+
+int CVESDecoder::SetClientRect(RECT rcWnd)
+{
+	HRESULT ddRval = -1;
+
+	//m_rcWnd = rcWnd;
+	m_pDirectDraw->SetClientRect(rcWnd);
 
 	return ddRval;
 }
@@ -446,13 +346,15 @@ int CVESDecoder::CanvasEnlarge(void)
 {
 	int rtcode = ESDECODER_UNKNOWN_ERROR;
 
-	m_VidDecodeInfo.display_decimate_coeff += 2;
-	if (m_VidDecodeInfo.display_decimate_coeff > 4)
+	int display_decimate_coeff = m_VidDecodeInfo.display_decimate_coeff;
+
+	display_decimate_coeff += 2;
+	if (display_decimate_coeff > 4)
 	{
-		m_VidDecodeInfo.display_decimate_coeff = -4;
+		display_decimate_coeff = -4;
 	}
 
-	rtcode = CanvasSetup(m_VidDecodeInfo.display_decimate_coeff);
+	rtcode = CanvasSetup(display_decimate_coeff);
 
 	return rtcode;
 }
@@ -461,13 +363,15 @@ int CVESDecoder::CanvasReduce(void)
 {
 	int rtcode = ESDECODER_UNKNOWN_ERROR;
 
-	m_VidDecodeInfo.display_decimate_coeff -= 2;
-	if (m_VidDecodeInfo.display_decimate_coeff < -4)
+	int display_decimate_coeff = m_VidDecodeInfo.display_decimate_coeff;
+
+	display_decimate_coeff -= 2;
+	if (display_decimate_coeff < -4)
 	{
-		m_VidDecodeInfo.display_decimate_coeff = 4;
+		display_decimate_coeff = 4;
 	}
 
-	rtcode = CanvasSetup(m_VidDecodeInfo.display_decimate_coeff);
+	rtcode = CanvasSetup(display_decimate_coeff);
 
 	return rtcode;
 }
@@ -482,6 +386,8 @@ int CVESDecoder::CanvasSetup(int display_decimate_coeff)
 	if (wait_state == WAIT_OBJECT_0)
 	{
 #endif
+		m_VidDecodeInfo.display_decimate_coeff = display_decimate_coeff;
+
 		if (display_decimate_coeff == 0)
 		{
 			m_VidDecodeInfo.display_Y_width = m_VidDecodeInfo.source_luma_width;
@@ -545,12 +451,29 @@ int CVESDecoder::CanvasSetup(int display_decimate_coeff)
 	return rtcode;
 }
 
-void CVESDecoder::ToggleView(void)
+int CVESDecoder::GetCanvasWH(int* pnwidth, int* pnheight)
 {
-	assert(m_pDirectDraw != NULL);
+	int rtcode = ESDECODER_NO_ERROR;
 
-	m_pDirectDraw->ToggleView();
+	if ((pnwidth != NULL) && (pnheight != NULL))
+	{
+		*pnwidth = m_stOutputFrameParams.Y_width;
+		*pnheight = m_stOutputFrameParams.Y_height;
+	}
+	else
+	{
+		rtcode = ESDECODER_PARAMETER_ERROR;
+	}
+
+	return rtcode;
 }
+
+//void CVESDecoder::ToggleView(void)
+//{
+//	assert(m_pDirectDraw != NULL);
+//
+//	m_pDirectDraw->ToggleView();
+//}
 
 
 uint32_t thread_frame_process(LPVOID lpParam)

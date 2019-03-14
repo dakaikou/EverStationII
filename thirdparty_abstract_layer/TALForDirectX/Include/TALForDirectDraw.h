@@ -66,10 +66,10 @@ protected:
 public:
 	virtual int OpenVideo(HWND hWnd, int source_width, int source_height, unsigned int dwFourCC, double dFrameRate);
 	virtual int CloseVideo(void);
+	virtual int SetClientRect(RECT dstRect);
 	virtual int FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frameSize, const FRAME_PARAMS_t* pstFrameParams);
 	virtual int RenderOnPrimarySurface(void);
 	virtual int ToggleGrid(void);
-	virtual int ToggleView(void);
 
 private:		//direct audio output
 
@@ -87,6 +87,7 @@ private:		//direct audio output
 	//int						m_nViewHeight;
 	HWND					m_hVidWnd;
 	DWORD					m_dwFourCC;
+	RECT					m_rcClient;
 
 	//FRAME_PARAMS_t			m_stTemporalFrameParams;
 	//LPBYTE					m_pTemporalFrameBuf;

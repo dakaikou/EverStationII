@@ -141,6 +141,15 @@ int CTALForDirectDraw::CloseVideo(void)
 	return rtcode;
 }
 
+int CTALForDirectDraw::SetClientRect(RECT rcClient)
+{
+	int					rtcode = -1;
+
+	m_rcClient = rcClient;
+
+	return rtcode;
+}
+
 int CTALForDirectDraw::AllocateDirectDrawResource(HWND hWnd, int canvas_width, int canvas_height, unsigned int dwFourCC)
 {
 	int					rtcode = -1;
@@ -486,48 +495,48 @@ int CTALForDirectDraw::ToggleGrid(void)
 	return 0;
 }
 
-int CTALForDirectDraw::ToggleView(void)
-{
-	int rtcode = -1;
-
-	RECT  rcClient;
-	::GetClientRect(m_hVidWnd, &rcClient);
-
-	int nClientWidth = rcClient.right - rcClient.left;
-	int nClientHeight = rcClient.bottom - rcClient.top;
-
-	int dstWidth = (int)(m_nSourceWidth * m_dViewEnlargeCoeff);
-	int dstHeight = (int)(m_nSourceHeight * m_dViewEnlargeCoeff);
-	if ((dstWidth >= nClientWidth) || (dstHeight >= nClientHeight))
-	{
-		m_dViewEnlargeCoeff = 0.25;
-	}
-	else
-	{
-		m_dViewEnlargeCoeff *= 2.0;
-
-		if (m_dViewEnlargeCoeff > 4.0)
-		{
-			m_dViewEnlargeCoeff = 0.25;
-		}
-	}
-
-	dstWidth = (int)(m_nSourceWidth * m_dViewEnlargeCoeff);
-	dstHeight = (int)(m_nSourceHeight * m_dViewEnlargeCoeff);
-
-	if (dstHeight > nClientHeight)
-	{
-		m_dViewEnlargeCoeff = (double)nClientHeight / m_nSourceHeight;
-	}
-	else if (dstWidth > nClientWidth)
-	{
-		m_dViewEnlargeCoeff = (double)nClientWidth / m_nSourceWidth;
-	}
-
-	rtcode = RenderOnPrimarySurface();
-
-	return rtcode;
-}
+//int CTALForDirectDraw::ToggleView(void)
+//{
+//	int rtcode = -1;
+//
+//	RECT  rcClient;
+//	::GetClientRect(m_hVidWnd, &rcClient);
+//
+//	int nClientWidth = rcClient.right - rcClient.left;
+//	int nClientHeight = rcClient.bottom - rcClient.top;
+//
+//	int dstWidth = (int)(m_nSourceWidth * m_dViewEnlargeCoeff);
+//	int dstHeight = (int)(m_nSourceHeight * m_dViewEnlargeCoeff);
+//	if ((dstWidth >= nClientWidth) || (dstHeight >= nClientHeight))
+//	{
+//		m_dViewEnlargeCoeff = 0.25;
+//	}
+//	else
+//	{
+//		m_dViewEnlargeCoeff *= 2.0;
+//
+//		if (m_dViewEnlargeCoeff > 4.0)
+//		{
+//			m_dViewEnlargeCoeff = 0.25;
+//		}
+//	}
+//
+//	dstWidth = (int)(m_nSourceWidth * m_dViewEnlargeCoeff);
+//	dstHeight = (int)(m_nSourceHeight * m_dViewEnlargeCoeff);
+//
+//	if (dstHeight > nClientHeight)
+//	{
+//		m_dViewEnlargeCoeff = (double)nClientHeight / m_nSourceHeight;
+//	}
+//	else if (dstWidth > nClientWidth)
+//	{
+//		m_dViewEnlargeCoeff = (double)nClientWidth / m_nSourceWidth;
+//	}
+//
+//	rtcode = RenderOnPrimarySurface();
+//
+//	return rtcode;
+//}
 
 int CTALForDirectDraw::RenderOnPrimarySurface(void)
 {
@@ -542,14 +551,10 @@ int CTALForDirectDraw::RenderOnPrimarySurface(void)
 			m_lpDDSPrimary->SetClipper(m_pcClipper);
 		}
 
-		//Get the current window client area
-		RECT  rcClient;
-		::GetClientRect(m_hVidWnd, &rcClient);
-
 		POINT ptOrigin;
 
-		int nClientWidth = rcClient.right - rcClient.left;
-		int nClientHeight = rcClient.bottom - rcClient.top;
+		int nClientWidth = m_rcClient.right - m_rcClient.left;
+		int nClientHeight = m_rcClient.bottom - m_rcClient.top;
 
 		int dstWidth = (int)(m_nSourceWidth * m_dViewEnlargeCoeff);
 		int dstHeight = (int)(m_nSourceHeight * m_dViewEnlargeCoeff);
@@ -561,7 +566,7 @@ int CTALForDirectDraw::RenderOnPrimarySurface(void)
 			if (dstHeight > nClientHeight) dstHeight = nClientHeight;
 		}
 
-		ptOrigin.x = (nClientWidth - dstWidth) / 2;
+		ptOrigin.x = m_rcClient.left + (nClientWidth - dstWidth) / 2;
 		ptOrigin.y = (nClientHeight - dstHeight) / 2;
 
 		POINT ptScreen;
@@ -639,6 +644,7 @@ int CTALForDirectDraw::RenderOnPrimarySurface(void)
 
 	return ddRval;
 }
+
 
 #if RENDER_IN_THREAD
 //why should we run a thread to render surface? I don't know.  chendelin 2019.2.21

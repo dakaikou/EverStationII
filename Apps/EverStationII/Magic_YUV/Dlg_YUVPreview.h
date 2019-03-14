@@ -18,7 +18,9 @@
 
 #include "MiddleWare/MiddleWare_ESDecoder/Include/VideoDecoder_YUV.h"
 
-#define WM_VIDEO_CONTAINER_REPORT_PSNR_EXIT	WM_USER + 0x6af9
+#define WM_VIDEO_CONTAINER_REPORT_PSNR_EXIT			WM_USER + 0x6af9
+#define WM_VIDEO_CONTAINER_REPORT_TRANSCODE_EXIT	WM_USER + 0x6d2a
+
 
 class CDlg_YUVPreview : public CDialog
 {
@@ -42,18 +44,30 @@ public:
 // Implementation
 public:
 
-	CDlg_Progress	m_dlgProgress;
+	CDlg_Progress		 m_dlgProgress;
+
+	YUV_SERIAL_PARAM_t	 m_stSrcYUVParams;
+	YUV_SERIAL_PARAM_t	 m_stDstYUVParams;
+	CString				 m_strReferenceFile;
+	CString				 m_strWorkingFile;
+	CString				 m_strSavingFile;
 
 	void Reset(void);
 //	void Set(void);
 
-	void ReportFramePSNR(int nFrameNum, double psnr);
+	void ReportFramePSNR(int nFrameNum, double Ypsnr, double Upsnr, double Vpsnr);
 
 protected:
 
+	CYUV_VideoDecoder	 m_ReferenceYUVDecoder;
+	CYUV_VideoDecoder	 m_WorkingYUVDecoder;
+
 	CDlg_VideoShowScreen m_dlgVideo;
-	CYUV_VideoDecoder	 m_YUVDecoder;
 	//CButton		 m_splitbtnPreview;
+	//YUV_PSNR_ThreadParams_t m_psnr_thread_params;
+
+	void CheckSrcFrameParameters(YUV_SERIAL_PARAM_t* pstYuvParams);
+	void CheckDstFrameParameters(YUV_SERIAL_PARAM_t* pstYuvParams);
 
 	void ParseWandH(char* path, int *w, int *h);
 	void ParseFPS(char* path, int *fps);
@@ -68,12 +82,15 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnBtnYuvReferenceFileOpen();
 	afx_msg void OnBtnYuvWorkingFileOpen();
+	afx_msg void OnBtnYuvSavingFileOpen();
 	afx_msg void OnBtnYuvFilePreview();
-	afx_msg void OnBtnYuvFilePSNR();
+	afx_msg void OnBtnYuvFileCalculatePSNR();
+	afx_msg void OnBtnYuvFileTranscode();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
 	afx_msg LRESULT OnReportPlayThreadExit(WPARAM, LPARAM);
 	afx_msg LRESULT OnReportPSNRThreadExit(WPARAM, LPARAM);
+	afx_msg LRESULT OnReportTranscodeThreadExit(WPARAM, LPARAM);
 
 	DECLARE_MESSAGE_MAP()
 public:
@@ -81,7 +98,6 @@ public:
 	CListCtrl m_listPSNRReport;
 };
 
-uint32_t YUV_PSNR_Thread(PVOID pVoid);
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

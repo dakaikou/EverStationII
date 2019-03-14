@@ -18,7 +18,7 @@ CYUV_VideoDecoder::~CYUV_VideoDecoder(void)
 {
 }
 
-int CYUV_VideoDecoder::Open(uint32_t dwStreamType, const char* pszFileName, const YUV_SOURCE_PARAM_t* psourceInfo)
+int CYUV_VideoDecoder::Open(uint32_t dwStreamType, const char* pszFileName, const YUV_SERIAL_PARAM_t* pYuvSerialParam)
 {
 	int rtcode = ESDECODER_UNKNOWN_ERROR;
 
@@ -26,89 +26,43 @@ int CYUV_VideoDecoder::Open(uint32_t dwStreamType, const char* pszFileName, cons
 
 	if (rtcode == ESDECODER_NO_ERROR)
 	{
-		if (psourceInfo != NULL)
+		if (pYuvSerialParam != NULL)
 		{
 			m_VidDecodeInfo.size = sizeof(VIDEO_DECODE_Params_t);
 
 			//information got from caller
-			m_VidDecodeInfo.display_framerate = psourceInfo->framerate;
-			m_VidDecodeInfo.display_Y_width = psourceInfo->luma_width;
-			m_VidDecodeInfo.display_Y_height = psourceInfo->luma_height;
-			m_VidDecodeInfo.display_decimate_coeff = 0;
 
-			m_VidDecodeInfo.source_FourCC = psourceInfo->dwFourCC;
+			m_VidDecodeInfo.source_FourCC = pYuvSerialParam->dwFourCC;
 			//strcpy_s(m_VidDecodeInfo.source_pszFourCC, sizeof(m_VidDecodeInfo.source_pszFourCC), psourceInfo->pszFourCC);
 
-			m_VidDecodeInfo.source_luma_width = psourceInfo->luma_width;
-			m_VidDecodeInfo.source_luma_height = psourceInfo->luma_height;
+			m_VidDecodeInfo.source_luma_width = pYuvSerialParam->luma_width;
+			m_VidDecodeInfo.source_luma_height = pYuvSerialParam->luma_height;
+			m_VidDecodeInfo.source_chroma_width = pYuvSerialParam->chroma_width;
+			m_VidDecodeInfo.source_chroma_height = pYuvSerialParam->chroma_height;
 
-			m_VidDecodeInfo.source_bpp = psourceInfo->quantizationBits;
+			m_VidDecodeInfo.source_bpp = pYuvSerialParam->quantizationBits;
 
 			//calculation
 			m_VidDecodeInfo.luma_pix_count = m_VidDecodeInfo.source_luma_width * m_VidDecodeInfo.source_luma_height;
-			m_VidDecodeInfo.luma_buf_size = m_VidDecodeInfo.luma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-
-			switch (m_VidDecodeInfo.source_FourCC)
-			{
-			case 0x56555949:		//IYUV
-				m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_0;
-				m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-				m_VidDecodeInfo.source_chroma_height = (m_VidDecodeInfo.source_luma_height >> 1);
-				m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-				m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-
-				break;
-
-			case 0x30323449:		//I420
-				m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_0;
-				m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-				m_VidDecodeInfo.source_chroma_height = (m_VidDecodeInfo.source_luma_height >> 1);
-				m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-				m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-
-				break;
-
-			case 0x32315659:		//YV12
-				m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_2;
-				m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-				m_VidDecodeInfo.source_chroma_height = m_VidDecodeInfo.source_luma_height;
-				m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-				m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-
-				break;
-
-			default:
-				m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_0;
-				m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-				m_VidDecodeInfo.source_chroma_height = (m_VidDecodeInfo.source_luma_height >> 1);
-				m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-				m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-				break;
-			}
-			//else if (strcmp(m_VidDecodeInfo.source_pszFourCC, "YUY2") == 0)
-			//{
-			//	m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_2;
-			//	m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-			//	m_VidDecodeInfo.source_chroma_height = m_VidDecodeInfo.source_luma_height;
-			//	m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-			//	m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-			//}
-			//else
-			//{
-			//	m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_0;
-			//	m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-			//	m_VidDecodeInfo.source_chroma_height = (m_VidDecodeInfo.source_luma_height >> 1);
-			//	m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-			//	m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-			//}
+			m_VidDecodeInfo.luma_buf_size = m_VidDecodeInfo.luma_pix_count * m_VidDecodeInfo.source_bpp / 8;
+			m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
+			m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * m_VidDecodeInfo.source_bpp / 8;
 
 			m_VidDecodeInfo.frame_buf_size = m_VidDecodeInfo.luma_buf_size + m_VidDecodeInfo.chroma_buf_size + m_VidDecodeInfo.chroma_buf_size;
+
+			//display parameters
+			m_VidDecodeInfo.display_framerate = pYuvSerialParam->framerate;
+
+			m_VidDecodeInfo.display_Y_width = pYuvSerialParam->luma_width;
+			m_VidDecodeInfo.display_Y_height = pYuvSerialParam->luma_height;
 
 			m_VidDecodeInfo.display_U_width = m_VidDecodeInfo.source_chroma_width;
 			m_VidDecodeInfo.display_U_height = m_VidDecodeInfo.source_chroma_height;
 
 			m_VidDecodeInfo.display_V_width = m_VidDecodeInfo.source_chroma_width;
 			m_VidDecodeInfo.display_V_height = m_VidDecodeInfo.source_chroma_height;
+
+			m_VidDecodeInfo.display_decimate_coeff = 0;
 
 			m_stOutputFrameParams.Y_width = m_VidDecodeInfo.display_Y_width;
 			m_stOutputFrameParams.Y_height = m_VidDecodeInfo.display_Y_height;
@@ -131,7 +85,7 @@ int CYUV_VideoDecoder::Open(uint32_t dwStreamType, const char* pszFileName, cons
 			m_pucSourceFrameBuf = (uint8_t*)malloc(m_nSourceFrameSize);
 			memset(m_pucSourceFrameBuf, 0x00, m_nSourceFrameSize);
 
-			m_nTotalFrameCount = m_nFileTotalSize / m_VidDecodeInfo.frame_buf_size;
+			m_nTotalFrameCount = (int)(m_nFileTotalSize / m_VidDecodeInfo.frame_buf_size);
 			m_nFrameEndPos = m_nFileTotalSize - (m_nFileTotalSize % m_VidDecodeInfo.frame_buf_size);
 		}
 		else
