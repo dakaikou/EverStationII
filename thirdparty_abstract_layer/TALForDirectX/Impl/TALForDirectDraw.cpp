@@ -233,21 +233,26 @@ int CTALForDirectDraw::AllocateDirectDrawResource(HWND hWnd, int canvas_width, i
 				ddsd.ddpfPixelFormat.dwFourCC = 0x32424752;
 				ddsd.ddpfPixelFormat.dwRGBBitCount = 24;			//default value
 #else
-#if RENDER_IN_YUV420_MODE
+//#if RENDER_IN_FIX_YUV420_MODE
+//				ddsd.ddpfPixelFormat.dwFlags = DDPF_FOURCC | DDPF_YUV;
+//				ddsd.ddpfPixelFormat.dwFourCC = MAKEFOURCC('I', '4', '2', '0');				//0x30323449	Y-U-V
+//				ddsd.ddpfPixelFormat.dwYUVBitCount = 8;			//default value
+//#else
+#if RENDER_IN_AUTO_YUV_MODE
 				ddsd.ddpfPixelFormat.dwFlags = DDPF_FOURCC | DDPF_YUV;
-				ddsd.ddpfPixelFormat.dwFourCC = MAKEFOURCC('I', '4', '2', '0');				//0x30323449	Y-U-V
+				ddsd.ddpfPixelFormat.dwFourCC = dwFourCC;					//0x59565955
 				ddsd.ddpfPixelFormat.dwYUVBitCount = 8;			//default value
-				//ddsd.ddpfPixelFormat.dwFourCC = MAKEFOURCC('Y', 'V', '1', '2');				//0x32315659,  Y-V-U
-				//ddsd.ddpfPixelFormat.dwYUVBitCount = 8;			//default value
 #else
 				ddsd.ddpfPixelFormat.dwFlags = DDPF_FOURCC | DDPF_YUV;
 				//ddsd.ddpfPixelFormat.dwFourCC = MAKEFOURCC('Y', 'U', 'Y', '2');				//0x32595559
 				//ddsd.ddpfPixelFormat.dwFourCC = MAKEFOURCC('U', 'Y', 'V', 'Y');					//0x59565955
 				//ddsd.ddpfPixelFormat.dwFourCC = MAKEFOURCC('Y', '4', '2', '2');				//0x32323459
-				ddsd.ddpfPixelFormat.dwFourCC = dwFourCC;					//0x59565955
+				ddsd.ddpfPixelFormat.dwFourCC = MAKEFOURCC('A', 'Y', 'U', 'V');				//0x56555941
+				//ddsd.ddpfPixelFormat.dwFourCC = dwFourCC;					//0x59565955
 				ddsd.ddpfPixelFormat.dwYUVBitCount = 8;			//default value
 #endif
 #endif
+//#endif
 
 				rtcode = m_lpDD->CreateSurface(&ddsd, &m_lpDDSOffscreen, NULL);
 				if (rtcode == DD_OK)
@@ -343,7 +348,8 @@ int CTALForDirectDraw::ReleaseDirectDrawResource(void)
 	return NO_ERROR;
 }
 
-int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpYBuf, const LPBYTE lpUBuf, const LPBYTE lpVBuf, int planeSize)
+//int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpYBuf, const LPBYTE lpUBuf, const LPBYTE lpVBuf, int planeSize)
+int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frameSize)
 {
 	LPBYTE  lpFrame = NULL;
 	LPBYTE  lpSurf = NULL;
@@ -352,9 +358,7 @@ int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpYBuf, const LPBYTE 
 	DDSURFACEDESC2		ddsd;    // DirectDraw ±Ì√Ê√Ë ˆ
 
 	if ((m_lpDDSOffscreen != NULL) &&
-		(lpYBuf != NULL) &&
-		(lpUBuf != NULL) &&
-		(lpVBuf != NULL))
+		(lpFrameBuf != NULL))
 	{
 		ZeroMemory(&ddsd, sizeof(DDSURFACEDESC2));
 		ddsd.dwSize = sizeof(DDSURFACEDESC2);
@@ -393,57 +397,59 @@ int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpYBuf, const LPBYTE 
 					//	lpSurf += ddsd.lPitch / 2;
 					//}
 #else
-#if RENDER_IN_YUV420_MODE
-					uint8_t* ptrY = lpYBuf;
-					uint8_t* ptrU = lpUBuf;
-					uint8_t* ptrV = lpVBuf;
-					for (DWORD i = 0; i < ddsd.dwHeight; i++)
-					{
-						//for (DWORD j = 0; j < ddsd.dwWidth; j++)
-						//{
-						//	lpSurf[j] = ptrY[j];
-						//}
-						memcpy(lpSurf, ptrY, ddsd.dwWidth);
-						lpSurf += ddsd.lPitch;
-						ptrY += ddsd.dwWidth;
-					}
-
-					for (DWORD i = 0; i < ddsd.dwHeight / 2; i++)
-					{
-						//for (DWORD j = 0; j < ddsd.dwWidth/2; j++)
-						//{
-						//	lpSurf[j] = ptrU[j];
-						//}
-						memcpy(lpSurf, ptrU, ddsd.dwWidth / 2);
-						ptrU += ddsd.dwWidth / 2;
-						lpSurf += ddsd.lPitch / 2;
-				}
-
-					for (DWORD i = 0; i < ddsd.dwHeight / 2; i++)
-					{
-						for (DWORD j = 0; j < ddsd.dwWidth / 2; j++)
-						{
-							lpSurf[j] = ptrV[j];
-						}
-						//memcpy(lpSurf, lpFrame, ddsd.dwWidth / 2);
-						ptrV += ddsd.dwWidth / 2;
-						lpSurf += ddsd.lPitch / 2;
-					}
-#endif
+//#if RENDER_IN_FIX_YUV420_MODE
+//					uint8_t* ptrY = lpYBuf;
+//					uint8_t* ptrU = lpUBuf;
+//					uint8_t* ptrV = lpVBuf;
+//					for (DWORD i = 0; i < ddsd.dwHeight; i++)
+//					{
+//						//for (DWORD j = 0; j < ddsd.dwWidth; j++)
+//						//{
+//						//	lpSurf[j] = ptrY[j];
+//						//}
+//						memcpy(lpSurf, ptrY, ddsd.dwWidth);
+//						lpSurf += ddsd.lPitch;
+//						ptrY += ddsd.dwWidth;
+//					}
+//
+//					for (DWORD i = 0; i < ddsd.dwHeight / 2; i++)
+//					{
+//						//for (DWORD j = 0; j < ddsd.dwWidth/2; j++)
+//						//{
+//						//	lpSurf[j] = ptrU[j];
+//						//}
+//						memcpy(lpSurf, ptrU, ddsd.dwWidth / 2);
+//						ptrU += ddsd.dwWidth / 2;
+//						lpSurf += ddsd.lPitch / 2;
+//				}
+//
+//					for (DWORD i = 0; i < ddsd.dwHeight / 2; i++)
+//					{
+//						for (DWORD j = 0; j < ddsd.dwWidth / 2; j++)
+//						{
+//							lpSurf[j] = ptrV[j];
+//						}
+//						//memcpy(lpSurf, lpFrame, ddsd.dwWidth / 2);
+//						ptrV += ddsd.dwWidth / 2;
+//						lpSurf += ddsd.lPitch / 2;
+//					}
+//#else
+//#if RENDER_IN_AUTO_YUV_MODE
 
 					int luma_width = ddsd.dwWidth;
 					int luma_height = ddsd.dwHeight;
 					int chroma_width = ddsd.dwWidth;
 					int chroma_height = ddsd.dwHeight;
 
-					uint8_t* ptrY = lpYBuf;
-					uint8_t* ptrU = lpUBuf;
-					uint8_t* ptrV = lpVBuf;
-
 					if (ddsd.ddpfPixelFormat.dwFourCC == 0x56555949)				//IYUV   4:2:0
 					{
 						chroma_width = luma_width / 2;
 						chroma_height = luma_height / 2;
+
+						uint8_t* ptrY = lpFrameBuf;
+						uint8_t* ptrU = ptrY + luma_width * luma_height;
+						uint8_t* ptrV = ptrU + chroma_width * chroma_height;
+
 						for (DWORD i = 0; i < luma_height; i++)
 						{
 							for (DWORD j = 0; j < luma_width; j++)
@@ -480,23 +486,29 @@ int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpYBuf, const LPBYTE 
 					else if (ddsd.ddpfPixelFormat.dwFourCC == 0x32595559)			//YUY2		4:2:2
 					{
 						chroma_width = luma_width / 2;
+						chroma_height = luma_height;
+
+						uint8_t* ptrY = lpFrameBuf;
+						uint8_t* ptrU = ptrY + luma_width * luma_height;
+						uint8_t* ptrV = ptrU + chroma_width * chroma_height;
+
 						for (DWORD i = 0; i < luma_height; i++)
 						{
-							int rowIndex = 0;
+							int pxIndex = 0;
 							for (DWORD j = 0; j < luma_width; j++)
 							{
-								lpSurf[rowIndex] = ptrY[j];
-								rowIndex++;
+								lpSurf[pxIndex] = ptrY[j];
+								pxIndex++;
 								if (j % 2 == 0)
 								{
-									lpSurf[rowIndex] = ptrV[j / 2];
+									lpSurf[pxIndex] = ptrV[j / 2];
 								}
 								else
 								{
-									lpSurf[rowIndex] = ptrU[j / 2];
+									lpSurf[pxIndex] = ptrU[j / 2];
 								}
 
-								rowIndex++;
+								pxIndex++;
 							}
 							//memcpy(lpSurf, ptrY, ddsd.dwWidth);
 							lpSurf += ddsd.lPitch;
@@ -505,7 +517,38 @@ int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpYBuf, const LPBYTE 
 							ptrV += chroma_width;
 						}
 					}
+					else if (ddsd.ddpfPixelFormat.dwFourCC == 0x56555941)			//AYUV		4:4:4
+					{
+						uint8_t* ptrR = lpFrameBuf;
+						uint8_t* ptrG = ptrR + luma_width * luma_height;
+						uint8_t* ptrB = ptrG + luma_width * luma_height;
+
+						//chroma_width = luma_width;
+						for (DWORD i = 0; i < luma_height; i++)
+						{
+							int pxIndex = 0;
+							for (DWORD j = 0; j < luma_width; j++)
+							{
+								lpSurf[pxIndex] = ptrR[j];				//R
+								pxIndex++;
+								lpSurf[pxIndex] = ptrG[j];				//G
+								pxIndex++;
+								lpSurf[pxIndex] = ptrB[j];				//B
+								pxIndex++;
+								lpSurf[pxIndex] = 0xFF;				//A
+								pxIndex++;
+
+							}
+							lpSurf += ddsd.lPitch;
+							ptrB += luma_width;
+							ptrG += luma_width;
+							ptrR += luma_width;
+						}
+					}
 #endif
+//#endif
+//#endif
+
 				}
 
 				if (m_dwDebugTimeTick == 0x00000000)

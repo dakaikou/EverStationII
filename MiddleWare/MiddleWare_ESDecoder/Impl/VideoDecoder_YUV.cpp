@@ -34,6 +34,9 @@ int CYUV_VideoDecoder::Open(uint32_t dwStreamType, const char* pszFileName, cons
 				m_stYUVSequenceParam.chroma_plane_size +
 				m_stYUVSequenceParam.chroma_plane_size;			//YUV 3 plane
 
+			m_nTotalFrameCount = (int)(m_nFileTotalSize / m_nYUVFrameSize);
+			m_nFrameEndPos = m_nFileTotalSize - (m_nFileTotalSize % m_nYUVFrameSize);
+
 			m_pucYUVFrameBuf = (uint8_t*)malloc(m_nYUVFrameSize);
 			memset(m_pucYUVFrameBuf, 0x00, m_nYUVFrameSize);
 
@@ -41,14 +44,22 @@ int CYUV_VideoDecoder::Open(uint32_t dwStreamType, const char* pszFileName, cons
 
 			m_stOutputPlaneParam.luma_width = m_stYUVSequenceParam.luma_width;
 			m_stOutputPlaneParam.luma_height = m_stYUVSequenceParam.luma_height;
-			m_stOutputPlaneParam.chroma_width = m_stYUVSequenceParam.chroma_width;
-			m_stOutputPlaneParam.chroma_height = m_stYUVSequenceParam.chroma_height;
-			m_stOutputPlaneParam.luma_plane_size = m_stYUVSequenceParam.luma_plane_size;
-			m_stOutputPlaneParam.chroma_plane_size = m_stYUVSequenceParam.chroma_plane_size;
 			m_stOutputPlaneParam.framerate = m_stYUVSequenceParam.framerate;
 			m_stOutputPlaneParam.nColorSpace = m_stYUVSequenceParam.nColorSpace;
 			m_stOutputPlaneParam.quantizationBits = m_stYUVSequenceParam.quantizationBits;
+#if RENDER_IN_AUTO_YUV_MODE
 			m_stOutputPlaneParam.dwFourCC = m_stYUVSequenceParam.dwFourCC;
+			m_stOutputPlaneParam.chroma_width = m_stYUVSequenceParam.chroma_width;
+			m_stOutputPlaneParam.chroma_height = m_stYUVSequenceParam.chroma_height;
+#else
+//#if RENDER_IN_FIX_YUV444_MODE
+			m_stOutputPlaneParam.dwFourCC = 0x56555941;		//AYUV
+			m_stOutputPlaneParam.chroma_width = m_stYUVSequenceParam.luma_width;
+			m_stOutputPlaneParam.chroma_height = m_stYUVSequenceParam.luma_height;
+//#endif
+#endif
+			m_stOutputPlaneParam.luma_plane_size = m_stOutputPlaneParam.luma_width * m_stOutputPlaneParam.luma_height;
+			m_stOutputPlaneParam.chroma_plane_size = m_stOutputPlaneParam.chroma_width * m_stOutputPlaneParam.chroma_height;
 
 			m_nOutputPlaneSize = m_stOutputPlaneParam.luma_plane_size + 
 				m_stOutputPlaneParam.chroma_plane_size + 
@@ -56,9 +67,6 @@ int CYUV_VideoDecoder::Open(uint32_t dwStreamType, const char* pszFileName, cons
 
 			m_pucOutputPlaneBuf = (uint8_t*)malloc(m_nOutputPlaneSize);			//RGB 3 plane
 			memset(m_pucOutputPlaneBuf, 0x00, m_nOutputPlaneSize);
-
-			m_nTotalFrameCount = (int)(m_nFileTotalSize / m_nYUVFrameSize);
-			m_nFrameEndPos = m_nFileTotalSize - (m_nFileTotalSize % m_nYUVFrameSize);
 		}
 		else
 		{

@@ -192,5 +192,7 @@ MW_ES_LIB int PICTURE_Enlarge(uint8_t* src, int src_w, int src_h, uint8_t* dst, 
 MW_ES_LIB int PICTURE_Reduce(uint8_t* src, int src_w, int src_h, uint8_t* dst, int dst_w, int dst_h, int coeff);
 MW_ES_LIB double PICTURE_psnr(uint8_t* reference, uint8_t* working, int size);
 
+MW_ES_LIB int PICTURE_yuv2rgb(int colorSpace, uint8_t Y, uint8_t U, uint8_t V, uint8_t* R, uint8_t* G, uint8_t* B);
+
 #endif
 

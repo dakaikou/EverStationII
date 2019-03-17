@@ -209,49 +209,318 @@ int CVESDecoder::FrameProcessAndFeedToDirectDraw(void)
 	if (wait_state == WAIT_OBJECT_0)
 	{
 #endif
-		uint8_t* pucY = m_pucYUVFrameBuf;
-		uint8_t* pucU = pucY + m_stYUVSequenceParam.luma_plane_size;
-		uint8_t* pucV = pucU + m_stYUVSequenceParam.chroma_plane_size;
-
-		uint8_t* pucPlaneY = m_pucOutputPlaneBuf;
-		uint8_t* pucPlaneU = pucPlaneY + m_stOutputPlaneParam.luma_plane_size;
-		uint8_t* pucPlaneV = pucPlaneU + m_stOutputPlaneParam.chroma_plane_size;
+		uint8_t* pucFrameY = m_pucYUVFrameBuf;
+		uint8_t* pucFrameU = pucFrameY + m_stYUVSequenceParam.luma_plane_size;
+		uint8_t* pucFrameV = pucFrameU + m_stYUVSequenceParam.chroma_plane_size;
 
 #if USE_FRAMEBUF_ACCESS_MUTEX
 		uint32_t wait_state = ::WaitForSingleObject(m_hSourceFrameBufAccess, INFINITE);
 		if (wait_state == WAIT_OBJECT_0)
 		{
 #endif
+			uint8_t R, G, B;
+			uint8_t Y, U, V;
 
-			if (m_decimate_coeff == 0)
+#if RENDER_IN_AUTO_YUV_MODE
+
+			uint8_t* pSrcY = pucFrameY;
+			uint8_t* pSrcU = pucFrameU;
+			uint8_t* pSrcV = pucFrameV;
+
+			if (m_stYUVSequenceParam.dwFourCC == 0x56555941)			//ARGB	4:4:4
 			{
-				assert(m_stYUVSequenceParam.luma_plane_size == m_stOutputPlaneParam.luma_plane_size);
-				memcpy(pucPlaneY, pucY, m_stYUVSequenceParam.luma_plane_size);
-				memcpy(pucPlaneU, pucU, m_stYUVSequenceParam.chroma_plane_size);
-				memcpy(pucPlaneV, pucV, m_stYUVSequenceParam.chroma_plane_size);
+				assert(m_stYUVSequenceParam.luma_plane_size == m_stYUVSequenceParam.chroma_plane_size);
+				assert(m_stOutputPlaneParam.luma_plane_size == m_stOutputPlaneParam.chroma_plane_size);
+
+				uint8_t* pucPlaneR = m_pucOutputPlaneBuf;
+				uint8_t* pucPlaneG = pucPlaneR + m_stOutputPlaneParam.luma_plane_size;
+				uint8_t* pucPlaneB = pucPlaneG + m_stOutputPlaneParam.luma_plane_size;
+
+				uint8_t* pDstR = pucPlaneR;
+				uint8_t* pDstG = pucPlaneG;
+				uint8_t* pDstB = pucPlaneB;
+
+				for (int row = 0; row < m_stOutputPlaneParam.luma_height; row++)
+				{
+					for (int col = 0; col < m_stOutputPlaneParam.luma_width; col++)
+					{
+						int luma_col = col;
+						int chroma_col = col;
+
+						if (m_decimate_coeff > 0)
+						{
+							luma_col /= m_decimate_coeff;
+							chroma_col /= m_decimate_coeff;
+						}
+						else if (m_decimate_coeff < 0)
+						{
+							luma_col *= -m_decimate_coeff;
+							chroma_col *= -m_decimate_coeff;
+						}
+
+						PICTURE_yuv2rgb(m_stOutputPlaneParam.nColorSpace, pSrcY[luma_col], pSrcU[chroma_col], pSrcV[chroma_col], &R, &G, &B);
+
+						pDstR[col] = R;
+						pDstG[col] = G;
+						pDstB[col] = B;
+					}
+					pDstR += m_stOutputPlaneParam.luma_width;
+					pDstG += m_stOutputPlaneParam.luma_width;
+					pDstB += m_stOutputPlaneParam.luma_width;
+
+					if (m_decimate_coeff == 0)
+					{
+						pSrcY += m_stYUVSequenceParam.luma_width;
+						pSrcU += m_stYUVSequenceParam.chroma_width;
+						pSrcV += m_stYUVSequenceParam.chroma_width;
+					}
+					else if (m_decimate_coeff > 0)
+					{
+						if ((row % m_decimate_coeff) == (m_decimate_coeff - 1))
+						{
+							pSrcY += m_stYUVSequenceParam.luma_width;
+							pSrcU += m_stYUVSequenceParam.chroma_width;
+							pSrcV += m_stYUVSequenceParam.chroma_width;
+						}
+					}
+					else
+					{
+						pSrcY += -(m_stYUVSequenceParam.luma_width * m_decimate_coeff);
+						pSrcU += -(m_stYUVSequenceParam.chroma_width * m_decimate_coeff);
+						pSrcV += -(m_stYUVSequenceParam.chroma_width * m_decimate_coeff);
+					}
+				}
 			}
-			else if (m_decimate_coeff > 0)
+			else
 			{
-				PICTURE_Enlarge(pucY, m_stYUVSequenceParam.luma_width, m_stYUVSequenceParam.luma_height,
-					pucPlaneY, m_stOutputPlaneParam.luma_width, m_stOutputPlaneParam.luma_height, m_decimate_coeff);
+				uint8_t* pucPlaneY = m_pucOutputPlaneBuf;
+				uint8_t* pucPlaneU = pucPlaneY + m_stOutputPlaneParam.luma_plane_size;
+				uint8_t* pucPlaneV = pucPlaneU + m_stOutputPlaneParam.chroma_plane_size;
 
-				PICTURE_Enlarge(pucU, m_stYUVSequenceParam.chroma_width, m_stYUVSequenceParam.chroma_height,
-					pucPlaneU, m_stOutputPlaneParam.chroma_width, m_stOutputPlaneParam.chroma_height, m_decimate_coeff);
+				if (m_decimate_coeff == 0)
+				{
+					memcpy(pucPlaneY, pucFrameY, m_stYUVSequenceParam.luma_plane_size);
+					memcpy(pucPlaneU, pucFrameU, m_stYUVSequenceParam.chroma_plane_size);
+					memcpy(pucPlaneV, pucFrameV, m_stYUVSequenceParam.chroma_plane_size);
+				}
+				else if (m_decimate_coeff > 0)
+				{
+					PICTURE_Enlarge(pucFrameY, m_stYUVSequenceParam.luma_width, m_stYUVSequenceParam.luma_height,
+						pucPlaneY, m_stOutputPlaneParam.luma_width, m_stOutputPlaneParam.luma_height, m_decimate_coeff);
 
-				PICTURE_Enlarge(pucV, m_stYUVSequenceParam.chroma_width, m_stYUVSequenceParam.chroma_height,
-					pucPlaneV, m_stOutputPlaneParam.chroma_width, m_stOutputPlaneParam.chroma_height, m_decimate_coeff);
+					PICTURE_Enlarge(pucFrameU, m_stYUVSequenceParam.chroma_width, m_stYUVSequenceParam.chroma_height,
+						pucPlaneU, m_stOutputPlaneParam.chroma_width, m_stOutputPlaneParam.chroma_height, m_decimate_coeff);
+
+					PICTURE_Enlarge(pucFrameV, m_stYUVSequenceParam.chroma_width, m_stYUVSequenceParam.chroma_height,
+						pucPlaneV, m_stOutputPlaneParam.chroma_width, m_stOutputPlaneParam.chroma_height, m_decimate_coeff);
+				}
+				else if (m_decimate_coeff < 0)
+				{
+					PICTURE_Reduce(pucFrameY, m_stYUVSequenceParam.luma_width, m_stYUVSequenceParam.luma_height,
+						pucPlaneY, m_stOutputPlaneParam.luma_width, m_stOutputPlaneParam.luma_height, -m_decimate_coeff);
+
+					PICTURE_Reduce(pucFrameU, m_stYUVSequenceParam.chroma_width, m_stYUVSequenceParam.chroma_height,
+						pucPlaneU, m_stOutputPlaneParam.chroma_width, m_stOutputPlaneParam.chroma_height, -m_decimate_coeff);
+
+					PICTURE_Reduce(pucFrameV, m_stYUVSequenceParam.chroma_width, m_stYUVSequenceParam.chroma_height,
+						pucPlaneV, m_stOutputPlaneParam.chroma_width, m_stOutputPlaneParam.chroma_height, -m_decimate_coeff);
+				}
 			}
-			else if (m_decimate_coeff < 0)
+#else
+			uint8_t* pucPlaneR = m_pucOutputPlaneBuf;
+			uint8_t* pucPlaneG = pucPlaneR + m_stOutputPlaneParam.luma_plane_size;
+			uint8_t* pucPlaneB = pucPlaneG + m_stOutputPlaneParam.luma_plane_size;
+
+			uint8_t* pSrcY = pucFrameY;
+			uint8_t* pSrcU = pucFrameU;
+			uint8_t* pSrcV = pucFrameV;
+			uint8_t* pDstR = pucPlaneR;
+			uint8_t* pDstG = pucPlaneG;
+			uint8_t* pDstB = pucPlaneB;
+
+			if (m_stYUVSequenceParam.dwFourCC == 0x56555941)			//ARGB	4:4:4
 			{
-				PICTURE_Reduce(pucY, m_stYUVSequenceParam.luma_width, m_stYUVSequenceParam.luma_height,
-					pucPlaneY, m_stOutputPlaneParam.luma_width, m_stOutputPlaneParam.luma_height, -m_decimate_coeff);
+				assert(m_stYUVSequenceParam.luma_plane_size == m_stYUVSequenceParam.chroma_plane_size);
+				assert(m_stOutputPlaneParam.luma_plane_size == m_stOutputPlaneParam.chroma_plane_size);
 
-				PICTURE_Reduce(pucU, m_stYUVSequenceParam.chroma_width, m_stYUVSequenceParam.chroma_height,
-					pucPlaneU, m_stOutputPlaneParam.chroma_width, m_stOutputPlaneParam.chroma_height, -m_decimate_coeff);
+				for (int row = 0; row < m_stOutputPlaneParam.luma_height; row++)
+				{
+					for (int col = 0; col < m_stOutputPlaneParam.luma_width; col++)
+					{
+						int luma_col = col;
+						int chroma_col = col;
 
-				PICTURE_Reduce(pucV, m_stYUVSequenceParam.chroma_width, m_stYUVSequenceParam.chroma_height,
-					pucPlaneV, m_stOutputPlaneParam.chroma_width, m_stOutputPlaneParam.chroma_height, -m_decimate_coeff);
+						if (m_decimate_coeff > 0)
+						{
+							luma_col /= m_decimate_coeff;
+							chroma_col /= m_decimate_coeff;
+						}
+						else if (m_decimate_coeff < 0)
+						{
+							luma_col *= -m_decimate_coeff;
+							chroma_col *= -m_decimate_coeff;
+						}
+
+						Y = pSrcY[luma_col];
+						U = pSrcU[chroma_col];
+						V = pSrcV[chroma_col];
+						PICTURE_yuv2rgb(m_stOutputPlaneParam.nColorSpace, Y, U, V, &R, &G, &B);
+
+						pDstR[col] = R;
+						pDstG[col] = G;
+						pDstB[col] = B;
+					}
+					pDstR += m_stOutputPlaneParam.luma_width;
+					pDstG += m_stOutputPlaneParam.luma_width;
+					pDstB += m_stOutputPlaneParam.luma_width;
+
+					if (m_decimate_coeff == 0)
+					{
+						pSrcY += m_stYUVSequenceParam.luma_width;
+						pSrcU += m_stYUVSequenceParam.chroma_width;
+						pSrcV += m_stYUVSequenceParam.chroma_width;
+					}
+					else if (m_decimate_coeff > 0)
+					{
+						if ((row % m_decimate_coeff) == (m_decimate_coeff - 1))
+						{
+							pSrcY += m_stYUVSequenceParam.luma_width;
+							pSrcU += m_stYUVSequenceParam.chroma_width;
+							pSrcV += m_stYUVSequenceParam.chroma_width;
+						}
+					}
+					else
+					{
+						pSrcY += -(m_stYUVSequenceParam.luma_width * m_decimate_coeff);
+						pSrcU += -(m_stYUVSequenceParam.chroma_width * m_decimate_coeff);
+						pSrcV += -(m_stYUVSequenceParam.chroma_width * m_decimate_coeff);
+					}
+				}
 			}
+			else if (m_stYUVSequenceParam.dwFourCC == 0x32595559)		//YUY2  4:2:2
+			{
+				for (int row = 0; row < m_stOutputPlaneParam.luma_height; row++)
+				{
+					for (int col = 0; col < m_stOutputPlaneParam.luma_width; col++)
+					{
+						int luma_col = col;
+						int chroma_col = col / 2;
+
+						if (m_decimate_coeff > 0)
+						{
+							luma_col /= m_decimate_coeff;
+							chroma_col /= m_decimate_coeff;
+						}
+						else if (m_decimate_coeff < 0)
+						{
+							luma_col *= -m_decimate_coeff;
+							chroma_col *= -m_decimate_coeff;
+						}
+
+						Y = pSrcY[luma_col];
+						U = pSrcU[chroma_col];
+						V = pSrcV[chroma_col];
+						PICTURE_yuv2rgb(m_stOutputPlaneParam.nColorSpace, Y, U, V, &R, &G, &B);
+
+						pDstR[col] = R;
+						pDstG[col] = G;
+						pDstB[col] = B;
+					}
+					pDstR += m_stOutputPlaneParam.luma_width;
+					pDstG += m_stOutputPlaneParam.luma_width;
+					pDstB += m_stOutputPlaneParam.luma_width;
+
+					if (m_decimate_coeff == 0)
+					{
+						pSrcY += m_stYUVSequenceParam.luma_width;
+						pSrcU += m_stYUVSequenceParam.chroma_width;
+						pSrcV += m_stYUVSequenceParam.chroma_width;
+					}
+					else if (m_decimate_coeff > 0)
+					{
+						if ((row % m_decimate_coeff) == (m_decimate_coeff - 1))
+						{
+							pSrcY += m_stYUVSequenceParam.luma_width;
+							pSrcU += m_stYUVSequenceParam.chroma_width;
+							pSrcV += m_stYUVSequenceParam.chroma_width;
+						}
+					}
+					else
+					{
+						pSrcY += -(m_stYUVSequenceParam.luma_width * m_decimate_coeff);
+						pSrcU += -(m_stYUVSequenceParam.chroma_width * m_decimate_coeff);
+						pSrcV += -(m_stYUVSequenceParam.chroma_width * m_decimate_coeff);
+					}
+				}
+			}
+			else if (m_stYUVSequenceParam.dwFourCC == 0x56555949)		//IYUV   4:2:0
+			{
+				for (int row = 0; row < m_stOutputPlaneParam.luma_height; row++)
+				{
+					for (int col = 0; col < m_stOutputPlaneParam.luma_width; col++)
+					{
+						int luma_col = col;
+						int chroma_col = col / 2;
+
+						if (m_decimate_coeff > 0)
+						{
+							luma_col /= m_decimate_coeff;
+							chroma_col /= m_decimate_coeff;
+						}
+						else if (m_decimate_coeff < 0)
+						{
+							luma_col *= -m_decimate_coeff;
+							chroma_col *= -m_decimate_coeff;
+						}
+
+						Y = pSrcY[luma_col];
+						U = pSrcU[chroma_col];
+						V = pSrcV[chroma_col];
+						PICTURE_yuv2rgb(m_stOutputPlaneParam.nColorSpace, Y, U, V, &R, &G, &B);
+
+						pDstR[col] = R;
+						pDstG[col] = G;
+						pDstB[col] = B;
+					}
+					pDstR += m_stOutputPlaneParam.luma_width;
+					pDstG += m_stOutputPlaneParam.luma_width;
+					pDstB += m_stOutputPlaneParam.luma_width;
+
+					if (m_decimate_coeff == 0)
+					{
+						pSrcY += m_stYUVSequenceParam.luma_width;
+						if (row % 2 == 1)
+						{
+							pSrcU += m_stYUVSequenceParam.chroma_width;
+							pSrcV += m_stYUVSequenceParam.chroma_width;
+						}
+					}
+					else if (m_decimate_coeff > 0)
+					{
+						if ((row % m_decimate_coeff) == (m_decimate_coeff - 1))
+						{
+							pSrcY += m_stYUVSequenceParam.luma_width;
+						}
+						int chroma_decimate_coeff = m_decimate_coeff * 2;
+						if ((row % chroma_decimate_coeff) == (chroma_decimate_coeff - 1))
+						{
+							pSrcU += m_stYUVSequenceParam.chroma_width;
+							pSrcV += m_stYUVSequenceParam.chroma_width;
+						}
+					}
+					else
+					{
+						pSrcY += -(m_stYUVSequenceParam.luma_width * m_decimate_coeff);
+						if (row % 2 == 1)
+						{
+							pSrcU += -(m_stYUVSequenceParam.chroma_width * m_decimate_coeff);
+							pSrcV += -(m_stYUVSequenceParam.chroma_width * m_decimate_coeff);
+						}
+					}
+
+				}
+			}
+#endif
 
 #if USE_FRAMEBUF_ACCESS_MUTEX
 			::ReleaseMutex(m_hSourceFrameBufAccess);
@@ -259,18 +528,21 @@ int CVESDecoder::FrameProcessAndFeedToDirectDraw(void)
 #endif
 		::SetEvent(m_hSourceFrameBufEmptyEvent);
 
-		if (m_callback_report_yuv_luma_stats != NULL)
+		if (m_decimate_coeff == 0)
 		{
-			m_callback_report_yuv_luma_stats(m_hwnd_for_caller, 0x45678912, 0x23456789);
-		}
+			if (m_callback_report_yuv_luma_stats != NULL)
+			{
+				m_callback_report_yuv_luma_stats(m_hwnd_for_caller, (WPARAM)m_pucOutputPlaneBuf, (LPARAM)m_nOutputPlaneSize);
+			}
 
-		if (m_callback_report_yuv_chroma_stats != NULL)
-		{
-			m_callback_report_yuv_chroma_stats(m_hwnd_for_caller, 0x86091335, 0x67521189);
+			if (m_callback_report_yuv_chroma_stats != NULL)
+			{
+				m_callback_report_yuv_chroma_stats(m_hwnd_for_caller, (WPARAM)m_pucOutputPlaneBuf, (LPARAM)m_nOutputPlaneSize);
+			}
 		}
 
 		//FeedToDirectDraw(m_pucOutputFrameBuf, m_nOutputFrameSize, &m_stOutputFrameParams);
-		HRESULT ddRval = m_pDirectDraw->FeedToOffScreenSurface(pucPlaneY, pucPlaneU, pucPlaneV, m_stOutputPlaneParam.luma_plane_size);
+		HRESULT ddRval = m_pDirectDraw->FeedToOffScreenSurface(m_pucOutputPlaneBuf, m_nOutputPlaneSize);
 
 #if USE_FRAMEBUF_ACCESS_MUTEX
 		::ReleaseMutex(m_hOutputFrameBufAccess);
@@ -399,28 +671,49 @@ int CVESDecoder::CanvasSetup(int display_decimate_coeff)
 		{
 			m_stOutputPlaneParam.luma_width = m_stYUVSequenceParam.luma_width;
 			m_stOutputPlaneParam.luma_height = m_stYUVSequenceParam.luma_height;
+#if RENDER_IN_AUTO_YUV_MODE
 			m_stOutputPlaneParam.chroma_width = m_stYUVSequenceParam.chroma_width;
 			m_stOutputPlaneParam.chroma_height = m_stYUVSequenceParam.chroma_height;
 			m_stOutputPlaneParam.chroma_width = m_stYUVSequenceParam.chroma_width;
 			m_stOutputPlaneParam.chroma_height = m_stYUVSequenceParam.chroma_height;
+#else
+			m_stOutputPlaneParam.chroma_width = m_stOutputPlaneParam.luma_width;
+			m_stOutputPlaneParam.chroma_height = m_stOutputPlaneParam.luma_height;
+			m_stOutputPlaneParam.chroma_width = m_stOutputPlaneParam.luma_width;
+			m_stOutputPlaneParam.chroma_height = m_stOutputPlaneParam.luma_height;
+#endif
 		}
 		else if (display_decimate_coeff > 0)
 		{
 			m_stOutputPlaneParam.luma_width = m_stYUVSequenceParam.luma_width * display_decimate_coeff;
 			m_stOutputPlaneParam.luma_height = m_stYUVSequenceParam.luma_height * display_decimate_coeff;
+#if RENDER_IN_AUTO_YUV_MODE
 			m_stOutputPlaneParam.chroma_width = m_stYUVSequenceParam.chroma_width * display_decimate_coeff;
 			m_stOutputPlaneParam.chroma_height = m_stYUVSequenceParam.chroma_height * display_decimate_coeff;
 			m_stOutputPlaneParam.chroma_width = m_stYUVSequenceParam.chroma_width * display_decimate_coeff;
 			m_stOutputPlaneParam.chroma_height = m_stYUVSequenceParam.chroma_height * display_decimate_coeff;
+#else
+			m_stOutputPlaneParam.chroma_width = m_stOutputPlaneParam.luma_width;
+			m_stOutputPlaneParam.chroma_height = m_stOutputPlaneParam.luma_height;
+			m_stOutputPlaneParam.chroma_width = m_stOutputPlaneParam.luma_width;
+			m_stOutputPlaneParam.chroma_height = m_stOutputPlaneParam.luma_height;
+#endif
 		}
 		else if (display_decimate_coeff < 0)
 		{
 			m_stOutputPlaneParam.luma_width = -m_stYUVSequenceParam.luma_width / display_decimate_coeff;
 			m_stOutputPlaneParam.luma_height = -m_stYUVSequenceParam.luma_height / display_decimate_coeff;
+#if RENDER_IN_AUTO_YUV_MODE
 			m_stOutputPlaneParam.chroma_width = -m_stYUVSequenceParam.chroma_width / display_decimate_coeff;
 			m_stOutputPlaneParam.chroma_height = -m_stYUVSequenceParam.chroma_height / display_decimate_coeff;
 			m_stOutputPlaneParam.chroma_width = -m_stYUVSequenceParam.chroma_width / display_decimate_coeff;
 			m_stOutputPlaneParam.chroma_height = -m_stYUVSequenceParam.chroma_height / display_decimate_coeff;
+#else
+			m_stOutputPlaneParam.chroma_width = m_stOutputPlaneParam.luma_width;
+			m_stOutputPlaneParam.chroma_height = m_stOutputPlaneParam.luma_height;
+			m_stOutputPlaneParam.chroma_width = m_stOutputPlaneParam.luma_width;
+			m_stOutputPlaneParam.chroma_height = m_stOutputPlaneParam.luma_height;
+#endif
 		}
 
 		m_pDirectDraw->CloseVideo();
@@ -621,5 +914,50 @@ double PICTURE_psnr(uint8_t* reference, uint8_t* working, int size)
 	}
 
 	return psnr;
+}
+
+MW_ES_LIB int PICTURE_yuv2rgb(int colorSpace, uint8_t Y, uint8_t U, uint8_t V, uint8_t* R, uint8_t* G, uint8_t* B)
+{
+	if (colorSpace == 601)
+	{
+		int C = Y - 16;
+		int D = U - 128;
+		int E = V - 128;
+		int nR = ((298 * C + 409 * E + 128) >> 8);
+		int nG = ((298 * C - 100 * D - 208 * E + 128) >> 8);
+		int nB = ((298 * C + 516 * D + 128) >> 8);
+
+		*R = (uint8_t)clip3(0, 255, nR);
+		*G = (uint8_t)clip3(0, 255, nG);
+		*B = (uint8_t)clip3(0, 255, nB);
+	}
+	else if (colorSpace == 709)
+	{
+		int C = Y - 16;
+		int D = U - 128;
+		int E = V - 128;
+		int nR = ((298 * C + 409 * E + 128) >> 8);
+		int nG = ((298 * C - 100 * D - 208 * E + 128) >> 8);
+		int nB = ((298 * C + 516 * D + 128) >> 8);
+
+		*R = (uint8_t)clip3(0, 255, nR);
+		*G = (uint8_t)clip3(0, 255, nG);
+		*B = (uint8_t)clip3(0, 255, nB);
+	}
+	else if (colorSpace == 2020)
+	{
+		int C = Y - 16;
+		int D = U - 128;
+		int E = V - 128;
+		int nR = ((298 * C + 409 * E + 128) >> 8);
+		int nG = ((298 * C - 100 * D - 208 * E + 128) >> 8);
+		int nB = ((298 * C + 516 * D + 128) >> 8);
+
+		*R = (uint8_t)clip3(0, 255, nR);
+		*G = (uint8_t)clip3(0, 255, nG);
+		*B = (uint8_t)clip3(0, 255, nB);
+	}
+
+	return 0;
 }
 

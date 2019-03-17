@@ -21,7 +21,6 @@ static char THIS_FILE[] = __FILE__;
 #include "..\MainFrm.h"
 #include "..\Common\Dlg_VideoShowScreen.h"
 #include "..\Common\GuiApi_MSG.h"
-//#include "..\Magic_YUV\GuiApi_YUV.h"
 
 uint32_t YUV_PSNR_Thread(PVOID pVoid);
 uint32_t YUV_TransCode_Thread(PVOID pVoid);
@@ -176,6 +175,9 @@ void CDlg_YUVPreview::InitComboxForSampleStructure(CComboBox* pCmbBox)
 	nIndex = pCmbBox->AddString("YUV 4:2:2");
 	pCmbBox->SetItemData(nIndex, 0x32595559);			//FourCC Option [UYVY,0x59565955] [YUY2,0x32595559]
 
+	nIndex = pCmbBox->AddString("YUV 4:4:4");
+	pCmbBox->SetItemData(nIndex, 0x56555941);			//FourCC Option [AYUV,0x56555941]
+
 	//int nIndex = pCmbBox->AddString("IYUV [4:2:0 Y-U-V]");
 	//pCmbBox->SetItemData(nIndex, 0x56555949);
 
@@ -193,7 +195,10 @@ void CDlg_YUVPreview::InitComboxForColorSpace(CComboBox* pCmbBox)
 {
 	pCmbBox->ResetContent();
 
-	int nIndex = pCmbBox->AddString("ITU-R.BT.709");
+	int nIndex = pCmbBox->AddString("ITU-R.BT.601");
+	pCmbBox->SetItemData(nIndex, 601);
+
+	nIndex = pCmbBox->AddString("ITU-R.BT.709");
 	pCmbBox->SetItemData(nIndex, 709);
 
 	nIndex = pCmbBox->AddString("ITU-R.BT.2020");
@@ -263,7 +268,7 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 	//setup the color space
 	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_SRC_COLORSPACE);
 	InitComboxForColorSpace(pCmbBox);
-	pCmbBox->SetCurSel(0);
+	pCmbBox->SetCurSel(1);
 
 	//设置播放帧率
 	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_SRC_FRAMERATE);
@@ -282,7 +287,7 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 	//setup the color space
 	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_DST_COLORSPACE);
 	InitComboxForColorSpace(pCmbBox);
-	pCmbBox->SetCurSel(0);
+	pCmbBox->SetCurSel(1);
 
 	//设置播放帧率
 	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_DST_FRAMERATE);
@@ -780,6 +785,12 @@ void CDlg_YUVPreview::CheckSrcFrameParameters(YUV_SEQUENCE_PARAM_t* pstYuvParams
 
 		case 0x32595559:		//YUY2
 			pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
+			pstYuvParams->chroma_height = pstYuvParams->luma_height;
+
+			break;
+
+		case 0x56555941:		//AYUV
+			pstYuvParams->chroma_width = pstYuvParams->luma_width;
 			pstYuvParams->chroma_height = pstYuvParams->luma_height;
 
 			break;

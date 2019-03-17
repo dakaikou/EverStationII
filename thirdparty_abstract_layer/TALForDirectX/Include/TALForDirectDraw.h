@@ -26,8 +26,13 @@
 #define USE_SURFACE_ACCESS_MUTEX		1	
 
 #define RENDER_IN_THREAD				0	
-#define RENDER_IN_RGB_MODE				0
-#define RENDER_IN_YUV420_MODE			0
+
+#define RENDER_IN_RGB_MODE					0
+#define RENDER_IN_FIX_YUV420_MODE			0
+#define RENDER_IN_FIX_YUV444_MODE			0
+#define RENDER_IN_AUTO_YUV_MODE				0
+
+#define clip3(x, y, z)  ((z < x) ? x : ((z > y) ? y : z))
 
 class TAL_DIRECTX_LIB CTALForDirectDraw
 {
@@ -53,7 +58,8 @@ public:
 	virtual int OpenVideo(HWND hWnd, int source_width, int source_height, DWORD dwFourCC);
 	virtual int CloseVideo(void);
 	virtual int SetClientRect(RECT dstRect);
-	virtual int FeedToOffScreenSurface(const LPBYTE lpYBuf, const LPBYTE lpUBuf, const LPBYTE lpVBuf, int planeSize);
+	//virtual int FeedToOffScreenSurface(const LPBYTE lpYBuf, const LPBYTE lpUBuf, const LPBYTE lpVBuf, int planeSize);
+	virtual int FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frameSize);
 	virtual int RenderOnPrimarySurface(void);
 	virtual int ToggleGrid(void);
 
