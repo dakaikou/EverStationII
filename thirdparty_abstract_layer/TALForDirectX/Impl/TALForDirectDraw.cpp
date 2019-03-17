@@ -17,13 +17,16 @@ CTALForDirectDraw::CTALForDirectDraw(void)
 	//m_dCanvasEnlargeCoeff = 1.0;
 	m_dViewEnlargeCoeff = 1.0;
 
-	m_dFrameRate = 30.0;				//default value 30/s
+	//m_dFrameRate = 30.0;				//default value 30/s
 	m_nSourceWidth = -1;
 	m_nSourceHeight = -1;
 	//m_nCanvasWidth = -1;
 	//m_nCanvasHeight = -1;
-	//m_nViewWidth = -1;
-	//m_nViewHeight = -1;
+	m_ptOrigin.x = 0;
+	m_ptOrigin.y = 0;
+	m_nViewWidth = -1;
+	m_nViewHeight = -1;
+	m_dwFourCC = 0x00000000;
 
 #if USE_SURFACE_ACCESS_MUTEX
 	m_hSurfaceAccess = ::CreateMutex(NULL, FALSE, NULL);
@@ -81,7 +84,7 @@ void CTALForDirectDraw::StopRenderThread(void)
 }
 #endif
 
-int CTALForDirectDraw::OpenVideo(HWND hWnd, int source_width, int source_height, unsigned int dwFourCC, double framerate)
+int CTALForDirectDraw::OpenVideo(HWND hWnd, int source_width, int source_height, DWORD dwFourCC)
 {
 	int					rtcode = -1;
 
@@ -98,15 +101,15 @@ int CTALForDirectDraw::OpenVideo(HWND hWnd, int source_width, int source_height,
 	m_dViewEnlargeCoeff = 1.0;
 
 	//initial state: view == canvas
-	//m_nViewWidth = m_nCanvasWidth;
-	//m_nViewHeight = m_nCanvasHeight;
+	m_nViewWidth = m_nSourceWidth;
+	m_nViewHeight = m_nSourceHeight;
 
 	//int nCanvasWidth = (int)round(m_nSourceWidth * m_dCanvasEnlargeCoeff);
 	//int nCanvasHeight = (int)round(m_nSourceHeight * m_dCanvasEnlargeCoeff);
 
 	m_dwFourCC = dwFourCC;
 
-	m_dFrameRate = framerate;
+	//m_dFrameRate = framerate;
 
 	rtcode = AllocateDirectDrawResource(m_hVidWnd, m_nSourceWidth, m_nSourceHeight, m_dwFourCC);
 
@@ -132,8 +135,10 @@ int CTALForDirectDraw::CloseVideo(void)
 	m_nSourceHeight = -1;
 	//m_nCanvasWidth = -1;
 	//m_nCanvasHeight = -1;
-	//m_nViewWidth = -1;
-	//m_nViewHeight = -1;
+	m_ptOrigin.x = 0;
+	m_ptOrigin.y = 0;
+	m_nViewWidth = -1;
+	m_nViewHeight = -1;
 	//m_dCanvasEnlargeCoeff = 1.0;
 	m_dViewEnlargeCoeff = 1.0;
 	m_dwFourCC = 0x00000000;
@@ -147,10 +152,35 @@ int CTALForDirectDraw::SetClientRect(RECT rcClient)
 
 	m_rcClient = rcClient;
 
+	int nClientWidth = m_rcClient.right - m_rcClient.left;
+	int nClientHeight = m_rcClient.bottom - m_rcClient.top;
+
+	int m_nViewWidth = (int)(m_nSourceWidth * m_dViewEnlargeCoeff);
+	int m_nViewHeight = (int)(m_nSourceHeight * m_dViewEnlargeCoeff);
+	//int dstWidth = m_nViewWidth;
+	//int dstHeight = m_nViewHeight;
+	//if (m_dViewEnlargeCoeff == 1.0)		//Solve the 4K video display bug
+	//{
+	//	if ((m_nViewWidth > nClientWidth) || (m_nViewHeight > nClientHeight))
+	//	{
+	//		double srcAspectRatio = (double)m_nSourceWidth / m_nSourceHeight;
+	//		double clientAspectRatio = (double)nClientWidth / nClientHeight;
+	//		double aspectRatio = max(srcAspectRatio, clientAspectRatio);
+
+	//		m_nViewWidth = nClientWidth;
+	//		m_nViewHeight = nClientHeight;
+	//	}
+
+	//	//if (dstHeight > nClientHeight) dstHeight = nClientHeight;
+	//}
+
+	m_ptOrigin.x = m_rcClient.left + (nClientWidth - m_nViewWidth) / 2;
+	m_ptOrigin.y = (nClientHeight - m_nViewHeight) / 2;
+
 	return rtcode;
 }
 
-int CTALForDirectDraw::AllocateDirectDrawResource(HWND hWnd, int canvas_width, int canvas_height, unsigned int dwFourCC)
+int CTALForDirectDraw::AllocateDirectDrawResource(HWND hWnd, int canvas_width, int canvas_height, DWORD dwFourCC)
 {
 	int					rtcode = -1;
 	DDSURFACEDESC2		ddsd;    // DirectDraw 表面描述
@@ -196,33 +226,28 @@ int CTALForDirectDraw::AllocateDirectDrawResource(HWND hWnd, int canvas_width, i
 				ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT;
 				ddsd.dwWidth = canvas_width;
 				ddsd.dwHeight = canvas_height;
+
 				ddsd.ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
+#if RENDER_IN_RGB_MODE
+				ddsd.ddpfPixelFormat.dwFlags = DDPF_FOURCC | DDPF_RGB;
+				ddsd.ddpfPixelFormat.dwFourCC = 0x32424752;
+				ddsd.ddpfPixelFormat.dwRGBBitCount = 24;			//default value
+#else
+#if RENDER_IN_YUV420_MODE
 				ddsd.ddpfPixelFormat.dwFlags = DDPF_FOURCC | DDPF_YUV;
-
-				//DWORD dwFourCC = MAKEFOURCC(pszFourCC[0], pszFourCC[1], pszFourCC[2], pszFourCC[3]);
-				ddsd.ddpfPixelFormat.dwFourCC = dwFourCC;
+				ddsd.ddpfPixelFormat.dwFourCC = MAKEFOURCC('I', '4', '2', '0');				//0x30323449	Y-U-V
 				ddsd.ddpfPixelFormat.dwYUVBitCount = 8;			//default value
-
-			//	if (dwFourCC == 0x56555949)			//IYUV: Planar YUV, YUV420 Y-U-V, the same as I420
-			//	{
-			//		m_ddsd.ddpfPixelFormat.dwYUVBitCount = 12;
-			//	}
-			//	else if (dwFourCC == 0x30323449)			//I420: Planar YUV, YUV420 Y-U-V, the same as IYUV
-			//	{
-			//		m_ddsd.ddpfPixelFormat.dwYUVBitCount = 12;
-			//	}
-			//	else if (dwFourCC == 0x32315659)			//YV12: Planar YUV, YUV420 Y-V-U
-			//	{
-			//		m_ddsd.ddpfPixelFormat.dwYUVBitCount = 12;
-			//	}
-		////	else if (dwFourCC == 0x36315659)			//YV16: Planar YUV422 Y-U-V
-		////	{
-		////		m_ddsd.ddpfPixelFormat.dwYUVBitCount = 16;
-		////	}
-			//	else										//YUV420 Y-V-U
-			//	{
-			//		m_ddsd.ddpfPixelFormat.dwYUVBitCount = 12;
-			//	}
+				//ddsd.ddpfPixelFormat.dwFourCC = MAKEFOURCC('Y', 'V', '1', '2');				//0x32315659,  Y-V-U
+				//ddsd.ddpfPixelFormat.dwYUVBitCount = 8;			//default value
+#else
+				ddsd.ddpfPixelFormat.dwFlags = DDPF_FOURCC | DDPF_YUV;
+				//ddsd.ddpfPixelFormat.dwFourCC = MAKEFOURCC('Y', 'U', 'Y', '2');				//0x32595559
+				//ddsd.ddpfPixelFormat.dwFourCC = MAKEFOURCC('U', 'Y', 'V', 'Y');					//0x59565955
+				//ddsd.ddpfPixelFormat.dwFourCC = MAKEFOURCC('Y', '4', '2', '2');				//0x32323459
+				ddsd.ddpfPixelFormat.dwFourCC = dwFourCC;					//0x59565955
+				ddsd.ddpfPixelFormat.dwYUVBitCount = 8;			//default value
+#endif
+#endif
 
 				rtcode = m_lpDD->CreateSurface(&ddsd, &m_lpDDSOffscreen, NULL);
 				if (rtcode == DD_OK)
@@ -235,19 +260,6 @@ int CTALForDirectDraw::AllocateDirectDrawResource(HWND hWnd, int canvas_width, i
 						{
 							m_nDebugFrameCount = 0;
 							m_dwDebugTimeTick = 0;
-
-							//RECT  rcClient;
-							//::GetClientRect(m_hVidWnd, &rcClient);
-
-							//int nClientWidth = rcClient.right - rcClient.left;
-							//int nClientHeight = rcClient.bottom - rcClient.top;
-
-							//double dWidthEnlargeCoeff = (double)nClientWidth / m_ddsd.dwWidth;
-							//double dHeightEnlargeCoeff = (double)nClientHeight / m_ddsd.dwWidth;
-							//m_dMaxEnlargeCoeff = min(dWidthEnlargeCoeff, dHeightEnlargeCoeff);
-
-							//int nStep = (int)(m_dMaxEnlargeCoeff / 0.25);
-							//m_dEnlargeCoeff = nStep * 0.25;
 						}
 						else
 						{
@@ -331,24 +343,19 @@ int CTALForDirectDraw::ReleaseDirectDrawResource(void)
 	return NO_ERROR;
 }
 
-int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frameSize, const FRAME_PARAMS_t* pstFrameParams)
+int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpYBuf, const LPBYTE lpUBuf, const LPBYTE lpVBuf, int planeSize)
 {
 	LPBYTE  lpFrame = NULL;
 	LPBYTE  lpSurf = NULL;
-	int		i;
 	HRESULT	ddRval = -1;
 
 	DDSURFACEDESC2		ddsd;    // DirectDraw 表面描述
-	int					pitchLuma, pitchChroma;
 
 	if ((m_lpDDSOffscreen != NULL) &&
-		(lpFrameBuf != NULL) && (pstFrameParams != NULL))
+		(lpYBuf != NULL) &&
+		(lpUBuf != NULL) &&
+		(lpVBuf != NULL))
 	{
-		//临时寄存当前帧指针，仅在下一帧图像到来前有效
-		//m_pTemporalFrameBuf = lpFrameBuf;
-		//m_pTemporalFrameSize = frameSize;
-		//memcpy(&m_stTemporalFrameParams, pstFrameParams, sizeof(FRAME_PARAMS_t));
-
 		ZeroMemory(&ddsd, sizeof(DDSURFACEDESC2));
 		ddsd.dwSize = sizeof(DDSURFACEDESC2);
 		do
@@ -356,60 +363,149 @@ int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frame
 			ddRval = m_lpDDSOffscreen->Lock(NULL, &ddsd, DDLOCK_WAIT | DDLOCK_WRITEONLY, NULL);
 			if (ddRval == DD_OK)
 			{
-				lpFrame = lpFrameBuf;
-
-				DWORD dwFourCC = ddsd.ddpfPixelFormat.dwFourCC;
-				switch (dwFourCC)
+				// 填充离屏表面
+				lpSurf = (LPBYTE)ddsd.lpSurface;
+				if (lpSurf != NULL)
 				{
-				case 0x32315659: //MAKEFOURCC('Y', 'V', '1', '2'):
-				case 0x30323449: //MAKEFOURCC('I', '4', '2', '0'):
-				case 0x56555949: //MAKEFOURCC('I', 'Y', 'U', 'V'):
-					//widthY = m_ddsd.dwWidth;
-					//heightY = m_ddsd.dwHeight;
-					pitchLuma = ddsd.lPitch;
-
-					//widthV = (m_ddsd.dwWidth >> 1);
-					//heightV = (m_ddsd.dwHeight >> 1);
-					pitchChroma = (ddsd.lPitch >> 1);
-
-					//widthU = (m_ddsd.dwWidth >> 1);
-					//heightU = (m_ddsd.dwHeight >> 1);
-					//pitchU = (m_ddsd.lPitch >> 1);
-
-					//assert(y_size == (widthY * heightY));
-					//assert(u_size == (widthU * heightU));
-					//assert(v_size == (widthV * heightV));
-
-					// 填充离屏表面
-					lpSurf = (LPBYTE)ddsd.lpSurface;
-					if ((lpSurf != NULL) && (lpFrame != NULL))
+#if RENDER_IN_RGB_MODE
+					lpFrame = lpRBuf;
+					for (DWORD i = 0; i < ddsd.dwHeight; i++)
 					{
-						for (i = 0; i < pstFrameParams->Y_height; i++)
-						{
-							memcpy(lpSurf, lpFrame, pstFrameParams->Y_width);
-							lpFrame += pstFrameParams->Y_width;
-							lpSurf += pitchLuma;
-						}
-
-						for (i = 0; i < pstFrameParams->U_height; i++)
-						{
-							memcpy(lpSurf, lpFrame, pstFrameParams->U_width);
-							lpFrame += pstFrameParams->U_width;
-							lpSurf += pitchChroma;
-						}
-
-						for (i = 0; i < pstFrameParams->V_height; i++)
-						{
-							memcpy(lpSurf, lpFrame, pstFrameParams->V_width);
-							lpFrame += pstFrameParams->V_width;
-							lpSurf += pitchChroma;
-						}
+						lpSurf[i] = 0x00;
+						//memcpy(lpSurf, lpFrame, ddsd.dwWidth);
+						lpFrame += ddsd.dwWidth;
+						lpSurf += ddsd.lPitch;
 					}
 
-					break;
+					//lpFrame = lpGBuf;
+					//for (DWORD i = 0; i < ddsd.dwHeight/2; i++)
+					//{
+					//	memcpy(lpSurf, lpFrame, ddsd.dwWidth/2);
+					//	lpFrame += ddsd.dwWidth/2;
+					//	lpSurf += ddsd.lPitch/2;
+					//}
 
-				default:
-					break;
+					//lpFrame = lpBBuf;
+					//for (DWORD i = 0; i < ddsd.dwHeight / 2; i++)
+					//{
+					//	memcpy(lpSurf, lpFrame, ddsd.dwWidth / 2);
+					//	lpFrame += ddsd.dwWidth / 2;
+					//	lpSurf += ddsd.lPitch / 2;
+					//}
+#else
+#if RENDER_IN_YUV420_MODE
+					uint8_t* ptrY = lpYBuf;
+					uint8_t* ptrU = lpUBuf;
+					uint8_t* ptrV = lpVBuf;
+					for (DWORD i = 0; i < ddsd.dwHeight; i++)
+					{
+						//for (DWORD j = 0; j < ddsd.dwWidth; j++)
+						//{
+						//	lpSurf[j] = ptrY[j];
+						//}
+						memcpy(lpSurf, ptrY, ddsd.dwWidth);
+						lpSurf += ddsd.lPitch;
+						ptrY += ddsd.dwWidth;
+					}
+
+					for (DWORD i = 0; i < ddsd.dwHeight / 2; i++)
+					{
+						//for (DWORD j = 0; j < ddsd.dwWidth/2; j++)
+						//{
+						//	lpSurf[j] = ptrU[j];
+						//}
+						memcpy(lpSurf, ptrU, ddsd.dwWidth / 2);
+						ptrU += ddsd.dwWidth / 2;
+						lpSurf += ddsd.lPitch / 2;
+				}
+
+					for (DWORD i = 0; i < ddsd.dwHeight / 2; i++)
+					{
+						for (DWORD j = 0; j < ddsd.dwWidth / 2; j++)
+						{
+							lpSurf[j] = ptrV[j];
+						}
+						//memcpy(lpSurf, lpFrame, ddsd.dwWidth / 2);
+						ptrV += ddsd.dwWidth / 2;
+						lpSurf += ddsd.lPitch / 2;
+					}
+#endif
+
+					int luma_width = ddsd.dwWidth;
+					int luma_height = ddsd.dwHeight;
+					int chroma_width = ddsd.dwWidth;
+					int chroma_height = ddsd.dwHeight;
+
+					uint8_t* ptrY = lpYBuf;
+					uint8_t* ptrU = lpUBuf;
+					uint8_t* ptrV = lpVBuf;
+
+					if (ddsd.ddpfPixelFormat.dwFourCC == 0x56555949)				//IYUV   4:2:0
+					{
+						chroma_width = luma_width / 2;
+						chroma_height = luma_height / 2;
+						for (DWORD i = 0; i < luma_height; i++)
+						{
+							for (DWORD j = 0; j < luma_width; j++)
+							{
+								lpSurf[j] = ptrY[j];
+							}
+							//memcpy(lpSurf, ptrY, ddsd.dwWidth);
+							lpSurf += ddsd.lPitch;
+							ptrY += luma_width;
+						}
+
+						for (DWORD i = 0; i < chroma_height; i++)
+						{
+							for (DWORD j = 0; j < chroma_width; j++)
+							{
+								lpSurf[j] = ptrU[j];
+							}
+							//memcpy(lpSurf, ptrU, ddsd.dwWidth / 2);
+							lpSurf += ddsd.lPitch / 2;
+							ptrU += chroma_width;
+						}
+
+						for (DWORD i = 0; i < chroma_height; i++)
+						{
+							for (DWORD j = 0; j < chroma_width; j++)
+							{
+								lpSurf[j] = ptrV[j];
+							}
+							//memcpy(lpSurf, lpFrame, ddsd.dwWidth / 2);
+							lpSurf += ddsd.lPitch / 2;
+							ptrV += chroma_width;
+						}
+					}
+					else if (ddsd.ddpfPixelFormat.dwFourCC == 0x32595559)			//YUY2		4:2:2
+					{
+						chroma_width = luma_width / 2;
+						for (DWORD i = 0; i < luma_height; i++)
+						{
+							int rowIndex = 0;
+							for (DWORD j = 0; j < luma_width; j++)
+							{
+								lpSurf[rowIndex] = ptrY[j];
+								rowIndex++;
+								if (j % 2 == 0)
+								{
+									lpSurf[rowIndex] = ptrV[j / 2];
+								}
+								else
+								{
+									lpSurf[rowIndex] = ptrU[j / 2];
+								}
+
+								rowIndex++;
+							}
+							//memcpy(lpSurf, ptrY, ddsd.dwWidth);
+							lpSurf += ddsd.lPitch;
+							ptrY += luma_width;
+							ptrU += chroma_width;
+							ptrV += chroma_width;
+						}
+					}
+#endif
 				}
 
 				if (m_dwDebugTimeTick == 0x00000000)
@@ -462,9 +558,6 @@ int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frame
 			{
 				//显示器休眠后再次激活后的返回错误码
 				ReleaseDirectDrawResource();
-
-				//int nCanvasWidth = (int)round(m_nSourceWidth * m_dCanvasEnlargeCoeff);
-				//int nCanvasHeight = (int)round(m_nSourceHeight * m_dCanvasEnlargeCoeff);
 
 				AllocateDirectDrawResource(m_hVidWnd, m_nSourceWidth, m_nSourceHeight, m_dwFourCC);
 			}
@@ -551,37 +644,16 @@ int CTALForDirectDraw::RenderOnPrimarySurface(void)
 			m_lpDDSPrimary->SetClipper(m_pcClipper);
 		}
 
-		POINT ptOrigin;
-
-		int nClientWidth = m_rcClient.right - m_rcClient.left;
-		int nClientHeight = m_rcClient.bottom - m_rcClient.top;
-
-		int dstWidth = (int)(m_nSourceWidth * m_dViewEnlargeCoeff);
-		int dstHeight = (int)(m_nSourceHeight * m_dViewEnlargeCoeff);
-		//int dstWidth = m_nViewWidth;
-		//int dstHeight = m_nViewHeight;
-		if (m_dViewEnlargeCoeff == 1.0)		//Solve the 4K video display bug
-		{
-			if (dstWidth > nClientWidth) dstWidth = nClientWidth;
-			if (dstHeight > nClientHeight) dstHeight = nClientHeight;
-		}
-
-		ptOrigin.x = m_rcClient.left + (nClientWidth - dstWidth) / 2;
-		ptOrigin.y = (nClientHeight - dstHeight) / 2;
-
 		POINT ptScreen;
 		RECT  rectSrc, rectDst;
 
-		ptScreen = ptOrigin;
+		ptScreen = m_ptOrigin;
 		::ClientToScreen(m_hVidWnd, &ptScreen);
 
 		rectDst.left = ptScreen.x;
 		rectDst.top = ptScreen.y;
-		rectDst.right = rectDst.left + dstWidth;
-		rectDst.bottom = rectDst.top + dstHeight;
-
-		//int nCanvasWidth = (int)round(m_nSourceWidth * m_dCanvasEnlargeCoeff);
-		//int nCanvasHeight = (int)round(m_nSourceHeight * m_dCanvasEnlargeCoeff);
+		rectDst.right = rectDst.left + m_nViewWidth;
+		rectDst.bottom = rectDst.top + m_nViewHeight;
 
 		rectSrc.left = 0;
 		rectSrc.top = 0;
@@ -623,14 +695,14 @@ int CTALForDirectDraw::RenderOnPrimarySurface(void)
 			for (int row = m_nGrid; row < m_nSourceHeight; row += m_nGrid)
 			{
 				int delty = (int)(row * m_dViewEnlargeCoeff);
-				::MoveToEx(hDC, ptOrigin.x, ptOrigin.y + delty, NULL);
-				::LineTo(hDC, ptOrigin.x + dstWidth, ptOrigin.y + delty);
+				::MoveToEx(hDC, m_ptOrigin.x, m_ptOrigin.y + delty, NULL);
+				::LineTo(hDC, m_ptOrigin.x + m_nViewWidth, m_ptOrigin.y + delty);
 			}
 			for (int col = m_nGrid; col < m_nSourceWidth; col += m_nGrid)
 			{
 				int deltx = (int)(col * m_dViewEnlargeCoeff);
-				::MoveToEx(hDC, ptOrigin.x + deltx, ptOrigin.y, NULL);
-				::LineTo(hDC, ptOrigin.x + deltx, ptOrigin.y + dstHeight);
+				::MoveToEx(hDC, m_ptOrigin.x + deltx, m_ptOrigin.y, NULL);
+				::LineTo(hDC, m_ptOrigin.x + deltx, m_ptOrigin.y + m_nViewHeight);
 			}
 
 			::ReleaseDC(m_hVidWnd, hDC);

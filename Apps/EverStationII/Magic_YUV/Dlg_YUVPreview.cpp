@@ -21,9 +21,8 @@ static char THIS_FILE[] = __FILE__;
 #include "..\MainFrm.h"
 #include "..\Common\Dlg_VideoShowScreen.h"
 #include "..\Common\GuiApi_MSG.h"
-#include "..\Magic_YUV\GuiApi_YUV.h"
+//#include "..\Magic_YUV\GuiApi_YUV.h"
 
-double psnr(uint8_t* reference, uint8_t* working, int width, int height);
 uint32_t YUV_PSNR_Thread(PVOID pVoid);
 uint32_t YUV_TransCode_Thread(PVOID pVoid);
 
@@ -101,6 +100,21 @@ void CDlg_YUVPreview::Reset(void)
 	UpdateData(FALSE);
 }
 
+
+void CDlg_YUVPreview::InitComboxForFileType(CComboBox* pCmbBox)
+{
+	pCmbBox->ResetContent();
+
+	int nIndex = pCmbBox->AddString("YUV - Planar");
+	pCmbBox->SetItemData(nIndex, 0x0000);
+
+	nIndex = pCmbBox->AddString("YUV - Packed");
+	pCmbBox->SetItemData(nIndex, 0x0001);
+
+	nIndex = pCmbBox->AddString("RAS");
+	pCmbBox->SetItemData(nIndex, 0x0002);
+}
+
 void CDlg_YUVPreview::InitComboxForFrameWH(CComboBox* pCmbBox)
 {
 	pCmbBox->ResetContent();
@@ -139,8 +153,14 @@ void CDlg_YUVPreview::InitComboxForFrameWH(CComboBox* pCmbBox)
 	nIndex = pCmbBox->AddString("640x480 [VGA]");
 	pCmbBox->SetItemData(nIndex, (640 << 16) | 480);
 
-	nIndex = pCmbBox->AddString("640x360 [nHD]");
+	nIndex = pCmbBox->AddString("480x270 [HD/16]");
+	pCmbBox->SetItemData(nIndex, (480 << 16) | 270);
+
+	nIndex = pCmbBox->AddString("640x360 [HD/9]");
 	pCmbBox->SetItemData(nIndex, (640 << 16) | 360);
+
+	nIndex = pCmbBox->AddString("960x540 [HD/4]");
+	pCmbBox->SetItemData(nIndex, (960 << 16) | 540);
 
 	nIndex = pCmbBox->AddString("1920x1080 [HD]");
 	pCmbBox->SetItemData(nIndex, (1920 << 16) | 1080);
@@ -149,14 +169,21 @@ void CDlg_YUVPreview::InitComboxForFrameWH(CComboBox* pCmbBox)
 void CDlg_YUVPreview::InitComboxForSampleStructure(CComboBox* pCmbBox)
 {
 	pCmbBox->ResetContent();
-	int nIndex = pCmbBox->AddString("IYUV [4:2:0 Y-U-V]");
-	pCmbBox->SetItemData(nIndex, 0x56555949);
 
-	nIndex = pCmbBox->AddString("I420 [4:2:0 Y-U-V]");
-	pCmbBox->SetItemData(nIndex, 0x30323449);
+	int nIndex = pCmbBox->AddString("YUV 4:2:0");
+	pCmbBox->SetItemData(nIndex, 0x56555949);			//FourCC Option: [IYUV,0x56555949] [I420,0x30323449]
 
-	nIndex = pCmbBox->AddString("YV12 [4:2:0 Y-V-U]");
-	pCmbBox->SetItemData(nIndex, 0x32315659);
+	nIndex = pCmbBox->AddString("YUV 4:2:2");
+	pCmbBox->SetItemData(nIndex, 0x32595559);			//FourCC Option [UYVY,0x59565955] [YUY2,0x32595559]
+
+	//int nIndex = pCmbBox->AddString("IYUV [4:2:0 Y-U-V]");
+	//pCmbBox->SetItemData(nIndex, 0x56555949);
+
+	//nIndex = pCmbBox->AddString("I420 [4:2:0 Y-U-V]");
+	//pCmbBox->SetItemData(nIndex, 0x30323449);
+
+	//nIndex = pCmbBox->AddString("YV12 [4:2:0 Y-V-U]");
+	//pCmbBox->SetItemData(nIndex, 0x32315659);
 
 	//nIndex = pCmbBox->AddString("YUY2");
 	//pCmbBox->SetItemData(nIndex, 0x56555949);
@@ -219,6 +246,10 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 
 	m_dlgVideo.Create(IDD_SHOW_VIDEO_SCREEN, this);
 	m_dlgVideo.ShowWindow(SW_HIDE);
+
+	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_SRC_FILEFORMAT);
+	InitComboxForFileType(pCmbBox);
+	pCmbBox->SetCurSel(0);
 
 	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_SRC_WH);
 	InitComboxForFrameWH(pCmbBox);
@@ -622,16 +653,16 @@ void CDlg_YUVPreview::OnBtnYuvFilePreview()
 			pWnd = GetDlgItem(IDC_YUVPREVIEWDLG_MFCBUTTON_WORKING_PSNR);
 			pWnd->EnableWindow(FALSE);
 
-			CheckSrcFrameParameters(&m_stSrcYUVParams);
+			CheckSrcFrameParameters(&m_stSrcSequenceParams);
 
 			if (m_strReferenceFile.GetLength() > 0)
 			{
-				m_ReferenceYUVDecoder.Open((STREAM_FILE | YUV_FILE_YUV), m_strReferenceFile.GetBuffer(128), &m_stSrcYUVParams);
+				m_ReferenceYUVDecoder.Open((STREAM_FILE | YUV_FILE_YUV), m_strReferenceFile.GetBuffer(128), &m_stSrcSequenceParams);
 				m_dlgVideo.AttachVideoDecoder(&m_ReferenceYUVDecoder);
 			}
 			if (m_strWorkingFile.GetLength() > 0)
 			{
-				m_WorkingYUVDecoder.Open((STREAM_FILE | YUV_FILE_YUV), m_strWorkingFile.GetBuffer(128), &m_stSrcYUVParams);
+				m_WorkingYUVDecoder.Open((STREAM_FILE | YUV_FILE_YUV), m_strWorkingFile.GetBuffer(128), &m_stSrcSequenceParams);
 				m_dlgVideo.AttachVideoDecoder(&m_WorkingYUVDecoder);
 			}
 
@@ -692,11 +723,11 @@ void CDlg_YUVPreview::OnBtnYuvFilePreview()
 	UpdateData(FALSE);
 }
 
-void CDlg_YUVPreview::CheckSrcFrameParameters(YUV_SERIAL_PARAM_t* pstYuvParams)
+void CDlg_YUVPreview::CheckSrcFrameParameters(YUV_SEQUENCE_PARAM_t* pstYuvParams)
 {
 	if (pstYuvParams != NULL)
 	{
-		memset(pstYuvParams, 0x00, sizeof(YUV_SERIAL_PARAM_t));
+		memset(pstYuvParams, 0x00, sizeof(YUV_SEQUENCE_PARAM_t));
 
 		int				nSel;
 		CComboBox*		pCmbBox = NULL;
@@ -714,6 +745,7 @@ void CDlg_YUVPreview::CheckSrcFrameParameters(YUV_SERIAL_PARAM_t* pstYuvParams)
 			pstYuvParams->luma_width = 352;
 			pstYuvParams->luma_height = 288;
 		}
+		pstYuvParams->luma_plane_size = pstYuvParams->luma_width * pstYuvParams->luma_height;
 
 		pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_SRC_SAMPLESTRUCTURE);
 		nSel = pCmbBox->GetCurSel();
@@ -742,6 +774,12 @@ void CDlg_YUVPreview::CheckSrcFrameParameters(YUV_SERIAL_PARAM_t* pstYuvParams)
 
 		case 0x32315659:		//YV12
 			pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
+			pstYuvParams->chroma_height = (pstYuvParams->luma_height >> 1);
+
+			break;
+
+		case 0x32595559:		//YUY2
+			pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
 			pstYuvParams->chroma_height = pstYuvParams->luma_height;
 
 			break;
@@ -751,22 +789,8 @@ void CDlg_YUVPreview::CheckSrcFrameParameters(YUV_SERIAL_PARAM_t* pstYuvParams)
 			pstYuvParams->chroma_height = (pstYuvParams->luma_height >> 1);
 			break;
 		}
-		//else if (strcmp(m_VidDecodeInfo.source_pszFourCC, "YUY2") == 0)
-		//{
-		//	m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_2;
-		//	m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-		//	m_VidDecodeInfo.source_chroma_height = m_VidDecodeInfo.source_luma_height;
-		//	m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-		//	m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-		//}
-		//else
-		//{
-		//	m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_0;
-		//	m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-		//	m_VidDecodeInfo.source_chroma_height = (m_VidDecodeInfo.source_luma_height >> 1);
-		//	m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-		//	m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-		//}
+
+		pstYuvParams->chroma_plane_size = pstYuvParams->chroma_width * pstYuvParams->chroma_height;
 
 		pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_SRC_COLORSPACE);
 		nSel = pCmbBox->GetCurSel();
@@ -795,14 +819,14 @@ void CDlg_YUVPreview::CheckSrcFrameParameters(YUV_SERIAL_PARAM_t* pstYuvParams)
 	}
 }
 
-void CDlg_YUVPreview::CheckDstFrameParameters(YUV_SERIAL_PARAM_t* pstYuvParams)
+void CDlg_YUVPreview::CheckDstFrameParameters(YUV_SEQUENCE_PARAM_t* pstYuvParams)
 {
-	memset(pstYuvParams, 0x00, sizeof(YUV_SERIAL_PARAM_t));
+	memset(pstYuvParams, 0x00, sizeof(YUV_SEQUENCE_PARAM_t));
 
 	int				nSel;
 	CComboBox*		pCmbBox = NULL;
 
-	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_SRC_WH);
+	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_DST_WH);
 	nSel = pCmbBox->GetCurSel();
 	if (nSel != CB_ERR)
 	{
@@ -815,8 +839,9 @@ void CDlg_YUVPreview::CheckDstFrameParameters(YUV_SERIAL_PARAM_t* pstYuvParams)
 		pstYuvParams->luma_width = 352;
 		pstYuvParams->luma_height = 288;
 	}
+	pstYuvParams->luma_plane_size = pstYuvParams->luma_width * pstYuvParams->luma_height;
 
-	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_SRC_SAMPLESTRUCTURE);
+	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_DST_SAMPLESTRUCTURE);
 	nSel = pCmbBox->GetCurSel();
 	if (nSel != CB_ERR)
 	{
@@ -843,6 +868,12 @@ void CDlg_YUVPreview::CheckDstFrameParameters(YUV_SERIAL_PARAM_t* pstYuvParams)
 
 	case 0x32315659:		//YV12
 		pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
+		pstYuvParams->chroma_height = (pstYuvParams->luma_height >> 1);
+
+		break;
+
+	case 0x32595559:		//YUY2
+		pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
 		pstYuvParams->chroma_height = pstYuvParams->luma_height;
 
 		break;
@@ -852,24 +883,10 @@ void CDlg_YUVPreview::CheckDstFrameParameters(YUV_SERIAL_PARAM_t* pstYuvParams)
 		pstYuvParams->chroma_height = (pstYuvParams->luma_height >> 1);
 		break;
 	}
-	//else if (strcmp(m_VidDecodeInfo.source_pszFourCC, "YUY2") == 0)
-	//{
-	//	m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_2;
-	//	m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-	//	m_VidDecodeInfo.source_chroma_height = m_VidDecodeInfo.source_luma_height;
-	//	m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-	//	m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-	//}
-	//else
-	//{
-	//	m_VidDecodeInfo.source_chroma_format = CHROMA_FORMAT_4_2_0;
-	//	m_VidDecodeInfo.source_chroma_width = (m_VidDecodeInfo.source_luma_width >> 1);
-	//	m_VidDecodeInfo.source_chroma_height = (m_VidDecodeInfo.source_luma_height >> 1);
-	//	m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-	//	m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * (m_VidDecodeInfo.source_bpp / 8);
-	//}
 
-	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_SRC_COLORSPACE);
+	pstYuvParams->chroma_plane_size = pstYuvParams->chroma_width * pstYuvParams->chroma_height;
+
+	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_DST_COLORSPACE);
 	nSel = pCmbBox->GetCurSel();
 	if (nSel != CB_ERR)
 	{
@@ -880,7 +897,7 @@ void CDlg_YUVPreview::CheckDstFrameParameters(YUV_SERIAL_PARAM_t* pstYuvParams)
 		pstYuvParams->nColorSpace = 709;			//ITU-R.BT.709
 	}
 
-	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_SRC_FRAMERATE);
+	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_DST_FRAMERATE);
 	nSel = pCmbBox->GetCurSel();
 	if (nSel != CB_ERR)
 	{
@@ -935,9 +952,65 @@ void CDlg_YUVPreview::OnBtnYuvFileCalculatePSNR()
 	m_dlgProgress.SetTitle(strTitle);
 	m_dlgProgress.ShowWindow(SW_SHOW);
 
-	CheckSrcFrameParameters(&m_stSrcYUVParams);
+	CheckSrcFrameParameters(&m_stSrcSequenceParams);
 
 	::CreateThread(NULL, 1024, (LPTHREAD_START_ROUTINE)YUV_PSNR_Thread, this, 0, 0);
+}
+
+void CDlg_YUVPreview::OnBtnYuvFileTranscode()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CWnd*	pWnd = NULL;
+
+	UpdateData(TRUE);
+
+	pWnd = GetDlgItem(IDC_YUVPREVIEWDLG_EDIT_SAVING_FILE);
+	pWnd->GetWindowText(m_strSavingFile);
+
+	if (m_strSavingFile.GetLength() > 0)
+	{
+		CString strTitle;
+
+		char* path = m_strWorkingFile.GetBuffer();
+		char* working_filename = strrchr(path, '\\');
+
+		if (working_filename == NULL)
+		{
+			working_filename = path;
+		}
+		else
+		{
+			working_filename++;
+		}
+
+		path = m_strSavingFile.GetBuffer();
+		char* saving_filename = strrchr(path, '\\');
+		if (saving_filename == NULL)
+		{
+			saving_filename = path;
+		}
+		else
+		{
+			saving_filename++;
+		}
+
+		strTitle.Format("格式转换: %s -> %s", working_filename, saving_filename);
+
+		m_dlgProgress.SetTitle(strTitle);
+		m_dlgProgress.ShowWindow(SW_SHOW);
+
+		CheckSrcFrameParameters(&m_stSrcSequenceParams);
+		CheckDstFrameParameters(&m_stDstSequenceParams);
+
+		pWnd = GetDlgItem(IDC_YUVPREVIEWDLG_MFCBUTTON_WORKING_TRANSCODE);
+		pWnd->EnableWindow(FALSE);
+
+		::CreateThread(NULL, 1024, (LPTHREAD_START_ROUTINE)YUV_TransCode_Thread, this, 0, 0);
+	}
+	else
+	{
+		AfxMessageBox("目标文件不能为空!", MB_OK);
+	}
 }
 
 BOOL CDlg_YUVPreview::DestroyWindow()
@@ -1115,12 +1188,12 @@ uint32_t YUV_PSNR_Thread(PVOID pVoid)
 {
 	CDlg_YUVPreview* pdlg = (CDlg_YUVPreview*)pVoid;
 
-	YUV_SERIAL_PARAM_t* pYuvSerialParam = &(pdlg->m_stSrcYUVParams);
+	YUV_SEQUENCE_PARAM_t* pstSequenceParam = &(pdlg->m_stSrcSequenceParams);
 	char* pszReferenceFile = pdlg->m_strReferenceFile.GetBuffer();
 	char* pszWorkingFile = pdlg->m_strWorkingFile.GetBuffer();
 
-	int luma_buf_size = pYuvSerialParam->luma_width * pYuvSerialParam->luma_height * pYuvSerialParam->quantizationBits / 8;
-	int chroma_buf_size = pYuvSerialParam->chroma_width * pYuvSerialParam->chroma_height * pYuvSerialParam->quantizationBits / 8;
+	int luma_buf_size = pstSequenceParam->luma_width * pstSequenceParam->luma_height * pstSequenceParam->quantizationBits / 8;
+	int chroma_buf_size = pstSequenceParam->chroma_width * pstSequenceParam->chroma_height * pstSequenceParam->quantizationBits / 8;
 	int frame_buf_size = luma_buf_size + chroma_buf_size + chroma_buf_size;
 
 	uint8_t* pucReferenceFrameBuf = (uint8_t*)malloc(frame_buf_size);
@@ -1161,9 +1234,9 @@ uint32_t YUV_PSNR_Thread(PVOID pVoid)
 		rdsize = _read(hWorkingFile, pucWorkingFrameBuf, frame_buf_size);
 		assert(rdsize == frame_buf_size);
 
-		double Ypsnr = psnr(pucReferenceY, pucWorkingY, pYuvSerialParam->luma_width, pYuvSerialParam->luma_height);
-		double Upsnr = psnr(pucReferenceU, pucWorkingU, pYuvSerialParam->chroma_width, pYuvSerialParam->chroma_height);
-		double Vpsnr = psnr(pucReferenceV, pucWorkingV, pYuvSerialParam->chroma_width, pYuvSerialParam->chroma_height);
+		double Ypsnr = PICTURE_psnr(pucReferenceY, pucWorkingY, luma_buf_size);
+		double Upsnr = PICTURE_psnr(pucReferenceU, pucWorkingU, chroma_buf_size);
+		double Vpsnr = PICTURE_psnr(pucReferenceV, pucWorkingV, chroma_buf_size);
 		sumY += Ypsnr;
 		sumU += Upsnr;
 		sumV += Vpsnr;
@@ -1197,10 +1270,10 @@ uint32_t YUV_TransCode_Thread(PVOID pVoid)
 	char* pszWorkingFile = pdlg->m_strWorkingFile.GetBuffer();
 	char* pszSavingFile = pdlg->m_strSavingFile.GetBuffer();
 
-	YUV_SERIAL_PARAM_t* pSrcSerialParam = &(pdlg->m_stSrcYUVParams);
+	YUV_SEQUENCE_PARAM_t* pSrcSequenceParam = &(pdlg->m_stSrcSequenceParams);
 
-	int src_luma_buf_size = pSrcSerialParam->luma_width * pSrcSerialParam->luma_height * pSrcSerialParam->quantizationBits / 8;
-	int src_chroma_buf_size = pSrcSerialParam->chroma_width * pSrcSerialParam->chroma_height * pSrcSerialParam->quantizationBits / 8;
+	int src_luma_buf_size = pSrcSequenceParam->luma_width * pSrcSequenceParam->luma_height * pSrcSequenceParam->quantizationBits / 8;
+	int src_chroma_buf_size = pSrcSequenceParam->chroma_width * pSrcSequenceParam->chroma_height * pSrcSequenceParam->quantizationBits / 8;
 	int src_frame_buf_size = src_luma_buf_size + src_chroma_buf_size + src_chroma_buf_size;
 
 	uint8_t* pucWorkingFrameBuf = (uint8_t*)malloc(src_frame_buf_size);
@@ -1210,10 +1283,10 @@ uint32_t YUV_TransCode_Thread(PVOID pVoid)
 	uint8_t* pucWorkingU = pucWorkingFrameBuf + src_luma_buf_size;
 	uint8_t* pucWorkingV = pucWorkingFrameBuf + src_luma_buf_size + src_chroma_buf_size;
 
-	YUV_SERIAL_PARAM_t* pDstSerialParam = &(pdlg->m_stDstYUVParams);
+	YUV_SEQUENCE_PARAM_t* pDstSequenceParam = &(pdlg->m_stDstSequenceParams);
 
-	int dst_luma_buf_size = pDstSerialParam->luma_width * pDstSerialParam->luma_height * pDstSerialParam->quantizationBits / 8;
-	int dst_chroma_buf_size = pDstSerialParam->chroma_width * pDstSerialParam->chroma_height * pDstSerialParam->quantizationBits / 8;
+	int dst_luma_buf_size = pSrcSequenceParam->luma_width * pDstSequenceParam->luma_height * pDstSequenceParam->quantizationBits / 8;
+	int dst_chroma_buf_size = pSrcSequenceParam->chroma_width * pDstSequenceParam->chroma_height * pDstSequenceParam->quantizationBits / 8;
 	int dst_frame_buf_size = dst_luma_buf_size + dst_chroma_buf_size + dst_chroma_buf_size;
 
 	uint8_t* pucSavingFrameBuf = (uint8_t*)malloc(dst_frame_buf_size);
@@ -1222,6 +1295,16 @@ uint32_t YUV_TransCode_Thread(PVOID pVoid)
 	uint8_t* pucSavingY = pucSavingFrameBuf;
 	uint8_t* pucSavingU = pucSavingFrameBuf + dst_luma_buf_size;
 	uint8_t* pucSavingV = pucSavingFrameBuf + dst_luma_buf_size + dst_chroma_buf_size;
+
+	int decimate_coeff = 0;
+	if (pDstSequenceParam->luma_width > pSrcSequenceParam->luma_width)
+	{
+		decimate_coeff = pDstSequenceParam->luma_width / pSrcSequenceParam->luma_width;
+	}
+	else if (pDstSequenceParam->luma_width < pSrcSequenceParam->luma_width)
+	{
+		decimate_coeff = -pSrcSequenceParam->luma_width / pDstSequenceParam->luma_width;
+	}
 
 	int hSavingFile, hWorkingFile;
 	_sopen_s(&hSavingFile, pszSavingFile, _O_CREAT | _O_BINARY | _O_WRONLY, _SH_DENYWR, _S_IWRITE);
@@ -1237,10 +1320,39 @@ uint32_t YUV_TransCode_Thread(PVOID pVoid)
 		int rdsize = _read(hWorkingFile, pucWorkingFrameBuf, src_frame_buf_size);
 		assert(rdsize == src_frame_buf_size);
 
-		memcpy(pucSavingFrameBuf, pucWorkingFrameBuf, rdsize);
+		//if (frame_num >= 300 && frame_num < 500)			//segment cutting
+		{
+			if (decimate_coeff == 0)
+			{
+				assert(src_frame_buf_size == dst_frame_buf_size);
+				memcpy(pucSavingFrameBuf, pucWorkingFrameBuf, rdsize);
+			}
+			else if (decimate_coeff > 0)
+			{
+				PICTURE_Enlarge(pucWorkingY, pSrcSequenceParam->luma_width, pSrcSequenceParam->luma_height,
+					pucSavingY, pDstSequenceParam->luma_width, pDstSequenceParam->luma_height, decimate_coeff);
 
-		int wrsize = _write(hSavingFile, pucSavingFrameBuf, dst_frame_buf_size);
-		assert(wrsize == dst_frame_buf_size);
+				PICTURE_Enlarge(pucWorkingU, pSrcSequenceParam->chroma_width, pSrcSequenceParam->chroma_height,
+					pucSavingU, pDstSequenceParam->chroma_width, pDstSequenceParam->chroma_height, decimate_coeff);
+
+				PICTURE_Enlarge(pucWorkingV, pSrcSequenceParam->chroma_width, pSrcSequenceParam->chroma_height,
+					pucSavingV, pDstSequenceParam->chroma_width, pDstSequenceParam->chroma_height, decimate_coeff);
+			}
+			else if (decimate_coeff < 0)
+			{
+				PICTURE_Reduce(pucWorkingY, pSrcSequenceParam->luma_width, pSrcSequenceParam->luma_height,
+					pucSavingY, pDstSequenceParam->luma_width, pDstSequenceParam->luma_height, -decimate_coeff);
+
+				PICTURE_Reduce(pucWorkingU, pSrcSequenceParam->chroma_width, pSrcSequenceParam->chroma_height,
+					pucSavingU, pDstSequenceParam->chroma_width, pDstSequenceParam->chroma_height, -decimate_coeff);
+
+				PICTURE_Reduce(pucWorkingV, pSrcSequenceParam->chroma_width, pSrcSequenceParam->chroma_height,
+					pucSavingV, pDstSequenceParam->chroma_width, pDstSequenceParam->chroma_height, -decimate_coeff);
+			}
+
+			int wrsize = _write(hSavingFile, pucSavingFrameBuf, dst_frame_buf_size);
+			assert(wrsize == dst_frame_buf_size);
+		}
 
 		int percent = (int)(100.0 * frame_num / nWorkingTotalFrameCount);
 		pdlg->m_dlgProgress.SetPos(percent);
@@ -1257,84 +1369,3 @@ uint32_t YUV_TransCode_Thread(PVOID pVoid)
 	return 0;
 }
 
-double psnr(uint8_t* reference, uint8_t* working, int width, int height)
-{
-	unsigned char*  pOrg = reference;
-	unsigned char*  pRec = working;
-	double          ssd = 0;
-	int             diff;
-
-	for (int r = 0; r < height; r++)
-	{
-		for (int c = 0; c < width; c++)
-		{
-			diff = pRec[c] - pOrg[c];
-			ssd += (double)(diff * diff);
-		}
-		pRec += width;
-		pOrg += width;
-	}
-
-	if (ssd == 0.0)
-	{
-		return 99.99;
-	}
-	return (10.0 * log10((double)width * (double)height * 65025.0 / ssd));
-}
-
-
-void CDlg_YUVPreview::OnBtnYuvFileTranscode()
-{
-	// TODO: 在此添加控件通知处理程序代码
-	CWnd*	pWnd = NULL;
-
-	UpdateData(TRUE);
-
-	pWnd = GetDlgItem(IDC_YUVPREVIEWDLG_EDIT_SAVING_FILE);
-	pWnd->GetWindowText(m_strSavingFile);
-
-	if (m_strSavingFile.GetLength() > 0)
-	{
-		CString strTitle;
-
-		char* path = m_strWorkingFile.GetBuffer();
-		char* working_filename = strrchr(path, '\\');
-
-		if (working_filename == NULL)
-		{
-			working_filename = path;
-		}
-		else
-		{
-			working_filename++;
-		}
-
-		path = m_strSavingFile.GetBuffer();
-		char* saving_filename = strrchr(path, '\\');
-		if (saving_filename == NULL)
-		{
-			saving_filename = path;
-		}
-		else
-		{
-			saving_filename++;
-		}
-
-		strTitle.Format("格式转换: %s -> %s", working_filename, saving_filename);
-
-		m_dlgProgress.SetTitle(strTitle);
-		m_dlgProgress.ShowWindow(SW_SHOW);
-
-		CheckSrcFrameParameters(&m_stSrcYUVParams);
-		CheckDstFrameParameters(&m_stDstYUVParams);
-
-		pWnd = GetDlgItem(IDC_YUVPREVIEWDLG_MFCBUTTON_WORKING_TRANSCODE);
-		pWnd->EnableWindow(FALSE);
-
-		::CreateThread(NULL, 1024, (LPTHREAD_START_ROUTINE)YUV_TransCode_Thread, this, 0, 0);
-	}
-	else
-	{
-		AfxMessageBox("目标文件不能为空!", MB_OK);
-	}
-}

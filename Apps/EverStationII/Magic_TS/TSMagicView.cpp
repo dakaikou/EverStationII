@@ -378,7 +378,7 @@ void CTSMagicView::InitConsoleTab(void)
 	int	item;
 	CTabCtrl*	 pTabCtrl = (CTabCtrl*)GetDlgItem(IDC_TAB_TSMAGIC);
 
-	m_imageTab.Create(IDB_CONSOLE, 20, 1, RGB(0xab,0xcd,0xef));
+	m_imageTab.Create(IDB_CONSOLE_TS_MAGIC, 20, 1, RGB(0xab,0xcd,0xef));
 
 	pTabCtrl->SetImageList(&m_imageTab);
 //	pTabCtrl->SetMinTabWidth(80);

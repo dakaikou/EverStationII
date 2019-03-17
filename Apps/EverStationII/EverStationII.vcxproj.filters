@@ -189,9 +189,6 @@
     <ClInclude Include="Magic_ES\ESMagicview.h">
       <Filter>头文件\Magic_ES</Filter>
     </ClInclude>
-    <ClInclude Include="Magic_YUV\Dlg_xxxyuvFileName.h">
-      <Filter>头文件\Magic_YUV</Filter>
-    </ClInclude>
     <ClInclude Include="Magic_YUV\Dlg_YUVCombine.h">
       <Filter>头文件\Magic_YUV</Filter>
     </ClInclude>
@@ -421,9 +418,6 @@
     </ClCompile>
     <ClCompile Include="MFCExt\SplitWnd\SplitWnd.cpp">
       <Filter>源文件\MFCExt\SplitWnd</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_YUV\Dlg_xxxyuvFileName.cpp">
-      <Filter>源文件\Magic_YUV</Filter>
     </ClCompile>
     <ClCompile Include="Magic_YUV\Dlg_YUVCombine.cpp">
       <Filter>源文件\Magic_YUV</Filter>
@@ -1010,6 +1004,36 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="res\播放器按钮-停止-48x48.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\console1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\tag_lable_tsmagic.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\tag_lable_yuv.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\tag_lable_yuvmagic.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\yuv_combine_element_up_36px.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\yuv_combine_element_down_36px.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\yuv_combine_element_add_36px.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\yuv_combine_element_del_36px.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\yuv_combine_element_do_36px.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\yuv_combine_element_reset_36px.bmp">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

@@ -18,7 +18,7 @@ CYUV_VideoDecoder::~CYUV_VideoDecoder(void)
 {
 }
 
-int CYUV_VideoDecoder::Open(uint32_t dwStreamType, const char* pszFileName, const YUV_SERIAL_PARAM_t* pYuvSerialParam)
+int CYUV_VideoDecoder::Open(uint32_t dwStreamType, const char* pszFileName, const YUV_SEQUENCE_PARAM_t* pstYuvSequenceParam)
 {
 	int rtcode = ESDECODER_UNKNOWN_ERROR;
 
@@ -26,67 +26,39 @@ int CYUV_VideoDecoder::Open(uint32_t dwStreamType, const char* pszFileName, cons
 
 	if (rtcode == ESDECODER_NO_ERROR)
 	{
-		if (pYuvSerialParam != NULL)
+		if (pstYuvSequenceParam != NULL)
 		{
-			m_VidDecodeInfo.size = sizeof(VIDEO_DECODE_Params_t);
+			memcpy(&m_stYUVSequenceParam, pstYuvSequenceParam, sizeof(YUV_SEQUENCE_PARAM_t));
 
-			//information got from caller
+			m_nYUVFrameSize = m_stYUVSequenceParam.luma_plane_size +
+				m_stYUVSequenceParam.chroma_plane_size +
+				m_stYUVSequenceParam.chroma_plane_size;			//YUV 3 plane
 
-			m_VidDecodeInfo.source_FourCC = pYuvSerialParam->dwFourCC;
-			//strcpy_s(m_VidDecodeInfo.source_pszFourCC, sizeof(m_VidDecodeInfo.source_pszFourCC), psourceInfo->pszFourCC);
+			m_pucYUVFrameBuf = (uint8_t*)malloc(m_nYUVFrameSize);
+			memset(m_pucYUVFrameBuf, 0x00, m_nYUVFrameSize);
 
-			m_VidDecodeInfo.source_luma_width = pYuvSerialParam->luma_width;
-			m_VidDecodeInfo.source_luma_height = pYuvSerialParam->luma_height;
-			m_VidDecodeInfo.source_chroma_width = pYuvSerialParam->chroma_width;
-			m_VidDecodeInfo.source_chroma_height = pYuvSerialParam->chroma_height;
+			m_decimate_coeff = 0;
 
-			m_VidDecodeInfo.source_bpp = pYuvSerialParam->quantizationBits;
+			m_stOutputPlaneParam.luma_width = m_stYUVSequenceParam.luma_width;
+			m_stOutputPlaneParam.luma_height = m_stYUVSequenceParam.luma_height;
+			m_stOutputPlaneParam.chroma_width = m_stYUVSequenceParam.chroma_width;
+			m_stOutputPlaneParam.chroma_height = m_stYUVSequenceParam.chroma_height;
+			m_stOutputPlaneParam.luma_plane_size = m_stYUVSequenceParam.luma_plane_size;
+			m_stOutputPlaneParam.chroma_plane_size = m_stYUVSequenceParam.chroma_plane_size;
+			m_stOutputPlaneParam.framerate = m_stYUVSequenceParam.framerate;
+			m_stOutputPlaneParam.nColorSpace = m_stYUVSequenceParam.nColorSpace;
+			m_stOutputPlaneParam.quantizationBits = m_stYUVSequenceParam.quantizationBits;
+			m_stOutputPlaneParam.dwFourCC = m_stYUVSequenceParam.dwFourCC;
 
-			//calculation
-			m_VidDecodeInfo.luma_pix_count = m_VidDecodeInfo.source_luma_width * m_VidDecodeInfo.source_luma_height;
-			m_VidDecodeInfo.luma_buf_size = m_VidDecodeInfo.luma_pix_count * m_VidDecodeInfo.source_bpp / 8;
-			m_VidDecodeInfo.chroma_pix_count = m_VidDecodeInfo.source_chroma_width * m_VidDecodeInfo.source_chroma_height;
-			m_VidDecodeInfo.chroma_buf_size = m_VidDecodeInfo.chroma_pix_count * m_VidDecodeInfo.source_bpp / 8;
+			m_nOutputPlaneSize = m_stOutputPlaneParam.luma_plane_size + 
+				m_stOutputPlaneParam.chroma_plane_size + 
+				m_stOutputPlaneParam.chroma_plane_size;
 
-			m_VidDecodeInfo.frame_buf_size = m_VidDecodeInfo.luma_buf_size + m_VidDecodeInfo.chroma_buf_size + m_VidDecodeInfo.chroma_buf_size;
+			m_pucOutputPlaneBuf = (uint8_t*)malloc(m_nOutputPlaneSize);			//RGB 3 plane
+			memset(m_pucOutputPlaneBuf, 0x00, m_nOutputPlaneSize);
 
-			//display parameters
-			m_VidDecodeInfo.display_framerate = pYuvSerialParam->framerate;
-
-			m_VidDecodeInfo.display_Y_width = pYuvSerialParam->luma_width;
-			m_VidDecodeInfo.display_Y_height = pYuvSerialParam->luma_height;
-
-			m_VidDecodeInfo.display_U_width = m_VidDecodeInfo.source_chroma_width;
-			m_VidDecodeInfo.display_U_height = m_VidDecodeInfo.source_chroma_height;
-
-			m_VidDecodeInfo.display_V_width = m_VidDecodeInfo.source_chroma_width;
-			m_VidDecodeInfo.display_V_height = m_VidDecodeInfo.source_chroma_height;
-
-			m_VidDecodeInfo.display_decimate_coeff = 0;
-
-			m_stOutputFrameParams.Y_width = m_VidDecodeInfo.display_Y_width;
-			m_stOutputFrameParams.Y_height = m_VidDecodeInfo.display_Y_height;
-			m_stOutputFrameParams.Y_frameSize = m_VidDecodeInfo.display_Y_width * m_VidDecodeInfo.display_Y_height;
-
-			m_stOutputFrameParams.U_width = m_VidDecodeInfo.display_U_width;
-			m_stOutputFrameParams.U_height = m_VidDecodeInfo.display_U_height;
-			m_stOutputFrameParams.U_frameSize = m_VidDecodeInfo.display_U_width * m_VidDecodeInfo.display_U_height;
-
-			m_stOutputFrameParams.V_width = m_VidDecodeInfo.display_V_width;
-			m_stOutputFrameParams.V_height = m_VidDecodeInfo.display_V_height;
-			m_stOutputFrameParams.V_frameSize = m_VidDecodeInfo.display_V_width * m_VidDecodeInfo.display_V_height;
-
-			m_nOutputFrameSize = m_stOutputFrameParams.Y_frameSize + m_stOutputFrameParams.U_frameSize + m_stOutputFrameParams.V_frameSize;			//RGB 3 plane
-
-			m_pucOutputFrameBuf = (uint8_t*)malloc(m_nOutputFrameSize);			//RGB 3 plane
-			memset(m_pucOutputFrameBuf, 0x00, m_nOutputFrameSize);
-
-			m_nSourceFrameSize = m_VidDecodeInfo.frame_buf_size;
-			m_pucSourceFrameBuf = (uint8_t*)malloc(m_nSourceFrameSize);
-			memset(m_pucSourceFrameBuf, 0x00, m_nSourceFrameSize);
-
-			m_nTotalFrameCount = (int)(m_nFileTotalSize / m_VidDecodeInfo.frame_buf_size);
-			m_nFrameEndPos = m_nFileTotalSize - (m_nFileTotalSize % m_VidDecodeInfo.frame_buf_size);
+			m_nTotalFrameCount = (int)(m_nFileTotalSize / m_nYUVFrameSize);
+			m_nFrameEndPos = m_nFileTotalSize - (m_nFileTotalSize % m_nYUVFrameSize);
 		}
 		else
 		{
@@ -130,13 +102,10 @@ int CYUV_VideoDecoder::Preview_Forward1Picture(void)
 //				if (wait_state == WAIT_OBJECT_0)
 //				{
 //#endif
-					rdsize = _read(m_hFile, m_pucSourceFrameBuf, m_VidDecodeInfo.frame_buf_size);
-					if (rdsize < m_VidDecodeInfo.frame_buf_size)
-					{
-						assert(0);
-					}
+					rdsize = _read(m_hFile, m_pucYUVFrameBuf, m_nYUVFrameSize);
+					assert(rdsize == m_nYUVFrameSize);
 
-					m_nCurReadPos += m_VidDecodeInfo.frame_buf_size;
+					m_nCurReadPos += rdsize;
 
 					percent = (int)(m_nCurReadPos * 100.0 / m_nFileTotalSize);
 
@@ -160,7 +129,7 @@ int CYUV_VideoDecoder::Preview_Backward1Picture(void)
 {
 	int64_t filepos = m_nCurReadPos;
 	
-	filepos -= (m_VidDecodeInfo.frame_buf_size * (1+1));
+	filepos -= (m_nYUVFrameSize * (1+1));
 	if (filepos < 0)
 	{
 		_lseeki64(m_hFile, 0, SEEK_SET);
@@ -180,14 +149,14 @@ int CYUV_VideoDecoder::Preview_ForwardNPicture(int n)
 {
 	int64_t filepos = m_nCurReadPos;
 
-	filepos += m_VidDecodeInfo.frame_buf_size * (n-1);
+	filepos += m_nYUVFrameSize * (n-1);
 
 	//if move exceed the last frame, than seek at the last frame
-	if (filepos > (m_nFileTotalSize - m_VidDecodeInfo.frame_buf_size))
+	if (filepos > (m_nFileTotalSize - m_nYUVFrameSize))
 	{
-		filepos = (m_nFileTotalSize - m_VidDecodeInfo.frame_buf_size);
+		filepos = (m_nFileTotalSize - m_nYUVFrameSize);
 	}
-	filepos -= (filepos % m_VidDecodeInfo.frame_buf_size);
+	filepos -= (filepos % m_nYUVFrameSize);
 	_lseeki64(m_hFile, filepos, SEEK_SET);
 	m_nCurReadPos = filepos;
 
@@ -199,7 +168,7 @@ int CYUV_VideoDecoder::Preview_BackwardNPicture(int n)
 {
 	int64_t filepos = m_nCurReadPos;
 
-	filepos -= m_VidDecodeInfo.frame_buf_size * (n+1);
+	filepos -= m_nYUVFrameSize * (n+1);
 	if (filepos < 0)
 	{
 		filepos = 0;
@@ -213,8 +182,8 @@ int CYUV_VideoDecoder::Preview_BackwardNPicture(int n)
 //implementation of virtual fuction
 int CYUV_VideoDecoder::Preview_LastPicture(void)
 {
-	int64_t filepos = m_nFileTotalSize - m_VidDecodeInfo.frame_buf_size;
-	filepos -= (filepos % m_VidDecodeInfo.frame_buf_size);
+	int64_t filepos = m_nFileTotalSize - m_nYUVFrameSize;
+	filepos -= (filepos % m_nYUVFrameSize);
 
 	_lseeki64(m_hFile, filepos, SEEK_SET);
 	m_nCurReadPos = filepos;
@@ -237,7 +206,7 @@ int CYUV_VideoDecoder::Preview_SeekAtPercent(int nPercent)
 	int64_t		 offset;
 
 	offset = (int64_t)((m_nFileTotalSize / 100.0)  * nPercent);
-	offset -= (offset % m_VidDecodeInfo.frame_buf_size);
+	offset -= (offset % m_nYUVFrameSize);
 	_lseeki64(m_hFile, offset, SEEK_SET);
 	m_nCurReadPos = offset;
 
@@ -248,8 +217,7 @@ int CYUV_VideoDecoder::Preview_Picture(int nFrameNum)
 {
 	int64_t		 offset;
 
-	offset = (int64_t)(nFrameNum * m_VidDecodeInfo.frame_buf_size);
-	//offset -= (offset % m_VidDecodeInfo.frame_buf_size);
+	offset = (int64_t)(nFrameNum * m_nYUVFrameSize);
 	_lseeki64(m_hFile, offset, SEEK_SET);
 	m_nCurReadPos = offset;
 
@@ -260,7 +228,7 @@ int	CYUV_VideoDecoder::Preview_CurPicture(void)
 {
 	int64_t filepos = m_nCurReadPos;
 
-	filepos -= m_VidDecodeInfo.frame_buf_size;
+	filepos -= m_nYUVFrameSize;
 	if (filepos < 0)
 	{
 		_lseeki64(m_hFile, 0, SEEK_SET);
@@ -274,33 +242,6 @@ int	CYUV_VideoDecoder::Preview_CurPicture(void)
 
 	return Preview_Forward1Picture();
 }
-
-//void DecodeFourCC2Text(char* pszFourCC, char* pszText, int size)
-//{
-//	if ((pszFourCC != NULL) && (pszText != NULL))
-//	{
-//		if (strcmp(pszFourCC, "IYUV") == 0)
-//		{
-//			strcpy_s(pszText, size, "YUV4:2:0	Y-U-V");
-//		}
-//		else if (strcmp(pszFourCC, "YV12") == 0)
-//		{
-//			strcpy_s(pszText, size, "YUV4:2:0	Y-V-U");
-//		}
-//		else if (strcmp(pszFourCC, "YUY2") == 0)
-//		{
-//			strcpy_s(pszText, size, "YUV4:2:2	Y-U-Y-V");
-//		}
-//		else if (strcmp(pszFourCC, "YV16") == 0)
-//		{
-//			strcpy_s(pszText, size, "YUV4:2:2	Y-V-U");
-//		}
-//		else
-//		{
-//			strcpy_s(pszText, size, "");
-//		}
-//	}
-//}
 
 
 

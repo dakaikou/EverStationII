@@ -46,8 +46,8 @@ public:
 
 	CDlg_Progress		 m_dlgProgress;
 
-	YUV_SERIAL_PARAM_t	 m_stSrcYUVParams;
-	YUV_SERIAL_PARAM_t	 m_stDstYUVParams;
+	YUV_SEQUENCE_PARAM_t	 m_stSrcSequenceParams;
+	YUV_SEQUENCE_PARAM_t	 m_stDstSequenceParams;
 	CString				 m_strReferenceFile;
 	CString				 m_strWorkingFile;
 	CString				 m_strSavingFile;
@@ -66,12 +66,13 @@ protected:
 	//CButton		 m_splitbtnPreview;
 	//YUV_PSNR_ThreadParams_t m_psnr_thread_params;
 
-	void CheckSrcFrameParameters(YUV_SERIAL_PARAM_t* pstYuvParams);
-	void CheckDstFrameParameters(YUV_SERIAL_PARAM_t* pstYuvParams);
+	void CheckSrcFrameParameters(YUV_SEQUENCE_PARAM_t* pstYuvParams);
+	void CheckDstFrameParameters(YUV_SEQUENCE_PARAM_t* pstYuvParams);
 
 	void ParseWandH(char* path, int *w, int *h);
 	void ParseFPS(char* path, int *fps);
 
+	void InitComboxForFileType(CComboBox* pCmbBox);
 	void InitComboxForFrameWH(CComboBox* pCmbBox);
 	void InitComboxForSampleStructure(CComboBox* pCmbBox);
 	void InitComboxForColorSpace(CComboBox* pCmbBox);

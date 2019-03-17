@@ -27,71 +27,99 @@
 #define USE_FRAMEBUF_ACCESS_MUTEX		1	
 #define USE_FRAMERATE_CONTROLL			0
 
-typedef enum
-{
-	CHROMA_FORMAT_MONO = 0,
-	CHROMA_FORMAT_4_2_0,
-	CHROMA_FORMAT_4_2_2,
-	CHROMA_FORMAT_4_4_4
-} CHROMA_FORMAT_e;
-
 typedef struct
 {
-	int			size;				//the byte counts for this structure
-	int			getparams;			//determine whether these parameters are usable
+	int			 luma_width;
+	int			 luma_height;
+	int			 luma_plane_size;
 
-	int			display_grid_size;	//0、8、16、32、64
-	int		    display_Y_width;
-	int			display_Y_height;
-	int		    display_U_width;
-	int			display_U_height;
-	int		    display_V_width;
-	int			display_V_height;
-	int			display_decimate_coeff;		//-4\-2\0\2\4
-	double		display_framerate;
+	int			 chroma_width;
+	int			 chroma_height;
+	int			 chroma_plane_size;
 
-	int			source_chroma_format;		//CHROMA_FORMAT_MONO、CHROMA_FORMAT_4_2_0、CHROMA_FORMAT_4_2_2、CHROMA_FORMAT_4_4_4
-	//char		source_pszFourCC[5];
-	unsigned int source_FourCC;
+	unsigned int dwFourCC;
+	int			 nColorSpace;				//709\2020
+	double		 framerate;
 
-	int			source_luma_width;
-	int			source_luma_height;
+	int			quantizationBits;			//8\10\12
 
-	int			source_bpp;
+} YUV_SEQUENCE_PARAM_t;
 
-	int			source_chroma_width;
-	int			source_chroma_height;
+//typedef struct
+//{
+//	int			 width;
+//	int			 height;
+//	unsigned int dwFourCC;
+//	int			 nColorSpace;				//709\2020
+//
+//	int			 plane_size;
+//
+//} OUTPUT_PLANE_PARAM_t;
 
-	int			luma_buf_size;
-	int			luma_pix_count;
-	uint8_t*	pucY;
+//typedef enum
+//{
+//	CHROMA_FORMAT_MONO = 0,
+//	CHROMA_FORMAT_4_2_0,
+//	CHROMA_FORMAT_4_2_2,
+//	CHROMA_FORMAT_4_4_4
+//} CHROMA_FORMAT_e;
 
-	int			chroma_buf_size;
-	int			chroma_pix_count;
-	uint8_t*	pucU;
-	uint8_t*	pucV;
-
-	int			frame_buf_size;							//luma_buf_size + chroma_buf_size + chroma_buf_size
-
-	int			mb_width;								//mpeg_sequence_header & mpeg_sequence_extension	
-	int			mb_height_frame;						//mpeg_sequence_header & mpeg_sequence_extension	
-	int			mb_height_field;						//mpeg_sequence_header & mpeg_sequence_extension	
-	int			mb_count;
-	int			luma_mbw;
-	int			luma_mbh;
-	int			chroma_mbw;
-	int			chroma_mbh;
-
-	int			blockcount;
-
-} VIDEO_DECODE_Params_t;
+//typedef struct
+//{
+//	int			size;				//the byte counts for this structure
+//	int			getparams;			//determine whether these parameters are usable
+//
+//	int			display_grid_size;	//0、8、16、32、64
+//	int		    display_Y_width;
+//	int			display_Y_height;
+//	int		    display_U_width;
+//	int			display_U_height;
+//	int		    display_V_width;
+//	int			display_V_height;
+//	int			display_decimate_coeff;		//-4\-2\0\2\4
+//	double		display_framerate;
+//
+//	int			source_chroma_format;		//CHROMA_FORMAT_MONO、CHROMA_FORMAT_4_2_0、CHROMA_FORMAT_4_2_2、CHROMA_FORMAT_4_4_4
+//	//char		source_pszFourCC[5];
+//	unsigned int source_FourCC;
+//
+//	int			source_luma_width;
+//	int			source_luma_height;
+//
+//	int			source_bpp;
+//
+//	int			source_chroma_width;
+//	int			source_chroma_height;
+//
+//	int			luma_buf_size;
+//	int			luma_pix_count;
+//	uint8_t*	pucY;
+//
+//	int			chroma_buf_size;
+//	int			chroma_pix_count;
+//	uint8_t*	pucU;
+//	uint8_t*	pucV;
+//
+//	int			frame_buf_size;							//luma_buf_size + chroma_buf_size + chroma_buf_size
+//
+//	int			mb_width;								//mpeg_sequence_header & mpeg_sequence_extension	
+//	int			mb_height_frame;						//mpeg_sequence_header & mpeg_sequence_extension	
+//	int			mb_height_field;						//mpeg_sequence_header & mpeg_sequence_extension	
+//	int			mb_count;
+//	int			luma_mbw;
+//	int			luma_mbh;
+//	int			chroma_mbw;
+//	int			chroma_mbh;
+//
+//	int			blockcount;
+//
+//} VIDEO_DECODE_Params_t;
 
 class MW_ES_LIB CVESDecoder : public CESDecoder
 {
 public:
 	CVESDecoder(void);
 
-	//int		Open(uint32_t dwStreamType, const char* pszFileName, const YUV_SOURCE_PARAM_t* psource_info = NULL);
 	int		Open(uint32_t dwStreamType, const char* pszFileName);
 	int		Close(void);
 
@@ -117,13 +145,13 @@ protected:
 
 	//RECT					m_rcWnd;
 
-	VIDEO_DECODE_Params_t	m_VidDecodeInfo;
-	uint8_t*				m_pucSourceFrameBuf;
-	int						m_nSourceFrameSize;
+	YUV_SEQUENCE_PARAM_t	m_stYUVSequenceParam;
+	uint8_t*				m_pucYUVFrameBuf;
+	int						m_nYUVFrameSize;
 
-	uint8_t*				m_pucOutputFrameBuf;
-	int						m_nOutputFrameSize;
-	FRAME_PARAMS_t			m_stOutputFrameParams;
+	YUV_SEQUENCE_PARAM_t	m_stOutputPlaneParam;
+	uint8_t*				m_pucOutputPlaneBuf;
+	int						m_nOutputPlaneSize;
 
 	HWND	m_hwnd_for_caller;
 	int(*m_callback_report_yuv_luma_stats)(HWND hWnd, WPARAM wParam, LPARAM lParam);
@@ -139,12 +167,13 @@ protected:
 	//int			m_nCanvasWidth;
 	//int			m_nCanvasHeight;
 	//int			m_dCanvasEnlargeCoeff;		//-4/-2/0/2/4
+	int				m_decimate_coeff;
 public:
 	
 	int DirectDraw_RePaint(void);
 
 	int FrameProcessAndFeedToDirectDraw(void);
-	int FeedToDirectDraw(const LPBYTE lpFrameBuf, int frameSize, const FRAME_PARAMS_t* pstFrameParams);
+	//int FeedToDirectDraw(const LPBYTE lpRGBBuf, int frameSize);
 	double GetDisplayFrameRate(void);
 	int GetCanvasWH(int* pnwidth, int* pnheight);
 
@@ -159,8 +188,9 @@ public:
 
 uint32_t thread_frame_process(LPVOID lpParam);
 
-int PICTURE_Enlarge(uint8_t* src, int src_w, int src_h, uint8_t* dst, int dst_w, int dst_h, int coeff);
-int PICTURE_Reduce(uint8_t* src, int src_w, int src_h, uint8_t* dst, int dst_w, int dst_h, int coeff);
+MW_ES_LIB int PICTURE_Enlarge(uint8_t* src, int src_w, int src_h, uint8_t* dst, int dst_w, int dst_h, int coeff);
+MW_ES_LIB int PICTURE_Reduce(uint8_t* src, int src_w, int src_h, uint8_t* dst, int dst_w, int dst_h, int coeff);
+MW_ES_LIB double PICTURE_psnr(uint8_t* reference, uint8_t* working, int size);
 
 #endif
 

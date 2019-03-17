@@ -288,7 +288,6 @@
     <ClInclude Include="Magic_TS\TSMagic_Trigger_Section.h" />
     <ClInclude Include="Magic_TS\TSMagic_Trigger_TSPacket.h" />
     <ClInclude Include="Magic_TS\View_EpgContainer.h" />
-    <ClInclude Include="Magic_YUV\Dlg_xxxyuvFileName.h" />
     <ClInclude Include="Magic_YUV\Dlg_YUVCombine.h" />
     <ClInclude Include="Magic_YUV\Dlg_YUVPreview.h" />
     <ClInclude Include="Magic_YUV\guiapi_yuv.h" />
@@ -379,7 +378,6 @@
     <ClCompile Include="Magic_TS\TSMagic_Trigger_Section.cpp" />
     <ClCompile Include="Magic_TS\TSMagic_Trigger_TSPacket.cpp" />
     <ClCompile Include="Magic_TS\View_EpgContainer.cpp" />
-    <ClCompile Include="Magic_YUV\Dlg_xxxyuvFileName.cpp" />
     <ClCompile Include="Magic_YUV\Dlg_YUVCombine.cpp" />
     <ClCompile Include="Magic_YUV\Dlg_YUVPreview.cpp" />
     <ClCompile Include="Magic_YUV\YUVMagicDoc.cpp" />
@@ -489,6 +487,7 @@
     <Image Include="res\classview_hc.bmp" />
     <Image Include="res\class_view.ico" />
     <Image Include="res\class_view_hc.ico" />
+    <Image Include="res\console1.bmp" />
     <Image Include="res\dtv.bmp" />
     <Image Include="res\event_info.bmp" />
     <Image Include="res\EverStationII.ico" />
@@ -527,6 +526,9 @@
     <Image Include="res\radiobtn_framectrl_unchecked_selected.bmp" />
     <Image Include="res\sort.bmp" />
     <Image Include="res\sort_hc.bmp" />
+    <Image Include="res\tag_lable_tsmagic.bmp" />
+    <Image Include="res\tag_lable_yuv.bmp" />
+    <Image Include="res\tag_lable_yuvmagic.bmp" />
     <Image Include="res\Toolbar.bmp" />
     <Image Include="res\toolbar1.bmp" />
     <Image Include="res\toolbar_.bmp" />
@@ -535,6 +537,12 @@
     <Image Include="res\Toolbar256.bmp" />
     <Image Include="res\toolbar_everstation_256.bmp" />
     <Image Include="res\userimages.bmp" />
+    <Image Include="res\yuv_combine_element_add_36px.bmp" />
+    <Image Include="res\yuv_combine_element_del_36px.bmp" />
+    <Image Include="res\yuv_combine_element_down_36px.bmp" />
+    <Image Include="res\yuv_combine_element_do_36px.bmp" />
+    <Image Include="res\yuv_combine_element_reset_36px.bmp" />
+    <Image Include="res\yuv_combine_element_up_36px.bmp" />
     <Image Include="res\播放器按钮-停止-48x48.bmp" />
     <Image Include="res\播放器按钮-播放-1-Normal - 64x64.bmp" />
     <Image Include="res\播放器按钮-播放-2-Focuse - 64x64.bmp" />

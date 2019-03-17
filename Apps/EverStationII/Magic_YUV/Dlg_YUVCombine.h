@@ -42,14 +42,16 @@ protected:
 	//{{AFX_MSG(CDlg_YUVCombine)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnBtnAdd();
-	afx_msg void OnBtnCombine();
+	afx_msg void OnBtnDo();
 	afx_msg void OnBtnDel();
 	afx_msg void OnBtnDown();
-	afx_msg void OnBtnReset();
-	afx_msg void OnBtnSaveasYuv();
 	afx_msg void OnBtnUp();
+	afx_msg void OnBtnReset();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+public:
+	CListBox m_listSourceFile;
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -14,7 +14,7 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // CYUVMagicView
-#include "..\Magic_YUV\GuiApi_YUV.h"
+//#include "..\Magic_YUV\GuiApi_YUV.h"
 #include "..\resource.h"
 
 #include "thirdparty_libs\glog\glog\logging.h"
@@ -148,10 +148,10 @@ void CYUVMagicView::InitConsoleTab(void)
 	int	item;
 	CTabCtrl*	 pTabCtrl = (CTabCtrl*)GetDlgItem(IDC_TAB_YUVMAGIC);
 
-	m_imageTab.Create(IDB_CONSOLE, 20, 1, RGB(0xab,0xcd,0xef));
+	m_imageTab.Create(IDB_CONSOLE_YUV_MAGIC, 36, 1, RGB(0xab,0xcd,0xef));
 
 	pTabCtrl->SetImageList(&m_imageTab);
-	pTabCtrl->SetItemSize(CSize(200, 25));
+	pTabCtrl->SetItemSize(CSize(200, 42));
 
 #if GUI_YUV_PREVIEW
 	item = pTabCtrl->GetItemCount();

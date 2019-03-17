@@ -26,22 +26,8 @@
 #define USE_SURFACE_ACCESS_MUTEX		1	
 
 #define RENDER_IN_THREAD				0	
-
-typedef struct
-{
-	int Y_width;
-	int Y_height;
-	int Y_frameSize;
-
-	int U_width;
-	int U_height;
-	int U_frameSize;
-
-	int V_width;
-	int V_height;
-	int V_frameSize;
-
-} FRAME_PARAMS_t;
+#define RENDER_IN_RGB_MODE				0
+#define RENDER_IN_YUV420_MODE			0
 
 class TAL_DIRECTX_LIB CTALForDirectDraw
 {
@@ -55,7 +41,7 @@ public:
 	int			m_bRenderControllStatus;
 	int			m_bRenderResponseStatus;
 
-	double		m_dFrameRate;
+	//double		m_dFrameRate;
 
 protected:
 	int			m_nGrid;
@@ -64,10 +50,10 @@ protected:
 	uint32_t	m_dwDebugTimeTick;
 
 public:
-	virtual int OpenVideo(HWND hWnd, int source_width, int source_height, unsigned int dwFourCC, double dFrameRate);
+	virtual int OpenVideo(HWND hWnd, int source_width, int source_height, DWORD dwFourCC);
 	virtual int CloseVideo(void);
 	virtual int SetClientRect(RECT dstRect);
-	virtual int FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frameSize, const FRAME_PARAMS_t* pstFrameParams);
+	virtual int FeedToOffScreenSurface(const LPBYTE lpYBuf, const LPBYTE lpUBuf, const LPBYTE lpVBuf, int planeSize);
 	virtual int RenderOnPrimarySurface(void);
 	virtual int ToggleGrid(void);
 
@@ -83,17 +69,14 @@ private:		//direct audio output
 	int						m_nSourceHeight;
 	//int						m_nCanvasWidth;
 	//int						m_nCanvasHeight;
-	//int						m_nViewWidth;
-	//int						m_nViewHeight;
+	int						m_nViewWidth;
+	int						m_nViewHeight;
 	HWND					m_hVidWnd;
 	DWORD					m_dwFourCC;
 	RECT					m_rcClient;
+	POINT					m_ptOrigin;
 
-	//FRAME_PARAMS_t			m_stTemporalFrameParams;
-	//LPBYTE					m_pTemporalFrameBuf;
-	//int						m_pTemporalFrameSize;
-
-	int AllocateDirectDrawResource(HWND hWnd, int canvas_width, int canvas_height, unsigned int dwFourCC);
+	int AllocateDirectDrawResource(HWND hWnd, int canvas_width, int canvas_height, DWORD dwFourCC);
 	int ReleaseDirectDrawResource(void);
 
 #if RENDER_IN_THREAD
