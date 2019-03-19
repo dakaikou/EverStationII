@@ -27,10 +27,7 @@
 
 #define RENDER_IN_THREAD				0	
 
-#define RENDER_IN_RGB_MODE					0
-#define RENDER_IN_FIX_YUV420_MODE			0
-#define RENDER_IN_FIX_YUV444_MODE			0
-#define RENDER_IN_AUTO_YUV_MODE				1
+#define RENDER_IN_RGB_MODE				0
 
 #define clip3(x, y, z)  ((z < x) ? x : ((z > y) ? y : z))
 

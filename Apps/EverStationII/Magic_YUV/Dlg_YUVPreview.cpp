@@ -152,6 +152,9 @@ void CDlg_YUVPreview::InitComboxForFrameWH(CComboBox* pCmbBox)
 	nIndex = pCmbBox->AddString("640x480 [VGA]");
 	pCmbBox->SetItemData(nIndex, (640 << 16) | 480);
 
+	nIndex = pCmbBox->AddString("1280x720 [HD/?]");
+	pCmbBox->SetItemData(nIndex, (1280 << 16) | 720);
+
 	nIndex = pCmbBox->AddString("480x270 [HD/16]");
 	pCmbBox->SetItemData(nIndex, (480 << 16) | 270);
 
@@ -180,6 +183,9 @@ void CDlg_YUVPreview::InitComboxForSampleStructure(CComboBox* pCmbBox)
 
 	nIndex = pCmbBox->AddString("4:2:2 Y-V-U Planar");
 	pCmbBox->SetItemData(nIndex, MAKEFOURCC('4', '2', '2', 'P'));			
+
+	nIndex = pCmbBox->AddString("4:2:2 U-Y-V-U Packed");
+	pCmbBox->SetItemData(nIndex, MAKEFOURCC('U', 'Y', 'V', 'Y'));
 
 	nIndex = pCmbBox->AddString("4:4:4 Y-U-V Planar");
 	pCmbBox->SetItemData(nIndex, MAKEFOURCC('Y', '4', '4', 'B'));			
@@ -772,6 +778,7 @@ void CDlg_YUVPreview::CheckSrcFrameParameters(INPUT_YUV_SEQUENCE_PARAM_t* pstYuv
 
 		case MAKEFOURCC('Y', '4', '2', 'B'):		//YUV 4:2:2 Planar
 		case MAKEFOURCC('4', '2', '2', 'P'):		//YVU 4:2:2 Planar
+		case MAKEFOURCC('U', 'Y', 'V', 'Y'):		//UYVY 4:2:2 Packed
 			pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
 			pstYuvParams->chroma_height = pstYuvParams->luma_height;
 
@@ -853,33 +860,31 @@ void CDlg_YUVPreview::CheckDstFrameParameters(INPUT_YUV_SEQUENCE_PARAM_t* pstYuv
 
 	switch (pstYuvParams->dwFourCC)
 	{
-	case 0x56555949:		//IYUV
+	case MAKEFOURCC('I', 'Y', 'U', 'V'):		//YUV 4:2:0 Planar
+	case MAKEFOURCC('I', '4', '2', '0'):		//YUV 4:2:0 Planar
+	case MAKEFOURCC('Y', 'V', '1', '2'):		//YVU 4:2:0 Planer
 		pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
 		pstYuvParams->chroma_height = (pstYuvParams->luma_height >> 1);
 
 		break;
 
-	case 0x30323449:		//I420
-		pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
-		pstYuvParams->chroma_height = (pstYuvParams->luma_height >> 1);
-
-		break;
-
-	case 0x32315659:		//YV12
-		pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
-		pstYuvParams->chroma_height = (pstYuvParams->luma_height >> 1);
-
-		break;
-
-	case 0x32595559:		//YUY2
+	case MAKEFOURCC('Y', '4', '2', 'B'):		//YUV 4:2:2 Planar
+	case MAKEFOURCC('4', '2', '2', 'P'):		//YVU 4:2:2 Planar
+	case MAKEFOURCC('U', 'Y', 'V', 'Y'):		//UYVY 4:2:2 Packed
 		pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
 		pstYuvParams->chroma_height = pstYuvParams->luma_height;
 
 		break;
 
+	case MAKEFOURCC('Y', '4', '4', 'B'):		//YUV 4:4:4 Planar
+	case MAKEFOURCC('4', '4', '4', 'P'):		//YVU 4:4:4 Planar
+		pstYuvParams->chroma_width = pstYuvParams->luma_width;
+		pstYuvParams->chroma_height = pstYuvParams->luma_height;
+		break;
+
 	default:
-		pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
-		pstYuvParams->chroma_height = (pstYuvParams->luma_height >> 1);
+		pstYuvParams->chroma_width = pstYuvParams->luma_width;
+		pstYuvParams->chroma_height = pstYuvParams->luma_height;
 		break;
 	}
 

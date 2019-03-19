@@ -220,160 +220,254 @@ int CVESDecoder::FrameProcessAndFeedToDirectDraw(void)
 
 			if (m_stOutputYUVSequenceParam.dwFourCC == MAKEFOURCC('A', 'Y', 'U', 'V'))			//AYUV	4:4:4, Packed Mode, FourCC code = 0x56555941
 			{
-				uint8_t R, G, B;
-				uint8_t Y, U, V;
-				uint8_t *pSrcY, *pSrcU, *pSrcV;
-
-				if (m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('Y', '4', '4', 'B'))		//YUV 4:4:4 Planar
+				if (
+					(m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('Y', '4', '4', 'B')) ||			//YUV	4:4:4, Planar Mode
+					(m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('4', '4', '4', 'P'))				//YVU	4:4:4, Planar Mode
+					)
 				{
-					pSrcY = m_pucInputYUVFrameBuf;
-					pSrcU = pSrcY + m_stInputYUVSequenceParam.luma_plane_size;
-					pSrcV = pSrcU + m_stInputYUVSequenceParam.chroma_plane_size;
-				}
-				else  //YVU 4:4:4 Planar   444P
-				{
-					pSrcY = m_pucInputYUVFrameBuf;
-					pSrcV = pSrcY + m_stInputYUVSequenceParam.luma_plane_size;
-					pSrcU = pSrcV + m_stInputYUVSequenceParam.chroma_plane_size;
-				}
+					uint8_t R, G, B;
+					uint8_t Y, U, V;
+					uint8_t *pSrcY, *pSrcU, *pSrcV;
 
-				assert(m_stInputYUVSequenceParam.luma_plane_size == m_stInputYUVSequenceParam.chroma_plane_size);
-				assert(m_stOutputYUVSequenceParam.luma_plane_size == m_stOutputYUVSequenceParam.chroma_plane_size);
-				assert(m_stOutputYUVSequenceParam.luma_plane_size == m_stOutputYUVSequenceParam.alpha_plane_size);
-
-				uint8_t* pDstLine = m_pucOutputYUVFrameBuf;
-
-				for (int dstRow = 0; dstRow < m_stOutputYUVSequenceParam.luma_height; dstRow++)
-				{
-					for (int dstCol = 0; dstCol < m_stOutputYUVSequenceParam.luma_width; dstCol++)
+					if (m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('Y', '4', '4', 'B'))		//YUV 4:4:4 Planar
 					{
-						int srcLumaCol = dstCol;
-						int srcChroma = dstCol;
+						pSrcY = m_pucInputYUVFrameBuf;
+						pSrcU = pSrcY + m_stInputYUVSequenceParam.luma_plane_size;
+						pSrcV = pSrcU + m_stInputYUVSequenceParam.chroma_plane_size;
+					}
+					else  //YVU 4:4:4 Planar   444P
+					{
+						pSrcY = m_pucInputYUVFrameBuf;
+						pSrcV = pSrcY + m_stInputYUVSequenceParam.luma_plane_size;
+						pSrcU = pSrcV + m_stInputYUVSequenceParam.chroma_plane_size;
+					}
 
-						if (m_decimate_coeff > 0)
-						{
-							srcLumaCol /= m_decimate_coeff;
-							srcChroma /= m_decimate_coeff;
-						}
-						else if (m_decimate_coeff < 0)
-						{
-							srcLumaCol *= -m_decimate_coeff;
-							srcChroma *= -m_decimate_coeff;
-						}
+					assert(m_stInputYUVSequenceParam.luma_plane_size == m_stInputYUVSequenceParam.chroma_plane_size);
+					assert(m_stOutputYUVSequenceParam.luma_plane_size == m_stOutputYUVSequenceParam.chroma_plane_size);
+					assert(m_stOutputYUVSequenceParam.luma_plane_size == m_stOutputYUVSequenceParam.alpha_plane_size);
 
-						Y = pSrcY[srcLumaCol];
-						U = pSrcU[srcChroma];
-						V = pSrcV[srcChroma];
+					uint8_t* pDstLine = m_pucOutputYUVFrameBuf;
+
+					for (int dstRow = 0; dstRow < m_stOutputYUVSequenceParam.luma_height; dstRow++)
+					{
+						for (int dstCol = 0; dstCol < m_stOutputYUVSequenceParam.luma_width; dstCol++)
+						{
+							int srcLumaCol = dstCol;
+							int srcChroma = dstCol;
+
+							if (m_decimate_coeff > 0)
+							{
+								srcLumaCol /= m_decimate_coeff;
+								srcChroma /= m_decimate_coeff;
+							}
+							else if (m_decimate_coeff < 0)
+							{
+								srcLumaCol *= -m_decimate_coeff;
+								srcChroma *= -m_decimate_coeff;
+							}
+
+							Y = pSrcY[srcLumaCol];
+							U = pSrcU[srcChroma];
+							V = pSrcV[srcChroma];
 #if 1
-						PICTURE_yuv2rgb(m_stOutputYUVSequenceParam.nColorSpace, Y, U, V, &R, &G, &B);
+							PICTURE_yuv2rgb(m_stOutputYUVSequenceParam.nColorSpace, Y, U, V, &R, &G, &B);
 #else
-						R = Y;
-						G = U;
-						B = V;
+							R = Y;
+							G = U;
+							B = V;
 #endif
-						int colOffset = (dstCol << 2);
-						pDstLine[colOffset + 0] = R;
-						pDstLine[colOffset + 1] = G;
-						pDstLine[colOffset + 2] = B;
-						pDstLine[colOffset + 3] = 0;
-					}
-					pDstLine += (m_stOutputYUVSequenceParam.luma_width << 2);
+							int colOffset = (dstCol << 2);
+							pDstLine[colOffset + 0] = R;
+							pDstLine[colOffset + 1] = G;
+							pDstLine[colOffset + 2] = B;
+							pDstLine[colOffset + 3] = 0;
+						}
+						pDstLine += (m_stOutputYUVSequenceParam.luma_width << 2);
 
-					if (m_decimate_coeff == 0)
-					{
-						pSrcY += m_stInputYUVSequenceParam.luma_width;
-						pSrcU += m_stInputYUVSequenceParam.chroma_width;
-						pSrcV += m_stInputYUVSequenceParam.chroma_width;
-					}
-					else if (m_decimate_coeff > 0)
-					{
-						if ((dstRow % m_decimate_coeff) == (m_decimate_coeff - 1))
+						if (m_decimate_coeff == 0)
 						{
 							pSrcY += m_stInputYUVSequenceParam.luma_width;
 							pSrcU += m_stInputYUVSequenceParam.chroma_width;
 							pSrcV += m_stInputYUVSequenceParam.chroma_width;
 						}
+						else if (m_decimate_coeff > 0)
+						{
+							if ((dstRow % m_decimate_coeff) == (m_decimate_coeff - 1))
+							{
+								pSrcY += m_stInputYUVSequenceParam.luma_width;
+								pSrcU += m_stInputYUVSequenceParam.chroma_width;
+								pSrcV += m_stInputYUVSequenceParam.chroma_width;
+							}
+						}
+						else
+						{
+							pSrcY += -(m_stInputYUVSequenceParam.luma_width * m_decimate_coeff);
+							pSrcU += -(m_stInputYUVSequenceParam.chroma_width * m_decimate_coeff);
+							pSrcV += -(m_stInputYUVSequenceParam.chroma_width * m_decimate_coeff);
+						}
 					}
-					else
-					{
-						pSrcY += -(m_stInputYUVSequenceParam.luma_width * m_decimate_coeff);
-						pSrcU += -(m_stInputYUVSequenceParam.chroma_width * m_decimate_coeff);
-						pSrcV += -(m_stInputYUVSequenceParam.chroma_width * m_decimate_coeff);
-					}
+				}
+				else
+				{
+					assert(0);
 				}
 			}
 			else if (m_stOutputYUVSequenceParam.dwFourCC == MAKEFOURCC('Y', 'U', 'Y', '2'))			//YUY2	4:2:2, Packed Mode, FourCC code = 0x32595559
 			{
-				uint8_t *pSrcY, *pSrcU, *pSrcV;
-
-				if (m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('Y', '4', '2', 'B'))		//YUV 4:2:2 Planar
+				if (
+					(m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('Y', '4', '2', 'B')) ||			//YUV	4:2:2, Planar Mode
+					(m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('4', '2', '2', 'P'))				//YVU	4:2:2, Planar Mode
+					)
 				{
-					pSrcY = m_pucInputYUVFrameBuf;
-					pSrcU = pSrcY + m_stInputYUVSequenceParam.luma_plane_size;
-					pSrcV = pSrcU + m_stInputYUVSequenceParam.chroma_plane_size;
-				}
-				else  //YVU 4:2:2 Planar   422P
-				{
-					pSrcY = m_pucInputYUVFrameBuf;
-					pSrcV = pSrcY + m_stInputYUVSequenceParam.luma_plane_size;
-					pSrcU = pSrcV + m_stInputYUVSequenceParam.chroma_plane_size;
-				}
+					uint8_t *pSrcY, *pSrcU, *pSrcV;
 
-				uint8_t* pDstLine = m_pucOutputYUVFrameBuf;
-
-				for (int dstRow = 0; dstRow < m_stOutputYUVSequenceParam.luma_height; dstRow++)
-				{
-					for (int dstCol = 0; dstCol < m_stOutputYUVSequenceParam.luma_width; dstCol++)
+					if (m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('Y', '4', '2', 'B'))		//YUV 4:2:2 Planar
 					{
-						int srcLumaCol = dstCol;
-						int srcChormaCol = dstCol / 2;
-
-						if (m_decimate_coeff > 0)
-						{
-							srcLumaCol /= m_decimate_coeff;
-							srcChormaCol /= m_decimate_coeff;
-						}
-						else if (m_decimate_coeff < 0)
-						{
-							srcLumaCol *= -m_decimate_coeff;
-							srcChormaCol *= -m_decimate_coeff;
-						}
-
-						pDstLine[2* dstCol + 0] = pSrcY[srcLumaCol];
-
-						if (dstCol % 2 == 0)
-						{
-							pDstLine[2 * dstCol + 1] = pSrcU[srcChormaCol];
-						}
-						else
-						{
-							pDstLine[2 * dstCol + 1] = pSrcV[srcChormaCol];
-						}
+						pSrcY = m_pucInputYUVFrameBuf;
+						pSrcU = pSrcY + m_stInputYUVSequenceParam.luma_plane_size;
+						pSrcV = pSrcU + m_stInputYUVSequenceParam.chroma_plane_size;
+					}
+					else  //YVU 4:2:2 Planar   422P
+					{
+						pSrcY = m_pucInputYUVFrameBuf;
+						pSrcV = pSrcY + m_stInputYUVSequenceParam.luma_plane_size;
+						pSrcU = pSrcV + m_stInputYUVSequenceParam.chroma_plane_size;
 					}
 
-					pDstLine += (m_stOutputYUVSequenceParam.luma_width << 1);
+					uint8_t* pDstLine = m_pucOutputYUVFrameBuf;
 
-					if (m_decimate_coeff == 0)
+					for (int dstRow = 0; dstRow < m_stOutputYUVSequenceParam.luma_height; dstRow++)
 					{
-						pSrcY += m_stInputYUVSequenceParam.luma_width;
-						pSrcU += m_stInputYUVSequenceParam.chroma_width;
-						pSrcV += m_stInputYUVSequenceParam.chroma_width;
-					}
-					else if (m_decimate_coeff > 0)
-					{
-						if ((dstRow % m_decimate_coeff) == (m_decimate_coeff - 1))
+						for (int dstCol = 0; dstCol < m_stOutputYUVSequenceParam.luma_width; dstCol++)
+						{
+							int srcLumaCol = dstCol;
+							int srcChormaCol = dstCol / 2;
+
+							if (m_decimate_coeff > 0)
+							{
+								srcLumaCol /= m_decimate_coeff;
+								srcChormaCol /= m_decimate_coeff;
+							}
+							else if (m_decimate_coeff < 0)
+							{
+								srcLumaCol *= -m_decimate_coeff;
+								srcChormaCol *= -m_decimate_coeff;
+							}
+
+							pDstLine[2 * dstCol + 0] = pSrcY[srcLumaCol];
+
+							if (dstCol % 2 == 0)
+							{
+								pDstLine[2 * dstCol + 1] = pSrcU[srcChormaCol];
+							}
+							else
+							{
+								pDstLine[2 * dstCol + 1] = pSrcV[srcChormaCol];
+							}
+						}
+
+						pDstLine += (m_stOutputYUVSequenceParam.luma_width << 1);
+
+						if (m_decimate_coeff == 0)
 						{
 							pSrcY += m_stInputYUVSequenceParam.luma_width;
 							pSrcU += m_stInputYUVSequenceParam.chroma_width;
 							pSrcV += m_stInputYUVSequenceParam.chroma_width;
 						}
+						else if (m_decimate_coeff > 0)
+						{
+							if ((dstRow % m_decimate_coeff) == (m_decimate_coeff - 1))
+							{
+								pSrcY += m_stInputYUVSequenceParam.luma_width;
+								pSrcU += m_stInputYUVSequenceParam.chroma_width;
+								pSrcV += m_stInputYUVSequenceParam.chroma_width;
+							}
+						}
+						else
+						{
+							pSrcY += -(m_stInputYUVSequenceParam.luma_width * m_decimate_coeff);
+							pSrcU += -(m_stInputYUVSequenceParam.chroma_width * m_decimate_coeff);
+							pSrcV += -(m_stInputYUVSequenceParam.chroma_width * m_decimate_coeff);
+						}
 					}
-					else
+				}
+				else
+				{
+					assert(0);
+				}
+			}
+			else if (m_stOutputYUVSequenceParam.dwFourCC == MAKEFOURCC('U', 'Y', 'V', 'Y'))			//UYVY	4:2:2, Packed Mode, FourCC code = 0x59565955
+			{
+				if (m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('U', 'Y', 'V', 'Y'))
+				{
+					uint8_t* pDstLine = m_pucOutputYUVFrameBuf;
+					uint8_t* pSrcLine = m_pucInputYUVFrameBuf;
+
+					for (int dstRow = 0; dstRow < m_stOutputYUVSequenceParam.luma_height; dstRow++)
 					{
-						pSrcY += -(m_stInputYUVSequenceParam.luma_width * m_decimate_coeff);
-						pSrcU += -(m_stInputYUVSequenceParam.chroma_width * m_decimate_coeff);
-						pSrcV += -(m_stInputYUVSequenceParam.chroma_width * m_decimate_coeff);
+						for (int dstCol = 0; dstCol < m_stOutputYUVSequenceParam.luma_width; dstCol++)
+						{
+							int srcLumaCol = dstCol;
+
+							if (m_decimate_coeff > 0)
+							{
+								srcLumaCol /= m_decimate_coeff;
+							}
+							else if (m_decimate_coeff < 0)
+							{
+								srcLumaCol *= -m_decimate_coeff;
+							}
+
+							int srcBufOffset = (srcLumaCol << 1);
+							int dstBufOffset = (dstCol << 1);
+
+							pDstLine[dstBufOffset + 1] = pSrcLine[srcBufOffset + 1];
+						}
+						for (int dstCol = 0; dstCol < m_stOutputYUVSequenceParam.luma_width; dstCol += 2)
+						{
+							int srcChromaCol = dstCol/2;
+
+							if (m_decimate_coeff > 0)
+							{
+								srcChromaCol /= m_decimate_coeff;
+							}
+							else if (m_decimate_coeff < 0)
+							{
+								srcChromaCol *= -m_decimate_coeff;
+							}
+
+							int srcUBufOffset = (((srcChromaCol << 1) + 0) << 1);
+							int dstBufOffset = (dstCol << 1);
+							pDstLine[dstBufOffset + 0] = pSrcLine[srcUBufOffset + 0];
+
+							int srcVBufOffset = (((srcChromaCol << 1) + 1) << 1);
+							dstBufOffset = ((dstCol + 1) << 1);
+
+							pDstLine[dstBufOffset + 0] = pSrcLine[srcVBufOffset + 0];
+						}
+
+						pDstLine += (m_stOutputYUVSequenceParam.luma_width << 1);
+
+						if (m_decimate_coeff == 0)
+						{
+							pSrcLine += (m_stInputYUVSequenceParam.luma_width << 1);
+						}
+						else if (m_decimate_coeff > 0)
+						{
+							if ((dstRow % m_decimate_coeff) == (m_decimate_coeff - 1))
+							{
+								pSrcLine += (m_stInputYUVSequenceParam.luma_width << 1);
+							}
+						}
+						else
+						{
+							pSrcLine += (-(m_stInputYUVSequenceParam.luma_width * m_decimate_coeff) << 1);
+						}
 					}
+				}
+				else
+				{
+					assert(0);
 				}
 			}
 			else if (
@@ -382,66 +476,77 @@ int CVESDecoder::FrameProcessAndFeedToDirectDraw(void)
 				(m_stOutputYUVSequenceParam.dwFourCC == MAKEFOURCC('I', 'Y', 'U', 'V'))				//IYUV	4:2:0, Planar Mode, FourCC code = 0x56555949
 				)
 			{
-				uint8_t* pSrcLuma = m_pucInputYUVFrameBuf;
-				uint8_t* pSrcChroma = pSrcLuma + m_stInputYUVSequenceParam.luma_plane_size;
-
-				uint8_t* pDstLuma = m_pucOutputYUVFrameBuf;
-				uint8_t* pDstChroma = pDstLuma + m_stOutputYUVSequenceParam.luma_plane_size;
-
-				for (int dstRow = 0; dstRow < m_stOutputYUVSequenceParam.luma_height; dstRow++)
+				if (
+					(m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('Y', 'V', '1', '2')) ||			//YUY2	4:2:0, Planar Mode, FourCC code = 0x32315659
+					(m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('I', '4', '2', '0')) ||			//I420	4:2:0, Planar Mode, FourCC code = 0x30323449
+					(m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('I', 'Y', 'U', 'V'))				//IYUV	4:2:0, Planar Mode, FourCC code = 0x56555949
+					)
 				{
-					for (int dstCol = 0; dstCol < m_stOutputYUVSequenceParam.luma_width; dstCol++)
+					uint8_t* pSrcLuma = m_pucInputYUVFrameBuf;
+					uint8_t* pSrcChroma = pSrcLuma + m_stInputYUVSequenceParam.luma_plane_size;
+
+					uint8_t* pDstLuma = m_pucOutputYUVFrameBuf;
+					uint8_t* pDstChroma = pDstLuma + m_stOutputYUVSequenceParam.luma_plane_size;
+
+					for (int dstRow = 0; dstRow < m_stOutputYUVSequenceParam.luma_height; dstRow++)
 					{
-						int srcLumaCol = dstCol;
-
-						if (m_decimate_coeff > 0)
+						for (int dstCol = 0; dstCol < m_stOutputYUVSequenceParam.luma_width; dstCol++)
 						{
-							srcLumaCol /= m_decimate_coeff;
+							int srcLumaCol = dstCol;
+
+							if (m_decimate_coeff > 0)
+							{
+								srcLumaCol /= m_decimate_coeff;
+							}
+							else if (m_decimate_coeff < 0)
+							{
+								srcLumaCol *= -m_decimate_coeff;
+							}
+
+							pDstLuma[dstCol] = pSrcLuma[srcLumaCol];
 						}
-						else if (m_decimate_coeff < 0)
+						for (int dstCol = 0; dstCol < m_stOutputYUVSequenceParam.chroma_width; dstCol++)
 						{
-							srcLumaCol *= -m_decimate_coeff;
+							int chromaCol = dstCol;
+
+							if (m_decimate_coeff > 0)
+							{
+								chromaCol /= m_decimate_coeff;
+							}
+							else if (m_decimate_coeff < 0)
+							{
+								chromaCol *= -m_decimate_coeff;
+							}
+
+							pDstChroma[dstCol] = pSrcChroma[chromaCol];
 						}
 
-						pDstLuma[dstCol] = pSrcLuma[srcLumaCol];
-					}
-					for (int dstCol = 0; dstCol < m_stOutputYUVSequenceParam.chroma_width; dstCol++)
-					{
-						int chromaCol = dstCol;
+						pDstLuma += m_stOutputYUVSequenceParam.luma_width;
+						pDstChroma += m_stOutputYUVSequenceParam.chroma_width;
 
-						if (m_decimate_coeff > 0)
-						{
-							chromaCol /= m_decimate_coeff;
-						}
-						else if (m_decimate_coeff < 0)
-						{
-							chromaCol *= -m_decimate_coeff;
-						}
-
-						pDstChroma[dstCol] = pSrcChroma[chromaCol];
-					}
-
-					pDstLuma += m_stOutputYUVSequenceParam.luma_width;
-					pDstChroma += m_stOutputYUVSequenceParam.chroma_width;
-
-					if (m_decimate_coeff == 0)
-					{
-						pSrcLuma += m_stInputYUVSequenceParam.luma_width;
-						pSrcChroma += m_stInputYUVSequenceParam.chroma_width;
-					}
-					else if (m_decimate_coeff > 0)
-					{
-						if ((dstRow % m_decimate_coeff) == (m_decimate_coeff - 1))
+						if (m_decimate_coeff == 0)
 						{
 							pSrcLuma += m_stInputYUVSequenceParam.luma_width;
 							pSrcChroma += m_stInputYUVSequenceParam.chroma_width;
 						}
+						else if (m_decimate_coeff > 0)
+						{
+							if ((dstRow % m_decimate_coeff) == (m_decimate_coeff - 1))
+							{
+								pSrcLuma += m_stInputYUVSequenceParam.luma_width;
+								pSrcChroma += m_stInputYUVSequenceParam.chroma_width;
+							}
+						}
+						else
+						{
+							pSrcLuma += -(m_stInputYUVSequenceParam.luma_width * m_decimate_coeff);
+							pSrcChroma += -(m_stInputYUVSequenceParam.chroma_width * m_decimate_coeff);
+						}
 					}
-					else
-					{
-						pSrcLuma += -(m_stInputYUVSequenceParam.luma_width * m_decimate_coeff);
-						pSrcChroma += -(m_stInputYUVSequenceParam.chroma_width * m_decimate_coeff);
-					}
+				}
+				else
+				{
+					assert(0);
 				}
 
 				//if (m_decimate_coeff == 0)
@@ -471,6 +576,8 @@ int CVESDecoder::FrameProcessAndFeedToDirectDraw(void)
 				(m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('4', '4', '4', 'P'))			//Y-V-U	4:4:4 Planar
 				)
 			{
+				//YUV(YVU) 4:4:4 planar format convert to AYUV 4:4:4:4 Packed format
+
 				assert(m_stInputYUVSequenceParam.luma_plane_size == m_stInputYUVSequenceParam.chroma_plane_size);
 				assert(m_stOutputYUVSequenceParam.luma_plane_size == m_stOutputYUVSequenceParam.chroma_plane_size);
 				assert(m_stOutputYUVSequenceParam.alpha_plane_size == m_stOutputYUVSequenceParam.alpha_plane_size);
@@ -550,6 +657,8 @@ int CVESDecoder::FrameProcessAndFeedToDirectDraw(void)
 			else if ((m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('Y', '4', '2', 'B')) ||		//YUV  4:2:2 Planar
 					(m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('4', '2', '2', 'P')))			//YVU  4:2:2 Planar
 			{
+				//YUV(YVU) 4:2:2 planar format convert to AYUV 4:4:4:4 Packed format
+
 				uint8_t R, G, B;
 				uint8_t Y, U, V;
 				uint8_t *pSrcY, *pSrcU, *pSrcV;
@@ -628,6 +737,7 @@ int CVESDecoder::FrameProcessAndFeedToDirectDraw(void)
 					 (m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('Y', 'V', '1', '2'))			//YVU  4:2:0 Planar
 					 )
 			{
+				//YUV(YVU) 4:2:0 planar format convert to AYUV 4:4:4:4 Packed format
 				uint8_t R, G, B;
 				uint8_t Y, U, V;
 				uint8_t *pSrcY, *pSrcU, *pSrcV;
@@ -714,6 +824,74 @@ int CVESDecoder::FrameProcessAndFeedToDirectDraw(void)
 
 				}
 			}
+			else if (m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('U', 'Y', 'V', 'Y')) 		//UYUV  4:2:2 Packed
+			{
+				//YUV(YVU) 4:2:2 packed format convert to AYUV 4:4:4:4 Packed format
+				uint8_t* pDstLine = m_pucOutputYUVFrameBuf;
+				uint8_t* pSrcLine = m_pucInputYUVFrameBuf;
+
+				for (int dstRow = 0; dstRow < m_stOutputYUVSequenceParam.luma_height; dstRow++)
+				{
+					for (int dstCol = 0; dstCol < m_stOutputYUVSequenceParam.luma_width; dstCol++)
+					{
+						int srcLumaCol = dstCol;
+						int srcChromaCol = dstCol / 2;
+
+						if (m_decimate_coeff > 0)
+						{
+							srcLumaCol /= m_decimate_coeff;
+							srcChromaCol /= m_decimate_coeff;
+						}
+						else if (m_decimate_coeff < 0)
+						{
+							srcLumaCol *= -m_decimate_coeff;
+							srcChromaCol *= -m_decimate_coeff;
+						}
+
+						int srcYBufOffset = (srcLumaCol << 1);
+						int srcUBufOffset = (((srcChromaCol << 1) + 0) << 1);
+						int srcVBufOffset = (((srcChromaCol << 1) + 1) << 1);
+
+						uint8_t R, G, B;
+						uint8_t Y, U, V;
+
+						Y = pSrcLine[srcYBufOffset + 1];
+						U = pSrcLine[srcUBufOffset + 0];
+						V = pSrcLine[srcVBufOffset + 0];
+
+						PICTURE_yuv2rgb(m_stOutputYUVSequenceParam.nColorSpace, Y, U, V, &R, &G, &B);
+
+						int colOffset = (dstCol << 2);
+						pDstLine[colOffset + 0] = R;
+						pDstLine[colOffset + 1] = G;
+						pDstLine[colOffset + 2] = B;
+						pDstLine[colOffset + 3] = 0;
+					}
+
+					pDstLine += (m_stOutputYUVSequenceParam.luma_width << 2);
+
+					if (m_decimate_coeff == 0)
+					{
+						pSrcLine += (m_stInputYUVSequenceParam.luma_width << 1);
+					}
+					else if (m_decimate_coeff > 0)
+					{
+						if ((dstRow % m_decimate_coeff) == (m_decimate_coeff - 1))
+						{
+							pSrcLine += (m_stInputYUVSequenceParam.luma_width << 1);
+						}
+					}
+					else
+					{
+						pSrcLine += (-(m_stInputYUVSequenceParam.luma_width * m_decimate_coeff) << 1);
+					}
+				}
+			}
+			else
+			{
+				assert(0);
+			}
+
 #endif
 
 #if USE_FRAMEBUF_ACCESS_MUTEX

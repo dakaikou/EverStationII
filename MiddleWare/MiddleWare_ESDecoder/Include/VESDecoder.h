@@ -27,6 +27,8 @@
 #define USE_FRAMEBUF_ACCESS_MUTEX		1	
 #define USE_FRAMERATE_CONTROLL			0
 
+#define RENDER_IN_AUTO_YUV_MODE			0
+
 typedef struct
 {
 	int			 luma_width;
