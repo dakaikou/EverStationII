@@ -37,24 +37,35 @@ typedef struct
 	int			 chroma_height;
 	int			 chroma_plane_size;
 
-	unsigned int dwFourCC;
+	unsigned int dwFourCC;					//Setup according to the  YUV File Format
 	int			 nColorSpace;				//709\2020
 	double		 framerate;
 
 	int			quantizationBits;			//8\10\12
 
-} YUV_SEQUENCE_PARAM_t;
+} INPUT_YUV_SEQUENCE_PARAM_t;
 
-//typedef struct
-//{
-//	int			 width;
-//	int			 height;
-//	unsigned int dwFourCC;
-//	int			 nColorSpace;				//709\2020
-//
-//	int			 plane_size;
-//
-//} OUTPUT_PLANE_PARAM_t;
+typedef struct
+{
+	int			 luma_width;
+	int			 luma_height;
+	int			 luma_plane_size;
+
+	int			 chroma_width;
+	int			 chroma_height;
+	int			 chroma_plane_size;
+
+	int			 alpha_width;
+	int			 alpha_height;
+	int			 alpha_plane_size;
+
+	unsigned int dwFourCC;					//Limit to DirectX's ability
+	int			 nColorSpace;				//709\2020
+	double		 framerate;
+
+	int			 quantizationBits;			//8\10\12
+
+} OUTPUT_YUV_SEQUENCE_PARAM_t;
 
 //typedef enum
 //{
@@ -145,13 +156,13 @@ protected:
 
 	//RECT					m_rcWnd;
 
-	YUV_SEQUENCE_PARAM_t	m_stYUVSequenceParam;
-	uint8_t*				m_pucYUVFrameBuf;
-	int						m_nYUVFrameSize;
+	INPUT_YUV_SEQUENCE_PARAM_t	m_stInputYUVSequenceParam;
+	uint8_t*					m_pucInputYUVFrameBuf;
+	int							m_nInputYUVFrameSize;
 
-	YUV_SEQUENCE_PARAM_t	m_stOutputPlaneParam;
-	uint8_t*				m_pucOutputPlaneBuf;
-	int						m_nOutputPlaneSize;
+	OUTPUT_YUV_SEQUENCE_PARAM_t	m_stOutputYUVSequenceParam;
+	uint8_t*					m_pucOutputYUVFrameBuf;
+	int							m_nOutputYUVFrameSize;
 
 	HWND	m_hwnd_for_caller;
 	int(*m_callback_report_yuv_luma_stats)(HWND hWnd, WPARAM wParam, LPARAM lParam);

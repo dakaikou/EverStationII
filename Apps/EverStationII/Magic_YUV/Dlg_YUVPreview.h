@@ -46,8 +46,8 @@ public:
 
 	CDlg_Progress		 m_dlgProgress;
 
-	YUV_SEQUENCE_PARAM_t	 m_stSrcSequenceParams;
-	YUV_SEQUENCE_PARAM_t	 m_stDstSequenceParams;
+	INPUT_YUV_SEQUENCE_PARAM_t	 m_stSrcSequenceParams;
+	INPUT_YUV_SEQUENCE_PARAM_t	 m_stDstSequenceParams;
 	CString				 m_strReferenceFile;
 	CString				 m_strWorkingFile;
 	CString				 m_strSavingFile;
@@ -66,8 +66,8 @@ protected:
 	//CButton		 m_splitbtnPreview;
 	//YUV_PSNR_ThreadParams_t m_psnr_thread_params;
 
-	void CheckSrcFrameParameters(YUV_SEQUENCE_PARAM_t* pstYuvParams);
-	void CheckDstFrameParameters(YUV_SEQUENCE_PARAM_t* pstYuvParams);
+	void CheckSrcFrameParameters(INPUT_YUV_SEQUENCE_PARAM_t* pstYuvParams);
+	void CheckDstFrameParameters(INPUT_YUV_SEQUENCE_PARAM_t* pstYuvParams);
 
 	void ParseWandH(char* path, int *w, int *h);
 	void ParseFPS(char* path, int *fps);

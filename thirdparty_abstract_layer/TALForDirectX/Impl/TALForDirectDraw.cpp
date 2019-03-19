@@ -351,7 +351,7 @@ int CTALForDirectDraw::ReleaseDirectDrawResource(void)
 //int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpYBuf, const LPBYTE lpUBuf, const LPBYTE lpVBuf, int planeSize)
 int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frameSize)
 {
-	LPBYTE  lpFrame = NULL;
+	//LPBYTE  lpFrame = NULL;
 	LPBYTE  lpSurf = NULL;
 	HRESULT	ddRval = -1;
 
@@ -397,157 +397,103 @@ int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frame
 					//	lpSurf += ddsd.lPitch / 2;
 					//}
 #else
-//#if RENDER_IN_FIX_YUV420_MODE
-//					uint8_t* ptrY = lpYBuf;
-//					uint8_t* ptrU = lpUBuf;
-//					uint8_t* ptrV = lpVBuf;
-//					for (DWORD i = 0; i < ddsd.dwHeight; i++)
-//					{
-//						//for (DWORD j = 0; j < ddsd.dwWidth; j++)
-//						//{
-//						//	lpSurf[j] = ptrY[j];
-//						//}
-//						memcpy(lpSurf, ptrY, ddsd.dwWidth);
-//						lpSurf += ddsd.lPitch;
-//						ptrY += ddsd.dwWidth;
-//					}
-//
-//					for (DWORD i = 0; i < ddsd.dwHeight / 2; i++)
-//					{
-//						//for (DWORD j = 0; j < ddsd.dwWidth/2; j++)
-//						//{
-//						//	lpSurf[j] = ptrU[j];
-//						//}
-//						memcpy(lpSurf, ptrU, ddsd.dwWidth / 2);
-//						ptrU += ddsd.dwWidth / 2;
-//						lpSurf += ddsd.lPitch / 2;
-//				}
-//
-//					for (DWORD i = 0; i < ddsd.dwHeight / 2; i++)
-//					{
-//						for (DWORD j = 0; j < ddsd.dwWidth / 2; j++)
-//						{
-//							lpSurf[j] = ptrV[j];
-//						}
-//						//memcpy(lpSurf, lpFrame, ddsd.dwWidth / 2);
-//						ptrV += ddsd.dwWidth / 2;
-//						lpSurf += ddsd.lPitch / 2;
-//					}
-//#else
-//#if RENDER_IN_AUTO_YUV_MODE
-
 					int luma_width = ddsd.dwWidth;
 					int luma_height = ddsd.dwHeight;
-					int chroma_width = ddsd.dwWidth;
-					int chroma_height = ddsd.dwHeight;
 
-					if (ddsd.ddpfPixelFormat.dwFourCC == 0x56555949)				//IYUV   4:2:0
+					if (
+						(ddsd.ddpfPixelFormat.dwFourCC == MAKEFOURCC('I', 'Y', 'U', 'V')) ||				//IYUV   4:2:0, Planar format, FourCC code = 0x56555949
+						(ddsd.ddpfPixelFormat.dwFourCC == MAKEFOURCC('I', '4', '2', '0'))	||			//I420   4:2:0, Planar format, FourCC code = 0x30323449
+						(ddsd.ddpfPixelFormat.dwFourCC == MAKEFOURCC('Y', 'V', '1', '2'))				//YV12   4:2:0, Planar format, FourCC code = 0x32315659
+						)
 					{
-						chroma_width = luma_width / 2;
-						chroma_height = luma_height / 2;
+						int chroma_width = luma_width / 2;
+						//int chroma_height = luma_height / 2;
 
-						uint8_t* ptrY = lpFrameBuf;
-						uint8_t* ptrU = ptrY + luma_width * luma_height;
-						uint8_t* ptrV = ptrU + chroma_width * chroma_height;
+						uint8_t* ptrLuma = lpFrameBuf;
+						uint8_t* ptrChroma = ptrLuma + luma_width * luma_height;
 
-						for (DWORD i = 0; i < luma_height; i++)
+						//Luma
+						for (int i = 0; i < luma_height; i++)
 						{
-							for (DWORD j = 0; j < luma_width; j++)
-							{
-								lpSurf[j] = ptrY[j];
-							}
-							//memcpy(lpSurf, ptrY, ddsd.dwWidth);
+							memcpy(lpSurf, ptrLuma, luma_width);
+							ptrLuma += luma_width;
+
 							lpSurf += ddsd.lPitch;
-							ptrY += luma_width;
 						}
 
-						for (DWORD i = 0; i < chroma_height; i++)
+						//Chroma
+						for (int i = 0; i < luma_height; i++)
 						{
-							for (DWORD j = 0; j < chroma_width; j++)
-							{
-								lpSurf[j] = ptrU[j];
-							}
-							//memcpy(lpSurf, ptrU, ddsd.dwWidth / 2);
+							memcpy(lpSurf, ptrChroma, chroma_width);
+							ptrChroma += chroma_width;
+
 							lpSurf += ddsd.lPitch / 2;
-							ptrU += chroma_width;
 						}
 
-						for (DWORD i = 0; i < chroma_height; i++)
+						//for (int i = 0; i < chroma_height; i++)
+						//{
+						//	memcpy(lpSurf, ptrChroma, chroma_width);
+						//	ptrChroma += chroma_width;
+
+						//	lpSurf += ddsd.lPitch / 2;
+						//}
+					}
+					else if (
+						(ddsd.ddpfPixelFormat.dwFourCC == MAKEFOURCC('Y', 'U', 'Y', '2')) ||				//YUY2	4:2:2, Packet format, FourCC code = 0x32595559
+						(ddsd.ddpfPixelFormat.dwFourCC == MAKEFOURCC('Y', 'U', 'Y', 'V'))					//YUYV	4:2:2, Packet format, FourCC code = 0x56595559
+						)
+					{
+						uint8_t* ptrPackedLine = lpFrameBuf;
+						int lineSize = (luma_width << 1);
+
+						for (int i = 0; i < luma_height; i++)
 						{
-							for (DWORD j = 0; j < chroma_width; j++)
-							{
-								lpSurf[j] = ptrV[j];
-							}
-							//memcpy(lpSurf, lpFrame, ddsd.dwWidth / 2);
-							lpSurf += ddsd.lPitch / 2;
-							ptrV += chroma_width;
+							memcpy(lpSurf, ptrPackedLine, lineSize);
+							ptrPackedLine += lineSize;
+
+							lpSurf += ddsd.lPitch;
 						}
 					}
-					else if (ddsd.ddpfPixelFormat.dwFourCC == 0x32595559)			//YUY2		4:2:2
+					else if (
+						(ddsd.ddpfPixelFormat.dwFourCC == MAKEFOURCC('A', 'Y', 'U', 'V'))			//AYUV		4:4:4, Packed format, FourCC code = 0x56555941
+						)
 					{
-						chroma_width = luma_width / 2;
-						chroma_height = luma_height;
+						uint8_t* ptrPackedLine = lpFrameBuf;
+						int lineSize = (luma_width << 2);				//4 pixel for one macro pixel
 
-						uint8_t* ptrY = lpFrameBuf;
-						uint8_t* ptrU = ptrY + luma_width * luma_height;
-						uint8_t* ptrV = ptrU + chroma_width * chroma_height;
-
-						for (DWORD i = 0; i < luma_height; i++)
+						for (int i = 0; i < luma_height; i++)
 						{
-							int pxIndex = 0;
-							for (DWORD j = 0; j < luma_width; j++)
-							{
-								lpSurf[pxIndex] = ptrY[j];
-								pxIndex++;
-								if (j % 2 == 0)
-								{
-									lpSurf[pxIndex] = ptrV[j / 2];
-								}
-								else
-								{
-									lpSurf[pxIndex] = ptrU[j / 2];
-								}
+							memcpy(lpSurf, ptrPackedLine, lineSize);
+							ptrPackedLine += lineSize;
 
-								pxIndex++;
-							}
-							//memcpy(lpSurf, ptrY, ddsd.dwWidth);
 							lpSurf += ddsd.lPitch;
-							ptrY += luma_width;
-							ptrU += chroma_width;
-							ptrV += chroma_width;
 						}
-					}
-					else if (ddsd.ddpfPixelFormat.dwFourCC == 0x56555941)			//AYUV		4:4:4
-					{
-						uint8_t* ptrR = lpFrameBuf;
-						uint8_t* ptrG = ptrR + luma_width * luma_height;
-						uint8_t* ptrB = ptrG + luma_width * luma_height;
 
-						//chroma_width = luma_width;
-						for (DWORD i = 0; i < luma_height; i++)
-						{
-							int pxIndex = 0;
-							for (DWORD j = 0; j < luma_width; j++)
-							{
-								lpSurf[pxIndex] = ptrR[j];				//R
-								pxIndex++;
-								lpSurf[pxIndex] = ptrG[j];				//G
-								pxIndex++;
-								lpSurf[pxIndex] = ptrB[j];				//B
-								pxIndex++;
-								lpSurf[pxIndex] = 0xFF;				//A
-								pxIndex++;
+						//uint8_t* ptrR = lpFrameBuf;
+						//uint8_t* ptrG = ptrR + luma_width * luma_height;
+						//uint8_t* ptrB = ptrG + luma_width * luma_height;
 
-							}
-							lpSurf += ddsd.lPitch;
-							ptrB += luma_width;
-							ptrG += luma_width;
-							ptrR += luma_width;
-						}
+						//for (DWORD i = 0; i < luma_height; i++)
+						//{
+						//	int pxIndex = 0;
+						//	for (DWORD j = 0; j < luma_width; j++)
+						//	{
+						//		lpSurf[pxIndex] = ptrR[j];				//R
+						//		pxIndex++;
+						//		lpSurf[pxIndex] = ptrG[j];				//G
+						//		pxIndex++;
+						//		lpSurf[pxIndex] = ptrB[j];				//B
+						//		pxIndex++;
+						//		lpSurf[pxIndex] = 0xFF;				//A
+						//		pxIndex++;
+						//	}
+						//	lpSurf += ddsd.lPitch;
+						//	ptrB += luma_width;
+						//	ptrG += luma_width;
+						//	ptrR += luma_width;
+						//}
 					}
 #endif
-//#endif
-//#endif
 
 				}
 

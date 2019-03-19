@@ -169,26 +169,23 @@ void CDlg_YUVPreview::InitComboxForSampleStructure(CComboBox* pCmbBox)
 {
 	pCmbBox->ResetContent();
 
-	int nIndex = pCmbBox->AddString("YUV 4:2:0");
-	pCmbBox->SetItemData(nIndex, 0x56555949);			//FourCC Option: [IYUV,0x56555949] [I420,0x30323449]
+	int nIndex = pCmbBox->AddString("4:2:0 Y-U-V Planar");
+	pCmbBox->SetItemData(nIndex, MAKEFOURCC('I', 'Y', 'U', 'V'));			//FourCC Option: [IYUV,0x56555949] [I420,0x30323449]
 
-	nIndex = pCmbBox->AddString("YUV 4:2:2");
-	pCmbBox->SetItemData(nIndex, 0x32595559);			//FourCC Option [UYVY,0x59565955] [YUY2,0x32595559]
+	nIndex = pCmbBox->AddString("4:2:0 Y-V-U Planar");
+	pCmbBox->SetItemData(nIndex, MAKEFOURCC('Y', 'V', '1', '2'));			
 
-	nIndex = pCmbBox->AddString("YUV 4:4:4");
-	pCmbBox->SetItemData(nIndex, 0x56555941);			//FourCC Option [AYUV,0x56555941]
+	nIndex = pCmbBox->AddString("4:2:2 Y-U-V Planar");
+	pCmbBox->SetItemData(nIndex, MAKEFOURCC('Y', '4', '2', 'B'));
 
-	//int nIndex = pCmbBox->AddString("IYUV [4:2:0 Y-U-V]");
-	//pCmbBox->SetItemData(nIndex, 0x56555949);
+	nIndex = pCmbBox->AddString("4:2:2 Y-V-U Planar");
+	pCmbBox->SetItemData(nIndex, MAKEFOURCC('4', '2', '2', 'P'));			
 
-	//nIndex = pCmbBox->AddString("I420 [4:2:0 Y-U-V]");
-	//pCmbBox->SetItemData(nIndex, 0x30323449);
+	nIndex = pCmbBox->AddString("4:4:4 Y-U-V Planar");
+	pCmbBox->SetItemData(nIndex, MAKEFOURCC('Y', '4', '4', 'B'));			
 
-	//nIndex = pCmbBox->AddString("YV12 [4:2:0 Y-V-U]");
-	//pCmbBox->SetItemData(nIndex, 0x32315659);
-
-	//nIndex = pCmbBox->AddString("YUY2");
-	//pCmbBox->SetItemData(nIndex, 0x56555949);
+	nIndex = pCmbBox->AddString("4:4:4 Y-V-U Planar");
+	pCmbBox->SetItemData(nIndex, MAKEFOURCC('4', '4', '4', 'P'));
 }
 
 void CDlg_YUVPreview::InitComboxForColorSpace(CComboBox* pCmbBox)
@@ -728,11 +725,11 @@ void CDlg_YUVPreview::OnBtnYuvFilePreview()
 	UpdateData(FALSE);
 }
 
-void CDlg_YUVPreview::CheckSrcFrameParameters(YUV_SEQUENCE_PARAM_t* pstYuvParams)
+void CDlg_YUVPreview::CheckSrcFrameParameters(INPUT_YUV_SEQUENCE_PARAM_t* pstYuvParams)
 {
 	if (pstYuvParams != NULL)
 	{
-		memset(pstYuvParams, 0x00, sizeof(YUV_SEQUENCE_PARAM_t));
+		memset(pstYuvParams, 0x00, sizeof(INPUT_YUV_SEQUENCE_PARAM_t));
 
 		int				nSel;
 		CComboBox*		pCmbBox = NULL;
@@ -765,39 +762,30 @@ void CDlg_YUVPreview::CheckSrcFrameParameters(YUV_SEQUENCE_PARAM_t* pstYuvParams
 
 		switch (pstYuvParams->dwFourCC)
 		{
-		case 0x56555949:		//IYUV
+		case MAKEFOURCC('I', 'Y', 'U', 'V'):		//YUV 4:2:0 Planar
+		case MAKEFOURCC('I', '4', '2', '0'):		//YUV 4:2:0 Planar
+		case MAKEFOURCC('Y', 'V', '1', '2'):		//YVU 4:2:0 Planer
 			pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
 			pstYuvParams->chroma_height = (pstYuvParams->luma_height >> 1);
 
 			break;
 
-		case 0x30323449:		//I420
-			pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
-			pstYuvParams->chroma_height = (pstYuvParams->luma_height >> 1);
-
-			break;
-
-		case 0x32315659:		//YV12
-			pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
-			pstYuvParams->chroma_height = (pstYuvParams->luma_height >> 1);
-
-			break;
-
-		case 0x32595559:		//YUY2
+		case MAKEFOURCC('Y', '4', '2', 'B'):		//YUV 4:2:2 Planar
+		case MAKEFOURCC('4', '2', '2', 'P'):		//YVU 4:2:2 Planar
 			pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
 			pstYuvParams->chroma_height = pstYuvParams->luma_height;
 
 			break;
 
-		case 0x56555941:		//AYUV
+		case MAKEFOURCC('Y', '4', '4', 'B'):		//YUV 4:4:4 Planar
+		case MAKEFOURCC('4', '4', '4', 'P'):		//YVU 4:4:4 Planar
 			pstYuvParams->chroma_width = pstYuvParams->luma_width;
 			pstYuvParams->chroma_height = pstYuvParams->luma_height;
-
 			break;
 
 		default:
-			pstYuvParams->chroma_width = (pstYuvParams->luma_width >> 1);
-			pstYuvParams->chroma_height = (pstYuvParams->luma_height >> 1);
+			pstYuvParams->chroma_width = pstYuvParams->luma_width;
+			pstYuvParams->chroma_height = pstYuvParams->luma_height;
 			break;
 		}
 
@@ -830,9 +818,9 @@ void CDlg_YUVPreview::CheckSrcFrameParameters(YUV_SEQUENCE_PARAM_t* pstYuvParams
 	}
 }
 
-void CDlg_YUVPreview::CheckDstFrameParameters(YUV_SEQUENCE_PARAM_t* pstYuvParams)
+void CDlg_YUVPreview::CheckDstFrameParameters(INPUT_YUV_SEQUENCE_PARAM_t* pstYuvParams)
 {
-	memset(pstYuvParams, 0x00, sizeof(YUV_SEQUENCE_PARAM_t));
+	memset(pstYuvParams, 0x00, sizeof(INPUT_YUV_SEQUENCE_PARAM_t));
 
 	int				nSel;
 	CComboBox*		pCmbBox = NULL;
@@ -1199,7 +1187,7 @@ uint32_t YUV_PSNR_Thread(PVOID pVoid)
 {
 	CDlg_YUVPreview* pdlg = (CDlg_YUVPreview*)pVoid;
 
-	YUV_SEQUENCE_PARAM_t* pstSequenceParam = &(pdlg->m_stSrcSequenceParams);
+	INPUT_YUV_SEQUENCE_PARAM_t* pstSequenceParam = &(pdlg->m_stSrcSequenceParams);
 	char* pszReferenceFile = pdlg->m_strReferenceFile.GetBuffer();
 	char* pszWorkingFile = pdlg->m_strWorkingFile.GetBuffer();
 
@@ -1281,7 +1269,7 @@ uint32_t YUV_TransCode_Thread(PVOID pVoid)
 	char* pszWorkingFile = pdlg->m_strWorkingFile.GetBuffer();
 	char* pszSavingFile = pdlg->m_strSavingFile.GetBuffer();
 
-	YUV_SEQUENCE_PARAM_t* pSrcSequenceParam = &(pdlg->m_stSrcSequenceParams);
+	INPUT_YUV_SEQUENCE_PARAM_t* pSrcSequenceParam = &(pdlg->m_stSrcSequenceParams);
 
 	int src_luma_buf_size = pSrcSequenceParam->luma_width * pSrcSequenceParam->luma_height * pSrcSequenceParam->quantizationBits / 8;
 	int src_chroma_buf_size = pSrcSequenceParam->chroma_width * pSrcSequenceParam->chroma_height * pSrcSequenceParam->quantizationBits / 8;
@@ -1294,7 +1282,7 @@ uint32_t YUV_TransCode_Thread(PVOID pVoid)
 	uint8_t* pucWorkingU = pucWorkingFrameBuf + src_luma_buf_size;
 	uint8_t* pucWorkingV = pucWorkingFrameBuf + src_luma_buf_size + src_chroma_buf_size;
 
-	YUV_SEQUENCE_PARAM_t* pDstSequenceParam = &(pdlg->m_stDstSequenceParams);
+	INPUT_YUV_SEQUENCE_PARAM_t* pDstSequenceParam = &(pdlg->m_stDstSequenceParams);
 
 	int dst_luma_buf_size = pSrcSequenceParam->luma_width * pDstSequenceParam->luma_height * pDstSequenceParam->quantizationBits / 8;
 	int dst_chroma_buf_size = pSrcSequenceParam->chroma_width * pDstSequenceParam->chroma_height * pDstSequenceParam->quantizationBits / 8;
