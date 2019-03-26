@@ -29,7 +29,7 @@
 
 #define RENDER_IN_RGB_MODE				0
 
-#define clip3(x, y, z)  ((z < x) ? x : ((z > y) ? y : z))
+#define clip3(x, y, z)  ((y < x) ? x : ((y > z) ? z : y))
 
 class TAL_DIRECTX_LIB CTALForDirectDraw
 {

@@ -29,6 +29,8 @@
 
 #define RENDER_IN_AUTO_YUV_MODE			0
 
+#define YUV2RGB_IN_FLOAT_MODE			0
+
 typedef struct
 {
 	int			 luma_width;

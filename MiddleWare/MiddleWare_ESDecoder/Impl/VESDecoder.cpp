@@ -1296,46 +1296,64 @@ double PICTURE_psnr(uint8_t* reference, uint8_t* working, int size)
 	return psnr;
 }
 
-MW_ES_LIB int PICTURE_yuv2rgb(int colorSpace, uint8_t Y, uint8_t U, uint8_t V, uint8_t* R, uint8_t* G, uint8_t* B)
+MW_ES_LIB int PICTURE_yuv2rgb(int colorSpace, uint8_t YD, uint8_t UD, uint8_t VD, uint8_t* pRD, uint8_t* pGD, uint8_t* pBD)
 {
 	if (colorSpace == 601)
 	{
-		int C = Y - 16;
-		int D = U - 128;
-		int E = V - 128;
-		int nR = ((298 * C + 409 * E + 128) >> 8);
-		int nG = ((298 * C - 100 * D - 208 * E + 128) >> 8);
-		int nB = ((298 * C + 516 * D + 128) >> 8);
+		int Y = YD;
+		int Cb = UD - 128;
+		int Cr = VD - 128;
+#if YUV2RGB_IN_FLOAT_MODE
+		int R = (int)(Y              + 1.371 * Cr + 0.5);
+		int G = (int)(Y - 0.336 * Cb - 0.698 * Cr + 0.5);
+		int B = (int)(Y + 1.732 * Cb              + 0.5);
+#else
+		int R = ((256 * Y +            351 * Cr + 128) >> 8);
+		int G = ((256 * Y -  86 * Cb - 179 * Cr + 128) >> 8);
+		int B = ((256 * Y + 443 * Cb            + 128) >> 8);
+#endif
 
-		*R = (uint8_t)clip3(0, 255, nR);
-		*G = (uint8_t)clip3(0, 255, nG);
-		*B = (uint8_t)clip3(0, 255, nB);
+		*pRD = (uint8_t)clip3(16, R, 235);
+		*pGD = (uint8_t)clip3(16, G, 235);
+		*pBD = (uint8_t)clip3(16, B, 235);
 	}
 	else if (colorSpace == 709)
 	{
-		int C = Y - 16;
-		int D = U - 128;
-		int E = V - 128;
-		int nR = ((298 * C + 409 * E + 128) >> 8);
-		int nG = ((298 * C - 100 * D - 208 * E + 128) >> 8);
-		int nB = ((298 * C + 516 * D + 128) >> 8);
+		int Y = YD;
+		int Cb = UD - 128;
+		int Cr = VD - 128;
+#if YUV2RGB_IN_FLOAT_MODE
+		int R = (int)(Y               + 1.5397 * Cr + 0.5);
+		int G = (int)(Y - 0.1832 * Cb - 0.4577 * Cr + 0.5);
+		int B = (int)(Y + 1.8142 * Cb               + 0.5);
+#else
+		int R = ((256 * Y +            394 * Cr + 128) >> 8);
+		int G = ((256 * Y -  47 * Cb - 117 * Cr + 128) >> 8);
+		int B = ((256 * Y + 464 * Cb            + 128) >> 8);
+#endif
 
-		*R = (uint8_t)clip3(0, 255, nR);
-		*G = (uint8_t)clip3(0, 255, nG);
-		*B = (uint8_t)clip3(0, 255, nB);
+		*pRD = (uint8_t)clip3(16, R, 235);
+		*pGD = (uint8_t)clip3(16, G, 235);
+		*pBD = (uint8_t)clip3(16, B, 235);
 	}
 	else if (colorSpace == 2020)
 	{
-		int C = Y - 16;
-		int D = U - 128;
-		int E = V - 128;
-		int nR = ((298 * C + 409 * E + 128) >> 8);
-		int nG = ((298 * C - 100 * D - 208 * E + 128) >> 8);
-		int nB = ((298 * C + 516 * D + 128) >> 8);
+		int Y = YD;
+		int Cb = UD - 128;
+		int Cr = VD - 128;
 
-		*R = (uint8_t)clip3(0, 255, nR);
-		*G = (uint8_t)clip3(0, 255, nG);
-		*B = (uint8_t)clip3(0, 255, nB);
+#if YUV2RGB_IN_FLOAT_MODE
+		int R = (int)(Y               + 1.4417 * Cr + 0.5);
+		int G = (int)(Y - 0.1609 * Cb - 0.5587 * Cr + 0.5);
+		int B = (int)(Y + 1.8394 * Cb               + 0.5);
+#else
+		int R = ((256 * Y            + 369 * Cr + 128) >> 8);
+		int G = ((256 * Y -  41 * Cb - 143 * Cr + 128) >> 8);
+		int B = ((256 * Y + 471 * Cb            + 128) >> 8);
+#endif
+		*pRD = (uint8_t)clip3(16, R, 235);
+		*pGD = (uint8_t)clip3(16, G, 235);
+		*pBD = (uint8_t)clip3(16, B, 235);
 	}
 
 	return 0;
