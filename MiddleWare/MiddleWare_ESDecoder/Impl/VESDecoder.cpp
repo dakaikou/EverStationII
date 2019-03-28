@@ -9,6 +9,7 @@
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 #include "thirdparty_abstract_layer\TALForDirectX\Include\TALForDirectDraw.h"
+#include "Utilities/Graphics/Include/Graphics.h"
 
 #include "../Include/common/video_common.h"
 #include "../Include/VESDecoder.h"
@@ -270,7 +271,7 @@ int CVESDecoder::FrameProcessAndFeedToDirectDraw(void)
 							U = pSrcU[srcChroma];
 							V = pSrcV[srcChroma];
 #if 1
-							PICTURE_yuv2rgb(m_stOutputYUVSequenceParam.nColorSpace, Y, U, V, &R, &G, &B);
+							GRAPHICS_yuv2rgb(m_stOutputYUVSequenceParam.nColorSpace, Y, U, V, &R, &G, &B);
 #else
 							R = Y;
 							G = U;
@@ -621,7 +622,7 @@ int CVESDecoder::FrameProcessAndFeedToDirectDraw(void)
 						Y = pSrcY[luma_col];
 						U = pSrcU[chroma_col];
 						V = pSrcV[chroma_col];
-						PICTURE_yuv2rgb(m_stOutputYUVSequenceParam.nColorSpace, Y, U, V, &R, &G, &B);
+						GRAPHICS_yuv2rgb(m_stOutputYUVSequenceParam.nColorSpace, Y, U, V, &R, &G, &B);
 
 						int colOffset = (col << 2);
 						pDstLine[colOffset + 0] = R;
@@ -699,7 +700,7 @@ int CVESDecoder::FrameProcessAndFeedToDirectDraw(void)
 						Y = pSrcY[luma_col];
 						U = pSrcU[chroma_col];
 						V = pSrcV[chroma_col];
-						PICTURE_yuv2rgb(m_stOutputYUVSequenceParam.nColorSpace, Y, U, V, &R, &G, &B);
+						GRAPHICS_yuv2rgb(m_stOutputYUVSequenceParam.nColorSpace, Y, U, V, &R, &G, &B);
 
 						int colOffset = (col << 2);
 						pDstLine[colOffset + 0] = R;
@@ -780,7 +781,7 @@ int CVESDecoder::FrameProcessAndFeedToDirectDraw(void)
 						Y = pSrcY[luma_col];
 						U = pSrcU[chroma_col];
 						V = pSrcV[chroma_col];
-						PICTURE_yuv2rgb(m_stOutputYUVSequenceParam.nColorSpace, Y, U, V, &R, &G, &B);
+						GRAPHICS_yuv2rgb(m_stOutputYUVSequenceParam.nColorSpace, Y, U, V, &R, &G, &B);
 
 						int colOffset = (col << 2);
 						pDstLine[colOffset + 0] = R;
@@ -859,7 +860,7 @@ int CVESDecoder::FrameProcessAndFeedToDirectDraw(void)
 						U = pSrcLine[srcUBufOffset + 0];
 						V = pSrcLine[srcVBufOffset + 0];
 
-						PICTURE_yuv2rgb(m_stOutputYUVSequenceParam.nColorSpace, Y, U, V, &R, &G, &B);
+						GRAPHICS_yuv2rgb(m_stOutputYUVSequenceParam.nColorSpace, Y, U, V, &R, &G, &B);
 
 						int colOffset = (dstCol << 2);
 						pDstLine[colOffset + 0] = R;
@@ -1216,146 +1217,6 @@ uint32_t thread_frame_process(LPVOID lpParam)
 	return rtcode;
 }
 
-int PICTURE_Enlarge(uint8_t* src, int src_w, int src_h, uint8_t* dst, int dst_w, int dst_h, int decimate_coeff)
-{
-	int rtcode = ESDECODER_UNKNOWN_ERROR;
-
-	if ((src != NULL) && (dst != NULL))
-	{
-		uint8_t* pSrcRowStart = src;
-		uint8_t* pDstRowStart = dst;
-		for (int src_row = 0; src_row < src_h; src_row++)
-		{
-			for (int j = 0; j < decimate_coeff; j++)
-			{
-				int dst_col_base = 0;
-				for (int src_col = 0; src_col < src_w; src_col++)
-				{
-					for (int i = 0; i < decimate_coeff; i++)
-					{
-						pDstRowStart[dst_col_base + i] = pSrcRowStart[src_col];
-					}
-					dst_col_base += decimate_coeff;
-				}
-
-				pDstRowStart += dst_w;
-			}
-
-			pSrcRowStart += src_w;
-		}
-	}
-
-	return rtcode;
-}
-
-int PICTURE_Reduce(uint8_t* src, int src_w, int src_h, uint8_t* dst, int dst_w, int dst_h, int decimate_coeff)
-{
-	int rtcode = ESDECODER_UNKNOWN_ERROR;
-
-	if ((src != NULL) && (dst != NULL))
-	{
-		uint8_t* pSrcRowStart = src;
-		uint8_t* pDstRowStart = dst;
-		for (int src_row = 0; src_row < src_h; src_row+=decimate_coeff)
-		{
-			int dst_col = 0;
-			for (int src_col = 0; src_col < src_w; src_col+= decimate_coeff)
-			{
-				pDstRowStart[dst_col] = pSrcRowStart[src_col];
-				dst_col ++;
-			}
-
-			pDstRowStart += dst_w;
-			pSrcRowStart += (src_w * decimate_coeff);
-		}
-	}
-
-	return rtcode;
-}
 
 
-double PICTURE_psnr(uint8_t* reference, uint8_t* working, int size)
-{
-	unsigned char*  pOrg = reference;
-	unsigned char*  pRec = working;
-	double          ssd = 0;
-	int             diff;
-	double			psnr = 99.99;
-
-	for (int i = 0; i < size; i++)
-	{
-		diff = pRec[i] - pOrg[i];
-		ssd += (double)(diff * diff);
-	}
-
-	if (ssd > 0)
-	{
-		psnr = (10.0 * log10(size * 65025.0 / ssd));			//255 * 255 = 65025
-	}
-
-	return psnr;
-}
-
-MW_ES_LIB int PICTURE_yuv2rgb(int colorSpace, uint8_t YD, uint8_t UD, uint8_t VD, uint8_t* pRD, uint8_t* pGD, uint8_t* pBD)
-{
-	if (colorSpace == 601)
-	{
-		int Y = YD;
-		int Cb = UD - 128;
-		int Cr = VD - 128;
-#if YUV2RGB_IN_FLOAT_MODE
-		int R = (int)(Y              + 1.371 * Cr + 0.5);
-		int G = (int)(Y - 0.336 * Cb - 0.698 * Cr + 0.5);
-		int B = (int)(Y + 1.732 * Cb              + 0.5);
-#else
-		int R = ((256 * Y +            351 * Cr + 128) >> 8);
-		int G = ((256 * Y -  86 * Cb - 179 * Cr + 128) >> 8);
-		int B = ((256 * Y + 443 * Cb            + 128) >> 8);
-#endif
-
-		*pRD = (uint8_t)clip3(16, R, 235);
-		*pGD = (uint8_t)clip3(16, G, 235);
-		*pBD = (uint8_t)clip3(16, B, 235);
-	}
-	else if (colorSpace == 709)
-	{
-		int Y = YD;
-		int Cb = UD - 128;
-		int Cr = VD - 128;
-#if YUV2RGB_IN_FLOAT_MODE
-		int R = (int)(Y               + 1.5397 * Cr + 0.5);
-		int G = (int)(Y - 0.1832 * Cb - 0.4577 * Cr + 0.5);
-		int B = (int)(Y + 1.8142 * Cb               + 0.5);
-#else
-		int R = ((256 * Y +            394 * Cr + 128) >> 8);
-		int G = ((256 * Y -  47 * Cb - 117 * Cr + 128) >> 8);
-		int B = ((256 * Y + 464 * Cb            + 128) >> 8);
-#endif
-
-		*pRD = (uint8_t)clip3(16, R, 235);
-		*pGD = (uint8_t)clip3(16, G, 235);
-		*pBD = (uint8_t)clip3(16, B, 235);
-	}
-	else if (colorSpace == 2020)
-	{
-		int Y = YD;
-		int Cb = UD - 128;
-		int Cr = VD - 128;
-
-#if YUV2RGB_IN_FLOAT_MODE
-		int R = (int)(Y               + 1.4417 * Cr + 0.5);
-		int G = (int)(Y - 0.1609 * Cb - 0.5587 * Cr + 0.5);
-		int B = (int)(Y + 1.8394 * Cb               + 0.5);
-#else
-		int R = ((256 * Y            + 369 * Cr + 128) >> 8);
-		int G = ((256 * Y -  41 * Cb - 143 * Cr + 128) >> 8);
-		int B = ((256 * Y + 471 * Cb            + 128) >> 8);
-#endif
-		*pRD = (uint8_t)clip3(16, R, 235);
-		*pGD = (uint8_t)clip3(16, G, 235);
-		*pBD = (uint8_t)clip3(16, B, 235);
-	}
-
-	return 0;
-}
 

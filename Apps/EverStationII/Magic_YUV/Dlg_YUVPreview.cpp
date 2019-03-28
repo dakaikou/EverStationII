@@ -14,9 +14,12 @@ static char THIS_FILE[] = __FILE__;
 // CDlg_YUVPreview dialog
 #include <fcntl.h>
 #include <io.h>
+#include <assert.h>
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_Video.h"
+#include "Utilities/Graphics/Include/Graphics.h"
+#include "Utilities/Math/Include/PSNR.h"
 
 #include "..\MainFrm.h"
 #include "..\Common\Dlg_VideoShowScreen.h"
@@ -1238,9 +1241,9 @@ uint32_t YUV_PSNR_Thread(PVOID pVoid)
 		rdsize = _read(hWorkingFile, pucWorkingFrameBuf, frame_buf_size);
 		assert(rdsize == frame_buf_size);
 
-		double Ypsnr = PICTURE_psnr(pucReferenceY, pucWorkingY, luma_buf_size);
-		double Upsnr = PICTURE_psnr(pucReferenceU, pucWorkingU, chroma_buf_size);
-		double Vpsnr = PICTURE_psnr(pucReferenceV, pucWorkingV, chroma_buf_size);
+		double Ypsnr = psnr(pucReferenceY, pucWorkingY, luma_buf_size);
+		double Upsnr = psnr(pucReferenceU, pucWorkingU, chroma_buf_size);
+		double Vpsnr = psnr(pucReferenceV, pucWorkingV, chroma_buf_size);
 		sumY += Ypsnr;
 		sumU += Upsnr;
 		sumV += Vpsnr;
@@ -1333,24 +1336,24 @@ uint32_t YUV_TransCode_Thread(PVOID pVoid)
 			}
 			else if (decimate_coeff > 0)
 			{
-				PICTURE_Enlarge(pucWorkingY, pSrcSequenceParam->luma_width, pSrcSequenceParam->luma_height,
+				GRAPHICS_PICTURE_Enlarge(pucWorkingY, pSrcSequenceParam->luma_width, pSrcSequenceParam->luma_height,
 					pucSavingY, pDstSequenceParam->luma_width, pDstSequenceParam->luma_height, decimate_coeff);
 
-				PICTURE_Enlarge(pucWorkingU, pSrcSequenceParam->chroma_width, pSrcSequenceParam->chroma_height,
+				GRAPHICS_PICTURE_Enlarge(pucWorkingU, pSrcSequenceParam->chroma_width, pSrcSequenceParam->chroma_height,
 					pucSavingU, pDstSequenceParam->chroma_width, pDstSequenceParam->chroma_height, decimate_coeff);
 
-				PICTURE_Enlarge(pucWorkingV, pSrcSequenceParam->chroma_width, pSrcSequenceParam->chroma_height,
+				GRAPHICS_PICTURE_Enlarge(pucWorkingV, pSrcSequenceParam->chroma_width, pSrcSequenceParam->chroma_height,
 					pucSavingV, pDstSequenceParam->chroma_width, pDstSequenceParam->chroma_height, decimate_coeff);
 			}
 			else if (decimate_coeff < 0)
 			{
-				PICTURE_Reduce(pucWorkingY, pSrcSequenceParam->luma_width, pSrcSequenceParam->luma_height,
+				GRAPHICS_PICTURE_Reduce(pucWorkingY, pSrcSequenceParam->luma_width, pSrcSequenceParam->luma_height,
 					pucSavingY, pDstSequenceParam->luma_width, pDstSequenceParam->luma_height, -decimate_coeff);
 
-				PICTURE_Reduce(pucWorkingU, pSrcSequenceParam->chroma_width, pSrcSequenceParam->chroma_height,
+				GRAPHICS_PICTURE_Reduce(pucWorkingU, pSrcSequenceParam->chroma_width, pSrcSequenceParam->chroma_height,
 					pucSavingU, pDstSequenceParam->chroma_width, pDstSequenceParam->chroma_height, -decimate_coeff);
 
-				PICTURE_Reduce(pucWorkingV, pSrcSequenceParam->chroma_width, pSrcSequenceParam->chroma_height,
+				GRAPHICS_PICTURE_Reduce(pucWorkingV, pSrcSequenceParam->chroma_width, pSrcSequenceParam->chroma_height,
 					pucSavingV, pDstSequenceParam->chroma_width, pDstSequenceParam->chroma_height, -decimate_coeff);
 			}
 

@@ -1,5 +1,5 @@
-#ifndef __SORT_H__
-#define __SORT_H__
+#ifndef __PSNR_H__
+#define __PSNR_H__
 
 #if defined(_WIN32) || defined(_WIN64)
 #   ifdef _TOOL_MATH_EXPORT
@@ -17,7 +17,7 @@
 
 #include <stdint.h>
 
-TOOL_MATH_LIB void quick_sort_method1(int arr[], int left, int right);
+TOOL_MATH_LIB double psnr(uint8_t* reference, uint8_t* working, int size);
 
 #endif
 

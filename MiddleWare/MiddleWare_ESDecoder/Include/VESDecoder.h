@@ -27,9 +27,7 @@
 #define USE_FRAMEBUF_ACCESS_MUTEX		1	
 #define USE_FRAMERATE_CONTROLL			0
 
-#define RENDER_IN_AUTO_YUV_MODE			0
-
-#define YUV2RGB_IN_FLOAT_MODE			0
+#define RENDER_IN_AUTO_YUV_MODE			1
 
 typedef struct
 {
@@ -203,11 +201,6 @@ public:
 
 uint32_t thread_frame_process(LPVOID lpParam);
 
-MW_ES_LIB int PICTURE_Enlarge(uint8_t* src, int src_w, int src_h, uint8_t* dst, int dst_w, int dst_h, int coeff);
-MW_ES_LIB int PICTURE_Reduce(uint8_t* src, int src_w, int src_h, uint8_t* dst, int dst_w, int dst_h, int coeff);
-MW_ES_LIB double PICTURE_psnr(uint8_t* reference, uint8_t* working, int size);
-
-MW_ES_LIB int PICTURE_yuv2rgb(int colorSpace, uint8_t Y, uint8_t U, uint8_t V, uint8_t* R, uint8_t* G, uint8_t* B);
 
 #endif
 
