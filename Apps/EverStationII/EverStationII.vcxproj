@@ -23,20 +23,20 @@
     <ProjectGuid>{B9F98726-AD03-4C8D-95A6-699DF0781EC3}</ProjectGuid>
     <Keyword>MFCProj</Keyword>
     <RootNamespace>EverStationII</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
     <UseOfMfc>Static</UseOfMfc>
@@ -44,14 +44,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
     <UseOfMfc>Static</UseOfMfc>
@@ -229,7 +229,7 @@
     <ClInclude Include="Common\GuiApi_MSG.h" />
     <ClInclude Include="Common\HexEditView_ByteBuffer.h" />
     <ClInclude Include="Common\InstrumentPanel_Base.h" />
-    <ClInclude Include="Common\InstrumentPanel_ColorSpaceDiagram.h" />
+    <ClInclude Include="Common\InstrumentPanel_ColorGamutDiagram.h" />
     <ClInclude Include="Common\InstrumentPanel_Histogram.h" />
     <ClInclude Include="Common\InstrumentPanel_ScatterDiagram.h" />
     <ClInclude Include="Common\InstrumentPanel_Waveform.h" />
@@ -314,7 +314,7 @@
     <ClCompile Include="Common\Dlg_VideoShowScreen.cpp" />
     <ClCompile Include="Common\HexEditView_ByteBuffer.cpp" />
     <ClCompile Include="Common\InstrumentPanel_Base.cpp" />
-    <ClCompile Include="Common\InstrumentPanel_ColorSpaceDiagram.cpp" />
+    <ClCompile Include="Common\InstrumentPanel_ColorGamutDiagram.cpp" />
     <ClCompile Include="Common\InstrumentPanel_Histogram.cpp" />
     <ClCompile Include="Common\InstrumentPanel_ScatterDiagram.cpp" />
     <ClCompile Include="Common\InstrumentPanel_Waveform.cpp" />

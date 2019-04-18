@@ -7,17 +7,18 @@
 //
 
 #include <windows.h>
+#include <stdint.h>
 #include "InstrumentPanel_Base.h"
 
 #define COLORSPACE_DIAGRAM_SAMPLE_DEPTH							1024 * 16
 //#define COLORSPACE_DIAGRAM_SAMPLE_DEPTH							1024 * 20
 
 /////////////////////////////////////////////////////////////////////////////
-class CInstrumentPanel_ColorSpaceDiagram : public CInstrumentPanel_Base
+class CInstrumentPanel_ColorGamutDiagram : public CInstrumentPanel_Base
 {
 // Construction
 public:
-	CInstrumentPanel_ColorSpaceDiagram();
+	CInstrumentPanel_ColorGamutDiagram();
 
 // Attributes
 public:
@@ -25,7 +26,8 @@ public:
 // Operations
 public:
 
-	void AppendSample(int ID, int x, int y);
+	//void AppendSample(int ID, int x, int y);
+	void AppendSample(int ID, uint8_t Y, uint8_t Cb, uint8_t Cr, int colorSpace);
 	void DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp);
 	void DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp);
 	void DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectWaveform);
@@ -37,7 +39,7 @@ public:
 
 // Implementation
 public:
-	virtual ~CInstrumentPanel_ColorSpaceDiagram();
+	virtual ~CInstrumentPanel_ColorGamutDiagram();
 
 // Implementation
 protected:

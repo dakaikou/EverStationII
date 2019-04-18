@@ -12,6 +12,7 @@
 CYUV_VideoDecoder::CYUV_VideoDecoder(void)
 {
 	m_nTotalFrameCount = 0;
+	m_nFrameEndPos = 0;
 }
 
 CYUV_VideoDecoder::~CYUV_VideoDecoder(void)
@@ -38,7 +39,10 @@ int CYUV_VideoDecoder::Open(uint32_t dwStreamType, const char* pszFileName, cons
 			m_nFrameEndPos = m_nFileTotalSize - (m_nFileTotalSize % m_nInputYUVFrameSize);
 
 			m_pucInputYUVFrameBuf = (uint8_t*)malloc(m_nInputYUVFrameSize);
-			memset(m_pucInputYUVFrameBuf, 0x00, m_nInputYUVFrameSize);
+			if (m_pucInputYUVFrameBuf != NULL)
+			{
+				memset(m_pucInputYUVFrameBuf, 0x00, m_nInputYUVFrameSize);
+			}
 
 			m_decimate_coeff = 0;
 
@@ -56,7 +60,7 @@ int CYUV_VideoDecoder::Open(uint32_t dwStreamType, const char* pszFileName, cons
 				m_stOutputYUVSequenceParam.dwFourCC = MAKEFOURCC('A', 'Y', 'U', 'V');		//Packed
 			}
 			else if ((m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('Y', '4', '2', 'B')) ||		//YUV 4:2:2 Planar   format
-				(m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('4', '2', '2', 'P'))			//YVU 4:2:2 Planar	 format
+				     (m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('4', '2', '2', 'P'))			//YVU 4:2:2 Planar	 format
 				)
 			{
 				//Planar format changes to Packed format
@@ -100,7 +104,10 @@ int CYUV_VideoDecoder::Open(uint32_t dwStreamType, const char* pszFileName, cons
 				m_stOutputYUVSequenceParam.alpha_plane_size;
 
 			m_pucOutputYUVFrameBuf = (uint8_t*)malloc(m_nOutputYUVFrameSize);			//RGB 3 plane
-			memset(m_pucOutputYUVFrameBuf, 0x00, m_nOutputYUVFrameSize);
+			if (m_pucOutputYUVFrameBuf != NULL)
+			{
+				memset(m_pucOutputYUVFrameBuf, 0x00, m_nOutputYUVFrameSize);
+			}
 		}
 		else
 		{

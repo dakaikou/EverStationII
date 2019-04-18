@@ -309,10 +309,10 @@
     <ClInclude Include="Common\Dlg_VideoShowScreen.h">
       <Filter>头文件\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Common\InstrumentPanel_ColorSpaceDiagram.h">
+    <ClInclude Include="Common\BitmapButton_HoverEffect.h">
       <Filter>头文件\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Common\BitmapButton_HoverEffect.h">
+    <ClInclude Include="Common\InstrumentPanel_ColorGamutDiagram.h">
       <Filter>头文件\Common</Filter>
     </ClInclude>
   </ItemGroup>
@@ -551,10 +551,10 @@
     <ClCompile Include="Common\Dlg_VideoShowScreen.cpp">
       <Filter>源文件\Common</Filter>
     </ClCompile>
-    <ClCompile Include="Common\InstrumentPanel_ColorSpaceDiagram.cpp">
+    <ClCompile Include="Common\BitmapButton_HoverEffect.cpp">
       <Filter>源文件\Common</Filter>
     </ClCompile>
-    <ClCompile Include="Common\BitmapButton_HoverEffect.cpp">
+    <ClCompile Include="Common\InstrumentPanel_ColorGamutDiagram.cpp">
       <Filter>源文件\Common</Filter>
     </ClCompile>
   </ItemGroup>

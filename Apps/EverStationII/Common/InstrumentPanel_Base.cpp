@@ -125,8 +125,8 @@ BEGIN_MESSAGE_MAP(CInstrumentPanel_Base, CStatic)
 	ON_WM_DESTROY()
 	ON_WM_TIMER()
 	ON_WM_SIZE()
-	//}}AFX_MSG_MAP
 	ON_WM_ERASEBKGND()
+	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

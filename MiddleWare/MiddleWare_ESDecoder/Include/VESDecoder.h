@@ -27,7 +27,10 @@
 #define USE_FRAMEBUF_ACCESS_MUTEX		1	
 #define USE_FRAMERATE_CONTROLL			0
 
-#define RENDER_IN_AUTO_YUV_MODE			1
+#define RENDER_IN_AUTO_YUV_MODE			0
+
+#define WM_STATISTIC_LUMA			WM_USER + 0x4bbc
+#define WM_STATISTIC_CHROMA			WM_USER + 0x4645
 
 typedef struct
 {
@@ -62,20 +65,12 @@ typedef struct
 	int			 alpha_plane_size;
 
 	unsigned int dwFourCC;					//Limit to DirectX's ability
-	int			 nColorSpace;				//709\2020
+	int			 nColorSpace;				//NTSC\PAL\709\2020
 	double		 framerate;
 
 	int			 quantizationBits;			//8\10\12
 
 } OUTPUT_YUV_SEQUENCE_PARAM_t;
-
-//typedef enum
-//{
-//	CHROMA_FORMAT_MONO = 0,
-//	CHROMA_FORMAT_4_2_0,
-//	CHROMA_FORMAT_4_2_2,
-//	CHROMA_FORMAT_4_4_4
-//} CHROMA_FORMAT_e;
 
 //typedef struct
 //{
@@ -136,7 +131,8 @@ public:
 	int		Open(uint32_t dwStreamType, const char* pszFileName);
 	int		Close(void);
 
-	int		AttachWnd(HWND hWnd, int(*callback_luma)(HWND, WPARAM, LPARAM) = NULL, int(*callback_chroma)(HWND, WPARAM, LPARAM) = NULL);
+	//int		AttachWnd(HWND hWnd, int(*callback_luma)(HWND, WPARAM, LPARAM) = NULL, int(*callback_chroma)(HWND, uint8_t*, int, int, DWORD) = NULL);
+	int		AttachWnd(HWND hWnd);
 	int		DetachWnd(HWND hWnd);
 	int     SetClientRect(RECT rcClient);
 
@@ -156,8 +152,6 @@ public:
 
 protected:
 
-	//RECT					m_rcWnd;
-
 	INPUT_YUV_SEQUENCE_PARAM_t	m_stInputYUVSequenceParam;
 	uint8_t*					m_pucInputYUVFrameBuf;
 	int							m_nInputYUVFrameSize;
@@ -167,8 +161,8 @@ protected:
 	int							m_nOutputYUVFrameSize;
 
 	HWND	m_hwnd_for_caller;
-	int(*m_callback_report_yuv_luma_stats)(HWND hWnd, WPARAM wParam, LPARAM lParam);
-	int(*m_callback_report_yuv_chroma_stats)(HWND hWnd, WPARAM wParam, LPARAM lParam);
+	//int(*m_callback_report_yuv_luma_stats)(HWND hWnd, WPARAM wParam, LPARAM lParam);
+	//int(*m_callback_report_yuv_chroma_stats)(HWND hWnd, uint8_t* ucFrameBuf, int width, int height, DWORD dwFourCC);
 
 private:		//direct audio output
 

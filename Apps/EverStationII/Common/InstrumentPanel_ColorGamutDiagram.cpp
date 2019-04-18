@@ -3,7 +3,9 @@
 #include "stdafx.h"
 #include <afxwin.h>
 #include <assert.h>
-#include "InstrumentPanel_ColorSpaceDiagram.h"
+#include "InstrumentPanel_ColorGamutDiagram.h"
+
+#include "Utilities/Graphics/Include/Graphics.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -11,24 +13,26 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#define clip3(x, y, z)  ((y < x) ? x : ((y > z) ? z : y))
+
 /////////////////////////////////////////////////////////////////////////////
 // CInstrumentPanel_Histogram
-CInstrumentPanel_ColorSpaceDiagram::CInstrumentPanel_ColorSpaceDiagram()
+CInstrumentPanel_ColorGamutDiagram::CInstrumentPanel_ColorGamutDiagram()
 {
 	m_nChannleDepth = COLORSPACE_DIAGRAM_SAMPLE_DEPTH;
 }
 
-CInstrumentPanel_ColorSpaceDiagram::~CInstrumentPanel_ColorSpaceDiagram()
+CInstrumentPanel_ColorGamutDiagram::~CInstrumentPanel_ColorGamutDiagram()
 {
 }
 
 
-BEGIN_MESSAGE_MAP(CInstrumentPanel_ColorSpaceDiagram, CInstrumentPanel_Base)
+BEGIN_MESSAGE_MAP(CInstrumentPanel_ColorGamutDiagram, CInstrumentPanel_Base)
 	//{{AFX_MSG_MAP(CInstrumentPanel_ColorSpaceDiagram)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-void CInstrumentPanel_ColorSpaceDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp)
+void CInstrumentPanel_ColorGamutDiagram::DisplayTheWholeSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp)
 {
 	int    xn = 0;
 	double xsample_sum = 0;
@@ -254,7 +258,7 @@ void CInstrumentPanel_ColorSpaceDiagram::DisplayTheWholeSamplesInMemory(CDC* pMe
 	}
 }
 
-void CInstrumentPanel_ColorSpaceDiagram::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp)
+void CInstrumentPanel_ColorGamutDiagram::DisplayTheNewSamplesInMemory(CDC* pMemDC, CBitmap* pGraphBmp)
 {
 	int    xn = 0;
 	double xsample_sum = 0;
@@ -444,144 +448,385 @@ void CInstrumentPanel_ColorSpaceDiagram::DisplayTheNewSamplesInMemory(CDC* pMemD
 	}
 }
 
-//注：这里varValue是相对于offset的标准方差
-//ideaValue -- 期望接近真值的一个理想值，实际也是存在误差的估计值
-//nSampleCurValue -- 样本当前测量值
-//nSampleMeanValue -- 样本长期测量均值
-//nSampleVarValue -- 样本长期最大偏离度
-void CInstrumentPanel_ColorSpaceDiagram::AppendSample(int ID, int x, int y)
+void CInstrumentPanel_ColorGamutDiagram::AppendSample(int ID, uint8_t srcY, uint8_t srcCb, uint8_t srcCr, int srcColorSpace)
 {
-#if ON_PAINTING_USE_MUTEX
-	DWORD wait_state = ::WaitForSingleObject(m_hPaintingAccess, INFINITE);
-	if (wait_state == WAIT_OBJECT_0)
+	POINT pixel;
+
+	if (srcColorSpace == 6010)				//NTSC 1953
 	{
-#endif
-		int nNegtiveBias, nPositiveBias;
+		//int error = 0;
+		//if ((srcY > 235) || (srcY < 16))
+		//{
+		//	srcY = 16;
+		//	error = 1;
+		//}
 
-		if (x < m_nMeasuredXMinValue)
+		if ((srcCb > 240) || (srcCb < 16))
 		{
-			m_nMeasuredXMinValue = x;
-		}
-		if (x > m_nMeasuredXMaxValue)
-		{
-			m_nMeasuredXMaxValue = x;
-		}
-
-		assert(m_nXAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX);
-
-		if (m_nMeasuredXMinValue < m_nXNegtiveMark)
-		{
-			if (m_nMeasuredXMinValue > m_nXFloor)
-			{
-				m_nXNegtiveMark = (int)(floor(m_nMeasuredXMinValue / (double)m_nXStep) * m_nXStep);
-				m_bNeedRedrawAllBmp = 1;
-			}
-		}
-		if (m_nMeasuredXMaxValue > m_nXPositiveMark)
-		{
-			if (m_nMeasuredXMaxValue < m_nXCeil)
-			{
-				m_nXPositiveMark = (int)(ceil(m_nMeasuredXMaxValue / (double)m_nXStep) * m_nXStep);
-				m_bNeedRedrawAllBmp = 1;
-			}
+			assert(0);
 		}
 
-		if (y < m_nMeasuredYMinValue)
+		if ((srcCr > 240) || (srcCr < 16))
 		{
-			m_nMeasuredYMinValue = y;
-		}
-		if (y > m_nMeasuredYMaxValue)
-		{
-			m_nMeasuredYMaxValue = y;
+			assert(0);
 		}
 
-		if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)
+		if (srcY > 0)
 		{
-			nNegtiveBias = m_nYNegtiveMark;
-			if (m_nMeasuredYMinValue < m_nYNegtiveMark)
-			{
-				if (m_nMeasuredYMinValue > m_nYFloor)
-				{
-					nNegtiveBias = (int)(floor(m_nMeasuredYMinValue / (double)m_nYStep) * m_nYStep);
-					m_bNeedRedrawAllBmp = 1;
-				}
-			}
+			uint8_t R = 255, G = 255, B = 255;
+			double cie1931_x = 0;
+			double cie1931_y = 0;
 
-			nPositiveBias = m_nYPositiveMark;
-			if (m_nMeasuredYMaxValue > m_nYPositiveMark)
-			{
-				if (m_nMeasuredYMaxValue < m_nYCeil)
-				{
-					nPositiveBias = (int)(ceil(m_nMeasuredYMaxValue / (double)m_nYStep) * m_nYStep);
-					m_bNeedRedrawAllBmp = 1;
-				}
-			}
+			//double y = (double)(srcY - 16) / 219;
+			double y = (double)srcY / 255;
+			double cb = (double)(srcCb - 128) / 224;
+			double cr = (double)(srcCr - 128) / 224;
 
-			if (m_bNeedRedrawAllBmp)
+			//GRAPHICS_yuv2rgb(srcColorSpace, srcY, srcCb, srcCr, &R, &G, &B);
+			double r = y + 1.402 * cr;
+			double g = y - 0.344 * cb - 0.714 * cr;
+			double b = y + 1.772 * cb;
+
+			r = clip3(0, r, 1.0);
+			g = clip3(0, g, 1.0);
+			b = clip3(0, b, 1.0);
+
+			R = (uint8_t)(255 * r);
+			G = (uint8_t)(255 * g);
+			B = (uint8_t)(255 * b);
+
+			//double cie1931_X = 0.4124 * r + 0.3576 * g + 0.1805 * b;
+			//double cie1931_Y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+			//double cie1931_Z = 0.0193 * r + 0.1192 * g + 0.9505 * b;
+
+			//double cie1931_X_Y_Z = cie1931_X + cie1931_Y + cie1931_Z;
+			//if ((cie1931_X > 0) && (cie1931_Y > 0) && (cie1931_Z > 0))
+			//{
+			//	cie1931_x = cie1931_X / cie1931_X_Y_Z;
+			//	cie1931_y = cie1931_Y / cie1931_X_Y_Z;
+			//assert((cie1931_x > 0) && (cie1931_x < 1.0));
+			//assert((cie1931_y > 0) && (cie1931_y < 1.0));
+			//}
+
+			//if ((cie1931_x > 0) && (cie1931_y > 0))
+			//{
+			//	pixel.x = XMAP_Value2Pos((int)(1000 * cie1931_x), m_rectWaveform);
+			//	pixel.y = YMAP_Value2Pos((int)(1000 * cie1931_y), m_rectWaveform);
+
+			//	m_pMemDC->SelectObject(m_pBkgroundBmp);
+			//	m_pMemDC->SetPixel(pixel, RGB(R, G, B));
+			//}
+
+			//NTSC
+			double cieX = 0.9807 * y + 0.2952 * cb + 0.7270 * cr;
+			double cieY = y + 0.0010 * cb + 0.0003 * cr;
+			double cieZ = 1.1818 * y + 1.9544 * cb - 0.0472 * cr;
+
+			if ((cieX > 0) && (cieY > 0) && (cieZ > 0))
 			{
-				int bias = max(abs(nNegtiveBias), abs(nPositiveBias));
-				m_nYNegtiveMark = -bias;
-				m_nYPositiveMark = bias;
+				double X_Y_Z = cieX + cieY + cieZ;
+				cie1931_x = cieX / X_Y_Z;
+				cie1931_y = cieY / X_Y_Z;
+
+				assert((cie1931_x > 0) && (cie1931_x < 1.0));
+				assert((cie1931_y > 0) && (cie1931_y < 1.0));
+
+				pixel.x = XMAP_Value2Pos((int)(1000 * cie1931_x), m_rectWaveform);
+				pixel.y = YMAP_Value2Pos((int)(1000 * cie1931_y), m_rectWaveform);
+
+				m_pMemDC->SelectObject(m_pBkgroundBmp);
+				m_pMemDC->SetPixel(pixel, RGB(R, G, B));
 			}
 		}
-		else if (m_nYAxisStyle == AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY)
+		else
 		{
-			nNegtiveBias = m_nYNegtiveMark;
-			if (m_nMeasuredYMinValue < m_nYNegtiveMark)
-			{
-				if (m_nMeasuredYMinValue > m_nYFloor)
-				{
-					nNegtiveBias = (int)(floor(m_nMeasuredYMinValue / (double)m_nYStep) * m_nYStep);
-					m_bNeedRedrawAllBmp = 1;
-				}
-			}
-
-			nPositiveBias = m_nYPositiveMark;
-			if (m_nMeasuredYMaxValue > m_nYPositiveMark)
-			{
-				if (m_nMeasuredYMaxValue < m_nYCeil)
-				{
-					nPositiveBias = (int)(ceil(m_nMeasuredYMaxValue / (double)m_nYStep) * m_nYStep);
-					m_bNeedRedrawAllBmp = 1;
-				}
-			}
-
-			if (m_bNeedRedrawAllBmp)
-			{
-				int bias = max(abs(nNegtiveBias), abs(nPositiveBias));
-				m_nYNegtiveMark = -bias;
-				m_nYPositiveMark = bias;
-			}
+			//assert(0);
+			srcY = 0;
 		}
-		else if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX)
-		{
-			if (m_nMeasuredYMinValue < m_nYNegtiveMark)
-			{
-				if (m_nMeasuredYMinValue > m_nYFloor)
-				{
-					m_nYNegtiveMark = (int)(floor(m_nMeasuredYMinValue / (double)m_nYStep) * m_nYStep);
-					m_bNeedRedrawAllBmp = 1;
-				}
-			}
-			if (m_nMeasuredYMaxValue > m_nYPositiveMark)
-			{
-				if (m_nMeasuredYMaxValue < m_nYCeil)
-				{
-					m_nYPositiveMark = (int)(ceil(m_nMeasuredYMaxValue / (double)m_nYStep) * m_nYStep);
-					m_bNeedRedrawAllBmp = 1;
-				}
-			}
-		}
-
-		CInstrumentPanel_Base::AppendXYSample(ID, x, y);
-
-#if ON_PAINTING_USE_MUTEX
-		::ReleaseMutex(m_hPaintingAccess);
 	}
-#endif
+	else if (srcColorSpace == 6012)				//PAL
+	{
+		//int error = 0;
+		//if ((srcY > 235) || (srcY < 16))
+		//{
+		//	srcY = 16;
+		//	error = 1;
+		//}
+
+		if ((srcCb > 240) || (srcCb < 16))
+		{
+			assert(0);
+		}
+
+		if ((srcCr > 240) || (srcCr < 16))
+		{
+			assert(0);
+		}
+
+		if (srcY > 0)
+		{
+			uint8_t R = 255, G = 255, B = 255;
+			double cie1931_x = 0;
+			double cie1931_y = 0;
+
+			//double y = (double)(srcY - 16) / 219;
+			double y = (double)srcY / 255;
+			double cb = (double)(srcCb - 128) / 224;
+			double cr = (double)(srcCr - 128) / 224;
+
+			//GRAPHICS_yuv2rgb(srcColorSpace, srcY, srcCb, srcCr, &R, &G, &B);
+			double r = y + 1.402 * cr;
+			double g = y - 0.344 * cb - 0.714 * cr;
+			double b = y + 1.772 * cb;
+
+			r = clip3(0, r, 1.0);
+			g = clip3(0, g, 1.0);
+			b = clip3(0, b, 1.0);
+
+			R = (uint8_t)(255 * r);
+			G = (uint8_t)(255 * g);
+			B = (uint8_t)(255 * b);
+
+			//double cie1931_X = 0.4124 * r + 0.3576 * g + 0.1805 * b;
+			//double cie1931_Y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+			//double cie1931_Z = 0.0193 * r + 0.1192 * g + 0.9505 * b;
+
+			//double cie1931_X_Y_Z = cie1931_X + cie1931_Y + cie1931_Z;
+			//if ((cie1931_X > 0) && (cie1931_Y > 0) && (cie1931_Z > 0))
+			//{
+			//	cie1931_x = cie1931_X / cie1931_X_Y_Z;
+			//	cie1931_y = cie1931_Y / cie1931_X_Y_Z;
+			//assert((cie1931_x > 0) && (cie1931_x < 1.0));
+			//assert((cie1931_y > 0) && (cie1931_y < 1.0));
+			//}
+
+			//if ((cie1931_x > 0) && (cie1931_y > 0))
+			//{
+			//	pixel.x = XMAP_Value2Pos((int)(1000 * cie1931_x), m_rectWaveform);
+			//	pixel.y = YMAP_Value2Pos((int)(1000 * cie1931_y), m_rectWaveform);
+
+			//	m_pMemDC->SelectObject(m_pBkgroundBmp);
+			//	m_pMemDC->SetPixel(pixel, RGB(R, G, B));
+			//}
+
+			//PAL
+			double cieX = 0.9505 * y + 0.1985 * cb + 0.3598 * cr;
+			double cieY = y - 0.1167 * cb - 0.1933 * cr;
+			double cieZ = 1.0891 * y + 1.6199 * cb - 0.0642 * cr;
+
+			if ((cieX > 0) && (cieY > 0) && (cieZ > 0))
+			{
+				double X_Y_Z = cieX + cieY + cieZ;
+				cie1931_x = cieX / X_Y_Z;
+				cie1931_y = cieY / X_Y_Z;
+
+				assert((cie1931_x > 0) && (cie1931_x < 1.0));
+				assert((cie1931_y > 0) && (cie1931_y < 1.0));
+
+				pixel.x = XMAP_Value2Pos((int)(1000 * cie1931_x), m_rectWaveform);
+				pixel.y = YMAP_Value2Pos((int)(1000 * cie1931_y), m_rectWaveform);
+
+				m_pMemDC->SelectObject(m_pBkgroundBmp);
+				m_pMemDC->SetPixel(pixel, RGB(R, G, B));
+			}
+		}
+		else
+		{
+			//assert(0);
+			srcY = 0;
+		}
+	}
+	else if (srcColorSpace == 709)				//ITU-R BT.709
+	{
+		//int error = 0;
+		if ((srcY > 235) || (srcY < 16))
+		{
+			//srcY = 16;
+			//error = 1;
+			srcY = clip3(16, srcY, 235);
+		}
+
+		if ((srcCb > 240) || (srcCb < 16))
+		{
+			assert(0);
+		}
+
+		if ((srcCr > 240) || (srcCr < 16))
+		{
+			assert(0);
+		}
+
+		if (srcY > 0)
+		{
+			uint8_t R = 255, G = 255, B = 255;
+			double cie1931_x = 0;
+			double cie1931_y = 0;
+
+			double y = (double)(srcY - 16) / 219;
+			//double y = (double)srcY / 255;
+			double cb = (double)(srcCb - 128) / 224;
+			double cr = (double)(srcCr - 128) / 224;
+
+			//GRAPHICS_yuv2rgb(srcColorSpace, srcY, srcCb, srcCr, &R, &G, &B);
+			double r = y + 1.5748 * cr;
+			double g = y - 0.1874 * cb - 0.4681 * cr;
+			double b = y + 1.8556 * cb;
+
+			r = clip3(0, r, 1.0);
+			g = clip3(0, g, 1.0);
+			b = clip3(0, b, 1.0);
+
+			R = (uint8_t)(255 * r);
+			G = (uint8_t)(255 * g);
+			B = (uint8_t)(255 * b);
+
+			//double cie1931_X = 0.4124 * r + 0.3576 * g + 0.1805 * b;
+			//double cie1931_Y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+			//double cie1931_Z = 0.0193 * r + 0.1192 * g + 0.9505 * b;
+
+			//double cie1931_X_Y_Z = cie1931_X + cie1931_Y + cie1931_Z;
+			//if ((cie1931_X > 0) && (cie1931_Y > 0) && (cie1931_Z > 0))
+			//{
+			//	cie1931_x = cie1931_X / cie1931_X_Y_Z;
+			//	cie1931_y = cie1931_Y / cie1931_X_Y_Z;
+			//assert((cie1931_x > 0) && (cie1931_x < 1.0));
+			//assert((cie1931_y > 0) && (cie1931_y < 1.0));
+			//}
+
+			//if ((cie1931_x > 0) && (cie1931_y > 0))
+			//{
+			//	pixel.x = XMAP_Value2Pos((int)(1000 * cie1931_x), m_rectWaveform);
+			//	pixel.y = YMAP_Value2Pos((int)(1000 * cie1931_y), m_rectWaveform);
+
+			//	m_pMemDC->SelectObject(m_pBkgroundBmp);
+			//	m_pMemDC->SetPixel(pixel, RGB(R, G, B));
+			//}
+
+			//y = 1.0;
+			double cieX = 0.9505 * y + 0.2679 * cb + 0.4820 * cr;
+			double cieY = y - 0.0001 * cb - 0.0001 * cr;
+			double cieZ = 1.0891 * y + 1.7415 * cb - 0.0254 * cr;
+
+			if ((cieX > 0) && (cieY > 0) && (cieZ > 0))
+			{
+				double X_Y_Z = cieX + cieY + cieZ;
+				cie1931_x = cieX / X_Y_Z;
+				cie1931_y = cieY / X_Y_Z;
+
+				assert((cie1931_x > 0) && (cie1931_x < 1.0));
+				assert((cie1931_y > 0) && (cie1931_y < 1.0));
+
+				//double r = 3.2410 * cieX - 1.5374 * cieY - 0.4986 * cieZ;
+				//double g = -0.9692 * cieX + 1.8760 * cieY + 0.0416 * cieZ;
+				//double b = 0.0556 * cieX - 0.2040 * cieY + 1.0570 * cieZ;
+
+				//r = clip3(0, r, 1.0);
+				//g = clip3(0, g, 1.0);
+				//b = clip3(0, b, 1.0);
+
+				//R = (uint8_t)(255 * r);
+				//G = (uint8_t)(255 * g);
+				//B = (uint8_t)(255 * b);
+
+				pixel.x = XMAP_Value2Pos((int)(1000 * cie1931_x), m_rectWaveform);
+				pixel.y = YMAP_Value2Pos((int)(1000 * cie1931_y), m_rectWaveform);
+
+				m_pMemDC->SelectObject(m_pBkgroundBmp);
+				m_pMemDC->SetPixel(pixel, RGB(R, G, B));
+			}
+		}
+		else
+		{
+			//assert(0);
+			srcY = 0;
+		}
+	}
+	else if (srcColorSpace == 2020)				//ITU-R BT.2020
+	{
+		//int error = 0;
+		//if ((srcY > 235) || (srcY < 16))
+		//{
+		//	srcY = 16;
+		//	error = 1;
+		//}
+
+		if ((srcCb > 240) || (srcCb < 16))
+		{
+			assert(0);
+		}
+
+		if ((srcCr > 240) || (srcCr < 16))
+		{
+			assert(0);
+		}
+
+		if (srcY > 0)
+		{
+			uint8_t R = 255, G = 255, B = 255;
+			double cie1931_x = 0;
+			double cie1931_y = 0;
+
+			//double y = (double)(srcY - 16) / 219;
+			double y = (double)srcY / 255;
+			double cb = (double)(srcCb - 128) / 224;
+			double cr = (double)(srcCr - 128) / 224;
+
+			//GRAPHICS_yuv2rgb(srcColorSpace, srcY, srcCb, srcCr, &R, &G, &B);
+			double r = y + 1.4746 * cr;
+			double g = y - 0.1646 * cb - 0.5714 * cr;
+			double b = y + 1.8814 * cb;
+
+			r = clip3(0, r, 1.0);
+			g = clip3(0, g, 1.0);
+			b = clip3(0, b, 1.0);
+
+			R = (uint8_t)(255 * r);
+			G = (uint8_t)(255 * g);
+			B = (uint8_t)(255 * b);
+
+			//double cie1931_X = 0.6370 * r + 0.1446 * g + 0.1689 * b;
+			//double cie1931_Y = 0.2627 * r + 0.6780 * g + 0.0593 * b;
+			//double cie1931_Z = 0.0000 * r + 0.0281 * g + 1.0610 * b;
+
+			//double cie1931_X_Y_Z = cie1931_X + cie1931_Y + cie1931_Z;
+			//if ((cie1931_X > 0) && (cie1931_Y > 0) && (cie1931_Z > 0))
+			//{
+			//	cie1931_x = cie1931_X / cie1931_X_Y_Z;
+			//	cie1931_y = cie1931_Y / cie1931_X_Y_Z;
+			//}
+
+			double cieX = 0.9505 * y + 0.2939 * cb + 0.8566 * cr;
+			double cieY = y;
+			double cieZ = 1.0891 * y + 1.9915 * cb - 0.0160 * cr;
+
+			if ((cieX > 0) && (cieY > 0) && (cieZ > 0))
+			{
+				double X_Y_Z = cieX + cieY + cieZ;
+				double ciex = cieX / X_Y_Z;
+				double ciey = cieY / X_Y_Z;
+
+				assert((ciex > 0) && (ciex < 1.0));
+				assert((ciey > 0) && (ciey < 1.0));
+
+				if ((ciex > 0) && (ciey > 0))
+				{
+					pixel.x = XMAP_Value2Pos((int)(1000 * ciex), m_rectWaveform);
+					pixel.y = YMAP_Value2Pos((int)(1000 * ciey), m_rectWaveform);
+
+					m_pMemDC->SelectObject(m_pBkgroundBmp);
+					m_pMemDC->SetPixel(pixel, RGB(R, G, B));
+				}
+			}
+		}
+		else
+		{
+			//assert(0);
+			srcY = 0;
+		}
+	}
 }
 
-void CInstrumentPanel_ColorSpaceDiagram::DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectGridArea)
+void CInstrumentPanel_ColorGamutDiagram::DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectGridArea)
 {
 	CString strMark;
 	double dGridDeltx, dGridDelty;
@@ -1073,10 +1318,14 @@ void CInstrumentPanel_ColorSpaceDiagram::DisplayBkGridInMemory(CDC* pMemDC, CBit
 
 		POINT ptRed, ptBlue, ptGreen, ptWhite;
 		
-		CPen* pColorSpacePen = new CPen;
-		pColorSpacePen->CreatePen(PS_SOLID, 1, RGB(160, 160, 160));
-
-		pMemDC->SelectObject(pColorSpacePen);
+		CPen* pColorSpace2020Pen = new CPen;
+		pColorSpace2020Pen->CreatePen(PS_SOLID, 1, RGB(235, 235, 235));
+		CPen* pColorSpace709Pen = new CPen;
+		pColorSpace709Pen->CreatePen(PS_SOLID, 1, RGB(235, 235, 16));
+		CPen* pColorSpace6010Pen = new CPen;
+		pColorSpace6010Pen->CreatePen(PS_SOLID, 1, RGB(235, 16, 235));
+		CPen* pColorSpace6012Pen = new CPen;
+		pColorSpace6012Pen->CreatePen(PS_SOLID, 1, RGB(16, 235, 235));
 
 		//4K UHD color space ITU-T BT.2020
 		ptWhite.x = XMAP_Value2Pos(313, rectGridArea);
@@ -1091,6 +1340,7 @@ void CInstrumentPanel_ColorSpaceDiagram::DisplayBkGridInMemory(CDC* pMemDC, CBit
 		ptBlue.x = XMAP_Value2Pos(131, rectGridArea);
 		ptBlue.y = YMAP_Value2Pos(46, rectGridArea);
 
+		pMemDC->SelectObject(pColorSpace2020Pen);
 		pMemDC->MoveTo(ptRed);
 		pMemDC->LineTo(ptGreen);
 		pMemDC->LineTo(ptBlue);
@@ -1099,6 +1349,10 @@ void CInstrumentPanel_ColorSpaceDiagram::DisplayBkGridInMemory(CDC* pMemDC, CBit
 		pMemDC->SetPixel(ptRed, RGB(255, 0, 0));
 		pMemDC->SetPixel(ptGreen, RGB(0, 255, 0));
 		pMemDC->SetPixel(ptBlue, RGB(0, 0, 255));
+
+		pMemDC->MoveTo(500, 100);
+		pMemDC->LineTo(550, 100);
+		pMemDC->TextOutA(560, 92, "UHD 2020");
 
 		//HD color space ITU-T BT.709
 		ptRed.x = XMAP_Value2Pos(640, rectGridArea);
@@ -1110,6 +1364,7 @@ void CInstrumentPanel_ColorSpaceDiagram::DisplayBkGridInMemory(CDC* pMemDC, CBit
 		ptBlue.x = XMAP_Value2Pos(150, rectGridArea);
 		ptBlue.y = YMAP_Value2Pos(60, rectGridArea);
 
+		pMemDC->SelectObject(pColorSpace709Pen);
 		pMemDC->MoveTo(ptRed);
 		pMemDC->LineTo(ptGreen);
 		pMemDC->LineTo(ptBlue);
@@ -1120,6 +1375,60 @@ void CInstrumentPanel_ColorSpaceDiagram::DisplayBkGridInMemory(CDC* pMemDC, CBit
 		pMemDC->SetPixel(ptGreen, RGB(0, 255, 0));
 		pMemDC->SetPixel(ptBlue, RGB(0, 0, 255));
 
+		pMemDC->MoveTo(500, 116);
+		pMemDC->LineTo(550, 116);
+		pMemDC->TextOutA(560, 108, "HD 709");
+
+		//SD color space ITU-T BT.601 PAL
+		ptRed.x = XMAP_Value2Pos(640, rectGridArea);
+		ptRed.y = YMAP_Value2Pos(330, rectGridArea);
+
+		ptGreen.x = XMAP_Value2Pos(290, rectGridArea);
+		ptGreen.y = YMAP_Value2Pos(600, rectGridArea);
+
+		ptBlue.x = XMAP_Value2Pos(150, rectGridArea);
+		ptBlue.y = YMAP_Value2Pos(60, rectGridArea);
+
+		pMemDC->SelectObject(pColorSpace6012Pen);
+		pMemDC->MoveTo(ptRed);
+		pMemDC->LineTo(ptGreen);
+		pMemDC->LineTo(ptBlue);
+		pMemDC->LineTo(ptRed);
+
+		pMemDC->SetPixel(ptWhite, RGB(255, 255, 255));
+		pMemDC->SetPixel(ptRed, RGB(255, 0, 0));
+		pMemDC->SetPixel(ptGreen, RGB(0, 255, 0));
+		pMemDC->SetPixel(ptBlue, RGB(0, 0, 255));
+
+		pMemDC->MoveTo(500, 132);
+		pMemDC->LineTo(550, 132);
+		pMemDC->TextOutA(560, 124, "SD PAL");
+
+		//SD color space ITU-T BT.601 NTSC
+		ptRed.x = XMAP_Value2Pos(670, rectGridArea);
+		ptRed.y = YMAP_Value2Pos(330, rectGridArea);
+
+		ptGreen.x = XMAP_Value2Pos(210, rectGridArea);
+		ptGreen.y = YMAP_Value2Pos(710, rectGridArea);
+
+		ptBlue.x = XMAP_Value2Pos(140, rectGridArea);
+		ptBlue.y = YMAP_Value2Pos(80, rectGridArea);
+
+		pMemDC->SelectObject(pColorSpace6010Pen);
+		pMemDC->MoveTo(ptRed);
+		pMemDC->LineTo(ptGreen);
+		pMemDC->LineTo(ptBlue);
+		pMemDC->LineTo(ptRed);
+
+		pMemDC->SetPixel(ptWhite, RGB(255, 255, 255));
+		pMemDC->SetPixel(ptRed, RGB(255, 0, 0));
+		pMemDC->SetPixel(ptGreen, RGB(0, 255, 0));
+		pMemDC->SetPixel(ptBlue, RGB(0, 0, 255));
+
+		pMemDC->MoveTo(500, 148);
+		pMemDC->LineTo(550, 148);
+		pMemDC->TextOutA(560, 140, "SD NTSC");
+
 		pMemDC->SelectObject(pOldPen);
 
 		delete pFramePen;
@@ -1128,5 +1437,10 @@ void CInstrumentPanel_ColorSpaceDiagram::DisplayBkGridInMemory(CDC* pMemDC, CBit
 
 		delete pMarkFont;
 		delete pTitleFont;
+
+		delete pColorSpace2020Pen;
+		delete pColorSpace709Pen;
+		delete pColorSpace6010Pen;
+		delete pColorSpace6012Pen;
 	}
 }

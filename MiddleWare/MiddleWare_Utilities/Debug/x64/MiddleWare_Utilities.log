@@ -1,1 +1,6 @@
-﻿
+﻿  stdafx.cpp
+  MiddleWare_Utilities_MediaFile.cpp
+E:\Projects-Mpeg2码流分析仪\软件工程\EverStationII\MiddleWare\MiddleWare_Utilities\Impl\MiddleWare_Utilities_MediaFile.cpp(44): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
+E:\Projects-Mpeg2码流分析仪\软件工程\EverStationII\MiddleWare\MiddleWare_Utilities\Impl\MiddleWare_Utilities_MediaFile.cpp(328): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
+    正在创建库 .\lib\MiddleWare_UtilitiesD(x64).lib 和对象 .\lib\MiddleWare_UtilitiesD(x64).exp
+  MiddleWare_Utilities.vcxproj -> E:\Projects-Mpeg2码流分析仪\软件工程\EverStationII\Debug\x64\MiddleWare_UtilitiesD(x64).dll

@@ -91,11 +91,13 @@ BEGIN_MESSAGE_MAP(CDlg_VideoShowScreen, CDialog)
 	ON_WM_TIMER()
 	ON_WM_CREATE()
 	ON_WM_CLOSE()
+	ON_WM_CTLCOLOR()
 	//}}AFX_MSG_MAP
 	ON_MESSAGE(WM_REPORT_VIDEO_DECODE_FPS, OnReportVideoDecodeFPS)
 	ON_MESSAGE(WM_PLAY_CONTROLLER_REPORT_EXIT, OnReportPlayThreadExit)
 	ON_MESSAGE(WM_PLAY_WORKING_PROGRESS, OnReportPlayThreadWorkingProgress)
-	ON_WM_CTLCOLOR()
+	ON_MESSAGE(WM_STATISTIC_LUMA, OnStatisticLuma)
+	ON_MESSAGE(WM_STATISTIC_CHROMA, OnStatisticChroma)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -200,7 +202,8 @@ void CDlg_VideoShowScreen::AttachVideoDecoder(PVOID pDecoder)
 				//	SetWindowText(pszTitle);
 				//}
 				HWND hWnd = this->GetSafeHwnd();
-				m_pVidDecoder[i]->AttachWnd(hWnd, CALLBACK_report_yuv_luma_stats, CALLBACK_report_yuv_chroma_stats);
+				//m_pVidDecoder[i]->AttachWnd(hWnd, CALLBACK_report_yuv_luma_stats, CALLBACK_report_yuv_chroma_stats);
+				m_pVidDecoder[i]->AttachWnd(hWnd);
 
 				m_nPlayProgressPercent = 0;
 
@@ -1182,20 +1185,46 @@ void CALLBACK VideoPlay_TimerHandler(UINT uTimerID, UINT msg, DWORD_PTR dwUser, 
 //	return 0;
 //}
 
-int CALLBACK_report_yuv_luma_stats(HWND hWnd, WPARAM wParam, LPARAM lParam)
+//int CALLBACK_report_yuv_luma_stats(HWND hWnd, WPARAM wParam, LPARAM lParam)
+//{
+//	CDlg_VideoShowScreen* pdlg = (CDlg_VideoShowScreen*)CWnd::FromHandle(hWnd);
+//
+//	pdlg->m_pPanelLumaStats->ReportStats(wParam, lParam);
+//
+//	return 0;
+//}
+
+//int CALLBACK_report_yuv_chroma_stats(HWND hWnd, uint8_t* pucFrameBuf, int width, int height, DWORD dwFourCC)
+//{
+//	CWnd* pWnd = CWnd::FromHandle(hWnd);
+//	//CDlg_VideoShowScreen dlg;
+//	//dlg.Attach(hWnd);
+//
+//	CDlg_VideoShowScreen* pdlg = (CDlg_VideoShowScreen*)pWnd;
+//
+//	//if (pdlg->m_pPanelChromaStats->IsWindowVisible())
+//	//{
+//		//pdlg->m_pPanelChromaStats->ReportStats(pucFrameBuf, width, height, dwFourCC);
+//		//m_pPanelChromaStats->ReportStats(pucFrameBuf, pstFrameParam);
+//		//}
+//
+//	return 0;
+//}
+
+LRESULT CDlg_VideoShowScreen::OnStatisticLuma(WPARAM wParam, LPARAM lParam)
 {
-	CDlg_VideoShowScreen* pdlg = (CDlg_VideoShowScreen*)CWnd::FromHandle(hWnd);
-
-	pdlg->m_pPanelLumaStats->ReportStats(wParam, lParam);
-
 	return 0;
 }
 
-int CALLBACK_report_yuv_chroma_stats(HWND hWnd, WPARAM wParam, LPARAM lParam)
+LRESULT CDlg_VideoShowScreen::OnStatisticChroma(WPARAM wParam, LPARAM lParam)
 {
-	CDlg_VideoShowScreen* pdlg = (CDlg_VideoShowScreen*)CWnd::FromHandle(hWnd);
+	uint8_t*	pucFrameBuf = (uint8_t*)lParam;
+	INPUT_YUV_SEQUENCE_PARAM_t* pstFrameParam = (INPUT_YUV_SEQUENCE_PARAM_t*)wParam;
 
-	pdlg->m_pPanelChromaStats->ReportStats(wParam, lParam);
+	if (m_pPanelChromaStats->IsWindowVisible())
+	{
+		m_pPanelChromaStats->ReportStats(pucFrameBuf, pstFrameParam);
+	}
 
 	return 0;
 }
@@ -1208,8 +1237,11 @@ LRESULT CDlg_VideoShowScreen::OnReportVideoDecodeFPS(WPARAM wParam, LPARAM lPara
 	return 0;
 }
 
+//WM_PLAY_CONTROLLER_REPORT_EXIT
 LRESULT CDlg_VideoShowScreen::OnReportPlayThreadExit(WPARAM wParam, LPARAM lParam)
 {
+	m_pPanelLumaStats->Reset();
+	m_pPanelChromaStats->Reset();
 	//消息接力
 	::PostMessage(m_hParentWnd, WM_VIDEO_CONTAINER_REPORT_PLAY_EXIT, 0, NULL);
 

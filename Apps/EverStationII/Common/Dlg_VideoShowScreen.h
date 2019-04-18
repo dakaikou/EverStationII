@@ -141,6 +141,9 @@ public:
 	afx_msg LRESULT OnReportPlayThreadWorkingProgress(WPARAM, LPARAM);
 	afx_msg LRESULT OnReportPlayThreadExit(WPARAM, LPARAM);
 
+	afx_msg LRESULT OnStatisticLuma(WPARAM, LPARAM);
+	afx_msg LRESULT OnStatisticChroma(WPARAM, LPARAM);
+
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
@@ -151,8 +154,8 @@ public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };
 
-int CALLBACK_report_yuv_luma_stats(HWND hWnd, WPARAM wParam, LPARAM lParam);
-int CALLBACK_report_yuv_chroma_stats(HWND hWnd, WPARAM wParam, LPARAM lParam);
+//int CALLBACK_report_yuv_luma_stats(HWND hWnd, WPARAM wParam, LPARAM lParam);
+//int CALLBACK_report_yuv_chroma_stats(HWND hWnd, uint8_t* pucFrameBuf, int width, int height, DWORD dwFourCC);
 
 //uint32_t VideoPlay_Thread(PVOID pVoid);
 //uint32_t AudioPlay_Thread(PVOID pVoid);

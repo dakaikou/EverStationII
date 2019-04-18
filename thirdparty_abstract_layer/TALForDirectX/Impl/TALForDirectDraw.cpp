@@ -337,7 +337,7 @@ int CTALForDirectDraw::FeedToOffScreenSurface(const LPBYTE lpFrameBuf, int frame
 {
 	//LPBYTE  lpFrame = NULL;
 	LPBYTE  lpSurf = NULL;
-	HRESULT	ddRval = -1;
+	HRESULT	ddRval = E_FAIL;
 
 	DDSURFACEDESC2		ddsd;    // DirectDraw ±Ì√Ê√Ë ˆ
 
@@ -574,7 +574,7 @@ int CTALForDirectDraw::ToggleGrid(void)
 
 int CTALForDirectDraw::RenderOnPrimarySurface(void)
 {
-	HRESULT	ddRval = -1;
+	HRESULT	ddRval = E_FAIL;
 
 	if ((m_lpDDSPrimary != NULL) && 
 		(m_lpDDSOffscreen != NULL) &&

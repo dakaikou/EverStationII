@@ -29,7 +29,7 @@ CVESDecoder::CVESDecoder(void)
 
 	//direct draw settings
 
-	m_callback_report_yuv_luma_stats = NULL;
+	//m_callback_report_yuv_luma_stats = NULL;
 	m_hwnd_for_caller = NULL;
 
 #if USE_FRAMEBUF_ACCESS_MUTEX
@@ -147,24 +147,25 @@ void CVESDecoder::StopFrameProcessThread(void)
 	}
 }
 
-int CVESDecoder::AttachWnd(HWND hWnd, int(*callback_luma)(HWND, WPARAM, LPARAM), int(*callback_chroma)(HWND, WPARAM, LPARAM))
+//int CVESDecoder::AttachWnd(HWND hWnd, int(*callback_luma)(HWND, WPARAM, LPARAM), int(*callback_chroma)(HWND, uint8_t*, int, int, DWORD))
+int CVESDecoder::AttachWnd(HWND hWnd)
 {
-	HRESULT ddRval = -1;
+	HRESULT ddRval = E_FAIL;
 
 	m_hwnd_for_caller = hWnd;
 
 	assert(m_pDirectDraw == NULL);
 	m_pDirectDraw = new CTALForDirectDraw;
-	ddRval = m_pDirectDraw->OpenVideo(hWnd, m_stOutputYUVSequenceParam.luma_width, m_stOutputYUVSequenceParam.luma_height, m_stOutputYUVSequenceParam.dwFourCC);
+	ddRval = m_pDirectDraw->OpenVideo(m_hwnd_for_caller, m_stOutputYUVSequenceParam.luma_width, m_stOutputYUVSequenceParam.luma_height, m_stOutputYUVSequenceParam.dwFourCC);
 
-	if (callback_luma != NULL)
-	{
-		m_callback_report_yuv_luma_stats = callback_luma;
-	}
-	if (callback_chroma != NULL)
-	{
-		m_callback_report_yuv_chroma_stats = callback_chroma;
-	}
+	//if (callback_luma != NULL)
+	//{
+	//	m_callback_report_yuv_luma_stats = callback_luma;
+	//}
+	//if (callback_chroma != NULL)
+	//{
+	//	m_callback_report_yuv_chroma_stats = callback_chroma;
+	//}
 
 	StartFrameProcessThread();
 
@@ -173,7 +174,7 @@ int CVESDecoder::AttachWnd(HWND hWnd, int(*callback_luma)(HWND, WPARAM, LPARAM),
 
 int CVESDecoder::SetClientRect(RECT rcWnd)
 {
-	HRESULT ddRval = -1;
+	HRESULT ddRval = E_FAIL;
 
 	//m_rcWnd = rcWnd;
 	m_pDirectDraw->SetClientRect(rcWnd);
@@ -183,9 +184,11 @@ int CVESDecoder::SetClientRect(RECT rcWnd)
 
 int CVESDecoder::DetachWnd(HWND hWnd)
 {
-	StopFrameProcessThread();
+	HRESULT ddRval = E_FAIL;
 
-	HRESULT ddRval = -1;
+	assert(m_hwnd_for_caller == hWnd);
+
+	StopFrameProcessThread();
 
 	if (m_pDirectDraw != NULL)
 	{
@@ -194,8 +197,8 @@ int CVESDecoder::DetachWnd(HWND hWnd)
 		m_pDirectDraw = NULL;
 	}
 
-	m_callback_report_yuv_luma_stats = NULL;
-	m_callback_report_yuv_chroma_stats = NULL;
+	//m_callback_report_yuv_luma_stats = NULL;
+	//m_callback_report_yuv_chroma_stats = NULL;
 
 	return ddRval;
 }
@@ -508,18 +511,18 @@ int CVESDecoder::FrameProcessAndFeedToDirectDraw(void)
 						}
 						for (int dstCol = 0; dstCol < m_stOutputYUVSequenceParam.chroma_width; dstCol++)
 						{
-							int chromaCol = dstCol;
+							int srcChromaCol = dstCol;
 
 							if (m_decimate_coeff > 0)
 							{
-								chromaCol /= m_decimate_coeff;
+								srcChromaCol /= m_decimate_coeff;
 							}
 							else if (m_decimate_coeff < 0)
 							{
-								chromaCol *= -m_decimate_coeff;
+								srcChromaCol *= -m_decimate_coeff;
 							}
 
-							pDstChroma[dstCol] = pSrcChroma[chromaCol];
+							pDstChroma[dstCol] = pSrcChroma[srcChromaCol];
 						}
 
 						pDstLuma += m_stOutputYUVSequenceParam.luma_width;
@@ -895,24 +898,27 @@ int CVESDecoder::FrameProcessAndFeedToDirectDraw(void)
 
 #endif
 
+			if (m_decimate_coeff == 0)
+			{
+				//if (m_callback_report_yuv_luma_stats != NULL)
+				//{
+				//	m_callback_report_yuv_luma_stats(m_hwnd_for_caller, (WPARAM)m_pucOutputYUVFrameBuf, (LPARAM)m_nOutputYUVFrameSize);
+				//}
+
+				//if (m_callback_report_yuv_chroma_stats != NULL)
+				//{
+				//	m_callback_report_yuv_chroma_stats(m_hwnd_for_caller, m_pucInputYUVFrameBuf, m_stInputYUVSequenceParam.luma_width, m_stInputYUVSequenceParam.luma_height, m_stInputYUVSequenceParam.dwFourCC);
+				//}
+
+				::SendMessage(m_hwnd_for_caller, WM_STATISTIC_LUMA, (WPARAM)& m_stInputYUVSequenceParam, (LPARAM)m_pucInputYUVFrameBuf);
+				::SendMessage(m_hwnd_for_caller, WM_STATISTIC_CHROMA, (WPARAM)&m_stInputYUVSequenceParam, (LPARAM)m_pucInputYUVFrameBuf);
+			}
+
 #if USE_FRAMEBUF_ACCESS_MUTEX
 			::ReleaseMutex(m_hSourceFrameBufAccess);
 		}
 #endif
 		::SetEvent(m_hSourceFrameBufEmptyEvent);
-
-		if (m_decimate_coeff == 0)
-		{
-			if (m_callback_report_yuv_luma_stats != NULL)
-			{
-				m_callback_report_yuv_luma_stats(m_hwnd_for_caller, (WPARAM)m_pucOutputYUVFrameBuf, (LPARAM)m_nOutputYUVFrameSize);
-			}
-
-			if (m_callback_report_yuv_chroma_stats != NULL)
-			{
-				m_callback_report_yuv_chroma_stats(m_hwnd_for_caller, (WPARAM)m_pucOutputYUVFrameBuf, (LPARAM)m_nOutputYUVFrameSize);
-			}
-		}
 
 		//FeedToDirectDraw(m_pucOutputFrameBuf, m_nOutputFrameSize, &m_stOutputFrameParams);
 		HRESULT ddRval = m_pDirectDraw->FeedToOffScreenSurface(m_pucOutputYUVFrameBuf, m_nOutputYUVFrameSize);
@@ -1111,7 +1117,10 @@ int CVESDecoder::CanvasSetup(int display_decimate_coeff)
 				m_stOutputYUVSequenceParam.alpha_plane_size;			//ARGB 4 plane
 
 			m_pucOutputYUVFrameBuf = (uint8_t*)malloc(m_nOutputYUVFrameSize);			//RGB 3 plane
-			memset(m_pucOutputYUVFrameBuf, 0x00, m_nOutputYUVFrameSize);
+			if (m_pucOutputYUVFrameBuf != NULL)
+			{
+				memset(m_pucOutputYUVFrameBuf, 0x00, m_nOutputYUVFrameSize);
+			}
 		}
 
 #if USE_FRAMEBUF_ACCESS_MUTEX

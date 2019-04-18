@@ -187,7 +187,7 @@ void CDlg_YUVPreview::InitComboxForSampleStructure(CComboBox* pCmbBox)
 	nIndex = pCmbBox->AddString("4:2:2 Y-V-U Planar");
 	pCmbBox->SetItemData(nIndex, MAKEFOURCC('4', '2', '2', 'P'));			
 
-	nIndex = pCmbBox->AddString("4:2:2 U-Y-V-U Packed");
+	nIndex = pCmbBox->AddString("4:2:2 U-Y-V-Y Packed");
 	pCmbBox->SetItemData(nIndex, MAKEFOURCC('U', 'Y', 'V', 'Y'));
 
 	nIndex = pCmbBox->AddString("4:4:4 Y-U-V Planar");
@@ -201,8 +201,11 @@ void CDlg_YUVPreview::InitComboxForColorSpace(CComboBox* pCmbBox)
 {
 	pCmbBox->ResetContent();
 
-	int nIndex = pCmbBox->AddString("ITU-R.BT.601");
-	pCmbBox->SetItemData(nIndex, 601);
+	int nIndex = pCmbBox->AddString("NTSC 1953");
+	pCmbBox->SetItemData(nIndex, 6010);
+
+	nIndex = pCmbBox->AddString("PAL");
+	pCmbBox->SetItemData(nIndex, 6012);
 
 	nIndex = pCmbBox->AddString("ITU-R.BT.709");
 	pCmbBox->SetItemData(nIndex, 709);
@@ -274,7 +277,7 @@ BOOL CDlg_YUVPreview::OnInitDialog()
 	//setup the color space
 	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_SRC_COLORSPACE);
 	InitComboxForColorSpace(pCmbBox);
-	pCmbBox->SetCurSel(1);
+	pCmbBox->SetCurSel(2);				//709
 
 	//…Ë÷√≤•∑≈÷°¬ 
 	pCmbBox = (CComboBox*)GetDlgItem(IDC_YUVPREVIEWDLG_CMB_SRC_FRAMERATE);
