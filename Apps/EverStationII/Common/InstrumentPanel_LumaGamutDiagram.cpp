@@ -28,18 +28,25 @@ BEGIN_MESSAGE_MAP(CInstrumentPanel_LumaGamutDiagram, CInstrumentPanel_Base)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-void CInstrumentPanel_LumaGamutDiagram::AppendSample(int colIndex, int colWidth, uint8_t srcY)
+void CInstrumentPanel_LumaGamutDiagram::AppendOneFrame(uint8_t* pucY, int luma_width, int luma_height)
 {
 	POINT pixel;
-
-	double x = (double)colIndex / colWidth;
-
-	CRect rectPicture(0,0, m_rectWaveform.Width(), m_rectWaveform.Height());
-
-	pixel.x = XMAP_Value2Pos((int)(1024 * x), rectPicture);
-	pixel.y = YMAP_Value2Pos(srcY, rectPicture);
+	CRect rectPicture(0, 0, m_rectWaveform.Width(), m_rectWaveform.Height());
 
 	m_pMemDC->SelectObject(m_pWaveformBmp);
-	m_pMemDC->SetPixel(pixel, RGB(255, 255, 255));
-}
 
+	for (int row = 0; row < luma_height; row++)
+	{
+		for (int col = 0; col < luma_width; col++)
+		{
+			double x = (double)col / luma_width;
+
+			pixel.x = XMAP_Value2Pos((int)(1024 * x), rectPicture);
+			pixel.y = YMAP_Value2Pos(pucY[col], rectPicture);
+
+			m_pMemDC->SetPixel(pixel, RGB(255, 255, 255));
+		}
+
+		pucY += luma_width;
+	}
+}

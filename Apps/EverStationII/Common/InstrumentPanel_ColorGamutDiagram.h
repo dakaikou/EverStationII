@@ -22,8 +22,9 @@ public:
 
 // Operations
 public:
+	void AppendOneFrame(uint8_t* pucY, int luma_width, int luma_height,
+		uint8_t* pucCb, uint8_t* pucCr, int chroma_width, int chroma_height, int nColorSpace);
 
-	void AppendSample(int ID, uint8_t Y, uint8_t Cb, uint8_t Cr, int colorSpace);
 	void DisplayLegendInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectWaveform);
 
 // Overrides

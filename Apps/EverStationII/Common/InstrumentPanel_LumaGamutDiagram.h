@@ -23,7 +23,7 @@ public:
 // Operations
 public:
 
-	void AppendSample(int colIndex, int colWidth, uint8_t Y);
+	void AppendOneFrame(uint8_t* pucY, int luma_width, int luma_height);
 
 // Overrides
 	// ClassWizard generated virtual function overrides

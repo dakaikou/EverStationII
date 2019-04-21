@@ -22,7 +22,6 @@ static char THIS_FILE[] = __FILE__;
 // CInstrumentPanel_Histogram
 CInstrumentPanel_ColorGamutDiagram::CInstrumentPanel_ColorGamutDiagram()
 {
-	//m_nChannleDepth = COLORGAMUT_DIAGRAM_SAMPLE_DEPTH;
 }
 
 CInstrumentPanel_ColorGamutDiagram::~CInstrumentPanel_ColorGamutDiagram()
@@ -35,324 +34,199 @@ BEGIN_MESSAGE_MAP(CInstrumentPanel_ColorGamutDiagram, CInstrumentPanel_Base)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-void CInstrumentPanel_ColorGamutDiagram::AppendSample(int ID, uint8_t srcY, uint8_t srcCb, uint8_t srcCr, int srcColorSpace)
+void CInstrumentPanel_ColorGamutDiagram::AppendOneFrame(uint8_t* pucY, int luma_width, int luma_height,
+	uint8_t* pucCb, uint8_t* pucCr, int chroma_width, int chroma_height, int nColorSpace)
 {
+	uint8_t R = 255, G = 255, B = 255;
+
+	double cie1931_x = 0;
+	double cie1931_y = 0;
+	double cieX = 0;
+	double cieY = 0;
+	double cieZ = 0;
+
 	POINT pixel;
 	CRect rectPicture(0, 0, m_rectWaveform.Width(), m_rectWaveform.Height());
 
-	if (srcColorSpace == 6010)				//NTSC 1953
+	m_pMemDC->SelectObject(m_pWaveformBmp);
+
+	for (int row = 0; row < chroma_height; row++)
 	{
-		//int error = 0;
-		//if ((srcY > 235) || (srcY < 16))
-		//{
-		//	srcY = 16;
-		//	error = 1;
-		//}
-
-		if ((srcCb > 240) || (srcCb < 16))
+		for (int col = 0; col < chroma_width; col++)
 		{
-			assert(0);
-		}
+			uint8_t srcY = pucY[(col << 1)];
+			uint8_t srcCb = pucCb[col];
+			uint8_t srcCr = pucCr[col];
 
-		if ((srcCr > 240) || (srcCr < 16))
-		{
-			assert(0);
-		}
-
-		if (srcY > 0)
-		{
-			uint8_t R = 255, G = 255, B = 255;
-			double cie1931_x = 0;
-			double cie1931_y = 0;
-
-			//double y = (double)(srcY - 16) / 219;
-			double y = (double)srcY / 255;
-			double cb = (double)(srcCb - 128) / 224;
-			double cr = (double)(srcCr - 128) / 224;
-
-			//GRAPHICS_yuv2rgb(srcColorSpace, srcY, srcCb, srcCr, &R, &G, &B);
-			double r = y + 1.402 * cr;
-			double g = y - 0.344 * cb - 0.714 * cr;
-			double b = y + 1.772 * cb;
-
-			r = clip3(0, r, 1.0);
-			g = clip3(0, g, 1.0);
-			b = clip3(0, b, 1.0);
-
-#if COLORFUL_CIE_XY_COORDINATES
-			R = (uint8_t)(255 * r);
-			G = (uint8_t)(255 * g);
-			B = (uint8_t)(255 * b);
-#endif
-
-#if RGB_TO_CIE
-			double cieX = 0.6069 * r + 0.1735 * g + 0.2003 * b;
-			double cieY = 0.2989 * r + 0.5866 * g + 0.1144 * b;
-			double cieZ = 0.0000 * r + 0.0661 * g + 1.1157 * b;
-#else
-			//NTSC
-			double cieX = 0.9807 * y + 0.2952 * cb + 0.7270 * cr;
-			double cieY = y + 0.0010 * cb + 0.0003 * cr;
-			double cieZ = 1.1818 * y + 1.9544 * cb - 0.0472 * cr;
-#endif
-			if ((cieX > 0) && (cieY > 0) && (cieZ > 0))
+			if (srcY > 0)
 			{
-				double X_Y_Z = cieX + cieY + cieZ;
-				cie1931_x = cieX / X_Y_Z;
-				cie1931_y = cieY / X_Y_Z;
-
-				assert((cie1931_x > 0) && (cie1931_x < 1.0));
-				assert((cie1931_y > 0) && (cie1931_y < 1.0));
-
-				pixel.x = XMAP_Value2Pos((int)(1000 * cie1931_x), rectPicture);
-				pixel.y = YMAP_Value2Pos((int)(1000 * cie1931_y), rectPicture);
-
-				m_pMemDC->SelectObject(m_pWaveformBmp);
-				m_pMemDC->SetPixel(pixel, RGB(R, G, B));
-			}
-		}
-		else
-		{
-			//assert(0);
-			srcY = 0;
-		}
-	}
-	else if (srcColorSpace == 6012)				//PAL
-	{
-		//int error = 0;
-		//if ((srcY > 235) || (srcY < 16))
-		//{
-		//	srcY = 16;
-		//	error = 1;
-		//}
-
-		if ((srcCb > 240) || (srcCb < 16))
-		{
-			assert(0);
-		}
-
-		if ((srcCr > 240) || (srcCr < 16))
-		{
-			assert(0);
-		}
-
-		if (srcY > 0)
-		{
-			uint8_t R = 255, G = 255, B = 255;
-			double cie1931_x = 0;
-			double cie1931_y = 0;
-
-			//double y = (double)(srcY - 16) / 219;
-			double y = (double)srcY / 255;
-			double cb = (double)(srcCb - 128) / 224;
-			double cr = (double)(srcCr - 128) / 224;
-
-			//GRAPHICS_yuv2rgb(srcColorSpace, srcY, srcCb, srcCr, &R, &G, &B);
-			double r = y + 1.402 * cr;
-			double g = y - 0.344 * cb - 0.714 * cr;
-			double b = y + 1.772 * cb;
-
-			r = clip3(0, r, 1.0);
-			g = clip3(0, g, 1.0);
-			b = clip3(0, b, 1.0);
-
-#if COLORFUL_CIE_XY_COORDINATES
-			R = (uint8_t)(255 * r);
-			G = (uint8_t)(255 * g);
-			B = (uint8_t)(255 * b);
-#endif
-
-#if RGB_TO_CIE
-			double cieX = 0.4306 * r + 0.3415 * g + 0.1784 * b;
-			double cieY = 0.2220 * r + 0.7067 * g + 0.0713 * b;
-			double cieZ = 0.0202 * r + 0.1296 * g + 0.9393 * b;
-#else
-			//PAL
-			double cieX = 0.9505 * y + 0.1985 * cb + 0.3598 * cr;
-			double cieY = y - 0.1167 * cb - 0.1933 * cr;
-			double cieZ = 1.0891 * y + 1.6199 * cb - 0.0642 * cr;
-#endif
-			if ((cieX > 0) && (cieY > 0) && (cieZ > 0))
-			{
-				double X_Y_Z = cieX + cieY + cieZ;
-				cie1931_x = cieX / X_Y_Z;
-				cie1931_y = cieY / X_Y_Z;
-
-				assert((cie1931_x > 0) && (cie1931_x < 1.0));
-				assert((cie1931_y > 0) && (cie1931_y < 1.0));
-
-				pixel.x = XMAP_Value2Pos((int)(1000 * cie1931_x), rectPicture);
-				pixel.y = YMAP_Value2Pos((int)(1000 * cie1931_y), rectPicture);
-
-				m_pMemDC->SelectObject(m_pWaveformBmp);
-				m_pMemDC->SetPixel(pixel, RGB(R, G, B));
-			}
-		}
-		else
-		{
-			//assert(0);
-			srcY = 0;
-		}
-	}
-	else if (srcColorSpace == 709)				//ITU-R BT.709
-	{
-		//int error = 0;
-		if ((srcY > 235) || (srcY < 16))
-		{
-			//srcY = 16;
-			//error = 1;
-			srcY = clip3(16, srcY, 235);
-		}
-
-		if ((srcCb > 240) || (srcCb < 16))
-		{
-			assert(0);
-		}
-
-		if ((srcCr > 240) || (srcCr < 16))
-		{
-			assert(0);
-		}
-
-		if (srcY > 0)
-		{
-			uint8_t R = 255, G = 255, B = 255;
-			double cie1931_x = 0;
-			double cie1931_y = 0;
-
-			double y = (double)(srcY - 16) / 219;
-			//double y = (double)srcY / 255;
-			double cb = (double)(srcCb - 128) / 224;
-			double cr = (double)(srcCr - 128) / 224;
-
-			//GRAPHICS_yuv2rgb(srcColorSpace, srcY, srcCb, srcCr, &R, &G, &B);
-			double r = y + 1.5748 * cr;
-			double g = y - 0.1874 * cb - 0.4681 * cr;
-			double b = y + 1.8556 * cb;
-
-			r = clip3(0, r, 1.0);
-			g = clip3(0, g, 1.0);
-			b = clip3(0, b, 1.0);
-
-#if COLORFUL_CIE_XY_COORDINATES
-			R = (uint8_t)(255 * r);
-			G = (uint8_t)(255 * g);
-			B = (uint8_t)(255 * b);
-#endif
-
-#if RGB_TO_CIE
-			double cieX = 0.4124 * r + 0.3576 * g + 0.1805 * b;
-			double cieY = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-			double cieZ = 0.0193 * r + 0.1192 * g + 0.9505 * b;
-#else
-			//y = 1.0;
-			double cieX = 0.9505 * y + 0.2679 * cb + 0.4820 * cr;
-			double cieY = y - 0.0001 * cb - 0.0001 * cr;
-			double cieZ = 1.0891 * y + 1.7415 * cb - 0.0254 * cr;
-#endif
-
-			if ((cieX > 0) && (cieY > 0) && (cieZ > 0))
-			{
-				double X_Y_Z = cieX + cieY + cieZ;
-				cie1931_x = cieX / X_Y_Z;
-				cie1931_y = cieY / X_Y_Z;
-
-				assert((cie1931_x > 0) && (cie1931_x < 1.0));
-				assert((cie1931_y > 0) && (cie1931_y < 1.0));
-
-				pixel.x = XMAP_Value2Pos((int)(1000 * cie1931_x), rectPicture);
-				pixel.y = YMAP_Value2Pos((int)(1000 * cie1931_y), rectPicture);
-
-				//m_pMemDC->SelectObject(m_pBkgroundBmp);
-				m_pMemDC->SelectObject(m_pWaveformBmp);
-				m_pMemDC->SetPixel(pixel, RGB(R, G, B));
-			}
-		}
-		else
-		{
-			//assert(0);
-			srcY = 0;
-		}
-	}
-	else if (srcColorSpace == 2020)				//ITU-R BT.2020
-	{
-		//int error = 0;
-		//if ((srcY > 235) || (srcY < 16))
-		//{
-		//	srcY = 16;
-		//	error = 1;
-		//}
-
-		if ((srcCb > 240) || (srcCb < 16))
-		{
-			assert(0);
-		}
-
-		if ((srcCr > 240) || (srcCr < 16))
-		{
-			assert(0);
-		}
-
-		if (srcY > 0)
-		{
-			uint8_t R = 255, G = 255, B = 255;
-			double cie1931_x = 0;
-			double cie1931_y = 0;
-
-			//double y = (double)(srcY - 16) / 219;
-			double y = (double)srcY / 255;
-			double cb = (double)(srcCb - 128) / 224;
-			double cr = (double)(srcCr - 128) / 224;
-
-			//GRAPHICS_yuv2rgb(srcColorSpace, srcY, srcCb, srcCr, &R, &G, &B);
-			double r = y + 1.4746 * cr;
-			double g = y - 0.1646 * cb - 0.5714 * cr;
-			double b = y + 1.8814 * cb;
-
-			r = clip3(0, r, 1.0);
-			g = clip3(0, g, 1.0);
-			b = clip3(0, b, 1.0);
-
-#if COLORFUL_CIE_XY_COORDINATES
-			R = (uint8_t)(255 * r);
-			G = (uint8_t)(255 * g);
-			B = (uint8_t)(255 * b);
-#endif
-
-#if RGB_TO_CIE
-			double cieX = 0.6370 * r + 0.1446 * g + 0.1689 * b;
-			double cieY = 0.2627 * r + 0.6780 * g + 0.0593 * b;
-			double cieZ = 0.0000 * r + 0.0281 * g + 1.0610 * b;
-#else
-			double cieX = 0.9505 * y + 0.2939 * cb + 0.8566 * cr;
-			double cieY = y;
-			double cieZ = 1.0891 * y + 1.9915 * cb - 0.0160 * cr;
-#endif
-
-			if ((cieX > 0) && (cieY > 0) && (cieZ > 0))
-			{
-				double X_Y_Z = cieX + cieY + cieZ;
-				double ciex = cieX / X_Y_Z;
-				double ciey = cieY / X_Y_Z;
-
-				assert((ciex > 0) && (ciex < 1.0));
-				assert((ciey > 0) && (ciey < 1.0));
-
-				if ((ciex > 0) && (ciey > 0))
+				if ((srcY > 235) || (srcY < 16))
 				{
-					pixel.x = XMAP_Value2Pos((int)(1000 * ciex), rectPicture);
-					pixel.y = YMAP_Value2Pos((int)(1000 * ciey), rectPicture);
+					srcY = clip3(16, srcY, 235);
+				}
 
-					m_pMemDC->SelectObject(m_pWaveformBmp);
+				if ((srcCb > 240) || (srcCb < 16))
+				{
+					assert(0);
+				}
+
+				if ((srcCr > 240) || (srcCr < 16))
+				{
+					assert(0);
+				}
+
+				if (nColorSpace == 6010)				//NTSC 1953
+				{
+					//double y = (double)(srcY - 16) / 219;
+					double y = (double)srcY / 255;
+					double cb = (double)(srcCb - 128) / 224;
+					double cr = (double)(srcCr - 128) / 224;
+
+					//GRAPHICS_yuv2rgb(srcColorSpace, srcY, srcCb, srcCr, &R, &G, &B);
+					double r = y + 1.402 * cr;
+					double g = y - 0.344 * cb - 0.714 * cr;
+					double b = y + 1.772 * cb;
+
+					r = clip3(0, r, 1.0);
+					g = clip3(0, g, 1.0);
+					b = clip3(0, b, 1.0);
+
+#if COLORFUL_CIE_XY_COORDINATES
+					R = (uint8_t)(255 * r);
+					G = (uint8_t)(255 * g);
+					B = (uint8_t)(255 * b);
+#endif
+
+#if RGB_TO_CIE
+					cieX = 0.6069 * r + 0.1735 * g + 0.2003 * b;
+					cieY = 0.2989 * r + 0.5866 * g + 0.1144 * b;
+					cieZ = 0.0000 * r + 0.0661 * g + 1.1157 * b;
+#else
+					//NTSC
+					cieX = 0.9807 * y + 0.2952 * cb + 0.7270 * cr;
+					cieY = y + 0.0010 * cb + 0.0003 * cr;
+					cieZ = 1.1818 * y + 1.9544 * cb - 0.0472 * cr;
+#endif
+				}
+				else if (nColorSpace == 6012)				//PAL
+				{
+					//double y = (double)(srcY - 16) / 219;
+					double y = (double)srcY / 255;
+					double cb = (double)(srcCb - 128) / 224;
+					double cr = (double)(srcCr - 128) / 224;
+
+					//GRAPHICS_yuv2rgb(srcColorSpace, srcY, srcCb, srcCr, &R, &G, &B);
+					double r = y + 1.402 * cr;
+					double g = y - 0.344 * cb - 0.714 * cr;
+					double b = y + 1.772 * cb;
+
+					r = clip3(0, r, 1.0);
+					g = clip3(0, g, 1.0);
+					b = clip3(0, b, 1.0);
+
+#if COLORFUL_CIE_XY_COORDINATES
+					R = (uint8_t)(255 * r);
+					G = (uint8_t)(255 * g);
+					B = (uint8_t)(255 * b);
+#endif
+
+#if RGB_TO_CIE
+					cieX = 0.4306 * r + 0.3415 * g + 0.1784 * b;
+					cieY = 0.2220 * r + 0.7067 * g + 0.0713 * b;
+					cieZ = 0.0202 * r + 0.1296 * g + 0.9393 * b;
+#else
+					//PAL
+					cieX = 0.9505 * y + 0.1985 * cb + 0.3598 * cr;
+					cieY = y - 0.1167 * cb - 0.1933 * cr;
+					cieZ = 1.0891 * y + 1.6199 * cb - 0.0642 * cr;
+#endif
+				}
+				else if (nColorSpace == 709)				//ITU-R BT.709
+				{
+					double y = (double)(srcY - 16) / 219;
+					//double y = (double)srcY / 255;
+					double cb = (double)(srcCb - 128) / 224;
+					double cr = (double)(srcCr - 128) / 224;
+
+					//GRAPHICS_yuv2rgb(srcColorSpace, srcY, srcCb, srcCr, &R, &G, &B);
+					double r = y + 1.5748 * cr;
+					double g = y - 0.1874 * cb - 0.4681 * cr;
+					double b = y + 1.8556 * cb;
+
+					r = clip3(0, r, 1.0);
+					g = clip3(0, g, 1.0);
+					b = clip3(0, b, 1.0);
+
+#if COLORFUL_CIE_XY_COORDINATES
+					R = (uint8_t)(255 * r);
+					G = (uint8_t)(255 * g);
+					B = (uint8_t)(255 * b);
+#endif
+
+#if RGB_TO_CIE
+					cieX = 0.4124 * r + 0.3576 * g + 0.1805 * b;
+					cieY = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+					cieZ = 0.0193 * r + 0.1192 * g + 0.9505 * b;
+#else
+					//y = 1.0;
+					cieX = 0.9505 * y + 0.2679 * cb + 0.4820 * cr;
+					cieY = y - 0.0001 * cb - 0.0001 * cr;
+					cieZ = 1.0891 * y + 1.7415 * cb - 0.0254 * cr;
+#endif
+				}
+				else if (nColorSpace == 2020)				//ITU-R BT.2020
+				{
+					//double y = (double)(srcY - 16) / 219;
+					double y = (double)srcY / 255;
+					double cb = (double)(srcCb - 128) / 224;
+					double cr = (double)(srcCr - 128) / 224;
+
+					//GRAPHICS_yuv2rgb(srcColorSpace, srcY, srcCb, srcCr, &R, &G, &B);
+					double r = y + 1.4746 * cr;
+					double g = y - 0.1646 * cb - 0.5714 * cr;
+					double b = y + 1.8814 * cb;
+
+					r = clip3(0, r, 1.0);
+					g = clip3(0, g, 1.0);
+					b = clip3(0, b, 1.0);
+
+#if COLORFUL_CIE_XY_COORDINATES
+					R = (uint8_t)(255 * r);
+					G = (uint8_t)(255 * g);
+					B = (uint8_t)(255 * b);
+#endif
+
+#if RGB_TO_CIE
+					cieX = 0.6370 * r + 0.1446 * g + 0.1689 * b;
+					cieY = 0.2627 * r + 0.6780 * g + 0.0593 * b;
+					cieZ = 0.0000 * r + 0.0281 * g + 1.0610 * b;
+#else
+					cieX = 0.9505 * y + 0.2939 * cb + 0.8566 * cr;
+					cieY = y;
+					cieZ = 1.0891 * y + 1.9915 * cb - 0.0160 * cr;
+#endif
+				}
+
+				if ((cieX > 0) && (cieY > 0) && (cieZ > 0))
+				{
+					double X_Y_Z = cieX + cieY + cieZ;
+					cie1931_x = cieX / X_Y_Z;
+					cie1931_y = cieY / X_Y_Z;
+
+					assert((cie1931_x > 0) && (cie1931_x < 1.0));
+					assert((cie1931_y > 0) && (cie1931_y < 1.0));
+
+					pixel.x = XMAP_Value2Pos((int)(1000 * cie1931_x), rectPicture);
+					pixel.y = YMAP_Value2Pos((int)(1000 * cie1931_y), rectPicture);
+
 					m_pMemDC->SetPixel(pixel, RGB(R, G, B));
 				}
 			}
 		}
-		else
-		{
-			//assert(0);
-			srcY = 0;
-		}
+
+		pucCb += chroma_width;
+		pucCr += chroma_width;
+		pucY += (luma_width << 1);
 	}
 }
 

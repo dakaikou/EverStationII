@@ -21,6 +21,8 @@
 //#define YUV2RGB_FOR_PC								1
 
 TOOL_GRAPHICS_LIB int GRAPHICS_yuv2rgb(int colorSpace, uint8_t YD, uint8_t UD, uint8_t VD, uint8_t* pRD, uint8_t* pGD, uint8_t* pBD, int bFullScale = 1);
+TOOL_GRAPHICS_LIB int GRAPHICS_rgb2XYZ(int colorSpace, uint8_t RD, uint8_t GD, uint8_t BD, double* pX, double* pY, double* pZ, int bFullScale = 1);
+
 TOOL_GRAPHICS_LIB int GRAPHICS_PICTURE_Enlarge(uint8_t* src, int src_w, int src_h, uint8_t* dst, int dst_w, int dst_h, int coeff);
 TOOL_GRAPHICS_LIB int GRAPHICS_PICTURE_Reduce(uint8_t* src, int src_w, int src_h, uint8_t* dst, int dst_w, int dst_h, int coeff);
 
