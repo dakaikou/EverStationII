@@ -315,6 +315,9 @@
     <ClInclude Include="Common\InstrumentPanel_ColorGamutDiagram.h">
       <Filter>头文件\Common</Filter>
     </ClInclude>
+    <ClInclude Include="Common\InstrumentPanel_LumaGamutDiagram.h">
+      <Filter>头文件\Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -555,6 +558,9 @@
       <Filter>源文件\Common</Filter>
     </ClCompile>
     <ClCompile Include="Common\InstrumentPanel_ColorGamutDiagram.cpp">
+      <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentPanel_LumaGamutDiagram.cpp">
       <Filter>源文件\Common</Filter>
     </ClCompile>
   </ItemGroup>

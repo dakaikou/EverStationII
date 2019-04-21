@@ -231,6 +231,7 @@ protected:
 	virtual void DisplayYAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine);
 
 	virtual void DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectWaveform);
+	virtual void DisplayLegendInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectWaveform);
 
 	void DisplayMeasurePanelInMemory(CDC* pMemDC, CBitmap* pBkBmp);
 
@@ -248,6 +249,7 @@ public:
 	void Init_Y_Axis(int nYAxisStyle, int nYShownOption, int nYMinAlarm, int nYMaxAlarm, char* pszYUnits, int nYFloor, int nYCeil, int nStep=100);
 
 	void Reset(void);
+	void Clear(void);
 
 	// Generated message map functions
 protected:

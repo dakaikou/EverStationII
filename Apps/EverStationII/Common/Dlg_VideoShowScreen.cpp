@@ -1213,6 +1213,14 @@ void CALLBACK VideoPlay_TimerHandler(UINT uTimerID, UINT msg, DWORD_PTR dwUser, 
 
 LRESULT CDlg_VideoShowScreen::OnStatisticLuma(WPARAM wParam, LPARAM lParam)
 {
+	uint8_t* pucFrameBuf = (uint8_t*)lParam;
+	INPUT_YUV_SEQUENCE_PARAM_t* pstFrameParam = (INPUT_YUV_SEQUENCE_PARAM_t*)wParam;
+
+	if (m_pPanelLumaStats->IsWindowVisible())
+	{
+		m_pPanelLumaStats->ReportStats(pucFrameBuf, pstFrameParam);
+	}
+
 	return 0;
 }
 

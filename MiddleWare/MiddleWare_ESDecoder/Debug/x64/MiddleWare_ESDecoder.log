@@ -1,9 +1,1 @@
-﻿  stdafx.cpp
-  ESDecoder.cpp
-  ESDecoder_Utilities.cpp
-  VESDecoder.cpp
-  VideoDecoder_YUV.cpp
-  dllmain.cpp
-  正在生成代码...
-    正在创建库 .\lib\MiddleWare_ESDecoderD(x64).lib 和对象 .\lib\MiddleWare_ESDecoderD(x64).exp
-  MiddleWare_ESDecoder.vcxproj -> E:\Projects-Mpeg2码流分析仪\软件工程\EverStationII\Debug\x64\MiddleWare_ESDecoderD(x64).dll
+﻿

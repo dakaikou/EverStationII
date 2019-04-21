@@ -632,6 +632,10 @@ void CInstrumentPanel_Base::DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, 
 	}
 }
 
+void CInstrumentPanel_Base::DisplayLegendInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectGridArea)
+{
+}
+
 void CInstrumentPanel_Base::DisplayMeasurePanelInMemory(CDC* pMemDC, CBitmap* pMemBmp)
 {
 	char	pszText[64];
@@ -1047,6 +1051,7 @@ void CInstrumentPanel_Base::OnPaint()
 			m_dXLogArithmicCoeff = (m_nXPositiveMark - m_nXZeroMark) / pow(10, LOGARITHMIC_RANK);
 
 			DisplayBkGridInMemory(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
+			DisplayLegendInMemory(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
 
 			DisplayXAlarmLineInMemory(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
 			DisplayYAlarmLineInMemory(m_pMemDC, m_pBkgroundBmp, m_rectWaveform);
@@ -1634,24 +1639,22 @@ void CInstrumentPanel_Base::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
-//void CInstrumentPanel_Base::ClearWaveformInMemory(CDC* pMemDC, CBitmap* pWaveformBmp)
-//{
-//	if ((pMemDC != NULL) && (pWaveformBmp != NULL))
-//	{
-//		BITMAP bm;
-//		CRect rectPicture;
-//
-//		pWaveformBmp->GetBitmap(&bm);
-//
-//		rectPicture.left = 0;
-//		rectPicture.top = 0;
-//		rectPicture.right = bm.bmWidth;
-//		rectPicture.bottom = bm.bmHeight;
-//
-//		pMemDC->SelectObject(pWaveformBmp);
-//		pMemDC->FillRect(&rectPicture, m_pWaveformBrush);
-//	}
-//}
+void CInstrumentPanel_Base::Clear(void)
+{
+	BITMAP bm;
+	CRect rectPicture;
+
+	m_pWaveformBmp->GetBitmap(&bm);
+
+	rectPicture.left = 0;
+	rectPicture.top = 0;
+	rectPicture.right = bm.bmWidth;
+	rectPicture.bottom = bm.bmHeight;
+
+	m_pMemDC->SelectObject(m_pWaveformBmp);
+	m_pMemDC->SetBkColor(SCREEN_BKWAVEFORMCOLOR);
+	m_pMemDC->FillRect(&rectPicture, m_pBkgroundBrush);
+}
 
 BOOL CInstrumentPanel_Base::OnEraseBkgnd(CDC* pDC)
 {
@@ -1674,19 +1677,19 @@ int CInstrumentPanel_Base::XMAP_Value2Pos(int xvalue, CRect rectPicture)
 		if (m_nXAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX)
 		{
 			double ratio = double(xvalue - m_nXNegtiveMark) / (m_nXPositiveMark - m_nXNegtiveMark);
-			xPos = (int)(rectPicture.left + ratio * rectPicture.Width());
+			xPos = (int)(rectPicture.left + ratio * rectPicture.Width() + 0.5);
 		}
 		else if (m_nXAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)		//对称型
 		{
 			if (xvalue > m_nXZeroMark)
 			{
 				double ratio = double(xvalue - m_nXZeroMark) / (m_nXPositiveMark - m_nXZeroMark);
-				xPos = (int)(rectPicture.left + 0.5 * (1 + ratio)*rectPicture.Width());
+				xPos = (int)(rectPicture.left + 0.5 * (1 + ratio)*rectPicture.Width() + 0.5);
 			}
 			else if (xvalue < m_nXZeroMark)
 			{
 				double ratio = double(m_nXZeroMark - xvalue) / (m_nXZeroMark - m_nXNegtiveMark);
-				xPos = (int)(rectPicture.left + 0.5 * (1 - ratio)*rectPicture.Width());
+				xPos = (int)(rectPicture.left + 0.5 * (1 - ratio)*rectPicture.Width() + 0.5);
 			}
 		}
 		else if (m_nXAxisStyle == AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY)		//对称型
@@ -1694,12 +1697,12 @@ int CInstrumentPanel_Base::XMAP_Value2Pos(int xvalue, CRect rectPicture)
 			if (xvalue > m_nXZeroMark)
 			{
 				double ratio = log10((xvalue - m_nXZeroMark) / m_dXLogArithmicCoeff) / LOGARITHMIC_RANK;
-				xPos = (int)(rectPicture.left + 0.5 * (1 + ratio)*rectPicture.Width());
+				xPos = (int)(rectPicture.left + 0.5 * (1 + ratio)*rectPicture.Width() + 0.5);
 			}
 			else if (xvalue < m_nXZeroMark)
 			{
 				double ratio = log10((m_nXZeroMark - xvalue) / m_dXLogArithmicCoeff) / LOGARITHMIC_RANK;
-				xPos = (int)(rectPicture.left + 0.5 * (1 - ratio)*rectPicture.Width());
+				xPos = (int)(rectPicture.left + 0.5 * (1 - ratio)*rectPicture.Width() + 0.5);
 			}
 		}
 	}
@@ -1716,19 +1719,19 @@ int CInstrumentPanel_Base::YMAP_Value2Pos(int yvalue, CRect rectPicture)
 		if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX)
 		{
 			double ratio = double(yvalue - m_nYNegtiveMark) / (m_nYPositiveMark - m_nYNegtiveMark);
-			yPos = (int)(rectPicture.bottom - ratio * rectPicture.Height());
+			yPos = (int)(rectPicture.bottom - ratio * rectPicture.Height() + 0.5);
 		}
 		else if (m_nYAxisStyle == AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY)		//对称型
 		{
 			if (yvalue > m_nYZeroMark)
 			{
 				double ratio = double(yvalue - m_nYZeroMark) / (m_nYPositiveMark - m_nYZeroMark);
-				yPos = (int)(rectPicture.top + 0.5 * (1 - ratio)*rectPicture.Height());
+				yPos = (int)(rectPicture.top + 0.5 * (1 - ratio)*rectPicture.Height() + 0.5);
 			}
 			else if (yvalue < m_nYZeroMark)
 			{
 				double ratio = double(m_nYZeroMark - yvalue) / (m_nYZeroMark - m_nYNegtiveMark);
-				yPos = (int)(rectPicture.top + 0.5 * (1 + ratio)*rectPicture.Height());
+				yPos = (int)(rectPicture.top + 0.5 * (1 + ratio)*rectPicture.Height() + 0.5);
 			}
 		}
 		else if (m_nYAxisStyle == AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY)		//对称型
@@ -1736,12 +1739,12 @@ int CInstrumentPanel_Base::YMAP_Value2Pos(int yvalue, CRect rectPicture)
 			if (yvalue > m_nYZeroMark)
 			{
 				double ratio = log10((yvalue - m_nYZeroMark)/m_dYLogArithmicCoeff) / LOGARITHMIC_RANK;
-				yPos = (int)(rectPicture.top + 0.5 * (1 - ratio)*rectPicture.Height());
+				yPos = (int)(rectPicture.top + 0.5 * (1 - ratio)*rectPicture.Height() + 0.5);
 			}
 			else if (yvalue < m_nYZeroMark)
 			{
 				double ratio = log10((m_nYZeroMark - yvalue) / m_dYLogArithmicCoeff) / LOGARITHMIC_RANK;
-				yPos = (int)(rectPicture.top + 0.5 * (1 + ratio)*rectPicture.Height());
+				yPos = (int)(rectPicture.top + 0.5 * (1 + ratio)*rectPicture.Height() + 0.5);
 			}
 		}
 	}
