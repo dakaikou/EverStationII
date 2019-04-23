@@ -8,10 +8,10 @@
 
 #include <windows.h>
 #include <stdint.h>
-#include "InstrumentPanel_Base.h"
+#include "InstrumentPanel_Kernel.h"
 
 /////////////////////////////////////////////////////////////////////////////
-class CInstrumentPanel_ColorGamutDiagram : public CInstrumentPanel_Base
+class CInstrumentPanel_ColorGamutDiagram : public CInstrumentPanel_Kernel
 {
 // Construction
 public:

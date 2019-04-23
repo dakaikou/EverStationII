@@ -154,7 +154,7 @@ BOOL CDlg_TSAnalyzer_Pcr::OnInitDialog()
 #endif
 
 #if SHOW_PCR_JITTER_HISTGRAM
-	if (!m_PcrJitterHistgramGraph.Create("PCR_AC 直方图", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_BOTTOM | CBRS_FLOAT_MULTI, rectPcrJitterHistgram, this))
+	if (!m_PcrJitterHistgramGraph.Create(NULL, "PCR_AC 直方图", WS_CHILD | WS_VISIBLE, rectPcrJitterHistgram, this, 0L))
 	{
 		TRACE0("未能创建TS流码率监控窗口\n");
 		return FALSE; // 未能创建
@@ -175,7 +175,7 @@ BOOL CDlg_TSAnalyzer_Pcr::OnInitDialog()
 //#endif
 
 #if SHOW_PCR_SCATTER_DIAGRAM
-	if (!m_PcrScatterDiagramGraph.Create("PCR_AC 散点图", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_BOTTOM | CBRS_FLOAT_MULTI, rectPcrScatterDiagram, this))
+	if (!m_PcrScatterDiagramGraph.Create(NULL, "PCR_AC 散点图", WS_CHILD | WS_VISIBLE, rectPcrScatterDiagram, this, 0L))
 	{
 		TRACE0("未能创建TS流码率监控窗口\n");
 		return FALSE; // 未能创建
@@ -187,7 +187,7 @@ BOOL CDlg_TSAnalyzer_Pcr::OnInitDialog()
 #endif
 
 #if SHOW_PCR_INTERVAL_HISTGRAM
-	if (!m_PcrIntervalHistgramGraph.Create("PCR间隔 直方图", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_BOTTOM | CBRS_FLOAT_MULTI, rectPcrIntervalHistgram, this))
+	if (!m_PcrIntervalHistgramGraph.Create(NULL, "PCR间隔 直方图", WS_CHILD | WS_VISIBLE, rectPcrIntervalHistgram, this, 0L))
 	{
 		TRACE0("未能创建PCR间隔监控窗口\n");
 		return FALSE; // 未能创建

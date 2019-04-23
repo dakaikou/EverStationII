@@ -231,6 +231,7 @@
     <ClInclude Include="Common\InstrumentPanel_Base.h" />
     <ClInclude Include="Common\InstrumentPanel_ColorGamutDiagram.h" />
     <ClInclude Include="Common\InstrumentPanel_Histogram.h" />
+    <ClInclude Include="Common\InstrumentPanel_Kernel.h" />
     <ClInclude Include="Common\InstrumentPanel_LumaGamutDiagram.h" />
     <ClInclude Include="Common\InstrumentPanel_ScatterDiagram.h" />
     <ClInclude Include="Common\InstrumentPanel_Waveform.h" />
@@ -317,6 +318,7 @@
     <ClCompile Include="Common\InstrumentPanel_Base.cpp" />
     <ClCompile Include="Common\InstrumentPanel_ColorGamutDiagram.cpp" />
     <ClCompile Include="Common\InstrumentPanel_Histogram.cpp" />
+    <ClCompile Include="Common\InstrumentPanel_Kernel.cpp" />
     <ClCompile Include="Common\InstrumentPanel_LumaGamutDiagram.cpp" />
     <ClCompile Include="Common\InstrumentPanel_ScatterDiagram.cpp" />
     <ClCompile Include="Common\InstrumentPanel_Waveform.cpp" />

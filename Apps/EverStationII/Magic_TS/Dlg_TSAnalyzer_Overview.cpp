@@ -92,7 +92,7 @@ BOOL CDlg_TSAnalyzer_Overview::OnInitDialog()
 	rectHisgram.left = rectTemp.left;
 	rectHisgram.bottom = rectTemp.top - 40;
 
-	if (!m_TsRateJitterGraphHistogram.Create("TS流码率统计分析", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_BOTTOM | CBRS_FLOAT_MULTI, rectHisgram, this))
+	if (!m_TsRateJitterGraphHistogram.Create(NULL, "TS流码率统计分析", WS_CHILD | WS_VISIBLE, rectHisgram, this, 0L))
 	{
 		TRACE0("未能创建TS流码率监控窗口\n");
 		return FALSE; // 未能创建

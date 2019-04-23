@@ -29,8 +29,8 @@ CInstrumentPanel_ColorGamutDiagram::~CInstrumentPanel_ColorGamutDiagram()
 }
 
 
-BEGIN_MESSAGE_MAP(CInstrumentPanel_ColorGamutDiagram, CInstrumentPanel_Base)
-	//{{AFX_MSG_MAP(CInstrumentPanel_ColorSpaceDiagram)
+BEGIN_MESSAGE_MAP(CInstrumentPanel_ColorGamutDiagram, CInstrumentPanel_Kernel)
+	//{{AFX_MSG_MAP(CInstrumentPanel_ColorGamutDiagram)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 

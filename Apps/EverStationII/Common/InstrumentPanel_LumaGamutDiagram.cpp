@@ -23,7 +23,7 @@ CInstrumentPanel_LumaGamutDiagram::~CInstrumentPanel_LumaGamutDiagram()
 }
 
 
-BEGIN_MESSAGE_MAP(CInstrumentPanel_LumaGamutDiagram, CInstrumentPanel_Base)
+BEGIN_MESSAGE_MAP(CInstrumentPanel_LumaGamutDiagram, CInstrumentPanel_Kernel)
 	//{{AFX_MSG_MAP(CInstrumentPanel_LumaGamutDiagram)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
