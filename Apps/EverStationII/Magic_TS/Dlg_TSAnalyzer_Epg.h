@@ -4,15 +4,15 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// Dlg_Epg.h : header file
+// Dlg_TSAnalyzer_Epg.h : header file
 //
 #include <afxwin.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_Epg dialog
-#include "..\MFCExt\SplitWnd\SplitWnd.h"
 #include "NaviTree_Services.h"
-#include "View_EpgContainer.h"
+#include "ListView_ServiceInfo.h"
+#include "ListView_EpgSchedule.h"
 #include "..\resource.h"
 
 class CDlg_TSAnalyzer_Epg : public CDialog
@@ -37,10 +37,12 @@ public:
 
 // Implementation
 protected:
-	CxSplitterWnd				m_wndSplitter;
+	CSplitterWnd				m_wndSplitter;
+	CSplitterWnd				m_wndRightSplitter;
 
 	CNaviTree_Services*		m_pServiceListPane;
-	CView_EpgContainer*		m_pViewEpg;
+	CListView_ServiceInfo*	m_pServiceDescription;
+	CListView_EpgSchedule*	m_pEpgScheduleList;
 
 public:
 	void Reset(void);
@@ -52,11 +54,13 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CDlg_TSAnalyzer_Epg)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnDestroy();
+	afx_msg LRESULT OnReportSelChange(WPARAM wParam, LPARAM lParam);
+	//virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 	virtual BOOL OnInitDialog();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnDestroy();
 };
 
 //{{AFX_INSERT_LOCATION}}

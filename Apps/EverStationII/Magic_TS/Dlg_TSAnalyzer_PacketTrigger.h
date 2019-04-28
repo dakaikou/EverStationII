@@ -13,7 +13,7 @@
 
 #include "TSMagic_Trigger_TSPacket.h"
 
-#include "..\MFCExt\SplitWnd\SplitWnd.h"
+//#include "..\MFCExt\SplitWnd\SplitWnd.h"
 #include "..\Common\TreeView_XMLBrowser.h"
 #if BYTE_BUFFER_USE_LISTCTRL_VIEW
 #include "..\Common\ListView_ByteBuffer.h"
@@ -49,7 +49,7 @@ protected:
 	int				m_bSelectingPID;
 	int				m_bSearching;
 
-	CxSplitterWnd				m_wndSplitter;
+	CSplitterWnd				m_wndSplitter;
 	CTreeView_PacketSyntax*	m_pTree;
 #if BYTE_BUFFER_USE_LISTCTRL_VIEW
 	CListView_ByteBuffer*		m_pList;

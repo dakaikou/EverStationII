@@ -274,7 +274,7 @@
     <ClInclude Include="Magic_TS\NaviTree_ESs.h" />
     <ClInclude Include="Magic_TS\NaviTree_PsiSiTables.h" />
     <ClInclude Include="Magic_TS\NaviTree_Services.h" />
-    <ClInclude Include="Magic_TS\TabView_TSMagic.h" />
+    <ClInclude Include="Magic_TS\SplitterWnd_PsiSiAnalyzer.h" />
     <ClInclude Include="Magic_TS\TSMagicDoc.h" />
     <ClInclude Include="Magic_TS\TSMagicFrm.h" />
     <ClInclude Include="Magic_TS\TSMagicView.h" />
@@ -289,7 +289,6 @@
     <ClInclude Include="Magic_TS\TSMagic_Trigger_PESES.h" />
     <ClInclude Include="Magic_TS\TSMagic_Trigger_Section.h" />
     <ClInclude Include="Magic_TS\TSMagic_Trigger_TSPacket.h" />
-    <ClInclude Include="Magic_TS\View_EpgContainer.h" />
     <ClInclude Include="Magic_YUV\Dlg_YUVCombine.h" />
     <ClInclude Include="Magic_YUV\Dlg_YUVPreview.h" />
     <ClInclude Include="Magic_YUV\guiapi_yuv.h" />
@@ -361,7 +360,7 @@
     <ClCompile Include="Magic_TS\NaviTree_ESs.cpp" />
     <ClCompile Include="Magic_TS\NaviTree_PsiSiTables.cpp" />
     <ClCompile Include="Magic_TS\NaviTree_Services.cpp" />
-    <ClCompile Include="Magic_TS\TabView_TSMagic.cpp" />
+    <ClCompile Include="Magic_TS\SplitterWnd_PsiSiAnalyzer.cpp" />
     <ClCompile Include="Magic_TS\TSMagicDoc.cpp" />
     <ClCompile Include="Magic_TS\TSMagicFrm.cpp" />
     <ClCompile Include="Magic_TS\TSMagicView.cpp" />
@@ -381,7 +380,6 @@
     <ClCompile Include="Magic_TS\TSMagic_Trigger_PESES.cpp" />
     <ClCompile Include="Magic_TS\TSMagic_Trigger_Section.cpp" />
     <ClCompile Include="Magic_TS\TSMagic_Trigger_TSPacket.cpp" />
-    <ClCompile Include="Magic_TS\View_EpgContainer.cpp" />
     <ClCompile Include="Magic_YUV\Dlg_YUVCombine.cpp" />
     <ClCompile Include="Magic_YUV\Dlg_YUVPreview.cpp" />
     <ClCompile Include="Magic_YUV\YUVMagicDoc.cpp" />

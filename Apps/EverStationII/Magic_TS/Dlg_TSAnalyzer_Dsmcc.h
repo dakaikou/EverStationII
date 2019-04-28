@@ -12,7 +12,7 @@
 // CDlg_TSAnalyzer_Epg dialog
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_DSMCC_Table.h"
 
-#include "..\MFCExt\SplitWnd\SplitWnd.h"
+//#include "..\MFCExt\SplitWnd\SplitWnd.h"
 #include "NaviList_DSMCCs.h"
 #include "../Common/TreeView_XMLBrowser.h"
 #include "..\resource.h"
@@ -39,7 +39,7 @@ public:
 
 // Implementation
 protected:
-	CxSplitterWnd				m_wndSplitter;
+	CSplitterWnd				m_wndSplitter;
 
 	CNaviList_DSMCCs*			m_pNaviPane;
 	CTreeView_PacketSyntax*		m_pInfoTree;

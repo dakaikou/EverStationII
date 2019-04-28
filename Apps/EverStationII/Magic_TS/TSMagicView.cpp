@@ -189,16 +189,17 @@ void CTSMagicView::AdjustLayout(int cx, int cy)
 	{
 		pWnd->SetWindowPos(NULL, 5, 5, cx - btn_width - 15, cy - 10, 0);
 
+		CRect		rectClient;
 		CRect		rectTab;
 		CRect		rectItem;
 
 		((CTabCtrl*)pWnd)->GetItemRect(0, &rectItem);
 
-		pWnd->GetClientRect(&rectTab);
-		rectTab.top += rectItem.Height() + 5;
-		rectTab.bottom -= 5;
-		rectTab.left += 5;
-		rectTab.right -= 5;
+		pWnd->GetClientRect(&rectClient);
+		rectTab.top = rectClient.top + rectItem.bottom + 5;
+		rectTab.bottom = rectClient.bottom - 5;
+		rectTab.left = rectClient.left + 5;
+		rectTab.right = rectClient.right - 5;
 
 #if GUI_TS_ANALYZER_PACKETS
 		m_dlgTSAnalyzerPackets.MoveWindow(&rectTab);
@@ -210,7 +211,14 @@ void CTSMagicView::AdjustLayout(int cx, int cy)
 //		m_dlgPacketModify.MoveWindow(&rectTab);
 //#endif
 #if GUI_TS_ANALYZER_PSISI
+		CRect rectTemp;
+		rectTemp.top = rectTab.top + 10;
+		rectTemp.left = rectTab.left + 10;
+		rectTemp.right = rectTab.right;
+		rectTemp.bottom = rectTab.bottom;
+
 		m_dlgTSAnalyzerPsiSi.MoveWindow(&rectTab);
+		//m_tabItem_PsiSiAnalyzer.MoveWindow(rectTemp);
 #endif
 //#if GUI_TS_SEC_TRIGGER
 //		m_dlgSectionTrigger.MoveWindow(&rectTab);
@@ -487,7 +495,14 @@ void CTSMagicView::InitConsoleTab(void)
 
 #if GUI_TS_ANALYZER_PSISI
 	m_dlgTSAnalyzerPsiSi.Create(IDD_TS_ANALYZER_PSISI, GetDlgItem(IDC_TAB_TSMAGIC));
-	m_pdlgWnd[TAB_SECTION] = (CWnd*)&m_dlgTSAnalyzerPsiSi;
+	m_pdlgWnd[TAB_SECTION] = (CWnd*)& m_dlgTSAnalyzerPsiSi;
+
+	//m_tabItem_PsiSiAnalyzer.CreateStatic(this, 1, 3);
+	//m_tabItem_PsiSiAnalyzer.CreateView(0, 0, RUNTIME_CLASS(CNaviTree_PsiSiTables), CSize(100, 0), NULL);
+	//m_tabItem_PsiSiAnalyzer.CreateView(0, 1, RUNTIME_CLASS(CTreeView_PacketSyntax), CSize(100, 0), NULL);
+	//m_tabItem_PsiSiAnalyzer.CreateView(0, 2, RUNTIME_CLASS(CHexEditView_ByteBuffer), CSize(0, 0), NULL);
+	//m_pdlgWnd[TAB_SECTION] = (CWnd*)& m_tabItem_PsiSiAnalyzer;
+
 #endif
 
 #if GUI_TS_ANALYZER_BOUQUETS
@@ -910,6 +925,7 @@ void CTSMagicView::GUIReset(void)
 #endif
 #if GUI_TS_ANALYZER_PSISI
 	m_dlgTSAnalyzerPsiSi.Reset();
+	//m_tabItem_PsiSiAnalyzer.Reset();
 #endif
 #if GUI_TS_SEC_TRIGGER
 	m_dlgSectionTrigger.Reset();
@@ -1575,6 +1591,7 @@ LRESULT CTSMagicView::OnReportSectionTriggerStatus(WPARAM wParam, LPARAM lParam)
 #if GUI_TS_ANALYZER_PSISI
 		section_buf = m_Trigger_Section.GetCatchedDatas(0, &length);
 		m_dlgTSAnalyzerPsiSi.DisplaySection(section_buf, length);
+		//m_tabItem_PsiSiAnalyzer.DisplaySection(section_buf, length);
 #endif
 	}
 
@@ -1696,6 +1713,7 @@ void CTSMagicView::OnDestroy()
 
 #if GUI_TS_ANALYZER_PSISI
 	m_dlgTSAnalyzerPsiSi.DestroyWindow();
+	//m_tabItem_PsiSiAnalyzer.DestroyWindow();
 #endif
 
 #if GUI_TS_ANALYZER_BOUQUETS

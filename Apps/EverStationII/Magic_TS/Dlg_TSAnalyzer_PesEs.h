@@ -20,7 +20,7 @@
 #include "..\MFCExt\TreeList\TreeListCtrl.h"
 #endif
 
-#include "..\MFCExt\SplitWnd\SplitWnd.h"
+//#include "..\MFCExt\SplitWnd\SplitWnd.h"
 #include "NaviTree_ESs.h"
 
 typedef struct
@@ -53,7 +53,7 @@ public:
 protected:
 	//CDlg_TS_DtsPts				m_dlgDtsPts;
 
-	CxSplitterWnd				m_wndSplitter;
+	CSplitterWnd				m_wndSplitter;
 	CNaviTree_ESs*				m_pPane;
 	CTreeView_PacketSyntax*		m_pTree;
 	CHexEditView_ByteBuffer*	m_pList;

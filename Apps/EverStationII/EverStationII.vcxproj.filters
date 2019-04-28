@@ -126,9 +126,6 @@
     <ClInclude Include="Magic_TS\ListView_ServiceInfo.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
-    <ClInclude Include="Magic_TS\TabView_TSMagic.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
     <ClInclude Include="Magic_TS\TSMagic_Callbacks_From_Lib.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
@@ -261,9 +258,6 @@
     <ClInclude Include="Magic_TS\TSMagic_ErrorCode.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
-    <ClInclude Include="Magic_TS\View_EpgContainer.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
     <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Dsmcc.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
@@ -321,6 +315,9 @@
     <ClInclude Include="Common\InstrumentPanel_Kernel.h">
       <Filter>头文件\Common</Filter>
     </ClInclude>
+    <ClInclude Include="Magic_TS\SplitterWnd_PsiSiAnalyzer.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -348,9 +345,6 @@
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
     <ClCompile Include="Magic_TS\Dlg_TriggerWaiting.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\TabView_TSMagic.cpp">
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
     <ClCompile Include="Magic_TS\TSMagic_Analyse_Offline.cpp">
@@ -512,9 +506,6 @@
     <ClCompile Include="Magic_TS\TSMagic_ErrorCode_LUT.cpp">
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
-    <ClCompile Include="Magic_TS\View_EpgContainer.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
     <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Dsmcc.cpp">
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
@@ -568,6 +559,9 @@
     </ClCompile>
     <ClCompile Include="Common\InstrumentPanel_Kernel.cpp">
       <Filter>源文件\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\SplitterWnd_PsiSiAnalyzer.cpp">
+      <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

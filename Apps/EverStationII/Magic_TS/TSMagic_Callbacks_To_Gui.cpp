@@ -123,6 +123,7 @@ void CALLBACK_REPORT_dsmcc(int section_number, CPVT* pPVT)
 	{
 #if GUI_TS_ANALYZER_PSISI
 		pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdateDSMCC(section_number, pPVT);
+		//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdateDSMCC(section_number, pPVT);
 #endif
 #if GUI_TS_ANALYZER_OCDC
 		pTSMagicView->m_dlgTSAnalyzerDsmcc.UpdateDSMCC(pPVT);
@@ -132,12 +133,13 @@ void CALLBACK_REPORT_dsmcc(int section_number, CPVT* pPVT)
 
 void CALLBACK_REPORT_mpe(int section_number, CMPE* pMPE)
 {
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
- 	if (pWindow != NULL)
+ 	if (pTSMagicView != NULL)
 	{
 #if GUI_TS_ANALYZER_PSISI
-		pWindow->m_dlgTSAnalyzerPsiSi.UpdateMPE(section_number, pMPE);
+		pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdateMPE(section_number, pMPE);
+		//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdateMPE(section_number, pMPE);
 #endif
 	}
 }
@@ -182,6 +184,7 @@ void CALLBACK_REPORT_pat(int section_number, CPAT* pPAT)
 
 #if GUI_TS_ANALYZER_PSISI
 		pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdatePAT(section_number, pPAT);
+		//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdatePAT(section_number, pPAT);
 #endif
 #if GUI_TS_ANALYZER_OVERVIEW
 		pTSMagicView->m_dlgTSAnalyzerOverview.UpdatePAT(pPAT);
@@ -255,6 +258,7 @@ void CALLBACK_REPORT_pmt(int section_number, CPMT* pPMT)
 
 #if GUI_TS_ANALYZER_PSISI
 		pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdatePMT(section_number, pPMT);
+		//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdatePMT(section_number, pPMT);
 #endif
 
 #if GUI_TS_ANALYZER_PESES
@@ -313,6 +317,7 @@ void CALLBACK_REPORT_cat(int section_number, CCAT* pCAT)
 
 #if GUI_TS_ANALYZER_PSISI
 			pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdateCAT(section_number, pCAT);
+			//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdateCAT(section_number, pCAT);
 #endif
 		}
 	}
@@ -320,28 +325,30 @@ void CALLBACK_REPORT_cat(int section_number, CCAT* pCAT)
 
 void CALLBACK_REPORT_tsdt(int section_number, CTSDT* pTSDT)
 {
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
- 	if (pWindow != NULL)
+ 	if (pTSMagicView != NULL)
 	{
 #if GUI_TS_ANALYZER_PSISI
-		pWindow->m_dlgTSAnalyzerPsiSi.UpdateTSDT(section_number, pTSDT);
+		pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdateTSDT(section_number, pTSDT);
+		//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdateTSDT(section_number, pTSDT);
 #endif
 	}
 }
 
 void CALLBACK_REPORT_cmt(CCMT* pCMT)
 {
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
- 	if (pWindow != NULL)
+ 	if (pTSMagicView != NULL)
 	{
 		if (pCMT != NULL)
 		{
 			uint8_t table_id = pCMT->GetTableID();
 
 #if GUI_TS_ANALYZER_PSISI
-			pWindow->m_dlgTSAnalyzerPsiSi.UpdateCMT(pCMT);
+			pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdateCMT(pCMT);
+			//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdateCMT(pCMT);
 
 			//if ((table_id >= TABLE_ID_ECM_MIN) && (table_id <= TABLE_ID_ECM_MAX))
 			//{
@@ -358,148 +365,157 @@ void CALLBACK_REPORT_cmt(CCMT* pCMT)
 
 void CALLBACK_REPORT_nit(int section_number, CNIT* pNIT)
 {
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
- 	if (pWindow != NULL)
+ 	if (pTSMagicView != NULL)
 	{
 #if GUI_TS_ANALYZER_NETWORK
 		pWindow->m_dlgTSAnalyzerServices.m_pPane->UpdateNIT(network_index, pNIT);
 #endif
 
 #if GUI_TS_ANALYZER_EPG
-		pWindow->m_dlgTSAnalyzerEpg.UpdateNIT(pNIT);
+		pTSMagicView->m_dlgTSAnalyzerEpg.UpdateNIT(pNIT);
 #endif
 
 #if GUI_TS_ANALYZER_PSISI
-		pWindow->m_dlgTSAnalyzerPsiSi.UpdateNIT(section_number, pNIT);
+		pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdateNIT(section_number, pNIT);
+		//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdateNIT(section_number, pNIT);
 #endif
 
 #if GUI_TS_ANALYZER_OVERVIEW
-		pWindow->m_dlgTSAnalyzerOverview.UpdateNIT(pNIT);
+		pTSMagicView->m_dlgTSAnalyzerOverview.UpdateNIT(pNIT);
 #endif
 	}
 }
 
 void CALLBACK_REPORT_int(int section_number, CINT* pINT)
 {
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
- 	if (pWindow != NULL)
+ 	if (pTSMagicView != NULL)
 	{
 #if GUI_TS_ANALYZER_PSISI
-		pWindow->m_dlgTSAnalyzerPsiSi.UpdateINT(section_number, pINT);
+		pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdateINT(section_number, pINT);
+		//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdateINT(section_number, pINT);
 #endif
 	}
 }
 
 void CALLBACK_REPORT_ait(int section_number, CAIT* pAIT)
 {
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
- 	if (pWindow != NULL)
+ 	if (pTSMagicView != NULL)
 	{
 #if GUI_TS_ANALYZER_PSISI
-		pWindow->m_dlgTSAnalyzerPsiSi.UpdateAIT(section_number, pAIT);
+		pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdateAIT(section_number, pAIT);
+		//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdateAIT(section_number, pAIT);
 #endif
 	}
 }
 
 void CALLBACK_REPORT_bat(int section_number, CBAT* pBAT)
 {
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
- 	if (pWindow != NULL)
+ 	if (pTSMagicView != NULL)
 	{
 #if GUI_TS_ANALYZER_PSISI
-		pWindow->m_dlgTSAnalyzerPsiSi.UpdateBAT(section_number, pBAT);
+		pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdateBAT(section_number, pBAT);
+		//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdateBAT(section_number, pBAT);
 #endif
 #if GUI_TS_ANALYZER_BOUQUETS
-		pWindow->m_dlgTSAnalyzerBouquets.m_pPane->UpdateBAT(pBAT);
+		pTSMagicView->m_dlgTSAnalyzerBouquets.m_pPane->UpdateBAT(pBAT);
 #endif
 	}
 }
 
 void CALLBACK_REPORT_sdt(int section_number, CSDT* pSDT)
 {
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
- 	if (pWindow != NULL)
+ 	if (pTSMagicView != NULL)
 	{
 #if GUI_TS_ANALYZER_PSISI
-		pWindow->m_dlgTSAnalyzerPsiSi.UpdateSDT(section_number, pSDT);
+		pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdateSDT(section_number, pSDT);
+		//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdateSDT(section_number, pSDT);
 #endif
 
 #if GUI_TS_ANALYZER_NETWORK
-		pWindow->m_dlgTSAnalyzerServices.m_pPane->UpdateSDT(sdt_index, pSDT);
+		pTSMagicView->m_dlgTSAnalyzerServices.m_pPane->UpdateSDT(sdt_index, pSDT);
 #endif
 
 #if GUI_TS_ANALYZER_OVERVIEW
-		pWindow->m_dlgTSAnalyzerOverview.UpdateSDT(pSDT);
+		pTSMagicView->m_dlgTSAnalyzerOverview.UpdateSDT(pSDT);
 #endif
 
 #if GUI_TS_ANALYZER_EPG
-		pWindow->m_dlgTSAnalyzerEpg.UpdateSDT(pSDT);
+		pTSMagicView->m_dlgTSAnalyzerEpg.UpdateSDT(pSDT);
 #endif
 
 #if GUI_TS_ANALYZER_OCDC
-		pWindow->m_dlgTSAnalyzerDsmcc.UpdateSDT(pSDT);
+		pTSMagicView->m_dlgTSAnalyzerDsmcc.UpdateSDT(pSDT);
 #endif
 	}
 }
 
 void CALLBACK_REPORT_tot(CTOT* pTOT)
 {
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
-	if (pWindow != NULL)
+	if (pTSMagicView != NULL)
 	{
 #if GUI_TS_ANALYZER_PSISI
-		pWindow->m_dlgTSAnalyzerPsiSi.UpdateTOT(pTOT);
+		pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdateTOT(pTOT);
+		//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdateTOT(pTOT);
 #endif
 	}
 }
 
 void CALLBACK_REPORT_tdt(CTDT* pTDT)
 {
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
-	if (pWindow != NULL)
+	if (pTSMagicView != NULL)
 	{
 #if GUI_TS_ANALYZER_PSISI
-		pWindow->m_dlgTSAnalyzerPsiSi.UpdateTDT(pTDT);
+		pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdateTDT(pTDT);
+		//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdateTDT(pTDT);
 #endif
 	}
 }
 
 void CALLBACK_REPORT_rst(CRST* pRST)
 {
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
-	if (pWindow != NULL)
+	if (pTSMagicView != NULL)
 	{
 #if GUI_TS_ANALYZER_PSISI
-		pWindow->m_dlgTSAnalyzerPsiSi.UpdateRST(pRST);
+		pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdateRST(pRST);
+		//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdateRST(pRST);
 #endif
 	}
 }
 
 void CALLBACK_REPORT_eit(int section_number, CEIT* pEIT)
 {
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
- 	if (pWindow != NULL)
+ 	if (pTSMagicView != NULL)
 	{
 #if GUI_TS_ANALYZER_PSISI
-		pWindow->m_dlgTSAnalyzerPsiSi.UpdateEIT(section_number, pEIT);
+		pTSMagicView->m_dlgTSAnalyzerPsiSi.UpdateEIT(section_number, pEIT);
+		//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdateEIT(section_number, pEIT);
 #endif
 	}
 }
 
 void CALLBACK_GUI_RESET_nit(void)
 {
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
- 	if (pWindow != NULL)
+ 	if (pTSMagicView != NULL)
 	{
 	}
 }

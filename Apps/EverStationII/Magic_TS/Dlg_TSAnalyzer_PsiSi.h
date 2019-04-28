@@ -9,10 +9,9 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_PsiSi dialog
-#include "..\MFCExt\SplitWnd\SplitWnd.h"
+//#include "..\MFCExt\SplitWnd\SplitWnd.h"
 
 #include "NaviTree_PsiSiTables.h"
-//#include "TreeView_PsiSiSyntax.h"
 #include "..\Common\TreeView_XMLBrowser.h"
 
 #if BYTE_BUFFER_USE_LISTCTRL_VIEW
@@ -21,6 +20,7 @@
 #include "..\Common\HexEditView_ByteBuffer.h"
 #endif
 #include "..\resource.h"
+#include "SplitterWnd_PsiSiAnalyzer.h"
 
 class CDlg_TSAnalyzer_PsiSi : public CDialog
 {
@@ -68,7 +68,8 @@ public:
 	void UpdateCMT(CCMT* pCMT);
 
 protected:
-	CxSplitterWnd				m_wndSplitter;
+	CSplitterWnd				m_wndSplitter;
+	//CSplitterWnd_PsiSiAnalyzer	m_wndSplitter;
 	CNaviTree_PsiSiTables*		m_pNaviTree;
 	CTreeView_PacketSyntax*		m_pSyntaxTree;
 	CHexEditView_ByteBuffer*	m_pHexList;

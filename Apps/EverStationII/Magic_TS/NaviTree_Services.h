@@ -4,19 +4,36 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// Pane_EpgInfoTreeView.h : header file
+// NaviTree_Services.h : header file
 //
 
 /////////////////////////////////////////////////////////////////////////////
-// CPane_EpgInfoTreeView view
+// CNaviTree_Services view
 #include "..\Common\define.h"
 #include "..\Magic_TS\TSMagic_GuiApi.h"
 
-#include "View_EpgContainer.h"
-//#include "ListView_EpgSchedule.h"
-//#include "ListView_ServiceInfo.h"
-
 #include <afxcview.h>
+
+//要求实现为信息展示的功能控件，不能知道其他控件
+//若确实需要与其他控件交互，应将消息反射回父窗口
+//chendelin 2019.4.28
+
+//输入：SDT表，NIT表
+//      数据库
+//      接受消息的（父）窗口
+//输出：通过用户自定义消息的形式告知调用者当前选中的业务的network_id,transport_stream_id和service_id
+
+#define TREEITEM_STYLE_NETWORK	 0x1
+#define TREEITEM_STYLE_STREAM	 0x2
+#define TREEITEM_STYLE_SERVICE	 0x3
+#define TREEITEM_STYLE_NULL		 0xf
+
+#define WM_USER_SEL_CHANGE		 WM_USER + 0x7D6E
+//+------+----------------------+--------------------------+
+//|   4  |          12          |            16            |
+//+------+----------------------+--------------------------+
+//  类型         reserved                    ID
+
 
 class CNaviTree_Services : public CTreeView
 {
@@ -30,13 +47,14 @@ protected:
 	HTREEITEM		m_hRootItem;
 	CImageList		m_ImageList;
 
+	HWND			m_hwndReceiver;
+
 public:
-	CView_EpgContainer*			m_pViewEpg;
 
 // Operations
 public:
 	void Reset(void);
-//	void Set(int offline);
+	void Set(HWND hwndReceiver, int offline = 1);
 	void UpdateSDT(CSDT* pSDT);
 	void UpdateNIT(CNIT* pNIT);
 
@@ -45,7 +63,7 @@ protected:
 
 // Overrides
 	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CPane_EpgInfoTreeView)
+	//{{AFX_VIRTUAL(CNaviTree_Services)
 	public:
 	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
 	protected:
@@ -62,12 +80,14 @@ public:
 
 	// Generated message map functions
 protected:
-	//{{AFX_MSG(CPane_EpgInfoTreeView)
+	//{{AFX_MSG(CNaviTree_Services)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void OnDblclk(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
+public:
 };
 
 /////////////////////////////////////////////////////////////////////////////

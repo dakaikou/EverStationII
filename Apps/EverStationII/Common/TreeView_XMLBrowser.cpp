@@ -14,10 +14,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTreeView_PsisiSyntax
 
-//#include "MiddleWare/MiddleWare_Tools\Include\MiddleWare_Tools.h"
-//#include "..\common\define.h"
-//#include "..\Common\GuiCommon_TreeFunction.h"
-
 IMPLEMENT_DYNCREATE(CTreeView_PacketSyntax, CTreeView)
 
 CTreeView_PacketSyntax::CTreeView_PacketSyntax()

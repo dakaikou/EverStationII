@@ -406,6 +406,7 @@ BOOL CDlg_TSAnalyzer_PsiSi::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pRes
 
 	if (m_pSyntaxTree != NULL)
 	{
+		//语法树和16进制字节表显示联动
 		if (nmhdr->hwndFrom == m_pSyntaxTree->GetSafeHwnd())
 		{
 			if (nmhdr->code == TVN_SELCHANGED)
@@ -438,7 +439,7 @@ BOOL CDlg_TSAnalyzer_PsiSi::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pRes
 					}
 				}
 
-				return false;	////如果不返回，会将TVN_SELECTED消息反射回m_pSyntaxTree控件，然后又弹射回来，如此反复，无限循环
+				return false;	////如果不返回false，会将TVN_SELECTED消息反射回m_pSyntaxTree控件，然后又弹射回来，如此反复，无限循环
 			}
 		}
 	}

@@ -25,7 +25,6 @@
 #include "TSMagic_Trigger_Section.h"
 #include "TSMagic_Trigger_PesEs.h"
 
-#include "TabView_TSMagic.h"
 #include "..\Common\Dlg_Progress.h"
 
 #if GUI_TS_ANALYZER_PACKETS
@@ -38,6 +37,7 @@
 
 #if GUI_TS_ANALYZER_PSISI
 #include "Dlg_TSAnalyzer_PsiSi.h"
+//#include "SplitterWnd_PsiSiAnalyzer.h"
 #endif
 
 //#if GUI_TS_SEC_TRIGGER
@@ -124,6 +124,7 @@ public:
 
 #if GUI_TS_ANALYZER_PSISI
 	CDlg_TSAnalyzer_PsiSi	m_dlgTSAnalyzerPsiSi;
+	//CSplitterWnd_PsiSiAnalyzer m_tabItem_PsiSiAnalyzer;
 #endif
 
 #if GUI_TS_ANALYZER_BOUQUETS
@@ -204,7 +205,7 @@ public:
 
 protected:
 
-	CTabView_TSMagic*			m_pMagicTab;
+	//CTabView_TSMagic*			m_pMagicTab;
 
 	int			TAB_OVERVIEW;
 	int			TAB_SERVICES;

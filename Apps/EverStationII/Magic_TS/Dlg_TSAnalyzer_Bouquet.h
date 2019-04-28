@@ -9,7 +9,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TS_Analyzer_Bouquets dialog
-#include "..\MFCExt\SplitWnd\SplitWnd.h"
+//#include "..\MFCExt\SplitWnd\SplitWnd.h"
 #include "../Common/TreeView_XMLBrowser.h"
 #include "NaviTree_Bouquets.h"
 #include "..\resource.h"
@@ -36,7 +36,7 @@ public:
 
 // Implementation
 public:
-	CxSplitterWnd				m_wndSplitter;
+	CSplitterWnd				m_wndSplitter;
 
 	CNaviTree_Bouquets*	m_pPane;
 	//CTreeView_BouquetInfo*		m_pTree;
