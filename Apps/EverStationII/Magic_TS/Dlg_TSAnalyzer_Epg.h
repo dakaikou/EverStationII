@@ -55,7 +55,7 @@ protected:
 	//{{AFX_MSG(CDlg_TSAnalyzer_Epg)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnDestroy();
-	afx_msg LRESULT OnReportSelChange(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnReportServiceSelChange(WPARAM wParam, LPARAM lParam);
 	//virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 	virtual BOOL OnInitDialog();
 	//}}AFX_MSG

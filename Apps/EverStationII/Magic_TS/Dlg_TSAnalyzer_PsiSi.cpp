@@ -13,6 +13,8 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_PsiSi dialog
+#include "../Magic_TS/TSMagicView.h"
+#include "../Magic_TS/TSMagic_GuiApi_MSG.h"
 
 #include "syntax_translate_layer\MPEG2_DVB_Section\Include\Mpeg2_table_id.h"
 #include "syntax_translate_layer\MPEG2_DVB_Section\Include\DVB_table_id.h"
@@ -50,8 +52,9 @@ void CDlg_TSAnalyzer_PsiSi::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_PsiSi, CDialog)
 	//{{AFX_MSG_MAP(CDlg_TSAnalyzer_PsiSi)
 	ON_WM_SIZE()
-	//}}AFX_MSG_MAP
 	ON_WM_DESTROY()
+	//}}AFX_MSG_MAP
+	ON_MESSAGE(WM_USER_PSISI_SEL_CHANGE, OnReportPsiSiSelChange)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -107,6 +110,8 @@ BOOL CDlg_TSAnalyzer_PsiSi::OnInitDialog()
 		m_wndSplitter.MoveWindow(&rect);
 
 		m_pNaviTree = (CNaviTree_PsiSiTables*)m_wndSplitter.GetPane(0, 0);
+		m_pNaviTree->Set(this->GetSafeHwnd());
+
 		m_pSyntaxTree = (CTreeView_PacketSyntax*)m_wndSplitter.GetPane(0, 1);
 		m_pSyntaxTree->Init("PSI/SI section 语法分析");
 		m_pSyntaxTree->m_hNotifyParent = GetSafeHwnd();
@@ -453,4 +458,90 @@ void CDlg_TSAnalyzer_PsiSi::OnDestroy()
 	CDialog::OnDestroy();
 
 	// TODO: 在此处添加消息处理程序代码
+}
+
+LRESULT CDlg_TSAnalyzer_PsiSi::OnReportPsiSiSelChange(WPARAM wParam, LPARAM lParam)
+{
+	m_pSyntaxTree->Reset();
+	m_pHexList->Reset();
+
+	uint16_t	  usKeyID;
+	uint32_t	  dwSelectItemData = (uint32_t)lParam;
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+	char		  pszText[MAX_TXT_CHARS];
+
+	if (pTSMagicView->m_kThreadParams.main_thread_running)
+	{
+		if ((pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1) ||
+			(pTSMagicView->m_kThreadParams.pes_trigger_thread_running == 1) ||
+			(pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1) ||
+			(pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1) ||
+			(pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1) ||
+			(pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1))
+		{
+			if (pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1)
+			{
+				sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现TS捕捉线程尚未结束！");
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+			}
+			if (pTSMagicView->m_kThreadParams.pes_trigger_thread_running == 1)
+			{
+				sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现PES捕捉线程尚未结束！");
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+			}
+			if (pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1)
+			{
+				sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现ES捕捉线程尚未结束！");
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+			}
+			if (pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1)
+			{
+				sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现section捕捉线程尚未结束！");
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+			}
+			if (pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1)
+			{
+				sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现DSMCC下载线程尚未结束！");
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+			}
+			if (pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1)
+			{
+				sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现TS录制线程尚未结束！");
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+			}
+		}
+		else
+		{
+			CTrigger_PsiSiSection* pSectionTrigger = pTSMagicView->GetSectionTrigger();
+			CDB_PsiSiObjs* pDB_PsiSiObjs = pTSMagicView->GetPsiSiObjsDBase();
+			CPVT* pPVT = NULL;
+
+			usKeyID = (dwSelectItemData & 0xffff0000) >> 16;
+			pPVT = pDB_PsiSiObjs->QueryByKey(usKeyID);
+			if (pPVT != NULL)
+			{
+				if (pPVT->IsNormalSectionSyntax() == 1)
+				{
+					int section_number = (dwSelectItemData & 0x000000ff);
+					pSectionTrigger->SetMatchParamsForNormalSection(pPVT->GetPID(), pPVT->GetTableID(), pPVT->GetTableIDExtension(), section_number);
+				}
+				else
+				{
+					pSectionTrigger->SetMatchParamsForOtherSection(pPVT->GetPID(), pPVT->GetTableID());
+				}
+			}
+
+			::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_SECTION_TRIGGER_STATE, 1, 0);
+
+			if (pTSMagicView->m_kThreadParams.offline == 1)
+			{
+				if (pTSMagicView->m_kThreadParams.main_thread_stopped == 1)
+				{
+					::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_section_trigger_thread, (LPVOID) & (pTSMagicView->m_kThreadParams), 0, 0);
+				}
+			}
+		}
+	}
+
+	return 0;
 }

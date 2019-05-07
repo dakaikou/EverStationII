@@ -13,7 +13,8 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TS_Analyzer_Bouquets dialog
-
+#include "../Magic_TS/TSMagicView.h"
+#include "Utilities\Directory\Include\TOOL_Directory.h"
 
 CDlg_TSAnalyzer_Bouquets::CDlg_TSAnalyzer_Bouquets(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlg_TSAnalyzer_Bouquets::IDD, pParent)
@@ -36,15 +37,16 @@ void CDlg_TSAnalyzer_Bouquets::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_Bouquets, CDialog)
 	//{{AFX_MSG_MAP(CDlg_TS_Analyzer_Bouquets)
 	ON_WM_SIZE()
-	//}}AFX_MSG_MAP
 	ON_WM_DESTROY()
+	//}}AFX_MSG_MAP
+	ON_MESSAGE(WM_USER_BOUQUET_SEL_CHANGE, OnReportBouquetSelChange)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TS_Analyzer_Bouquets message handlers
 void CDlg_TSAnalyzer_Bouquets::Reset(void)
 {
-	m_pPane->Reset();
+	m_pNaviPane->Reset();
 	m_pInfoTree->Reset();
 }
 
@@ -75,11 +77,11 @@ BOOL CDlg_TSAnalyzer_Bouquets::OnInitDialog()
 
 		m_wndSplitter.MoveWindow(&rect);
 
-		m_pPane = (CNaviTree_Bouquets*)m_wndSplitter.GetPane(0, 0);
-		m_pInfoTree = (CTreeView_PacketSyntax*)m_wndSplitter.GetPane(0, 1);
-		m_pInfoTree->Init("Bouquet分析");
+		m_pNaviPane = (CNaviTree_Bouquets*)m_wndSplitter.GetPane(0, 0);
+		m_pNaviPane->Set(this->GetSafeHwnd());
 
-		m_pPane->m_pInfoTree = m_pInfoTree;
+		m_pInfoTree = (CTreeView_PacketSyntax*)m_wndSplitter.GetPane(0, 1);
+		m_pInfoTree->Init("Bouquet");
 	}
 
 	Reset();
@@ -110,4 +112,39 @@ void CDlg_TSAnalyzer_Bouquets::OnDestroy()
 	CDialog::OnDestroy();
 
 	// TODO: 在此处添加消息处理程序代码
+}
+
+LRESULT CDlg_TSAnalyzer_Bouquets::OnReportBouquetSelChange(WPARAM wParam, LPARAM lParam)
+{
+	uint32_t code = (uint32_t)lParam;
+	uint16_t usKey = ((lParam & 0xffff0000) >> 16);
+	uint16_t bouquet_id = (lParam & 0x0000ffff);
+
+	m_pInfoTree->Reset();
+
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+	CDB_PsiSiObjs* pDB_PsiSiOjbs = pTSMagicView->GetPsiSiObjsDBase();
+
+	TALForXMLDoc xmlDoc;
+	pDB_PsiSiOjbs->BuildBouquetTree(code, &xmlDoc);
+	m_pInfoTree->ShowXMLDoc(&xmlDoc);
+
+#ifdef _DEBUG
+	char	pszExeFile[MAX_PATH];
+	char	exeDrive[3];
+	char	pszXmlDir[MAX_PATH];
+	char	pszFilePath[MAX_PATH];
+	GetModuleFileName(NULL, pszExeFile, MAX_PATH);
+	exeDrive[0] = pszExeFile[0];
+	exeDrive[1] = pszExeFile[1];
+	exeDrive[2] = '\0';
+
+	sprintf_s(pszXmlDir, sizeof(pszXmlDir), "%s\\~EverStationII\\xml", exeDrive);
+	DIR_BuildDirectory(pszXmlDir);
+
+	sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\BOUQUET_sematics_0x%04X.xml", pszXmlDir, code & 0xffff);
+	xmlDoc.SaveFile(pszFilePath);
+#endif
+
+	return 0;
 }

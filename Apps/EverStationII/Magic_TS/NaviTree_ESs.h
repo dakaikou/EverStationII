@@ -9,10 +9,22 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // CPane_PsiSiTableTreeView view
-#include "..\Common\define.h"
-#include "..\Magic_TS\TSMagic_GuiApi.h"
+//#include "..\Common\define.h"
+//#include "..\Magic_TS\TSMagic_GuiApi.h"
 
 #include <afxcview.h>
+#include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_PSISI_Table.h"
+
+//要求实现为信息展示的独立功能控件，不依赖其他兄弟窗口，不应该知道父窗口是谁，只要知道父窗口句柄即可
+//若确实需要与其他兄弟窗口交互，应将消息中继回父窗口
+//chendelin 2019.4.29
+
+//输入：PSI/SI表，见中间件层PsiSiTable的定义
+//      数据库
+//      接受消息的（父）窗口句柄
+//输出：通过用户自定义消息的形式告知调用者当前所选中业务的ES_id
+
+#define WM_USER_ES_SEL_CHANGE		 WM_USER + 0x031F
 
 class CNaviTree_ESs : public CTreeView
 {
@@ -25,16 +37,17 @@ protected:
 	HTREEITEM		m_hPesEsRootItem;
 	CImageList		m_ImageList;
 
+	HWND			m_hwndReceiver;
 // Operations
 public:
 	void UpdatePAT(CPAT* pPAT);
 	void UpdatePMT(CPMT* pPMT);
 
 	void Reset(void);
-
+	void Set(HWND hwndReceiver, int offline = 1);
 private:
 	void DeleteChildItems(HTREEITEM hParentItem);
-	void FiringCatchThread(void);
+	//void FiringCatchThread(void);
 
 private:
 
@@ -59,7 +72,8 @@ public:
 protected:
 	//{{AFX_MSG(CPane_PsiSiTableTreeView)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void OnDblclk(NMHDR* pNMHDR, LRESULT* pResult);
+//	afx_msg void OnDblclk(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()

@@ -1,4 +1,4 @@
-// Pane_BouquetInfoTreeView.cpp : implementation file
+// NaviTree_Bouquets.cpp : implementation file
 //
 
 #include "stdafx.h"
@@ -12,17 +12,20 @@ static char THIS_FILE[] = __FILE__;
 
 //#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
-#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
+//#include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 
-#include "syntax_translate_layer\MPEG2_DVB_Section\Include\DVB_SI_Utilities.h"
-#include "Utilities\Directory\Include\TOOL_Directory.h"
+//#include "syntax_translate_layer\MPEG2_DVB_Section\Include\DVB_SI_Utilities.h"
 
-#include "..\Common\define.h"
+//#include "..\Common\define.h"
 
 #include "TSMagicView.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// CPane_BouquetInfoTreeView
+// CNaviTree_Bouquets
+//+--------------------------+--------------------------+
+//|           16             |            16            |
+//+--------------------------+--------------------------+
+//           KEY                       bouquet_id
 
 IMPLEMENT_DYNCREATE(CNaviTree_Bouquets, CTreeView)
 
@@ -37,16 +40,15 @@ CNaviTree_Bouquets::~CNaviTree_Bouquets()
 }
 
 BEGIN_MESSAGE_MAP(CNaviTree_Bouquets, CTreeView)
-	//{{AFX_MSG_MAP(CPane_BouquetInfoTreeView)
+	//{{AFX_MSG_MAP(CNaviTree_Bouquets)
 	ON_WM_CREATE()
-	ON_NOTIFY_REFLECT(NM_DBLCLK, OnDblclk)
 	//}}AFX_MSG_MAP
-//	ON_MESSAGE(WM_UPDATE_NIT, OnUpdateNIT)
-//	ON_MESSAGE(WM_UPDATE_SDT, OnUpdateSDT)
+	ON_NOTIFY_REFLECT(NM_DBLCLK, &CNaviTree_Bouquets::OnNMDblclk)
+	ON_NOTIFY_REFLECT(TVN_SELCHANGED, &CNaviTree_Bouquets::OnTvnSelchanged)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CPane_BouquetInfoTreeView drawing
+// CNaviTree_Bouquets drawing
 
 void CNaviTree_Bouquets::OnDraw(CDC* pDC)
 {
@@ -70,7 +72,7 @@ void CNaviTree_Bouquets::Dump(CDumpContext& dc) const
 #endif //_DEBUG
 
 /////////////////////////////////////////////////////////////////////////////
-// CPane_BouquetInfoTreeView message handlers
+// CNaviTree_Bouquets message handlers
 
 BOOL CNaviTree_Bouquets::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext) 
 {
@@ -195,50 +197,6 @@ void CNaviTree_Bouquets::UpdateBAT(CBAT* pBAT)
 	}
 }
 
-void CNaviTree_Bouquets::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	// TODO: Add your control notification handler code here
-#if DEBUG_BAT
-	CTreeCtrl& treeCtrl = GetTreeCtrl();
-
-	HTREEITEM hSelItem = treeCtrl.GetSelectedItem();
-	DWORD code = (DWORD)treeCtrl.GetItemData(hSelItem);
-
-	if (code > 0)
-	{
-		m_pInfoTree->Reset();
-
-		//uint16_t usKey = (code & 0xffff0000) >> 16;
-
-		CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-		CDB_PsiSiObjs* pDB_PsiSiOjbs = pTSMagicView->GetPsiSiObjsDBase();
-
-		TALForXMLDoc xmlDoc;
-		pDB_PsiSiOjbs->BuildBouquetTree(code, &xmlDoc);
-		m_pInfoTree->ShowXMLDoc(&xmlDoc);
-
-#ifdef _DEBUG
-		char	pszExeFile[MAX_PATH];
-		char	exeDrive[3];
-		char	pszXmlDir[MAX_PATH];
-		char	pszFilePath[MAX_PATH];
-		GetModuleFileName(NULL, pszExeFile, MAX_PATH);
-		exeDrive[0] = pszExeFile[0];
-		exeDrive[1] = pszExeFile[1];
-		exeDrive[2] = '\0';
-
-		sprintf_s(pszXmlDir, sizeof(pszXmlDir), "%s\\~EverStationII\\xml", exeDrive);
-		DIR_BuildDirectory(pszXmlDir);
-
-		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\BOUQUET_sematics_0x%04X.xml", pszXmlDir, code & 0xffff);
-		xmlDoc.SaveFile(pszFilePath);
-#endif
-	}
-#endif
-
-	*pResult = 0;
-}
-
 void CNaviTree_Bouquets::DeleteChildItems(HTREEITEM hParentItem)
 {
 	HTREEITEM hChildItem;
@@ -270,6 +228,45 @@ void CNaviTree_Bouquets::Reset(void)
 	DeleteChildItems(m_hRootItem);
 }
 
-//void CPane_BouquetInfoTreeView::Set(int offline)
-//{
-//}
+void CNaviTree_Bouquets::Set(HWND hwndReceiver, int offline)
+{
+	m_hwndReceiver = hwndReceiver;
+}
+
+void CNaviTree_Bouquets::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	// TODO: 在此添加控件通知处理程序代码
+//#if DEBUG_BAT
+//	CTreeCtrl& treeCtrl = GetTreeCtrl();
+//
+//	HTREEITEM hSelItem = treeCtrl.GetSelectedItem();
+//	DWORD code = (DWORD)treeCtrl.GetItemData(hSelItem);
+//
+//	if (code > 0)
+//	{
+//		::SendMessage(m_hwndReceiver, WM_USER_BOUQUET_SEL_CHANGE, NULL, code);
+//	}
+//#endif
+
+	*pResult = 0;
+}
+
+
+void CNaviTree_Bouquets::OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	TVITEM item = pNMTreeView->itemNew;
+	HTREEITEM hSelItem = item.hItem;
+
+	if (item.mask & TVIF_PARAM)
+	{
+		DWORD uiValue = (DWORD)(item.lParam);
+		if (uiValue > 0)
+		{
+			::SendMessage(m_hwndReceiver, WM_USER_BOUQUET_SEL_CHANGE, NULL, uiValue);
+		}
+	}
+
+	*pResult = 0;
+}

@@ -39,7 +39,7 @@ BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_Epg, CDialog)
 	ON_WM_SIZE()
 	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
-	ON_MESSAGE(WM_USER_SEL_CHANGE, OnReportSelChange)
+	ON_MESSAGE(WM_USER_SERVICE_SEL_CHANGE, OnReportServiceSelChange)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -131,7 +131,7 @@ void CDlg_TSAnalyzer_Epg::OnDestroy()
 	// TODO: 在此处添加消息处理程序代码
 }
 
-LRESULT CDlg_TSAnalyzer_Epg::OnReportSelChange(WPARAM wParam, LPARAM lParam)
+LRESULT CDlg_TSAnalyzer_Epg::OnReportServiceSelChange(WPARAM wParam, LPARAM lParam)
 {
 	uint16_t network_id = ((wParam & 0xffff0000) >> 16);
 	uint16_t transport_stream_id = (wParam & 0x0000ffff);

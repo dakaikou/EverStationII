@@ -274,7 +274,6 @@
     <ClInclude Include="Magic_TS\NaviTree_ESs.h" />
     <ClInclude Include="Magic_TS\NaviTree_PsiSiTables.h" />
     <ClInclude Include="Magic_TS\NaviTree_Services.h" />
-    <ClInclude Include="Magic_TS\SplitterWnd_PsiSiAnalyzer.h" />
     <ClInclude Include="Magic_TS\TSMagicDoc.h" />
     <ClInclude Include="Magic_TS\TSMagicFrm.h" />
     <ClInclude Include="Magic_TS\TSMagicView.h" />
@@ -360,7 +359,6 @@
     <ClCompile Include="Magic_TS\NaviTree_ESs.cpp" />
     <ClCompile Include="Magic_TS\NaviTree_PsiSiTables.cpp" />
     <ClCompile Include="Magic_TS\NaviTree_Services.cpp" />
-    <ClCompile Include="Magic_TS\SplitterWnd_PsiSiAnalyzer.cpp" />
     <ClCompile Include="Magic_TS\TSMagicDoc.cpp" />
     <ClCompile Include="Magic_TS\TSMagicFrm.cpp" />
     <ClCompile Include="Magic_TS\TSMagicView.cpp" />

@@ -13,6 +13,10 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_Epg dialog
+#include "../Magic_TS/TSMagicView.h"
+#include "Utilities\Directory\Include\TOOL_Directory.h"
+
+#include "TSMagic_Dsmcc_Download.h"
 
 CDlg_TSAnalyzer_Dsmcc::CDlg_TSAnalyzer_Dsmcc(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlg_TSAnalyzer_Dsmcc::IDD, pParent)
@@ -35,8 +39,12 @@ void CDlg_TSAnalyzer_Dsmcc::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_Dsmcc, CDialog)
 	//{{AFX_MSG_MAP(CDlg_TSAnalyzer_Dsmcc)
 	ON_WM_SIZE()
-	//}}AFX_MSG_MAP
 	ON_WM_DESTROY()
+	//}}AFX_MSG_MAP
+	ON_MESSAGE(WM_USER_OCDC_SEL_CHANGE, OnReportOcDcSelChange)
+	ON_MESSAGE(WM_USER_OCDC_DOWNLOAD_PREPARE, OnReportOcDcDownloadPrepare)
+	ON_MESSAGE(WM_USER_OCDC_DOWNLOAD_START, OnReportOcDcDownloadStart)
+	ON_MESSAGE(WM_USER_OCDC_APPEND_PID, OnReportOcDcAppendPID)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -77,10 +85,10 @@ BOOL CDlg_TSAnalyzer_Dsmcc::OnInitDialog()
 		m_wndSplitter.MoveWindow(&rect);
 
 		m_pNaviPane = (CNaviList_DSMCCs*)m_wndSplitter.GetPane(0, 0);
+		m_pNaviPane->Set(this->GetSafeHwnd());
+
 		m_pInfoTree = (CTreeView_PacketSyntax*)m_wndSplitter.GetPane(0, 1);
 		m_pInfoTree->Init("DSMCC 语义分析");
-
-		m_pNaviPane->m_pInfoTree = m_pInfoTree;
 	}
 
 	Reset();
@@ -123,4 +131,72 @@ void CDlg_TSAnalyzer_Dsmcc::OnDestroy()
 	CDialog::OnDestroy();
 
 	// TODO: 在此处添加消息处理程序代码
+}
+
+LRESULT CDlg_TSAnalyzer_Dsmcc::OnReportOcDcSelChange(WPARAM wParam, LPARAM lParam)
+{
+	uint16_t usPID = (uint16_t)(lParam & 0x0000ffff);
+
+	m_pInfoTree->Reset();
+
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+	CDB_PsiSiObjs* pDB_PsiSiObjs = pTSMagicView->GetPsiSiObjsDBase();
+	
+	TALForXMLDoc xmlDoc;
+	pDB_PsiSiObjs->BuildDsmccTree(usPID, &xmlDoc);
+	m_pInfoTree->ShowXMLDoc(&xmlDoc);
+	
+#ifdef _DEBUG
+	char	pszExeFile[MAX_PATH];
+	char	exeDrive[3];
+	char	pszXmlDir[MAX_PATH];
+	char	pszFilePath[MAX_PATH];
+	GetModuleFileName(NULL, pszExeFile, MAX_PATH);
+	exeDrive[0] = pszExeFile[0];
+	exeDrive[1] = pszExeFile[1];
+	exeDrive[2] = '\0';
+	
+	sprintf_s(pszXmlDir, sizeof(pszXmlDir), "%s\\~EverStationII\\xml", exeDrive);
+	DIR_BuildDirectory(pszXmlDir);
+	
+	sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\DSMCC_sematics_0x%04X.xml", pszXmlDir, usPID);
+	xmlDoc.SaveFile(pszFilePath);
+#endif
+
+	return 0;
+}
+
+LRESULT CDlg_TSAnalyzer_Dsmcc::OnReportOcDcDownloadPrepare(WPARAM wParam, LPARAM lParam)
+{
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+	CDB_OCDCs* pDB_OCDCs = pTSMagicView->GetOCDCsDBase();
+
+	pDB_OCDCs->Reset();
+
+	return 0;
+}
+
+LRESULT CDlg_TSAnalyzer_Dsmcc::OnReportOcDcAppendPID(WPARAM wParam, LPARAM lParam)
+{
+	uint16_t usPID = (uint16_t)(lParam & 0x0000ffff);
+
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+	CDB_OCDCs* pDB_OCDCs = pTSMagicView->GetOCDCsDBase();
+
+	DOWNLOAD_INFO_t stDownloadInfo;
+	stDownloadInfo.usCandidatePID = usPID;
+	pDB_OCDCs->AppendDownloadInfo(&stDownloadInfo);
+
+	return 0;
+}
+
+LRESULT CDlg_TSAnalyzer_Dsmcc::OnReportOcDcDownloadStart(WPARAM wParam, LPARAM lParam)
+{
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+
+	pTSMagicView->m_kThreadParams.dsmcc_download_thread_running = 0;
+	pTSMagicView->m_kThreadParams.dsmcc_download_thread_stopped = 0;
+	::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_dsmcc_download_thread, (LPVOID) & (pTSMagicView->m_kThreadParams), 0, 0);
+
+	return 0;
 }

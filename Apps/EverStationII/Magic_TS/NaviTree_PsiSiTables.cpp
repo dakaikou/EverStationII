@@ -43,19 +43,23 @@ CNaviTree_PsiSiTables::CNaviTree_PsiSiTables()
 	m_hTsdtItem = NULL;
 	m_hEcmItem = NULL;
 	m_hEmmItem = NULL;
+
+	m_hwndReceiver = NULL;
 }
 
 CNaviTree_PsiSiTables::~CNaviTree_PsiSiTables()
 {
 //	DeleteChildItems(m_hPsisiRootItem);
 //	DeleteChildItems(m_hDataCastRootItem);
+	m_hwndReceiver = NULL;
 }
 
 
 BEGIN_MESSAGE_MAP(CNaviTree_PsiSiTables, CTreeView)
 	//{{AFX_MSG_MAP(CPane_PsiSiTableTreeView)
 	ON_WM_CREATE()
-	ON_NOTIFY_REFLECT(NM_DBLCLK, OnDblclk)
+	//ON_NOTIFY_REFLECT(NM_DBLCLK, OnDblclk)
+	ON_NOTIFY_REFLECT(NM_DBLCLK, &CNaviTree_PsiSiTables::OnNMDblclk)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -886,9 +890,10 @@ void CNaviTree_PsiSiTables::UpdateNIT(int section_number, CNIT* pNIT)
 	}
 }
 
-//void CPane_PsiSiTableTreeView::Set(int offline)
-//{
-//}
+void CNaviTree_PsiSiTables::Set(HWND hwndReceiver, int offline)
+{
+	m_hwndReceiver = hwndReceiver;
+}
 
 void CNaviTree_PsiSiTables::Reset(void)
 {
@@ -1645,15 +1650,13 @@ void CNaviTree_PsiSiTables::DeleteChildItems(HTREEITEM hParentItem)
 	}
 }
 
-
-void CNaviTree_PsiSiTables::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult) 
+void CNaviTree_PsiSiTables::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	// TODO: Add your control notification handler code here
-
-	uint16_t	  usKeyID;
+	// TODO: 在此添加控件通知处理程序代码
+	//uint16_t	  usKeyID;
 	uint32_t	  dwSelectItemData;
-	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	char		  pszText[MAX_TXT_CHARS];
+	//CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+	//char		  pszText[MAX_TXT_CHARS];
 
 	CTreeCtrl& treeCtrl = GetTreeCtrl();
 
@@ -1663,78 +1666,80 @@ void CNaviTree_PsiSiTables::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 		dwSelectItemData = (uint32_t)treeCtrl.GetItemData(hSelItem);
 		if (dwSelectItemData > 0)
 		{
-			if (pTSMagicView->m_kThreadParams.main_thread_running)
-			{
-				if ((pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1) ||
-					(pTSMagicView->m_kThreadParams.pes_trigger_thread_running == 1) ||
-					(pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1) ||
-					(pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1) ||
-					(pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1) ||
-					(pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1))
-				{
-					if (pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1)
-					{
-						sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现TS捕捉线程尚未结束！");
-						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
-					}
-					if (pTSMagicView->m_kThreadParams.pes_trigger_thread_running == 1)
-					{
-						sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现PES捕捉线程尚未结束！");
-						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
-					}
-					if (pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1)
-					{
-						sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现ES捕捉线程尚未结束！");
-						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
-					}
-					if (pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1)
-					{
-						sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现section捕捉线程尚未结束！");
-						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
-					}
-					if (pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1)
-					{
-						sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现DSMCC下载线程尚未结束！");
-						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
-					}
-					if (pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1)
-					{
-						sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现TS录制线程尚未结束！");
-						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
-					}
-				}
-				else
-				{
-					CTrigger_PsiSiSection* pSectionTrigger = pTSMagicView->GetSectionTrigger();
-					CDB_PsiSiObjs* pDB_PsiSiObjs = pTSMagicView->GetPsiSiObjsDBase();
-					CPVT*			 pPVT = NULL;
+			::SendMessage(m_hwndReceiver, WM_USER_PSISI_SEL_CHANGE, NULL, dwSelectItemData);
 
-					usKeyID = (dwSelectItemData & 0xffff0000) >> 16;
-					pPVT = pDB_PsiSiObjs->QueryByKey(usKeyID);
-					if (pPVT != NULL)
-					{
-						if (pPVT->IsNormalSectionSyntax() == 1)
-						{
-							int section_number = (dwSelectItemData & 0x000000ff);
-							pSectionTrigger->SetMatchParamsForNormalSection(pPVT->GetPID(), pPVT->GetTableID(), pPVT->GetTableIDExtension(), section_number);
-						}
-						else
-						{
-							pSectionTrigger->SetMatchParamsForOtherSection(pPVT->GetPID(), pPVT->GetTableID());
-						}
-					}
+			//if (pTSMagicView->m_kThreadParams.main_thread_running)
+			//{
+			//	if ((pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1) ||
+			//		(pTSMagicView->m_kThreadParams.pes_trigger_thread_running == 1) ||
+			//		(pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1) ||
+			//		(pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1) ||
+			//		(pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1) ||
+			//		(pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1))
+			//	{
+			//		if (pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1)
+			//		{
+			//			sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现TS捕捉线程尚未结束！");
+			//			::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+			//		}
+			//		if (pTSMagicView->m_kThreadParams.pes_trigger_thread_running == 1)
+			//		{
+			//			sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现PES捕捉线程尚未结束！");
+			//			::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+			//		}
+			//		if (pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1)
+			//		{
+			//			sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现ES捕捉线程尚未结束！");
+			//			::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+			//		}
+			//		if (pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1)
+			//		{
+			//			sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现section捕捉线程尚未结束！");
+			//			::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+			//		}
+			//		if (pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1)
+			//		{
+			//			sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现DSMCC下载线程尚未结束！");
+			//			::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+			//		}
+			//		if (pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1)
+			//		{
+			//			sprintf_s(pszText, sizeof(pszText), "section捕捉：未能启动，因为发现TS录制线程尚未结束！");
+			//			::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+			//		}
+			//	}
+			//	else
+			//	{
+			//		CTrigger_PsiSiSection* pSectionTrigger = pTSMagicView->GetSectionTrigger();
+			//		CDB_PsiSiObjs* pDB_PsiSiObjs = pTSMagicView->GetPsiSiObjsDBase();
+			//		CPVT* pPVT = NULL;
 
-					::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_SECTION_TRIGGER_STATE, 1, 0);
+			//		usKeyID = (dwSelectItemData & 0xffff0000) >> 16;
+			//		pPVT = pDB_PsiSiObjs->QueryByKey(usKeyID);
+			//		if (pPVT != NULL)
+			//		{
+			//			if (pPVT->IsNormalSectionSyntax() == 1)
+			//			{
+			//				int section_number = (dwSelectItemData & 0x000000ff);
+			//				pSectionTrigger->SetMatchParamsForNormalSection(pPVT->GetPID(), pPVT->GetTableID(), pPVT->GetTableIDExtension(), section_number);
+			//			}
+			//			else
+			//			{
+			//				pSectionTrigger->SetMatchParamsForOtherSection(pPVT->GetPID(), pPVT->GetTableID());
+			//			}
+			//		}
 
-					if (pTSMagicView->m_kThreadParams.offline == 1)
-					{
-						if (pTSMagicView->m_kThreadParams.main_thread_stopped == 1)
-						{
-							::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_section_trigger_thread, (LPVOID)&(pTSMagicView->m_kThreadParams), 0, 0);
-						}
-					}
-				}
-			}
+			//		::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_SECTION_TRIGGER_STATE, 1, 0);
+
+			//		if (pTSMagicView->m_kThreadParams.offline == 1)
+			//		{
+			//			if (pTSMagicView->m_kThreadParams.main_thread_stopped == 1)
+			//			{
+			//				::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_section_trigger_thread, (LPVOID) & (pTSMagicView->m_kThreadParams), 0, 0);
+			//			}
+			//		}
+			//	}
+			//}
 		}
 	}
 

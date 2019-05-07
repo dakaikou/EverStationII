@@ -425,7 +425,7 @@ void CALLBACK_REPORT_bat(int section_number, CBAT* pBAT)
 		//pTSMagicView->m_tabItem_PsiSiAnalyzer.UpdateBAT(section_number, pBAT);
 #endif
 #if GUI_TS_ANALYZER_BOUQUETS
-		pTSMagicView->m_dlgTSAnalyzerBouquets.m_pPane->UpdateBAT(pBAT);
+		pTSMagicView->m_dlgTSAnalyzerBouquets.m_pNaviPane->UpdateBAT(pBAT);
 #endif
 	}
 }

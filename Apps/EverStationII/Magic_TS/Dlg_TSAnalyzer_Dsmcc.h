@@ -57,6 +57,10 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	virtual BOOL OnInitDialog();
 	//}}AFX_MSG
+	afx_msg LRESULT OnReportOcDcSelChange(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnReportOcDcDownloadPrepare(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnReportOcDcDownloadStart(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnReportOcDcAppendPID(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnDestroy();

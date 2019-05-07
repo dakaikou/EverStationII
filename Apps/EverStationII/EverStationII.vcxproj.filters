@@ -315,9 +315,6 @@
     <ClInclude Include="Common\InstrumentPanel_Kernel.h">
       <Filter>头文件\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Magic_TS\SplitterWnd_PsiSiAnalyzer.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -559,9 +556,6 @@
     </ClCompile>
     <ClCompile Include="Common\InstrumentPanel_Kernel.cpp">
       <Filter>源文件\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\SplitterWnd_PsiSiAnalyzer.cpp">
-      <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

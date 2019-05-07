@@ -38,7 +38,7 @@ public:
 public:
 	CSplitterWnd				m_wndSplitter;
 
-	CNaviTree_Bouquets*	m_pPane;
+	CNaviTree_Bouquets*			m_pNaviPane;
 	//CTreeView_BouquetInfo*		m_pTree;
 	CTreeView_PacketSyntax*		m_pInfoTree;
 
@@ -55,6 +55,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
+	afx_msg LRESULT OnReportBouquetSelChange(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnDestroy();

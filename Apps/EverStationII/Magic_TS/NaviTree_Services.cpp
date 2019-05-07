@@ -10,7 +10,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-//#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 
@@ -21,6 +20,16 @@ static char THIS_FILE[] = __FILE__;
 #include "TSMagicView.h"
 /////////////////////////////////////////////////////////////////////////////
 // CNaviTree_Services
+
+//内部定义，不需要暴露给调用者
+#define TREEITEM_STYLE_NETWORK	 0x1
+#define TREEITEM_STYLE_STREAM	 0x2
+#define TREEITEM_STYLE_SERVICE	 0x3
+#define TREEITEM_STYLE_NULL		 0xf
+//+------+----------------------+--------------------------+
+//|   4  |          12          |            16            |
+//+------+----------------------+--------------------------+
+//  类型         reserved                    ID
 
 IMPLEMENT_DYNCREATE(CNaviTree_Services, CTreeView)
 
@@ -455,71 +464,147 @@ void CNaviTree_Services::UpdateSDT(CSDT* pSDT)
 	}
 }
 
-//void CNaviTree_Services::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult) 
-//{
-//	// TODO: Add your control notification handler code here
-//	uint32_t	item_code;
-//	uint8_t		item_style;
-//	uint16_t	item_param_id;
-//
-//	uint16_t	network_id;
-//	uint16_t	transport_stream_id;
-//	uint16_t	service_id;
-//
-//	//m_pViewEpg->Reset();
-//
-//	CTreeCtrl& treeCtrl = GetTreeCtrl();
-//	HTREEITEM hSelItem = treeCtrl.GetSelectedItem();
-//
-//	item_code = (DWORD)treeCtrl.GetItemData(hSelItem);
-//	item_style = (item_code & 0xf0000000) >> 28;
-//	item_param_id = (item_code & 0x0000ffff);
-//
-//	if (item_style == TREEITEM_STYLE_SERVICE)
-//	{
-//		service_id = item_param_id;
-//		HTREEITEM hParentItem = treeCtrl.GetParentItem(hSelItem);
-//
-//		uint32_t parent_item_code = (DWORD)treeCtrl.GetItemData(hParentItem);
-//		uint8_t parent_item_style = (parent_item_code & 0xf0000000) >> 28;
-//		uint16_t parent_item_param_id = (parent_item_code & 0x0000ffff);
-//
-//		assert(parent_item_style == TREEITEM_STYLE_STREAM);
-//		transport_stream_id = parent_item_param_id;
-//
-//		HTREEITEM hGrandParentItem = treeCtrl.GetParentItem(hParentItem);
-//
-//		uint32_t grandparent_item_code = (DWORD)treeCtrl.GetItemData(hGrandParentItem);
-//		uint8_t grandparent_item_style = (grandparent_item_code & 0xf0000000) >> 28;
-//		uint16_t grandparent_item_param_id = (grandparent_item_code & 0x0000ffff);
-//
-//		assert(grandparent_item_style == TREEITEM_STYLE_NETWORK);
-//		network_id = grandparent_item_param_id;
-//
-//		//m_pViewEpg->Update(network_id, transport_stream_id, service_id);
-//	}
-//	else if (item_style == TREEITEM_STYLE_STREAM)
-//	{
-//		transport_stream_id = item_param_id;
-//		HTREEITEM hParentItem = treeCtrl.GetParentItem(hSelItem);
-//
-//		uint32_t parent_item_code = (DWORD)treeCtrl.GetItemData(hParentItem);
-//		uint8_t parent_item_style = (parent_item_code & 0xf0000000) >> 28;
-//		uint16_t parent_item_param_id = (parent_item_code & 0x0000ffff);
-//
-//		assert(parent_item_style == TREEITEM_STYLE_NETWORK);
-//		network_id = parent_item_param_id;
-//
-//		//m_pViewEpg->Update(network_id, transport_stream_id, 0xFFFF);
-//	}
-//	else if (item_style == TREEITEM_STYLE_NETWORK)
-//	{
-//		network_id = item_param_id;
-//		//m_pViewEpg->Update(network_id, 0xFFFF, 0xFFFF);
-//	}
-//
-//	*pResult = 0;
-//}
+void CNaviTree_Services::OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+
+	//TVITEM item = pNMTreeView->itemNew;
+	//HTREEITEM hSelItem = item.hItem;
+
+	//if (item.mask & TVIF_PARAM)
+	//{
+	//	DWORD uiValue = (DWORD)(item.lParam);
+
+	//	uint32_t	item_code;
+	//	uint8_t		item_style;
+	//	uint16_t	item_param_id;
+
+	//	uint16_t	network_id = 0xffff;
+	//	uint16_t	transport_stream_id = 0xffff;
+	//	uint16_t	service_id = 0xffff;
+
+	//	CTreeCtrl& treeCtrl = GetTreeCtrl();
+	//	//HTREEITEM hSelItem = treeCtrl.GetSelectedItem();
+
+	//	//item_code = (DWORD)treeCtrl.GetItemData(hSelItem);
+	//	item_code = uiValue;
+	//	item_style = (item_code & 0xf0000000) >> 28;
+	//	item_param_id = (item_code & 0x0000ffff);
+
+	//	if (item_style == TREEITEM_STYLE_SERVICE)
+	//	{
+	//		service_id = item_param_id;
+	//		HTREEITEM hParentItem = treeCtrl.GetParentItem(hSelItem);
+
+	//		uint32_t parent_item_code = (DWORD)treeCtrl.GetItemData(hParentItem);
+	//		uint8_t parent_item_style = (parent_item_code & 0xf0000000) >> 28;
+	//		uint16_t parent_item_param_id = (parent_item_code & 0x0000ffff);
+
+	//		assert(parent_item_style == TREEITEM_STYLE_STREAM);
+	//		transport_stream_id = parent_item_param_id;
+
+	//		HTREEITEM hGrandParentItem = treeCtrl.GetParentItem(hParentItem);
+
+	//		uint32_t grandparent_item_code = (DWORD)treeCtrl.GetItemData(hGrandParentItem);
+	//		uint8_t grandparent_item_style = (grandparent_item_code & 0xf0000000) >> 28;
+	//		uint16_t grandparent_item_param_id = (grandparent_item_code & 0x0000ffff);
+
+	//		assert(grandparent_item_style == TREEITEM_STYLE_NETWORK);
+	//		network_id = grandparent_item_param_id;
+
+	//		WPARAM wParam = (network_id << 16) | transport_stream_id;
+
+	//		::SendMessage(m_hwndReceiver, WM_USER_SERVICE_SEL_CHANGE, wParam, service_id);
+	//	}
+	//	//else if (item_style == TREEITEM_STYLE_STREAM)
+	//	//{
+	//	//	transport_stream_id = item_param_id;
+	//	//	HTREEITEM hParentItem = treeCtrl.GetParentItem(hSelItem);
+
+	//	//	uint32_t parent_item_code = (DWORD)treeCtrl.GetItemData(hParentItem);
+	//	//	uint8_t parent_item_style = (parent_item_code & 0xf0000000) >> 28;
+	//	//	uint16_t parent_item_param_id = (parent_item_code & 0x0000ffff);
+
+	//	//	assert(parent_item_style == TREEITEM_STYLE_NETWORK);
+	//	//	network_id = parent_item_param_id;
+
+	//	//	//m_pViewEpg->Update(network_id, transport_stream_id, 0xFFFF);
+	//	//}
+	//	//else if (item_style == TREEITEM_STYLE_NETWORK)
+	//	//{
+	//	//	network_id = item_param_id;
+	//	//	//m_pViewEpg->Update(network_id, 0xFFFF, 0xFFFF);
+	//	//}
+	//}
+
+	*pResult = 0;
+}
+
+
+void CNaviTree_Services::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	// TODO: 在此添加控件通知处理程序代码
+
+	//消息中继
+	uint32_t	item_code;
+	uint8_t		item_style;
+	uint16_t	item_param_id;
+
+	uint16_t	network_id = 0xFFFF;
+	uint16_t	transport_stream_id = 0xFFFF;
+	uint16_t	service_id = 0xFFFF;
+
+	CTreeCtrl& treeCtrl = GetTreeCtrl();
+	HTREEITEM hSelItem = treeCtrl.GetSelectedItem();
+
+	item_code = (DWORD)treeCtrl.GetItemData(hSelItem);
+	item_style = (item_code & 0xf0000000) >> 28;
+	item_param_id = (item_code & 0x0000ffff);
+
+	if (item_style == TREEITEM_STYLE_SERVICE)
+	{
+		service_id = item_param_id;
+		HTREEITEM hParentItem = treeCtrl.GetParentItem(hSelItem);
+
+		uint32_t parent_item_code = (DWORD)treeCtrl.GetItemData(hParentItem);
+		uint8_t parent_item_style = (parent_item_code & 0xf0000000) >> 28;
+		uint16_t parent_item_param_id = (parent_item_code & 0x0000ffff);
+
+		assert(parent_item_style == TREEITEM_STYLE_STREAM);
+		transport_stream_id = parent_item_param_id;
+
+		HTREEITEM hGrandParentItem = treeCtrl.GetParentItem(hParentItem);
+
+		uint32_t grandparent_item_code = (DWORD)treeCtrl.GetItemData(hGrandParentItem);
+		uint8_t grandparent_item_style = (grandparent_item_code & 0xf0000000) >> 28;
+		uint16_t grandparent_item_param_id = (grandparent_item_code & 0x0000ffff);
+
+		assert(grandparent_item_style == TREEITEM_STYLE_NETWORK);
+		network_id = grandparent_item_param_id;
+	}
+	else if (item_style == TREEITEM_STYLE_STREAM)
+	{
+		transport_stream_id = item_param_id;
+		HTREEITEM hParentItem = treeCtrl.GetParentItem(hSelItem);
+
+		uint32_t parent_item_code = (DWORD)treeCtrl.GetItemData(hParentItem);
+		uint8_t parent_item_style = (parent_item_code & 0xf0000000) >> 28;
+		uint16_t parent_item_param_id = (parent_item_code & 0x0000ffff);
+
+		assert(parent_item_style == TREEITEM_STYLE_NETWORK);
+		network_id = parent_item_param_id;
+	}
+	else if (item_style == TREEITEM_STYLE_NETWORK)
+	{
+		network_id = item_param_id;
+	}
+
+	WPARAM wParam = (network_id << 16) | transport_stream_id;
+	::SendMessage(m_hwndReceiver, WM_USER_SERVICE_SEL_CHANGE, wParam, service_id);
+
+	*pResult = 0;
+}
 
 void CNaviTree_Services::DeleteChildItems(HTREEITEM hParentItem)
 {
@@ -545,154 +630,4 @@ void CNaviTree_Services::DeleteChildItems(HTREEITEM hParentItem)
 			}
 		}
 	}
-}
-
-
-void CNaviTree_Services::OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
-{
-	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
-	// TODO: 在此添加控件通知处理程序代码
-
-	TVITEM item = pNMTreeView->itemNew;
-	HTREEITEM hSelItem = item.hItem;
-
-	if (item.mask & TVIF_PARAM)
-	{
-		DWORD uiValue = (DWORD)(item.lParam);
-
-		uint32_t	item_code;
-		uint8_t		item_style;
-		uint16_t	item_param_id;
-
-		uint16_t	network_id = 0xffff;
-		uint16_t	transport_stream_id = 0xffff;
-		uint16_t	service_id = 0xffff;
-
-		CTreeCtrl& treeCtrl = GetTreeCtrl();
-		//HTREEITEM hSelItem = treeCtrl.GetSelectedItem();
-
-		//item_code = (DWORD)treeCtrl.GetItemData(hSelItem);
-		item_code = uiValue;
-		item_style = (item_code & 0xf0000000) >> 28;
-		item_param_id = (item_code & 0x0000ffff);
-
-		if (item_style == TREEITEM_STYLE_SERVICE)
-		{
-			service_id = item_param_id;
-			HTREEITEM hParentItem = treeCtrl.GetParentItem(hSelItem);
-
-			uint32_t parent_item_code = (DWORD)treeCtrl.GetItemData(hParentItem);
-			uint8_t parent_item_style = (parent_item_code & 0xf0000000) >> 28;
-			uint16_t parent_item_param_id = (parent_item_code & 0x0000ffff);
-
-			assert(parent_item_style == TREEITEM_STYLE_STREAM);
-			transport_stream_id = parent_item_param_id;
-
-			HTREEITEM hGrandParentItem = treeCtrl.GetParentItem(hParentItem);
-
-			uint32_t grandparent_item_code = (DWORD)treeCtrl.GetItemData(hGrandParentItem);
-			uint8_t grandparent_item_style = (grandparent_item_code & 0xf0000000) >> 28;
-			uint16_t grandparent_item_param_id = (grandparent_item_code & 0x0000ffff);
-
-			assert(grandparent_item_style == TREEITEM_STYLE_NETWORK);
-			network_id = grandparent_item_param_id;
-
-			WPARAM wParam = (network_id << 16) | transport_stream_id;
-
-			//::SendMessage(m_hwndReceiver, WM_NOTIFY, wParam, (LPARAM)pNMHDR);
-			::SendMessage(m_hwndReceiver, WM_USER_SEL_CHANGE, wParam, service_id);
-		}
-		//else if (item_style == TREEITEM_STYLE_STREAM)
-		//{
-		//	transport_stream_id = item_param_id;
-		//	HTREEITEM hParentItem = treeCtrl.GetParentItem(hSelItem);
-
-		//	uint32_t parent_item_code = (DWORD)treeCtrl.GetItemData(hParentItem);
-		//	uint8_t parent_item_style = (parent_item_code & 0xf0000000) >> 28;
-		//	uint16_t parent_item_param_id = (parent_item_code & 0x0000ffff);
-
-		//	assert(parent_item_style == TREEITEM_STYLE_NETWORK);
-		//	network_id = parent_item_param_id;
-
-		//	//m_pViewEpg->Update(network_id, transport_stream_id, 0xFFFF);
-		//}
-		//else if (item_style == TREEITEM_STYLE_NETWORK)
-		//{
-		//	network_id = item_param_id;
-		//	//m_pViewEpg->Update(network_id, 0xFFFF, 0xFFFF);
-		//}
-	}
-
-	*pResult = 0;
-}
-
-
-void CNaviTree_Services::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
-{
-	// TODO: 在此添加控件通知处理程序代码
-
-	//消息中继
-//	uint32_t	item_code;
-//	uint8_t		item_style;
-//	uint16_t	item_param_id;
-//
-//	uint16_t	network_id;
-//	uint16_t	transport_stream_id;
-//	uint16_t	service_id;
-//
-//	//m_pViewEpg->Reset();
-//
-//	CTreeCtrl& treeCtrl = GetTreeCtrl();
-//	HTREEITEM hSelItem = treeCtrl.GetSelectedItem();
-//
-//	item_code = (DWORD)treeCtrl.GetItemData(hSelItem);
-//	item_style = (item_code & 0xf0000000) >> 28;
-//	item_param_id = (item_code & 0x0000ffff);
-//
-//	if (item_style == TREEITEM_STYLE_SERVICE)
-//	{
-//		service_id = item_param_id;
-//		HTREEITEM hParentItem = treeCtrl.GetParentItem(hSelItem);
-//
-//		uint32_t parent_item_code = (DWORD)treeCtrl.GetItemData(hParentItem);
-//		uint8_t parent_item_style = (parent_item_code & 0xf0000000) >> 28;
-//		uint16_t parent_item_param_id = (parent_item_code & 0x0000ffff);
-//
-//		assert(parent_item_style == TREEITEM_STYLE_STREAM);
-//		transport_stream_id = parent_item_param_id;
-//
-//		HTREEITEM hGrandParentItem = treeCtrl.GetParentItem(hParentItem);
-//
-//		uint32_t grandparent_item_code = (DWORD)treeCtrl.GetItemData(hGrandParentItem);
-//		uint8_t grandparent_item_style = (grandparent_item_code & 0xf0000000) >> 28;
-//		uint16_t grandparent_item_param_id = (grandparent_item_code & 0x0000ffff);
-//
-//		assert(grandparent_item_style == TREEITEM_STYLE_NETWORK);
-//		network_id = grandparent_item_param_id;
-//
-//		//m_pViewEpg->Update(network_id, transport_stream_id, service_id);
-//	}
-//	else if (item_style == TREEITEM_STYLE_STREAM)
-//	{
-//		transport_stream_id = item_param_id;
-//		HTREEITEM hParentItem = treeCtrl.GetParentItem(hSelItem);
-//
-//		uint32_t parent_item_code = (DWORD)treeCtrl.GetItemData(hParentItem);
-//		uint8_t parent_item_style = (parent_item_code & 0xf0000000) >> 28;
-//		uint16_t parent_item_param_id = (parent_item_code & 0x0000ffff);
-//
-//		assert(parent_item_style == TREEITEM_STYLE_NETWORK);
-//		network_id = parent_item_param_id;
-//
-//		//m_pViewEpg->Update(network_id, transport_stream_id, 0xFFFF);
-//	}
-//	else if (item_style == TREEITEM_STYLE_NETWORK)
-//	{
-//		network_id = item_param_id;
-//		//m_pViewEpg->Update(network_id, 0xFFFF, 0xFFFF);
-//	}
-//
-	//::SendMessage(m_hwndReceiver, WM_NOTIFY, NULL, (LPARAM)pNMHDR);
-
-	*pResult = 0;
 }

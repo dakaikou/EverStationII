@@ -20,7 +20,7 @@
 #include "..\Common\HexEditView_ByteBuffer.h"
 #endif
 #include "..\resource.h"
-#include "SplitterWnd_PsiSiAnalyzer.h"
+//#include "SplitterWnd_PsiSiAnalyzer.h"
 
 class CDlg_TSAnalyzer_PsiSi : public CDialog
 {
@@ -81,6 +81,7 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
+	afx_msg LRESULT OnReportPsiSiSelChange(WPARAM wParam, LPARAM lParam);
 public:
 	afx_msg void OnDestroy();
 };

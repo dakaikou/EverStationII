@@ -16,6 +16,20 @@
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_Table.h"
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_DSMCC_Table.h"
 
+//要求实现为信息展示的独立功能控件，不依赖其他兄弟窗口，不应该知道父窗口是谁，只要知道父窗口句柄即可
+//若确实需要与其他兄弟窗口交互，应将消息中继回父窗口
+//chendelin 2019.4.29
+
+//输入：PSI/SI表，见中间件层PsiSiTable的定义
+//      数据库
+//      接受消息的（父）窗口句柄
+//输出：通过用户自定义消息的形式告知调用者当前所选中业务的ES_id
+
+#define WM_USER_OCDC_SEL_CHANGE		  WM_USER + 0x6138
+#define WM_USER_OCDC_DOWNLOAD_PREPARE WM_USER + 0x06AF
+#define WM_USER_OCDC_DOWNLOAD_START   WM_USER + 0x459e
+#define WM_USER_OCDC_APPEND_PID		  WM_USER + 0x4248
+
 #define LISTITEM_COL_INDEX_MARK				0
 #define LISTITEM_COL_INDEX_TS_PID			1
 #define LISTITEM_COL_INDEX_SERVICE_ID		2
@@ -43,18 +57,18 @@ public:
 
 protected:
 	CAROUSEL_COL_ITEM_t  m_stColHeader[LISTITEM_COL_COUNT];
-
+	HWND	m_hwndReceiver;
 // Attributes
 public:
-	CTreeView_PacketSyntax * m_pInfoTree;
+	//CTreeView_PacketSyntax * m_pInfoTree;
 
 // Operations
 protected:
-	void OC_BuildDownloadTable(uint16_t PID, uint32_t downloadId, uint16_t moduleId, uint32_t objectKey_data, char* pszDir);
+	//void OC_BuildDownloadTable(uint16_t PID, uint32_t downloadId, uint16_t moduleId, uint32_t objectKey_data, char* pszDir);
 
 public:
 	void Reset(void);
-	void Set(int offline);
+	void Set(HWND hwndReceiver, int offline = 1);
 	void UpdatePMT(CPMT* pPMT);
 	void UpdateSDT(CSDT* pSDT);
 	void UpdateDSMCC(CPVT* pPVT);

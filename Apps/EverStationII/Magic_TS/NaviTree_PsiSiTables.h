@@ -4,15 +4,27 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// Pane_PsisiSyntaxTreeview.h : header file
+// NaviTree_PsiSiTables.h : header file
 //
 
 /////////////////////////////////////////////////////////////////////////////
-// CPane_PsiSiTableTreeView view
-#include "..\Common\define.h"
-#include "..\Magic_TS\TSMagic_GuiApi.h"
+// CNaviTree_PsiSiTables view
+//#include "..\Common\define.h"
 
 #include <afxcview.h>
+#include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_PSISI_Table.h"
+#include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_DSMCC_Table.h"
+
+//要求实现为信息展示的独立功能控件，不依赖其他兄弟窗口，不应该知道父窗口是谁，只要知道父窗口句柄即可
+//若确实需要与其他兄弟窗口交互，应将消息中继回父窗口
+//chendelin 2019.4.29
+
+//输入：PSI/SI表，见中间件层PsiSiTable的定义
+//      数据库
+//      接受消息的（父）窗口句柄
+//输出：通过用户自定义消息的形式告知调用者当前所选中业务的bouquet_id
+
+#define WM_USER_PSISI_SEL_CHANGE		 WM_USER + 0x2c30
 
 class CNaviTree_PsiSiTables : public CTreeView
 {
@@ -46,6 +58,8 @@ protected:
 
 	CImageList		m_ImageList;
 
+	HWND			m_hwndReceiver;
+
 // Operations
 public:
 	void UpdateCMT(CCMT* pCMT);
@@ -68,7 +82,7 @@ public:
 	void UpdateMPE(int section_number, CMPE* pMPE);
 
 	void Reset(void);
-	//void Set(int offline);
+	void Set(HWND hwndReceiver, int offline = 1);
 
 protected:
 	//void SetTriggerParams(CTrigger_PsiSiSection* pSectionTrigger, uint32_t dwID);
@@ -81,11 +95,11 @@ private:
 
 // Overrides
 	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CPane_PsiSiTableTreeView)
+	//{{AFX_VIRTUAL(CNaviTree_PsiSiTables)
 	public:
 	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
-	protected:
 	virtual void OnDraw(CDC* pDC);      // overridden to draw this view
+protected:
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -98,12 +112,14 @@ public:
 
 	// Generated message map functions
 protected:
-	//{{AFX_MSG(CPane_PsiSiTableTreeView)
+	//{{AFX_MSG(CNaviTree_PsiSiTables)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void OnDblclk(NMHDR* pNMHDR, LRESULT* pResult);
+	//afx_msg void OnDblclk(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
+public:
 };
 
 /////////////////////////////////////////////////////////////////////////////

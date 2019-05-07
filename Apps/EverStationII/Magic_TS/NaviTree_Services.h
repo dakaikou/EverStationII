@@ -9,31 +9,19 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // CNaviTree_Services view
-#include "..\Common\define.h"
-#include "..\Magic_TS\TSMagic_GuiApi.h"
-
 #include <afxcview.h>
 
-//要求实现为信息展示的功能控件，不能知道其他控件
-//若确实需要与其他控件交互，应将消息反射回父窗口
+#include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_PSISI_Table.h"
+
+//要求实现为信息展示的独立功能控件，不依赖其他兄弟窗口，不应该知道父窗口是谁，只要知道父窗口句柄即可
+//若确实需要与其他兄弟窗口交互，应将消息中继回父窗口
 //chendelin 2019.4.28
 
-//输入：SDT表，NIT表
+//输入：SDT表，NIT表，见中间件层PsiSiTable的定义
 //      数据库
-//      接受消息的（父）窗口
-//输出：通过用户自定义消息的形式告知调用者当前选中的业务的network_id,transport_stream_id和service_id
-
-#define TREEITEM_STYLE_NETWORK	 0x1
-#define TREEITEM_STYLE_STREAM	 0x2
-#define TREEITEM_STYLE_SERVICE	 0x3
-#define TREEITEM_STYLE_NULL		 0xf
-
-#define WM_USER_SEL_CHANGE		 WM_USER + 0x7D6E
-//+------+----------------------+--------------------------+
-//|   4  |          12          |            16            |
-//+------+----------------------+--------------------------+
-//  类型         reserved                    ID
-
+//      接受消息的（父）窗口句柄
+//输出：通过用户自定义消息的形式告知调用者当前所选中业务的network_id,transport_stream_id和service_id
+#define WM_USER_SERVICE_SEL_CHANGE		 WM_USER + 0x7D6E
 
 class CNaviTree_Services : public CTreeView
 {

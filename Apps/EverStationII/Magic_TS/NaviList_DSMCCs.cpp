@@ -18,12 +18,11 @@ static char THIS_FILE[] = __FILE__;
 #include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_table_id.h"
 #include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Descriptor.h"
 
-#include "Utilities\Directory\Include\TOOL_Directory.h"
+//#include "Utilities\Directory\Include\TOOL_Directory.h"
 
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 
-#include "TSMagic_Dsmcc_Download.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CListView_ServiceInfo
@@ -32,18 +31,20 @@ IMPLEMENT_DYNCREATE(CNaviList_DSMCCs, CListView)
 
 CNaviList_DSMCCs::CNaviList_DSMCCs()
 {
+	m_hwndReceiver = NULL;
 }
 
 CNaviList_DSMCCs::~CNaviList_DSMCCs()
 {
+	m_hwndReceiver = NULL;
 }
 
 
 BEGIN_MESSAGE_MAP(CNaviList_DSMCCs, CListView)
 	//{{AFX_MSG_MAP(CListView_ServiceInfo)
 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 	ON_WM_SIZE()
+	//}}AFX_MSG_MAP
 	ON_NOTIFY_REFLECT(NM_DBLCLK, &CNaviList_DSMCCs::OnNMDblclk)
 	ON_NOTIFY_REFLECT(NM_RCLICK, &CNaviList_DSMCCs::OnNMRClick)
 	ON_COMMAND(ID_OCDC_DOWNLOAD, &CNaviList_DSMCCs::OnOcdcDownload)
@@ -84,8 +85,9 @@ BOOL CNaviList_DSMCCs::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWO
 	return CWnd::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext);
 }
 
-void CNaviList_DSMCCs::Set(int offline)
+void CNaviList_DSMCCs::Set(HWND hwndReceiver, int offline)
 {
+	m_hwndReceiver = hwndReceiver;
 }
 
 void CNaviList_DSMCCs::Reset(void)
@@ -453,37 +455,38 @@ void CNaviList_DSMCCs::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 	int nSel = listCtrl.GetSelectionMark();
 	if (nSel >= 0)
 	{
-		m_pInfoTree->Reset();
+		//m_pInfoTree->Reset();
 
 		//char* str;
 		//listCtrl.GetItemText(nSel, LISTITEM_COL_INDEX_TS_PID, pszTemp, sizeof(pszTemp));
 		////usPID = (uint16_t)strtol(pszTemp, &str, 16);
 		//sscanf_s(pszTemp, "0x%04X", &usPID);
 		usPID = (uint16_t)listCtrl.GetItemData(nSel);
+		::SendMessage(m_hwndReceiver, WM_USER_OCDC_SEL_CHANGE, NULL, usPID);
 
-		CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-		CDB_PsiSiObjs* pDB_PsiSiObjs = pTSMagicView->GetPsiSiObjsDBase();
-
-		TALForXMLDoc xmlDoc;
-		pDB_PsiSiObjs->BuildDsmccTree(usPID, &xmlDoc);
-		m_pInfoTree->ShowXMLDoc(&xmlDoc);
-
-#ifdef _DEBUG
-		char	pszExeFile[MAX_PATH];
-		char	exeDrive[3];
-		char	pszXmlDir[MAX_PATH];
-		char	pszFilePath[MAX_PATH];
-		GetModuleFileName(NULL, pszExeFile, MAX_PATH);
-		exeDrive[0] = pszExeFile[0];
-		exeDrive[1] = pszExeFile[1];
-		exeDrive[2] = '\0';
-
-		sprintf_s(pszXmlDir, sizeof(pszXmlDir), "%s\\~EverStationII\\xml", exeDrive);
-		DIR_BuildDirectory(pszXmlDir);
-
-		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\DSMCC_sematics_0x%04X.xml", pszXmlDir, usPID);
-		xmlDoc.SaveFile(pszFilePath);
-#endif
+//		CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+//		CDB_PsiSiObjs* pDB_PsiSiObjs = pTSMagicView->GetPsiSiObjsDBase();
+//
+//		TALForXMLDoc xmlDoc;
+//		pDB_PsiSiObjs->BuildDsmccTree(usPID, &xmlDoc);
+//		m_pInfoTree->ShowXMLDoc(&xmlDoc);
+//
+//#ifdef _DEBUG
+//		char	pszExeFile[MAX_PATH];
+//		char	exeDrive[3];
+//		char	pszXmlDir[MAX_PATH];
+//		char	pszFilePath[MAX_PATH];
+//		GetModuleFileName(NULL, pszExeFile, MAX_PATH);
+//		exeDrive[0] = pszExeFile[0];
+//		exeDrive[1] = pszExeFile[1];
+//		exeDrive[2] = '\0';
+//
+//		sprintf_s(pszXmlDir, sizeof(pszXmlDir), "%s\\~EverStationII\\xml", exeDrive);
+//		DIR_BuildDirectory(pszXmlDir);
+//
+//		sprintf_s(pszFilePath, sizeof(pszFilePath), "%s\\DSMCC_sematics_0x%04X.xml", pszXmlDir, usPID);
+//		xmlDoc.SaveFile(pszFilePath);
+//#endif
 	}
 
 	*pResult = 0;
@@ -530,32 +533,36 @@ void CNaviList_DSMCCs::OnOcdcDownload(void)
 
 	uint32_t	usPID;
 
-	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	//CDB_PsiSiTables* pDB_PsiSiTables = pTSMagicView->GetPsiSiTablesDBase();
-	CDB_OCDCs* pDB_OCDCs = pTSMagicView->GetOCDCsDBase();
+	//CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+	//CDB_OCDCs* pDB_OCDCs = pTSMagicView->GetOCDCsDBase();
 
-	pDB_OCDCs->Reset();
+	//pDB_OCDCs->Reset();
 
 	CListCtrl& listCtrl = GetListCtrl();
 
 	item_count = listCtrl.GetItemCount();
-	for (item_index = 0; item_index < item_count; item_index++)
+	if (item_count > 0)
 	{
-		state = listCtrl.GetItemState(item_index, LVIS_SELECTED);
-		if ((state & LVIS_SELECTED) == LVIS_SELECTED)
+		::SendMessage(m_hwndReceiver, WM_USER_OCDC_DOWNLOAD_PREPARE, NULL, NULL);
+		for (item_index = 0; item_index < item_count; item_index++)
 		{
-			//listCtrl.GetItemText(item_index, LISTITEM_COL_INDEX_TS_PID, pszTemp, sizeof(pszTemp));
-			//usPID = (uint16_t)strtol(pszTemp, &str, 16);
-			//sscanf_s(pszTemp, "0x%04X", &usPID);
-			usPID = (uint16_t)listCtrl.GetItemData(item_index);
+			state = listCtrl.GetItemState(item_index, LVIS_SELECTED);
+			if ((state & LVIS_SELECTED) == LVIS_SELECTED)
+			{
+				//listCtrl.GetItemText(item_index, LISTITEM_COL_INDEX_TS_PID, pszTemp, sizeof(pszTemp));
+				//usPID = (uint16_t)strtol(pszTemp, &str, 16);
+				//sscanf_s(pszTemp, "0x%04X", &usPID);
+				usPID = (uint16_t)listCtrl.GetItemData(item_index);
+				::SendMessage(m_hwndReceiver, WM_USER_OCDC_APPEND_PID, NULL, usPID);
 
-			DOWNLOAD_INFO_t stDownloadInfo;
-			stDownloadInfo.usCandidatePID = usPID;
-			pDB_OCDCs->AppendDownloadInfo(&stDownloadInfo);
+				//DOWNLOAD_INFO_t stDownloadInfo;
+				//stDownloadInfo.usCandidatePID = usPID;
+				//pDB_OCDCs->AppendDownloadInfo(&stDownloadInfo);
+			}
 		}
+		::SendMessage(m_hwndReceiver, WM_USER_OCDC_DOWNLOAD_START, NULL, NULL);
 	}
-
-	pTSMagicView->m_kThreadParams.dsmcc_download_thread_running = 0;
-	pTSMagicView->m_kThreadParams.dsmcc_download_thread_stopped = 0;
-	::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_dsmcc_download_thread, (LPVOID)&(pTSMagicView->m_kThreadParams), 0, 0);
+	//pTSMagicView->m_kThreadParams.dsmcc_download_thread_running = 0;
+	//pTSMagicView->m_kThreadParams.dsmcc_download_thread_stopped = 0;
+	//::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_dsmcc_download_thread, (LPVOID)&(pTSMagicView->m_kThreadParams), 0, 0);
 }

@@ -17,6 +17,7 @@ static char THIS_FILE[] = __FILE__;
 #include "..\resource.h"
 
 #include "TSMagicView.h"
+#include "../Magic_TS/TSMagic_GuiApi_MSG.h"
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_PesEs dialog
 
@@ -46,8 +47,8 @@ CDlg_TSAnalyzer_PesEs::CDlg_TSAnalyzer_PesEs(CWnd* pParent /*=NULL*/)
 
 	//fp_debug = NULL;
 
-	m_pTree = NULL;
-	m_pList = NULL;
+	m_pSyntaxTree = NULL;
+	m_pHexList = NULL;
 }
 
 void CDlg_TSAnalyzer_PesEs::DoDataExchange(CDataExchange* pDX)
@@ -61,9 +62,9 @@ void CDlg_TSAnalyzer_PesEs::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_PesEs, CDialog)
 	//{{AFX_MSG_MAP(CDlg_TSAnalyzer_PesEs)
 	ON_WM_SIZE()
-	//}}AFX_MSG_MAP
-	
 	ON_WM_DESTROY()
+	//}}AFX_MSG_MAP
+	ON_MESSAGE(WM_USER_ES_SEL_CHANGE, OnReportEsSelChange)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -95,16 +96,18 @@ BOOL CDlg_TSAnalyzer_PesEs::OnInitDialog()
 
 		m_wndSplitter.MoveWindow(&rect);
 
-		m_pPane = (CNaviTree_ESs*)m_wndSplitter.GetPane(0, 0);
+		m_pNaviPane = (CNaviTree_ESs*)m_wndSplitter.GetPane(0, 0);
+		m_pNaviPane->Set(this->GetSafeHwnd());
+
 		//m_pTree = (CTreeView_PesEsSyntax*)m_wndSplitter.GetPane(0, 1);
-		m_pTree = (CTreeView_PacketSyntax*)m_wndSplitter.GetPane(0, 1);
-		m_pTree->Init("PES/ES 语法分析");
-		m_pTree->m_hNotifyParent = GetSafeHwnd();
+		m_pSyntaxTree = (CTreeView_PacketSyntax*)m_wndSplitter.GetPane(0, 1);
+		m_pSyntaxTree->Init("PES/ES 语法分析");
+		m_pSyntaxTree->m_hNotifyParent = GetSafeHwnd();
 #if BYTE_BUFFER_USE_LISTCTRL_VIEW
-		m_pList = (CListView_ByteBuffer*)m_wndSplitter.GetPane(0, 2);
+		m_pHexList = (CListView_ByteBuffer*)m_wndSplitter.GetPane(0, 2);
 #else
-		m_pList = (CHexEditView_ByteBuffer*)m_wndSplitter.GetPane(0, 2);
-		m_pList->SetBPR(16);
+		m_pHexList = (CHexEditView_ByteBuffer*)m_wndSplitter.GetPane(0, 2);
+		m_pHexList->SetBPR(16);
 #endif
 	}
 	//m_pActiveAudDecoder = NULL;
@@ -189,9 +192,9 @@ void CDlg_TSAnalyzer_PesEs::OnSize(UINT nType, int cx, int cy)
 
 void CDlg_TSAnalyzer_PesEs::Reset(void)
 {
-	m_pPane->Reset();
-	m_pTree->Reset();
-	m_pList->Reset();
+	m_pNaviPane->Reset();
+	m_pSyntaxTree->Reset();
+	m_pHexList->Reset();
 
 	//CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 	//CWnd* pWnd;
@@ -293,7 +296,7 @@ void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(uint32_t uiPESStyle, uint8_t* pes_b
 	uint16_t PID = (uiPESStyle & 0x1fff0000) >> 16;
 	uint8_t class_type = (uiPESStyle & 0xE0000000) >> 29;
 
-	if ((m_pList != NULL) && (m_pTree != NULL))
+	if ((m_pHexList != NULL) && (m_pSyntaxTree != NULL))
 	{
 		TALForXMLDoc xml2Doc;
 
@@ -385,8 +388,8 @@ void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(uint32_t uiPESStyle, uint8_t* pes_b
 			pxmlPayloadNode->SetAttribute("display_options", "expanded");
 		}
 
-		m_pTree->Reset();
-		m_pTree->ShowXMLDoc(&xml2Doc);
+		//m_pSyntaxTree->Reset();
+		m_pSyntaxTree->ShowXMLDoc(&xml2Doc);
 
 #ifdef _DEBUG
 		char	pszExeFile[MAX_PATH];
@@ -405,8 +408,8 @@ void CDlg_TSAnalyzer_PesEs::DisplayPESPacket(uint32_t uiPESStyle, uint8_t* pes_b
 		xml2Doc.SaveFile(pszFilePath);
 #endif
 
-		m_pList->Reset();
-		m_pList->DisplayByteBuffer(pes_buf, pes_size);
+		//m_pHexList->Reset();
+		m_pHexList->DisplayByteBuffer(pes_buf, pes_size);
 	}
 }
 
@@ -1169,12 +1172,12 @@ void CDlg_TSAnalyzer_PesEs::DisplayUnknownESPacket(uint8_t* es_buf, int es_size,
 
 void CDlg_TSAnalyzer_PesEs::UpdatePAT(CPAT* pPAT)
 {
-	m_pPane->UpdatePAT(pPAT);
+	m_pNaviPane->UpdatePAT(pPAT);
 }
 
 void CDlg_TSAnalyzer_PesEs::UpdatePMT(CPMT* pPMT)
 {
-	m_pPane->UpdatePMT(pPMT);
+	m_pNaviPane->UpdatePMT(pPMT);
 }
 
 /*
@@ -1237,9 +1240,9 @@ BOOL CDlg_TSAnalyzer_PesEs::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pRes
 	// TODO: 在此添加专用代码和/或调用基类
 	NMHDR* nmhdr = (LPNMHDR)lParam;
 
-	if (m_pTree != NULL)
+	if (m_pSyntaxTree != NULL)
 	{
-		if (nmhdr->hwndFrom == m_pTree->GetSafeHwnd())
+		if (nmhdr->hwndFrom == m_pSyntaxTree->GetSafeHwnd())
 		{
 			if (nmhdr->code == TVN_SELCHANGED)
 			{
@@ -1262,11 +1265,11 @@ BOOL CDlg_TSAnalyzer_PesEs::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pRes
 
 						if ((offset >= 0) && (length > 0))
 						{
-							m_pList->SetSel(offset, offset + length);
+							m_pHexList->SetSel(offset, offset + length);
 						}
 						else
 						{
-							m_pList->SetSel(-1, -1);
+							m_pHexList->SetSel(-1, -1);
 						}
 					}
 				}
@@ -1285,4 +1288,93 @@ void CDlg_TSAnalyzer_PesEs::OnDestroy()
 	CDialog::OnDestroy();
 
 	// TODO: 在此处添加消息处理程序代码
+}
+
+LRESULT CDlg_TSAnalyzer_PesEs::OnReportEsSelChange(WPARAM wParam, LPARAM lParam)
+{
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+	char		  pszText[MAX_TXT_CHARS];
+	int			  nClassType;
+	int			  nPID;
+	int			  nStreamType;
+	int			  nSubType;
+
+	DWORD dwItemData = (uint32_t)lParam;
+
+	if ((dwItemData & 0xffff0000) != 0x00000000)
+	{
+		nClassType = (dwItemData & 0xE0000000) >> 29;
+		nPID = (dwItemData & 0x1FFF0000) >> 16;
+		nStreamType = (dwItemData & 0x0000FF00) >> 8;
+		nSubType = (dwItemData & 0x000000FF);
+
+		if ((nClassType == TSPAYLOAD_CLASS_PES_AUDIO) ||
+			(nClassType == TSPAYLOAD_CLASS_PES_VIDEO) ||
+			(nClassType == TSPAYLOAD_CLASS_PES_DATA))
+		{
+			if (pTSMagicView->m_kThreadParams.main_thread_running)
+			{
+				if ((pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1) ||
+					(pTSMagicView->m_kThreadParams.pes_trigger_thread_running == 1) ||
+					(pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1) ||
+					(pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1) ||
+					(pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1) ||
+					(pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1))
+				{
+					if (pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1)
+					{
+						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现TS捕捉线程尚未结束！");
+						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+					}
+					if (pTSMagicView->m_kThreadParams.pes_trigger_thread_running == 1)
+					{
+						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现PES捕捉线程尚未结束！");
+						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+					}
+					if (pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1)
+					{
+						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现ES捕捉线程尚未结束！");
+						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+					}
+					if (pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1)
+					{
+						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现section捕捉线程尚未结束！");
+						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+					}
+					if (pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1)
+					{
+						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现DSMCC下载线程尚未结束！");
+						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+					}
+					if (pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1)
+					{
+						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现TS录制线程尚未结束！");
+						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+					}
+				}
+				else
+				{
+					m_pSyntaxTree->Reset();
+					m_pHexList->Reset();
+
+					CTrigger_PESPacket* pPESPacketTrigger = pTSMagicView->GetPESPacketTrigger();
+					pPESPacketTrigger->SetMatchParams(-1, nPID, dwItemData, 1);
+					pTSMagicView->m_kThreadParams.hPesEsMsgWnd = pTSMagicView->m_dlgTSAnalyzerPesEs.GetSafeHwnd();
+
+					::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_PES_TRIGGER_STATE, 1, 0);
+
+					if (pTSMagicView->m_kThreadParams.offline == 1)
+					{
+						if (pTSMagicView->m_kThreadParams.main_thread_stopped == 1)
+						{
+							pTSMagicView->m_kThreadParams.pes_trigger_thread_running = 0;
+							::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_pes_trigger_thread, (LPVOID) & (pTSMagicView->m_kThreadParams), 0, 0);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return 0;
 }

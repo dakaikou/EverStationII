@@ -42,12 +42,13 @@ CNaviTree_ESs::~CNaviTree_ESs()
 BEGIN_MESSAGE_MAP(CNaviTree_ESs, CTreeView)
 	//{{AFX_MSG_MAP(CPane_PesEsPIDTreeView)
 	ON_WM_CREATE()
-	ON_NOTIFY_REFLECT(NM_DBLCLK, OnDblclk)
+//	ON_NOTIFY_REFLECT(NM_DBLCLK, OnDblclk)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY_REFLECT(NM_RCLICK, &CNaviTree_ESs::OnNMRClick)
 	ON_COMMAND(ID_ES_VIDEO_PREVIEW, &CNaviTree_ESs::OnEsVideoPreview)
 	ON_COMMAND(ID_ES_AUDIO_PREVIEW, &CNaviTree_ESs::OnEsAudioPreview)
 	ON_COMMAND(ID_ES_SYNTAX_ANALYSE, &CNaviTree_ESs::OnEsSyntaxAnalyse)
+	ON_NOTIFY_REFLECT(NM_DBLCLK, &CNaviTree_ESs::OnNMDblclk)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -319,6 +320,11 @@ void CNaviTree_ESs::UpdatePMT(CPMT* pPMT)
 	}
 }
 
+void CNaviTree_ESs::Set(HWND hwndReceiver, int offline)
+{
+	m_hwndReceiver = hwndReceiver;
+}
+
 void CNaviTree_ESs::Reset(void)
 {
 	char			pszText[MAX_TXT_CHARS];
@@ -361,15 +367,21 @@ void CNaviTree_ESs::DeleteChildItems(HTREEITEM hParentItem)
 	}
 }
 
-
-void CNaviTree_ESs::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult)
+void CNaviTree_ESs::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	// TODO: Add your control notification handler code here
-	FiringCatchThread();
+	// TODO: 在此添加控件通知处理程序代码
+	CTreeCtrl& treeCtrl = GetTreeCtrl();
+
+	HTREEITEM hSelItem = treeCtrl.GetSelectedItem();
+	DWORD dwItemData = (uint32_t)treeCtrl.GetItemData(hSelItem);
+
+	if ((dwItemData & 0xffff0000) != 0x00000000)
+	{
+		::SendMessage(m_hwndReceiver, WM_USER_ES_SEL_CHANGE, NULL, dwItemData);
+	}
 
 	*pResult = 0;
 }
-
 
 void CNaviTree_ESs::OnNMRClick(NMHDR *pNMHDR, LRESULT *pResult)
 {
@@ -438,18 +450,6 @@ void CNaviTree_ESs::OnEsAudioPreview()
 void CNaviTree_ESs::OnEsSyntaxAnalyse()
 {
 	// TODO: 在此添加命令处理程序代码
-	FiringCatchThread();
-}
-
-void CNaviTree_ESs::FiringCatchThread(void)
-{
-	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	char		  pszText[MAX_TXT_CHARS];
-	int			  nClassType;
-	int			  nPID;
-	int			  nStreamType;
-	int			  nSubType;
-
 	CTreeCtrl& treeCtrl = GetTreeCtrl();
 
 	HTREEITEM hSelItem = treeCtrl.GetSelectedItem();
@@ -457,73 +457,93 @@ void CNaviTree_ESs::FiringCatchThread(void)
 
 	if ((dwItemData & 0xffff0000) != 0x00000000)
 	{
-		nClassType = (dwItemData & 0xE0000000) >> 29;
-		nPID = (dwItemData & 0x1FFF0000) >> 16;
-		nStreamType = (dwItemData & 0x0000FF00) >> 8;
-		nSubType = (dwItemData & 0x000000FF);
-
-		if ((nClassType == TSPAYLOAD_CLASS_PES_AUDIO) ||
-			(nClassType == TSPAYLOAD_CLASS_PES_VIDEO) ||
-			(nClassType == TSPAYLOAD_CLASS_PES_DATA))
-		{
-			if (pTSMagicView->m_kThreadParams.main_thread_running)
-			{
-				if ((pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1) ||
-					(pTSMagicView->m_kThreadParams.pes_trigger_thread_running == 1) ||
-					(pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1) ||
-					(pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1) ||
-					(pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1) ||
-					(pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1))
-				{
-					if (pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1)
-					{
-						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现TS捕捉线程尚未结束！");
-						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
-					}
-					if (pTSMagicView->m_kThreadParams.pes_trigger_thread_running == 1)
-					{
-						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现PES捕捉线程尚未结束！");
-						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
-					}
-					if (pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1)
-					{
-						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现ES捕捉线程尚未结束！");
-						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
-					}
-					if (pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1)
-					{
-						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现section捕捉线程尚未结束！");
-						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
-					}
-					if (pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1)
-					{
-						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现DSMCC下载线程尚未结束！");
-						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
-					}
-					if (pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1)
-					{
-						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现TS录制线程尚未结束！");
-						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
-					}
-				}
-				else
-				{
-					CTrigger_PESPacket* pPESPacketTrigger = pTSMagicView->GetPESPacketTrigger();
-					pPESPacketTrigger->SetMatchParams(-1, nPID, dwItemData, 1);
-					pTSMagicView->m_kThreadParams.hPesEsMsgWnd = pTSMagicView->m_dlgTSAnalyzerPesEs.GetSafeHwnd();
-
-					::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_PES_TRIGGER_STATE, 1, 0);
-
-					if (pTSMagicView->m_kThreadParams.offline == 1)
-					{
-						if (pTSMagicView->m_kThreadParams.main_thread_stopped == 1)
-						{
-							pTSMagicView->m_kThreadParams.pes_trigger_thread_running = 0;
-							::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_pes_trigger_thread, (LPVOID)&(pTSMagicView->m_kThreadParams), 0, 0);
-						}
-					}
-				}
-			}
-		}
+		::SendMessage(m_hwndReceiver, WM_USER_ES_SEL_CHANGE, NULL, dwItemData);
 	}
 }
+
+//void CNaviTree_ESs::FiringCatchThread(void)
+//{
+//	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+//	char		  pszText[MAX_TXT_CHARS];
+//	int			  nClassType;
+//	int			  nPID;
+//	int			  nStreamType;
+//	int			  nSubType;
+//
+//	CTreeCtrl& treeCtrl = GetTreeCtrl();
+//
+//	HTREEITEM hSelItem = treeCtrl.GetSelectedItem();
+//	DWORD dwItemData = (uint32_t)treeCtrl.GetItemData(hSelItem);
+//
+//	if ((dwItemData & 0xffff0000) != 0x00000000)
+//	{
+//		nClassType = (dwItemData & 0xE0000000) >> 29;
+//		nPID = (dwItemData & 0x1FFF0000) >> 16;
+//		nStreamType = (dwItemData & 0x0000FF00) >> 8;
+//		nSubType = (dwItemData & 0x000000FF);
+//
+//		if ((nClassType == TSPAYLOAD_CLASS_PES_AUDIO) ||
+//			(nClassType == TSPAYLOAD_CLASS_PES_VIDEO) ||
+//			(nClassType == TSPAYLOAD_CLASS_PES_DATA))
+//		{
+//			if (pTSMagicView->m_kThreadParams.main_thread_running)
+//			{
+//				if ((pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1) ||
+//					(pTSMagicView->m_kThreadParams.pes_trigger_thread_running == 1) ||
+//					(pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1) ||
+//					(pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1) ||
+//					(pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1) ||
+//					(pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1))
+//				{
+//					if (pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1)
+//					{
+//						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现TS捕捉线程尚未结束！");
+//						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+//					}
+//					if (pTSMagicView->m_kThreadParams.pes_trigger_thread_running == 1)
+//					{
+//						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现PES捕捉线程尚未结束！");
+//						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+//					}
+//					if (pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1)
+//					{
+//						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现ES捕捉线程尚未结束！");
+//						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+//					}
+//					if (pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1)
+//					{
+//						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现section捕捉线程尚未结束！");
+//						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+//					}
+//					if (pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1)
+//					{
+//						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现DSMCC下载线程尚未结束！");
+//						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+//					}
+//					if (pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1)
+//					{
+//						sprintf_s(pszText, sizeof(pszText), "PES捕捉：未能启动，因为发现TS录制线程尚未结束！");
+//						::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+//					}
+//				}
+//				else
+//				{
+//					CTrigger_PESPacket* pPESPacketTrigger = pTSMagicView->GetPESPacketTrigger();
+//					pPESPacketTrigger->SetMatchParams(-1, nPID, dwItemData, 1);
+//					pTSMagicView->m_kThreadParams.hPesEsMsgWnd = pTSMagicView->m_dlgTSAnalyzerPesEs.GetSafeHwnd();
+//
+//					::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_PES_TRIGGER_STATE, 1, 0);
+//
+//					if (pTSMagicView->m_kThreadParams.offline == 1)
+//					{
+//						if (pTSMagicView->m_kThreadParams.main_thread_stopped == 1)
+//						{
+//							pTSMagicView->m_kThreadParams.pes_trigger_thread_running = 0;
+//							::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_pes_trigger_thread, (LPVOID)&(pTSMagicView->m_kThreadParams), 0, 0);
+//						}
+//					}
+//				}
+//			}
+//		}
+//	}
+//}

@@ -1,9 +1,1 @@
-﻿  stdafx.cpp
-  MiddleWare_DB_OCDCs.cpp
-  MiddleWare_DB_Pcrs.cpp
-  MiddleWare_DB_PsiSiObjs.cpp
-  MiddleWare_DB_TSPackets.cpp
-  dllmain.cpp
-  正在生成代码...
-    正在创建库 .\lib\MiddleWare_TS_DBasesD(x64).lib 和对象 .\lib\MiddleWare_TS_DBasesD(x64).exp
-  MiddleWare_TS_DBases.vcxproj -> E:\Projects-Mpeg2码流分析仪\软件工程\EverStationII\Debug\x64\MiddleWare_TS_DBasesD(x64).dll
+﻿

@@ -54,9 +54,9 @@ protected:
 	//CDlg_TS_DtsPts				m_dlgDtsPts;
 
 	CSplitterWnd				m_wndSplitter;
-	CNaviTree_ESs*				m_pPane;
-	CTreeView_PacketSyntax*		m_pTree;
-	CHexEditView_ByteBuffer*	m_pList;
+	CNaviTree_ESs*				m_pNaviPane;
+	CTreeView_PacketSyntax*		m_pSyntaxTree;
+	CHexEditView_ByteBuffer*	m_pHexList;
 public:
 
 	void Reset(void);
@@ -140,6 +140,8 @@ public:
 
 	//afx_msg LRESULT OnUpdateAACEsHeader(WPARAM wParam, LPARAM lParam);
 	//afx_msg LRESULT OnUpdateAACEsErrorCheck(WPARAM wParam, LPARAM lParam);
+
+	afx_msg LRESULT OnReportEsSelChange(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);

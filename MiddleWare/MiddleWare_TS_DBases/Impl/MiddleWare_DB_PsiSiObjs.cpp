@@ -993,7 +993,7 @@ int CDB_PsiSiObjs::BuildBouquetTree(uint32_t uiCode, TALForXMLDoc* pxmlDoc)
 		if (pBAT != NULL)
 		{
 			pBAT->GetBouquetName(pszTemp, sizeof(pszTemp));
-			sprintf_s(pszText, sizeof(pszText), "Bouquet分析 <bouquet_id=0x%04X(%d), bouquet_name=%s>", usBouquetID, usBouquetID, pszTemp);
+			sprintf_s(pszText, sizeof(pszText), "Bouquet<bouquet_id=0x%04X(%d), bouquet_name=%s>", usBouquetID, usBouquetID, pszTemp);
 			//设置标题
 
 			//根节点
