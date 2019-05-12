@@ -113,7 +113,7 @@ BOOL CDlg_TriggerWaiting::OnInitDialog()
 void CDlg_TriggerWaiting::OnBtnStop() 
 {
 	// TODO: Add your control notification handler code here
-	CTSMagicView*	pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 	CString strTitle;
 
 	GetWindowText(strTitle);
@@ -124,10 +124,10 @@ void CDlg_TriggerWaiting::OnBtnStop()
 //		assert(pWindow->m_kThreadParams.es_trigger_thread_running == 0);
 //		assert(pWindow->m_kThreadParams.section_trigger_thread_running == 0);
 
-		pWindow->m_kThreadParams.ts_trigger_thread_running = 0;
+		pTSMagicView->m_kThreadParams.ts_trigger_thread_running = 0;
 
 #if GUI_TS_ANALYZER_PK_TRIGGER
-		pWindow->m_dlgPacketTrigger.CancelTrigger();
+		pTSMagicView->m_dlgPacketTrigger.CancelTrigger();
 #endif
 	}
 	else if (strTitle == "PES²¶×½")
@@ -135,14 +135,14 @@ void CDlg_TriggerWaiting::OnBtnStop()
 		//		assert(pWindow->m_kThreadParams.ts_trigger_thread_running == 0);
 		//		assert(pWindow->m_kThreadParams.es_trigger_thread_running == 0);
 
-		pWindow->m_kThreadParams.pes_trigger_thread_running = 0;
+		pTSMagicView->m_kThreadParams.pes_trigger_thread_running = 0;
 	}
 	else if (strTitle == "ES²¶×½")
 	{
 //		assert(pWindow->m_kThreadParams.ts_trigger_thread_running == 0);
 //		assert(pWindow->m_kThreadParams.section_trigger_thread_running == 0);
 
-		pWindow->m_kThreadParams.es_trigger_thread_running = 0;
+		pTSMagicView->m_kThreadParams.es_trigger_thread_running = 0;
 
 //#if GUI_TS_ANALYZER_PESES
 //		pWindow->m_dlgTSAnalyzerPesEs.CancelTrigger();
@@ -154,14 +154,14 @@ void CDlg_TriggerWaiting::OnBtnStop()
 //		assert(pWindow->m_kThreadParams.ts_trigger_thread_running == 0);
 //		assert(pWindow->m_kThreadParams.es_trigger_thread_running == 0);
 
-		pWindow->m_kThreadParams.section_trigger_thread_running = 0;
+		pTSMagicView->m_kThreadParams.section_trigger_thread_running = 0;
 	}
 	else if (strTitle == "DSM-CCÏÂÔØ")
 	{
 //		assert(pWindow->m_kThreadParams.ts_trigger_thread_running == 0);
 //		assert(pWindow->m_kThreadParams.es_trigger_thread_running == 0);
 
-		pWindow->m_kThreadParams.dsmcc_download_thread_running = 0;
+		pTSMagicView->m_kThreadParams.dsmcc_download_thread_running = 0;
 	}
 
 	ShowWindow(SW_HIDE);

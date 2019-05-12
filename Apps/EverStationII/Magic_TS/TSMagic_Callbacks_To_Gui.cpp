@@ -25,20 +25,20 @@ void REPORT_TS_packet_statistic(WPARAM wParam, LPARAM lParam)
 {
 #if GUI_REPORT_TS_STATISTIC
 
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
- 	if (pWindow != NULL)
+ 	if (pTSMagicView != NULL)
 	{
 #if GUI_TS_ANALYZER_PACKETS
-		pWindow->m_dlgTSAnalyzerPackets.UpdatePIDList();
+		pTSMagicView->m_dlgTSAnalyzerPackets.UpdatePIDList();
 #endif
 
 #if GUI_TS_ANALYZER_PK_TRIGGER
-		pWindow->m_dlgPacketTrigger.UpdatePIDList();
+		pTSMagicView->m_dlgPacketTrigger.UpdatePIDList();
 #endif
 
 #if GUI_TS_ANALYZER_OVERVIEW
-		pWindow->m_dlgTSAnalyzerOverview.UpdatePacketInfo();
+		pTSMagicView->m_dlgTSAnalyzerOverview.UpdatePacketInfo();
 #endif
 	}
 
@@ -49,12 +49,12 @@ void CALLBACK_REPORT_PCR_Diagnosis(RECORD_PCR_t* pPcrRecord)
 {
 #if GUI_REPORT_PCR_DIAGNOSIS
 
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
-	if (pWindow != NULL)
+	if (pTSMagicView != NULL)
 	{
 #if GUI_TS_ANALYZER_PCR
-		pWindow->m_dlgTSAnalyzerPcr.UpdatePCRDiagnosis(pPcrRecord);
+		pTSMagicView->m_dlgTSAnalyzerPcr.UpdatePCRDiagnosis(pPcrRecord);
 #endif
 	}
 
@@ -67,12 +67,12 @@ int CALLBACK_REPORT_PCR_Observation(int ID, int curInterval, int curJitter)
 {
 #if GUI_REPORT_PCR_OBSERVATION
 
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
-	if (pWindow != NULL)
+	if (pTSMagicView != NULL)
 	{
 #if GUI_TS_ANALYZER_PCR
-		pWindow->m_dlgTSAnalyzerPcr.UpdatePCRObservation(ID, curInterval, curJitter);
+		pTSMagicView->m_dlgTSAnalyzerPcr.UpdatePCRObservation(ID, curInterval, curJitter);
 #endif
 	}
 
@@ -101,12 +101,12 @@ int CALLBACK_REPORT_bitrate(int ID, int bitrate)
 {
 #if GUI_REPORT_TS_BITRATE
 
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
-	if (pWindow != NULL)
+	if (pTSMagicView != NULL)
 	{
 #if GUI_TS_ANALYZER_OVERVIEW
-		pWindow->m_dlgTSAnalyzerOverview.UpdateBitrateSample(bitrate);
+		pTSMagicView->m_dlgTSAnalyzerOverview.UpdateBitrateSample(bitrate);
 #endif
 	}
 

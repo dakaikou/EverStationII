@@ -306,3 +306,4 @@ void CYUVMagicView::OnDestroy()
 	m_dlgCombine.DestroyWindow();
 #endif
 }
+

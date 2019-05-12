@@ -217,6 +217,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="ChildFrm.h" />
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="Common\BitmapButton_HoverEffect.h" />
@@ -235,6 +236,10 @@
     <ClInclude Include="Common\InstrumentPanel_LumaGamutDiagram.h" />
     <ClInclude Include="Common\InstrumentPanel_ScatterDiagram.h" />
     <ClInclude Include="Common\InstrumentPanel_Waveform.h" />
+    <ClInclude Include="Common\InstrumentView_Base.h" />
+    <ClInclude Include="Common\InstrumentView_Histogram.h" />
+    <ClInclude Include="Common\InstrumentView_Kernel.h" />
+    <ClInclude Include="Common\InstrumentView_ScatterDiagram.h" />
     <ClInclude Include="Common\ListView_ByteBuffer.h" />
     <ClInclude Include="Common\ListView_RunningLog.h" />
     <ClInclude Include="Common\TreeView_XMLBrowser.h" />
@@ -270,6 +275,7 @@
     <ClInclude Include="Magic_TS\ListView_EpgSchedule.h" />
     <ClInclude Include="Magic_TS\ListView_ServiceInfo.h" />
     <ClInclude Include="Magic_TS\NaviList_DSMCCs.h" />
+    <ClInclude Include="Magic_TS\NaviList_PCRs.h" />
     <ClInclude Include="Magic_TS\NaviTree_Bouquets.h" />
     <ClInclude Include="Magic_TS\NaviTree_ESs.h" />
     <ClInclude Include="Magic_TS\NaviTree_PsiSiTables.h" />
@@ -303,6 +309,7 @@
     <ClInclude Include="ViewTree.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AboutDlg.cpp" />
     <ClCompile Include="ChildFrm.cpp" />
     <ClCompile Include="ClassView.cpp" />
     <ClCompile Include="Common\BitmapButton_HoverEffect.cpp" />
@@ -320,6 +327,10 @@
     <ClCompile Include="Common\InstrumentPanel_LumaGamutDiagram.cpp" />
     <ClCompile Include="Common\InstrumentPanel_ScatterDiagram.cpp" />
     <ClCompile Include="Common\InstrumentPanel_Waveform.cpp" />
+    <ClCompile Include="Common\InstrumentView_Base.cpp" />
+    <ClCompile Include="Common\InstrumentView_Histogram.cpp" />
+    <ClCompile Include="Common\InstrumentView_Kernel.cpp" />
+    <ClCompile Include="Common\InstrumentView_ScatterDiagram.cpp" />
     <ClCompile Include="Common\ListView_ByteBuffer.cpp" />
     <ClCompile Include="Common\ListView_RunningLog.cpp" />
     <ClCompile Include="Common\TreeView_XMLBrowser.cpp" />
@@ -329,6 +340,7 @@
     <ClCompile Include="DockPane_RunningLog.cpp" />
     <ClCompile Include="EverStationII.cpp" />
     <ClCompile Include="EverStationIIDoc.cpp" />
+    <ClCompile Include="EverStationIIImports.cpp" />
     <ClCompile Include="EverStationIIView.cpp" />
     <ClCompile Include="FileView.cpp" />
     <ClCompile Include="Magic_ES\Dlg_ESOverview.cpp" />
@@ -355,6 +367,7 @@
     <ClCompile Include="Magic_TS\ListView_EpgSchedule.cpp" />
     <ClCompile Include="Magic_TS\ListView_ServiceInfo.cpp" />
     <ClCompile Include="Magic_TS\NaviList_DSMCCs.cpp" />
+    <ClCompile Include="Magic_TS\NaviList_PCRs.cpp" />
     <ClCompile Include="Magic_TS\NaviTree_Bouquets.cpp" />
     <ClCompile Include="Magic_TS\NaviTree_ESs.cpp" />
     <ClCompile Include="Magic_TS\NaviTree_PsiSiTables.cpp" />
@@ -405,6 +418,7 @@
     <Image Include="..\..\..\..\素材-GUI\播放器按钮-播放-4-Disabled - 64x64.bmp" />
     <Image Include="res\bitmap1.bmp" />
     <Image Include="res\bitmap2.bmp" />
+    <Image Include="res\bitmap3.bmp" />
     <Image Include="res\bitmap_t.bmp" />
     <Image Include="res\bmp00001.bmp" />
     <Image Include="res\bmp00002.bmp" />
@@ -498,6 +512,7 @@
     <Image Include="res\fileview_hc.bmp" />
     <Image Include="res\file_view.ico" />
     <Image Include="res\file_view_hc.ico" />
+    <Image Include="res\frontend-digital TV.bmp" />
     <Image Include="res\menuimages.bmp" />
     <Image Include="res\menuimages_hc.bmp" />
     <Image Include="res\menu_ima.bmp" />

@@ -171,6 +171,8 @@
 #define IDB_YUV_COMBINE_GO_36PX         398
 #define IDB_BITMAP2                     399
 #define IDB_YUV_COMBINE_RESET_36PX      399
+#define IDB_BITMAP3                     402
+#define IDB_DIGITAL_FRONTEND            402
 #define IDC_BTN_TSMAGIC                 1000
 #define IDC_STATIC_APPNAME              1000
 #define IDC_STATIC_APPNAME_EVERSTATIONII 1000
@@ -240,7 +242,6 @@
 #define IDC_STATIC_AUD_INTERVAL_GRAPH   1053
 #define IDC_LIST_TS_OVERVIEW            1053
 #define IDC_STATIC_TSRATE               1054
-#define IDC_LIST_PCR_LOG                1055
 #define IDC_LIST_TS_BANDWIDTH           1055
 #define IDC_EDIT_VFILE                  1055
 #define IDC_STATIC_AUD_JITTER           1056
@@ -493,7 +494,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        400
+#define _APS_NEXT_RESOURCE_VALUE        403
 #define _APS_NEXT_COMMAND_VALUE         32799
 #define _APS_NEXT_CONTROL_VALUE         1035
 #define _APS_NEXT_SYMED_VALUE           320

@@ -269,7 +269,7 @@ uint8_t		ucReqData[16];
 int		i;
 CWnd*	pWnd;
 
-CTSMagicView* pWindow = CTSMagicView::GetView();
+CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 pWindow->m_dlgSectionTriggerWaiting.ShowWindow(SW_SHOW);
 
 sprintf_s(pszText, sizeof(pszText), "DSM-CC Stream Descriptors TRIGGER: section_number = %d", section_number);
@@ -326,7 +326,7 @@ uint8_t		ucReqData[16];
 int		i;
 CWnd*	pWnd;
 
-CTSMagicView* pWindow = CTSMagicView::GetView();
+CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 pWindow->m_dlgSectionTriggerWaiting.ShowWindow(SW_SHOW);
 
 sprintf_s(pszText, sizeof(pszText), "DSM-CC DDM TRIGGER: section_number = %d", section_number);
@@ -383,7 +383,7 @@ uint8_t		ucReqData[16];
 int		i;
 CWnd*	pWnd;
 
-CTSMagicView* pWindow = CTSMagicView::GetView();
+CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 pWindow->m_dlgSectionTriggerWaiting.ShowWindow(SW_SHOW);
 
 sprintf_s(pszText, sizeof(pszText), "DSM-CC UNM TRIGGER: section_number = %d", section_number);

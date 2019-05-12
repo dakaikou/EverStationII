@@ -23,13 +23,13 @@ static char THIS_FILE[] = __FILE__;
 #include "TSMagic_Callbacks_To_Gui.h"
 #include "TSMagic_Trigger_TSPacket.h"
 #include "TSMagic_Trigger_Section.h"
-#include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TS_ErrorCode.h"
 
 #include "..\Common\define.h"
 
 #include "..\resource.h"
 #include ".\tsmagicview.h"
 
+#include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TS_ErrorCode.h"
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 #include "Utilities\Directory\Include\TOOL_Directory.h"
 
@@ -71,9 +71,10 @@ CTSMagicView::CTSMagicView()
 	TAB_WATCH_TELETEXT = -1;
 	TAB_WATCH_SUBTITLE = -1;
 	TAB_WATCH_OCDC = -1;
+	m_nCurActiveTab = -1;
 
-	m_lastClientSize.cx = 0;
-	m_lastClientSize.cy = 0;
+	//m_lastClientSize.cx = 0;
+	//m_lastClientSize.cy = 0;
 }
 
 CTSMagicView::~CTSMagicView()
@@ -91,6 +92,7 @@ void CTSMagicView::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTSMagicView, CFormView)
 	//{{AFX_MSG_MAP(CTSMagicView)
 	ON_WM_SIZE()
+	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_BTN_OPEN, OnBtnOpenOrClose)
 	ON_BN_CLICKED(IDC_BTN_STREAM, OnBtnStream)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_TSMAGIC, OnSelchangeTabConsole)
@@ -124,11 +126,6 @@ BEGIN_MESSAGE_MAP(CTSMagicView, CFormView)
 	ON_MESSAGE(WM_TSMAGIC_ES_TRIGGER_STATE, OnReportESTriggerStatus)
 	ON_MESSAGE(WM_TSMAGIC_SECTION_TRIGGER_STATE, OnReportSectionTriggerStatus)
 
-//	ON_WM_DESTROY()
-	//ON_WM_TIMER()
-	//ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_TS_MONITOR, OnLvnItemchangedListTsMonitor)
-	//ON_NOTIFY(LVN_ITEMCHANGED, IDC_PROGRESS_FILERATIO, OnLvnItemchangedProgressFileratio)
-	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -184,74 +181,75 @@ void CTSMagicView::AdjustLayout(int cx, int cy)
 		pWnd->SetWindowPos(NULL, cx - btn_width, cy - 5 - btn_height, rect.Width(), rect.Height(), 0);
 	}
 
-	pWnd = GetDlgItem(IDC_TAB_TSMAGIC);
-	if (pWnd->GetSafeHwnd() != NULL)
+	CTabCtrl* pTabCtrl = (CTabCtrl*)GetDlgItem(IDC_TAB_TSMAGIC);
+	if (pTabCtrl->GetSafeHwnd() != NULL)
 	{
-		pWnd->SetWindowPos(NULL, 5, 5, cx - btn_width - 15, cy - 10, 0);
-
 		CRect		rectClient;
-		CRect		rectTab;
-		CRect		rectItem;
 
-		((CTabCtrl*)pWnd)->GetItemRect(0, &rectItem);
+		pTabCtrl->SetWindowPos(NULL, 5, 5, cx - btn_width - 15, cy - 10, 0);
+		pTabCtrl->GetClientRect(&rectClient);
 
-		pWnd->GetClientRect(&rectClient);
-		rectTab.top = rectClient.top + rectItem.bottom + 5;
-		rectTab.bottom = rectClient.bottom - 5;
-		rectTab.left = rectClient.left + 5;
-		rectTab.right = rectClient.right - 5;
+		CRect		rectTabWorkArea;
+		CRect		rectTabTitle;
+
+		pTabCtrl->GetItemRect(0, &rectTabTitle);
+
+		rectTabWorkArea.top = rectClient.top + rectTabTitle.bottom + 5;
+		rectTabWorkArea.bottom = rectClient.bottom - 1;
+		rectTabWorkArea.left = rectClient.left + 1;
+		rectTabWorkArea.right = rectClient.right - 1;
 
 #if GUI_TS_ANALYZER_PACKETS
-		m_dlgTSAnalyzerPackets.MoveWindow(&rectTab);
+		m_dlgTSAnalyzerPackets.MoveWindow(&rectTabWorkArea);
 #endif
 #if GUI_TS_ANALYZER_PK_TRIGGER
-		m_dlgPacketTrigger.MoveWindow(&rectTab);
+		m_dlgPacketTrigger.MoveWindow(&rectTabWorkArea);
 #endif
 //#if GUI_TS_PK_MODIFY
 //		m_dlgPacketModify.MoveWindow(&rectTab);
 //#endif
 #if GUI_TS_ANALYZER_PSISI
-		CRect rectTemp;
-		rectTemp.top = rectTab.top + 10;
-		rectTemp.left = rectTab.left + 10;
-		rectTemp.right = rectTab.right;
-		rectTemp.bottom = rectTab.bottom;
+		//CRect rectTemp;
+		//rectTemp.top = rectTab.top + 10;
+		//rectTemp.left = rectTab.left + 10;
+		//rectTemp.right = rectTab.right;
+		//rectTemp.bottom = rectTab.bottom;
 
-		m_dlgTSAnalyzerPsiSi.MoveWindow(&rectTab);
+		m_dlgTSAnalyzerPsiSi.MoveWindow(&rectTabWorkArea);
 		//m_tabItem_PsiSiAnalyzer.MoveWindow(rectTemp);
 #endif
 //#if GUI_TS_SEC_TRIGGER
-//		m_dlgSectionTrigger.MoveWindow(&rectTab);
+//		m_dlgSectionTrigger.MoveWindow(&rectTabWorkArea);
 //#endif
 #if GUI_TS_ANALYZER_BOUQUETS
-		m_dlgTSAnalyzerBouquets.MoveWindow(&rectTab);
+		m_dlgTSAnalyzerBouquets.MoveWindow(&rectTabWorkArea);
 #endif
 #if GUI_TS_ANALYZER_EPG
-		m_dlgTSAnalyzerEpg.MoveWindow(&rectTab);
+		m_dlgTSAnalyzerEpg.MoveWindow(&rectTabWorkArea);
 #endif
 #if GUI_TS_ANALYZER_OVERVIEW
-		m_dlgTSAnalyzerOverview.MoveWindow(&rectTab);
+		m_dlgTSAnalyzerOverview.MoveWindow(&rectTabWorkArea);
 #endif
 #if GUI_TS_ANALYZER_NETWORK
-		m_dlgTSAnalyzerServices.MoveWindow(&rectTab);
+		m_dlgTSAnalyzerServices.MoveWindow(&rectTabWorkArea);
 #endif
 #if GUI_TS_ANALYZER_PCR
-		m_dlgTSAnalyzerPcr.MoveWindow(&rectTab);
+		m_dlgTSAnalyzerPcr.MoveWindow(&rectTabWorkArea);
 #endif
 #if GUI_TS_ANALYZER_PESES
-		m_dlgTSAnalyzerPesEs.MoveWindow(&rectTab);
+		m_dlgTSAnalyzerPesEs.MoveWindow(&rectTabWorkArea);
 #endif
 #if GUI_TS_ANALYZER_ES
-		m_dlgTSAnalyzerEs.MoveWindow(&rectTab);
+		m_dlgTSAnalyzerEs.MoveWindow(&rectTabWorkArea);
 #endif
 #if GUI_TS_ANALYZER_TELETEXT
-		m_dlgTSAnalyzerTeletext.MoveWindow(&rectTab);
+		m_dlgTSAnalyzerTeletext.MoveWindow(&rectTabWorkArea);
 #endif
 #if GUI_TS_ANALYZER_SUBTITLE
-		m_dlgTSAnalyzerSubtitle.MoveWindow(&rectTab);
+		m_dlgTSAnalyzerSubtitle.MoveWindow(&rectTabWorkArea);
 #endif
 #if GUI_TS_ANALYZER_OCDC
-		m_dlgTSAnalyzerDsmcc.MoveWindow(&rectTab);
+		m_dlgTSAnalyzerDsmcc.MoveWindow(&rectTabWorkArea);
 #endif
 
 	}
@@ -318,6 +316,8 @@ void CTSMagicView::OnInitialUpdate()
 	CTSMagicDoc* pDoc = (CTSMagicDoc*)GetDocument();
 
 	// TODO: Add your specialized code here and/or call the base class
+	pDoc->m_strDebug = "宝塔镇河妖";		//仅仅是为了程序测试用
+
 	CRect	rect;
 	CWnd*	pWnd;
 
@@ -374,10 +374,16 @@ void CTSMagicView::OnInitialUpdate()
 
 	strcpy_s(m_kThreadParams.pszDecimatePath, sizeof(m_kThreadParams.pszDecimatePath), pszDownloadRootPath);
 
-	m_bInitDone = 1;
-
 	GetClientRect(&rect);
+
+	CSize size;
+	size.cx = rect.right - rect.left;
+	size.cy = rect.bottom - rect.top;
+	SetScrollSizes(MM_HIMETRIC, size); // 将CScrollView的大小设置为当前客户区大小，禁止出现滚动条
+
 	AdjustLayout(rect.Width(), rect.Height());
+
+	m_bInitDone = 1;
 }
 
 void CTSMagicView::InitConsoleTab(void)
@@ -476,116 +482,135 @@ void CTSMagicView::InitConsoleTab(void)
 	pTabCtrl->InsertItem(item, "字幕解析", 2);
 #endif
 
-	pTabCtrl->SetCurSel(0);
-
 	for (i = 0; i < pTabCtrl->GetItemCount(); i++)
 	{
 		m_pdlgWnd[i] = NULL;
 	}
 
+	//同一时间创建这么多窗口，速度有点问题，留待以后优化。  chendelin  2019.5.12
 #if GUI_TS_ANALYZER_PACKETS
 	m_dlgTSAnalyzerPackets.Create(IDD_TS_ANALYZER_PACKETS, GetDlgItem(IDC_TAB_TSMAGIC));
+	m_dlgTSAnalyzerPackets.ShowWindow(SW_HIDE);
 	m_pdlgWnd[TAB_PACKET] = (CWnd*)&m_dlgTSAnalyzerPackets;
 #endif
 
 #if GUI_TS_ANALYZER_PK_TRIGGER
 	m_dlgPacketTrigger.Create(IDD_TS_ANALYZER_PACKET_TRIGGER, GetDlgItem(IDC_TAB_TSMAGIC));
+	m_dlgPacketTrigger.ShowWindow(SW_HIDE);
 	m_pdlgWnd[TAB_PK_TRIGGER] = (CWnd*)&m_dlgPacketTrigger;
 #endif
 
 #if GUI_TS_ANALYZER_PSISI
 	m_dlgTSAnalyzerPsiSi.Create(IDD_TS_ANALYZER_PSISI, GetDlgItem(IDC_TAB_TSMAGIC));
+	m_dlgTSAnalyzerPsiSi.ShowWindow(SW_HIDE);
 	m_pdlgWnd[TAB_SECTION] = (CWnd*)& m_dlgTSAnalyzerPsiSi;
-
-	//m_tabItem_PsiSiAnalyzer.CreateStatic(this, 1, 3);
-	//m_tabItem_PsiSiAnalyzer.CreateView(0, 0, RUNTIME_CLASS(CNaviTree_PsiSiTables), CSize(100, 0), NULL);
-	//m_tabItem_PsiSiAnalyzer.CreateView(0, 1, RUNTIME_CLASS(CTreeView_PacketSyntax), CSize(100, 0), NULL);
-	//m_tabItem_PsiSiAnalyzer.CreateView(0, 2, RUNTIME_CLASS(CHexEditView_ByteBuffer), CSize(0, 0), NULL);
-	//m_pdlgWnd[TAB_SECTION] = (CWnd*)& m_tabItem_PsiSiAnalyzer;
-
 #endif
 
 #if GUI_TS_ANALYZER_BOUQUETS
 	m_dlgTSAnalyzerBouquets.Create(IDD_TS_ANALYZER_BOUQUETS, GetDlgItem(IDC_TAB_TSMAGIC));
+	m_dlgTSAnalyzerBouquets.ShowWindow(SW_HIDE);
 	m_pdlgWnd[TAB_BOUQUET] = (CWnd*)&m_dlgTSAnalyzerBouquets;
 #endif
 
 #if GUI_TS_ANALYZER_EPG
 	m_dlgTSAnalyzerEpg.Create(IDD_TS_ANALYZER_EPG, GetDlgItem(IDC_TAB_TSMAGIC));
+	m_dlgTSAnalyzerEpg.ShowWindow(SW_HIDE);
 	m_pdlgWnd[TAB_EPG] = (CWnd*)&m_dlgTSAnalyzerEpg;
 #endif
 
 #if GUI_TS_ANALYZER_OVERVIEW
 	m_dlgTSAnalyzerOverview.Create(IDD_TS_ANALYZER_OVERVIEW, GetDlgItem(IDC_TAB_TSMAGIC));
+	m_dlgTSAnalyzerOverview.ShowWindow(SW_HIDE);
 	m_pdlgWnd[TAB_OVERVIEW] = (CWnd*)&m_dlgTSAnalyzerOverview;
 #endif
 
 #if GUI_TS_ANALYZER_NETWORK
 	m_dlgTSAnalyzerServices.Create(IDD_TS_ANALYZER_SERVICES, GetDlgItem(IDC_TAB_TSMAGIC));
+	m_dlgTSAnalyzerServices.ShowWindow(SW_HIDE);
 	m_pdlgWnd[TAB_SERVICES] = (CWnd*)&m_dlgTSAnalyzerServices;
 #endif
 
 #if GUI_TS_ANALYZER_PCR
 	m_dlgTSAnalyzerPcr.Create(IDD_TS_ANALYZER_PCR, GetDlgItem(IDC_TAB_TSMAGIC));
+	m_dlgTSAnalyzerPcr.ShowWindow(SW_HIDE);
 	m_pdlgWnd[TAB_PCR] = (CWnd*)&m_dlgTSAnalyzerPcr;
 #endif
 
 #if GUI_TS_ANALYZER_PESES
 	m_dlgTSAnalyzerPesEs.Create(IDD_TS_ANALYZER_PESES, GetDlgItem(IDC_TAB_TSMAGIC));
+	m_dlgTSAnalyzerPesEs.ShowWindow(SW_HIDE);
 	m_pdlgWnd[TAB_PESES] = (CWnd*)&m_dlgTSAnalyzerPesEs;
 #endif
 
 #if GUI_TS_ANALYZER_ES
 	m_dlgTSAnalyzerEs.Create(IDD_TS_ANALYZER_ES, GetDlgItem(IDC_TAB_TSMAGIC));
+	m_dlgTSAnalyzerEs.ShowWindow(SW_HIDE);
 	m_pdlgWnd[TAB_ES] = (CWnd*)&m_dlgTSAnalyzerEs;
 #endif
 
 #if GUI_TS_ANALYZER_TELETEXT
 	m_dlgTSAnalyzerTeletext.Create(IDD_TS_ANALYZER_TELETEXT, GetDlgItem(IDC_TAB_TSMAGIC));
+	m_dlgTSAnalyzerTeletext.ShowWindow(SW_HIDE);
 	m_pdlgWnd[TAB_WATCH_TELETEXT] = (CWnd*)&m_dlgTSAnalyzerTeletext;
 #endif
 
 #if GUI_TS_ANALYZER_SUBTITLE
 	m_dlgTSAnalyzerSubtitle.Create(IDD_TS_ANALYZER_SUBTITLE, GetDlgItem(IDC_TAB_TSMAGIC));
+	m_dlgTSAnalyzerSubtitle.ShowWindow(SW_HIDE);
 	m_pdlgWnd[TAB_WATCH_SUBTITLE] = (CWnd*)&m_dlgTSAnalyzerSubtitle;
 #endif
 
 #if GUI_TS_ANALYZER_OCDC
-//	m_dlgTSAnalyzerOCDC.Create(IDD_TS_ANALYZER_OCDC, GetDlgItem(IDC_TAB_TSMAGIC));
 	m_dlgTSAnalyzerDsmcc.Create(IDD_TS_ANALYZER_DSMCC, GetDlgItem(IDC_TAB_TSMAGIC));
+	m_dlgTSAnalyzerDsmcc.ShowWindow(SW_HIDE);
 	m_pdlgWnd[TAB_WATCH_OCDC] = (CWnd*)&m_dlgTSAnalyzerDsmcc;
 #endif
 
 #if GUI_TS_PK_MODIFY
 	m_dlgPacketModify.Create(IDD_TS_PACKET_MODIFY, GetDlgItem(IDC_TAB_TSMAGIC));
+	m_dlgPacketModify.ShowWindow(SW_HIDE);
 	m_pdlgWnd[TAB_PK_MODIFY] = (CWnd*)&m_dlgPacketModify;
 #endif
 
-	ActivateTabPage(pTabCtrl->GetCurSel());
+	pTabCtrl->SetCurSel(0);
+	ActivateTabPage(-1, 0);
+
+	m_nCurActiveTab = pTabCtrl->GetCurSel();
 }
 
-void CTSMagicView::ActivateTabPage(int nSel)
+void CTSMagicView::ActivateTabPage(int nOldSel, int nNewSel)
 {
-	int		  i;
+	//int		  i;
 	CTabCtrl* pTabCtrl = (CTabCtrl*)GetDlgItem(IDC_TAB_TSMAGIC);
 	CWnd*	  pWnd;
 
-	for (i = 0; i < pTabCtrl->GetItemCount(); i++)
+	if (nOldSel >= 0)
 	{
-		pWnd = m_pdlgWnd[i];
-
-		if (pWnd != NULL)
-		{
-			if (i == nSel)
-			{
-				pWnd->ShowWindow(SW_SHOW);
-			}
-			else
-			{
-				pWnd->ShowWindow(SW_HIDE);
-			}
-		}
+		pWnd = m_pdlgWnd[nOldSel];
+		pWnd->ShowWindow(SW_HIDE);
 	}
+	if (nNewSel >= 0)
+	{
+		pWnd = m_pdlgWnd[nNewSel];
+		pWnd->ShowWindow(SW_SHOW);
+	}
+
+	//for (i = 0; i < pTabCtrl->GetItemCount(); i++)
+	//{
+	//	pWnd = m_pdlgWnd[i];
+
+	//	if (pWnd != NULL)
+	//	{
+	//		if (i == nSel)
+	//		{
+	//			pWnd->ShowWindow(SW_SHOW);
+	//		}
+	//		else
+	//		{
+	//			pWnd->ShowWindow(SW_HIDE);
+	//		}
+	//	}
+	//}
 }
 
 void CTSMagicView::OnSize(UINT nType, int cx, int cy) 
@@ -756,7 +781,7 @@ void CTSMagicView::OnBtnStream()
 	CWnd*	pWnd = NULL;
 	//CString	strURL;
 
-	CEverStationIIApp* pApp = (CEverStationIIApp*)AfxGetApp();
+	//CEverStationIIApp* pApp = (CEverStationIIApp*)AfxGetApp();
 
 	if (m_kThreadParams.main_thread_running == 0)
 	{
@@ -897,9 +922,11 @@ void CTSMagicView::OnSelchangeTabConsole(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// TODO: Add your control notification handler code here
 	CTabCtrl* pTabCtrl = (CTabCtrl*)GetDlgItem(IDC_TAB_TSMAGIC);
-	int nSel = pTabCtrl->GetCurSel();
+	assert(pNMHDR->hwndFrom == pTabCtrl->GetSafeHwnd());
+	int nNewSel = pTabCtrl->GetCurSel();
 
-	ActivateTabPage(nSel);
+	ActivateTabPage(m_nCurActiveTab, nNewSel);
+	m_nCurActiveTab = nNewSel;
 	
 	*pResult = 0;
 }
@@ -999,6 +1026,10 @@ LRESULT CTSMagicView::OnTSMagicOfflineThreadMsg(WPARAM wParam, LPARAM lParam)
 
 #if GUI_TS_ANALYZER_ES
 		m_dlgTSAnalyzerEs.Set(1);
+#endif
+
+#if GUI_TS_ANALYZER_PCR
+		m_dlgTSAnalyzerPcr.Set(1);
 #endif
 
 #if GUI_TS_ANALYZER_TELETEXT
@@ -1197,6 +1228,10 @@ LRESULT CTSMagicView::OnTSMagicRealtimeThreadMsg(WPARAM wParam, LPARAM lParam)
 		m_dlgTSAnalyzerPackets.Set(0);
 #endif
 
+#if GUI_TS_ANALYZER_PCR
+		m_dlgTSAnalyzerPcr.Set(0);
+#endif
+
 		pApp->SetRunningState(1);
 	}
 	else					//线程退出
@@ -1235,7 +1270,7 @@ LRESULT CTSMagicView::OnTSMagicRealtimeThreadMsg(WPARAM wParam, LPARAM lParam)
 
 CTSMagicView* CTSMagicView::GetView(void)
 {
-	CTSMagicView* pView = NULL;
+	CTSMagicView* pTSMagicView = NULL;
 
 	CEverStationIIApp* pApp = (CEverStationIIApp*)AfxGetApp();
 	CMultiDocTemplate* pDocTemplate = pApp->m_pDocTemplateForTS;
@@ -1247,12 +1282,12 @@ CTSMagicView* CTSMagicView::GetView(void)
 		POSITION posView = pDoc->GetFirstViewPosition();
 		while (posView != NULL)
 		{
-			pView = (CTSMagicView*)pDoc->GetNextView(posView);
+			pTSMagicView = (CTSMagicView*)pDoc->GetNextView(posView);
 			break;
 		}
 	}
 
-	return pView;
+	return pTSMagicView;
 }
 
 void CTSMagicView::OnToolPcrDebug() 

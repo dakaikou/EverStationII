@@ -11,12 +11,13 @@
 // CDlg_TSAnalyzer_Pcr dialog
 #include "MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_Pcrs.h"
 
-#include "..\Common\InstrumentPanel_Histogram.h"
-#include "..\Common\InstrumentPanel_ScatterDiagram.h"
-#include "..\Common\InstrumentPanel_Waveform.h"
+#include "..\Common\InstrumentView_ScatterDiagram.h"
+#include "..\Common\InstrumentView_Histogram.h"
+
+#include "..\resource.h"
 
 #include "TSMagic_GuiApi.h"
-#include "..\resource.h"
+#include "NaviList_PCRs.h"
 #include "afxcmn.h"
 
 //#define SHOW_PCR_JITTER_WAVEFORM			0
@@ -24,6 +25,9 @@
 #define SHOW_PCR_JITTER_HISTGRAM			1
 #define SHOW_PCR_INTERVAL_HISTGRAM			1
 #define SHOW_PCR_SCATTER_DIAGRAM			1
+
+#define NAVI_PANE_WIDTH						400
+#define JITTER_OR_INTERVAL_PANE_WIDTH		600
 
 class CDlg_TSAnalyzer_Pcr : public CDialog
 {
@@ -35,28 +39,8 @@ public:
 	//{{AFX_DATA(CDlg_TSAnalyzer_Pcr)
 	enum { IDD = IDD_TS_ANALYZER_PCR };
 
-#if SHOW_PCR_JITTER_HISTGRAM
-	CInstrumentPanel_Histogram	m_PcrJitterHistgramGraph;
-#endif
-
-#if SHOW_PCR_INTERVAL_HISTGRAM
-	CInstrumentPanel_Histogram	m_PcrIntervalHistgramGraph;
-#endif
-
-#if SHOW_PCR_SCATTER_DIAGRAM
-	CInstrumentPanel_ScatterDiagram	m_PcrScatterDiagramGraph;
-#endif
-
-#if SHOW_PCR_JITTER_WAVEFORM
-	CInstrumentPanel_Waveform		m_PcrJitterWaveformGraph;
-#endif
-
-#if SHOW_PCR_INTERVAL_WAVEFORM
-	CInstrumentPanel_Waveform		m_PcrIntervalWaveformGraph;
-#endif
 	// NOTE: the ClassWizard will add data members here
 	//}}AFX_DATA
-
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -66,9 +50,37 @@ public:
 	//}}AFX_VIRTUAL
 
 // Implementation
+protected:
+	CSplitterWnd		m_wndSplitter;
+	CSplitterWnd		m_wndRightSplitter;
+
+	int					m_nLayoutColCount;
+
+	CNaviList_PCRs*		m_pNaviPane;
+#if SHOW_PCR_JITTER_HISTGRAM
+	CInstrumentView_Histogram*	m_pPcrJitterHistgramGraph;
+#endif
+	
+#if SHOW_PCR_INTERVAL_HISTGRAM
+	CInstrumentView_Histogram*	m_pPcrIntervalHistgramGraph;
+#endif
+	
+#if SHOW_PCR_SCATTER_DIAGRAM
+	CInstrumentView_ScatterDiagram*	m_pPcrScatterDiagramGraph;
+#endif
+	
+	//#if SHOW_PCR_JITTER_WAVEFORM
+	//	CInstrumentPanel_Waveform		m_PcrJitterWaveformGraph;
+	//#endif
+	//
+	//#if SHOW_PCR_INTERVAL_WAVEFORM
+	//	CInstrumentPanel_Waveform		m_PcrIntervalWaveformGraph;
+	//#endif
+
 public:
 	void UpdatePCRDiagnosis(RECORD_PCR_t* pCurPcrInfo);
 	void UpdatePCRObservation(int ID, int curInterval, int curJitter);
+	void Set(int offline = 1);
 	void Reset(void);
 
 protected:
@@ -80,7 +92,6 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
-	CListCtrl m_listPcrLog;
 	afx_msg void OnDestroy();
 };
 

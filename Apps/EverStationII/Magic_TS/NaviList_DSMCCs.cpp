@@ -250,8 +250,8 @@ void CNaviList_DSMCCs::UpdatePMT(CPMT* pPMT)
 						listCtrl.SetItemText(insert_index, LISTITEM_COL_INDEX_BROADCAST_ID, pszTemp);
 					}
 
-					CTSMagicView* pView = CTSMagicView::GetView();
-					CDB_PsiSiObjs* pDB_PsiSiObjs = pView->GetPsiSiObjsDBase();
+					CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+					CDB_PsiSiObjs* pDB_PsiSiObjs = pTSMagicView->GetPsiSiObjsDBase();
 
 					//从SDT表中倒查业务名称
 					CSDT* pSDT = pDB_PsiSiObjs->QueryActualSDT();
@@ -502,7 +502,7 @@ void CNaviList_DSMCCs::OnNMRClick(NMHDR *pNMHDR, LRESULT *pResult)
 
 	CListCtrl& listCtrl = GetListCtrl();
 
-	//CTSMagicView* pWindow = CTSMagicView::GetView();
+	//CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
 	//if (((pWindow->m_kThreadParams.offline == 1) && (pWindow->m_kThreadParams.main_thread_stopped == 1)) ||
 	//	(pWindow->m_kThreadParams.offline == 0))

@@ -8,20 +8,6 @@
 
 #include "InstrumentPanel_Kernel.h"
 
-//#define ON_PAINTING_USE_MUTEX			1
-//#define INSTRUMENT_PANEL_USE_MUTEX		0
-//#define INSTRUMENT_PANEL_USE_DIRECTX	0
-
-//#define SCREEN_BKGROUNDCOLOR			RGB(0, 0, 0)
-//#define SCREEN_BKWAVEFORMCOLOR			RGB(0, 0, 0)
-//#define SCREEN_BKMEASUREPANELCOLOR		RGB(0, 0, 0)
-
-//#define SCREEN_TEXTCOLOR		RGB(0, 255, 0)
-//#define SCREEN_TITLECOLOR		RGB(225, 255, 0)
-//#define SCREEN_UNITCOLOR		RGB(100, 220, 128)
-//#define SCREEN_GRIDCOLOR		RGB(128, 128, 128)
-//#define SCREEN_AXISCOLOR		RGB(220, 220, 220)
-
 #define SCREEN_WAVECOLOR0		RGB(250, 250, 0)
 #define SCREEN_WAVECOLOR1		RGB(50, 250, 50)
 #define SCREEN_WAVECOLOR2		RGB(150, 250, 100)
@@ -35,49 +21,16 @@
 #define SCREEN_WAVECOLOR10		RGB(150, 150, 100)
 #define SCREEN_WAVECOLOR11		RGB(100, 150, 150)
 
-//#define SCREEN_MAXLIMITCOLOR	RGB(200, 0, 0)
-//#define SCREEN_MINLIMITCOLOR	RGB(160, 0, 0)
-
-//#define SCREEN_PAINTCOLOR		RGB(220, 220, 0)
-
-//#define X_SEPARATOR						4
-//#define Y_SEPARATOR						4
-
-//#define RECT_MEASURE_WIDTH				160
-//#define RECT_XMARK_HEIGHT				40
-//#define RECT_XMARK_WIDTH				80
-//#define RECT_YMARK_HEIGHT				30
-//#define RECT_YMARK_WIDTH				80
-//#define RECT_TITLE_HEIGHT				40
-
-//#define FONT_TITLE_HEIGHT				20
-//#define FONT_MARK_HEIGHT				16
-//#define FONT_MEASURE_HEIGHT				16
-
-//#define VERTICAL_GRID_DIVISION				20
-//#define HORIZONTAL_GRID_DIVISION			20
-//#define VERTICAL_GRID_DIVISION_ONEWAY		10
-//#define VERTICAL_GRID_DIVISION_SYMMETRY		10
-//#define HORIZONTAL_GRID_DIVISION_ONEWAY		20
-//#define HORIZONTAL_GRID_DIVISION_SYMMETRY	20
-
-//#define LOGARITHMIC_RANK					(VERTICAL_GRID_DIVISION/2)
-
-//#define UNCREDITABLE_MAX_VALUE				-123456789
-//#define UNCREDITABLE_MIN_VALUE				123456789
-
+#ifndef SAMPLE_ATTRIBUTE
+#define SAMPLE_ATTRIBUTE
 typedef struct
 {
 	int min, mean, max, rms;
 } SAMPLE_ATTRIBUTE_t;
+#endif		//SAMPLE_ATTRIBUTE
 
-//typedef struct
-//{
-//	int x;
-//	int y;
-//	int bConsumed;
-//} SAMPLE_VALUE_t;
-
+#ifndef SAMPLE_CHANNEL
+#define SAMPLE_CHANNEL
 typedef struct
 {
 	int* pnXArray;
@@ -96,32 +49,13 @@ typedef struct
 #endif
 
 } SAMPLE_CHANNEL_t;
+#endif		//SAMPLE_CHANNEL
 
 #define MAX_CHANNEL_COUNT		12
 #define DEFAULT_CHANNEL_DEPTH	256
 
-//#define AXIS_STYLE_UNKNOWN							0
-//#define AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY			1
-//#define AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX		2
-//#define AXIS_STYLE_LOGARITHMIC_MEAN_SYMMETRY		3
-//#define AXIS_STYLE_LOGARITHMIC_FROM_MIN_TO_MAX		4
-
-//#define RANGE_MARK_SHOWN_KEYPOINT		0x00000004
-//#define RANGE_MARK_SHOWN_PARTIAL		0x00000002
-//#define RANGE_MARK_SHOWN_TOTAL			0x00000001
-//#define RANGE_MARK_HIDE					0x00000000
-
-//#define MEASURE_PANEL_SHOWN				0x00010000
-//#define MEASURE_PANEL_HIDE				0x00000000
-
-//#define MEASURE_VALUE_SHOWN				1
-//#define MEASURE_VALUE_HIDE				0
-
-//#define SCAN_STYLE_FIXED_POS		1
-//#define SCAN_STYLE_IN_SEQUENCE		0
-
 /////////////////////////////////////////////////////////////////////////////
-// CGraph_Oscilloscope window
+// CInstrumentPanel_Base window
 class CInstrumentPanel_Base : public CInstrumentPanel_Kernel
 {
 // Construction

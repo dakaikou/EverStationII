@@ -108,7 +108,7 @@ void CDlg_TSAnalyzer_Subtitle::OnSize(UINT nType, int cx, int cy)
 
 void CDlg_TSAnalyzer_Subtitle::Reset(void)
 {
-	CTSMagicView* pView = CTSMagicView::GetView();
+	//CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
 	CWnd* pWnd;
 
@@ -162,9 +162,9 @@ void CDlg_TSAnalyzer_Subtitle::OnBtnSubtitleTrigger()
 	// TODO: Add your control notification handler code here
 //	char		pszText[MAX_TXT_CHARS];
 
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
-	if (pWindow->m_kThreadParams.main_thread_running)
+	if (pTSMagicView->m_kThreadParams.main_thread_running)
 	{
 //		TreeFun_DeleteChildItems(&m_treeSubtitleSyntax, m_hVidPesItem);
 //		TreeFun_DeleteChildItems(&m_treeSubtitleSyntax, m_hVidEsItem);
@@ -208,7 +208,7 @@ void CDlg_TSAnalyzer_Subtitle::SetPIDInfo(CPMT* pPMT)
 	int				nItem;
 	uint32_t				code;
 
-	CTSMagicView* pView = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
 	m_listSubtitlePID.DeleteAllItems();
 
@@ -282,7 +282,7 @@ LRESULT CDlg_TSAnalyzer_Subtitle::OnUpdatePMT(WPARAM wParam, LPARAM lParam)
 	int				bExit;
 	DWORD			dwPID;
 
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
 //	uint8_t	ucSubType = 0x00;
 

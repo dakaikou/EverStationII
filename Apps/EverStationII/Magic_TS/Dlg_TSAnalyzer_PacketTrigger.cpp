@@ -422,7 +422,7 @@ void CDlg_TSAnalyzer_PacketTrigger::OnBtnClear()
 	// TODO: Add your control notification handler code here
 	CWnd*			pBtn = NULL;
 	CSliderCtrl*	pSlider = NULL;
-//	CTSMagicView*	pWindow = CTSMagicView::GetView();
+//	CTSMagicView*	pTSMagicView = CTSMagicView::GetView();
 
 	if (m_pList != NULL)
 	{
@@ -451,15 +451,15 @@ void CDlg_TSAnalyzer_PacketTrigger::OnBtnClear()
 
 	m_bSearching = 0;
 	
-//	if (pWindow != NULL)
+//	if (pTSMagicView != NULL)
 //	{
-//		if (pWindow->GetSafeHwnd() != NULL)
+//		if (pTSMagicView->GetSafeHwnd() != NULL)
 //		{
 //			//用户发出清除动作时，说明用户已经不关心本次捕获结果了。若此时发现捕捉线程仍在运行，应通知该线程关闭。
-//			if (pWindow->m_kThreadParams.ts_trigger_thread_running == 1)
+//			if (pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1)
 //			{
-//				pWindow->m_kThreadParams.ts_trigger_thread_running = 0;
-////				pWindow->m_kThreadParams.ts_trigger_thread_stopped = 0;
+//				pTSMagicView->m_kThreadParams.ts_trigger_thread_running = 0;
+////				pTSMagicView->m_kThreadParams.ts_trigger_thread_stopped = 0;
 //			}
 //		}
 //	}

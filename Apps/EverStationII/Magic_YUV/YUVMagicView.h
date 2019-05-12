@@ -77,7 +77,7 @@ protected:
 	void ActivateTabPage(int nSel);
 	void InitConsoleTab(void);
 	void GUIReset(void);
-	void TermAnalyseThread(void);
+	//void TermAnalyseThread(void);
 
 	int			TAB_YUV_PREVIEW;
 	int			TAB_YUV_EXCHANGE;

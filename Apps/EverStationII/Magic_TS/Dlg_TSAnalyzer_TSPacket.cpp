@@ -713,9 +713,9 @@ void CDlg_TSAnalyzer_Packets::OnBtnDecimateTS2TS()
 	
 	DWORD	state;
 
-	CTSMagicView*		pWindow = CTSMagicView::GetView();
-	thread_params_t*	pthread_params = &(pWindow->m_kThreadParams);
-	CDB_TSPackets*		pDB_TSPackets = pWindow->GetTSPacketsDBase();
+	CTSMagicView*		pTSMagicView = CTSMagicView::GetView();
+	thread_params_t*	pthread_params = &(pTSMagicView->m_kThreadParams);
+	CDB_TSPackets*		pDB_TSPackets = pTSMagicView->GetTSPacketsDBase();
 	//RECORD_TSPacket_t	TSPacketInfo;
 	CWnd*				pWnd = NULL;
 	int					rtcode;
@@ -751,46 +751,46 @@ void CDlg_TSAnalyzer_Packets::OnBtnDecimateTS2TS()
 
 	if (nSelCount > 0)
 	{
-		if ((pWindow->m_kThreadParams.ts_trigger_thread_running == 1) ||
-			(pWindow->m_kThreadParams.es_trigger_thread_running == 1) ||
-			(pWindow->m_kThreadParams.section_trigger_thread_running == 1) ||
-			(pWindow->m_kThreadParams.packet_decimate_thread_running == 1) ||
-			(pWindow->m_kThreadParams.dsmcc_download_thread_running == 1))
+		if ((pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1) ||
+			(pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1) ||
+			(pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1) ||
+			(pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1) ||
+			(pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1))
 		{
-			if (pWindow->m_kThreadParams.ts_trigger_thread_running == 1)
+			if (pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1)
 			{
 				sprintf_s(pszText, sizeof(pszText), "TS包录制：未能启动，因为发现TS捕捉线程尚未结束！");
-				::SendMessage(pWindow->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
 			}
-			if (pWindow->m_kThreadParams.es_trigger_thread_running == 1)
+			if (pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1)
 			{
 				sprintf_s(pszText, sizeof(pszText), "TS包录制：未能启动，因为发现ES捕捉线程尚未结束！");
-				::SendMessage(pWindow->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
 			}
-			if (pWindow->m_kThreadParams.section_trigger_thread_running == 1)
+			if (pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1)
 			{
 				sprintf_s(pszText, sizeof(pszText), "TS包录制：未能启动，因为发现section捕捉线程尚未结束！");
-				::SendMessage(pWindow->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
 			}
-			if (pWindow->m_kThreadParams.packet_decimate_thread_running == 1)
+			if (pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1)
 			{
 				sprintf_s(pszText, sizeof(pszText), "TS包录制：未能启动，因为发现TS录制线程尚未结束！");
-				::SendMessage(pWindow->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
 			}
-			if (pWindow->m_kThreadParams.dsmcc_download_thread_running == 1)
+			if (pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1)
 			{
 				sprintf_s(pszText, sizeof(pszText), "TS包录制：未能启动，因为发现DSMCC下载线程尚未结束！");
-				::SendMessage(pWindow->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
 			}
 		}
 		else
 		{
 			if (pthread_params->offline == 1)
 			{
-				if (pWindow->m_kThreadParams.main_thread_stopped == 1)
+				if (pTSMagicView->m_kThreadParams.main_thread_stopped == 1)
 				{
 					pthread_params->packet_decimate_thread_stopped = 0;			//若抽选线程退出时，此状态值将由抽选线程更改
-					::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_ts2ts_decimate_thread, (LPVOID)&(pWindow->m_kThreadParams), 0, 0);
+					::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_ts2ts_decimate_thread, (LPVOID)&(pTSMagicView->m_kThreadParams), 0, 0);
 				}
 			}
 
@@ -822,7 +822,7 @@ void CDlg_TSAnalyzer_Packets::OnBtnDecimateTS2PES()
 	int		rtcode;
 	char	pszDebug[128];
 
-	CTSMagicView*		pWindow = CTSMagicView::GetView();
+	CTSMagicView*		pTSMagicView = CTSMagicView::GetView();
 	CTransportStream*	pts_stream = &(pWindow->m_transport_stream);
 
 	UpdateData(TRUE);	
@@ -871,9 +871,9 @@ void CDlg_TSAnalyzer_Packets::OnBtnDecimateTS2ES()
 	CWnd*	pWnd = NULL;
 	char	pszText[MAX_TXT_CHARS];
 
-	CTSMagicView*		pWindow = CTSMagicView::GetView();
-	thread_params_t*	pthread_params = &(pWindow->m_kThreadParams);
-	CDB_TSPackets*		pDB_TSPackets = pWindow->GetTSPacketsDBase();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+	thread_params_t*	pthread_params = &(pTSMagicView->m_kThreadParams);
+	CDB_TSPackets*		pDB_TSPackets = pTSMagicView->GetTSPacketsDBase();
 	//RECORD_TSPacket_t	TSPacketInfo;
 	int					rtcode;
 
@@ -889,36 +889,36 @@ void CDlg_TSAnalyzer_Packets::OnBtnDecimateTS2ES()
 	nSel = m_listPID.GetSelectionMark();
 	if (nSel >= 0)
 	{
-		if ((pWindow->m_kThreadParams.ts_trigger_thread_running == 1) ||
-			(pWindow->m_kThreadParams.es_trigger_thread_running == 1) ||
-			(pWindow->m_kThreadParams.section_trigger_thread_running == 1) ||
-			(pWindow->m_kThreadParams.packet_decimate_thread_running == 1) ||
-			(pWindow->m_kThreadParams.dsmcc_download_thread_running == 1))
+		if ((pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1) ||
+			(pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1) ||
+			(pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1) ||
+			(pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1) ||
+			(pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1))
 		{
-			if (pWindow->m_kThreadParams.ts_trigger_thread_running == 1)
+			if (pTSMagicView->m_kThreadParams.ts_trigger_thread_running == 1)
 			{
 				sprintf_s(pszText, sizeof(pszText), "TS包录制(TS->ES)：未能启动，因为发现TS捕捉线程尚未结束！");
-				::SendMessage(pWindow->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
 			}
-			if (pWindow->m_kThreadParams.es_trigger_thread_running == 1)
+			if (pTSMagicView->m_kThreadParams.es_trigger_thread_running == 1)
 			{
 				sprintf_s(pszText, sizeof(pszText), "TS包录制(TS->ES)：未能启动，因为发现ES捕捉线程尚未结束！");
-				::SendMessage(pWindow->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
 			}
-			if (pWindow->m_kThreadParams.section_trigger_thread_running == 1)
+			if (pTSMagicView->m_kThreadParams.section_trigger_thread_running == 1)
 			{
 				sprintf_s(pszText, sizeof(pszText), "TS包录制(TS->ES)：未能启动，因为发现section捕捉线程尚未结束！");
-				::SendMessage(pWindow->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
 			}
-			if (pWindow->m_kThreadParams.packet_decimate_thread_running == 1)
+			if (pTSMagicView->m_kThreadParams.packet_decimate_thread_running == 1)
 			{
 				sprintf_s(pszText, sizeof(pszText), "TS包录制(TS->ES)：未能启动，因为发现TS录制线程尚未结束！");
-				::SendMessage(pWindow->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
 			}
-			if (pWindow->m_kThreadParams.dsmcc_download_thread_running == 1)
+			if (pTSMagicView->m_kThreadParams.dsmcc_download_thread_running == 1)
 			{
 				sprintf_s(pszText, sizeof(pszText), "TS包录制(TS->ES)：未能启动，因为发现DSMCC下载线程尚未结束！");
-				::SendMessage(pWindow->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
+				::SendMessage(pTSMagicView->GetSafeHwnd(), WM_TSMAGIC_APPEND_LOG, (WPARAM)pszText, (LPARAM)DEBUG_ERROR);
 			}
 		}
 		else
@@ -935,7 +935,7 @@ void CDlg_TSAnalyzer_Packets::OnBtnDecimateTS2ES()
 				{
 					if (pthread_params->main_thread_stopped == 1)
 					{
-						::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_ts2es_decimate_thread, (LPVOID)&(pWindow->m_kThreadParams), 0, 0);
+						::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_ts2es_decimate_thread, (LPVOID)&(pTSMagicView->m_kThreadParams), 0, 0);
 					}
 				}
 
@@ -969,9 +969,9 @@ void CDlg_TSAnalyzer_Packets::OnBnClickedBtnDecimateStop()
 //	int		action = 0;
 //	DWORD	state;
 
-	CTSMagicView*		pWindow = CTSMagicView::GetView();
-	thread_params_t*	pthread_params = &(pWindow->m_kThreadParams);
-	CDB_TSPackets*		pDB_TSPackets = pWindow->GetTSPacketsDBase();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+	thread_params_t*	pthread_params = &(pTSMagicView->m_kThreadParams);
+	CDB_TSPackets*		pDB_TSPackets = pTSMagicView->GetTSPacketsDBase();
 	//RECORD_TSPacket_t*	pPacketInfo;
 	CWnd*				pWnd = NULL;
 	int					rtcode;
@@ -1136,8 +1136,8 @@ void CDlg_TSAnalyzer_Packets::OnChangeEditEnd()
 
 void CDlg_TSAnalyzer_Packets::ActionMsg(WPARAM wParam)
 {
-	CTSMagicView*		pWindow = CTSMagicView::GetView();
-	thread_params_t*	pthread_params = &(pWindow->m_kThreadParams);
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+	thread_params_t*	pthread_params = &(pTSMagicView->m_kThreadParams);
 	CWnd* pWnd = NULL;
 
 	if (wParam == 1)		//线程进入
@@ -1205,8 +1205,8 @@ void CDlg_TSAnalyzer_Packets::OnRclickListPid(NMHDR *pNMHDR, LRESULT *pResult)
 		pSubMenu = menu.GetSubMenu(0);//获取第一个弹出菜单，所以第一个菜单必须有子菜单
 		pSubMenu->EnableMenuItem(ID_TS_DECIMATE_TO_TS, MF_ENABLED);
 
-		CTSMagicView*		pWindow = CTSMagicView::GetView();
-		CDB_TSPackets*		pDB_TSPackets = pWindow->GetTSPacketsDBase();
+		CTSMagicView* pTSMagicView = CTSMagicView::GetView();
+		CDB_TSPackets*		pDB_TSPackets = pTSMagicView->GetTSPacketsDBase();
 		RECORD_TSPacket_t	stTSPacketInfo;
 
 		pDB_TSPackets->GetRecord(usPID, &stTSPacketInfo);

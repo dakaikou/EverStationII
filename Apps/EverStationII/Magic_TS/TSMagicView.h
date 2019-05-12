@@ -205,8 +205,6 @@ public:
 
 protected:
 
-	//CTabView_TSMagic*			m_pMagicTab;
-
 	int			TAB_OVERVIEW;
 	int			TAB_SERVICES;
 	int			TAB_EPG;
@@ -223,6 +221,7 @@ protected:
 	int			TAB_WATCH_TELETEXT;
 	int			TAB_WATCH_SUBTITLE;
 	int			TAB_WATCH_OCDC;
+	int			m_nCurActiveTab;
 
 	CTransportStream	m_transport_stream;
 
@@ -239,10 +238,10 @@ protected:
 	CString		m_strTSInputOption;
 	CString		m_strTSInputAttribute;
 
-	CSize		m_lastClientSize;
+	//CSize		m_lastClientSize;
 
 	void AdjustLayout(int cx, int cy);
-	void ActivateTabPage(int nSel);
+	void ActivateTabPage(int nOldSel, int nNewSel);
 	void InitConsoleTab(void);
 	void GUIReset(void);
 

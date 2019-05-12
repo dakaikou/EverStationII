@@ -111,7 +111,7 @@ void CDlg_TSAnalyzer_Teletext::OnSize(UINT nType, int cx, int cy)
 
 void CDlg_TSAnalyzer_Teletext::Reset(void)
 {
-	CTSMagicView* pView = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
 	CWnd* pWnd;
 
@@ -173,24 +173,24 @@ void CDlg_TSAnalyzer_Teletext::OnBtnTeletextTrigger()
 /*
 	char		pszText[MAX_TXT_CHARS];
 
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
 	if (pWindow->m_kThreadParams.main_thread_running)
 	{
 		TreeFun_DeleteChildItems(&m_treeTeletextSyntax, m_hTeletextPesItem);
 		TreeFun_DeleteChildItems(&m_treeTeletextSyntax, m_hTeletextEsItem);
 
-		if (pWindow->m_kThreadParams.offline == 1)
+		if (pTSMagicView->m_kThreadParams.offline == 1)
 		{
 			//离线分析
-			if (pWindow->m_kThreadParams.main_thread_stopped == 1)		//分析已经结束
+			if (pTSMagicView->m_kThreadParams.main_thread_stopped == 1)		//分析已经结束
 			{
-				if (pWindow->m_kThreadParams.triggering == 0)
+				if (pTSMagicView->m_kThreadParams.triggering == 0)
 				{
-					if (pWindow->m_kThreadParams.downloading == 0)
+					if (pTSMagicView->m_kThreadParams.downloading == 0)
 					{
-						pWindow->m_kThreadParams.triggering = 1;
-						::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_es_trigger_thread, (LPVOID)pWindow, 0, 0);
+						pTSMagicView->m_kThreadParams.triggering = 1;
+						::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_es_trigger_thread, (LPVOID)pTSMagicView, 0, 0);
 					}
 				}
 				else
@@ -216,7 +216,7 @@ void CDlg_TSAnalyzer_Teletext::SetPIDInfo(CPMT* pPMT)
 	int				nItem;
 	uint32_t				code;
 
-	CTSMagicView* pView = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
 	m_listTeletextPID.DeleteAllItems();
 
@@ -288,7 +288,7 @@ LRESULT CDlg_TSAnalyzer_Teletext::OnUpdatePMT(WPARAM wParam, LPARAM lParam)
 	int				bExit;
 	DWORD			dwPID;
 
-	CTSMagicView* pWindow = CTSMagicView::GetView();
+	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
 
 //	uint8_t	ucSubType = 0x00;
 
