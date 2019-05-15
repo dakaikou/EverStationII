@@ -153,9 +153,6 @@
     <ClInclude Include="Magic_TS\TSMagic_Trigger_TSPacket.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
-    <ClInclude Include="Magic_TS\TSMagicFrm.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
     <ClInclude Include="Magic_TS\TSMagicView.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
@@ -171,16 +168,10 @@
     <ClInclude Include="Magic_PS\Dlg_PSOverview.h">
       <Filter>头文件\Magic_PS</Filter>
     </ClInclude>
-    <ClInclude Include="Magic_PS\PSMagicFrm.h">
-      <Filter>头文件\Magic_PS</Filter>
-    </ClInclude>
     <ClInclude Include="Magic_PS\psmagicview.h">
       <Filter>头文件\Magic_PS</Filter>
     </ClInclude>
     <ClInclude Include="Magic_ES\Dlg_ESOverview.h">
-      <Filter>头文件\Magic_ES</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_ES\ESMagicFrm.h">
       <Filter>头文件\Magic_ES</Filter>
     </ClInclude>
     <ClInclude Include="Magic_ES\ESMagicview.h">
@@ -193,9 +184,6 @@
       <Filter>头文件\Magic_YUV</Filter>
     </ClInclude>
     <ClInclude Include="Magic_YUV\guiapi_yuv.h">
-      <Filter>头文件\Magic_YUV</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_YUV\YUVMagicFrm.h">
       <Filter>头文件\Magic_YUV</Filter>
     </ClInclude>
     <ClInclude Include="Magic_YUV\YUVMagicView.h">
@@ -440,25 +428,16 @@
     <ClCompile Include="Magic_YUV\Dlg_YUVPreview.cpp">
       <Filter>源文件\Magic_YUV</Filter>
     </ClCompile>
-    <ClCompile Include="Magic_YUV\YUVMagicFrm.cpp">
-      <Filter>源文件\Magic_YUV</Filter>
-    </ClCompile>
     <ClCompile Include="Magic_YUV\YUVMagicView.cpp">
       <Filter>源文件\Magic_YUV</Filter>
     </ClCompile>
     <ClCompile Include="Magic_ES\Dlg_ESOverview.cpp">
       <Filter>源文件\Magic_ES</Filter>
     </ClCompile>
-    <ClCompile Include="Magic_ES\ESMagicFrm.cpp">
-      <Filter>源文件\Magic_ES</Filter>
-    </ClCompile>
     <ClCompile Include="Magic_ES\ESMagicView.cpp">
       <Filter>源文件\Magic_ES</Filter>
     </ClCompile>
     <ClCompile Include="Magic_PS\Dlg_PSOverview.cpp">
-      <Filter>源文件\Magic_PS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_PS\PSMagicFrm.cpp">
       <Filter>源文件\Magic_PS</Filter>
     </ClCompile>
     <ClCompile Include="Magic_PS\PSMagicView.cpp">
@@ -480,9 +459,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Magic_TS\TSMagicDoc.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\TSMagicFrm.cpp">
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
     <ClCompile Include="Common\InstrumentPanel_Base.cpp">

@@ -1,1 +1,6 @@
-﻿
+﻿  stdafx.cpp
+  dllmain.cpp
+  SIOWithUDP.cpp
+  正在生成代码...
+    正在创建库 .\lib\SIOWithUDPD(x64).lib 和对象 .\lib\SIOWithUDPD(x64).exp
+  SIOWithUDP.vcxproj -> E:\Projects-Mpeg2码流分析仪\软件工程\EverStationII\Debug\x64\SIOWithUDPD(x64).dll

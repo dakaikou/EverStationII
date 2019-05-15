@@ -1284,7 +1284,7 @@ BOOL CDlg_TSAnalyzer_PacketTrigger::OnNotify(WPARAM wParam, LPARAM lParam, LRESU
 				{
 					if (item.mask & TVIF_PARAM)
 					{
-						DWORD uiValue = item.lParam;
+						DWORD uiValue = (DWORD)(item.lParam);
 						//char pszTemp[64];
 						//sprintf_s(pszTemp, 64, "Parent: OnTvnSelchanged(), uiValue=0x%08X\0", uiValue);
 						//AfxMessageBox(pszTemp);

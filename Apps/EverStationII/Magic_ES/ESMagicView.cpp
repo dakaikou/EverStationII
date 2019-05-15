@@ -498,7 +498,7 @@ void CESMagicView::OnBtnPreview()
 	{
 		CComboBox* pCmbCtrl = (CComboBox*)GetDlgItem(IDC_CMB_ES_TYPE);
 		int nSel = pCmbCtrl->GetCurSel();
-		int nStreamType = pCmbCtrl->GetItemData(nSel);
+		int nStreamType = (int)pCmbCtrl->GetItemData(nSel);
 
 		//switch (nStreamType & (~STREAM_FILE))
 		//{

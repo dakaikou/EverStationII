@@ -1,1 +1,23 @@
-﻿
+﻿  stdafx.cpp
+  CDL_DSMCC_DDM.cpp
+  CDL_DSMCC_UNM.cpp
+  CDL_IPDC_MPE.cpp
+  CDL_MHP_AIT.cpp
+  CDL_PSISI_Common.cpp
+  CDL_PSI_CAT.cpp
+  CDL_PSI_PAT.cpp
+  CDL_PSI_PMT.cpp
+  CDL_PSI_TSDT.cpp
+  CDL_SI_BAT.cpp
+  CDL_SI_CMT.cpp
+  CDL_SI_EIT.cpp
+  CDL_SI_INT.cpp
+  CDL_SI_NIT.cpp
+  CDL_SI_RST.cpp
+  CDL_SI_SDT.cpp
+  CDL_SI_TDT.cpp
+  CDL_SI_TOT.cpp
+  dllmain.cpp
+  正在生成代码...
+    正在创建库 .\lib\MiddleWare_PsiSiTableD(x64).lib 和对象 .\lib\MiddleWare_PsiSiTableD(x64).exp
+  MiddleWare_PsiSiTable.vcxproj -> E:\Projects-Mpeg2码流分析仪\软件工程\EverStationII\Debug\x64\MiddleWare_PsiSiTableD(x64).dll

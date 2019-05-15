@@ -16,9 +16,9 @@
 #include "..\Common\TreeView_XMLBrowser.h"
 #include "..\Common\HexEditView_ByteBuffer.h"
 
-#if !MFC_CONTROL
-#include "..\MFCExt\TreeList\TreeListCtrl.h"
-#endif
+//#if !MFC_CONTROL
+//#include "..\MFCExt\TreeList\TreeListCtrl.h"
+//#endif
 
 //#include "..\MFCExt\SplitWnd\SplitWnd.h"
 #include "NaviTree_ESs.h"

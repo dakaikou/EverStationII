@@ -9,7 +9,6 @@
 #include <stdint.h>
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_ShowVideo dialog
-#include "..\MFCExt\tooltip2\tooltip2.h"
 #include "..\resource.h"
 
 #include "Dlg_VideoPanelPlayController.h"
