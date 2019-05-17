@@ -11,7 +11,6 @@
 #include "thirdparty_abstract_layer\TALForDirectX\Include\TALForDirectDraw.h"
 #include "Utilities/Graphics/Include/Graphics.h"
 
-#include "../Include/common/video_common.h"
 #include "../Include/VESDecoder.h"
 #include "../Include/ESDecoder_ErrorCode.h"
 

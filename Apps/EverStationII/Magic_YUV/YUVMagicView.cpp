@@ -249,10 +249,10 @@ void CYUVMagicView::OnSelchangeTabConsole(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CYUVMagicView::GUIReset(void)
 {
-	CWnd* pWnd;
+	//CWnd* pWnd;
 
-	pWnd = GetDlgItem(IDC_EDIT_FILE);			//说明窗口已经撤销
-	pWnd->SetWindowText("");
+	//pWnd = GetDlgItem(IDC_EDIT_FILE);			//说明窗口已经撤销
+	//pWnd->SetWindowText("");
 
 #if GUI_YUV_PREVIEW
 	m_dlgPreview.Reset();

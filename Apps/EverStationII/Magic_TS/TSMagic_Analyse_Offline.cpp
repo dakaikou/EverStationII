@@ -64,6 +64,9 @@ void offline_ts_loop(ts_thread_params_t* pThreadParams)
 
 	int	  stream_synced = 0;
 
+	COleDateTime	timeCurrent;
+	CString			strTime;
+
 	int					rtcode;
 	int					filter_index;
 	CSectionSplicer		SectionSplicer[MAX_SECTION_FILTERS];
@@ -84,21 +87,27 @@ void offline_ts_loop(ts_thread_params_t* pThreadParams)
 
 	if (pThreadParams != NULL)
 	{
-		assert(pThreadParams->main_thread_stopped == 0);
-		pThreadParams->main_thread_running = 1;
+		assert(pThreadParams->main_thread_running == 1);		//只读， 确认是不是上层应用通知线程运行的
+		pThreadParams->main_thread_stopped = 0;
 
 		thread_start_tickcount = ::GetTickCount();
 
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_OFFLINE_THREAD, 1, NULL);
 
-		sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: 开始(文件名：%s)", pThreadParams->pszFileName);
+		timeCurrent = COleDateTime::GetCurrentTime();
+		strTime = timeCurrent.Format("%Y年%m月%d日 %H:%M:%S");
+
+		sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: 开始(%s)", strTime.GetBuffer(strTime.GetLength()));
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_OPEN);
+		LOG(INFO) << pszDebug;
+
+		sprintf_s(pszDebug, sizeof(pszDebug), "URL: %s://%s", pThreadParams->pszPathHeader, pThreadParams->pszPathName);
+		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
 		LOG(INFO) << pszDebug;
 
 		ptransport_stream = pThreadParams->pTStream;
 		ptransport_stream->Reset();
 
-		//::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_REPORT_FILESIZE, (WPARAM)(&(ptransport_stream->m_llTotalFileLength)), (LPARAM)((char*)pThreadParams->pszFileName));
 		pTSPacketTrigger = pThreadParams->pTrigger_TSPacket;
 		pTSPacketTrigger->Reset();
 
@@ -552,10 +561,13 @@ void offline_ts_loop(ts_thread_params_t* pThreadParams)
 		if (pThreadParams->main_thread_running == 0)
 		{
 			//说明是用户强制要求退出主线程，清除界面分析结果
-			::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_OFFLINE_THREAD, 0, NULL);
+			::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_OFFLINE_THREAD, 0, NULL);			//强制结束
 		}
 		else
 		{
+			analyse_ratio = 100;
+			::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_REPORT_RATIO, (WPARAM)NULL, (LPARAM)analyse_ratio);
+
 			//说明是离线分析正常结束，退出主线程，保留界面分析结果
 			::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_OFFLINE_THREAD, 2, NULL);			//离线分析结束
 		}
@@ -563,10 +575,10 @@ void offline_ts_loop(ts_thread_params_t* pThreadParams)
 		thread_finish_tickcount = ::GetTickCount();
 		diff_tickcount = thread_finish_tickcount - thread_start_tickcount;
 
-		analyse_ratio = 100;
-		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_REPORT_RATIO, (WPARAM)NULL, (LPARAM)analyse_ratio);
+		timeCurrent = COleDateTime::GetCurrentTime();
+		strTime = timeCurrent.Format("%Y年%m月%d日 %H:%M:%S");
 
-		sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: 结束! (耗时%d ms)", diff_tickcount);
+		sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: 结束(%s)！(耗时%.3f s)", strTime.GetBuffer(strTime.GetLength()), diff_tickcount / 1000.0);
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_CLOSE);
 		LOG(INFO) << pszDebug;
 

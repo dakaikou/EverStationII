@@ -105,8 +105,8 @@ void realtime_ts_analyzer(ts_thread_params_t* pThreadParams)
 
 	if (pThreadParams != NULL)
 	{
-		assert(pThreadParams->main_thread_stopped == 0);
-		pThreadParams->main_thread_running = 1;
+		assert(pThreadParams->main_thread_running == 1);
+		pThreadParams->main_thread_stopped = 0;
 
 		thread_start_tickcount = ::GetTickCount();
 	
@@ -115,10 +115,14 @@ void realtime_ts_analyzer(ts_thread_params_t* pThreadParams)
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_REALTIME_THREAD, 1, NULL);
 
 		timeCurrent = COleDateTime::GetCurrentTime();
-		strTime = timeCurrent.Format("%Y年%m月%d日_%H:%M:%S");
+		strTime = timeCurrent.Format("%Y年%m月%d日 %H:%M:%S");
 
 		sprintf_s(pszDebug, sizeof(pszDebug), "实时分析: 开始(%s)", strTime.GetBuffer(strTime.GetLength()));
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_OPEN);
+		LOG(INFO) << pszDebug;
+
+		sprintf_s(pszDebug, sizeof(pszDebug), "URL: %s://%s", pThreadParams->pszPathHeader, pThreadParams->pszPathName);
+		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
 		LOG(INFO) << pszDebug;
 
 		ptransport_stream = pThreadParams->pTStream;
@@ -159,7 +163,7 @@ void realtime_ts_analyzer(ts_thread_params_t* pThreadParams)
 						//sprintf_s(pszDebug, sizeof(pszDebug), "实时分析: 找到同步, TS包长 %d字节（文件位置：0x%llx）\n", packet_length, read_byte_pos);
 
 						timeCurrent = COleDateTime::GetCurrentTime();
-						strTime = timeCurrent.Format("%Y年%m月%d日_%H:%M:%S");
+						strTime = timeCurrent.Format("%Y年%m月%d日 %H:%M:%S");
 
 						sprintf_s(pszDebug, sizeof(pszDebug), "实时分析: 找到同步(%s)\n", strTime.GetBuffer(strTime.GetLength()));
 						::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_ETR290_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_INFO);
@@ -617,7 +621,7 @@ void realtime_ts_analyzer(ts_thread_params_t* pThreadParams)
 		diff_tickcount = thread_end_tickcount - thread_start_tickcount;
 
 		timeCurrent = COleDateTime::GetCurrentTime();
-		strTime = timeCurrent.Format("%Y年%m月%d日_%H:%M:%S");
+		strTime = timeCurrent.Format("%Y年%m月%d日 %H:%M:%S");
 
 		sprintf_s(pszDebug, sizeof(pszDebug), "实时分析: 结束(%s)！(耗时%.3f s)", strTime.GetBuffer(strTime.GetLength()), diff_tickcount/1000.0);
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_CLOSE);
@@ -668,6 +672,9 @@ void realtime_ts_monitor(ts_thread_params_t* pThreadParams)
 
 	if (pThreadParams != NULL)
 	{
+		assert(pThreadParams->monitor_thread_running == 1);
+		pThreadParams->monitor_thread_stopped = 0;
+
 		sprintf_s(pszDebug, sizeof(pszDebug), "实时监测: 开始");
 		::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_OPEN);
 
@@ -684,8 +691,6 @@ void realtime_ts_monitor(ts_thread_params_t* pThreadParams)
 
 		ptransport_stream = pThreadParams->pTStream;
 		ptransport_stream->StartGetBitrate();
-
-		pThreadParams->monitor_thread_running = 1;
 
 		while (pThreadParams->monitor_thread_running == 1)
 		{
@@ -769,25 +774,25 @@ void TSMagic_threadparams_init(ts_thread_params_t* pthread_params)
 		pthread_params->offline = OFFLINE_ANALYZE;
 		
 		pthread_params->main_thread_running = 0;
-		pthread_params->main_thread_stopped = 0;
+		pthread_params->main_thread_stopped = 1;
 
 		pthread_params->packet_decimate_thread_running = 0;
-		pthread_params->packet_decimate_thread_stopped = 0;
+		pthread_params->packet_decimate_thread_stopped = 1;
 
 		pthread_params->dsmcc_download_thread_running = 0;
-		pthread_params->dsmcc_download_thread_stopped = 0;
+		pthread_params->dsmcc_download_thread_stopped = 1;
 
 		pthread_params->monitor_thread_running = 0;
-		pthread_params->monitor_thread_stopped = 0;
+		pthread_params->monitor_thread_stopped = 1;
 
 		pthread_params->ts_trigger_thread_running = 0;
-//		pthread_params->ts_trigger_thread_stopped = 0;
+//		pthread_params->ts_trigger_thread_stopped = 1;
 
 		pthread_params->es_trigger_thread_running = 0;
-		pthread_params->es_trigger_thread_stopped = 0;
+		//pthread_params->es_trigger_thread_stopped = 1;
 
 		pthread_params->section_trigger_thread_running = 0;
-//		pthread_params->section_trigger_thread_stopped = 0;
+//		pthread_params->section_trigger_thread_stopped = 1;
 
 		pthread_params->stream_option = STREAM_TS;
 //		pthread_params->standard_option = 1;						//按照DVB标准分析
@@ -804,58 +809,11 @@ void TSMagic_threadparams_init(ts_thread_params_t* pthread_params)
 
 		pthread_params->nDecimateStyle = DECIMATE_NONE;
 
-		memset(pthread_params->pszFileName, 0x00, sizeof(pthread_params->pszFileName));
+		memset(pthread_params->pszPathHeader, 0x00, sizeof(pthread_params->pszPathHeader));
+		memset(pthread_params->pszPathName, 0x00, sizeof(pthread_params->pszPathName));
 		memset(pthread_params->pszDecimatePath, 0x00, sizeof(pthread_params->pszDecimatePath));
 		memset(pthread_params->pszVesFileName, 0x00, sizeof(pthread_params->pszVesFileName));
 		memset(pthread_params->pszAesFileName, 0x00, sizeof(pthread_params->pszAesFileName));
 	}
 }
 
-void TSMagic_threadparams_reset(ts_thread_params_t* pthread_params)
-{
-	if (pthread_params != NULL)
-	{
-		//pthread_params->pVidDecoder = NULL;
-		//pthread_params->pAudDecoder = NULL;
-	}
-}
-
-//void TSMagic_threadparams_regist_esdecoder(thread_params_t* pthread_params, int type, CESDecoder* pDecoder)
-//{
-//	if ((pthread_params != NULL) && (pDecoder != NULL))
-//	{
-//		switch (type)
-//		{
-//		case 0:						//video
-//			pthread_params->pVidDecoder = pDecoder;
-//			break;
-//		case 1:						//audio
-//			pthread_params->pAudDecoder = pDecoder;
-//			break;
-//		case 2:						//data
-//			break;
-//		default:
-//			break;
-//		}
-//	}
-//}
-//
-//void TSMagic_threadparams_unregist_esdecoder(thread_params_t* pthread_params, int type)
-//{
-//	if (pthread_params != NULL)
-//	{
-//		switch (type)
-//		{
-//		case 0:						//video
-//			pthread_params->pVidDecoder = NULL;
-//			break;
-//		case 1:						//audio
-//			pthread_params->pAudDecoder = NULL;
-//			break;
-//		case 2:						//data
-//			break;
-//		default:
-//			break;
-//		}
-//	}
-//}

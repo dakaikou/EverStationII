@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-//#include "..\Common\define.h"
+#include "..\Common\define.h"
 
 //#include "TSMagic_Callbacks_From_Lib.h"
 //#include "TSMagic_Callbacks_To_Gui.h"
@@ -67,26 +67,52 @@ void offline_es_analyze_loop(es_thread_params_t* pThreadParams)
 
 		thread_start_tickcount = ::GetTickCount();
 
-		::SendMessage(pThreadParams->hCallerWnd, WM_ESMAGIC_ANALYZE_THREAD, 1, 0);
+		::SendMessage(pThreadParams->hCallerWnd, WM_ESMAGIC_ANALYZE_THREAD, 1, NULL);
 
 		sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: 开始(文件名：%s)", pThreadParams->pszFileName);
-		//::SendMessage(pThreadParams->hMainWnd, WM_ESMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_OPEN);
+		::SendMessage(pThreadParams->hCallerWnd, WM_ESMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_OPEN);
 		LOG(INFO) << pszDebug;
 
-		for (int step = 0; step < 100; step++)
+		while (pThreadParams->main_thread_running == 1)
 		{
-			::SendMessage(pThreadParams->hCallerWnd, WM_ESMAGIC_ANALYZE_THREAD, 1, step);
+			analyse_ratio ++;
+			::SendMessage(pThreadParams->hCallerWnd, WM_ESMAGIC_REPORT_RATIO, (WPARAM)NULL, (LPARAM)analyse_ratio);
+			//::SendMessage(pThreadParams->hCallerWnd, WM_ESMAGIC_ANALYZE_THREAD, 1, step);
 			Sleep(500);
+
+			if (analyse_ratio >= 100)
+			{
+				break;
+			}
 		}
 
-		::SendMessage(pThreadParams->hCallerWnd, WM_ESMAGIC_ANALYZE_THREAD, 0, 0);
+		if (pThreadParams->main_thread_running == 0)
+		{
+			//说明是用户强制要求退出主线程，清除界面分析结果
+			::SendMessage(pThreadParams->hCallerWnd, WM_ESMAGIC_ANALYZE_THREAD, 0, NULL);
+		}
+		else
+		{
+			analyse_ratio = 100;
+			::SendMessage(pThreadParams->hCallerWnd, WM_ESMAGIC_REPORT_RATIO, (WPARAM)NULL, (LPARAM)analyse_ratio);
+			
+			//说明是离线分析正常结束，退出主线程，保留界面分析结果
+			::SendMessage(pThreadParams->hCallerWnd, WM_ESMAGIC_ANALYZE_THREAD, 2, NULL);			//离线分析结束
+		}
+
+		thread_finish_tickcount = ::GetTickCount();
+		diff_tickcount = thread_finish_tickcount - thread_start_tickcount;
+
+		sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: 结束! (耗时%d ms)", diff_tickcount);
+		::SendMessage(pThreadParams->hCallerWnd, WM_ESMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_CLOSE);
+		LOG(INFO) << pszDebug;
 
 		pThreadParams->main_thread_stopped = 1;			//通知应用程序，主线程顺利退出
 	}
 	else
 	{
 		sprintf_s(pszDebug, sizeof(pszDebug), "离线分析: 输入参数错误！");
-		//::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
+		::SendMessage(pThreadParams->hCallerWnd, WM_ESMAGIC_APPEND_LOG, (WPARAM)pszDebug, (LPARAM)DEBUG_ERROR);
 		LOG(INFO) << pszDebug;
 	}
 }

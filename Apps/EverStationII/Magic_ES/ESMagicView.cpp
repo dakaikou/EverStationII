@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "..\EverStationII.h"
+#include "..\MainFrm.h"
 #include "ESMagicView.h"
 #include "ESMagicDoc.h"
 
@@ -17,15 +18,8 @@ static char THIS_FILE[] = __FILE__;
 #include "ESMagicFrm.h"
 //#include "ESMagic_Analyze_Offline.h"
 
+#include "syntax_translate_layer/MPEG2_TSPacket/Include/Mpeg2_TS_packet.h"
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
-
-//#include "..\Common\GuiCommon_TreeFunction.h"
-//#include "..\Common\GuiCommon_AVSVideoSyntax.h"
-//#include "..\Common\GuiCommon_H264VideoSyntax.h"
-//#include "..\Common\GuiCommon_MpegVideoSyntax.h"
-//#include "..\Common\GuiCommon_MpegAudioSyntax.h"
-//#include "..\Common\GuiCommon_AACAudioSyntax.h"
-//#include "..\Common\GuiCommon_AC3AudioSyntax.h"
 
 #include "..\resource.h"
 
@@ -59,11 +53,13 @@ void CESMagicView::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CESMagicView, CFormView)
 	//{{AFX_MSG_MAP(CESMagicView)
 	ON_WM_SIZE()
-	ON_BN_CLICKED(IDC_BTN_OPEN, OnBtnOpenOrClose)
-	ON_BN_CLICKED(IDC_BTN_PREVIEW, OnBtnPreview)
-	ON_BN_CLICKED(IDC_BTN_ES2TS, OnBtnES2TS)
+	ON_BN_CLICKED(IDC_BTN_ESFILE_OPEN_CLOSE, OnBtnOpenOrClose)
+	ON_BN_CLICKED(IDC_BTN_ESFILE_PREVIEW, OnBtnPreview)
+	ON_BN_CLICKED(IDC_BTN_ESFILE_2TS, OnBtnES2TS)
 	//}}AFX_MSG_MAP
 
+	ON_MESSAGE(WM_ESMAGIC_APPEND_LOG, OnESAppendLog)
+	ON_MESSAGE(WM_ESMAGIC_REPORT_RATIO, OnESReportRatio)
 	//ON_MESSAGE(WM_UPDATE_M2V_ES_SEQUENCE_HEADER, OnUpdateM2VEsSequenceHeader)
 	//ON_MESSAGE(WM_UPDATE_M2V_ES_SEQUENCE_EXTENSION, OnUpdateM2VEsSequenceExtension)
 	//ON_MESSAGE(WM_UPDATE_M2V_ES_SEQUENCE_DISPLAY_EXTENSION, OnUpdateM2VEsSequenceDisplayExtension)
@@ -128,7 +124,7 @@ void CESMagicView::AdjustLayout(int cx, int cy)
 
 	//计算最下面一排控件的高度，以及对齐位置
 	int nCtrlHeight = 30;
-	pWnd = GetDlgItem(IDC_BTN_OPEN);
+	pWnd = GetDlgItem(IDC_BTN_ESFILE_OPEN_CLOSE);
 	if (pWnd->GetSafeHwnd() != NULL)
 	{
 		pWnd->GetClientRect(&rect);
@@ -142,7 +138,7 @@ void CESMagicView::AdjustLayout(int cx, int cy)
 		m_wndSplitter.SetWindowPos(NULL, 5, 5, cx - 10, nYAlignOffset - 10, 0);
 	}
 
-	pWnd = GetDlgItem(IDC_CMB_ES_TYPE);
+	pWnd = GetDlgItem(IDC_CMB_ESFILE_TYPE);
 	if (pWnd->GetSafeHwnd() != NULL)
 	{
 		pWnd->GetWindowRect(&rect);
@@ -151,7 +147,7 @@ void CESMagicView::AdjustLayout(int cx, int cy)
 		pWnd->SetWindowPos(NULL, rect.left, nYAlignOffset + 5, rect.Width(), rect.Height(), 0);
 	}
 
-	pWnd = GetDlgItem(IDC_EDIT_FILE);
+	pWnd = GetDlgItem(IDC_EDIT_ESFILE_PATH);
 	if (pWnd->GetSafeHwnd() != NULL)
 	{
 		pWnd->GetWindowRect(&rect);
@@ -160,7 +156,7 @@ void CESMagicView::AdjustLayout(int cx, int cy)
 		pWnd->SetWindowPos(NULL, rect.left, nYAlignOffset + 5, rect.Width(), rect.Height(), 0);
 	}
 
-	pWnd = GetDlgItem(IDC_BTN_OPEN);
+	pWnd = GetDlgItem(IDC_BTN_ESFILE_OPEN_CLOSE);
 	if (pWnd->GetSafeHwnd() != NULL)
 	{
 		pWnd->GetWindowRect(&rect);
@@ -169,7 +165,7 @@ void CESMagicView::AdjustLayout(int cx, int cy)
 		pWnd->SetWindowPos(NULL, rect.left, nYAlignOffset + 5, rect.Width(), rect.Height(), 0);
 	}
 
-	pWnd = GetDlgItem(IDC_BTN_PREVIEW);
+	pWnd = GetDlgItem(IDC_BTN_ESFILE_PREVIEW);
 	if (pWnd->GetSafeHwnd() != NULL)
 	{
 		pWnd->GetWindowRect(&rect);
@@ -178,7 +174,7 @@ void CESMagicView::AdjustLayout(int cx, int cy)
 		pWnd->SetWindowPos(NULL, rect.left, nYAlignOffset + 5, rect.Width(), rect.Height(), 0);
 	}
 
-	pWnd = GetDlgItem(IDC_BTN_ES2TS);
+	pWnd = GetDlgItem(IDC_BTN_ESFILE_2TS);
 	if (pWnd->GetSafeHwnd() != NULL)
 	{
 		pWnd->GetWindowRect(&rect);
@@ -193,7 +189,7 @@ void CESMagicView::OnInitialUpdate()
 	CFormView::OnInitialUpdate();
 	
 	// TODO: Add your specialized code here and/or call the base class
-	CComboBox* pCmbCtrl = (CComboBox*)GetDlgItem(IDC_CMB_ES_TYPE);
+	CComboBox* pCmbCtrl = (CComboBox*)GetDlgItem(IDC_CMB_ESFILE_TYPE);
 	pCmbCtrl->ResetContent();
 
 	int nItem = pCmbCtrl->AddString("MPEG视频");
@@ -227,7 +223,7 @@ void CESMagicView::OnInitialUpdate()
 		//计算最下面一排控件的高度，以及对齐位置
 		CRect rectBtn;
 		int nCtrlHeight = 30;
-		CWnd* pWnd = GetDlgItem(IDC_BTN_OPEN);
+		CWnd* pWnd = GetDlgItem(IDC_BTN_ESFILE_OPEN_CLOSE);
 		if (pWnd->GetSafeHwnd() != NULL)
 		{
 			pWnd->GetClientRect(&rectBtn);
@@ -243,9 +239,11 @@ void CESMagicView::OnInitialUpdate()
 		rectSplitterWnd.top = rectClient.top + 5;
 		rectSplitterWnd.bottom = nYAlignOffset - 5;
 
+		int middle_col_width = rectSplitterWnd.Width() - WND_WIDTH_ES_FRAME_NAVI - WND_WIDTH_ES_HEX_BUFFER;
+		if (middle_col_width < 100) middle_col_width = 100;
 		m_wndSplitter.CreateStatic(this, 1, 3);
 		m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CNaviList_ESFrames), CSize(WND_WIDTH_ES_FRAME_NAVI, 0), NULL);
-		m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CTreeView_XMLBrowser), CSize(rectSplitterWnd.Width() - WND_WIDTH_ES_FRAME_NAVI - WND_WIDTH_ES_HEX_BUFFER, 0), NULL);
+		m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CTreeView_XMLBrowser), CSize(middle_col_width, 0), NULL);
 #if BYTE_BUFFER_USE_LISTCTRL_VIEW
 		m_wndSplitter.CreateView(0, 2, RUNTIME_CLASS(CListView_ByteBuffer), CSize(WND_WIDTH_ES_HEX_BUFFER, 0), NULL);
 #else
@@ -303,23 +301,26 @@ void CESMagicView::Reset(void)
 {
 	CWnd* pWnd;
 
-	pWnd = GetDlgItem(IDC_EDIT_FILE);			//说明窗口已经撤销
+	pWnd = GetDlgItem(IDC_CMB_ESFILE_TYPE);			
+	pWnd->EnableWindow(TRUE);
+
+	pWnd = GetDlgItem(IDC_EDIT_ESFILE_PATH);			
 	pWnd->SetWindowText("");
 
-	pWnd = GetDlgItem(IDC_BTN_OPEN);
+	pWnd = GetDlgItem(IDC_BTN_ESFILE_OPEN_CLOSE);
 	pWnd->SetWindowText("打开");
 
-	pWnd = GetDlgItem(IDC_BTN_PREVIEW);
+	pWnd = GetDlgItem(IDC_BTN_ESFILE_PREVIEW);
 	pWnd->EnableWindow(FALSE);
 
-	pWnd = GetDlgItem(IDC_BTN_ES2TS);
+	pWnd = GetDlgItem(IDC_BTN_ESFILE_2TS);
 	pWnd->EnableWindow(FALSE);
-
-	//TreeFun_DeleteChildItems(&m_treeESSyntax, m_hRootItem);
-	//TreeFun_SetItemText(&m_treeESSyntax, m_hRootItem, "ES语法分析");
 
 	m_dlgESAnalyzeProgress.Reset();
 	m_dlgESAnalyzeProgress.ShowWindow(SW_HIDE);
+
+	GetStatusBar().SetPaneText(1, "");
+	GetStatusBar().SetPaneProgress(1, 0);
 
 	UpdateData(FALSE);
 }
@@ -349,7 +350,8 @@ CESMagicView* CESMagicView::GetView(void)
 void CESMagicView::OnBtnOpenOrClose() 
 {
 	// TODO: Add your control notification handler code here
-	CComboBox* pCmbCtrl = (CComboBox*)GetDlgItem(IDC_CMB_ES_TYPE);
+	CEverStationIIApp* pApp = (CEverStationIIApp*)AfxGetApp();
+	CComboBox* pCmbCtrl = (CComboBox*)GetDlgItem(IDC_CMB_ESFILE_TYPE);
 	CWnd*	pWnd;
 	int		nStreamType = STREAM_UNKNOWN;
 	int nSel = pCmbCtrl->GetCurSel();
@@ -371,20 +373,11 @@ void CESMagicView::OnBtnOpenOrClose()
 
 			if (FILE_CheckStreamType(nStreamType & (~STREAM_FILE), strFileName.GetBuffer(128)))
 			{
-				pWnd = GetDlgItem(IDC_BTN_OPEN);
-				pWnd->SetWindowText("关闭");
-				m_bOpened = 1;
-
-				pWnd = GetDlgItem(IDC_EDIT_FILE);
+				pWnd = GetDlgItem(IDC_EDIT_ESFILE_PATH);
 				pWnd->SetWindowText(strFileName);
 
-				pCmbCtrl->EnableWindow(FALSE);
-
-				pWnd = GetDlgItem(IDC_BTN_PREVIEW);
-				pWnd->EnableWindow(TRUE);
-
-				pWnd = GetDlgItem(IDC_BTN_ES2TS);
-				pWnd->EnableWindow(TRUE);
+				pWnd = GetDlgItem(IDC_BTN_ESFILE_OPEN_CLOSE);
+				pWnd->EnableWindow(FALSE);			//禁止“打开”按钮再进行操作
 
 				//switch (nStreamType & (~STREAM_FILE))
 				//{
@@ -443,8 +436,6 @@ void CESMagicView::OnBtnOpenOrClose()
 				//m_kThreadParams.pTrigger_PESPacket = &m_Trigger_PESPacket;
 
 				::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ESMagic_analyze_thread, (LPVOID)&m_es_thread_params, 0, 0);
-
-				//UpdateData(FALSE);
 			}
 			else
 			{
@@ -456,6 +447,17 @@ void CESMagicView::OnBtnOpenOrClose()
 	}
 	else
 	{
+		m_es_thread_params.main_thread_running = 0;			//强制通知主线程退出
+
+		pWnd = GetDlgItem(IDC_BTN_ESFILE_OPEN_CLOSE);
+		pWnd->EnableWindow(FALSE);			//禁止“打开”按钮再进行操作
+
+		if (m_es_thread_params.main_thread_stopped == 1)
+		{
+			//若离线分析线程已经退出，此时需要补发一个消息，否则界面控件显示会不正常
+			::SendMessage(this->GetSafeHwnd(), WM_ESMAGIC_ANALYZE_THREAD, 0, NULL);
+		}
+
 		//switch (nStreamType & (~STREAM_FILE))
 		//{
 		//case STREAM_MPEGVES:
@@ -480,12 +482,6 @@ void CESMagicView::OnBtnOpenOrClose()
 		//	m_WAVEDecoder.Close();
 		//	break;
 		//}
-
-		pCmbCtrl->EnableWindow(TRUE);
-
-		m_bOpened = 0;
-
-		Reset();
 	}
 }
 
@@ -496,12 +492,12 @@ void CESMagicView::OnBtnPreview()
 
 	CString strFileName;
 	
-	CWnd* pWnd = GetDlgItem(IDC_EDIT_FILE);
+	CWnd* pWnd = GetDlgItem(IDC_EDIT_ESFILE_PATH);
 	pWnd->GetWindowText(strFileName);
 
 	if (strFileName != "")
 	{
-		CComboBox* pCmbCtrl = (CComboBox*)GetDlgItem(IDC_CMB_ES_TYPE);
+		CComboBox* pCmbCtrl = (CComboBox*)GetDlgItem(IDC_CMB_ESFILE_TYPE);
 		int nSel = pCmbCtrl->GetCurSel();
 		int nStreamType = (int)pCmbCtrl->GetItemData(nSel);
 
@@ -539,7 +535,7 @@ void CESMagicView::OnBtnES2TS(void)
 
 	CString strFileName;
 	
-	CWnd* pWnd = GetDlgItem(IDC_EDIT_FILE);
+	CWnd* pWnd = GetDlgItem(IDC_EDIT_ESFILE_PATH);
 	pWnd->GetWindowText(strFileName);
 
 //	strFileName = "e:\\blueangel.ac3";
@@ -943,31 +939,102 @@ LRESULT CESMagicView::OnUpdateWAVEHeader(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-/**
- *  TS流抽选消息响应函数
- */
+CMFCStatusBar& CESMagicView::GetStatusBar() const
+{
+	return ((CMainFrame*)AfxGetMainWnd())->GetStatusBar();
+}
+
+LRESULT CESMagicView::OnESAppendLog(WPARAM wParam, LPARAM lParam)
+{
+	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
+	pFrame->m_DockPane_RunningLog.AppendLogForUserAction((int)lParam, (char*)wParam);
+
+	return NULL;
+}
+
+LRESULT CESMagicView::OnESReportRatio(WPARAM wParam, LPARAM lParam)
+{
+	GetStatusBar().SetPaneProgress(1, (int)lParam);
+
+	return NULL;
+}
+
 LRESULT CESMagicView::OnESMagicAnalyzeThreadMsg(WPARAM wParam, LPARAM lParam)
 {
 	CEverStationIIApp* pApp = (CEverStationIIApp*)AfxGetApp();
-	char			 pszDebug[256];
+	CWnd* pWnd = NULL;
+	//char			 pszDebug[256];
 
 	if (wParam == 1)		//线程进入
 	{
-		if (!m_dlgESAnalyzeProgress.IsWindowVisible())
+		pWnd = GetDlgItem(IDC_BTN_ESFILE_OPEN_CLOSE);
+		if (pWnd != NULL)
 		{
-			strcpy_s(pszDebug, sizeof(pszDebug), "ES分析");
-			m_dlgESAnalyzeProgress.SetWindowText(pszDebug);
-			m_dlgESAnalyzeProgress.ShowWindow(SW_SHOW);
-			m_dlgESAnalyzeProgress.m_progress.SetPos((int)lParam);				//lParam是分析的百分比
+			pWnd->SetWindowText("停止");
+			pWnd->EnableWindow(TRUE);
 		}
+		m_bOpened = 1;
+
+		//pWnd = GetDlgItem(IDC_EDIT_ESFILE);
+		//pWnd->SetWindowText(strFileName);
+
+		CComboBox* pCmbCtrl = (CComboBox*)GetDlgItem(IDC_CMB_ESFILE_TYPE);
+		pCmbCtrl->EnableWindow(FALSE);
+
+		pWnd = GetDlgItem(IDC_BTN_ESFILE_PREVIEW);
+		pWnd->EnableWindow(FALSE);
+
+		pWnd = GetDlgItem(IDC_BTN_ESFILE_2TS);
+		pWnd->EnableWindow(FALSE);
+
+		GetStatusBar().SetPaneText(1, m_es_thread_params.pszFileName);
+
+		pApp->SetRunningState(1);
+
+		//if (!m_dlgESAnalyzeProgress.IsWindowVisible())
+		//{
+		//	strcpy_s(pszDebug, sizeof(pszDebug), "ES分析");
+		//	m_dlgESAnalyzeProgress.SetWindowText(pszDebug);
+		//	m_dlgESAnalyzeProgress.ShowWindow(SW_SHOW);
+		//	m_dlgESAnalyzeProgress.m_progress.SetPos((int)lParam);				//lParam是分析的百分比
+		//}
+	}
+	else if (wParam == 2)		//离线分析结束
+	{
+		pWnd = GetDlgItem(IDC_BTN_ESFILE_OPEN_CLOSE);
+		if (pWnd != NULL)
+		{
+			pWnd->SetWindowText("关闭");
+			pWnd->EnableWindow(TRUE);
+		}
+
+		pWnd = GetDlgItem(IDC_BTN_ESFILE_PREVIEW);
+		pWnd->EnableWindow(TRUE);
+
+		pWnd = GetDlgItem(IDC_BTN_ESFILE_2TS);
+		pWnd->EnableWindow(TRUE);
 	}
 	else					//线程退出
 	{
-		if (m_dlgESAnalyzeProgress.IsWindowVisible())
+		pWnd = GetDlgItem(IDC_BTN_ESFILE_OPEN_CLOSE);
+		if (pWnd != NULL)
 		{
-			m_dlgESAnalyzeProgress.ShowWindow(SW_HIDE);
-			m_dlgESAnalyzeProgress.Reset();
+			pWnd->SetWindowText("打开");
+			pWnd->EnableWindow(TRUE);
 		}
+
+		pApp->SetRunningState(0);
+
+		m_bOpened = 0;
+
+		Reset();
+
+
+		//if (m_dlgESAnalyzeProgress.IsWindowVisible())
+		//{
+		//	m_dlgESAnalyzeProgress.ShowWindow(SW_HIDE);
+		//	m_dlgESAnalyzeProgress.Reset();
+		//}
 
 		//如果抽选线程在主线程之后退出，必须增加下面的语句，否则界面显示不正确
 		//if (m_kThreadParams.main_thread_running == 0)

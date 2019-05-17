@@ -18,8 +18,6 @@
 #include "TSMagic_Trigger_TSPacket.h"
 #include "TSMagic_Trigger_PESES.h"
 
-//#include "..\Common\Define.h"
-
 #define GUI_TS_ANALYZER_OVERVIEW			1
 #define GUI_TS_ANALYZER_NETWORK				0
 #define GUI_TS_ANALYZER_EPG					1
@@ -37,14 +35,10 @@
 #define GUI_TS_PK_MODIFY					0
 #define GUI_TS_SEC_TRIGGER					0
 
-#define DTSPTS_FIFO_LENGTH					256
-
-#define	MAX_PICTURE_COUNT					40
-
 /*--------------------------------------------------------------------
 	Thread parameters' table
 --------------------------------------------------------------------*/
-typedef struct thread_params_s
+typedef struct ts_thread_params_s
 {
 	HWND		hMainWnd;
 	HWND		hPesEsMsgWnd;
@@ -52,35 +46,37 @@ typedef struct thread_params_s
 	int			offline;
 
 	//主线程的状态
-	int			main_thread_running;			//用户控制
-	int			main_thread_stopped;			//反馈状态
-
-	//TS抽选线程
-	int			packet_decimate_thread_running;		//用户控制
-	int			packet_decimate_thread_stopped;		//反馈状态
+	int			main_thread_running;			//用户控制，在界面层设置，在线程里只读
+	int			main_thread_stopped;			//状态反馈，在线程里设置，在界面层只读
 
 	//实时流监测线程
 	int			monitor_thread_running;
 	int			monitor_thread_stopped;
 
+	//TS抽选线程
+	int			packet_decimate_thread_running;		//用户控制
+	int			packet_decimate_thread_stopped;		//反馈状态
+
 	//DSMCC OC/DC下载线程
 	int			dsmcc_download_thread_running;
 	int			dsmcc_download_thread_stopped;
 
+	//包捕捉状态标识
 	int			ts_trigger_thread_running;				
-//	int			ts_trigger_thread_stopped;
-
 	int			pes_trigger_thread_running;
-//	int			pes_trigger_thread_stopped;
-
 	int			es_trigger_thread_running;
-	int			es_trigger_thread_stopped;
-
 	int			section_trigger_thread_running;
-//	int			section_trigger_thread_stopped;
 
-//	int			triggering;
+	int			thread_running;				//bit0 -- main thread (analyze)
+											//bit1 -- ts catch thread
+											//bit2 -- pes catch thread
+	                                        //bit3 -- es catch thread
+	                                        //bit4 -- section catch thread
+											//bit5 -- dsmcc_download thread
+											//bit6 -- packet_decimate thread
 
+
+	//发现TS信号标识
 	int			find_signal;
 
 	int			stream_option;					//0 -- ts
@@ -93,10 +89,8 @@ typedef struct thread_params_s
 												//1 -- DVB
 												//2 -- NGB
 
-	char			pszFileName[MAX_PATH];
-
-	//CESDecoder* pVidDecoder;
-	//CESDecoder* pAudDecoder;
+	char			pszPathHeader[6];
+	char			pszPathName[MAX_PATH];
 
 	int				nDecimateStyle;							
 	char			pszDecimatePath[MAX_PATH];
@@ -122,6 +116,6 @@ uint32_t TSMagic_realtime_analyzer(LPVOID lpParam);
 uint32_t TSMagic_realtime_monitor(LPVOID lpParam);
 
 void TSMagic_threadparams_init(ts_thread_params_t* pthread_params);
-void TSMagic_threadparams_reset(ts_thread_params_t* pthread_params);
+//void TSMagic_threadparams_reset(ts_thread_params_t* pthread_params);
 
 #endif  //_TSMAGIC_GUIAPI_H_

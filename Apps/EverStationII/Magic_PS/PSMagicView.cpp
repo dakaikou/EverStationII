@@ -54,9 +54,9 @@ void CPSMagicView::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CPSMagicView, CFormView)
 	//{{AFX_MSG_MAP(CPSMagicView)
 	ON_WM_SIZE()
-	ON_BN_CLICKED(IDC_BTN_OPEN, OnBtnOpenOrClose)
-	ON_BN_CLICKED(IDC_BTN_DISPATCH, OnBtnEsDispatch)
-	ON_BN_CLICKED(IDC_BTN_PS_PREVIEW, OnBtnPsPreview)
+	ON_BN_CLICKED(IDC_BTN_PSFILE_OPEN_CLOSE, OnBtnOpenOrClose)
+	ON_BN_CLICKED(IDC_BTN_PSFILE_DISPATCH, OnBtnEsDispatch)
+	ON_BN_CLICKED(IDC_BTN_PSFILE_PREVIEW, OnBtnPsPreview)
 	//}}AFX_MSG_MAP
 	//ON_MESSAGE(WM_UPDATE_MPEG_PACK_HEADER, OnUpdateMPEGPackHeader)
 	//ON_MESSAGE(WM_UPDATE_MPEG_SYSTEM_HEADER, OnUpdateMPEGSystemHeader)
@@ -102,7 +102,7 @@ void CPSMagicView::ReLayoutWindow(int cx, int cy)
 
 	yoffset = 0;
 
-	pWnd = GetDlgItem(IDC_TREE_PS_SYNTAX);
+	pWnd = GetDlgItem(IDC_TREE_PSFILE_SYNTAX);
 	if (pWnd->GetSafeHwnd() != NULL)
 	{
 		pWnd->SetWindowPos(NULL, 5, 5, cx - 130, cy - 50, 0);
@@ -110,7 +110,7 @@ void CPSMagicView::ReLayoutWindow(int cx, int cy)
 		yoffset = cy - 40;
 	}
 
-	pWnd = GetDlgItem(IDC_BTN_OPEN);
+	pWnd = GetDlgItem(IDC_BTN_PSFILE_OPEN_CLOSE);
 	if (pWnd->GetSafeHwnd() != NULL)
 	{
 		pWnd->GetWindowRect(&rect);
@@ -119,7 +119,7 @@ void CPSMagicView::ReLayoutWindow(int cx, int cy)
 		xoffset = 10 + rect.Width();
 	}
 
-	pWnd = GetDlgItem(IDC_EDIT_FILE);
+	pWnd = GetDlgItem(IDC_EDIT_PSFILE_PATH);
 	if (pWnd->GetSafeHwnd() != NULL)
 	{
 		yoffset += 4;
@@ -129,7 +129,7 @@ void CPSMagicView::ReLayoutWindow(int cx, int cy)
 		xoffset += rect.Width() + 40;
 	}
 
-	pWnd = GetDlgItem(IDC_BTN_PS_PREVIEW);
+	pWnd = GetDlgItem(IDC_BTN_PSFILE_PREVIEW);
 	if (pWnd->GetSafeHwnd() != NULL)
 	{
 //		yoffset -= 4;
@@ -139,7 +139,7 @@ void CPSMagicView::ReLayoutWindow(int cx, int cy)
 		xoffset += rect.Width() + 10;
 	}
 
-	pWnd = GetDlgItem(IDC_BTN_PS2TS);
+	pWnd = GetDlgItem(IDC_BTN_PSFILE_2TS);
 	if (pWnd->GetSafeHwnd() != NULL)
 	{
 		pWnd->GetWindowRect(&rect);
@@ -175,7 +175,7 @@ void CPSMagicView::ReLayoutWindow(int cx, int cy)
 //		pWnd->SetWindowPos(NULL, cx - rect.Width() - 5, rect.top, rect.Width(), rect.Height(), 0);
 //	}
 
-	pWnd = GetDlgItem(IDC_BTN_DISPATCH);
+	pWnd = GetDlgItem(IDC_BTN_PSFILE_DISPATCH);
 	if (pWnd->GetSafeHwnd() != NULL)
 	{
 		pWnd->GetWindowRect(&rect);
@@ -209,13 +209,13 @@ void CPSMagicView::OnInitialUpdate()
 //	pWnd = GetDlgItem(IDC_BTN_PS2AC3);
 //	pWnd->EnableWindow(FALSE);
 
-	pWnd = GetDlgItem(IDC_BTN_DISPATCH);
+	pWnd = GetDlgItem(IDC_BTN_PSFILE_DISPATCH);
 	pWnd->EnableWindow(FALSE);
 
-	pWnd = GetDlgItem(IDC_BTN_PS_PREVIEW);
+	pWnd = GetDlgItem(IDC_BTN_PSFILE_PREVIEW);
 	pWnd->EnableWindow(FALSE);
 
-	pWnd = GetDlgItem(IDC_BTN_PS2TS);
+	pWnd = GetDlgItem(IDC_BTN_PSFILE_2TS);
 	pWnd->EnableWindow(FALSE);
 
 	m_dlgProgress.Create(IDD_ANALYSE_PROGRESS, this);
@@ -247,10 +247,10 @@ void CPSMagicView::Reset(void)
 {
 	CWnd* pWnd;
 
-	pWnd = GetDlgItem(IDC_BTN_OPEN);
+	pWnd = GetDlgItem(IDC_BTN_PSFILE_OPEN_CLOSE);
 	pWnd->SetWindowText("打开");
 
-	pWnd = GetDlgItem(IDC_EDIT_FILE);			//说明窗口已经撤销
+	pWnd = GetDlgItem(IDC_EDIT_PSFILE_PATH);			//说明窗口已经撤销
 	pWnd->SetWindowText("");
 
 //	pWnd = GetDlgItem(IDC_BTN_PS2VES);
@@ -262,13 +262,13 @@ void CPSMagicView::Reset(void)
 //	pWnd = GetDlgItem(IDC_BTN_PS2AC3);
 //	pWnd->EnableWindow(FALSE);
 
-	pWnd = GetDlgItem(IDC_BTN_DISPATCH);
+	pWnd = GetDlgItem(IDC_BTN_PSFILE_DISPATCH);
 	pWnd->EnableWindow(FALSE);
 
-	pWnd = GetDlgItem(IDC_BTN_PS_PREVIEW);
+	pWnd = GetDlgItem(IDC_BTN_PSFILE_PREVIEW);
 	pWnd->EnableWindow(FALSE);
 
-	pWnd = GetDlgItem(IDC_BTN_PS2TS);
+	pWnd = GetDlgItem(IDC_BTN_PSFILE_2TS);
 	pWnd->EnableWindow(FALSE);
 
 	//TreeFun_DeleteChildItems(&m_treePSSyntax, m_hRootItem);

@@ -189,7 +189,6 @@
   <ItemGroup>
     <ClInclude Include="Include\common\audio_common.h" />
     <ClInclude Include="Include\common\file_common.h" />
-    <ClInclude Include="Include\common\video_common.h" />
     <ClInclude Include="Include\ESDecoder.h" />
     <ClInclude Include="Include\ESDecoder_ErrorCode.h" />
     <ClInclude Include="Include\ESDecoder_Utilities.h" />

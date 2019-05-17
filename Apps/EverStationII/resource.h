@@ -8,9 +8,7 @@
 #define IDC_BTN_BROWSE_AFILE            4
 #define IDD_ABOUTBOX                    100
 #define IDP_OLE_INIT_FAILED             100
-#define IDS_ANALYSE_PROGRESS            101
 #define IDD_FORMVIEW_EPG_CONTAINER      101
-#define IDS_ANALYSE_OBJECT              102
 #define IDR_POPUP_EDIT                  119
 #define ID_STATUSBAR_PANE1              120
 #define ID_STATUSBAR_PANE2              121
@@ -184,24 +182,25 @@
 #define IDC_RADIO_TSIN_UDP              1004
 #define IDC_LIST_SECTION_DATA           1005
 #define IDC_BTN_FILE_BROWSE             1005
-#define IDC_BTN_OPEN                    1006
 #define IDC_EDIT_TS_FILE                1006
+#define IDC_BTN_PSFILE_OPEN_CLOSE       1006
 #define IDC_IPADDRESS_TS_INPUT          1007
 #define IDC_BTN_PREVIEW                 1008
 #define IDC_EDIT_TS_UDP_PORT            1008
 #define IDC_CHECK_ENABLE_PCR_DEBUG      1008
+#define IDC_BTN_ESFILE_PREVIEW          1008
 #define IDC_CHECK_ENABLE_TSRATE_DEBUG   1009
 #define IDC_BTN_ESMAGIC                 1010
 #define IDC_EDIT_PCAP_FILTER            1010
-#define IDC_BTN_ES2TS                   1011
 #define IDC_LIST_PCAP_DEVICES           1011
+#define IDC_BTN_ESFILE_2TS              1011
 #define IDC_EDT_TSPACKET_TRIGGER_COUNT  1013
-#define IDC_BTN_STREAM                  1015
-#define IDC_BTN_DISPATCH                1015
-#define IDC_BTN_PS_PREVIEW              1016
+#define IDC_BTN_TSTREAM_OPEN_CLOSE     1015
+#define IDC_BTN_PSFILE_DISPATCH         1015
+#define IDC_BTN_PSFILE_PREVIEW          1016
 #define IDC_TAB_YUVMAGIC                1017
-#define IDC_BTN_PS2TS                   1018
-#define IDC_EDIT_FILE                   1019
+#define IDC_BTN_PSFILE_2TS              1018
+#define IDC_EDIT_PSFILE_PATH            1019
 #define IDC_SPIN_TSPACKET_TRIGGER_COUNT 1020
 #define IDC_LIST_PID                    1021
 #define IDC_CMB_TSPACKET_PID            1022
@@ -217,11 +216,14 @@
 #define IDC_BTN_DECIMATE_TS2TS          1034
 #define IDC_CMB_TSPACKET_TRANSPORT_ERROR_INDICATOR 1034
 #define IDC_STATIC_START                1035
+#define IDC_BTN_TSFILE_OPEN_CLOSE       1035
 #define IDC_BTN_DECIMATE_TS2PES         1036
 #define IDC_CMB_TSPACKET_PAYLOAD_UNIT_START_INDICATOR 1036
+#define IDC_BTN_ESFILE_OPEN_CLOSE       1036
 #define IDC_BTN_DECIMATE_STOP           1037
-#define IDC_CMB_ES_TYPE                 1037
+#define IDC_CMB_ESFILE_TYPE             1037
 #define IDC_STATIC_END                  1038
+#define IDC_EDIT_ESFILE_PATH            1038
 #define IDC_CMB_TSPACKET_TRANSPORT_PRIORITY 1039
 #define IDC_STATIC_LENGTH               1040
 #define IDC_STATIC_FORMAT               1041
@@ -239,6 +241,7 @@
 #define IDC_STATIC_AUD_JITTER_GRAPH     1051
 #define IDC_LIST_TS_MONITOR             1052
 #define IDC_TREE_PS_SYNTAX              1052
+#define IDC_TREE_PSFILE_SYNTAX          1052
 #define IDC_STATIC_AUD_INTERVAL_GRAPH   1053
 #define IDC_LIST_TS_OVERVIEW            1053
 #define IDC_STATIC_TSRATE               1054
@@ -493,9 +496,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        403
+#define _APS_NEXT_RESOURCE_VALUE        404
 #define _APS_NEXT_COMMAND_VALUE         32799
-#define _APS_NEXT_CONTROL_VALUE         1035
+#define _APS_NEXT_CONTROL_VALUE         1039
 #define _APS_NEXT_SYMED_VALUE           320
 #endif
 #endif

@@ -56,9 +56,6 @@
     <ClInclude Include="Include\common\file_common.h">
       <Filter>头文件\common</Filter>
     </ClInclude>
-    <ClInclude Include="Include\common\video_common.h">
-      <Filter>头文件\common</Filter>
-    </ClInclude>
     <ClInclude Include="Include\VESDecoder.h">
       <Filter>头文件</Filter>
     </ClInclude>

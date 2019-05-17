@@ -51,6 +51,7 @@ int CYUV_VideoDecoder::Open(uint32_t dwStreamType, const char* pszFileName, cons
 			m_stOutputYUVSequenceParam.framerate = m_stInputYUVSequenceParam.framerate;
 			m_stOutputYUVSequenceParam.nColorSpace = m_stInputYUVSequenceParam.nColorSpace;
 			m_stOutputYUVSequenceParam.quantizationBits = m_stInputYUVSequenceParam.quantizationBits;
+
 #if RENDER_IN_AUTO_YUV_MODE
 			if ((m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('Y', '4', '4', 'B')) ||		//YUV 4:4:4 Planar   format
 				(m_stInputYUVSequenceParam.dwFourCC == MAKEFOURCC('4', '4', '4', 'P'))			//YVU 4:4:4 Planar	 format
@@ -158,8 +159,6 @@ int CYUV_VideoDecoder::Preview_Forward1Picture(void)
 
 					percent = (int)(m_nCurReadPos * 100.0 / m_nFileTotalSize);
 
-					//m_bSourceDataAvailable = 1;
-
 //#if USE_FRAMEBUF_ACCESS_MUTEX
 //					::ReleaseMutex(m_hSourceFrameBufAccess);
 //				}
@@ -178,7 +177,7 @@ int CYUV_VideoDecoder::Preview_Backward1Picture(void)
 {
 	int64_t filepos = m_nCurReadPos;
 	
-	filepos -= (m_nInputYUVFrameSize * (1+1));
+	filepos -= ((int64_t)m_nInputYUVFrameSize * (1+1));
 	if (filepos < 0)
 	{
 		_lseeki64(m_hFile, 0, SEEK_SET);
@@ -197,8 +196,9 @@ int CYUV_VideoDecoder::Preview_Backward1Picture(void)
 int CYUV_VideoDecoder::Preview_ForwardNPicture(int n)
 {
 	int64_t filepos = m_nCurReadPos;
+	int m = n - 1;
 
-	filepos += m_nInputYUVFrameSize * (n-1);
+	filepos += (int64_t)m_nInputYUVFrameSize * m;
 
 	//if move exceed the last frame, than seek at the last frame
 	if (filepos > (m_nFileTotalSize - m_nInputYUVFrameSize))
@@ -216,8 +216,9 @@ int CYUV_VideoDecoder::Preview_ForwardNPicture(int n)
 int CYUV_VideoDecoder::Preview_BackwardNPicture(int n)
 {
 	int64_t filepos = m_nCurReadPos;
+	int m = n + 1;
 
-	filepos -= m_nInputYUVFrameSize * (n+1);
+	filepos -= (int64_t)m_nInputYUVFrameSize * m;
 	if (filepos < 0)
 	{
 		filepos = 0;
@@ -266,7 +267,7 @@ int CYUV_VideoDecoder::Preview_Picture(int nFrameNum)
 {
 	int64_t		 offset;
 
-	offset = (int64_t)(nFrameNum * m_nInputYUVFrameSize);
+	offset = (int64_t)(nFrameNum * (int64_t)m_nInputYUVFrameSize);
 	_lseeki64(m_hFile, offset, SEEK_SET);
 	m_nCurReadPos = offset;
 

@@ -93,8 +93,8 @@ BEGIN_MESSAGE_MAP(CTSMagicView, CFormView)
 	//{{AFX_MSG_MAP(CTSMagicView)
 	ON_WM_SIZE()
 	ON_WM_DESTROY()
-	ON_BN_CLICKED(IDC_BTN_OPEN, OnBtnOpenOrClose)
-	ON_BN_CLICKED(IDC_BTN_STREAM, OnBtnStream)
+	ON_BN_CLICKED(IDC_BTN_TSFILE_OPEN_CLOSE, OnBtnFileOpenOrClose)
+	ON_BN_CLICKED(IDC_BTN_TSTREAM_OPEN_CLOSE, OnBtnStreamOpenOrClose)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_TSMAGIC, OnSelchangeTabConsole)
 	//ON_COMMAND(IDC_TOOL_PCR_DEBUG, OnToolPcrDebug)
 	//}}AFX_MSG_MAP
@@ -160,7 +160,7 @@ void CTSMagicView::AdjustLayout(int cx, int cy)
 	//int		xoffset, yalign;
 	int		btn_width, btn_height;
 
-	pWnd = GetDlgItem(IDC_BTN_OPEN);
+	pWnd = GetDlgItem(IDC_BTN_TSFILE_OPEN_CLOSE);
 	if (pWnd->GetSafeHwnd() != NULL)
 	{
 		pWnd->GetWindowRect(&rect);
@@ -172,7 +172,7 @@ void CTSMagicView::AdjustLayout(int cx, int cy)
 		pWnd->SetWindowPos(NULL, cx - btn_width, cy - 10 - 2 * btn_height, rect.Width(), rect.Height(), 0);
 	}
 
-	pWnd = GetDlgItem(IDC_BTN_STREAM);
+	pWnd = GetDlgItem(IDC_BTN_TSTREAM_OPEN_CLOSE);
 	if (pWnd->GetSafeHwnd() != NULL)
 	{
 		pWnd->GetWindowRect(&rect);
@@ -326,11 +326,11 @@ void CTSMagicView::OnInitialUpdate()
 	//pWnd = GetDlgItem(IDC_PROGRESS_FILE);
 	//pWnd->SetWindowText("");
 
-	pWnd = GetDlgItem(IDC_BTN_OPEN);
+	pWnd = GetDlgItem(IDC_BTN_TSFILE_OPEN_CLOSE);
 	pWnd->SetWindowText("离线分析");
 	pWnd->EnableWindow(TRUE);
 
-	pWnd = GetDlgItem(IDC_BTN_STREAM);
+	pWnd = GetDlgItem(IDC_BTN_TSTREAM_OPEN_CLOSE);
 	pWnd->SetWindowText("实时分析");
 	pWnd->EnableWindow(TRUE);
 
@@ -632,7 +632,7 @@ void CTSMagicView::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
-void CTSMagicView::OnBtnOpenOrClose() 
+void CTSMagicView::OnBtnFileOpenOrClose() 
 {
 	// TODO: Add your command handler code here
 	int		rtcode = 0;
@@ -650,40 +650,31 @@ void CTSMagicView::OnBtnOpenOrClose()
 
 			if (FILE_CheckStreamType(m_kThreadParams.stream_option, strFileName.GetBuffer(256)))
 			{
-//				strFileName.MakeUpper();
-				//sprintf_s(pszURL, sizeof(pszURL), "file:///%s", strFileName.GetBuffer(256));
-				rtcode = m_transport_stream.Open("FILE", strFileName.GetBuffer(256), 0);
+				strcpy_s(m_kThreadParams.pszPathHeader, sizeof(m_kThreadParams.pszPathHeader), "FILE");
+				strcpy_s(m_kThreadParams.pszPathName, sizeof(m_kThreadParams.pszPathName), strFileName.GetBuffer(256));
+
+				pWnd = GetDlgItem(IDC_BTN_TSFILE_OPEN_CLOSE);
+				pWnd->EnableWindow(FALSE);
+
+				pWnd = GetDlgItem(IDC_BTN_TSTREAM_OPEN_CLOSE);
+				pWnd->EnableWindow(FALSE);
+
+				rtcode = m_transport_stream.Open(m_kThreadParams.pszPathHeader, m_kThreadParams.pszPathName, 0);
 				if (rtcode == MIDDLEWARE_TS_NO_ERROR)
 				{
-					//CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
-					//pFrame->m_DockPane_RunningLog.Open();
-
-					pWnd = GetDlgItem(IDC_BTN_OPEN);
-					pWnd->EnableWindow(FALSE);
-
-					pWnd = GetDlgItem(IDC_BTN_STREAM);
-					pWnd->EnableWindow(FALSE);
-
-					//pWnd = GetDlgItem(IDC_EDIT_TS_URL);
-					//pWnd->EnableWindow(FALSE);
-
-//					strcpy_s(m_kThreadParams.pszFileName, sizeof(m_kThreadParams.pszFileName), pszURL);
-					sprintf_s(m_kThreadParams.pszFileName, sizeof(m_kThreadParams.pszFileName), strFileName.GetBuffer(256));
-
 					m_kThreadParams.offline = 1;
 
-//					m_kThreadParams.main_thread_running = 0;		//若线程启动，会将此值修改为1，可以据此判断主线程是否启动
-					m_kThreadParams.main_thread_stopped = 0;		//若线程退出，会将此值修改为1，可以据此判断主线程是否启动
+					m_kThreadParams.main_thread_running = 1;		//若通知线程运行
 
 					m_kThreadParams.ts_trigger_thread_running = 0;
-//					m_kThreadParams.ts_trigger_thread_stopped = 0;
+					//					m_kThreadParams.ts_trigger_thread_stopped = 0;
 
 					m_kThreadParams.es_trigger_thread_running = 0;
-					m_kThreadParams.es_trigger_thread_stopped = 0;
+					//m_kThreadParams.es_trigger_thread_stopped = 0;
 
 					m_kThreadParams.section_trigger_thread_running = 0;
-//					m_kThreadParams.section_trigger_thread_stopped = 0;
-					
+					//					m_kThreadParams.section_trigger_thread_stopped = 0;
+
 					m_kThreadParams.find_signal = 0;
 
 					m_kThreadParams.packet_decimate_thread_running = 0;
@@ -706,11 +697,10 @@ void CTSMagicView::OnBtnOpenOrClose()
 					m_kThreadParams.pTrigger_TSPacket = &m_Trigger_TSPacket;
 					m_kThreadParams.pTrigger_PESPacket = &m_Trigger_PESPacket;
 
-					::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_offline_thread, (LPVOID)&m_kThreadParams, 0, 0);
+					::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_offline_thread, (LPVOID)& m_kThreadParams, 0, 0);
 				}
 				else
 				{
-//					AfxMessageBox("ERROR: 打开文件失败!");
 					AfxMessageBox("<---打开文件失败,请检查文件是否存在!--->", MB_OK | MB_ICONSTOP);
 				}
 			}
@@ -722,11 +712,6 @@ void CTSMagicView::OnBtnOpenOrClose()
 	}
 	else
 	{
-		//先把TS流停了
-		rtcode = m_transport_stream.Close();
-		assert(rtcode == MIDDLEWARE_TS_NO_ERROR);
-
-		//再把主线程停了
 		m_kThreadParams.packet_decimate_thread_running = 0;			//通知抽选线程退出
 		m_kThreadParams.dsmcc_download_thread_running = 0;			//通知DSMCC线程退出
 		m_kThreadParams.ts_trigger_thread_running = 0;
@@ -736,9 +721,7 @@ void CTSMagicView::OnBtnOpenOrClose()
 
 		m_kThreadParams.main_thread_running = 0;			//通知主线程退出
 
-		m_kThreadParams.find_signal = 0;
-
-		pWnd = GetDlgItem(IDC_BTN_OPEN);
+		pWnd = GetDlgItem(IDC_BTN_TSFILE_OPEN_CLOSE);
 		pWnd->EnableWindow(FALSE);
 
 		if (m_kThreadParams.main_thread_stopped == 1)
@@ -746,79 +729,57 @@ void CTSMagicView::OnBtnOpenOrClose()
 			//若离线分析线程已经退出，此时需要补发一个消息，否则界面控件显示会不正常
 			::SendMessage(this->GetSafeHwnd(), WM_TSMAGIC_OFFLINE_THREAD, 0, NULL);
 		}
-
-		//必须等待主线程的退出
-		//但是不能用死循环的方式等待线程，因为线程可能还需要向界面抛出消息，此时死循环将阻止界面接收消息
-//		while (m_kThreadParams.main_thread_stopped == 0)
-//		{
-//			Sleep(100);
-//		}
-
-//		if (m_kThreadParams.main_thread_stopped == 0)
-//		{
-//			Sleep(500);
-//		}
-//		else
-//		{
-//			if (m_kThreadParams.downloading == 1)				//如果正在下载
-//			{
-//				Sleep(500);
-//			}
-//			else
-//			{
-//				::SendMessage(this->GetSafeHwnd(), WM_TSMAGIC_OFFLINE_THREAD, 0, NULL);
-//			}
-//		}
-
-		//CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
-		//pFrame->m_DockPane_RunningLog.Close();
 	}
 }
 
-void CTSMagicView::OnBtnStream() 
+void CTSMagicView::OnBtnStreamOpenOrClose() 
 {
 	int		rtcode = 0;
 	CWnd*	pWnd = NULL;
-	//CString	strURL;
 
-	//CEverStationIIApp* pApp = (CEverStationIIApp*)AfxGetApp();
-
-	if (m_kThreadParams.main_thread_running == 0)
+	if (m_kThreadParams.main_thread_stopped == 1)
 	{
 		loadCfg();
 
-		rtcode = m_transport_stream.Open(m_strTSInputOption.GetBuffer(16), m_strTSInputAttribute.GetBuffer(256), 1);
-		if (rtcode == 0)
+		pWnd = GetDlgItem(IDC_BTN_TSTREAM_OPEN_CLOSE);
+		if (pWnd != NULL)
 		{
-			//CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
-			//pFrame->m_DockPane_RunningLog.Open();
+			pWnd->EnableWindow(FALSE);
+		}
 
-			//memset(m_kThreadParams.pszFileName, '\0', MAX_PATH);
-			sprintf_s(m_kThreadParams.pszFileName, sizeof(m_kThreadParams.pszFileName), m_strTSInputAttribute.GetBuffer(256));
+		pWnd = GetDlgItem(IDC_BTN_TSFILE_OPEN_CLOSE);
+		if (pWnd != NULL)
+		{
+			pWnd->EnableWindow(FALSE);
+		}
 
+		strcpy_s(m_kThreadParams.pszPathHeader, sizeof(m_kThreadParams.pszPathHeader), m_strTSInputOption.GetBuffer(6));
+		strcpy_s(m_kThreadParams.pszPathName, sizeof(m_kThreadParams.pszPathName), m_strTSInputAttribute.GetBuffer(256));
+
+		rtcode = m_transport_stream.Open(m_kThreadParams.pszPathHeader, m_kThreadParams.pszPathName, 1);
+		if (rtcode == MIDDLEWARE_TS_NO_ERROR)
+		{
 			m_kThreadParams.offline = 0;
-//			m_kThreadParams.main_thread_running = 0;		//若线程启动，会将此值修改为1，可以据此判断主线程是否启动
-			m_kThreadParams.main_thread_stopped = 0;		//若线程退出，会将此值修改为1，可以据此判断主线程是否启动
+			m_kThreadParams.main_thread_running = 1;		//若线程启动，会将此值修改为1，可以据此判断主线程是否启动
 
-			m_kThreadParams.monitor_thread_running = 0;
-			m_kThreadParams.monitor_thread_stopped = 0;
+			m_kThreadParams.monitor_thread_running = 1;
+			//m_kThreadParams.monitor_thread_stopped = 0;
 
-			m_kThreadParams.packet_decimate_thread_running = 0;
-			m_kThreadParams.packet_decimate_thread_stopped = 0;
+			//m_kThreadParams.packet_decimate_thread_running = 0;
+			//m_kThreadParams.packet_decimate_thread_stopped = 0;
 
-			m_kThreadParams.ts_trigger_thread_running = 0;
-//			m_kThreadParams.ts_trigger_thread_stopped = 0;
+			//m_kThreadParams.ts_trigger_thread_running = 0;
+	//			m_kThreadParams.ts_trigger_thread_stopped = 0;
 
-			m_kThreadParams.es_trigger_thread_running = 0;
-			m_kThreadParams.es_trigger_thread_stopped = 0;
+			//m_kThreadParams.es_trigger_thread_running = 0;
+			//m_kThreadParams.es_trigger_thread_stopped = 0;
 
-			m_kThreadParams.section_trigger_thread_running = 0;
-//			m_kThreadParams.section_trigger_thread_stopped = 0;
+			//m_kThreadParams.section_trigger_thread_running = 0;
+	//			m_kThreadParams.section_trigger_thread_stopped = 0;
 
-			m_kThreadParams.dsmcc_download_thread_running = 0;
-			m_kThreadParams.dsmcc_download_thread_stopped = 0;
+			//m_kThreadParams.dsmcc_download_thread_running = 0;
+			//m_kThreadParams.dsmcc_download_thread_stopped = 0;
 
-			m_kThreadParams.find_signal = 0;
 			m_kThreadParams.hMainWnd = this->GetSafeHwnd();
 
 			m_kThreadParams.pDB_Pcrs = &m_DB_Pcrs;
@@ -830,27 +791,9 @@ void CTSMagicView::OnBtnStream()
 			m_kThreadParams.pTrigger_TSPacket = &m_Trigger_TSPacket;
 			m_kThreadParams.pTrigger_PESPacket = &m_Trigger_PESPacket;
 
-			::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_realtime_monitor, (LPVOID)&m_kThreadParams, 0, 0);
-			::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_realtime_analyzer, (LPVOID)&m_kThreadParams, 0, 0);
+			::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_realtime_monitor, (LPVOID)& m_kThreadParams, 0, 0);
+			::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_realtime_analyzer, (LPVOID)& m_kThreadParams, 0, 0);
 
-			pWnd = GetDlgItem(IDC_BTN_STREAM);
-			if (pWnd != NULL)
-			{
-//				pWnd->SetWindowText("停止");
-				pWnd->EnableWindow(FALSE);
-			}
-
-			//pWnd = GetDlgItem(IDC_EDIT_TS_URL);
-			//if (pWnd != NULL)
-			//{
-			//	pWnd->EnableWindow(FALSE);
-			//}
-
-			pWnd = GetDlgItem(IDC_BTN_OPEN);
-			if (pWnd != NULL)
-			{
-				pWnd->EnableWindow(FALSE);
-			}
 
 #if GUI_TS_ANALYZER_OVERVIEW
 			m_dlgTSAnalyzerOverview.Set(0);
@@ -860,9 +803,9 @@ void CTSMagicView::OnBtnStream()
 			m_dlgTSAnalyzerPackets.Set(0);
 #endif
 
-//#if GUI_TS_ANALYZER_PESES
-//			m_dlgTSAnalyzerPesEs.Set(0);
-//#endif
+			//#if GUI_TS_ANALYZER_PESES
+			//			m_dlgTSAnalyzerPesEs.Set(0);
+			//#endif
 
 #if GUI_TS_ANALYZER_ES
 			m_dlgTSAnalyzerEs.Set(0);
@@ -872,25 +815,21 @@ void CTSMagicView::OnBtnStream()
 			m_dlgTSAnalyzerTeletext.Set();
 #endif
 
-//#if GUI_TS_ANALYZER_SUBTITLE
-//			m_dlgTSAnalyzerSubtitle.Set();
-//#endif
+			//#if GUI_TS_ANALYZER_SUBTITLE
+			//			m_dlgTSAnalyzerSubtitle.Set();
+			//#endif
 
 #if GUI_TS_SEC_TRIGGER
 			m_dlgSectionTrigger.Set(0);
 #endif
-
 		}
 		else
 		{
-			AfxMessageBox("<---连接硬件失败,请检查外围设备连接!--->", MB_OK|MB_ICONSTOP);
+			AfxMessageBox("<---连接硬件失败,请检查外围设备连接!--->", MB_OK | MB_ICONSTOP);
 		}
 	}
 	else
 	{
-		rtcode = m_transport_stream.Close();
-		assert(rtcode == NO_ERROR);
-
 		m_kThreadParams.packet_decimate_thread_running = 0;		//通知抽选线程退出
 		m_kThreadParams.dsmcc_download_thread_running = 0;			//通知DSMCC线程退出
 
@@ -899,22 +838,10 @@ void CTSMagicView::OnBtnStream()
 		m_kThreadParams.section_trigger_thread_running = 0;
 
 		m_kThreadParams.monitor_thread_running = 0;			//设置为0，强迫实时监测程退出
-
 		m_kThreadParams.main_thread_running = 0;			//设置为0，强迫主线程退出
 
-		m_kThreadParams.find_signal = 0;
-
-		pWnd = GetDlgItem(IDC_BTN_STREAM);
+		pWnd = GetDlgItem(IDC_BTN_TSTREAM_OPEN_CLOSE);
 		pWnd->EnableWindow(FALSE);
-
-		//CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
-		//pFrame->m_DockPane_RunningLog.Close();
-
-		//必须等到主线程的退出
-//		while (m_kThreadParams.main_thread_stopped == 0)
-//		{
-//			Sleep(100);
-//		}
 	}
 }
 
@@ -933,10 +860,10 @@ void CTSMagicView::OnSelchangeTabConsole(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTSMagicView::GUIReset(void)
 {
-	GetStatusBar().SetPaneText(1, "");
+	//GetStatusBar().SetPaneText(1, "");
 
-	GetStatusBar().SetPaneProgress(2, 0);
-	GetStatusBar().SetPaneText(2, "文件读取进度条");
+	GetStatusBar().SetPaneProgress(1, 0);
+	GetStatusBar().SetPaneText(1, "文件读取进度条");
 
 #if GUI_TS_ANALYZER_OVERVIEW
 	m_dlgTSAnalyzerOverview.Reset();
@@ -1011,14 +938,14 @@ LRESULT CTSMagicView::OnTSMagicOfflineThreadMsg(WPARAM wParam, LPARAM lParam)
 
 	if (wParam == 1)		//线程进入
 	{
-		pWnd = GetDlgItem(IDC_BTN_OPEN);
+		pWnd = GetDlgItem(IDC_BTN_TSFILE_OPEN_CLOSE);
 		if (pWnd != NULL)
 		{
-			pWnd->SetWindowText("停止");
+			pWnd->SetWindowText("停止分析");
 			pWnd->EnableWindow(TRUE);
 		}
 
-		GetStatusBar().SetPaneText(1, m_kThreadParams.pszFileName);
+		GetStatusBar().SetPaneText(1, m_kThreadParams.pszPathName);
 
 //#if GUI_TS_ANALYZER_PESES
 //		m_dlgTSAnalyzerPesEs.Set(1);
@@ -1052,7 +979,12 @@ LRESULT CTSMagicView::OnTSMagicOfflineThreadMsg(WPARAM wParam, LPARAM lParam)
 	}
 	else if (wParam == 2)		//离线分析结束
 	{
-		//GetStatusBar().SetPaneProgress(1, 100);
+		pWnd = GetDlgItem(IDC_BTN_TSFILE_OPEN_CLOSE);
+		if (pWnd != NULL)
+		{
+			pWnd->SetWindowText("关闭文件");
+			//pWnd->EnableWindow(TRUE);
+		}
 
 #if GUI_TS_ANALYZER_PACKETS
 		m_dlgTSAnalyzerPackets.Set(1);
@@ -1060,28 +992,24 @@ LRESULT CTSMagicView::OnTSMagicOfflineThreadMsg(WPARAM wParam, LPARAM lParam)
 	}
 	else					//线程退出
 	{
-		pWnd = GetDlgItem(IDC_BTN_OPEN);
+		pWnd = GetDlgItem(IDC_BTN_TSFILE_OPEN_CLOSE);
 		if (pWnd != NULL)
 		{
 			pWnd->SetWindowText("离线分析");
 			pWnd->EnableWindow(TRUE);
 		}
 
-		pWnd = GetDlgItem(IDC_BTN_STREAM);
+		pWnd = GetDlgItem(IDC_BTN_TSTREAM_OPEN_CLOSE);
 		if (pWnd != NULL)
 		{
 			pWnd->EnableWindow(TRUE);
 		}
 
-		//pWnd = GetDlgItem(IDC_EDIT_TS_URL);
-		//if (pWnd != NULL)
-		//{
-		//	pWnd->EnableWindow(TRUE);
-		//}
-
-		GUIReset();
+		m_transport_stream.Close();
 
 		pApp->SetRunningState(0);
+
+		GUIReset();
 	}
 
 	return 0;
@@ -1215,14 +1143,14 @@ LRESULT CTSMagicView::OnTSMagicRealtimeThreadMsg(WPARAM wParam, LPARAM lParam)
 
 	if (wParam == 1)		//线程进入
 	{
-		pWnd = GetDlgItem(IDC_BTN_STREAM);
+		pWnd = GetDlgItem(IDC_BTN_TSTREAM_OPEN_CLOSE);
 		if (pWnd != NULL)
 		{
-			pWnd->SetWindowText("停止");
+			pWnd->SetWindowText("停止分析");
 			pWnd->EnableWindow(TRUE);
 		}
 
-		GetStatusBar().SetPaneText(1, m_kThreadParams.pszFileName);
+		GetStatusBar().SetPaneText(1, m_kThreadParams.pszPathName);
 
 #if GUI_TS_ANALYZER_PACKETS
 		m_dlgTSAnalyzerPackets.Set(0);
@@ -1236,30 +1164,20 @@ LRESULT CTSMagicView::OnTSMagicRealtimeThreadMsg(WPARAM wParam, LPARAM lParam)
 	}
 	else					//线程退出
 	{
-		pWnd = GetDlgItem(IDC_BTN_STREAM);
+		pWnd = GetDlgItem(IDC_BTN_TSTREAM_OPEN_CLOSE);
 		if (pWnd != NULL)
 		{
 			pWnd->SetWindowText("实时分析");
 			pWnd->EnableWindow(TRUE);
 		}
 
-		//pWnd = GetDlgItem(IDC_EDIT_TS_URL);
-		//if (pWnd != NULL)
-		//{
-		//	pWnd->EnableWindow(TRUE);
-		//}
-
-		pWnd = GetDlgItem(IDC_BTN_OPEN);
+		pWnd = GetDlgItem(IDC_BTN_TSFILE_OPEN_CLOSE);
 		if (pWnd != NULL)
 		{
 			pWnd->EnableWindow(TRUE);
 		}
 
-		pWnd = GetDlgItem(IDC_EDIT_FILE);
-		if (pWnd != NULL)
-		{
-			pWnd->SetWindowText("");
-		}
+		m_transport_stream.Close();
 
 		GUIReset();
 
@@ -1368,7 +1286,7 @@ LRESULT CTSMagicView::OnTSReportRatio(WPARAM wParam, LPARAM lParam)
 //	}
 
 	//m_progressFile.SetPos((int)lParam);
-	GetStatusBar().SetPaneProgress(2, (int)lParam);
+	GetStatusBar().SetPaneProgress(1, (int)lParam);
 
 	return NULL;
 }
@@ -1633,28 +1551,6 @@ LRESULT CTSMagicView::OnReportSectionTriggerStatus(WPARAM wParam, LPARAM lParam)
 	return NULL;
 }
 
-//void CTSMagicView::OnDestroy()
-//{
-//	CFormView::OnDestroy();
-//
-//	// TODO: 在此处添加消息处理程序代码
-//}
-
-/*
-void CTSMagicView::OnLvnItemchangedListTsMonitor(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-	// TODO: 在此添加控件通知处理程序代码
-	*pResult = 0;
-}
-
-void CTSMagicView::OnLvnItemchangedProgressFileratio(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-	// TODO: 在此添加控件通知处理程序代码
-	*pResult = 0;
-}
-*/
 
 CDB_TSPackets* CTSMagicView::GetTSPacketsDBase(void)
 {

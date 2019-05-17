@@ -20,6 +20,8 @@
 #include <stdint.h>
 #include <windows.h>
 
+#define WM_ESMAGIC_APPEND_LOG					WM_USER + 0x275B
+#define WM_ESMAGIC_REPORT_RATIO					WM_USER + 0x19B3
 #define WM_ESMAGIC_ANALYZE_THREAD				WM_USER + 0x9963
 
 /*--------------------------------------------------------------------

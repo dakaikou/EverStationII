@@ -124,7 +124,6 @@ public:
 
 #if GUI_TS_ANALYZER_PSISI
 	CDlg_TSAnalyzer_PsiSi	m_dlgTSAnalyzerPsiSi;
-	//CSplitterWnd_PsiSiAnalyzer m_tabItem_PsiSiAnalyzer;
 #endif
 
 #if GUI_TS_ANALYZER_BOUQUETS
@@ -270,8 +269,8 @@ public:
 	// Generated message map functions
 	//{{AFX_MSG(CTSMagicView)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnBtnOpenOrClose();
-	afx_msg void OnBtnStream();
+	afx_msg void OnBtnFileOpenOrClose();
+	afx_msg void OnBtnStreamOpenOrClose();
 	afx_msg void OnSelchangeTabConsole(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnToolPcrDebug();
 	//}}AFX_MSG
@@ -305,9 +304,6 @@ public:
 	afx_msg LRESULT OnReportESTriggerStatus(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnReportSectionTriggerStatus(WPARAM wParam, LPARAM lParam);
 
-//	afx_msg void OnDestroy();
-	//afx_msg void OnTimer(UINT nIDEvent);
-	//CProgressCtrl m_progressFile;
 	afx_msg void OnDestroy();
 };
 

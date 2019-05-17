@@ -61,8 +61,6 @@ protected:
 private:
 };
 
-//MW_ES_LIB void DecodeFourCC2Text(char* pszFourCC, char* pszText, int strSize);
-
 
 #endif
 

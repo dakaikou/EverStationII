@@ -18,34 +18,9 @@
 #include <stdint.h>
 
 #include <windows.h>
-//#include <mmsystem.h>
 
-#include "syntax_translate_layer/Mpeg_PESPacket/Include/MPEG_PES_packet.h"
-#include "syntax_translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_packet.h"
-
-//#include "./common/audio_common.h"
-//#include "./common/file_common.h"
-
-//#include "thirdparty_libs/directx/include/dsound.h"
 
 #define DS_NOTIFY_COUNT					2
-
-//typedef enum
-//{
-//	ES_TRIGGER_NONE	= 0,
-//	ES_TRIGGER_ONESHOT,
-//	ES_TRIGGER_CONTINUE
-//} ES_TRIGGER_STYLE_e;
-
-//typedef struct
-//{
-//	uint32_t		syncword;
-//	uint32_t		start_code;
-//
-//	uint8_t*		rbsp_byte;
-//	int				NumBytesInRBSP;
-//
-//} AV_nal_unit_t, *pAV_nal_unit_t;
 
 class MW_ES_LIB CESDecoder
 {
@@ -53,22 +28,11 @@ public:
 	CESDecoder(void);
 
 public:
-	PES_packet_t	m_PES_packet;
 
 protected:
 
-	int64_t			m_nPrePcrPos;
-	int64_t			m_nPrePtsPos;
-	int64_t			m_nPreDtsPos;
-
-	uint16_t		m_usES_PID;
-	uint16_t		m_usPCR_PID;
-
 	uint32_t		m_dwStreamType;
 
-	int				(*m_callback_av_es_parse)(PVOID* pvoid);
-
-	//pull mode functions
 	char			m_pszFileName[256];
 
 	int				m_hFile;
@@ -81,12 +45,6 @@ public:
 	int			Open(uint32_t dwStreamType, const char* pszFileName);
 	int			Close(void);
 	int			GetTitle(char* pszTitle, int strLen);
-	
-	int			WriteTSPacket(transport_packet_t* pts_packet, int64_t pos);
-//	int			WriteTSPacket(U8* buf, int length, int64_t pos);
-	int			WriteESData(uint8_t* buf, int length);
-	int			FillData(void);
-	int			SetParams(uint16_t ES_PID, uint16_t  PCR_PID);
 
 public:
 	virtual int	Preview_FirstPicture(void);

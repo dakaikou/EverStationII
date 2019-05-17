@@ -1,6 +1,8 @@
 #include <stdafx.h>
 #include <assert.h>
 
+#include "../Common/Define.h"	//²»ÄÜÈ¥µô
+
 #include "TSMagic_GuiApi.h"
 #include "TSMagic_GuiApi_MSG.h"
 #include "TSMagic_ErrorCode.H"

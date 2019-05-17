@@ -114,14 +114,6 @@ BOOL CDlg_TSAnalyzer_PesEs::OnInitDialog()
 		m_pHexList->SetBPR(16);
 #endif
 	}
-	//m_pActiveAudDecoder = NULL;
-	//m_pActiveVidDecoder = NULL;
-
-	//m_dlgTV.Create(IDD_SHOW_VIDEO_SCREEN, this);
-	//m_dlgTV.ShowWindow(SW_HIDE);
-
-	//m_dlgDtsPts.Create(IDD_TS_DTS_PTS, this);
-	//m_dlgDtsPts.ShowWindow(SW_HIDE);
 
 	Reset();
 	
@@ -138,51 +130,14 @@ void CDlg_TSAnalyzer_PesEs::OnSize(UINT nType, int cx, int cy)
 	{
 		m_wndSplitter.SetWindowPos(NULL, 5, 5, cx - 10, cy - 10, 0);
 
+		int middle_col_width = cx - 10 - WND_WIDTH_ES_PID_NAVI - WND_WIDTH_ES_HEX_BUFFER;
+		if (middle_col_width < 100) middle_col_width = 50;
 		m_wndSplitter.SetColumnInfo(0, WND_WIDTH_ES_PID_NAVI, 0);
-		m_wndSplitter.SetColumnInfo(1, cx - 10 - WND_WIDTH_ES_PID_NAVI - WND_WIDTH_ES_HEX_BUFFER, 0);
+		m_wndSplitter.SetColumnInfo(1, middle_col_width, 0);
 		m_wndSplitter.SetColumnInfo(2, WND_WIDTH_ES_HEX_BUFFER, 0);
 
 		m_wndSplitter.RecalcLayout();
 	}
-
-	//CWnd*	pWnd;
-	//CRect	rect;
-
-	//pWnd = GetDlgItem(IDC_BTN_PESES_PTS);
-	//if (pWnd->GetSafeHwnd() != NULL)
-	//{
-	//	pWnd->GetWindowRect(&rect);
-	//	ScreenToClient(&rect);
-
-	//	pWnd->SetWindowPos(NULL, rect.left, cy - rect.Height() - 10, rect.Width(), rect.Height(), 0);
-	//}
-
-	//pWnd = GetDlgItem(IDC_BTN_PESES_DTS);
-	//if (pWnd->GetSafeHwnd() != NULL)
-	//{
-	//	pWnd->GetWindowRect(&rect);
-	//	ScreenToClient(&rect);
-
-	//	pWnd->SetWindowPos(NULL, rect.left, cy - rect.Height() - 10, rect.Width(), rect.Height(), 0);
-	//}
-
-	//pWnd = GetDlgItem(IDC_BTN_PESES_BUFFER);
-	//if (pWnd->GetSafeHwnd() != NULL)
-	//{
-	//	pWnd->GetWindowRect(&rect);
-	//	ScreenToClient(&rect);
-
-	//	pWnd->SetWindowPos(NULL, rect.left, cy - rect.Height() - 10, rect.Width(), rect.Height(), 0);
-	//}
-
-	//pWnd = GetDlgItem(IDC_BTN_PESES_WATCH);
-	//if (pWnd->GetSafeHwnd() != NULL)
-	//{
-	//	pWnd->GetWindowRect(&rect);
-	//	ScreenToClient(&rect);
-
-	//	pWnd->SetWindowPos(NULL, rect.left, cy - rect.Height() - 10, rect.Width(), rect.Height(), 0);
-	//}
 }
 
 void CDlg_TSAnalyzer_PesEs::Reset(void)
@@ -190,78 +145,6 @@ void CDlg_TSAnalyzer_PesEs::Reset(void)
 	m_pNaviPane->Reset();
 	m_pSyntaxTree->Reset();
 	m_pHexList->Reset();
-
-	//CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	//CWnd* pWnd;
-//	char pszText[128];
-
-	//pWnd = GetDlgItem(IDC_BTN_PESES_PTS);
-	//pWnd->EnableWindow(FALSE);
-
-	//pWnd = GetDlgItem(IDC_BTN_PESES_DTS);
-	//pWnd->EnableWindow(FALSE);
-
-	//pWnd = GetDlgItem(IDC_BTN_PESES_BUFFER);
-	//pWnd->EnableWindow(FALSE);
-
-	//pWnd = GetDlgItem(IDC_BTN_PESES_WATCH);
-	//pWnd->EnableWindow(FALSE);
-
-	//m_dwVidCode = 0x00000000;
-	//m_dwAudCode = 0x00000000;
-
-	//if (m_dlgTV.IsWindowVisible())
-	//{
-	//	m_dlgTV.ShowWindow(SW_HIDE);
-	//}
-
-//	if (m_dlgDtsPts.IsWindowVisible())
-//	{
-//		m_dlgDtsPts.ShowWindow(SW_HIDE);
-//	}
-
-	//if (fp_debug != NULL)
-	//{
-	//	fclose(fp_debug);
-	//	fp_debug = NULL;
-	//}
-
-//	if (m_pActiveDecoder != NULL)
-//	{
-//		if (pTSMagicView != NULL)
-//		{
-//			TSMagic_threadparams_unregist_esdecoder(&(pTSMagicView->m_kThreadParams), m_nActiveType);
-//		}
-
-//		m_pActiveDecoder->Close();
-//		m_pActiveDecoder = NULL;
-//	}
-
-//	m_nActiveType = 0;
-
-
-	//if (m_pActiveVidDecoder != NULL)
-	//{
-	//	if (pTSMagicView != NULL)
-	//	{
-	//		TSMagic_threadparams_unregist_esdecoder(&(pTSMagicView->m_kThreadParams), 0);
-	//	}
-
-	//	m_pActiveVidDecoder->Close();
-	//	m_pActiveVidDecoder = NULL;
-	//}
-
-	//if (m_pActiveAudDecoder != NULL)
-	//{
-	//	if (pTSMagicView != NULL)
-	//	{
-	//		TSMagic_threadparams_unregist_esdecoder(&(pTSMagicView->m_kThreadParams), 1);
-	//	}
-	//	
-	//	m_pActiveAudDecoder->Close();
-	//	m_pActiveAudDecoder = NULL;
-	//}
-
 }
 
 //void CDlg_TSAnalyzer_PesEs::Set(int offline)

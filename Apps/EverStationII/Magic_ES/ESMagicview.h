@@ -72,6 +72,7 @@ protected:
 
 	void AdjustLayout(int cx, int cy);
 	void Reset(void);
+	CMFCStatusBar& GetStatusBar(void) const;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -99,6 +100,9 @@ public:
 	afx_msg void OnBtnES2TS();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+	afx_msg LRESULT OnESAppendLog(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnESReportRatio(WPARAM wParam, LPARAM lParam);
 
 	afx_msg LRESULT OnUpdateM2VPes(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUpdateM2VEsSequenceHeader(WPARAM wParam, LPARAM lParam);

@@ -20,8 +20,6 @@
 
 #include "thirdparty_abstract_layer\TALForDirectX\Include\TALForDirectDraw.h"
 
-#include "./common/video_common.h"
-
 #include "ESDecoder.h"
 
 #define USE_FRAMEBUF_ACCESS_MUTEX		1	
@@ -71,57 +69,6 @@ typedef struct
 	int			 quantizationBits;			//8\10\12
 
 } OUTPUT_YUV_SEQUENCE_PARAM_t;
-
-//typedef struct
-//{
-//	int			size;				//the byte counts for this structure
-//	int			getparams;			//determine whether these parameters are usable
-//
-//	int			display_grid_size;	//0、8、16、32、64
-//	int		    display_Y_width;
-//	int			display_Y_height;
-//	int		    display_U_width;
-//	int			display_U_height;
-//	int		    display_V_width;
-//	int			display_V_height;
-//	int			display_decimate_coeff;		//-4\-2\0\2\4
-//	double		display_framerate;
-//
-//	int			source_chroma_format;		//CHROMA_FORMAT_MONO、CHROMA_FORMAT_4_2_0、CHROMA_FORMAT_4_2_2、CHROMA_FORMAT_4_4_4
-//	//char		source_pszFourCC[5];
-//	unsigned int source_FourCC;
-//
-//	int			source_luma_width;
-//	int			source_luma_height;
-//
-//	int			source_bpp;
-//
-//	int			source_chroma_width;
-//	int			source_chroma_height;
-//
-//	int			luma_buf_size;
-//	int			luma_pix_count;
-//	uint8_t*	pucY;
-//
-//	int			chroma_buf_size;
-//	int			chroma_pix_count;
-//	uint8_t*	pucU;
-//	uint8_t*	pucV;
-//
-//	int			frame_buf_size;							//luma_buf_size + chroma_buf_size + chroma_buf_size
-//
-//	int			mb_width;								//mpeg_sequence_header & mpeg_sequence_extension	
-//	int			mb_height_frame;						//mpeg_sequence_header & mpeg_sequence_extension	
-//	int			mb_height_field;						//mpeg_sequence_header & mpeg_sequence_extension	
-//	int			mb_count;
-//	int			luma_mbw;
-//	int			luma_mbh;
-//	int			chroma_mbw;
-//	int			chroma_mbh;
-//
-//	int			blockcount;
-//
-//} VIDEO_DECODE_Params_t;
 
 class MW_ES_LIB CVESDecoder : public CESDecoder
 {
