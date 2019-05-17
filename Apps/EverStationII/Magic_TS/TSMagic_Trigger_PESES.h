@@ -1,15 +1,11 @@
 #ifndef _TSMAGIC_TRIGGER_PESES_H_
 #define _TSMAGIC_TRIGGER_PESES_H_
 
-#include "MiddleWare/MiddleWare_ESDecoder/Include/ESDecoder.h"
-//#include "libMpeg2/Mpeg2_TS_packet.h"
-
-#include "..\Common\Define.h"
-
-#include "TSMagic_GuiAPi.h"
+#include <stdint.h>
+#include "TSMagic_Trigger.h"
 
 uint32_t TSMagic_pes_trigger_thread(LPVOID lpParam);
-uint32_t TSMagic_es_trigger_thread(LPVOID lpParam);			//to be obseleted			chendelin 2018.2.4
+//uint32_t TSMagic_es_trigger_thread(LPVOID lpParam);			//to be obseleted			chendelin 2018.2.4
 
 class CTrigger_PESPacket : public CTrigger
 {
@@ -26,10 +22,9 @@ public:
 	void SetMatchParams(int filter_id, uint16_t PID, uint32_t style, int demand_count);
 
 	void Reset(void);
-	//	int GetFilterID(void);
 	uint16_t GetPID(void);
 	uint32_t GetStyle(void);
-	int  IsMatched(uint8_t* buf, int length);
+	//int  IsMatched(uint8_t* buf, int length);
 };
 
 #endif	//_TSMAGIC_TRIGGER_PESES_H_

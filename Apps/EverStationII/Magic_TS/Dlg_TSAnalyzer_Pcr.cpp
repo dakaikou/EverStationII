@@ -213,13 +213,13 @@ void CDlg_TSAnalyzer_Pcr::OnSize(UINT nType, int cx, int cy)
 
 void CDlg_TSAnalyzer_Pcr::UpdatePCRDiagnosis(RECORD_PCR_t* pCurPcrInfo)
 {
-	char			pszText[MAX_TXT_CHARS];
+	char			pszText[MAX_PATH];
 	int				nItemCount;
 	int				nOffset;
 
 	if (pCurPcrInfo != NULL)
 	{
-		sprintf_s(pszText, MAX_TXT_CHARS, "0x%04X", pCurPcrInfo->PCR_PID);
+		sprintf_s(pszText, MAX_PATH, "0x%04X", pCurPcrInfo->PCR_PID);
 
 		LVFINDINFO info;
 		info.flags = LVFI_PARTIAL | LVFI_STRING;
@@ -361,7 +361,7 @@ void CDlg_TSAnalyzer_Pcr::UpdatePCRDiagnosis(RECORD_PCR_t* pCurPcrInfo)
 
 			listPcrLog.InsertItem(nOffset + PCR_ITEM_NEGATIVE_DISCONTINUITY, "");
 			listPcrLog.SetItemText(nOffset + PCR_ITEM_NEGATIVE_DISCONTINUITY, 2, "负跳变");
-			sprintf_s(pszText, MAX_TXT_CHARS, "%d 次", pCurPcrInfo->pcr_code_negative_discontinuity_count);
+			sprintf_s(pszText, MAX_PATH, "%d 次", pCurPcrInfo->pcr_code_negative_discontinuity_count);
 			listPcrLog.SetItemText(nOffset + PCR_ITEM_NEGATIVE_DISCONTINUITY, 3, pszText);
 			listPcrLog.SetItemData(nOffset + PCR_ITEM_NEGATIVE_DISCONTINUITY, pCurPcrInfo->pcr_code_negative_discontinuity_count);
 

@@ -119,7 +119,7 @@ int CNaviTree_Bouquets::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void CNaviTree_Bouquets::UpdateBAT(CBAT* pBAT)
 {
 	TV_INSERTSTRUCT TreeCtrlItem;
-	char			pszText[MAX_TXT_CHARS];
+	char			pszText[MAX_PATH];
 	char			pszTemp[48];
 	int				find_bouquet_item;
 	DWORD			item_data;

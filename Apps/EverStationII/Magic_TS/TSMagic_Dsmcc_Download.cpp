@@ -33,7 +33,7 @@
 #include <Shlwapi.h>
 
 //DSMCC OC/DCœ¬‘ÿœﬂ≥Ã
-void ts_dsmcc_download_loop(pthread_params_t pThreadParams)
+void ts_dsmcc_download_loop(ts_thread_params_t* pThreadParams)
 {
 #if OPEN_DSMCC_DOWNLOAD
 
@@ -139,7 +139,7 @@ void ts_dsmcc_download_loop(pthread_params_t pThreadParams)
 
 uint32_t TSMagic_dsmcc_download_thread(LPVOID lpParam)
 {
-	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
+	ts_thread_params_t*	pThreadParams = (ts_thread_params_t*)lpParam;
 	ts_dsmcc_download_loop(pThreadParams);
 
 	return 0;

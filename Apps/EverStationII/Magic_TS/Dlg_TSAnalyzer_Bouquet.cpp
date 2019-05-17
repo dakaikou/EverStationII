@@ -65,7 +65,7 @@ BOOL CDlg_TSAnalyzer_Bouquets::OnInitDialog()
 	{
 		m_wndSplitter.CreateStatic(this, 1, 2);
 		m_wndSplitter.CreateView(0,0,RUNTIME_CLASS(CNaviTree_Bouquets), CSize(100,0), NULL);
-		m_wndSplitter.CreateView(0,1,RUNTIME_CLASS(CTreeView_PacketSyntax), CSize(0,0), NULL);
+		m_wndSplitter.CreateView(0,1,RUNTIME_CLASS(CTreeView_XMLBrowser), CSize(0,0), NULL);
 		
 		CRect rect;
 
@@ -80,7 +80,7 @@ BOOL CDlg_TSAnalyzer_Bouquets::OnInitDialog()
 		m_pNaviPane = (CNaviTree_Bouquets*)m_wndSplitter.GetPane(0, 0);
 		m_pNaviPane->Set(this->GetSafeHwnd());
 
-		m_pInfoTree = (CTreeView_PacketSyntax*)m_wndSplitter.GetPane(0, 1);
+		m_pInfoTree = (CTreeView_XMLBrowser*)m_wndSplitter.GetPane(0, 1);
 		m_pInfoTree->Init("Bouquet");
 	}
 

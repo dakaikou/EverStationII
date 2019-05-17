@@ -42,7 +42,7 @@ protected:
 	CSplitterWnd				m_wndSplitter;
 
 	CNaviList_DSMCCs*			m_pNaviPane;
-	CTreeView_PacketSyntax*		m_pInfoTree;
+	CTreeView_XMLBrowser*		m_pInfoTree;
 
 public:
 	void Reset(void);

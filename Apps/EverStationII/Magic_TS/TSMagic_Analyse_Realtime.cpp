@@ -36,7 +36,7 @@
 
 #define MAX_SECTION_FILTERS				16
 
-void realtime_ts_analyzer(pthread_params_t pThreadParams)
+void realtime_ts_analyzer(ts_thread_params_t* pThreadParams)
 {
 	int	  rtcode;
 
@@ -646,14 +646,14 @@ void realtime_ts_analyzer(pthread_params_t pThreadParams)
 
 uint32_t TSMagic_realtime_analyzer(LPVOID lpParam)
 {
-	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
+	ts_thread_params_t*	pThreadParams = (ts_thread_params_t*)lpParam;
 
 	realtime_ts_analyzer(pThreadParams);
 
 	return 0;
 }
 
-void realtime_ts_monitor(pthread_params_t pThreadParams)
+void realtime_ts_monitor(ts_thread_params_t* pThreadParams)
 {
 	char				pszDebug[MAX_TXT_CHARS];
 	int					bitrate;
@@ -756,13 +756,13 @@ void realtime_ts_monitor(pthread_params_t pThreadParams)
 
 uint32_t TSMagic_realtime_monitor(LPVOID lpParam)
 {
-	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
+	ts_thread_params_t*	pThreadParams = (ts_thread_params_t*)lpParam;
 	realtime_ts_monitor(pThreadParams);
 
 	return 0;
 }
 
-void TSMagic_threadparams_init(thread_params_t* pthread_params)
+void TSMagic_threadparams_init(ts_thread_params_t* pthread_params)
 {
 	if (pthread_params != NULL)
 	{
@@ -811,7 +811,7 @@ void TSMagic_threadparams_init(thread_params_t* pthread_params)
 	}
 }
 
-void TSMagic_threadparams_reset(thread_params_t* pthread_params)
+void TSMagic_threadparams_reset(ts_thread_params_t* pthread_params)
 {
 	if (pthread_params != NULL)
 	{

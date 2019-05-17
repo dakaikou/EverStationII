@@ -18,20 +18,14 @@
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_SectionSplicer.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/Mpeg2_PESSplicer.h"
+#include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/MiddleWare_PesSplicer_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TS_PayloadSplicer/Include/MiddleWare_SectionSplicer_ErrorCode.h"
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TS_ErrorCode.h"
-#include "MiddleWare/MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
+#include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_PSISI_ErrorCode.h"
 #include "MiddleWare/MiddleWare_ESDecoder/Include/ESDecoder.h"
 
 #include "syntax_translate_layer/MPEG2_DVB_Section/Include/MPEG2_DVB_ErrorCode.h"
-#include "syntax_translate_layer/MPEG2_TSPacket\Include\Mpeg2_TS_Utilities.h"
-
-//#include "MiddleWare_ESDecoder/Include/VideoDecoder_Mpeg2.h"
-//#include "MiddleWare_ESDecoder/Include/VideoDecoder_H264.h"
-//#include "MiddleWare_ESDecoder/Include/VideoDecoder_AVS.h"
-//#include "MiddleWare_ESDecoder/Include/AudioDecoder_Mpeg2.h"
-//#include "MiddleWare_ESDecoder/Include/AudioDecoder_AC3.h"
-//#include "MiddleWare_ESDecoder/Include/AudioDecoder_AAC.h"
+#include "syntax_translate_layer/MPEG2_TSPacket/Include/Mpeg2_TS_Utilities.h"
 
 #include "thirdparty_libs\glog\glog\logging.h"
 
@@ -42,7 +36,7 @@
 
 #define MAX_SECTION_FILTERS				16
 
-void offline_ts_loop(pthread_params_t pThreadParams)
+void offline_ts_loop(ts_thread_params_t* pThreadParams)
 {
 	uint8_t*  section_buf;
 	int		  section_length;
@@ -223,7 +217,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 							{
 								//TS_PID与待捕捉的PES包一致
 								rtcode = PESSplicer.WriteTSPacket(&transport_packet);
-								if (rtcode == NO_ERROR)
+								if (rtcode == PESES_SPLICE_LAST_PACKET)
 								{
 									int pes_length;
 									uint8_t* pes_buf = PESSplicer.GetPESPacket(&pes_length);
@@ -588,7 +582,7 @@ void offline_ts_loop(pthread_params_t pThreadParams)
 
 uint32_t TSMagic_offline_thread(LPVOID lpParam)
 {
-	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
+	ts_thread_params_t*	pThreadParams = (ts_thread_params_t*)lpParam;
 
 	offline_ts_loop(pThreadParams);
 

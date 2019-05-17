@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-//#include "everstation.h"
 #include "Dlg_TSAnalyzer_PesEs.h"
 
 #ifdef _DEBUG
@@ -14,6 +13,7 @@ static char THIS_FILE[] = __FILE__;
 #include <stdint.h>
 #include <assert.h>
 
+#include "../Common/Define.h"
 #include "..\resource.h"
 
 #include "TSMagicView.h"
@@ -39,6 +39,9 @@ static char THIS_FILE[] = __FILE__;
 
 #include "Utilities\Directory\Include\TOOL_Directory.h"
 
+#define WND_WIDTH_ES_PID_NAVI			650
+#define WND_WIDTH_ES_HEX_BUFFER			650
+
 CDlg_TSAnalyzer_PesEs::CDlg_TSAnalyzer_PesEs(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlg_TSAnalyzer_PesEs::IDD, pParent)
 {
@@ -47,6 +50,7 @@ CDlg_TSAnalyzer_PesEs::CDlg_TSAnalyzer_PesEs(CWnd* pParent /*=NULL*/)
 
 	//fp_debug = NULL;
 
+	m_pNaviPane = NULL;
 	m_pSyntaxTree = NULL;
 	m_pHexList = NULL;
 }
@@ -64,7 +68,7 @@ BEGIN_MESSAGE_MAP(CDlg_TSAnalyzer_PesEs, CDialog)
 	ON_WM_SIZE()
 	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
-	ON_MESSAGE(WM_USER_ES_SEL_CHANGE, OnReportEsSelChange)
+	ON_MESSAGE(WM_USER_ES_PID_SEL_CHANGE, OnReportEsSelChange)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -77,30 +81,30 @@ BOOL CDlg_TSAnalyzer_PesEs::OnInitDialog()
 	// TODO: Add extra initialization here
 	if (m_wndSplitter.GetSafeHwnd() == NULL)
 	{
+		CRect rectClient;
+		GetClientRect(&rectClient);
+
+		CRect rectSplitterWnd;
+		rectSplitterWnd.left = rectClient.left + 5;
+		rectSplitterWnd.right = rectClient.right - 5;
+		rectSplitterWnd.top = rectClient.top + 5;
+		rectSplitterWnd.bottom = rectClient.bottom - 100;
+
 		m_wndSplitter.CreateStatic(this, 1, 3);
-		m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CNaviTree_ESs), CSize(250, 0), NULL);
-		m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CTreeView_PacketSyntax), CSize(400, 0), NULL);
+		m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CNaviTree_ESPIDs), CSize(WND_WIDTH_ES_PID_NAVI, 0), NULL);
+		m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CTreeView_XMLBrowser), CSize(rectSplitterWnd.Width() - WND_WIDTH_ES_PID_NAVI - WND_WIDTH_ES_HEX_BUFFER, 0), NULL);
 #if BYTE_BUFFER_USE_LISTCTRL_VIEW
-		m_wndSplitter.CreateView(0, 2, RUNTIME_CLASS(CListView_ByteBuffer), CSize(100, 0), NULL);
+		m_wndSplitter.CreateView(0, 2, RUNTIME_CLASS(CListView_ByteBuffer), CSize(WND_WIDTH_ES_HEX_BUFFER, 0), NULL);
 #else
-		m_wndSplitter.CreateView(0, 2, RUNTIME_CLASS(CHexEditView_ByteBuffer), CSize(100, 0), NULL);
+		m_wndSplitter.CreateView(0, 2, RUNTIME_CLASS(CHexEditView_ByteBuffer), CSize(WND_WIDTH_ES_HEX_BUFFER, 0), NULL);
 #endif
 
-		CRect rect;
+		m_wndSplitter.MoveWindow(&rectSplitterWnd);
 
-		GetClientRect(&rect);
-		rect.left += 5;
-		rect.right -= 5;
-		rect.top += 5;
-		rect.bottom -= 100;
-
-		m_wndSplitter.MoveWindow(&rect);
-
-		m_pNaviPane = (CNaviTree_ESs*)m_wndSplitter.GetPane(0, 0);
+		m_pNaviPane = (CNaviTree_ESPIDs*)m_wndSplitter.GetPane(0, 0);
 		m_pNaviPane->Set(this->GetSafeHwnd());
 
-		//m_pTree = (CTreeView_PesEsSyntax*)m_wndSplitter.GetPane(0, 1);
-		m_pSyntaxTree = (CTreeView_PacketSyntax*)m_wndSplitter.GetPane(0, 1);
+		m_pSyntaxTree = (CTreeView_XMLBrowser*)m_wndSplitter.GetPane(0, 1);
 		m_pSyntaxTree->Init("PES/ES Óï·¨·ÖÎö");
 		m_pSyntaxTree->m_hNotifyParent = GetSafeHwnd();
 #if BYTE_BUFFER_USE_LISTCTRL_VIEW
@@ -134,18 +138,9 @@ void CDlg_TSAnalyzer_PesEs::OnSize(UINT nType, int cx, int cy)
 	{
 		m_wndSplitter.SetWindowPos(NULL, 5, 5, cx - 10, cy - 10, 0);
 
-		m_wndSplitter.SetColumnInfo(0, 500, 0);
-
-		int n2ColWidth = cx - 500 - 10;
-
-		int nHexViewWidth = 740;
-		if (n2ColWidth < 1480)
-		{
-			nHexViewWidth = n2ColWidth / 2;
-		}
-
-		m_wndSplitter.SetColumnInfo(1, n2ColWidth - nHexViewWidth, 0);
-		m_wndSplitter.SetColumnInfo(2, nHexViewWidth, 0);
+		m_wndSplitter.SetColumnInfo(0, WND_WIDTH_ES_PID_NAVI, 0);
+		m_wndSplitter.SetColumnInfo(1, cx - 10 - WND_WIDTH_ES_PID_NAVI - WND_WIDTH_ES_HEX_BUFFER, 0);
+		m_wndSplitter.SetColumnInfo(2, WND_WIDTH_ES_HEX_BUFFER, 0);
 
 		m_wndSplitter.RecalcLayout();
 	}
@@ -1293,7 +1288,7 @@ void CDlg_TSAnalyzer_PesEs::OnDestroy()
 LRESULT CDlg_TSAnalyzer_PesEs::OnReportEsSelChange(WPARAM wParam, LPARAM lParam)
 {
 	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	char		  pszText[MAX_TXT_CHARS];
+	char		  pszText[MAX_PATH];
 	int			  nClassType;
 	int			  nPID;
 	int			  nStreamType;

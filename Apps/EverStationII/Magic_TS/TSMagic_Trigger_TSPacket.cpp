@@ -25,7 +25,7 @@ CTrigger_TSPacket::~CTrigger_TSPacket(void)
 {
 }
 
-void ts_packet_trigger_loop(pthread_params_t pThreadParams)
+void ts_packet_trigger_loop(ts_thread_params_t* pThreadParams)
 {
 	uint8_t	  packet_buf[204];
 	int		  packet_length;
@@ -170,7 +170,7 @@ void ts_packet_trigger_loop(pthread_params_t pThreadParams)
 
 uint32_t TSMagic_packet_trigger_thread(LPVOID lpParam)
 {
-	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
+	ts_thread_params_t*	pThreadParams = (ts_thread_params_t*)lpParam;
 	ts_packet_trigger_loop(pThreadParams);
 
 	return 0;

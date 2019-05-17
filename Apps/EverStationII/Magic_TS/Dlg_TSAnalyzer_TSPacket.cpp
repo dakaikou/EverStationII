@@ -16,6 +16,8 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_Packets dialog
+#include "../Common/Define.h"
+
 #include "TSMagic_GuiApi.h"
 #include "TSMagic_GuiApi_MSG.h"
 #include "TSMagic_Decimate_TSPacket.h"
@@ -709,12 +711,12 @@ void CDlg_TSAnalyzer_Packets::OnBtnDecimateTS2TS()
 	int				nItemCount;
 	int				item_index;
 //	int				action = 0;
-	char			pszText[MAX_TXT_CHARS];
+	char			pszText[MAX_PATH];
 	
 	DWORD	state;
 
 	CTSMagicView*		pTSMagicView = CTSMagicView::GetView();
-	thread_params_t*	pthread_params = &(pTSMagicView->m_kThreadParams);
+	ts_thread_params_t*	pthread_params = &(pTSMagicView->m_kThreadParams);
 	CDB_TSPackets*		pDB_TSPackets = pTSMagicView->GetTSPacketsDBase();
 	//RECORD_TSPacket_t	TSPacketInfo;
 	CWnd*				pWnd = NULL;
@@ -869,10 +871,10 @@ void CDlg_TSAnalyzer_Packets::OnBtnDecimateTS2ES()
 	WORD	usPID;
 //	int		action = 0;
 	CWnd*	pWnd = NULL;
-	char	pszText[MAX_TXT_CHARS];
+	char	pszText[MAX_PATH];
 
 	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	thread_params_t*	pthread_params = &(pTSMagicView->m_kThreadParams);
+	ts_thread_params_t*	pthread_params = &(pTSMagicView->m_kThreadParams);
 	CDB_TSPackets*		pDB_TSPackets = pTSMagicView->GetTSPacketsDBase();
 	//RECORD_TSPacket_t	TSPacketInfo;
 	int					rtcode;
@@ -970,7 +972,7 @@ void CDlg_TSAnalyzer_Packets::OnBnClickedBtnDecimateStop()
 //	DWORD	state;
 
 	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	thread_params_t*	pthread_params = &(pTSMagicView->m_kThreadParams);
+	ts_thread_params_t*	pthread_params = &(pTSMagicView->m_kThreadParams);
 	CDB_TSPackets*		pDB_TSPackets = pTSMagicView->GetTSPacketsDBase();
 	//RECORD_TSPacket_t*	pPacketInfo;
 	CWnd*				pWnd = NULL;
@@ -1137,7 +1139,7 @@ void CDlg_TSAnalyzer_Packets::OnChangeEditEnd()
 void CDlg_TSAnalyzer_Packets::ActionMsg(WPARAM wParam)
 {
 	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	thread_params_t*	pthread_params = &(pTSMagicView->m_kThreadParams);
+	ts_thread_params_t*	pthread_params = &(pTSMagicView->m_kThreadParams);
 	CWnd* pWnd = NULL;
 
 	if (wParam == 1)		//线程进入

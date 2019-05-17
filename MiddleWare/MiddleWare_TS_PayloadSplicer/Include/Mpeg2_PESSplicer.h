@@ -35,7 +35,8 @@ private:
 	int			m_nPkIndex;
 	int			m_nWriteSize;
 
-	int			m_pes_payload_unit_started;
+	//int			m_pes_payload_unit_started;
+	int			m_bSplicingStarted;
 
 public:
 

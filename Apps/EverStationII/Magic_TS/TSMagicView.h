@@ -201,7 +201,7 @@ public:
 	CTrigger_TSPacket*   GetTSPacketTrigger(void);
 	CTrigger_PESPacket*   GetPESPacketTrigger(void);
 
-	thread_params_t		m_kThreadParams;
+	ts_thread_params_t		m_kThreadParams;
 
 protected:
 

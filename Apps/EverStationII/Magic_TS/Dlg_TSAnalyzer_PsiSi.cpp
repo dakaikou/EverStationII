@@ -13,6 +13,7 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // CDlg_TSAnalyzer_PsiSi dialog
+#include "../Common/Define.h"
 #include "../Magic_TS/TSMagicView.h"
 #include "../Magic_TS/TSMagic_GuiApi_MSG.h"
 
@@ -96,7 +97,7 @@ BOOL CDlg_TSAnalyzer_PsiSi::OnInitDialog()
 	{
 		m_wndSplitter.CreateStatic(this, 1, 3);
 		m_wndSplitter.CreateView(0,0,RUNTIME_CLASS(CNaviTree_PsiSiTables), CSize(100,0), NULL);
-		m_wndSplitter.CreateView(0,1,RUNTIME_CLASS(CTreeView_PacketSyntax), CSize(100,0), NULL);
+		m_wndSplitter.CreateView(0,1,RUNTIME_CLASS(CTreeView_XMLBrowser), CSize(100,0), NULL);
 		m_wndSplitter.CreateView(0,2,RUNTIME_CLASS(CHexEditView_ByteBuffer), CSize(0, 0), NULL);
 
 		CRect rect;
@@ -112,7 +113,7 @@ BOOL CDlg_TSAnalyzer_PsiSi::OnInitDialog()
 		m_pNaviTree = (CNaviTree_PsiSiTables*)m_wndSplitter.GetPane(0, 0);
 		m_pNaviTree->Set(this->GetSafeHwnd());
 
-		m_pSyntaxTree = (CTreeView_PacketSyntax*)m_wndSplitter.GetPane(0, 1);
+		m_pSyntaxTree = (CTreeView_XMLBrowser*)m_wndSplitter.GetPane(0, 1);
 		m_pSyntaxTree->Init("PSI/SI section Óï·¨·ÖÎö");
 		m_pSyntaxTree->m_hNotifyParent = GetSafeHwnd();
 		m_pHexList = (CHexEditView_ByteBuffer*)m_wndSplitter.GetPane(0, 2);
@@ -468,7 +469,7 @@ LRESULT CDlg_TSAnalyzer_PsiSi::OnReportPsiSiSelChange(WPARAM wParam, LPARAM lPar
 	uint16_t	  usKeyID;
 	uint32_t	  dwSelectItemData = (uint32_t)lParam;
 	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-	char		  pszText[MAX_TXT_CHARS];
+	char		  pszText[MAX_PATH];
 
 	if (pTSMagicView->m_kThreadParams.main_thread_running)
 	{

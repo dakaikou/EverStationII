@@ -14,31 +14,31 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTreeView_PsisiSyntax
 
-IMPLEMENT_DYNCREATE(CTreeView_PacketSyntax, CTreeView)
+IMPLEMENT_DYNCREATE(CTreeView_XMLBrowser, CTreeView)
 
-CTreeView_PacketSyntax::CTreeView_PacketSyntax()
+CTreeView_XMLBrowser::CTreeView_XMLBrowser()
 {
 	m_strTitle = "Unknown Tree";
 	m_hRootItem = NULL;
 }
 
-CTreeView_PacketSyntax::~CTreeView_PacketSyntax()
+CTreeView_XMLBrowser::~CTreeView_XMLBrowser()
 {
 }
 
 
-BEGIN_MESSAGE_MAP(CTreeView_PacketSyntax, CTreeView)
+BEGIN_MESSAGE_MAP(CTreeView_XMLBrowser, CTreeView)
 	//{{AFX_MSG_MAP(CTreeView_PesEsSyntax)
 	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
-	ON_NOTIFY_REFLECT(TVN_KEYDOWN, &CTreeView_PacketSyntax::OnTvnKeydown)
-	ON_NOTIFY_REFLECT(TVN_SELCHANGED, &CTreeView_PacketSyntax::OnTvnSelchanged)
+	ON_NOTIFY_REFLECT(TVN_KEYDOWN, &CTreeView_XMLBrowser::OnTvnKeydown)
+	ON_NOTIFY_REFLECT(TVN_SELCHANGED, &CTreeView_XMLBrowser::OnTvnSelchanged)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTreeView_PesEsSyntax drawing
 
-void CTreeView_PacketSyntax::OnDraw(CDC* pDC)
+void CTreeView_XMLBrowser::OnDraw(CDC* pDC)
 {
 	CDocument* pDoc = GetDocument();
 	// TODO: add draw code here
@@ -48,12 +48,12 @@ void CTreeView_PacketSyntax::OnDraw(CDC* pDC)
 // CTreeView_PesEsSyntax diagnostics
 
 #ifdef _DEBUG
-void CTreeView_PacketSyntax::AssertValid() const
+void CTreeView_XMLBrowser::AssertValid() const
 {
 	CTreeView::AssertValid();
 }
 
-void CTreeView_PacketSyntax::Dump(CDumpContext& dc) const
+void CTreeView_XMLBrowser::Dump(CDumpContext& dc) const
 {
 	CTreeView::Dump(dc);
 }
@@ -62,7 +62,7 @@ void CTreeView_PacketSyntax::Dump(CDumpContext& dc) const
 /////////////////////////////////////////////////////////////////////////////
 // CTreeView_PsisiSyntax message handlers
 
-BOOL CTreeView_PacketSyntax::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
+BOOL CTreeView_XMLBrowser::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
 {
 	// TODO: Add your specialized code here and/or call the base class
 	dwStyle |= TVS_HASLINES | TVS_HASBUTTONS | TVS_LINESATROOT;
@@ -70,7 +70,7 @@ BOOL CTreeView_PacketSyntax::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowNam
 	return CWnd::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext);
 }
 
-void CTreeView_PacketSyntax::Init(char* pszTitle)
+void CTreeView_XMLBrowser::Init(char* pszTitle)
 {
 	m_strTitle = pszTitle;
 }
@@ -100,7 +100,7 @@ void CTreeView_PacketSyntax::Init(char* pszTitle)
 //	}
 //}
 
-void CTreeView_PacketSyntax::Reset(void)
+void CTreeView_XMLBrowser::Reset(void)
 {
 	CTreeCtrl&		treeCtrl = GetTreeCtrl();
 	treeCtrl.DeleteAllItems();
@@ -119,7 +119,7 @@ void CTreeView_PacketSyntax::Reset(void)
 
 }
 
-int CTreeView_PacketSyntax::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CTreeView_XMLBrowser::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CTreeView::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -140,7 +140,7 @@ int CTreeView_PacketSyntax::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CTreeView_PacketSyntax::ShowXMLDoc(tinyxml2::XMLDocument* pxmlDoc)
+void CTreeView_XMLBrowser::ShowXMLDoc(tinyxml2::XMLDocument* pxmlDoc)
 {
 	CTreeCtrl&		treeCtrl = GetTreeCtrl();
 	treeCtrl.DeleteAllItems();
@@ -152,7 +152,7 @@ void CTreeView_PacketSyntax::ShowXMLDoc(tinyxml2::XMLDocument* pxmlDoc)
 }
 
 //this function is need to optimize
-HTREEITEM CTreeView_PacketSyntax::DisplaySingleNode(HTREEITEM hParent, tinyxml2::XMLElement* pxmlNode)
+HTREEITEM CTreeView_XMLBrowser::DisplaySingleNode(HTREEITEM hParent, tinyxml2::XMLElement* pxmlNode)
 {
 	CTreeCtrl&		treeCtrl = GetTreeCtrl();
 	char			pszText[512];				//why is 512 bytes?  chendelin 2018.10.18
@@ -370,7 +370,7 @@ HTREEITEM CTreeView_PacketSyntax::DisplaySingleNode(HTREEITEM hParent, tinyxml2:
 	return hItem;
 }
 
-void CTreeView_PacketSyntax::Preorder(HTREEITEM hParent, tinyxml2::XMLElement* pxmlNode)
+void CTreeView_XMLBrowser::Preorder(HTREEITEM hParent, tinyxml2::XMLElement* pxmlNode)
 {
 	if (pxmlNode != NULL)
 	{
@@ -382,7 +382,7 @@ void CTreeView_PacketSyntax::Preorder(HTREEITEM hParent, tinyxml2::XMLElement* p
 	}
 }
 
-void CTreeView_PacketSyntax::OnTvnKeydown(NMHDR *pNMHDR, LRESULT *pResult)
+void CTreeView_XMLBrowser::OnTvnKeydown(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMTVKEYDOWN pTVKeyDown = reinterpret_cast<LPNMTVKEYDOWN>(pNMHDR);
 	// TODO: 在此添加控件通知处理程序代码
@@ -394,7 +394,7 @@ void CTreeView_PacketSyntax::OnTvnKeydown(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-void CTreeView_PacketSyntax::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
+void CTreeView_XMLBrowser::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
 	// TODO: 在此添加控件通知处理程序代码

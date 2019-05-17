@@ -71,7 +71,7 @@ protected:
 	CSplitterWnd				m_wndSplitter;
 	//CSplitterWnd_PsiSiAnalyzer	m_wndSplitter;
 	CNaviTree_PsiSiTables*		m_pNaviTree;
-	CTreeView_PacketSyntax*		m_pSyntaxTree;
+	CTreeView_XMLBrowser*		m_pSyntaxTree;
 	CHexEditView_ByteBuffer*	m_pHexList;
 
 	// Generated message map functions

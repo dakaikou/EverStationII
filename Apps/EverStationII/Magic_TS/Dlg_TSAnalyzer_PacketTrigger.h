@@ -50,7 +50,7 @@ protected:
 	int				m_bSearching;
 
 	CSplitterWnd				m_wndSplitter;
-	CTreeView_PacketSyntax*	m_pTree;
+	CTreeView_XMLBrowser*	m_pTree;
 #if BYTE_BUFFER_USE_LISTCTRL_VIEW
 	CListView_ByteBuffer*		m_pList;
 #else

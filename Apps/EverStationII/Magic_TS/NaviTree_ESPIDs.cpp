@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 //#include "EverStation.h"
-#include "NaviTree_ESs.h"
+#include "NaviTree_ESPIDs.h"
 //#include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities.h"
 #include "MiddleWare\MiddleWare_PsiSiTable\Include\MiddleWare_PSISI_ErrorCode.h"
 
@@ -26,35 +26,35 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CPane_PsiSiTableTreeView
 
-IMPLEMENT_DYNCREATE(CNaviTree_ESs, CTreeView)
+IMPLEMENT_DYNCREATE(CNaviTree_ESPIDs, CTreeView)
 
-CNaviTree_ESs::CNaviTree_ESs()
+CNaviTree_ESPIDs::CNaviTree_ESPIDs()
 {
 }
 
-CNaviTree_ESs::~CNaviTree_ESs()
+CNaviTree_ESPIDs::~CNaviTree_ESPIDs()
 {
 //	DeleteChildItems(m_hPsisiRootItem);
 //	DeleteChildItems(m_hDataCastRootItem);
 }
 
 
-BEGIN_MESSAGE_MAP(CNaviTree_ESs, CTreeView)
+BEGIN_MESSAGE_MAP(CNaviTree_ESPIDs, CTreeView)
 	//{{AFX_MSG_MAP(CPane_PesEsPIDTreeView)
 	ON_WM_CREATE()
 //	ON_NOTIFY_REFLECT(NM_DBLCLK, OnDblclk)
 	//}}AFX_MSG_MAP
-	ON_NOTIFY_REFLECT(NM_RCLICK, &CNaviTree_ESs::OnNMRClick)
-	ON_COMMAND(ID_ES_VIDEO_PREVIEW, &CNaviTree_ESs::OnEsVideoPreview)
-	ON_COMMAND(ID_ES_AUDIO_PREVIEW, &CNaviTree_ESs::OnEsAudioPreview)
-	ON_COMMAND(ID_ES_SYNTAX_ANALYSE, &CNaviTree_ESs::OnEsSyntaxAnalyse)
-	ON_NOTIFY_REFLECT(NM_DBLCLK, &CNaviTree_ESs::OnNMDblclk)
+	ON_NOTIFY_REFLECT(NM_RCLICK, &CNaviTree_ESPIDs::OnNMRClick)
+	ON_COMMAND(ID_ES_VIDEO_PREVIEW, &CNaviTree_ESPIDs::OnEsVideoPreview)
+	ON_COMMAND(ID_ES_AUDIO_PREVIEW, &CNaviTree_ESPIDs::OnEsAudioPreview)
+	ON_COMMAND(ID_ES_SYNTAX_ANALYSE, &CNaviTree_ESPIDs::OnEsSyntaxAnalyse)
+	ON_NOTIFY_REFLECT(NM_DBLCLK, &CNaviTree_ESPIDs::OnNMDblclk)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CPane_PesEsPIDTreeView drawing
 
-void CNaviTree_ESs::OnDraw(CDC* pDC)
+void CNaviTree_ESPIDs::OnDraw(CDC* pDC)
 {
 //	CDocument* pDoc = GetDocument();
 	// TODO: add draw code here
@@ -64,12 +64,12 @@ void CNaviTree_ESs::OnDraw(CDC* pDC)
 // CPane_PesEsPIDTreeView diagnostics
 
 #ifdef _DEBUG
-void CNaviTree_ESs::AssertValid() const
+void CNaviTree_ESPIDs::AssertValid() const
 {
 	CTreeView::AssertValid();
 }
 
-void CNaviTree_ESs::Dump(CDumpContext& dc) const
+void CNaviTree_ESPIDs::Dump(CDumpContext& dc) const
 {
 	CTreeView::Dump(dc);
 }
@@ -78,7 +78,7 @@ void CNaviTree_ESs::Dump(CDumpContext& dc) const
 /////////////////////////////////////////////////////////////////////////////
 // CPane_PesEsPIDTreeView message handlers
 
-BOOL CNaviTree_ESs::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
+BOOL CNaviTree_ESPIDs::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
 {
 	// TODO: Add your specialized code here and/or call the base class
 	dwStyle |= (TVS_HASLINES | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_SHOWSELALWAYS | TVS_FULLROWSELECT);
@@ -86,7 +86,7 @@ BOOL CNaviTree_ESs::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD 
 	return CWnd::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext);
 }
 
-int CNaviTree_ESs::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CNaviTree_ESPIDs::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CTreeView::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -122,7 +122,7 @@ int CNaviTree_ESs::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CNaviTree_ESs::UpdatePAT(CPAT* pPAT)
+void CNaviTree_ESPIDs::UpdatePAT(CPAT* pPAT)
 {
 	char			pszText[64];
 	int				valid_program_count;
@@ -173,7 +173,7 @@ void CNaviTree_ESs::UpdatePAT(CPAT* pPAT)
 	}
 }
 
-void CNaviTree_ESs::UpdatePMT(CPMT* pPMT)
+void CNaviTree_ESPIDs::UpdatePMT(CPMT* pPMT)
 {
 	char			pszText[MAX_TXT_CHARS];
 	char			pszTemp[128];
@@ -320,12 +320,12 @@ void CNaviTree_ESs::UpdatePMT(CPMT* pPMT)
 	}
 }
 
-void CNaviTree_ESs::Set(HWND hwndReceiver, int offline)
+void CNaviTree_ESPIDs::Set(HWND hwndReceiver, int offline)
 {
 	m_hwndReceiver = hwndReceiver;
 }
 
-void CNaviTree_ESs::Reset(void)
+void CNaviTree_ESPIDs::Reset(void)
 {
 	char			pszText[MAX_TXT_CHARS];
 
@@ -341,7 +341,7 @@ void CNaviTree_ESs::Reset(void)
 	treeCtrl.SetItemState(m_hPesEsRootItem, ~TVIS_BOLD, TVIS_BOLD);
 }
 
-void CNaviTree_ESs::DeleteChildItems(HTREEITEM hParentItem)
+void CNaviTree_ESPIDs::DeleteChildItems(HTREEITEM hParentItem)
 {
 	HTREEITEM hChildItem;
 	HTREEITEM hOldItem;
@@ -367,7 +367,7 @@ void CNaviTree_ESs::DeleteChildItems(HTREEITEM hParentItem)
 	}
 }
 
-void CNaviTree_ESs::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
+void CNaviTree_ESPIDs::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CTreeCtrl& treeCtrl = GetTreeCtrl();
@@ -377,13 +377,13 @@ void CNaviTree_ESs::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 
 	if ((dwItemData & 0xffff0000) != 0x00000000)
 	{
-		::SendMessage(m_hwndReceiver, WM_USER_ES_SEL_CHANGE, NULL, dwItemData);
+		::SendMessage(m_hwndReceiver, WM_USER_ES_PID_SEL_CHANGE, NULL, dwItemData);
 	}
 
 	*pResult = 0;
 }
 
-void CNaviTree_ESs::OnNMRClick(NMHDR *pNMHDR, LRESULT *pResult)
+void CNaviTree_ESPIDs::OnNMRClick(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	// TODO: 在此添加控件通知处理程序代码
 	int			  nClassType;
@@ -432,7 +432,7 @@ void CNaviTree_ESs::OnNMRClick(NMHDR *pNMHDR, LRESULT *pResult)
 }
 
 
-void CNaviTree_ESs::OnEsVideoPreview()
+void CNaviTree_ESPIDs::OnEsVideoPreview()
 {
 	// TODO: 在此添加命令处理程序代码
 	CDlg_VideoShowScreen	m_dlgTV;
@@ -441,13 +441,13 @@ void CNaviTree_ESs::OnEsVideoPreview()
 }
 
 
-void CNaviTree_ESs::OnEsAudioPreview()
+void CNaviTree_ESPIDs::OnEsAudioPreview()
 {
 	// TODO: 在此添加命令处理程序代码
 }
 
 
-void CNaviTree_ESs::OnEsSyntaxAnalyse()
+void CNaviTree_ESPIDs::OnEsSyntaxAnalyse()
 {
 	// TODO: 在此添加命令处理程序代码
 	CTreeCtrl& treeCtrl = GetTreeCtrl();
@@ -457,7 +457,7 @@ void CNaviTree_ESs::OnEsSyntaxAnalyse()
 
 	if ((dwItemData & 0xffff0000) != 0x00000000)
 	{
-		::SendMessage(m_hwndReceiver, WM_USER_ES_SEL_CHANGE, NULL, dwItemData);
+		::SendMessage(m_hwndReceiver, WM_USER_ES_PID_SEL_CHANGE, NULL, dwItemData);
 	}
 }
 

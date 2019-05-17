@@ -142,7 +142,7 @@ void CNaviTree_Services::UpdateNIT(CNIT* pNIT)
 {
 	TV_INSERTSTRUCT TreeCtrlItem;
 	char			pszNetworkName[64];
-	char			pszText[MAX_TXT_CHARS];
+	char			pszText[MAX_PATH];
 	HTREEITEM		hNetworkItem = NULL;
 	HTREEITEM		hStreamItem;
 	//char*			pstr_dst;
@@ -301,7 +301,7 @@ void CNaviTree_Services::UpdateNIT(CNIT* pNIT)
 void CNaviTree_Services::UpdateSDT(CSDT* pSDT)
 {
 	TV_INSERTSTRUCT TreeCtrlItem;
-	char			pszText[MAX_TXT_CHARS];
+	char			pszText[MAX_PATH];
 
 	int				service_index;
 	
@@ -411,7 +411,7 @@ void CNaviTree_Services::UpdateSDT(CSDT* pSDT)
 #if CHINESE_VERSION
 			sprintf_s(pszText, sizeof(pszText), "´«ËÍÁ÷[ONetID=0x%04X(%d)-TSID=0x%04X(%d)] <only refered in SDT>", usOriginalNetworkID, usOriginalNetworkID, usTransportStreamID, usTransportStreamID);
 #else
-			sprintf_s(pszTemp, sizeof(pszTemp), "STREAM[ONetID=0x%04X(%d)-TSID=0x%04X(%d)] - only refered in SDT", usOriginalNetworkID, usOriginalNetworkID, usTransportStreamID, usTransportStreamID);
+			sprintf_s(pszText, sizeof(pszText), "STREAM[ONetID=0x%04X(%d)-TSID=0x%04X(%d)] - only refered in SDT", usOriginalNetworkID, usOriginalNetworkID, usTransportStreamID, usTransportStreamID);
 #endif
 
 			//strcpy_s(pszText, sizeof(pszText), pszTemp);

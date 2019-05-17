@@ -21,7 +21,7 @@
 //#endif
 
 //#include "..\MFCExt\SplitWnd\SplitWnd.h"
-#include "NaviTree_ESs.h"
+#include "NaviTree_ESPIDs.h"
 
 typedef struct
 {
@@ -54,8 +54,8 @@ protected:
 	//CDlg_TS_DtsPts				m_dlgDtsPts;
 
 	CSplitterWnd				m_wndSplitter;
-	CNaviTree_ESs*				m_pNaviPane;
-	CTreeView_PacketSyntax*		m_pSyntaxTree;
+	CNaviTree_ESPIDs*			m_pNaviPane;
+	CTreeView_XMLBrowser*		m_pSyntaxTree;
 	CHexEditView_ByteBuffer*	m_pHexList;
 public:
 

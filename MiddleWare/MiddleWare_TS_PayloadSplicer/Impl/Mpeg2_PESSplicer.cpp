@@ -9,8 +9,15 @@
 
 CPESSplicer::CPESSplicer(void)
 {
-	Init();
-	Reset();
+	m_pucPESBuf = NULL;
+	m_nBufSize = 0;
+	m_nPESLength = 0;
+
+	m_usPID = 0xffff;
+	m_nPkIndex = -1;
+	m_nWriteSize = 0;
+
+	m_bSplicingStarted = 0;
 }
 
 CPESSplicer::~CPESSplicer()
@@ -39,7 +46,7 @@ void CPESSplicer::Reset(void)
 	m_nPkIndex = -1;
 	m_nWriteSize = 0;
 
-	m_pes_payload_unit_started = 0;
+	m_bSplicingStarted = 0;
 }
 
 int CPESSplicer::SetPID(uint16_t usPID)
@@ -49,6 +56,11 @@ int CPESSplicer::SetPID(uint16_t usPID)
 	return 0;
 }
 
+//通过往拼接器持续写入TS包数据，由本程序检测PES的起始和结束，然后拼接出PES包
+//输入：
+//-- TS包
+//返回：
+//--状态码
 int CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 {
 	int		rtcode = PESES_SPLICE_UNKNOWN_ERROR;
@@ -61,30 +73,27 @@ int CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 
 	if (ptransport_packet != NULL)
 	{
-		if (m_usPID == 0xFFFF)
+		if (m_usPID == 0xFFFF)		//表示当前拼接器尚未被占用，可用
 		{
 			m_usPID = ptransport_packet->PID;
 		}
-
-		if (ptransport_packet->PID == m_usPID)
+		
+		if (ptransport_packet->PID == m_usPID)    //当前TS包的PID与当前拼接器的PID一致
 		{
 			if (ptransport_packet->transport_error_indicator == 0)				//packet with no error
 			{
 				if (ptransport_packet->transport_scrambling_control == 0)		//not scrambled
 				{
+					//获取TS包净荷指针和净荷长度
 					payload_buf = ptransport_packet->payload_buf;
 					payload_length = ptransport_packet->payload_length;
 
 					assert(payload_length <= 184);
 
-					if (m_pes_payload_unit_started == 0)
+					if (m_bSplicingStarted == 0)	//当前拼接器尚未开始拼接
 					{
 						if (ptransport_packet->payload_unit_start_indicator == 1)  //拼接的起点
 						{
-							m_pes_payload_unit_started = 1;
-
-							m_nPkIndex = ptransport_packet->continuity_counter;
-
 							assert(m_pucPESBuf == NULL);
 							//if (m_pucPESBuf != NULL)
 							//{
@@ -95,70 +104,28 @@ int CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 
 							m_nBufSize = 0x10000;
 							m_pucPESBuf = (uint8_t*)malloc(m_nBufSize);
-							memcpy(m_pucPESBuf, payload_buf, payload_length);
-							m_nPESLength = payload_length;
+							if (m_pucPESBuf != NULL)
+							{
+								memcpy(m_pucPESBuf, payload_buf, payload_length);
+								m_nPESLength = payload_length;
+								rtcode = PESES_SPLICE_FIRST_PACKET;
+							}
+							else
+							{
+								rtcode = PESES_SPLICE_MEMORY_ERROR;
+							}
 
-							//if (main_type == PID_MAINTYPE_VIDEO)
-							//{
-							//	if ((sub_type == VIDEO_MPEG1) ||
-							//		(sub_type == VIDEO_MPEG2))
-							//	{
-							//		pAVDecoder = new CMPEG_VideoDecoder;
-							//	}
-							//	else if (sub_type == VIDEO_H264)
-							//	{
-							//		pAVDecoder = new CH264_VideoDecoder;
-							//	}
-							//	else if (sub_type == VIDEO_AVS)
-							//	{
-							//		pAVDecoder = new CAVS_VideoDecoder;
-							//	}
-							//}
-							//else if (main_type == PID_MAINTYPE_AUDIO)
-							//{
-							//	if ((sub_type == AUDIO_MPEG1) ||
-							//		(sub_type == AUDIO_MPEG1_L1) ||
-							//		(sub_type == AUDIO_MPEG1_L2) ||
-							//		(sub_type == AUDIO_MPEG1_L3) ||
-							//		(sub_type == AUDIO_MPEG2) ||
-							//		(sub_type == AUDIO_MPEG2_L1) ||
-							//		(sub_type == AUDIO_MPEG2_L2) ||
-							//		(sub_type == AUDIO_MPEG2_L3))
-							//	{
-							//		pAVDecoder = new CMPEG_AudioDecoder;
-							//	}
-							//	else if (sub_type == AUDIO_AC3)
-							//	{
-							//		pAVDecoder = new CAC3_AudioDecoder;
-							//	}
-							//	else if (sub_type == AUDIO_MPEG2_AAC)
-							//	{
-							//		pAVDecoder = new CAAC_AudioDecoder;
-							//	}
-							//}
-							//else
-							//{
-							//	pAVDecoder = new CESDecoder;
-							//}
+							//记载当前包序号，当下一个TS包到达时，可以根据包序号检验中间是否存在丢包
+							m_nPkIndex = ptransport_packet->continuity_counter;
 
-							//if (pAVDecoder != NULL)
-							//{
-							//	pAVDecoder->Open(pThreadParams->hPesEsMsgWnd, STREAM_TS, NULL);
-							//	pAVDecoder->SetParams(transport_packet.PID, 0xFFFF);
-							//	pAVDecoder->m_bTriggering = 1;
-
-							//	pAVDecoder->WriteTSPacket(&transport_packet, read_byte_pos);
-							//}
-
-							rtcode = PESES_SPLICE_FIRST_PACKET;
+							m_bSplicingStarted = 1;
 						}
-						else
+						else   //当前TS包未携带PES包起始部分，还没有找到PES头，忽略当前TS包
 						{
-							//还没有找到PES头，忽略当前TS包
 							rtcode = PESES_SPLICE_DO_NOT_SYNC;
 						}
 					}
-					else if (m_pes_payload_unit_started == 1)
+					else if (m_bSplicingStarted == 1)
 					{
 						int bAligned = 1;
 						//检查包序号
@@ -173,36 +140,17 @@ int CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 
 						if (bAligned)
 						{
-							if (ptransport_packet->payload_unit_start_indicator == 1)	//拼接的终点
+							if (ptransport_packet->payload_unit_start_indicator == 1)	//遇到了下一个PES包的开始，说明上一个PES包拼接完成
 							{
-								//遇到了下一个PES包的开始
-
-								//if (pAVDecoder != NULL)
-								//{
-								//	pAVDecoder->m_bTriggering = 0;
-								//}
-
-								//int nOldCatchedCount = pPESPacketTrigger->GetCatchedCount();
-
-								//pPESPacketTrigger->SaveAndClose(hLastRecordHandler, NULL, 0);
-
-								//if (nOldCatchedCount == 0)		//捕捉到第一个匹配PES包时报告状态
-								//{
-								//	::SendMessage(pThreadParams->hMainWnd, WM_TSMAGIC_PES_TRIGGER_STATE, 2, 0);
-								//}
-
-								//if (main_type == PID_MAINTYPE_VIDEO)			//检测是否遇到过sequence_end
-								//{
-								//}
-
-								m_pes_payload_unit_started = 0;
+								//当前算法存在的问题是，PES包尾的判断必须依赖下一个PES包的开始，若迟迟未等到下一个包的开始，则无法判断当前拼接是否完整
+								//需要改进。   chendelin  2019.5.17
+								//连续捕捉PES包就会有问题
+								m_bSplicingStarted = -1;			//空转状态
 
 								rtcode = PESES_SPLICE_LAST_PACKET;
 							}
-							else
+							else    //拼接过程中
 							{
-								//拼接过程中
-
 								//直接缓存数据
 								int new_size = m_nPESLength + payload_length;
 								if (new_size > m_nBufSize)
@@ -212,18 +160,16 @@ int CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 									m_pucPESBuf = new_buf;
 								}
 
-								memcpy(m_pucPESBuf + m_nPESLength, payload_buf, payload_length);
-								m_nPESLength += payload_length;
-
-								//assert(hLastRecordHandler >= 0);
-								//pPESPacketTrigger->AppendToLast(hLastRecordHandler, transport_packet.payload_buf, transport_packet.payload_length);
-
-								//if (pAVDecoder != NULL)
-								//{
-								//	pAVDecoder->WriteTSPacket(&transport_packet, read_byte_pos);
-								//}
-
-								rtcode = PESES_SPLICE_FOLLOW_PACKET;
+								if (m_pucPESBuf != NULL)
+								{
+									memcpy(m_pucPESBuf + m_nPESLength, payload_buf, payload_length);
+									m_nPESLength += payload_length;
+									rtcode = PESES_SPLICE_FOLLOW_PACKET;
+								}
+								else
+								{
+									rtcode = PESES_SPLICE_MEMORY_ERROR;
+								}
 							}
 						}
 						else
@@ -231,24 +177,25 @@ int CPESSplicer::WriteTSPacket(transport_packet_t* ptransport_packet)
 							Reset();
 							rtcode = PESES_SPLICE_CONTINUITY_ERROR;
 						}
-
+					}
+					else  //上一个PES包还未被应用层消费，拼接器空转等待
+					{
+						rtcode = PESES_SPLICE_UNKNOWN_ERROR;
 					}
 				}
-				else
+				else    //遇到TS包加扰的情况下，不管前面已经收集多少数据，都要扔掉
 				{
-					//遇到TS包加扰的情况下，不管前面已经收集多少数据，都要扔掉
 					Reset();
 					rtcode = PESES_SPLICE_SCRAMBLED_PACKET;				//TS包被加扰
 				}
 			}
-			else
+			else  //遇到TS包有传输错误的情况下，不管前面已经收集多少数据，都要扔掉
 			{
-				//遇到TS包错误的情况下，不管前面已经收集多少数据，都要扔掉
 				Reset();
 				rtcode = PESES_SPLICE_TRANSPORT_ERROR;			//TS包传输错误
 			}
 		}
-		else
+		else    //当前TS包的PID与当前拼接器的PID不一致，直接丢弃该TS包
 		{
 			rtcode = PESES_SPLICE_PID_ERROR;
 		}

@@ -16,7 +16,7 @@
 #include "MiddleWare/MiddleWare_TransportStream\Include\MiddleWare_TS_ErrorCode.h"
 #include "thirdparty_libs\glog\glog\logging.h"
 
-void ts2es_decimate_loop(pthread_params_t pThreadParams)
+void ts2es_decimate_loop(ts_thread_params_t* pThreadParams)
 {
 	uint8_t	  ts_packet_buf[204];
 	int		  ts_packet_length;
@@ -367,14 +367,14 @@ void ts2es_decimate_loop(pthread_params_t pThreadParams)
 
 uint32_t TSMagic_ts2es_decimate_thread(LPVOID lpParam)
 {
-	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
+	ts_thread_params_t*	pThreadParams = (ts_thread_params_t*)lpParam;
 	ts2es_decimate_loop(pThreadParams);
 
 	return 0;
 }
 
 //仅用于离线分析时的TS->TS抽选
-void ts2ts_decimate_loop(pthread_params_t pThreadParams)
+void ts2ts_decimate_loop(ts_thread_params_t* pThreadParams)
 {
 	uint8_t	  packet_buf[204];
 	int		  packet_length;
@@ -547,7 +547,7 @@ void ts2ts_decimate_loop(pthread_params_t pThreadParams)
 
 uint32_t TSMagic_ts2ts_decimate_thread(LPVOID lpParam)
 {
-	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
+	ts_thread_params_t*	pThreadParams = (ts_thread_params_t*)lpParam;
 	ts2ts_decimate_loop(pThreadParams);
 
 	return 0;

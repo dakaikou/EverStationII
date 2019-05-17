@@ -310,7 +310,6 @@
 #define IDC_PLAYCTRL_FRAMECTRL          1155
 #define IDC_CMB_COMPONENT               1158
 #define IDC_BTN_TSPACKET_CLEAR          1161
-#define IDC_TREE_ES_SYNTAX              1161
 #define IDC_BTN_TSPACKET_PRE            1162
 #define IDC_BTN_SECTION_NEXT            1163
 #define IDC_BTN_TSPACKET_NEXT           1164

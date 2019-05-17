@@ -14,16 +14,16 @@
 #include <afxext.h>
 #endif
 
-#include "..\resource.h"
+//#include "..\resource.h"
 #include "..\Common\Dlg_VideoShowScreen.h"
-
-//#define GUI_ES_OVERVIEW			0
-
-//#if GUI_ES_OVERVIEW
-//#include "Dlg_ESOverview.h"
-//#endif
-
 #include "..\Common\Dlg_Progress.h"
+#include "..\Common\TreeView_XMLBrowser.h"
+#include "..\Common\HexEditView_ByteBuffer.h"
+
+//#include "NaviTree_ESFrames.h"
+#include "NaviList_ESFrames.h"
+#include "ESMagic_Analyze_Offline.h"
+
 
 class CESMagicView : public CFormView
 {
@@ -35,27 +35,28 @@ public:
 public:
 	//{{AFX_DATA(CESMagicView)
 	enum { IDD = IDD_MAGIC_ES };
-	//TreeCtrl	m_treeESSyntax;
 	//}}AFX_DATA
 
 // Attributes
 public:
 
-	CDlg_Progress			m_dlgProgress;
+	CDlg_Progress			 m_dlgESAnalyzeProgress;
 
-	//TREEITEM				m_hRootItem;
+	CSplitterWnd			 m_wndSplitter;
+	CNaviList_ESFrames*		 m_pNaviPane;
+	CTreeView_XMLBrowser*	 m_pSyntaxTree;
+	CHexEditView_ByteBuffer* m_pHexList;
+
 // Operations
 public:
-
-//	CImageList	m_imageTab;
-
-//	CWnd*	m_pdlgWnd[16];
 
 	static CESMagicView* GetView(void);
 
 protected:
 	int					m_bInitDone;
 	int					m_bOpened;
+
+	es_thread_params_t			m_es_thread_params;
 
 	CDlg_VideoShowScreen		m_dlgVideo;
 
@@ -71,8 +72,6 @@ protected:
 
 	void AdjustLayout(int cx, int cy);
 	void Reset(void);
-
-	void InitTree(void);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -95,7 +94,6 @@ public:
 	// Generated message map functions
 	//{{AFX_MSG(CESMagicView)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnSelchangeTabConsole(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBtnOpenOrClose();
 	afx_msg void OnBtnPreview();
 	afx_msg void OnBtnES2TS();
@@ -133,6 +131,8 @@ public:
 	afx_msg LRESULT OnUpdateAACEsErrorCheck(WPARAM wParam, LPARAM lParam);
 
 	afx_msg	LRESULT OnUpdateWAVEHeader(WPARAM wParam, LPARAM lParam);
+
+	afx_msg	LRESULT OnESMagicAnalyzeThreadMsg(WPARAM wParam, LPARAM lParam);
 };
 
 /////////////////////////////////////////////////////////////////////////////

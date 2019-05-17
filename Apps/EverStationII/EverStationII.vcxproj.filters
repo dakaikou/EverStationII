@@ -162,17 +162,11 @@
     <ClInclude Include="Common\Dlg_Progress.h">
       <Filter>头文件\Common</Filter>
     </ClInclude>
-    <ClInclude Include="MFCExt\SplitWnd\SplitWnd.h">
-      <Filter>头文件\MFCExt\SplitWnd</Filter>
-    </ClInclude>
     <ClInclude Include="Magic_PS\Dlg_PSOverview.h">
       <Filter>头文件\Magic_PS</Filter>
     </ClInclude>
     <ClInclude Include="Magic_PS\psmagicview.h">
       <Filter>头文件\Magic_PS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_ES\Dlg_ESOverview.h">
-      <Filter>头文件\Magic_ES</Filter>
     </ClInclude>
     <ClInclude Include="Magic_ES\ESMagicview.h">
       <Filter>头文件\Magic_ES</Filter>
@@ -255,9 +249,6 @@
     <ClInclude Include="Magic_TS\NaviTree_Bouquets.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
-    <ClInclude Include="Magic_TS\NaviTree_ESs.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
     <ClInclude Include="Magic_TS\NaviTree_PsiSiTables.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
@@ -320,6 +311,18 @@
     </ClInclude>
     <ClInclude Include="AboutDlg.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_ES\NaviTree_ESFrames.h">
+      <Filter>头文件\Magic_ES</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\NaviTree_ESPIDs.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_ES\NaviList_ESFrames.h">
+      <Filter>头文件\Magic_ES</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_ES\ESMagic_Analyze_Offline.h">
+      <Filter>头文件\Magic_ES</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -431,9 +434,6 @@
     <ClCompile Include="Magic_YUV\YUVMagicView.cpp">
       <Filter>源文件\Magic_YUV</Filter>
     </ClCompile>
-    <ClCompile Include="Magic_ES\Dlg_ESOverview.cpp">
-      <Filter>源文件\Magic_ES</Filter>
-    </ClCompile>
     <ClCompile Include="Magic_ES\ESMagicView.cpp">
       <Filter>源文件\Magic_ES</Filter>
     </ClCompile>
@@ -506,9 +506,6 @@
     <ClCompile Include="Magic_TS\NaviTree_Bouquets.cpp">
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
-    <ClCompile Include="Magic_TS\NaviTree_ESs.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
     <ClCompile Include="Magic_TS\NaviTree_PsiSiTables.cpp">
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
@@ -571,6 +568,18 @@
     </ClCompile>
     <ClCompile Include="AboutDlg.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_ES\NaviTree_ESFrames.cpp">
+      <Filter>源文件\Magic_ES</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\NaviTree_ESPIDs.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_ES\NaviList_ESFrames.cpp">
+      <Filter>源文件\Magic_ES</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_ES\ESMagic_Analyse_Offline.cpp">
+      <Filter>源文件\Magic_ES</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

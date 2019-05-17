@@ -677,7 +677,7 @@ pWnd->SetWindowText(pszText);
 //}
 
 
-void ts_section_trigger_loop(pthread_params_t pThreadParams)
+void ts_section_trigger_loop(ts_thread_params_t* pThreadParams)
 {
 #if OPEN_SECTION_TRIGGER
 	uint8_t	  packet_buf[204];
@@ -901,7 +901,7 @@ void ts_section_trigger_loop(pthread_params_t pThreadParams)
 
 uint32_t TSMagic_section_trigger_thread(LPVOID lpParam)
 {
-	pthread_params_t	pThreadParams = (pthread_params_t)lpParam;
+	ts_thread_params_t*	pThreadParams = (ts_thread_params_t*)lpParam;
 	ts_section_trigger_loop(pThreadParams);
 
 	return 0;

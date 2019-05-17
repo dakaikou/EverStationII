@@ -40,7 +40,7 @@ public:
 
 	CNaviTree_Bouquets*			m_pNaviPane;
 	//CTreeView_BouquetInfo*		m_pTree;
-	CTreeView_PacketSyntax*		m_pInfoTree;
+	CTreeView_XMLBrowser*		m_pInfoTree;
 
 	void Reset(void);
 	void Set(int offline);

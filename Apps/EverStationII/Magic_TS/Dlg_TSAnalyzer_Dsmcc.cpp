@@ -72,7 +72,7 @@ BOOL CDlg_TSAnalyzer_Dsmcc::OnInitDialog()
 	{
 		m_wndSplitter.CreateStatic(this, 1, 2);
 		m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CNaviList_DSMCCs), CSize(100, 0), NULL);
-		m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CTreeView_PacketSyntax), CSize(0, 0), NULL);
+		m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CTreeView_XMLBrowser), CSize(0, 0), NULL);
 
 		CRect rect;
 
@@ -87,7 +87,7 @@ BOOL CDlg_TSAnalyzer_Dsmcc::OnInitDialog()
 		m_pNaviPane = (CNaviList_DSMCCs*)m_wndSplitter.GetPane(0, 0);
 		m_pNaviPane->Set(this->GetSafeHwnd());
 
-		m_pInfoTree = (CTreeView_PacketSyntax*)m_wndSplitter.GetPane(0, 1);
+		m_pInfoTree = (CTreeView_XMLBrowser*)m_wndSplitter.GetPane(0, 1);
 		m_pInfoTree->Init("DSMCC ÓïÒå·ÖÎö");
 	}
 

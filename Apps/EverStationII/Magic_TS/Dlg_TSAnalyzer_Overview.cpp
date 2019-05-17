@@ -11,6 +11,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#include "../Common/Define.h"
+
 #include <math.h>
 
 #include "syntax_translate_layer/MPEG2_DVB_Section/Include/Mpeg2_PSI_Utilities.h"

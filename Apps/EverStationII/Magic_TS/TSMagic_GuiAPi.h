@@ -1,5 +1,7 @@
-#ifndef _MPEG2_GUIAPI_H_
-#define _MPEG2_GUIAPI_H_
+#ifndef _TSMAGIC_GUIAPI_H_
+#define _TSMAGIC_GUIAPI_H_
+
+#include <stdint.h>
 
 #include "MiddleWare/MiddleWare_ESDecoder/Include/ESDecoder.h"
 #include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_PSISI_Table.h"
@@ -16,7 +18,7 @@
 #include "TSMagic_Trigger_TSPacket.h"
 #include "TSMagic_Trigger_PESES.h"
 
-#include "..\Common\Define.h"
+//#include "..\Common\Define.h"
 
 #define GUI_TS_ANALYZER_OVERVIEW			1
 #define GUI_TS_ANALYZER_NETWORK				0
@@ -96,7 +98,7 @@ typedef struct thread_params_s
 	//CESDecoder* pVidDecoder;
 	//CESDecoder* pAudDecoder;
 
-	int			nDecimateStyle;							
+	int				nDecimateStyle;							
 	char			pszDecimatePath[MAX_PATH];
 
 	char			pszVesFileName[MAX_PATH];
@@ -113,15 +115,13 @@ typedef struct thread_params_s
 	CTrigger_TSPacket*		pTrigger_TSPacket;
 	CTrigger_PESPacket*		pTrigger_PESPacket;
 
-} thread_params_t, *pthread_params_t;
+} ts_thread_params_t, *pts_thread_params_t;
 
 uint32_t TSMagic_offline_thread(LPVOID lpParam);
 uint32_t TSMagic_realtime_analyzer(LPVOID lpParam);
 uint32_t TSMagic_realtime_monitor(LPVOID lpParam);
 
-void TSMagic_threadparams_init(thread_params_t* pthread_params);
-void TSMagic_threadparams_reset(thread_params_t* pthread_params);
-//void TSMagic_threadparams_regist_esdecoder(thread_params_t* pthread_params, int type, CESDecoder* pDecoder);
-//void TSMagic_threadparams_unregist_esdecoder(thread_params_t* pthread_params, int type);
+void TSMagic_threadparams_init(ts_thread_params_t* pthread_params);
+void TSMagic_threadparams_reset(ts_thread_params_t* pthread_params);
 
-#endif
+#endif  //_TSMAGIC_GUIAPI_H_

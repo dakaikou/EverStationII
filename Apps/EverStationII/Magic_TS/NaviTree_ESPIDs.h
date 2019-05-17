@@ -1,16 +1,14 @@
-#if !defined(AFX_PANE_PESESPIDTREEVIEW_H__BB4F1884_8E1B_11D6_B5D2_000629D3759C__INCLUDED_)
-#define AFX_PANE_PESESPIDTREEVIEW_H__BB4F1884_8E1B_11D6_B5D2_000629D3759C__INCLUDED_
+#if !defined(AFX_NAVITREE_ESPIDS_H__BB4F1884_8E1B_11D6_B5D2_000629D3759C__INCLUDED_)
+#define AFX_NAVITREE_ESPIDS_H__BB4F1884_8E1B_11D6_B5D2_000629D3759C__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// Pane_PsisiSyntaxTreeview.h : header file
+// NaviTree_ESPIDs.h : header file
 //
 
 /////////////////////////////////////////////////////////////////////////////
-// CPane_PsiSiTableTreeView view
-//#include "..\Common\define.h"
-//#include "..\Magic_TS\TSMagic_GuiApi.h"
+// CNaviTree_ESPIDs view
 
 #include <afxcview.h>
 #include "MiddleWare/MiddleWare_PsiSiTable/Include/MiddleWare_PSISI_Table.h"
@@ -24,13 +22,13 @@
 //      接受消息的（父）窗口句柄
 //输出：通过用户自定义消息的形式告知调用者当前所选中业务的ES_id
 
-#define WM_USER_ES_SEL_CHANGE		 WM_USER + 0x031F
+#define WM_USER_ES_PID_SEL_CHANGE		 WM_USER + 0x031F
 
-class CNaviTree_ESs : public CTreeView
+class CNaviTree_ESPIDs : public CTreeView
 {
 public:
-	CNaviTree_ESs();           // protected constructor used by dynamic creation
-	DECLARE_DYNCREATE(CNaviTree_ESs)
+	CNaviTree_ESPIDs();           // protected constructor used by dynamic creation
+	DECLARE_DYNCREATE(CNaviTree_ESPIDs)
 
 // Attributes
 protected:
@@ -53,7 +51,7 @@ private:
 
 // Overrides
 	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CPane_PsiSiTableTreeView)
+	//{{AFX_VIRTUAL(CNaviTree_ESPIDs)
 	public:
 	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
 	protected:
@@ -62,7 +60,7 @@ private:
 
 // Implementation
 public:
-	virtual ~CNaviTree_ESs();
+	virtual ~CNaviTree_ESPIDs();
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
@@ -70,7 +68,7 @@ public:
 
 	// Generated message map functions
 protected:
-	//{{AFX_MSG(CPane_PsiSiTableTreeView)
+	//{{AFX_MSG(CNaviTree_ESPIDs)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 //	afx_msg void OnDblclk(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult);
@@ -89,4 +87,4 @@ public:
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_PANE_PESESPIDTREEVIEW_H__BB4F1884_8E1B_11D6_B5D2_000629D3759C__INCLUDED_)
+#endif // !defined(AFX_NAVITREE_ESPIDS_H__BB4F1884_8E1B_11D6_B5D2_000629D3759C__INCLUDED_)

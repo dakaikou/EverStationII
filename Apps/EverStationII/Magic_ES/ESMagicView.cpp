@@ -15,7 +15,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CESMagicView
 #include "ESMagicFrm.h"
-#include "../Magic_TS/TSMagic_GuiApi_MSG.h"
+//#include "ESMagic_Analyze_Offline.h"
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 
@@ -28,6 +28,9 @@ static char THIS_FILE[] = __FILE__;
 //#include "..\Common\GuiCommon_AC3AudioSyntax.h"
 
 #include "..\resource.h"
+
+#define WND_WIDTH_ES_FRAME_NAVI			650
+#define WND_WIDTH_ES_HEX_BUFFER			650
 
 IMPLEMENT_DYNCREATE(CESMagicView, CFormView)
 
@@ -49,7 +52,6 @@ void CESMagicView::DoDataExchange(CDataExchange* pDX)
 {
 	CFormView::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CESMagicView)
-	//DDX_Control(pDX, IDC_TREE_ES_SYNTAX, m_treeESSyntax);
 	//}}AFX_DATA_MAP
 }
 
@@ -89,7 +91,8 @@ BEGIN_MESSAGE_MAP(CESMagicView, CFormView)
 
 	//ON_MESSAGE(WM_UPDATE_AAC_ES_HEADER, OnUpdateAACEsHeader)
 
-	ON_MESSAGE(WM_UPDATE_WAVE_HEADER, OnUpdateWAVEHeader)
+	//ON_MESSAGE(WM_UPDATE_WAVE_HEADER, OnUpdateWAVEHeader)
+	ON_MESSAGE(WM_ESMAGIC_ANALYZE_THREAD, OnESMagicAnalyzeThreadMsg)
 
 END_MESSAGE_MAP()
 
@@ -122,36 +125,21 @@ void CESMagicView::AdjustLayout(int cx, int cy)
 {
 	CWnd*	pWnd;
 	CRect	rect;
-	int		xoffset;
-	int		yoffset;
-	int		width;
-	int		height;
 
-	yoffset = 0;
-
-	pWnd = GetDlgItem(IDC_TREE_ES_SYNTAX);
+	//计算最下面一排控件的高度，以及对齐位置
+	int nCtrlHeight = 30;
+	pWnd = GetDlgItem(IDC_BTN_OPEN);
 	if (pWnd->GetSafeHwnd() != NULL)
 	{
-		height = cy - 35;
-		pWnd->SetWindowPos(NULL, 5, 5, cx - 10, height - 10, 0);
+		pWnd->GetClientRect(&rect);
+		nCtrlHeight = rect.Height();
+	}
 
-		yoffset = height + 5; 
-/*
-		CRect		rectTab;
-		CRect		rectItem;
+	int nYAlignOffset = cy - 10 - nCtrlHeight;
 
-		((CTabCtrl*)pWnd)->GetItemRect(0, &rectItem);
-
-		pWnd->GetClientRect(&rectTab);
-		rectTab.top += rectItem.Height() + 5;
-		rectTab.bottom -= 1;
-		rectTab.left += 1;
-		rectTab.right -= 1;
-
-#if GUI_ES_OVERVIEW
-		m_dlgTSAnalyzerOverview.MoveWindow(&rectTab);
-#endif
-*/
+	if (m_wndSplitter.GetSafeHwnd() != NULL)
+	{
+		m_wndSplitter.SetWindowPos(NULL, 5, 5, cx - 10, nYAlignOffset - 10, 0);
 	}
 
 	pWnd = GetDlgItem(IDC_CMB_ES_TYPE);
@@ -160,11 +148,7 @@ void CESMagicView::AdjustLayout(int cx, int cy)
 		pWnd->GetWindowRect(&rect);
 		ScreenToClient(&rect);
 
-		width = rect.Width();
-		height = rect.Height();
-		pWnd->SetWindowPos(NULL, 5, yoffset + 5, width, height, 0);
-
-		xoffset = width + 10;
+		pWnd->SetWindowPos(NULL, rect.left, nYAlignOffset + 5, rect.Width(), rect.Height(), 0);
 	}
 
 	pWnd = GetDlgItem(IDC_EDIT_FILE);
@@ -173,11 +157,7 @@ void CESMagicView::AdjustLayout(int cx, int cy)
 		pWnd->GetWindowRect(&rect);
 		ScreenToClient(&rect);
 
-		width = rect.Width();
-		height = rect.Height();
-		pWnd->SetWindowPos(NULL, xoffset + 5, yoffset + 5, width, height, 0);
-
-		xoffset += width + 10;
+		pWnd->SetWindowPos(NULL, rect.left, nYAlignOffset + 5, rect.Width(), rect.Height(), 0);
 	}
 
 	pWnd = GetDlgItem(IDC_BTN_OPEN);
@@ -186,11 +166,7 @@ void CESMagicView::AdjustLayout(int cx, int cy)
 		pWnd->GetWindowRect(&rect);
 		ScreenToClient(&rect);
 
-		width = rect.Width();
-		height = rect.Height();
-		pWnd->SetWindowPos(NULL, xoffset + 5, yoffset + 5, width, height, 0);
-
-		xoffset += width + 10;
+		pWnd->SetWindowPos(NULL, rect.left, nYAlignOffset + 5, rect.Width(), rect.Height(), 0);
 	}
 
 	pWnd = GetDlgItem(IDC_BTN_PREVIEW);
@@ -199,11 +175,7 @@ void CESMagicView::AdjustLayout(int cx, int cy)
 		pWnd->GetWindowRect(&rect);
 		ScreenToClient(&rect);
 
-		width = rect.Width();
-		height = rect.Height();
-		pWnd->SetWindowPos(NULL, xoffset + 5, yoffset + 5, width, height, 0);
-
-		xoffset += width + 10;
+		pWnd->SetWindowPos(NULL, rect.left, nYAlignOffset + 5, rect.Width(), rect.Height(), 0);
 	}
 
 	pWnd = GetDlgItem(IDC_BTN_ES2TS);
@@ -212,19 +184,8 @@ void CESMagicView::AdjustLayout(int cx, int cy)
 		pWnd->GetWindowRect(&rect);
 		ScreenToClient(&rect);
 
-		width = rect.Width();
-		height = rect.Height();
-		pWnd->SetWindowPos(NULL, xoffset + 5, yoffset + 5, width, height, 0);
-
-		xoffset += width + 10;
+		pWnd->SetWindowPos(NULL, rect.left, nYAlignOffset + 5, rect.Width(), rect.Height(), 0);
 	}
-}
-
-void CESMagicView::InitTree(void)
-{
-	//TreeFun_InitTree(&m_treeESSyntax, this, IDC_TREE_ES_SYNTAX);
-
-	//m_hRootItem = TreeFun_InsertItem(&m_treeESSyntax, TREE_ROOT, "ES语法分析", -1, 0, NULL);
 }
 
 void CESMagicView::OnInitialUpdate() 
@@ -232,14 +193,10 @@ void CESMagicView::OnInitialUpdate()
 	CFormView::OnInitialUpdate();
 	
 	// TODO: Add your specialized code here and/or call the base class
-
 	CComboBox* pCmbCtrl = (CComboBox*)GetDlgItem(IDC_CMB_ES_TYPE);
-
-	int nItem;
-
 	pCmbCtrl->ResetContent();
 
-	nItem = pCmbCtrl->AddString("MPEG视频");
+	int nItem = pCmbCtrl->AddString("MPEG视频");
 	pCmbCtrl->SetItemData(nItem, STREAM_MPEGVES | STREAM_FILE);
 	
 	nItem = pCmbCtrl->AddString("AVS视频");
@@ -262,21 +219,68 @@ void CESMagicView::OnInitialUpdate()
 
 	pCmbCtrl->SetCurSel(4);
 
-	m_bInitDone = 1;
+	CRect	rectClient;
+	GetClientRect(&rectClient);
 
-	CRect	rect;
-	GetClientRect(&rect);
-	AdjustLayout(rect.Width(), rect.Height());
+	if (m_wndSplitter.GetSafeHwnd() == NULL)
+	{
+		//计算最下面一排控件的高度，以及对齐位置
+		CRect rectBtn;
+		int nCtrlHeight = 30;
+		CWnd* pWnd = GetDlgItem(IDC_BTN_OPEN);
+		if (pWnd->GetSafeHwnd() != NULL)
+		{
+			pWnd->GetClientRect(&rectBtn);
+			nCtrlHeight = rectBtn.Height();
+		}
 
-	InitTree();
+		int nYAlignOffset = rectClient.bottom - 10 - nCtrlHeight;
+
+		CRect rectSplitterWnd;
+
+		rectSplitterWnd.left = rectClient.left + 5;
+		rectSplitterWnd.right = rectClient.right - 5;
+		rectSplitterWnd.top = rectClient.top + 5;
+		rectSplitterWnd.bottom = nYAlignOffset - 5;
+
+		m_wndSplitter.CreateStatic(this, 1, 3);
+		m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CNaviList_ESFrames), CSize(WND_WIDTH_ES_FRAME_NAVI, 0), NULL);
+		m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CTreeView_XMLBrowser), CSize(rectSplitterWnd.Width() - WND_WIDTH_ES_FRAME_NAVI - WND_WIDTH_ES_HEX_BUFFER, 0), NULL);
+#if BYTE_BUFFER_USE_LISTCTRL_VIEW
+		m_wndSplitter.CreateView(0, 2, RUNTIME_CLASS(CListView_ByteBuffer), CSize(WND_WIDTH_ES_HEX_BUFFER, 0), NULL);
+#else
+		m_wndSplitter.CreateView(0, 2, RUNTIME_CLASS(CHexEditView_ByteBuffer), CSize(WND_WIDTH_ES_HEX_BUFFER, 0), NULL);
+#endif
+
+		m_wndSplitter.MoveWindow(&rectSplitterWnd);
+
+		m_pNaviPane = (CNaviList_ESFrames*)m_wndSplitter.GetPane(0, 0);
+		//m_pNaviPane->Set(this->GetSafeHwnd());
+		m_pNaviPane->Set();
+
+		m_pSyntaxTree = (CTreeView_XMLBrowser*)m_wndSplitter.GetPane(0, 1);
+		m_pSyntaxTree->Init("ES语法分析");
+		m_pSyntaxTree->m_hNotifyParent = GetSafeHwnd();
+#if BYTE_BUFFER_USE_LISTCTRL_VIEW
+		m_pHexList = (CListView_ByteBuffer*)m_wndSplitter.GetPane(0, 2);
+#else
+		m_pHexList = (CHexEditView_ByteBuffer*)m_wndSplitter.GetPane(0, 2);
+		m_pHexList->SetBPR(16);
+#endif
+	}
 
 	m_dlgVideo.Create(IDD_SHOW_VIDEO_SCREEN, this);
 	m_dlgVideo.ShowWindow(SW_HIDE);
 
-	m_dlgProgress.Create(IDD_ANALYSE_PROGRESS, this);
-	m_dlgProgress.ShowWindow(SW_HIDE);
+	m_dlgESAnalyzeProgress.Create(IDD_ANALYSE_PROGRESS, this);
+	//m_dlgESAnalyzeProgress.SetWindowText(_T("ES分析"));
+	m_dlgESAnalyzeProgress.ShowWindow(SW_HIDE);
 
 	Reset();
+
+	AdjustLayout(rectClient.Width(), rectClient.Height());
+
+	m_bInitDone = 1;
 }
 
 void CESMagicView::OnSize(UINT nType, int cx, int cy) 
@@ -312,10 +316,10 @@ void CESMagicView::Reset(void)
 	pWnd->EnableWindow(FALSE);
 
 	//TreeFun_DeleteChildItems(&m_treeESSyntax, m_hRootItem);
-
 	//TreeFun_SetItemText(&m_treeESSyntax, m_hRootItem, "ES语法分析");
 
-	m_dlgProgress.ShowWindow(SW_HIDE);
+	m_dlgESAnalyzeProgress.Reset();
+	m_dlgESAnalyzeProgress.ShowWindow(SW_HIDE);
 
 	UpdateData(FALSE);
 }
@@ -357,7 +361,7 @@ void CESMagicView::OnBtnOpenOrClose()
 
 	if (m_bOpened == 0)
 	{
-		CFileDialog fileDlg(TRUE, "*.*", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, "mpeg video files(*.*)|*.*|", NULL);
+		CFileDialog fileDlg(TRUE, "*.*", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, "media files(*.*)|*.*|", NULL);
 
 		CString strFileName = _T("");
 
@@ -406,12 +410,13 @@ void CESMagicView::OnBtnOpenOrClose()
 				//	m_WAVEDecoder.Open(this->GetSafeHwnd(), nStreamType, strFileName.GetBuffer(128));
 				//	break;
 				//}
-				//strcpy_s(m_kThreadParams.pszFileName, sizeof(m_kThreadParams.pszFileName), pszURL);
 
-				//m_kThreadParams.offline = 1;
+				strcpy_s(m_es_thread_params.pszFileName, sizeof(m_es_thread_params.pszFileName), strFileName.GetBuffer(128));
+
+				m_es_thread_params.offline = 1;
 
 				////					m_kThreadParams.main_thread_running = 0;		//若线程启动，会将此值修改为1，可以据此判断主线程是否启动
-				//m_kThreadParams.main_thread_stopped = 0;		//若线程退出，会将此值修改为1，可以据此判断主线程是否启动
+				m_es_thread_params.main_thread_stopped = 0;		//若线程退出，会将此值修改为1，可以据此判断主线程是否启动
 
 				//m_kThreadParams.ts_trigger_thread_running = 0;
 				////					m_kThreadParams.ts_trigger_thread_stopped = 0;
@@ -433,13 +438,13 @@ void CESMagicView::OnBtnOpenOrClose()
 				//m_kThreadParams.monitor_thread_running = 0;
 				//m_kThreadParams.monitor_thread_stopped = 0;
 
-				//m_kThreadParams.hMainWnd = this->GetSafeHwnd();
+				m_es_thread_params.hCallerWnd = this->GetSafeHwnd();
 
 				//m_kThreadParams.pTrigger_PESPacket = &m_Trigger_PESPacket;
 
-				//::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TSMagic_offline_thread, (LPVOID)&m_kThreadParams, 0, 0);
+				::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ESMagic_analyze_thread, (LPVOID)&m_es_thread_params, 0, 0);
 
-				UpdateData(FALSE);
+				//UpdateData(FALSE);
 			}
 			else
 			{
@@ -560,8 +565,8 @@ void CESMagicView::OnBtnES2TS(void)
 				int					pklength = 188;
 				size_t				rdlen = 0;
 
-				m_dlgProgress.SetWindowText("ES2TS打包进度条");
-				m_dlgProgress.ShowWindow(SW_SHOW);
+				m_dlgESAnalyzeProgress.SetWindowText("ES2TS打包进度条");
+				m_dlgESAnalyzeProgress.ShowWindow(SW_SHOW);
 
 				TS_packet.sync_byte = 0x47;
 				TS_packet.PID = 0x1ff0;
@@ -599,7 +604,7 @@ void CESMagicView::OnBtnES2TS(void)
 					}
 				}
 
-				m_dlgProgress.ShowWindow(SW_HIDE);
+				m_dlgESAnalyzeProgress.ShowWindow(SW_HIDE);
 
 				fclose(fp_dst);
 			}
@@ -935,5 +940,41 @@ LRESULT CESMagicView::OnUpdateWAVEHeader(WPARAM wParam, LPARAM lParam)
 //
 //		m_treeESSyntax.Expand(m_hRootItem, TREE_EXPAND);
 //	}
+	return 0;
+}
+
+/**
+ *  TS流抽选消息响应函数
+ */
+LRESULT CESMagicView::OnESMagicAnalyzeThreadMsg(WPARAM wParam, LPARAM lParam)
+{
+	CEverStationIIApp* pApp = (CEverStationIIApp*)AfxGetApp();
+	char			 pszDebug[256];
+
+	if (wParam == 1)		//线程进入
+	{
+		if (!m_dlgESAnalyzeProgress.IsWindowVisible())
+		{
+			strcpy_s(pszDebug, sizeof(pszDebug), "ES分析");
+			m_dlgESAnalyzeProgress.SetWindowText(pszDebug);
+			m_dlgESAnalyzeProgress.ShowWindow(SW_SHOW);
+			m_dlgESAnalyzeProgress.m_progress.SetPos((int)lParam);				//lParam是分析的百分比
+		}
+	}
+	else					//线程退出
+	{
+		if (m_dlgESAnalyzeProgress.IsWindowVisible())
+		{
+			m_dlgESAnalyzeProgress.ShowWindow(SW_HIDE);
+			m_dlgESAnalyzeProgress.Reset();
+		}
+
+		//如果抽选线程在主线程之后退出，必须增加下面的语句，否则界面显示不正确
+		//if (m_kThreadParams.main_thread_running == 0)
+		//{
+		//	::SendMessage(this->GetSafeHwnd(), WM_TSMAGIC_OFFLINE_THREAD, 0, NULL);
+		//}
+	}
+
 	return 0;
 }

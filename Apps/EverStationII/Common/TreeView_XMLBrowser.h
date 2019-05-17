@@ -10,14 +10,13 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // CTreeView_PesEsSyntax view
-//#include "libs_NormalTree/Include/XStream_NormalTree.h"
 #include "thirdparty_libs\tinyxml2\Include\tinyxml2.h"
 
-class CTreeView_PacketSyntax : public CTreeView
+class CTreeView_XMLBrowser : public CTreeView
 {
 public:
-	CTreeView_PacketSyntax();           // protected constructor used by dynamic creation
-	DECLARE_DYNCREATE(CTreeView_PacketSyntax)
+	CTreeView_XMLBrowser();           // protected constructor used by dynamic creation
+	DECLARE_DYNCREATE(CTreeView_XMLBrowser)
 
 protected:
 
@@ -52,7 +51,7 @@ public:
 
 // Implementation
 protected:
-	virtual ~CTreeView_PacketSyntax();
+	virtual ~CTreeView_XMLBrowser();
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;

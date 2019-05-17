@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdint.h>
 
+#include "../Common/define.h"
 #include "TSMagic_GuiApi.h"
 #include "TSMagic_GuiApi_MSG.h"
 #include "TSMagic_ErrorCode.h"
@@ -29,8 +30,8 @@ int REPORT_PSISI_section(CDB_PsiSiObjs* pDB_PsiSiObjs, HWND hWnd, uint16_t PID, 
 	int			rtcode = TSMAGIC_UNKNOWN_ERROR;
 	CPVT*		pPVT = NULL;
 
-	char		pszText[MAX_TXT_CHARS];
-	char		pszTemp[MAX_TXT_CHARS];
+	char		pszText[MAX_PATH];
+	char		pszTemp[MAX_PATH];
 
 	if ((pDB_PsiSiObjs != NULL) && (buf != NULL) && (length >= 3))
 	{

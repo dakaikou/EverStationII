@@ -19,6 +19,8 @@ static char THIS_FILE[] = __FILE__;
 #include "TSMagic_GuiApi.h"
 #include "TSMagic_GuiApi_MSG.h"
 
+#include "../Common/Define.h"
+
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 #include "syntax_express_xml/XML_MPEG2_TSPacket/Include/Mpeg2_TS_packet_xml.h"
 #include "syntax_translate_layer/Mpeg2_TSPacket/Include/Mpeg2_TS_PID.h"
@@ -246,14 +248,14 @@ BOOL CDlg_TSAnalyzer_PacketTrigger::OnInitDialog()
 	if (m_wndSplitter.GetSafeHwnd() == NULL)
 	{
 		m_wndSplitter.CreateStatic(this, 1, 2);
-		m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CTreeView_PacketSyntax), CSize(600, 0), NULL);
+		m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CTreeView_XMLBrowser), CSize(600, 0), NULL);
 #if BYTE_BUFFER_USE_LISTCTRL_VIEW
 		m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CListView_ByteBuffer), CSize(400, 0), NULL);
 #else
 		m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CHexEditView_ByteBuffer), CSize(400, 0), NULL);
 #endif
 
-		m_pTree = (CTreeView_PacketSyntax*)m_wndSplitter.GetPane(0, 0);
+		m_pTree = (CTreeView_XMLBrowser*)m_wndSplitter.GetPane(0, 0);
 		m_pTree->Init("TS°üÓï·¨·ÖÎö");
 		m_pTree->m_hNotifyParent = GetSafeHwnd();
 #if BYTE_BUFFER_USE_LISTCTRL_VIEW
