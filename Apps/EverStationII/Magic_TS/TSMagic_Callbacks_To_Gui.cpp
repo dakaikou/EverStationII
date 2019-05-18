@@ -3,8 +3,8 @@
 
 #include "../Common/Define.h"	//²»ÄÜÈ¥µô
 
-#include "TSMagic_GuiApi.h"
-#include "TSMagic_GuiApi_MSG.h"
+//#include "TSMagic_GuiApi.h"
+#include "TSMagic_AnalyseThread_MSG.h"
 #include "TSMagic_ErrorCode.H"
 
 #include "TSMagic_Callbacks_To_Gui.h"

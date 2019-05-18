@@ -4,8 +4,8 @@
 
 #include "MiddleWare/MiddleWare_Utilities/Include/MiddleWare_Utilities_MediaFile.h"
 
-#include "TSMagic_GuiApi.h"
-#include "TSMagic_GuiApi_MSG.h"
+#include "TSMagic_AnalyseThread.h"
+#include "TSMagic_AnalyseThread_MSG.h"
 #include "TSMagic_ErrorCode.h"
 #include "TSMagic_Trigger_PESES.h"
 

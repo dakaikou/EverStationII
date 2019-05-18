@@ -5,6 +5,8 @@
 #include "../Include/DVB_MHP_Utilities.h"
 #include "../Include/MPEG2_DVB_ErrorCode.h"
 
+#define CHINESE_VERSION   1
+
 int DVB_MHP_Num2Text_ApplicationServiceBoundFlag(int service_bound_flag, char* pszText, int strSize)
 {
 	int rtcode = SECTION_PARSE_NO_ERROR;

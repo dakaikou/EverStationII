@@ -90,55 +90,10 @@
     <ClInclude Include="PropertiesWnd.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Magic_TS\Dlg_SignalStatus.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\Dlg_TriggerWaiting.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Epg.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Overview.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_PacketTrigger.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Pcr.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_PesEs.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_PsiSi.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Subtitle.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Teletext.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\ListView_EpgSchedule.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\ListView_ServiceInfo.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
     <ClInclude Include="Magic_TS\TSMagic_Callbacks_From_Lib.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
     <ClInclude Include="Magic_TS\TSMagic_Callbacks_To_Gui.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\TSMagic_Decimate_TSPacket.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\TSMagic_GuiAPi.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\TSMagic_GuiApi_MSG.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
     <ClInclude Include="Magic_TS\TSMagic_Trigger.h">
@@ -240,32 +195,8 @@
     <ClInclude Include="Magic_TS\TSMagic_ErrorCode.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
-    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Dsmcc.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\NaviList_DSMCCs.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\NaviTree_Bouquets.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\NaviTree_PsiSiTables.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\NaviTree_Services.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Bouquet.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_TSPacket.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
     <ClInclude Include="Common\TreeView_XMLBrowser.h">
       <Filter>头文件\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Magic_TS\TSMagic_Dsmcc_Download.h">
-      <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
     <ClInclude Include="Common\GuiApi_MSG.h">
       <Filter>头文件\Common</Filter>
@@ -294,9 +225,6 @@
     <ClInclude Include="Common\InstrumentPanel_Kernel.h">
       <Filter>头文件\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Magic_TS\NaviList_PCRs.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
     <ClInclude Include="Common\InstrumentView_Kernel.h">
       <Filter>头文件\Common</Filter>
     </ClInclude>
@@ -315,14 +243,80 @@
     <ClInclude Include="Magic_ES\NaviTree_ESFrames.h">
       <Filter>头文件\Magic_ES</Filter>
     </ClInclude>
-    <ClInclude Include="Magic_TS\NaviTree_ESPIDs.h">
-      <Filter>头文件\Magic_TS</Filter>
-    </ClInclude>
     <ClInclude Include="Magic_ES\NaviList_ESFrames.h">
       <Filter>头文件\Magic_ES</Filter>
     </ClInclude>
     <ClInclude Include="Magic_ES\ESMagic_Analyze_Offline.h">
       <Filter>头文件\Magic_ES</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Syntax_PesEs.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Syntax_PsiSi.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Syntax_TSPacket.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Metering_Overview.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Metering_Pcr.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Metering_TSPackets.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Semantic_Bouquet.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_Semantic_Epg.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAnalyzer_SemanticEx_Dsmcc.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\GuiWnd_ListView_EpgSchedule.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\GuiWnd_ListView_ServiceDescription.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\GuiWnd_NaviList_DsmccGuide.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\GuiWnd_NaviList_PcrGuide.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\GuiWnd_NaviTree_BouquetGuide.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\GuiWnd_NaviTree_PesEsGuide.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\GuiWnd_NaviTree_PsiSiSectionGuide.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\GuiWnd_NaviTree_ServiceGuide.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_AnalyseThread_Dsmcc_Download.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_AnalyseThread_TSPacket_Decimate.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_AnalyseThread.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\TSMagic_AnalyseThread_MSG.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAssist_SignalStatus.h">
+      <Filter>头文件\Magic_TS</Filter>
+    </ClInclude>
+    <ClInclude Include="Magic_TS\Dlg_TSAssist_TriggerWaiting.h">
+      <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -347,25 +341,10 @@
     <ClCompile Include="PropertiesWnd.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Magic_TS\Dlg_SignalStatus.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\Dlg_TriggerWaiting.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\TSMagic_Analyse_Offline.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\TSMagic_Analyse_Realtime.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
     <ClCompile Include="Magic_TS\TSMagic_Callbacks_From_Lib.cpp">
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
     <ClCompile Include="Magic_TS\TSMagic_Callbacks_To_Gui.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\TSMagic_Decimate_TSPacket.cpp">
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
     <ClCompile Include="Magic_TS\TSMagic_Trigger.cpp">
@@ -385,36 +364,6 @@
     </ClCompile>
     <ClCompile Include="Common\Dlg_Progress.cpp">
       <Filter>源文件\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Epg.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Overview.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_PacketTrigger.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Pcr.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_PesEs.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_PsiSi.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Subtitle.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Teletext.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\ListView_EpgSchedule.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\ListView_ServiceInfo.cpp">
-      <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
     <ClCompile Include="Common\Dlg_Decimate.cpp">
       <Filter>源文件\Common</Filter>
@@ -497,32 +446,8 @@
     <ClCompile Include="Magic_TS\TSMagic_ErrorCode_LUT.cpp">
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
-    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Dsmcc.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\NaviList_DSMCCs.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\NaviTree_Bouquets.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\NaviTree_PsiSiTables.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\NaviTree_Services.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Bouquet.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_TSPacket.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
     <ClCompile Include="Common\TreeView_XMLBrowser.cpp">
       <Filter>源文件\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Magic_TS\TSMagic_Dsmcc_Download.cpp">
-      <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
     <ClCompile Include="Common\Dlg_VideoPanelChromaStats.cpp">
       <Filter>源文件\Common</Filter>
@@ -548,9 +473,6 @@
     <ClCompile Include="Common\InstrumentPanel_Kernel.cpp">
       <Filter>源文件\Common</Filter>
     </ClCompile>
-    <ClCompile Include="Magic_TS\NaviList_PCRs.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
     <ClCompile Include="Common\InstrumentView_Kernel.cpp">
       <Filter>源文件\Common</Filter>
     </ClCompile>
@@ -572,14 +494,80 @@
     <ClCompile Include="Magic_ES\NaviTree_ESFrames.cpp">
       <Filter>源文件\Magic_ES</Filter>
     </ClCompile>
-    <ClCompile Include="Magic_TS\NaviTree_ESPIDs.cpp">
-      <Filter>源文件\Magic_TS</Filter>
-    </ClCompile>
     <ClCompile Include="Magic_ES\NaviList_ESFrames.cpp">
       <Filter>源文件\Magic_ES</Filter>
     </ClCompile>
     <ClCompile Include="Magic_ES\ESMagic_Analyse_Offline.cpp">
       <Filter>源文件\Magic_ES</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Syntax_PesEs.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Syntax_PsiSi.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Syntax_TSPacket.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Metering_Overview.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Metering_Pcr.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Metering_TSPackets.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Semantic_Bouquet.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_Semantic_Epg.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAnalyzer_SemanticEx_Dsmcc.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\GuiWnd_ListView_EpgSchedule.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\GuiWnd_NaviList_DsmccGuide.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\GuiWnd_NaviList_PcrGuide.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\GuiWnd_NaviTree_BouquetGuide.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\GuiWnd_NaviTree_PesEsGuide.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\GuiWnd_NaviTree_PsiSiSectionGuide.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\GuiWnd_NaviTree_ServiceGuide.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\GuiWnd_ListView_ServiceDescription.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_AnalyseThread_Dsmcc_Download.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_AnalyseThread_TSPacket_Decimate.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_AnalyseThread_Main_Offline.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\TSMagic_AnalyseThread_Main_Realtime.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAssist_SignalStatus.cpp">
+      <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="Magic_TS\Dlg_TSAssist_TriggerWaiting.cpp">
+      <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -173,7 +173,7 @@ int CNaviTree_ESFrames::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 //void CNaviTree_ESFrames::UpdatePMT(CPMT* pPMT)
 //{
-//	char			pszText[MAX_TXT_CHARS];
+//	char			pszText[256];
 //	char			pszTemp[128];
 //	int				program_number;
 //	uint8_t				class_type;
@@ -462,7 +462,7 @@ void CNaviTree_ESFrames::OnEsSyntaxAnalyse()
 //void CNaviTree_ESs::FiringCatchThread(void)
 //{
 //	CTSMagicView* pTSMagicView = CTSMagicView::GetView();
-//	char		  pszText[MAX_TXT_CHARS];
+//	char		  pszText[256];
 //	int			  nClassType;
 //	int			  nPID;
 //	int			  nStreamType;

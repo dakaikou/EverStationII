@@ -10,7 +10,7 @@
 #include "../Magic_YUV/Dlg_YUVPreview.h"
 
 #include "../MainFrm.h"
-#include "../Magic_TS/TSMagic_GuiApi_MSG.h"
+#include "../Magic_TS/TSMagic_AnalyseThread_MSG.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

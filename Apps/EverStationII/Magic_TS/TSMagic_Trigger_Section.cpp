@@ -2,8 +2,8 @@
 
 #include "..\Common\define.h"
 
-#include "TSMagic_GuiApi.h"
-#include "TSMagic_GuiApi_MSG.h"
+//#include "TSMagic_GuiApi.h"
+#include "TSMagic_AnalyseThread_MSG.h"
 #include "TSMagic_ErrorCode.h"
 #include "TSMagic_Trigger_Section.h"
 #include "TSMagic_Callbacks_To_Gui.h"
@@ -263,7 +263,7 @@ void CTrigger_PsiSiSection::SetMatchParamsForOtherSection(uint16_t PID, uint8_t 
 void SECTION_TRIGGER_DSMCC_SD_Set(uint16_t PID, uint16_t table_id_extension, uint8_t section_number)
 {
 #if GUI_TS_ANALYZER_PSISI
-char		pszText[MAX_TXT_CHARS];
+char		pszText[256];
 uint8_t		ucReqMask[16];
 uint8_t		ucReqData[16];
 int		i;
@@ -320,7 +320,7 @@ pWnd->SetWindowText(pszText);
 void SECTION_TRIGGER_DSMCC_DDM_Set(uint16_t PID, uint16_t table_id_extension, uint8_t section_number)
 {
 #if GUI_TS_ANALYZER_PSISI
-char		pszText[MAX_TXT_CHARS];
+char		pszText[256];
 uint8_t		ucReqMask[16];
 uint8_t		ucReqData[16];
 int		i;
@@ -377,7 +377,7 @@ pWnd->SetWindowText(pszText);
 void SECTION_TRIGGER_DSMCC_UNM_Set(uint16_t PID, uint16_t table_id_extension, uint8_t section_number)
 {
 #if GUI_TS_ANALYZER_PSISI
-char		pszText[MAX_TXT_CHARS];
+char		pszText[256];
 uint8_t		ucReqMask[16];
 uint8_t		ucReqData[16];
 int		i;

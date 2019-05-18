@@ -23,7 +23,7 @@ static char THIS_FILE[] = __FILE__;
 
 #include "..\resource.h"
 
-#define WND_WIDTH_ES_FRAME_NAVI			650
+#define WND_WIDTH_ES_FRAME_NAVI			550
 #define WND_WIDTH_ES_HEX_BUFFER			650
 
 IMPLEMENT_DYNCREATE(CESMagicView, CFormView)
@@ -814,7 +814,7 @@ LRESULT CESMagicView::OnUpdateM2VEsSequenceEnd(WPARAM wParam, LPARAM lParam)
 LRESULT CESMagicView::OnUpdateM2VGOPTime(WPARAM wParam, LPARAM lParam)
 {
 /*
-	char										pszText[MAX_TXT_CHARS];
+	char										pszText[256];
 	CMPEG_VideoDecoder*							pVideoDecoder;
 	MPEG2_video_group_of_pictures_header		group_of_pictures_header;
 

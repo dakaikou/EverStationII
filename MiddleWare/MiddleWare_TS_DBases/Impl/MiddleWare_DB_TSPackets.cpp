@@ -24,6 +24,8 @@
 
 #include "thirdparty_libs/SQLite3/Include/sqlite3.h"  
 
+#define CHINESE_VERSION   1
+
 //int user_callback(void* param, int nColCount, char** pColValue, char** pColName)
 //{
 //	char pszMsg[256];

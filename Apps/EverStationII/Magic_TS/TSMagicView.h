@@ -14,83 +14,88 @@
 #include <afxext.h>
 #endif
 
+#define GUI_TS_ANALYZER_OVERVIEW			1
+#define GUI_TS_ANALYZER_NETWORK				0
+#define GUI_TS_ANALYZER_EPG					1
+#define GUI_TS_ANALYZER_PCR					1
+#define GUI_TS_ANALYZER_PACKETS				1
+#define GUI_TS_ANALYZER_PSISI				1
+#define GUI_TS_ANALYZER_BOUQUETS			1
+#define GUI_TS_ANALYZER_PESES				1
+#define GUI_TS_ANALYZER_ES					0
+#define GUI_TS_ANALYZER_TELETEXT			0
+#define GUI_TS_ANALYZER_SUBTITLE			0
+#define GUI_TS_ANALYZER_OCDC				1
+#define GUI_TS_ANALYZER_PK_TRIGGER			1
+#define GUI_TS_PTSDTS						1
+#define GUI_TS_PK_MODIFY					0
+#define GUI_TS_SEC_TRIGGER					0
+
+#define BYTE_BUFFER_USE_LISTCTRL_VIEW				0
+
 #include "MiddleWare/MiddleWare_TransportStream/Include/MiddleWare_TransportStream.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_TSPackets.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_Pcrs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_PsiSiObjs.h"
 #include "MiddleWare/MiddleWare_TS_DBases/Include/MiddleWare_DB_OCDCs.h"
 
-#include "TSMagic_GuiApi.h"
+#include "TSMagic_AnalyseThread.h"
 #include "TSMagic_Trigger.h"
 #include "TSMagic_Trigger_Section.h"
 #include "TSMagic_Trigger_PesEs.h"
 
 #include "..\Common\Dlg_Progress.h"
 
+#if GUI_TS_ANALYZER_OVERVIEW
+#include "Dlg_TSAnalyzer_Metering_Overview.h"
+#endif
+
+#if GUI_TS_ANALYZER_PCR
+#include "Dlg_TSAnalyzer_Metering_Pcr.h"
+#endif
+
 #if GUI_TS_ANALYZER_PACKETS
-#include "Dlg_TSAnalyzer_TSPacket.h"
-#endif
-
-#if GUI_TS_ANALYZER_PK_TRIGGER
-#include "Dlg_TSAnalyzer_PacketTrigger.h"
-#endif
-
-#if GUI_TS_ANALYZER_PSISI
-#include "Dlg_TSAnalyzer_PsiSi.h"
-//#include "SplitterWnd_PsiSiAnalyzer.h"
-#endif
-
-//#if GUI_TS_SEC_TRIGGER
-//#include "Dlg_SectionTrigger.h"
-//#endif
-
-#if GUI_TS_ANALYZER_BOUQUETS
-#include "Dlg_TSAnalyzer_Bouquet.h"
+#include "Dlg_TSAnalyzer_Metering_TSPackets.h"
 #endif
 
 #if GUI_TS_ANALYZER_EPG
-#include "Dlg_TSAnalyzer_Epg.h"
+#include "Dlg_TSAnalyzer_Semantic_Epg.h"
 #endif
 
-#if GUI_TS_ANALYZER_OVERVIEW
-#include "Dlg_TSAnalyzer_Overview.h"
+#if GUI_TS_ANALYZER_BOUQUETS
+#include "Dlg_TSAnalyzer_Semantic_Bouquet.h"
 #endif
 
 #if GUI_TS_ANALYZER_NETWORK
-#include "Dlg_TSAnalyzer_Services.h"
+#include "Dlg_TSAnalyzer_Semantic_Services.h"
 #endif
 
-//#if GUI_TS_PK_MODIFY
-//#include "Dlg_PacketModify.h"
-//#endif
+#if GUI_TS_ANALYZER_PK_TRIGGER
+#include "Dlg_TSAnalyzer_Syntax_TSPacket.h"
+#endif
 
-#if GUI_TS_ANALYZER_PCR
-#include "Dlg_TSAnalyzer_Pcr.h"
+#if GUI_TS_ANALYZER_PSISI
+#include "Dlg_TSAnalyzer_Syntax_PsiSi.h"
 #endif
 
 #if GUI_TS_ANALYZER_PESES
-#include "Dlg_TSAnalyzer_PesEs.h"
-#endif
-
-#if GUI_TS_ANALYZER_ES
-#include "Dlg_TSAnalyzer_ES.h"
-#endif
-
-#if GUI_TS_ANALYZER_TELETEXT
-#include "Dlg_TSAnalyzer_Teletext.h"
-#endif
-
-#if GUI_TS_ANALYZER_SUBTITLE
-#include "Dlg_TSAnalyzer_Subtitle.h"
+#include "Dlg_TSAnalyzer_Syntax_PesEs.h"
 #endif
 
 #if GUI_TS_ANALYZER_OCDC
-//#include "Dlg_TSAnalyzer_OCDC.h"
-#include "Dlg_TSAnalyzer_Dsmcc.h"
+#include "Dlg_TSAnalyzer_SemanticEx_Dsmcc.h"
 #endif
 
-#include "Dlg_TriggerWaiting.h"
-#include "Dlg_SignalStatus.h"
+#if GUI_TS_ANALYZER_TELETEXT
+#include "Dlg_TSAnalyzer_SemanticEx_Teletext.h"
+#endif
+
+#if GUI_TS_ANALYZER_SUBTITLE
+#include "Dlg_TSAnalyzer_SemanticEx_Subtitle.h"
+#endif
+
+#include "Dlg_TSAssist_TriggerWaiting.h"
+#include "Dlg_TSAssist_SignalStatus.h"
 
 #include "afxcmn.h"
 
@@ -111,11 +116,11 @@ public:
 public:
 
 #if GUI_TS_ANALYZER_PACKETS
-	CDlg_TSAnalyzer_Packets	m_dlgTSAnalyzerPackets;
+	CDlg_TSAnalyzer_Metering_TSPackets	m_dlgTSAnalyzerPackets;
 #endif
 
 #if GUI_TS_ANALYZER_PK_TRIGGER
-	CDlg_TSAnalyzer_PacketTrigger  m_dlgPacketTrigger;
+	CDlg_TSAnalyzer_Syntax_TSPacket  m_dlgPacketTrigger;
 #endif
 
 #if GUI_TS_PK_MODIFY
@@ -123,19 +128,19 @@ public:
 #endif
 
 #if GUI_TS_ANALYZER_PSISI
-	CDlg_TSAnalyzer_PsiSi	m_dlgTSAnalyzerPsiSi;
+	CDlg_TSAnalyzer_Syntax_PsiSi	m_dlgTSAnalyzerPsiSi;
 #endif
 
 #if GUI_TS_ANALYZER_BOUQUETS
-	CDlg_TSAnalyzer_Bouquets		m_dlgTSAnalyzerBouquets;
+	CDlg_TSAnalyzer_Semantic_Bouquets		m_dlgTSAnalyzerBouquets;
 #endif
 
 #if GUI_TS_ANALYZER_EPG
-	CDlg_TSAnalyzer_Epg			m_dlgTSAnalyzerEpg;
+	CDlg_TSAnalyzer_Semantic_Epg			m_dlgTSAnalyzerEpg;
 #endif
 
 #if GUI_TS_ANALYZER_OVERVIEW
-	CDlg_TSAnalyzer_Overview		m_dlgTSAnalyzerOverview;
+	CDlg_TSAnalyzer_Metering_Overview		m_dlgTSAnalyzerOverview;
 #endif
 
 #if GUI_TS_ANALYZER_NETWORK
@@ -143,11 +148,11 @@ public:
 #endif
 
 #if GUI_TS_ANALYZER_PCR
-	CDlg_TSAnalyzer_Pcr			m_dlgTSAnalyzerPcr;
+	CDlg_TSAnalyzer_Metering_Pcr			m_dlgTSAnalyzerPcr;
 #endif
 
 #if GUI_TS_ANALYZER_PESES
-	CDlg_TSAnalyzer_PesEs			m_dlgTSAnalyzerPesEs;
+	CDlg_TSAnalyzer_Syntax_PesEs			m_dlgTSAnalyzerPesEs;
 #endif
 
 #if GUI_TS_ANALYZER_ES
@@ -164,18 +169,18 @@ public:
 
 #if GUI_TS_ANALYZER_OCDC
 	//CDlg_TSAnalyzer_OCDC		m_dlgTSAnalyzerOCDC;
-	CDlg_TSAnalyzer_Dsmcc		m_dlgTSAnalyzerDsmcc;
+	CDlg_TSAnalyzer_SemanticEx_Dsmcc		m_dlgTSAnalyzerDsmcc;
 #endif
 
-	CDlg_TriggerWaiting		m_dlgTSTriggerWaiting;
-	CDlg_TriggerWaiting		m_dlgPESTriggerWaiting;
-	CDlg_TriggerWaiting		m_dlgESTriggerWaiting;
-	CDlg_TriggerWaiting		m_dlgSectionTriggerWaiting;
-	CDlg_TriggerWaiting		m_dlgDsmccDownloadWaiting;
+	CDlg_TSAssist_TriggerWaiting		m_dlgTSTriggerWaiting;
+	CDlg_TSAssist_TriggerWaiting		m_dlgPESTriggerWaiting;
+	//CDlg_TriggerWaiting		m_dlgESTriggerWaiting;
+	CDlg_TSAssist_TriggerWaiting		m_dlgSectionTriggerWaiting;
 
+	CDlg_TSAssist_TriggerWaiting		m_dlgDsmccDownloadWaiting;
 	CDlg_Progress			m_dlgTSDecimateProgress;
 
-	CDlg_SignalStatus		m_dlgSignalStatus;
+	CDlg_TSAssist_SignalStatus		m_dlgSignalStatus;
 
 // Operations
 public:
@@ -242,9 +247,11 @@ protected:
 	void AdjustLayout(int cx, int cy);
 	void ActivateTabPage(int nOldSel, int nNewSel);
 	void InitConsoleTab(void);
+	void InitThreadparams(void);
+
 	void GUIReset(void);
 
-	void loadCfg(void);
+	void LoadInterfaceCfg(void);
 
 	CMFCStatusBar& GetStatusBar(void) const;
 
@@ -301,7 +308,7 @@ public:
 
 	afx_msg LRESULT OnReportTSTriggerStatus(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnReportPESTriggerStatus(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnReportESTriggerStatus(WPARAM wParam, LPARAM lParam);
+	//afx_msg LRESULT OnReportESTriggerStatus(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnReportSectionTriggerStatus(WPARAM wParam, LPARAM lParam);
 
 	afx_msg void OnDestroy();

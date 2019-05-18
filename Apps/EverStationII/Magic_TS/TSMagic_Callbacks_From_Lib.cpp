@@ -3,8 +3,8 @@
 #include <stdint.h>
 
 #include "../Common/define.h"
-#include "TSMagic_GuiApi.h"
-#include "TSMagic_GuiApi_MSG.h"
+//#include "TSMagic_GuiApi.h"
+#include "TSMagic_AnalyseThread_MSG.h"
 #include "TSMagic_ErrorCode.h"
 
 #include "TSMagic_Callbacks_From_Lib.h"

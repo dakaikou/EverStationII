@@ -130,7 +130,7 @@ void CListView_ByteBuffer::PrepareRemainedRow(void)
 {
 	CListCtrl&	listCtrl = GetListCtrl();
 
-	char			 pszItem[MAX_TXT_CHARS];
+	char			 pszItem[256];
 	//int				 left_len;
 	//int				 cols;
 	//unsigned char*	rdptr;
@@ -221,7 +221,7 @@ void CListView_ByteBuffer::DisplayFirstViewedBuffer(unsigned char* remain_buf, i
 	CListCtrl&	listCtrl = GetListCtrl();
 
 	int				 count = listCtrl.GetItemCount();
-	char			 pszItem[MAX_TXT_CHARS];
+	char			 pszItem[256];
 	int				 left_len;
 	int				 cols;
 	unsigned char*	rdptr;
@@ -293,7 +293,7 @@ void CListView_ByteBuffer::DisplayRemainBuffer(unsigned char* remain_buf, int re
 	CListCtrl&	listCtrl = GetListCtrl();
 
 	int				 count = listCtrl.GetItemCount();
-	char			 pszItem[MAX_TXT_CHARS];
+	char			 pszItem[256];
 	int				 left_len;
 	int				 cols;
 	unsigned char*	rdptr;
