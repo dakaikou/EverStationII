@@ -16,18 +16,6 @@
 #define SCREEN_GRIDCOLOR		RGB(128, 128, 128)
 #define SCREEN_AXISCOLOR		RGB(220, 220, 220)
 
-//#define SCREEN_WAVECOLOR0		RGB(250, 250, 0)
-//#define SCREEN_WAVECOLOR1		RGB(50, 250, 50)
-//#define SCREEN_WAVECOLOR2		RGB(150, 250, 100)
-//#define SCREEN_WAVECOLOR3		RGB(100, 250, 150)
-//#define SCREEN_WAVECOLOR4		RGB(250, 200, 0)
-//#define SCREEN_WAVECOLOR5		RGB(200, 200, 50)
-//#define SCREEN_WAVECOLOR6		RGB(150, 200, 100)
-//#define SCREEN_WAVECOLOR7		RGB(100, 200, 150)
-//#define SCREEN_WAVECOLOR8		RGB(250, 150, 0)
-//#define SCREEN_WAVECOLOR9		RGB(200, 150, 50)
-//#define SCREEN_WAVECOLOR10		RGB(150, 150, 100)
-//#define SCREEN_WAVECOLOR11		RGB(100, 150, 150)
 #define SCREEN_MAXLIMITCOLOR	RGB(200, 0, 0)
 #define SCREEN_MINLIMITCOLOR	RGB(160, 0, 0)
 #define X_SEPARATOR						4
@@ -63,6 +51,7 @@
 
 #define MEASURE_PANEL_SHOWN				0x00010000
 #define MEASURE_PANEL_HIDE				0x00000000
+
 class CInstrumentPanel_Kernel : public CWnd
 {
 	DECLARE_DYNAMIC(CInstrumentPanel_Kernel)
@@ -156,8 +145,13 @@ protected:
 	int XMAP_Value2Pos(int value, CRect rectPicture);
 	int YMAP_Value2Pos(int value, CRect rectPicture);
 
+private:
+	void InitGraphResource(void);
+	void ReleaseGraphResource(void);
+
 public:
 
+	void SetTitle(CString strTitle);
 	void Init_X_Axis(int nXAxisStyle, int nXShownOption, int nXMinAlarm, int nXMaxAlarm, char* pszXUnits, int nXFloor, int nXCeil, int nStep=100);
 	void Init_Y_Axis(int nYAxisStyle, int nYShownOption, int nYMinAlarm, int nYMaxAlarm, char* pszYUnits, int nYFloor, int nYCeil, int nStep=100);
 
@@ -173,6 +167,7 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	virtual void PreSubclassWindow();
 };
 
 /////////////////////////////////////////////////////////////////////////////

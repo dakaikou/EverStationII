@@ -1064,43 +1064,24 @@ int CInstrumentPanel_Kernel::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// TODO:  在此添加您专用的创建代码
 	m_strTitle = lpCreateStruct->lpszName;
 
-	CDC* pDC = GetDC();
-
-	if (m_pMemDC == NULL)
-	{
-		m_pMemDC = new CDC;
-		m_pMemDC->CreateCompatibleDC(pDC);
-	}
-
-	if (m_pBkgroundBrush == NULL)
-	{
-		m_pBkgroundBrush = new CBrush;
-		m_pBkgroundBrush->CreateSolidBrush(SCREEN_BKGROUNDCOLOR);
-	}
-
-	if (m_pWaveformBrush == NULL)
-	{
-		m_pWaveformBrush = new CBrush;
-		m_pWaveformBrush->CreateSolidBrush(SCREEN_BKWAVEFORMCOLOR);
-	}
-
-	if (m_pMeasurePanelBrush == NULL)
-	{
-		m_pMeasurePanelBrush = new CBrush;
-		m_pMeasurePanelBrush->CreateSolidBrush(SCREEN_BKMEASUREPANELCOLOR);
-	}
-
-	ReleaseDC(pDC);
-
-#if ON_PAINTING_USE_MUTEX
-	m_hPaintingAccess = ::CreateMutex(NULL, FALSE, NULL);
-#endif
-
-	srand(GetTickCount());
-	m_uiTimerID = rand();
-	SetTimer(m_uiTimerID, 1000, NULL);
+	InitGraphResource();
 
 	return 0;
+}
+
+
+void CInstrumentPanel_Kernel::PreSubclassWindow()
+{
+	// TODO: 在此添加专用代码和/或调用基类
+	InitGraphResource();
+}
+
+void CInstrumentPanel_Kernel::OnDestroy()
+{
+	CWnd::OnDestroy();
+
+	// TODO: 在此处添加消息处理程序代码
+	ReleaseGraphResource();
 }
 
 void CInstrumentPanel_Kernel::Reset(void)
@@ -1172,69 +1153,6 @@ void CInstrumentPanel_Kernel::Init_Y_Axis(int nYAxisStyle, int nYShownOption, in
 	m_nYStep = nYStep;
 
 	AdjustLayout();
-}
-
-
-
-void CInstrumentPanel_Kernel::OnDestroy()
-{
-	CWnd::OnDestroy();
-
-	// TODO: 在此处添加消息处理程序代码
-#if ON_PAINTING_USE_MUTEX
-	DWORD wait_state = ::WaitForSingleObject(m_hPaintingAccess, INFINITE);
-	if (wait_state == WAIT_OBJECT_0)
-	{
-#endif
-		if (m_pMemDC != NULL)
-		{
-			delete m_pMemDC;
-			m_pMemDC = NULL;
-		}
-
-		if (m_pBkgroundBmp != NULL)
-		{
-			delete m_pBkgroundBmp;
-			m_pBkgroundBmp = NULL;
-		}
-
-		if (m_pWaveformBmp != NULL)
-		{
-			delete m_pWaveformBmp;
-			m_pWaveformBmp = NULL;
-		}
-
-		if (m_pMeasurePanelBmp != NULL)
-		{
-			delete m_pMeasurePanelBmp;
-			m_pMeasurePanelBmp = NULL;
-		}
-
-		if (m_pBkgroundBrush != NULL)
-		{
-			delete m_pBkgroundBrush;
-			m_pBkgroundBrush = NULL;
-		}
-
-		if (m_pWaveformBrush != NULL)
-		{
-			delete m_pWaveformBrush;
-			m_pWaveformBrush = NULL;
-		}
-
-		if (m_pMeasurePanelBrush != NULL)
-		{
-			delete m_pMeasurePanelBrush;
-			m_pMeasurePanelBrush = NULL;
-		}
-
-#if ON_PAINTING_USE_MUTEX
-		::CloseHandle(m_hPaintingAccess);
-		m_hPaintingAccess = NULL;
-	}
-#endif
-
-	KillTimer(m_uiTimerID);
 }
 
 void CInstrumentPanel_Kernel::AdjustLayout(void)
@@ -1429,4 +1347,108 @@ int CInstrumentPanel_Kernel::YMAP_Value2Pos(int yvalue, CRect rectPicture)
 	}
 
 	return yPos;
+}
+
+void CInstrumentPanel_Kernel::InitGraphResource(void)
+{
+	CDC* pDC = GetDC();
+
+	if (m_pMemDC == NULL)
+	{
+		m_pMemDC = new CDC;
+		m_pMemDC->CreateCompatibleDC(pDC);
+	}
+
+	if (m_pBkgroundBrush == NULL)
+	{
+		m_pBkgroundBrush = new CBrush;
+		m_pBkgroundBrush->CreateSolidBrush(SCREEN_BKGROUNDCOLOR);
+	}
+
+	if (m_pWaveformBrush == NULL)
+	{
+		m_pWaveformBrush = new CBrush;
+		m_pWaveformBrush->CreateSolidBrush(SCREEN_BKWAVEFORMCOLOR);
+	}
+
+	if (m_pMeasurePanelBrush == NULL)
+	{
+		m_pMeasurePanelBrush = new CBrush;
+		m_pMeasurePanelBrush->CreateSolidBrush(SCREEN_BKMEASUREPANELCOLOR);
+	}
+
+	ReleaseDC(pDC);
+
+#if ON_PAINTING_USE_MUTEX
+	m_hPaintingAccess = ::CreateMutex(NULL, FALSE, NULL);
+#endif
+
+	srand(GetTickCount());
+	m_uiTimerID = rand();
+	SetTimer(m_uiTimerID, 1000, NULL);
+
+	CWnd::PreSubclassWindow();
+}
+
+void CInstrumentPanel_Kernel::ReleaseGraphResource(void)
+{
+#if ON_PAINTING_USE_MUTEX
+	DWORD wait_state = ::WaitForSingleObject(m_hPaintingAccess, INFINITE);
+	if (wait_state == WAIT_OBJECT_0)
+	{
+#endif
+		if (m_pMemDC != NULL)
+		{
+			delete m_pMemDC;
+			m_pMemDC = NULL;
+		}
+
+		if (m_pBkgroundBmp != NULL)
+		{
+			delete m_pBkgroundBmp;
+			m_pBkgroundBmp = NULL;
+		}
+
+		if (m_pWaveformBmp != NULL)
+		{
+			delete m_pWaveformBmp;
+			m_pWaveformBmp = NULL;
+		}
+
+		if (m_pMeasurePanelBmp != NULL)
+		{
+			delete m_pMeasurePanelBmp;
+			m_pMeasurePanelBmp = NULL;
+		}
+
+		if (m_pBkgroundBrush != NULL)
+		{
+			delete m_pBkgroundBrush;
+			m_pBkgroundBrush = NULL;
+		}
+
+		if (m_pWaveformBrush != NULL)
+		{
+			delete m_pWaveformBrush;
+			m_pWaveformBrush = NULL;
+		}
+
+		if (m_pMeasurePanelBrush != NULL)
+		{
+			delete m_pMeasurePanelBrush;
+			m_pMeasurePanelBrush = NULL;
+		}
+
+#if ON_PAINTING_USE_MUTEX
+		::CloseHandle(m_hPaintingAccess);
+		m_hPaintingAccess = NULL;
+	}
+#endif
+
+	KillTimer(m_uiTimerID);
+}
+
+void CInstrumentPanel_Kernel::SetTitle(CString strTitle)
+{
+	m_strTitle = strTitle;
 }

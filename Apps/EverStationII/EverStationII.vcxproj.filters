@@ -318,6 +318,48 @@
     <ClInclude Include="Magic_TS\Dlg_TSAssist_TriggerWaiting.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
+    <ClInclude Include="MFCExt\TreeList\TLCDragWnd.h">
+      <Filter>头文件\MFCExt\TreeList</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCExt\TreeList\TLCDropWnd.h">
+      <Filter>头文件\MFCExt\TreeList</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCExt\TreeList\TLHDragWnd.h">
+      <Filter>头文件\MFCExt\TreeList</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCExt\TreeList\TLHDropWnd.h">
+      <Filter>头文件\MFCExt\TreeList</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCExt\TreeList\TreeListColumnInfo.h">
+      <Filter>头文件\MFCExt\TreeList</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCExt\TreeList\TreeListComboCtrl.h">
+      <Filter>头文件\MFCExt\TreeList</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCExt\TreeList\TreeListCtrl.h">
+      <Filter>头文件\MFCExt\TreeList</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCExt\TreeList\TreeListDC.h">
+      <Filter>头文件\MFCExt\TreeList</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCExt\TreeList\TreeListEditCtrl.h">
+      <Filter>头文件\MFCExt\TreeList</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCExt\TreeList\TreeListHeaderCtrl.h">
+      <Filter>头文件\MFCExt\TreeList</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCExt\TreeList\TreeListItem.h">
+      <Filter>头文件\MFCExt\TreeList</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCExt\TreeList\TreeListStaticCtrl.h">
+      <Filter>头文件\MFCExt\TreeList</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCExt\TreeList\TreeListTipCtrl.h">
+      <Filter>头文件\MFCExt\TreeList</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCExt\TreeList\xTreeList.h">
+      <Filter>头文件\MFCExt\TreeList</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

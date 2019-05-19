@@ -195,7 +195,7 @@
 #define IDC_LIST_PCAP_DEVICES           1011
 #define IDC_BTN_ESFILE_2TS              1011
 #define IDC_EDT_TSPACKET_TRIGGER_COUNT  1013
-#define IDC_BTN_TSTREAM_OPEN_CLOSE     1015
+#define IDC_BTN_TSTREAM_OPEN_CLOSE      1015
 #define IDC_BTN_PSFILE_DISPATCH         1015
 #define IDC_BTN_PSFILE_PREVIEW          1016
 #define IDC_TAB_YUVMAGIC                1017
@@ -225,6 +225,7 @@
 #define IDC_STATIC_END                  1038
 #define IDC_EDIT_ESFILE_PATH            1038
 #define IDC_CMB_TSPACKET_TRANSPORT_PRIORITY 1039
+#define IDC_STATIC_HISTGRAM_TSRATE      1039
 #define IDC_STATIC_LENGTH               1040
 #define IDC_STATIC_FORMAT               1041
 #define IDC_CMB_TSPACKET_PCR_FLAG       1042
@@ -498,7 +499,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        404
 #define _APS_NEXT_COMMAND_VALUE         32799
-#define _APS_NEXT_CONTROL_VALUE         1039
+#define _APS_NEXT_CONTROL_VALUE         1040
 #define _APS_NEXT_SYMED_VALUE           320
 #endif
 #endif

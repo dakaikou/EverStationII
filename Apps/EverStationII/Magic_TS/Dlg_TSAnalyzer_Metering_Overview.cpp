@@ -12,6 +12,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 #include "../Common/Define.h"
+#include "../Resource.h"
 
 #include <math.h>
 
@@ -48,9 +49,9 @@ void CDlg_TSAnalyzer_Metering_Overview::DoDataExchange(CDataExchange* pDX)
 //	DDX_Control(pDX, IDC_STATIC_TSRATE_OSCILLOSCOPE, m_TsRateJitterGraphOscilloscope);
 	//DDX_Control(pDX, IDC_STATIC_TSRATE_HISTOGRAM, m_TsRateJitterGraphHistogram);
 	DDX_Control(pDX, IDC_LIST_TS_MONITOR, m_listMonitor);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_LIST_TS_BANDWIDTH, m_listBandwidth);
 	DDX_Control(pDX, IDC_LIST_TS_OVERVIEW, m_listTSOverview);
+	//}}AFX_DATA_MAP
 }
 
 
@@ -75,30 +76,34 @@ BOOL CDlg_TSAnalyzer_Metering_Overview::OnInitDialog()
 
 	m_nRunning = 0;
 
-	CRect rectHisgram;
+	CRect rectHistgram;
 	CRect rectTemp;
 
 	CWnd* pWnd = GetDlgItem(IDC_LIST_TS_MONITOR);
 	pWnd->GetWindowRect(&rectTemp);
 	ScreenToClient(&rectTemp);
-	rectHisgram.top = rectTemp.top;
+	rectHistgram.top = rectTemp.top;
 
 	pWnd = GetDlgItem(IDC_LIST_TS_BANDWIDTH);
 	pWnd->GetWindowRect(&rectTemp);
 	ScreenToClient(&rectTemp);
-	rectHisgram.right = rectTemp.right;
+	rectHistgram.right = rectTemp.right;
 
 	pWnd = GetDlgItem(IDC_LIST_TS_OVERVIEW);
 	pWnd->GetWindowRect(&rectTemp);
 	ScreenToClient(&rectTemp);
-	rectHisgram.left = rectTemp.left;
-	rectHisgram.bottom = rectTemp.top - 40;
+	rectHistgram.left = rectTemp.left;
+	rectHistgram.bottom = rectTemp.top - 40;
 
-	if (!m_TsRateJitterGraphHistogram.Create(NULL, "TS流码率统计分析", WS_CHILD | WS_VISIBLE, rectHisgram, this, 0L))
-	{
-		TRACE0("未能创建TS流码率监控窗口\n");
-		return FALSE; // 未能创建
-	}
+	//if (!m_TsRateJitterGraphHistogram.Create(NULL, "TS流码率统计分析", WS_CHILD | WS_VISIBLE, rectHistgram, this, 0L))
+	//{
+	//	TRACE0("未能创建TS流码率监控窗口\n");
+	//	return FALSE; // 未能创建
+	//}
+	m_TsRateJitterGraphHistogram.SetTitle("TS流码率统计分析");
+	m_TsRateJitterGraphHistogram.SubclassDlgItem(IDC_STATIC_HISTGRAM_TSRATE, this);
+	m_TsRateJitterGraphHistogram.MoveWindow(&rectHistgram);
+
 	//m_TsRateJitterGraphHistogram.Init_X_Axis(AXIS_STYLE_CARTESIAN_MEAN_SYMMETRY, RANGE_MARK_SHOWN, -100, 100, "bps", -10000, 10000);	//X轴（-1000， 1000）bps，Y轴（0， 100%）比例			
 	//m_TsRateJitterGraphHistogram.Init_Y_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, RANGE_MARK_HIDE, 0, 100, "%", 0, 100);	//X轴（-1000， 1000）bps，Y轴（0， 100%）比例			
 	m_TsRateJitterGraphHistogram.Init_X_Axis(AXIS_STYLE_CARTESIAN_FROM_MIN_TO_MAX, MEASURE_PANEL_SHOWN | RANGE_MARK_SHOWN_KEYPOINT, 100000000, 0, "bps", 0, 100000000, 1000);	//X轴（-1000， 1000）bps，Y轴（0， 100%）比例			
