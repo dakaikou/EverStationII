@@ -171,6 +171,17 @@
 #define IDB_YUV_COMBINE_RESET_36PX      399
 #define IDB_BITMAP3                     402
 #define IDB_DIGITAL_FRONTEND            402
+#define IDC_MFCEXT_CURSOR_BUTTON        404
+#define IDC_CURSOR2                     405
+#define IDC_MFCEXT_CURSOR_CHECK         405
+#define IDC_MFCEXT_CURSOR_CROSS         406
+#define IDC_MFCEXT_CURSOR_DROP          407
+#define IDC_MFCEXT_CURSOR_HORZ          408
+#define IDC_MFCEXT_CURSOR_LOCK          409
+#define IDC_MFCEXT_CURSOR_SIZE          410
+#define IDC_MFCEXT_CURSOR_SPLIT         411
+#define IDC_MFCEXT_CURSOR_STOP          412
+#define IDC_MFCEXT_CURSOR_VERT          413
 #define IDC_BTN_TSMAGIC                 1000
 #define IDC_STATIC_APPNAME              1000
 #define IDC_STATIC_APPNAME_EVERSTATIONII 1000
@@ -351,12 +362,19 @@
 #define IDC_CHECK16                     1294
 #define IDC_CHECK18                     1295
 #define IDB_TREELIST_BITMAP             6000
+#define IDB_MFCEXT_TREELIST_MASK_ENABLE 6000
 #define IDB_TREELIST_CHECK              6003
+#define IDB_MFCEXT_TREELIST_CHECK       6003
 #define IDB_TREELIST_LOCK               6004
+#define IDB_MFCEXT_TREELIST_LOCK        6004
 #define IDB_TREELIST_TREE               6008
+#define IDB_MFCEXT_TREELIST_TREE        6008
 #define IDB_TREELIST_SORT               6009
+#define IDB_MFCEXT_TREELIST_SORT        6009
 #define IDB_TREELIST_HEADER             6010
+#define IDB_MFCEXT_TREELIST_HEADER      6010
 #define IDB_TREELIST_DISABLE            6011
+#define IDB_MFCEXT_TREELIST_MASK_DISABLE 6011
 #define IDB_TREE_INFO                   6012
 #define IDB_EPG                         6013
 #define IDB_BOUQUET                     6014
@@ -497,7 +515,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        404
+#define _APS_NEXT_RESOURCE_VALUE        414
 #define _APS_NEXT_COMMAND_VALUE         32799
 #define _APS_NEXT_CONTROL_VALUE         1040
 #define _APS_NEXT_SYMED_VALUE           320

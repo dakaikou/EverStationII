@@ -2,6 +2,9 @@
 //
 
 #include "stdafx.h"
+
+#include <afxwin.h>
+
 #include "TreeListColumnInfo.h"
 #include "TreeListDC.h"
 #include "TLHDragWnd.h"
@@ -74,8 +77,8 @@ CTreeListHeaderCtrl::CTreeListHeaderCtrl() :
 	m_Font.CreateStockObject( SYSTEM_FIXED_FONT );
 
 	// load cursors
-	m_hSize		= AfxGetApp()->LoadCursor( IDC_CURSOR_SIZE );
-	m_hSplit	= AfxGetApp()->LoadCursor( IDC_CURSOR_SPLIT );
+	m_hSize		= AfxGetApp()->LoadCursor( IDC_MFCEXT_CURSOR_SIZE );
+	m_hSplit	= AfxGetApp()->LoadCursor( IDC_MFCEXT_CURSOR_SPLIT );
 	m_hArrow	= AfxGetApp()->LoadStandardCursor( IDC_ARROW );
 }
 
@@ -117,11 +120,11 @@ END_MESSAGE_MAP()
 BOOL CTreeListHeaderCtrl::Create()
 {
 	// create sort image
-	if( !m_imgSort.Create( IDB_TREELIST_SORT, 8, 4, 0xFF00FF ) )
+	if( !m_imgSort.Create( IDB_MFCEXT_TREELIST_SORT, 8, 4, 0xFF00FF ) )
 		return FALSE;
 
 	// create header image
-	if( !m_imgHeader.Create( IDB_TREELIST_HEADER, 16, 4, 0xFF00FF ) )
+	if( !m_imgHeader.Create(IDB_MFCEXT_TREELIST_HEADER, 16, 4, 0xFF00FF ) )
 		return FALSE;
 
 	m_pImageList = &m_imgHeader;
@@ -745,7 +748,7 @@ BOOL CTreeListHeaderCtrl::BeginDraging( CPoint point )
 	m_bDraging = TRUE;
 	SetCapture();
 
-	CTreeListColumnInfo* pColumnInfo;
+	CTreeListColumnInfo* pColumnInfo = NULL;
 	int nPerfix = 0;
 	for( int iShow=0; iShow<arShows.GetSize(); iShow++ )
 	{

@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include <afxwin.h>
+
 #define TLIS_SELECTED			0x00000001		// selected
 #define TLIS_EXPANDED			0x00000002		// expanded
 #define TLIS_EXPANDEDONCE		0x00000004		// expanded once

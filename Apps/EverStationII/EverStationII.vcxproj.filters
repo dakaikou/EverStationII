@@ -357,9 +357,6 @@
     <ClInclude Include="MFCExt\TreeList\TreeListTipCtrl.h">
       <Filter>头文件\MFCExt\TreeList</Filter>
     </ClInclude>
-    <ClInclude Include="MFCExt\TreeList\xTreeList.h">
-      <Filter>头文件\MFCExt\TreeList</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -610,6 +607,45 @@
     </ClCompile>
     <ClCompile Include="Magic_TS\Dlg_TSAssist_TriggerWaiting.cpp">
       <Filter>源文件\Magic_TS</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCExt\TreeList\TLCDragWnd.cpp">
+      <Filter>源文件\MFCExt\TreeList</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCExt\TreeList\TLCDropWnd.cpp">
+      <Filter>源文件\MFCExt\TreeList</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCExt\TreeList\TLHDragWnd.cpp">
+      <Filter>源文件\MFCExt\TreeList</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCExt\TreeList\TLHDropWnd.cpp">
+      <Filter>源文件\MFCExt\TreeList</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCExt\TreeList\TreeListColumnInfo.cpp">
+      <Filter>源文件\MFCExt\TreeList</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCExt\TreeList\TreeListComboCtrl.cpp">
+      <Filter>源文件\MFCExt\TreeList</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCExt\TreeList\TreeListCtrl.cpp">
+      <Filter>源文件\MFCExt\TreeList</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCExt\TreeList\TreeListDC.cpp">
+      <Filter>源文件\MFCExt\TreeList</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCExt\TreeList\TreeListEditCtrl.cpp">
+      <Filter>源文件\MFCExt\TreeList</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCExt\TreeList\TreeListHeaderCtrl.cpp">
+      <Filter>源文件\MFCExt\TreeList</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCExt\TreeList\TreeListItem.cpp">
+      <Filter>源文件\MFCExt\TreeList</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCExt\TreeList\TreeListStaticCtrl.cpp">
+      <Filter>源文件\MFCExt\TreeList</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCExt\TreeList\TreeListTipCtrl.cpp">
+      <Filter>源文件\MFCExt\TreeList</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1096,6 +1132,27 @@
     <Image Include="res\frontend-digital TV.bmp">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="res\mfcext_treelist_tree.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\mfcext_treelist_sort.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\mfcext_treelist_lock.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\mfcext_treelist_header.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\mfcext_treelist_mask_disable.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\mfcext_treelist_check.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\mfcext_treelist_mask_enable.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="EverStationII.rc">
@@ -1104,6 +1161,36 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\EverStationII.rc2">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\mfcext_cursor_button.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\mfcext_cursor_check.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\mfcext_cursor_cross.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\mfcext_cursor_drop.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\mfcext_cursor_horz.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\mfcext_cursor_lock.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\mfcext_cursor_size.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\mfcext_cursor_split.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\mfcext_cursor_stop.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\mfcext_cursor_vert.cur">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>

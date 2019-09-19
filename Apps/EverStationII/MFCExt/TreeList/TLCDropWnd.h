@@ -6,6 +6,7 @@
 #endif // _MSC_VER > 1000
 // TLCDropWnd.h : header file
 //
+#include <afxwin.h>
 
 #define TLCDROPWND_CLASSNAME		_T("TurboDLL.TLCDropWnd")
 /////////////////////////////////////////////////////////////////////////////

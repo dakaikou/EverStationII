@@ -6,6 +6,7 @@
 #endif // _MSC_VER > 1000
 // TreeListTipCtrl.h : header file
 //
+#include <afxwin.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CTreeListTipCtrl window
@@ -22,15 +23,13 @@ typedef BOOL (WINAPI *lpfnSetLayeredWindowAttributes)( HWND hwnd, COLORREF crKey
 
 BOOL InitLayeredWindows();
 
-class CTreeListCtrl;
-
 class CTreeListTipCtrl : public CWnd
 {
 // Construction
 public:
 	CTreeListTipCtrl();
 	virtual ~CTreeListTipCtrl();
-	BOOL Create( CTreeListCtrl* pTreeListCtrl );
+	BOOL Create(CWnd* pTreeListCtrl );
 
 // Members
 protected:
@@ -51,7 +50,7 @@ protected:
 
 // Attributes
 public:
-	CTreeListCtrl*		m_pTreeListCtrl;	// parent CTreeListCtrl
+	CWnd*		m_pTreeListCtrl;	// parent CTreeListCtrl
 
 // Operations
 public:
@@ -74,7 +73,7 @@ public:
 protected:
 	//{{AFX_MSG(CTreeListTipCtrl)
 	afx_msg void OnPaint();
-	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg int OnMouseActivate(CWnd* pDesktopWnd, UINT nHitTest, UINT message);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

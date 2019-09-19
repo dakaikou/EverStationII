@@ -319,8 +319,8 @@ void CESMagicView::Reset(void)
 	m_dlgESAnalyzeProgress.Reset();
 	m_dlgESAnalyzeProgress.ShowWindow(SW_HIDE);
 
-	GetStatusBar().SetPaneText(1, "");
-	GetStatusBar().SetPaneProgress(1, 0);
+	GetStatusBar().SetPaneText(2, "");
+	GetStatusBar().SetPaneProgress(2, 0);
 
 	UpdateData(FALSE);
 }

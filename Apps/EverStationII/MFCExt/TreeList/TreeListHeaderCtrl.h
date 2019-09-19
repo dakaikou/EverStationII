@@ -6,6 +6,7 @@
 #endif // _MSC_VER > 1000
 // TreeListHeaderCtrl.h : header file
 //
+#include <afxwin.h>
 #include "TreeListColumnInfo.h"
 
 #define TREELISTHEADERCTRL_CLASSNAME	_T("TurboDLL.TreeListHeaderCtrl")

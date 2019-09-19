@@ -2,12 +2,12 @@
 //
 
 #include "stdafx.h"
-#include "TreeListHeaderCtrl.h"
+//#include "TreeListHeaderCtrl.h"
 #include "TreeListTipCtrl.h"
-#include "TreeListStaticCtrl.h"
-#include "TreeListEditCtrl.h"
-#include "TreeListComboCtrl.h"
-#include "TreeListCtrl.h"
+//#include "TreeListStaticCtrl.h"
+//#include "TreeListEditCtrl.h"
+//#include "TreeListComboCtrl.h"
+//#include "TreeListCtrl.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -88,7 +88,7 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTreeListTipCtrl message handlers
-BOOL CTreeListTipCtrl::Create( CTreeListCtrl* pTreeListCtrl )
+BOOL CTreeListTipCtrl::Create( CWnd* pTreeListCtrl )
 {
 	// create tip
 	ASSERT_VALID( pTreeListCtrl );
@@ -334,7 +334,7 @@ void CTreeListTipCtrl::OnPaint()
 	dc.SelectObject( pOldFont );
 }
 
-void CTreeListTipCtrl::OnTimer(UINT nIDEvent) 
+void CTreeListTipCtrl::OnTimer(UINT_PTR nIDEvent) 
 {
 	// fade in/out timer
 	switch( nIDEvent )

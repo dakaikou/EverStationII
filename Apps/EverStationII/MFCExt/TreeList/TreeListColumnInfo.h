@@ -1,6 +1,7 @@
 // TreeListColumnInfo.h: interface for the CTreeListColumnInfo class.
 //
 //////////////////////////////////////////////////////////////////////
+#include <afxwin.h>
 
 #if !defined(AFX_TREELISTCOLUMNINFO_H__A20B2FC5_7522_4EFC_915D_9B4280E1DCC5__INCLUDED_)
 #define AFX_TREELISTCOLUMNINFO_H__A20B2FC5_7522_4EFC_915D_9B4280E1DCC5__INCLUDED_

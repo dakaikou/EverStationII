@@ -2,6 +2,9 @@
 //
 
 #include "stdafx.h"
+
+#include <afxwin.h>
+
 #include "TreeListDC.h"
 #include "TreeListHeaderCtrl.h"
 #include "TreeListTipCtrl.h"
@@ -108,12 +111,12 @@ CTreeListCtrl::CTreeListCtrl() :
 	m_Palette.CreateStockObject( DEFAULT_PALETTE );
 	m_Font.CreateStockObject( SYSTEM_FIXED_FONT );
 
-	m_hButton	= AfxGetApp()->LoadCursor( IDC_CURSOR_BUTTON );
-	m_hCheck	= AfxGetApp()->LoadCursor( IDC_CURSOR_CHECK );
-	m_hLock		= AfxGetApp()->LoadCursor( IDC_CURSOR_LOCK );
+	m_hButton	= AfxGetApp()->LoadCursor( IDC_MFCEXT_CURSOR_BUTTON );
+	m_hCheck	= AfxGetApp()->LoadCursor( IDC_MFCEXT_CURSOR_CHECK );
+	m_hLock		= AfxGetApp()->LoadCursor( IDC_MFCEXT_CURSOR_LOCK );
 
-	m_hDrop		= AfxGetApp()->LoadCursor( IDC_CURSOR_DROP );
-	m_hStop		= AfxGetApp()->LoadCursor( IDC_CURSOR_STOP );
+	m_hDrop		= AfxGetApp()->LoadCursor( IDC_MFCEXT_CURSOR_DROP );
+	m_hStop		= AfxGetApp()->LoadCursor( IDC_MFCEXT_CURSOR_STOP );
 	m_hArrow	= AfxGetApp()->LoadStandardCursor( IDC_ARROW );
 
 	m_pRootItem = new CTreeListItem( 1 );
@@ -247,19 +250,19 @@ BOOL CTreeListCtrl::Create()
 	if( !m_wndCombo.Create( dwStyle, Rect, this, 0 ) )
 		return FALSE;
 
-	if( !m_bmpBkBitmap.LoadBitmap( IDB_TREELIST_BITMAP ) )
+	if( !m_bmpBkBitmap.LoadBitmap( IDB_MFCEXT_TREELIST_MASK_ENABLE ) )
 		return FALSE;
 
-	if( !m_bmpBkDisable.LoadBitmap( IDB_TREELIST_DISABLE ) )
+	if( !m_bmpBkDisable.LoadBitmap(IDB_MFCEXT_TREELIST_MASK_DISABLE) )
 		return FALSE;
 
-	if( !m_imgCheck.Create( IDB_TREELIST_CHECK, 16, 3, 0xFF00FF ) )
+	if( !m_imgCheck.Create( IDB_MFCEXT_TREELIST_CHECK, 16, 3, 0xFF00FF ) )
 		return FALSE;
 
-	if( !m_imgLock.Create( IDB_TREELIST_LOCK, 8, 3, 0xFF00FF ) )
+	if( !m_imgLock.Create( IDB_MFCEXT_TREELIST_LOCK, 8, 3, 0xFF00FF ) )
 		return FALSE;
 
-	if( !m_imgTree.Create( IDB_TREELIST_TREE, 16, 3, 0xFFFFFF ) )
+	if( !m_imgTree.Create(IDB_MFCEXT_TREELIST_MASK_ENABLE, 16, 3, 0xFFFFFF ) )
 		return FALSE;
 
 	m_pImageList = &m_imgTree;
@@ -5827,7 +5830,7 @@ CWnd* CTreeListCtrl::GetControl( CTreeListItem* pItem, int iCol )
 	if( !GetState( TLS_MODIFY ) )
 		return NULL;
 
-	CWnd* pWnd;
+	CWnd* pWnd = NULL;
 	// restore a control
 	switch( GetColumnModify( iCol ) )
 	{
@@ -6805,7 +6808,7 @@ BOOL CTreeListCtrl::IsInSelectsTree( CTreeListItem* pItem )
 	return bFound;
 }
 
-void CTreeListCtrl::OnTimer(UINT nIDEvent) 
+void CTreeListCtrl::OnTimer(UINT_PTR nIDEvent)
 {
 	CPoint point;
 	CTreeListItem* pItem;

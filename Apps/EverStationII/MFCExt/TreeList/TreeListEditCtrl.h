@@ -6,6 +6,7 @@
 #endif // _MSC_VER > 1000
 // TreeListEditCtrl.h : header file
 //
+#include <afxwin.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CTreeListEditCtrl window

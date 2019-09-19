@@ -6,7 +6,7 @@
 #endif // _MSC_VER > 1000
 // TLHDropWnd.h : header file
 //
-
+#include <afxwin.h>
 /////////////////////////////////////////////////////////////////////////////
 // CTLHDropWnd window
 #define TLHDROPWND_CLASSNAME		_T("TurboDLL.TLHDropWnd")

@@ -10,11 +10,15 @@
 #pragma once
 #endif // _MSC_VER > 1000
 // TreeListCtrl.h : header file
+
+#include "TreeListTipCtrl.h"
+#include "TreeListComboCtrl.h"
+#include "TreeListEditCtrl.h"
+#include "TreeListHeaderCtrl.h"
+#include "TreeListStaticCtrl.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CTreeListCtrl window
-#include <afxtempl.h>
-#include "xTreeList.h"
-
 #define TREELISTCTRL_CLASSNAME		_T("TurboDLL.TreeListCtrl")
 
 // TreeListCtrl Styles
@@ -189,12 +193,12 @@ typedef BOOL (WINAPI *lpfnUpdateLayeredWindow)(	HWND hWnd, HDC hdcDst, POINT *pp
 
 typedef BOOL (WINAPI *lpfnSetLayeredWindowAttributes)( HWND hwnd, COLORREF crKey, BYTE xAlpha, DWORD dwFlags );
 
-class CTreeListItem;
-class CTreeListHeaderCtrl;
-class CTreeListTipCtrl;
-class CTreeListStaticCtrl;
-class CTreeListEditCtrl;
-class CTreeListComboCtrl;
+//class CTreeListItem;
+//class CTreeListHeaderCtrl;
+//class CTreeListTipCtrl;
+//class CTreeListStaticCtrl;
+//class CTreeListEditCtrl;
+//class CTreeListComboCtrl;
 
 class CTreeListCtrl : public CWnd
 {
@@ -634,7 +638,7 @@ protected:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnDestroy();
-	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnCancelMode();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

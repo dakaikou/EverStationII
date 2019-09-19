@@ -2,7 +2,7 @@
 //
 #include "stdafx.h"
 //#include "pch.h"
-#include "../EverStationII.h"
+//#include "../EverStationII.h"
 #include "InstrumentView_Histogram.h"
 
 

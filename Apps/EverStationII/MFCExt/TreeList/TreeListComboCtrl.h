@@ -6,12 +6,15 @@
 #endif // _MSC_VER > 1000
 // TreeListComboCtrl.h : header file
 //
+#include <afxwin.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CTreeListComboCtrl window
 
 class CTreeListComboCtrl : public CComboBox
 {
+	friend class CTreeListCtrl;
+
 // Construction
 public:
 	CTreeListComboCtrl();

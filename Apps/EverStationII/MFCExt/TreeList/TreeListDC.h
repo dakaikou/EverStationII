@@ -9,6 +9,9 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include <afxwin.h>
+
+
 class CTreeListDC : public CDC
 {
 public:

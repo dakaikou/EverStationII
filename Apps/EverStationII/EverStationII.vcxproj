@@ -310,7 +310,6 @@
     <ClInclude Include="MFCExt\TreeList\TreeListItem.h" />
     <ClInclude Include="MFCExt\TreeList\TreeListStaticCtrl.h" />
     <ClInclude Include="MFCExt\TreeList\TreeListTipCtrl.h" />
-    <ClInclude Include="MFCExt\TreeList\xTreeList.h" />
     <ClInclude Include="PropertiesWnd.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -403,6 +402,19 @@
     <ClCompile Include="Magic_YUV\YUVMagicView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="MFCExt\SplitWnd\SplitWnd.cpp" />
+    <ClCompile Include="MFCExt\TreeList\TLCDragWnd.cpp" />
+    <ClCompile Include="MFCExt\TreeList\TLCDropWnd.cpp" />
+    <ClCompile Include="MFCExt\TreeList\TLHDragWnd.cpp" />
+    <ClCompile Include="MFCExt\TreeList\TLHDropWnd.cpp" />
+    <ClCompile Include="MFCExt\TreeList\TreeListColumnInfo.cpp" />
+    <ClCompile Include="MFCExt\TreeList\TreeListComboCtrl.cpp" />
+    <ClCompile Include="MFCExt\TreeList\TreeListCtrl.cpp" />
+    <ClCompile Include="MFCExt\TreeList\TreeListDC.cpp" />
+    <ClCompile Include="MFCExt\TreeList\TreeListEditCtrl.cpp" />
+    <ClCompile Include="MFCExt\TreeList\TreeListHeaderCtrl.cpp" />
+    <ClCompile Include="MFCExt\TreeList\TreeListItem.cpp" />
+    <ClCompile Include="MFCExt\TreeList\TreeListStaticCtrl.cpp" />
+    <ClCompile Include="MFCExt\TreeList\TreeListTipCtrl.cpp" />
     <ClCompile Include="PropertiesWnd.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -521,6 +533,13 @@
     <Image Include="res\menuimages.bmp" />
     <Image Include="res\menuimages_hc.bmp" />
     <Image Include="res\menu_ima.bmp" />
+    <Image Include="res\mfcext_treelist_check.bmp" />
+    <Image Include="res\mfcext_treelist_header.bmp" />
+    <Image Include="res\mfcext_treelist_lock.bmp" />
+    <Image Include="res\mfcext_treelist_mask_disable.bmp" />
+    <Image Include="res\mfcext_treelist_mask_enable.bmp" />
+    <Image Include="res\mfcext_treelist_sort.bmp" />
+    <Image Include="res\mfcext_treelist_tree.bmp" />
     <Image Include="res\output_wnd.ico" />
     <Image Include="res\output_wnd_hc.ico" />
     <Image Include="res\playctrl.bmp" />
@@ -580,6 +599,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\EverStationII.rc2" />
+    <None Include="res\mfcext_cursor_button.cur" />
+    <None Include="res\mfcext_cursor_check.cur" />
+    <None Include="res\mfcext_cursor_cross.cur" />
+    <None Include="res\mfcext_cursor_drop.cur" />
+    <None Include="res\mfcext_cursor_horz.cur" />
+    <None Include="res\mfcext_cursor_lock.cur" />
+    <None Include="res\mfcext_cursor_size.cur" />
+    <None Include="res\mfcext_cursor_split.cur" />
+    <None Include="res\mfcext_cursor_stop.cur" />
+    <None Include="res\mfcext_cursor_vert.cur" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
