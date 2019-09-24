@@ -14,8 +14,8 @@
 
 //#include "..\Magic_TS\TSMagic_GuiApi.h"
 
-#include "..\Common\InstrumentPanel_Histogram.h"
-#include "..\Common\InstrumentPanel_Waveform.h"
+#include "..\Common\InstrumentCtrl\InstrumentCtrl_Histogram.h"
+#include "..\Common\InstrumentCtrl\InstrumentCtrl_Waveform.h"
 
 #include "..\resource.h"
 #include "afxcmn.h"

@@ -3,7 +3,7 @@
 #include "stdafx.h"
 #include <afxwin.h>
 #include <assert.h>
-#include "InstrumentPanel_LumaGamutDiagram.h"
+#include "InstrumentCtrl_LumaGamutDiagram.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -23,7 +23,7 @@ CInstrumentPanel_LumaGamutDiagram::~CInstrumentPanel_LumaGamutDiagram()
 }
 
 
-BEGIN_MESSAGE_MAP(CInstrumentPanel_LumaGamutDiagram, CInstrumentPanel_Kernel)
+BEGIN_MESSAGE_MAP(CInstrumentPanel_LumaGamutDiagram, CInstrumentCtrl_Wnd)
 	//{{AFX_MSG_MAP(CInstrumentPanel_LumaGamutDiagram)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()

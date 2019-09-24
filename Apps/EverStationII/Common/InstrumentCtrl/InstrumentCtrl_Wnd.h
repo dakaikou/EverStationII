@@ -2,6 +2,7 @@
 #define AFX_TIME_BASEV3_INSTRUMENT_PANEL_H__2CB59A93_04A1_11D5_B4BD_0050BA6DB00C__INCLUDED_
 #pragma once
 
+#include <afxwin.h>
 
 // CInstrumentPanel_BaseV3
 #define ON_PAINTING_USE_MUTEX			1
@@ -52,13 +53,13 @@
 #define MEASURE_PANEL_SHOWN				0x00010000
 #define MEASURE_PANEL_HIDE				0x00000000
 
-class CInstrumentPanel_Kernel : public CWnd
+class CInstrumentCtrl_Wnd : public CWnd
 {
-	DECLARE_DYNAMIC(CInstrumentPanel_Kernel)
+	DECLARE_DYNAMIC(CInstrumentCtrl_Wnd)
 
 public:
-	CInstrumentPanel_Kernel();
-	virtual ~CInstrumentPanel_Kernel();
+	CInstrumentCtrl_Wnd();
+	virtual ~CInstrumentCtrl_Wnd();
 
 protected:
 	int		  m_bNeedRedrawAllBmp;

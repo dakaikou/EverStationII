@@ -5,7 +5,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 //
-#include "InstrumentPanel_Base.h"
+#include "InstrumentCtrl_Base.h"
 
 #define WAVEFORM_SAMPLE_DEPTH							1024
 #define WAVEFORM_SAMPLE_COUNT							1024

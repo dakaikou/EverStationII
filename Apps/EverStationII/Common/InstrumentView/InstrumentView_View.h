@@ -49,13 +49,13 @@
 #define MEASURE_PANEL_SHOWN							0x00010000
 #define MEASURE_PANEL_HIDE							0x00000000
 
-class CInstrumentView_Kernel : public CView
+class CInstrumentView_View : public CView
 {
-	DECLARE_DYNCREATE(CInstrumentView_Kernel)
+	DECLARE_DYNCREATE(CInstrumentView_View)
 
 protected:
-	CInstrumentView_Kernel();           // 动态创建所使用的受保护的构造函数
-	virtual ~CInstrumentView_Kernel();
+	CInstrumentView_View();           // 动态创建所使用的受保护的构造函数
+	virtual ~CInstrumentView_View();
 
 protected:
 	int		  m_bNeedRedrawAllBmp;

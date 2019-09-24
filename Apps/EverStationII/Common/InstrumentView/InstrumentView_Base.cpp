@@ -1,14 +1,13 @@
 ﻿// InstrumentView_Kernel.cpp: 实现文件
 //
 #include "stdafx.h"
-//#include "pch.h"
 #include "../EverStationII.h"
 #include "InstrumentView_Base.h"
 
 
 // CInstrumentView_Base
 
-IMPLEMENT_DYNCREATE(CInstrumentView_Base, CInstrumentView_Kernel)
+IMPLEMENT_DYNCREATE(CInstrumentView_Base, CInstrumentView_View)
 
 CInstrumentView_Base::CInstrumentView_Base()
 {
@@ -37,7 +36,7 @@ CInstrumentView_Base::~CInstrumentView_Base()
 {
 }
 
-BEGIN_MESSAGE_MAP(CInstrumentView_Base, CInstrumentView_Kernel)
+BEGIN_MESSAGE_MAP(CInstrumentView_Base, CInstrumentView_View)
 END_MESSAGE_MAP()
 
 
@@ -100,7 +99,7 @@ void CInstrumentView_Base::Reset(void)
 	}
 #endif
 
-	CInstrumentView_Kernel::Reset();
+	CInstrumentView_View::Reset();
 }
 
 void CInstrumentView_Base::AppendXSample(int ID, int x)

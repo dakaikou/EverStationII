@@ -227,3 +227,7 @@ v4.56.2019051200
 
 v4.56.2019091900
        --移植了一个开源的CTreeListCtrl控件类，编译通过，但是没有办法进行测试验证。我实际需要的是CTreeListView，还不知道怎么改造，能不能改造成功。
+
+v4.56.2019092400
+       --调整了CInstrumentPanel的目录结构，并更名为CInstrumentCtrl；
+       --调整了CInstrumentView的目录结构。

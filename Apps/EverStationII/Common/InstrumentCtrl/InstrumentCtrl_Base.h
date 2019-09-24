@@ -6,7 +6,7 @@
 #endif // _MSC_VER > 1000
 //
 
-#include "InstrumentPanel_Kernel.h"
+#include "InstrumentCtrl_Wnd.h"
 
 #define SCREEN_WAVECOLOR0		RGB(250, 250, 0)
 #define SCREEN_WAVECOLOR1		RGB(50, 250, 50)
@@ -56,7 +56,7 @@ typedef struct
 
 /////////////////////////////////////////////////////////////////////////////
 // CInstrumentPanel_Base window
-class CInstrumentPanel_Base : public CInstrumentPanel_Kernel
+class CInstrumentPanel_Base : public CInstrumentCtrl_Wnd
 {
 // Construction
 public:

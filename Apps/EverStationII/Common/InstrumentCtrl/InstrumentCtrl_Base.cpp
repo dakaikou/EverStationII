@@ -9,7 +9,7 @@
 #include <wingdi.h>
 #include <afxwin.h>
 #include <assert.h>
-#include "InstrumentPanel_Base.h"
+#include "InstrumentCtrl_Base.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -48,7 +48,7 @@ CInstrumentPanel_Base::~CInstrumentPanel_Base()
 }
 
 
-BEGIN_MESSAGE_MAP(CInstrumentPanel_Base, CInstrumentPanel_Kernel)
+BEGIN_MESSAGE_MAP(CInstrumentPanel_Base, CInstrumentCtrl_Wnd)
 	//{{AFX_MSG_MAP(CInstrumentPanel_Base)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -92,7 +92,7 @@ void CInstrumentPanel_Base::Reset(void)
 	}
 #endif
 
-	CInstrumentPanel_Kernel::Reset();
+	CInstrumentCtrl_Wnd::Reset();
 }
 
 void CInstrumentPanel_Base::AppendXSample(int ID, int x)

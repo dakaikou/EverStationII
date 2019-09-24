@@ -9,7 +9,7 @@
 #include <wingdi.h>
 #include <afxwin.h>
 #include <assert.h>
-#include "InstrumentPanel_Histogram.h"
+#include "InstrumentCtrl_Histogram.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

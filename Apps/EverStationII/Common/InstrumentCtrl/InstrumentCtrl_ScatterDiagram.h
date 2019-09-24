@@ -6,7 +6,7 @@
 #endif // _MSC_VER > 1000
 //
 
-#include "InstrumentPanel_Base.h"
+#include "InstrumentCtrl_Base.h"
 
 #define SCATTER_DIAGRAM_SAMPLE_DEPTH							1024 * 16
 //#define SCATTER_DIAGRAM_SAMPLE_DEPTH							1024 * 20

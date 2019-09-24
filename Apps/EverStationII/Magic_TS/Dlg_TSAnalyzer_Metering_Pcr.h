@@ -11,8 +11,8 @@
 // CDlg_TSAnalyzer_Pcr dialog
 #include "MiddleWare\MiddleWare_TS_DBases\Include\MiddleWare_DB_Pcrs.h"
 
-#include "..\Common\InstrumentView_ScatterDiagram.h"
-#include "..\Common\InstrumentView_Histogram.h"
+#include "..\Common\InstrumentView\InstrumentView_ScatterDiagram.h"
+#include "..\Common\InstrumentView\InstrumentView_Histogram.h"
 
 #include "..\resource.h"
 

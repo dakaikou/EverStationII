@@ -3,7 +3,7 @@
 #include "stdafx.h"
 #include <afxwin.h>
 #include <assert.h>
-#include "InstrumentPanel_ScatterDiagram.h"
+#include "InstrumentCtrl_ScatterDiagram.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

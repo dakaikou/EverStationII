@@ -55,11 +55,23 @@
     <Filter Include="头文件\Magic_YUV">
       <UniqueIdentifier>{66c6f748-9af7-4cdc-94da-d9f97e7b4298}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\MFCExt\TreeList">
+    <Filter Include="源文件\MFCExt\TreeListCtrl">
       <UniqueIdentifier>{852559d1-d55a-4f0a-8437-a6de3d9bebb2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\MFCExt\TreeList">
+    <Filter Include="头文件\MFCExt\TreeListCtrl">
       <UniqueIdentifier>{9f8fe803-e1ec-46fd-8786-a6f8565fb541}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Common\InstrumentCtrl">
+      <UniqueIdentifier>{b35f049f-f982-42b5-a486-3c3ae7660932}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Common\InstrumentView">
+      <UniqueIdentifier>{509696ee-bb92-49bf-9c46-ccd612343b70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Common\InstrumentCtrl">
+      <UniqueIdentifier>{a6803dba-fca3-4836-a600-7d95c801b5dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Common\InstrumentView">
+      <UniqueIdentifier>{89f26829-da57-4439-9b6a-b320c8397f64}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -159,18 +171,6 @@
     <ClInclude Include="Magic_TS\TSMagicDoc.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
-    <ClInclude Include="Common\InstrumentPanel_Base.h">
-      <Filter>头文件\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\InstrumentPanel_Histogram.h">
-      <Filter>头文件\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\InstrumentPanel_Waveform.h">
-      <Filter>头文件\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\InstrumentPanel_ScatterDiagram.h">
-      <Filter>头文件\Common</Filter>
-    </ClInclude>
     <ClInclude Include="Magic_YUV\YUVMagicDoc.h">
       <Filter>头文件\Magic_YUV</Filter>
     </ClInclude>
@@ -214,27 +214,6 @@
       <Filter>头文件\Common</Filter>
     </ClInclude>
     <ClInclude Include="Common\BitmapButton_HoverEffect.h">
-      <Filter>头文件\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\InstrumentPanel_ColorGamutDiagram.h">
-      <Filter>头文件\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\InstrumentPanel_LumaGamutDiagram.h">
-      <Filter>头文件\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\InstrumentPanel_Kernel.h">
-      <Filter>头文件\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\InstrumentView_Kernel.h">
-      <Filter>头文件\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\InstrumentView_Base.h">
-      <Filter>头文件\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\InstrumentView_Histogram.h">
-      <Filter>头文件\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\InstrumentView_ScatterDiagram.h">
       <Filter>头文件\Common</Filter>
     </ClInclude>
     <ClInclude Include="AboutDlg.h">
@@ -318,44 +297,77 @@
     <ClInclude Include="Magic_TS\Dlg_TSAssist_TriggerWaiting.h">
       <Filter>头文件\Magic_TS</Filter>
     </ClInclude>
-    <ClInclude Include="MFCExt\TreeList\TLCDragWnd.h">
-      <Filter>头文件\MFCExt\TreeList</Filter>
+    <ClInclude Include="MFCExt\TreeListCtrl\TLCDragWnd.h">
+      <Filter>头文件\MFCExt\TreeListCtrl</Filter>
     </ClInclude>
-    <ClInclude Include="MFCExt\TreeList\TLCDropWnd.h">
-      <Filter>头文件\MFCExt\TreeList</Filter>
+    <ClInclude Include="MFCExt\TreeListCtrl\TLCDropWnd.h">
+      <Filter>头文件\MFCExt\TreeListCtrl</Filter>
     </ClInclude>
-    <ClInclude Include="MFCExt\TreeList\TLHDragWnd.h">
-      <Filter>头文件\MFCExt\TreeList</Filter>
+    <ClInclude Include="MFCExt\TreeListCtrl\TLHDragWnd.h">
+      <Filter>头文件\MFCExt\TreeListCtrl</Filter>
     </ClInclude>
-    <ClInclude Include="MFCExt\TreeList\TLHDropWnd.h">
-      <Filter>头文件\MFCExt\TreeList</Filter>
+    <ClInclude Include="MFCExt\TreeListCtrl\TLHDropWnd.h">
+      <Filter>头文件\MFCExt\TreeListCtrl</Filter>
     </ClInclude>
-    <ClInclude Include="MFCExt\TreeList\TreeListColumnInfo.h">
-      <Filter>头文件\MFCExt\TreeList</Filter>
+    <ClInclude Include="MFCExt\TreeListCtrl\TreeListColumnInfo.h">
+      <Filter>头文件\MFCExt\TreeListCtrl</Filter>
     </ClInclude>
-    <ClInclude Include="MFCExt\TreeList\TreeListComboCtrl.h">
-      <Filter>头文件\MFCExt\TreeList</Filter>
+    <ClInclude Include="MFCExt\TreeListCtrl\TreeListComboCtrl.h">
+      <Filter>头文件\MFCExt\TreeListCtrl</Filter>
     </ClInclude>
-    <ClInclude Include="MFCExt\TreeList\TreeListCtrl.h">
-      <Filter>头文件\MFCExt\TreeList</Filter>
+    <ClInclude Include="MFCExt\TreeListCtrl\TreeListCtrl.h">
+      <Filter>头文件\MFCExt\TreeListCtrl</Filter>
     </ClInclude>
-    <ClInclude Include="MFCExt\TreeList\TreeListDC.h">
-      <Filter>头文件\MFCExt\TreeList</Filter>
+    <ClInclude Include="MFCExt\TreeListCtrl\TreeListDC.h">
+      <Filter>头文件\MFCExt\TreeListCtrl</Filter>
     </ClInclude>
-    <ClInclude Include="MFCExt\TreeList\TreeListEditCtrl.h">
-      <Filter>头文件\MFCExt\TreeList</Filter>
+    <ClInclude Include="MFCExt\TreeListCtrl\TreeListEditCtrl.h">
+      <Filter>头文件\MFCExt\TreeListCtrl</Filter>
     </ClInclude>
-    <ClInclude Include="MFCExt\TreeList\TreeListHeaderCtrl.h">
-      <Filter>头文件\MFCExt\TreeList</Filter>
+    <ClInclude Include="MFCExt\TreeListCtrl\TreeListHeaderCtrl.h">
+      <Filter>头文件\MFCExt\TreeListCtrl</Filter>
     </ClInclude>
-    <ClInclude Include="MFCExt\TreeList\TreeListItem.h">
-      <Filter>头文件\MFCExt\TreeList</Filter>
+    <ClInclude Include="MFCExt\TreeListCtrl\TreeListItem.h">
+      <Filter>头文件\MFCExt\TreeListCtrl</Filter>
     </ClInclude>
-    <ClInclude Include="MFCExt\TreeList\TreeListStaticCtrl.h">
-      <Filter>头文件\MFCExt\TreeList</Filter>
+    <ClInclude Include="MFCExt\TreeListCtrl\TreeListStaticCtrl.h">
+      <Filter>头文件\MFCExt\TreeListCtrl</Filter>
     </ClInclude>
-    <ClInclude Include="MFCExt\TreeList\TreeListTipCtrl.h">
-      <Filter>头文件\MFCExt\TreeList</Filter>
+    <ClInclude Include="MFCExt\TreeListCtrl\TreeListTipCtrl.h">
+      <Filter>头文件\MFCExt\TreeListCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\InstrumentView\InstrumentView_Base.h">
+      <Filter>头文件\Common\InstrumentView</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\InstrumentView\InstrumentView_Histogram.h">
+      <Filter>头文件\Common\InstrumentView</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\InstrumentView\InstrumentView_ScatterDiagram.h">
+      <Filter>头文件\Common\InstrumentView</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\InstrumentCtrl\InstrumentCtrl_Base.h">
+      <Filter>头文件\Common\InstrumentCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\InstrumentCtrl\InstrumentCtrl_ColorGamutDiagram.h">
+      <Filter>头文件\Common\InstrumentCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\InstrumentCtrl\InstrumentCtrl_Histogram.h">
+      <Filter>头文件\Common\InstrumentCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\InstrumentCtrl\InstrumentCtrl_LumaGamutDiagram.h">
+      <Filter>头文件\Common\InstrumentCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\InstrumentCtrl\InstrumentCtrl_ScatterDiagram.h">
+      <Filter>头文件\Common\InstrumentCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\InstrumentCtrl\InstrumentCtrl_Waveform.h">
+      <Filter>头文件\Common\InstrumentCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\InstrumentCtrl\InstrumentCtrl_Wnd.h">
+      <Filter>头文件\Common\InstrumentCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\InstrumentView\InstrumentView_View.h">
+      <Filter>头文件\Common\InstrumentView</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -449,18 +461,6 @@
     <ClCompile Include="Magic_TS\TSMagicDoc.cpp">
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
-    <ClCompile Include="Common\InstrumentPanel_Base.cpp">
-      <Filter>源文件\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\InstrumentPanel_Histogram.cpp">
-      <Filter>源文件\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\InstrumentPanel_Waveform.cpp">
-      <Filter>源文件\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\InstrumentPanel_ScatterDiagram.cpp">
-      <Filter>源文件\Common</Filter>
-    </ClCompile>
     <ClCompile Include="Magic_ES\ESMagicDoc.cpp">
       <Filter>源文件\Magic_ES</Filter>
     </ClCompile>
@@ -501,27 +501,6 @@
       <Filter>源文件\Common</Filter>
     </ClCompile>
     <ClCompile Include="Common\BitmapButton_HoverEffect.cpp">
-      <Filter>源文件\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\InstrumentPanel_ColorGamutDiagram.cpp">
-      <Filter>源文件\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\InstrumentPanel_LumaGamutDiagram.cpp">
-      <Filter>源文件\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\InstrumentPanel_Kernel.cpp">
-      <Filter>源文件\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\InstrumentView_Kernel.cpp">
-      <Filter>源文件\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\InstrumentView_Base.cpp">
-      <Filter>源文件\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\InstrumentView_Histogram.cpp">
-      <Filter>源文件\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\InstrumentView_ScatterDiagram.cpp">
       <Filter>源文件\Common</Filter>
     </ClCompile>
     <ClCompile Include="EverStationIIImports.cpp">
@@ -608,44 +587,77 @@
     <ClCompile Include="Magic_TS\Dlg_TSAssist_TriggerWaiting.cpp">
       <Filter>源文件\Magic_TS</Filter>
     </ClCompile>
-    <ClCompile Include="MFCExt\TreeList\TLCDragWnd.cpp">
-      <Filter>源文件\MFCExt\TreeList</Filter>
+    <ClCompile Include="MFCExt\TreeListCtrl\TLCDragWnd.cpp">
+      <Filter>源文件\MFCExt\TreeListCtrl</Filter>
     </ClCompile>
-    <ClCompile Include="MFCExt\TreeList\TLCDropWnd.cpp">
-      <Filter>源文件\MFCExt\TreeList</Filter>
+    <ClCompile Include="MFCExt\TreeListCtrl\TLCDropWnd.cpp">
+      <Filter>源文件\MFCExt\TreeListCtrl</Filter>
     </ClCompile>
-    <ClCompile Include="MFCExt\TreeList\TLHDragWnd.cpp">
-      <Filter>源文件\MFCExt\TreeList</Filter>
+    <ClCompile Include="MFCExt\TreeListCtrl\TLHDragWnd.cpp">
+      <Filter>源文件\MFCExt\TreeListCtrl</Filter>
     </ClCompile>
-    <ClCompile Include="MFCExt\TreeList\TLHDropWnd.cpp">
-      <Filter>源文件\MFCExt\TreeList</Filter>
+    <ClCompile Include="MFCExt\TreeListCtrl\TLHDropWnd.cpp">
+      <Filter>源文件\MFCExt\TreeListCtrl</Filter>
     </ClCompile>
-    <ClCompile Include="MFCExt\TreeList\TreeListColumnInfo.cpp">
-      <Filter>源文件\MFCExt\TreeList</Filter>
+    <ClCompile Include="MFCExt\TreeListCtrl\TreeListColumnInfo.cpp">
+      <Filter>源文件\MFCExt\TreeListCtrl</Filter>
     </ClCompile>
-    <ClCompile Include="MFCExt\TreeList\TreeListComboCtrl.cpp">
-      <Filter>源文件\MFCExt\TreeList</Filter>
+    <ClCompile Include="MFCExt\TreeListCtrl\TreeListComboCtrl.cpp">
+      <Filter>源文件\MFCExt\TreeListCtrl</Filter>
     </ClCompile>
-    <ClCompile Include="MFCExt\TreeList\TreeListCtrl.cpp">
-      <Filter>源文件\MFCExt\TreeList</Filter>
+    <ClCompile Include="MFCExt\TreeListCtrl\TreeListCtrl.cpp">
+      <Filter>源文件\MFCExt\TreeListCtrl</Filter>
     </ClCompile>
-    <ClCompile Include="MFCExt\TreeList\TreeListDC.cpp">
-      <Filter>源文件\MFCExt\TreeList</Filter>
+    <ClCompile Include="MFCExt\TreeListCtrl\TreeListDC.cpp">
+      <Filter>源文件\MFCExt\TreeListCtrl</Filter>
     </ClCompile>
-    <ClCompile Include="MFCExt\TreeList\TreeListEditCtrl.cpp">
-      <Filter>源文件\MFCExt\TreeList</Filter>
+    <ClCompile Include="MFCExt\TreeListCtrl\TreeListEditCtrl.cpp">
+      <Filter>源文件\MFCExt\TreeListCtrl</Filter>
     </ClCompile>
-    <ClCompile Include="MFCExt\TreeList\TreeListHeaderCtrl.cpp">
-      <Filter>源文件\MFCExt\TreeList</Filter>
+    <ClCompile Include="MFCExt\TreeListCtrl\TreeListHeaderCtrl.cpp">
+      <Filter>源文件\MFCExt\TreeListCtrl</Filter>
     </ClCompile>
-    <ClCompile Include="MFCExt\TreeList\TreeListItem.cpp">
-      <Filter>源文件\MFCExt\TreeList</Filter>
+    <ClCompile Include="MFCExt\TreeListCtrl\TreeListItem.cpp">
+      <Filter>源文件\MFCExt\TreeListCtrl</Filter>
     </ClCompile>
-    <ClCompile Include="MFCExt\TreeList\TreeListStaticCtrl.cpp">
-      <Filter>源文件\MFCExt\TreeList</Filter>
+    <ClCompile Include="MFCExt\TreeListCtrl\TreeListStaticCtrl.cpp">
+      <Filter>源文件\MFCExt\TreeListCtrl</Filter>
     </ClCompile>
-    <ClCompile Include="MFCExt\TreeList\TreeListTipCtrl.cpp">
-      <Filter>源文件\MFCExt\TreeList</Filter>
+    <ClCompile Include="MFCExt\TreeListCtrl\TreeListTipCtrl.cpp">
+      <Filter>源文件\MFCExt\TreeListCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentView\InstrumentView_Base.cpp">
+      <Filter>源文件\Common\InstrumentView</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentView\InstrumentView_Histogram.cpp">
+      <Filter>源文件\Common\InstrumentView</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentView\InstrumentView_ScatterDiagram.cpp">
+      <Filter>源文件\Common\InstrumentView</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentCtrl\InstrumentCtrl_Base.cpp">
+      <Filter>源文件\Common\InstrumentCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentCtrl\InstrumentCtrl_ColorGamutDiagram.cpp">
+      <Filter>源文件\Common\InstrumentCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentCtrl\InstrumentCtrl_Histogram.cpp">
+      <Filter>源文件\Common\InstrumentCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentCtrl\InstrumentCtrl_LumaGamutDiagram.cpp">
+      <Filter>源文件\Common\InstrumentCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentCtrl\InstrumentCtrl_ScatterDiagram.cpp">
+      <Filter>源文件\Common\InstrumentCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentCtrl\InstrumentCtrl_Waveform.cpp">
+      <Filter>源文件\Common\InstrumentCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentCtrl\InstrumentCtrl_Wnd.cpp">
+      <Filter>源文件\Common\InstrumentCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\InstrumentView\InstrumentView_View.cpp">
+      <Filter>源文件\Common\InstrumentView</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

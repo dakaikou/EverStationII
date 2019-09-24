@@ -1,16 +1,15 @@
 ﻿// InstrumentView_Kernel.cpp: 实现文件
 //
 #include "stdafx.h"
-//#include "pch.h"
 #include "../EverStationII.h"
-#include "InstrumentView_Kernel.h"
+#include "InstrumentView_View.h"
 
 
 // CInstrumentView_Kernel
 
-IMPLEMENT_DYNCREATE(CInstrumentView_Kernel, CView)
+IMPLEMENT_DYNCREATE(CInstrumentView_View, CView)
 
-CInstrumentView_Kernel::CInstrumentView_Kernel()
+CInstrumentView_View::CInstrumentView_View()
 {
 	m_pMemDC = NULL;
 
@@ -42,11 +41,11 @@ CInstrumentView_Kernel::CInstrumentView_Kernel()
 #endif
 }
 
-CInstrumentView_Kernel::~CInstrumentView_Kernel()
+CInstrumentView_View::~CInstrumentView_View()
 {
 }
 
-BEGIN_MESSAGE_MAP(CInstrumentView_Kernel, CView)
+BEGIN_MESSAGE_MAP(CInstrumentView_View, CView)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_TIMER()
@@ -54,8 +53,8 @@ BEGIN_MESSAGE_MAP(CInstrumentView_Kernel, CView)
 END_MESSAGE_MAP()
 
 
-// CInstrumentView_Kernel 绘图
-void CInstrumentView_Kernel::DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectGridArea)
+// CInstrumentView_View 绘图
+void CInstrumentView_View::DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectGridArea)
 {
 	CString strMark;
 	double dGridDeltx, dGridDelty;
@@ -557,11 +556,11 @@ void CInstrumentView_Kernel::DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp,
 }
 
 //绘制图例，此处为虚函数，实质性绘制工作由继承类实现
-void CInstrumentView_Kernel::DisplayLegendInMemory(CDC * pMemDC, CBitmap * pBkBmp, CRect rectGridArea)
+void CInstrumentView_View::DisplayLegendInMemory(CDC * pMemDC, CBitmap * pBkBmp, CRect rectGridArea)
 {
 }
 
-void CInstrumentView_Kernel::DisplayMeasurePanelInMemory(CDC * pMemDC, CBitmap * pMemBmp)
+void CInstrumentView_View::DisplayMeasurePanelInMemory(CDC * pMemDC, CBitmap * pMemBmp)
 {
 	char	pszText[64];
 
@@ -686,7 +685,7 @@ void CInstrumentView_Kernel::DisplayMeasurePanelInMemory(CDC * pMemDC, CBitmap *
 	}
 }
 
-void CInstrumentView_Kernel::DisplayXAlarmLineInMemory(CDC * pMemDC, CBitmap * pBkBmp, CRect rectAlarmLine)
+void CInstrumentView_View::DisplayXAlarmLineInMemory(CDC * pMemDC, CBitmap * pBkBmp, CRect rectAlarmLine)
 {
 	if ((pMemDC != NULL) && (pBkBmp != NULL))
 	{
@@ -821,7 +820,7 @@ void CInstrumentView_Kernel::DisplayXAlarmLineInMemory(CDC * pMemDC, CBitmap * p
 	}
 }
 
-void CInstrumentView_Kernel::DisplayYAlarmLineInMemory(CDC * pMemDC, CBitmap * pBkBmp, CRect rectAlarmLine)
+void CInstrumentView_View::DisplayYAlarmLineInMemory(CDC * pMemDC, CBitmap * pBkBmp, CRect rectAlarmLine)
 {
 	if ((pMemDC != NULL) && (pBkBmp != NULL))
 	{
@@ -956,7 +955,7 @@ void CInstrumentView_Kernel::DisplayYAlarmLineInMemory(CDC * pMemDC, CBitmap * p
 	}
 }
 
-void CInstrumentView_Kernel::OnDraw(CDC* pDC)
+void CInstrumentView_View::OnDraw(CDC* pDC)
 {
 	CDocument* pDoc = GetDocument();
 	// TODO:  在此添加绘制代码
@@ -1039,24 +1038,24 @@ void CInstrumentView_Kernel::OnDraw(CDC* pDC)
 #endif
 }
 
-void CInstrumentView_Kernel::DisplayTheWholeSamplesInMemory(CDC* pDC, CBitmap* pGraphBmp)
+void CInstrumentView_View::DisplayTheWholeSamplesInMemory(CDC* pDC, CBitmap* pGraphBmp)
 {
 	//虚函数，实际的绘图功能由继承类实现
 }
 
-void CInstrumentView_Kernel::DisplayTheNewSamplesInMemory(CDC* pDC, CBitmap* pGraphBmp)
+void CInstrumentView_View::DisplayTheNewSamplesInMemory(CDC* pDC, CBitmap* pGraphBmp)
 {
 	//虚函数，实际的绘图功能由继承类实现
 }
 
-void CInstrumentView_Kernel::Set(void)
+void CInstrumentView_View::Set(void)
 {
 	srand(GetTickCount());
 	m_uiTimerID = rand();
 	SetTimer(m_uiTimerID, 1000, NULL);
 }
 
-void CInstrumentView_Kernel::Reset(void)
+void CInstrumentView_View::Reset(void)
 {
 	KillTimer(m_uiTimerID);
 
@@ -1093,7 +1092,7 @@ void CInstrumentView_Kernel::Reset(void)
 	Invalidate(FALSE);
 }
 
-void CInstrumentView_Kernel::Clear(void)
+void CInstrumentView_View::Clear(void)
 {
 	BITMAP bm;
 	CRect rectPicture;
@@ -1109,12 +1108,12 @@ void CInstrumentView_Kernel::Clear(void)
 	m_pMemDC->FillRect(&rectPicture, m_pBkgroundBrush);
 }
 
-void CInstrumentView_Kernel::SetTitle(char* pszTitle)
+void CInstrumentView_View::SetTitle(char* pszTitle)
 {
 	m_strTitle = pszTitle;
 }
 
-void CInstrumentView_Kernel::Init_X_Axis(int nXAxisStyle, int nXShownOption, int nXMinAlarm, int nXMaxAlarm, char* pszXUnits, int nXFloor, int nXCeil, int nXStep)
+void CInstrumentView_View::Init_X_Axis(int nXAxisStyle, int nXShownOption, int nXMinAlarm, int nXMaxAlarm, char* pszXUnits, int nXFloor, int nXCeil, int nXStep)
 {
 	strcpy_s(m_pszXUnits, sizeof(m_pszXUnits), pszXUnits);
 
@@ -1132,7 +1131,7 @@ void CInstrumentView_Kernel::Init_X_Axis(int nXAxisStyle, int nXShownOption, int
 	//AdjustLayout();
 }
 
-void CInstrumentView_Kernel::Init_Y_Axis(int nYAxisStyle, int nYShownOption, int nYMinAlarm, int nYMaxAlarm, char* pszYUnits, int nYFloor, int nYCeil, int nYStep)
+void CInstrumentView_View::Init_Y_Axis(int nYAxisStyle, int nYShownOption, int nYMinAlarm, int nYMaxAlarm, char* pszYUnits, int nYFloor, int nYCeil, int nYStep)
 {
 	strcpy_s(m_pszYUnits, sizeof(m_pszYUnits), pszYUnits);
 
@@ -1151,7 +1150,7 @@ void CInstrumentView_Kernel::Init_Y_Axis(int nYAxisStyle, int nYShownOption, int
 }
 
 
-void CInstrumentView_Kernel::AdjustLayout(void)
+void CInstrumentView_View::AdjustLayout(void)
 {
 	int markWidth = max(RECT_YMARK_WIDTH, RECT_XMARK_WIDTH / 2);
 
@@ -1208,7 +1207,7 @@ void CInstrumentView_Kernel::AdjustLayout(void)
 	m_bNeedRedrawAllBmp = 1;
 }
 
-int CInstrumentView_Kernel::XMAP_Value2Pos(int xvalue, CRect rectPicture)
+int CInstrumentView_View::XMAP_Value2Pos(int xvalue, CRect rectPicture)
 {
 	int xPos = -1;
 
@@ -1250,7 +1249,7 @@ int CInstrumentView_Kernel::XMAP_Value2Pos(int xvalue, CRect rectPicture)
 	return xPos;
 }
 
-int CInstrumentView_Kernel::YMAP_Value2Pos(int yvalue, CRect rectPicture)
+int CInstrumentView_View::YMAP_Value2Pos(int yvalue, CRect rectPicture)
 {
 	int yPos = -1;
 
@@ -1295,13 +1294,13 @@ int CInstrumentView_Kernel::YMAP_Value2Pos(int yvalue, CRect rectPicture)
 // CInstrumentView_Kernel 诊断
 
 #ifdef _DEBUG
-void CInstrumentView_Kernel::AssertValid() const
+void CInstrumentView_View::AssertValid() const
 {
 	CView::AssertValid();
 }
 
 #ifndef _WIN32_WCE
-void CInstrumentView_Kernel::Dump(CDumpContext& dc) const
+void CInstrumentView_View::Dump(CDumpContext& dc) const
 {
 	CView::Dump(dc);
 }
@@ -1312,7 +1311,7 @@ void CInstrumentView_Kernel::Dump(CDumpContext& dc) const
 // CInstrumentView_Kernel 消息处理程序
 
 
-int CInstrumentView_Kernel::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CInstrumentView_View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -1360,7 +1359,7 @@ int CInstrumentView_Kernel::OnCreate(LPCREATESTRUCT lpCreateStruct)
 }
 
 
-void CInstrumentView_Kernel::OnDestroy()
+void CInstrumentView_View::OnDestroy()
 {
 	CView::OnDestroy();
 
@@ -1423,7 +1422,7 @@ void CInstrumentView_Kernel::OnDestroy()
 }
 
 
-void CInstrumentView_Kernel::OnTimer(UINT_PTR nIDEvent)
+void CInstrumentView_View::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	if (nIDEvent == m_uiTimerID)
@@ -1435,7 +1434,7 @@ void CInstrumentView_Kernel::OnTimer(UINT_PTR nIDEvent)
 }
 
 
-void CInstrumentView_Kernel::OnSize(UINT nType, int cx, int cy)
+void CInstrumentView_View::OnSize(UINT nType, int cx, int cy)
 {
 	CView::OnSize(nType, cx, cy);
 

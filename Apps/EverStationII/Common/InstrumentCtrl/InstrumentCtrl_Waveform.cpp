@@ -9,7 +9,7 @@
 #include <wingdi.h>
 #include <afxwin.h>
 #include <assert.h>
-#include "InstrumentPanel_Waveform.h"
+#include "InstrumentCtrl_Waveform.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

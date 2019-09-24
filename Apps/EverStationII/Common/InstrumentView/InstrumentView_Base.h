@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "InstrumentView_Kernel.h"
+#include "InstrumentView_View.h"
 // CInstrumentView_Base 视图
 
 #define SCREEN_WAVECOLOR0		RGB(250, 250, 0)
@@ -49,7 +49,7 @@ typedef struct
 #define MAX_CHANNEL_COUNT		12
 #define DEFAULT_CHANNEL_DEPTH	256
 
-class CInstrumentView_Base : public CInstrumentView_Kernel
+class CInstrumentView_Base : public CInstrumentView_View
 {
 	DECLARE_DYNCREATE(CInstrumentView_Base)
 

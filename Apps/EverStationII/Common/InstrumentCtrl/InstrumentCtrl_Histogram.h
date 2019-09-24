@@ -6,7 +6,7 @@
 #endif // _MSC_VER > 1000
 //
 
-#include "InstrumentPanel_Base.h"
+#include "InstrumentCtrl_Base.h"
 
 #define HISTGRAM_SAMPLE_DEPTH							1024 * 20
 #define HISTGRAM_HORZ_DIVISION							100								//根据被测对象的分辨率确定

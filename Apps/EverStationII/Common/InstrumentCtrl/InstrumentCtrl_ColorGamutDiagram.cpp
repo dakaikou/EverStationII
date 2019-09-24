@@ -3,7 +3,7 @@
 #include "stdafx.h"
 #include <afxwin.h>
 #include <assert.h>
-#include "InstrumentPanel_ColorGamutDiagram.h"
+#include "InstrumentCtrl_ColorGamutDiagram.h"
 
 #include "Utilities/Graphics/Include/Graphics.h"
 
@@ -29,7 +29,7 @@ CInstrumentPanel_ColorGamutDiagram::~CInstrumentPanel_ColorGamutDiagram()
 }
 
 
-BEGIN_MESSAGE_MAP(CInstrumentPanel_ColorGamutDiagram, CInstrumentPanel_Kernel)
+BEGIN_MESSAGE_MAP(CInstrumentPanel_ColorGamutDiagram, CInstrumentCtrl_Wnd)
 	//{{AFX_MSG_MAP(CInstrumentPanel_ColorGamutDiagram)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()

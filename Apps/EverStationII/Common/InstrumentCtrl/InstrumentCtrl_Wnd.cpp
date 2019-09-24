@@ -3,14 +3,14 @@
 #include "stdafx.h"
 
 #include "..\EverStationII.h"
-#include "InstrumentPanel_Kernel.h"
+#include "InstrumentCtrl_Wnd.h"
 
 
 // CInstrumentPanel_Kernel
 
-IMPLEMENT_DYNAMIC(CInstrumentPanel_Kernel, CWnd)
+IMPLEMENT_DYNAMIC(CInstrumentCtrl_Wnd, CWnd)
 
-CInstrumentPanel_Kernel::CInstrumentPanel_Kernel()
+CInstrumentCtrl_Wnd::CInstrumentCtrl_Wnd()
 {
 	m_pMemDC = NULL;
 
@@ -42,13 +42,13 @@ CInstrumentPanel_Kernel::CInstrumentPanel_Kernel()
 #endif
 }
 
-CInstrumentPanel_Kernel::~CInstrumentPanel_Kernel()
+CInstrumentCtrl_Wnd::~CInstrumentCtrl_Wnd()
 {
 }
 
 
-BEGIN_MESSAGE_MAP(CInstrumentPanel_Kernel, CWnd)
-	//{{AFX_MSG_MAP(CInstrumentPanel_Kernel)
+BEGIN_MESSAGE_MAP(CInstrumentCtrl_Wnd, CWnd)
+	//{{AFX_MSG_MAP(CInstrumentCtrl_Wnd)
 	ON_WM_PAINT()
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
@@ -59,7 +59,7 @@ BEGIN_MESSAGE_MAP(CInstrumentPanel_Kernel, CWnd)
 END_MESSAGE_MAP()
 
 // CInstrumentPanel_Kernel 消息处理程序
-void CInstrumentPanel_Kernel::DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectGridArea)
+void CInstrumentCtrl_Wnd::DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectGridArea)
 {
 	CString strMark;
 	double dGridDeltx, dGridDelty;
@@ -561,11 +561,11 @@ void CInstrumentPanel_Kernel::DisplayBkGridInMemory(CDC* pMemDC, CBitmap* pBkBmp
 }
 
 //绘制图例，此处为虚函数，实质性绘制工作由继承类实现
-void CInstrumentPanel_Kernel::DisplayLegendInMemory(CDC * pMemDC, CBitmap * pBkBmp, CRect rectGridArea)
+void CInstrumentCtrl_Wnd::DisplayLegendInMemory(CDC * pMemDC, CBitmap * pBkBmp, CRect rectGridArea)
 {
 }
 
-void CInstrumentPanel_Kernel::DisplayMeasurePanelInMemory(CDC* pMemDC, CBitmap* pMemBmp)
+void CInstrumentCtrl_Wnd::DisplayMeasurePanelInMemory(CDC* pMemDC, CBitmap* pMemBmp)
 {
 	char	pszText[64];
 
@@ -690,7 +690,7 @@ void CInstrumentPanel_Kernel::DisplayMeasurePanelInMemory(CDC* pMemDC, CBitmap* 
 	}
 }
 
-void CInstrumentPanel_Kernel::DisplayXAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine)
+void CInstrumentCtrl_Wnd::DisplayXAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine)
 {
 	if ((pMemDC != NULL) && (pBkBmp != NULL))
 	{
@@ -825,7 +825,7 @@ void CInstrumentPanel_Kernel::DisplayXAlarmLineInMemory(CDC* pMemDC, CBitmap* pB
 	}
 }
 
-void CInstrumentPanel_Kernel::DisplayYAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine)
+void CInstrumentCtrl_Wnd::DisplayYAlarmLineInMemory(CDC* pMemDC, CBitmap* pBkBmp, CRect rectAlarmLine)
 {
 	if ((pMemDC != NULL) && (pBkBmp != NULL))
 	{
@@ -961,7 +961,7 @@ void CInstrumentPanel_Kernel::DisplayYAlarmLineInMemory(CDC* pMemDC, CBitmap* pB
 }
 
 //绘图的主要功能实现
-void CInstrumentPanel_Kernel::OnPaint()
+void CInstrumentCtrl_Wnd::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
 					   // TODO: 在此处添加消息处理程序代码
@@ -1046,17 +1046,17 @@ void CInstrumentPanel_Kernel::OnPaint()
    // 不为绘图消息调用 CWnd::OnPaint()
 }
 
-void CInstrumentPanel_Kernel::DisplayTheWholeSamplesInMemory(CDC* pDC, CBitmap* pGraphBmp)
+void CInstrumentCtrl_Wnd::DisplayTheWholeSamplesInMemory(CDC* pDC, CBitmap* pGraphBmp)
 {
 	//虚函数，实际的绘图功能由继承类实现
 }
 
-void CInstrumentPanel_Kernel::DisplayTheNewSamplesInMemory(CDC* pDC, CBitmap* pGraphBmp)
+void CInstrumentCtrl_Wnd::DisplayTheNewSamplesInMemory(CDC* pDC, CBitmap* pGraphBmp)
 {
 	//虚函数，实际的绘图功能由继承类实现
 }
 
-int CInstrumentPanel_Kernel::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CInstrumentCtrl_Wnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -1070,13 +1070,13 @@ int CInstrumentPanel_Kernel::OnCreate(LPCREATESTRUCT lpCreateStruct)
 }
 
 
-void CInstrumentPanel_Kernel::PreSubclassWindow()
+void CInstrumentCtrl_Wnd::PreSubclassWindow()
 {
 	// TODO: 在此添加专用代码和/或调用基类
 	InitGraphResource();
 }
 
-void CInstrumentPanel_Kernel::OnDestroy()
+void CInstrumentCtrl_Wnd::OnDestroy()
 {
 	CWnd::OnDestroy();
 
@@ -1084,7 +1084,7 @@ void CInstrumentPanel_Kernel::OnDestroy()
 	ReleaseGraphResource();
 }
 
-void CInstrumentPanel_Kernel::Reset(void)
+void CInstrumentCtrl_Wnd::Reset(void)
 {
 #if ON_PAINTING_USE_MUTEX
 	DWORD wait_state = ::WaitForSingleObject(m_hPaintingAccess, INFINITE);
@@ -1119,7 +1119,7 @@ void CInstrumentPanel_Kernel::Reset(void)
 	Invalidate(FALSE);
 }
 
-void CInstrumentPanel_Kernel::Init_X_Axis(int nXAxisStyle, int nXShownOption, int nXMinAlarm, int nXMaxAlarm, char* pszXUnits, int nXFloor, int nXCeil, int nXStep)
+void CInstrumentCtrl_Wnd::Init_X_Axis(int nXAxisStyle, int nXShownOption, int nXMinAlarm, int nXMaxAlarm, char* pszXUnits, int nXFloor, int nXCeil, int nXStep)
 {
 	strcpy_s(m_pszXUnits, sizeof(m_pszXUnits), pszXUnits);
 
@@ -1137,7 +1137,7 @@ void CInstrumentPanel_Kernel::Init_X_Axis(int nXAxisStyle, int nXShownOption, in
 	AdjustLayout();
 }
 
-void CInstrumentPanel_Kernel::Init_Y_Axis(int nYAxisStyle, int nYShownOption, int nYMinAlarm, int nYMaxAlarm, char* pszYUnits, int nYFloor, int nYCeil, int nYStep)
+void CInstrumentCtrl_Wnd::Init_Y_Axis(int nYAxisStyle, int nYShownOption, int nYMinAlarm, int nYMaxAlarm, char* pszYUnits, int nYFloor, int nYCeil, int nYStep)
 {
 	strcpy_s(m_pszYUnits, sizeof(m_pszYUnits), pszYUnits);
 
@@ -1155,7 +1155,7 @@ void CInstrumentPanel_Kernel::Init_Y_Axis(int nYAxisStyle, int nYShownOption, in
 	AdjustLayout();
 }
 
-void CInstrumentPanel_Kernel::AdjustLayout(void)
+void CInstrumentCtrl_Wnd::AdjustLayout(void)
 {
 	int markWidth = max(RECT_YMARK_WIDTH, RECT_XMARK_WIDTH / 2);
 
@@ -1213,7 +1213,7 @@ void CInstrumentPanel_Kernel::AdjustLayout(void)
 }
 
 
-void CInstrumentPanel_Kernel::OnTimer(UINT_PTR nIDEvent)
+void CInstrumentCtrl_Wnd::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	if (nIDEvent == m_uiTimerID)
@@ -1224,7 +1224,7 @@ void CInstrumentPanel_Kernel::OnTimer(UINT_PTR nIDEvent)
 	CWnd::OnTimer(nIDEvent);
 }
 
-void CInstrumentPanel_Kernel::OnSize(UINT nType, int cx, int cy)
+void CInstrumentCtrl_Wnd::OnSize(UINT nType, int cx, int cy)
 {
 	CWnd::OnSize(nType, cx, cy);
 
@@ -1237,7 +1237,7 @@ void CInstrumentPanel_Kernel::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
-void CInstrumentPanel_Kernel::Clear(void)
+void CInstrumentCtrl_Wnd::Clear(void)
 {
 	BITMAP bm;
 	CRect rectPicture;
@@ -1253,7 +1253,7 @@ void CInstrumentPanel_Kernel::Clear(void)
 	m_pMemDC->FillRect(&rectPicture, m_pBkgroundBrush);
 }
 
-BOOL CInstrumentPanel_Kernel::OnEraseBkgnd(CDC* pDC)
+BOOL CInstrumentCtrl_Wnd::OnEraseBkgnd(CDC* pDC)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	//m_bNeedRedrawAllBmp = 1;
@@ -1265,7 +1265,7 @@ BOOL CInstrumentPanel_Kernel::OnEraseBkgnd(CDC* pDC)
 	//return OnEraseBkgnd(pDC);
 }
 
-int CInstrumentPanel_Kernel::XMAP_Value2Pos(int xvalue, CRect rectPicture)
+int CInstrumentCtrl_Wnd::XMAP_Value2Pos(int xvalue, CRect rectPicture)
 {
 	int xPos = -1;
 
@@ -1307,7 +1307,7 @@ int CInstrumentPanel_Kernel::XMAP_Value2Pos(int xvalue, CRect rectPicture)
 	return xPos;
 }
 
-int CInstrumentPanel_Kernel::YMAP_Value2Pos(int yvalue, CRect rectPicture)
+int CInstrumentCtrl_Wnd::YMAP_Value2Pos(int yvalue, CRect rectPicture)
 {
 	int yPos = -1;
 
@@ -1349,7 +1349,7 @@ int CInstrumentPanel_Kernel::YMAP_Value2Pos(int yvalue, CRect rectPicture)
 	return yPos;
 }
 
-void CInstrumentPanel_Kernel::InitGraphResource(void)
+void CInstrumentCtrl_Wnd::InitGraphResource(void)
 {
 	CDC* pDC = GetDC();
 
@@ -1390,7 +1390,7 @@ void CInstrumentPanel_Kernel::InitGraphResource(void)
 	CWnd::PreSubclassWindow();
 }
 
-void CInstrumentPanel_Kernel::ReleaseGraphResource(void)
+void CInstrumentCtrl_Wnd::ReleaseGraphResource(void)
 {
 #if ON_PAINTING_USE_MUTEX
 	DWORD wait_state = ::WaitForSingleObject(m_hPaintingAccess, INFINITE);
@@ -1448,7 +1448,7 @@ void CInstrumentPanel_Kernel::ReleaseGraphResource(void)
 	KillTimer(m_uiTimerID);
 }
 
-void CInstrumentPanel_Kernel::SetTitle(CString strTitle)
+void CInstrumentCtrl_Wnd::SetTitle(CString strTitle)
 {
 	m_strTitle = strTitle;
 }
